@@ -148,7 +148,10 @@ function decoyFor(p) {
  * breaking a lock a real thing a pilot can do rather than a number in a table.
  */
 function guide(p, dt) {
-  if (p.lost) return;
+  // A lost seeker normally stops steering for good. With `reacquire` on it keeps looking,
+  // which is the only way the branch below can ever fire — an early return here is what
+  // made the flag unreadable in the first place.
+  if (p.lost && !SEEKER.reacquire) return;
 
   const target = p.seek;
   const alive = target && (target.userData ? target.userData.hp > 0 : true);
@@ -169,9 +172,18 @@ function guide(p, dt) {
   if (dist < 1e-3) return;
   _seek.divideScalar(dist);
 
-  // seeker cone — a target that slips outside the sensor's view is gone for good
+  // Seeker cone. A target that slips outside the sensor's view is lost — and by default it
+  // stays lost, which is what `SEEKER.reacquire: false` has been describing since v1.00.40
+  // without anything reading it. The flag is read now, so it is a lever rather than a
+  // comment: with it on, a seeker that still has the target back inside its cone picks the
+  // lock up again instead of coasting past a ship it can see.
+  //
+  // Kept off by default deliberately. A missile that regains its lock removes the whole
+  // point of breaking one — the hard turn that beat the seeker becomes a delay rather than
+  // a defence — so this exists as a knob for a harder difficulty, not as a fix.
   _tmp.copy(p.vel).normalize();
   if (_tmp.dot(_seek) < SEEKER.cone) { p.lost = true; return; }
+  p.lost = false;
 
   // lead the intercept
   const spd = p.vel.length();

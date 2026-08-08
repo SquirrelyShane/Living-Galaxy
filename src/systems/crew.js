@@ -13,6 +13,8 @@ import { CREW_ROLES, ROLE_KEYS, CREW_TRAITS, TRAIT_KEYS, crewName, crewOutput, w
          willpowerOf, needsOf } from '../data/crew.js';
 import { makeRng } from '../core/rng.js';
 import { toast, status } from '../ui/toast.js';
+import { noteCrew, sampleCrew } from './crew-log.js';
+import { comfortEffects, updateWelfare, onShore, inTraining, comfortUpkeep } from './welfare.js';
 import { held, takeMaterial } from './crafting.js';
 import { sfx } from './audio.js';
 
@@ -113,8 +115,11 @@ function runBreaks(dt) {
       if (c.breakT <= 0) {
         c.onBreak = false;
         c.dutyT = 0;
-        c.fatigue = Math.max(0, (c.fatigue || 0) - CREW.breakRecover);
-        c.morale = Math.min(1, (c.morale ?? 1) + CREW.breakRecover * 0.2);
+        const fWas = c.fatigue || 0, mWas = c.morale ?? 1;
+        c.fatigue = Math.max(0, fWas - CREW.breakRecover);
+        c.morale = Math.min(1, mWas + CREW.breakRecover * 0.2);
+        noteCrew(c, 'stood down for a break', { stat: 'fatigue', delta: c.fatigue - fWas });
+        noteCrew(c, 'stood down for a break', { stat: 'morale', delta: c.morale - mWas });
       }
       continue;
     }
@@ -190,7 +195,12 @@ export function persuade(id, what = 'the order') {
   if (!c) return false;
   const chance = CREW.persuadeBase * (1 - willpowerOf(c)) + 0.15 * (c.morale ?? 1);
   const won = Math.random() < chance;
-  c.morale = Math.max(CREW.moraleFloor, (c.morale ?? 1) - CREW.persuadeMoraleCost * (won ? 1 : 0.5));
+  {
+    const was = c.morale ?? 1;
+    c.morale = Math.max(CREW.moraleFloor, was - CREW.persuadeMoraleCost * (won ? 1 : 0.5));
+    noteCrew(c, won ? 'talked round' : 'refused an order', {
+      stat: 'morale', delta: c.morale - was, level: won ? 'info' : 'notice' });
+  }
   toast(won ? `${c.name} agrees to ${what}` : `${c.name} refuses \u2014 ${what} is not happening`,
         3600);
   if (!won) sfx.deny();
@@ -206,7 +216,11 @@ export function influenceAttempt(strength = 1) {
   for (const c of (S.crew || [])) {
     const resist = willpowerOf(c);
     if (Math.random() < CREW.illusionBase * strength * (1 - resist)) {
-      c.morale = Math.max(CREW.moraleFloor, (c.morale ?? 1) - 0.18);
+      {
+        const was = c.morale ?? 1;
+        c.morale = Math.max(CREW.moraleFloor, was - 0.18);
+        noteCrew(c, 'hostile influence', { stat: 'morale', delta: c.morale - was, level: 'warn' });
+      }
       c.onDuty = false;                 // they walk off station for a while
       c.dutyT = 0;
       hit.push(c);
@@ -249,10 +263,22 @@ export function updateCrew(dt) {
 
   // Provisions and breaks. Both run on the same clock as everything else here; the hours
   // conversion is the one from CRAFT so the galley and the factory floor agree on time.
+  // Read once per tick rather than per crewman: a fitting cannot mean one thing in the
+  // fatigue branch and something slightly different in the healing branch.
+  const comf = comfortEffects();
+  updateWelfare(dt);
+
   feedCrew(dt, dt * CRAFT.gameHoursPerSecond);
   runBreaks(dt);
+  // A trend, not a recording — the cadence is what makes keeping one affordable.
+  sampleCrew();
 
   for (const c of S.crew) {
+    // Somebody ashore or on a course is not aboard. They do not stand a watch, wear down,
+    // learn from what the ship is doing, or eat the ship's provisions — which is exactly
+    // the cost that makes both worth thinking about.
+    if (onShore(c) || inTraining(c)) { c.served = (c.served || 0) + dt; continue; }
+
     const trait = CREW_TRAITS[c.trait] || CREW_TRAITS.steady;
     const post = postOf(c);
     const duty = onDuty(c);
@@ -268,13 +294,17 @@ export function updateCrew(dt) {
     const before = c.fatigue || 0;
     if (working && !S.docked) c.fatigue = Math.min(1, before + FATIGUE.rate * dt);
     else {
-      const rest = S.docked ? FATIGUE.dockedRecover
+      // Quarters pay here. A bunk with a door that shuts is the difference between
+      // off-watch time being a pause and off-watch time being rest — and it is the
+      // fitting that makes a rotation worth running rather than just worth having.
+      const rest = (S.docked ? FATIGUE.dockedRecover
                  : duty ? FATIGUE.recover
-                        : FATIGUE.recover * CREW.offDutyRecover;
+                        : FATIGUE.recover * CREW.offDutyRecover) * comf.restMult;
       c.fatigue = Math.max(0, before - rest * dt);
     }
     if (before < FATIGUE.warnAt && c.fatigue >= FATIGUE.warnAt) {
       toast(`${c.name} is running on empty — rotate them off watch`, 3600);
+      noteCrew(c, 'worn out on watch', { stat: 'fatigue', delta: c.fatigue - before, level: 'warn' });
       dirty = true;
     }
     // Crossing a tenth changes the derived stats enough to be worth a recalc, and not
@@ -284,7 +314,8 @@ export function updateCrew(dt) {
     // ── injury ────────────────────────────────────────────────────
     const hurt = c.injury || 0;
     if (hurt > 0) {
-      const heal = (S.docked ? CREW.healDocked : CREW.healRate) * (medic ? CREW.healMedic : 1);
+      const heal = (S.docked ? CREW.healDocked : CREW.healRate) *
+                   (medic ? CREW.healMedic : 1) * comf.healMult;
       c.injury = Math.max(0, hurt - heal * dt);
       if (hurt >= 0.05 && c.injury < 0.05) {
         toast(`${c.name} is fit for duty again`, 2600);
@@ -335,13 +366,42 @@ export function updateCrew(dt) {
     // trained for was as cheerful as one that had not. It is a sum now.
     const avgFatigue = S.crew.reduce((a, c) => a + (c.fatigue || 0), 0) / S.crew.length;
     for (const c of S.crew) {
-      let d = paid ? CREW.moraleDrift : -CREW.moraleUnpaid;
-      if (avgFatigue > FATIGUE.warnAt) d -= CREW.moraleTired;
-      if (isCross(c)) d -= CREW.moraleCross;
-      if (Math.max(c.hunger || 0, c.thirst || 0) > CREW.needs.warnAt) d -= CREW.needs.hungerMorale;
-      if (S.docked) d += CREW.moraleShore;
+      // Each term is recorded against its own cause rather than as one net movement. The
+      // net number tells a player their gunner is unhappy; the terms tell them it is the
+      // empty galley and not the pay, which is the only version they can act on. See
+      // systems/crew-log.js — `crewDiagnosis()` ranks exactly these.
+      const terms = [];
+      let d = 0;
+      if (paid) { d += CREW.moraleDrift; terms.push(['paid', CREW.moraleDrift]); }
+      else { d -= CREW.moraleUnpaid; terms.push(['wages missed', -CREW.moraleUnpaid]); }
+      if (avgFatigue > FATIGUE.warnAt) { d -= CREW.moraleTired; terms.push(['crew worn out', -CREW.moraleTired]); }
+      if (isCross(c)) { d -= CREW.moraleCross; terms.push(['posted off speciality', -CREW.moraleCross]); }
+      if (Math.max(c.hunger || 0, c.thirst || 0) > CREW.needs.warnAt) {
+        // A galley does not conjure provisions — it makes running low hurt less, which is
+        // the honest thing a cook can do about an empty hold.
+        const bite = CREW.needs.hungerMorale * (1 - comf.rationRelief);
+        d -= bite; terms.push(['short rations', -bite]);
+      }
+      if (comf.galleyMorale > 0) { d += comf.galleyMorale; terms.push(['a decent galley', comf.galleyMorale]); }
+      if (S.docked) { d += CREW.moraleShore; terms.push(['shore leave', CREW.moraleShore]); }
+
+      const was = c.morale;
       c.morale = Math.max(CREW.moraleFloor, Math.min(1, c.morale + d));
+      // Attribute against what actually landed, not what was asked for: at the floor or the
+      // ceiling the terms are notional, and a diagnosis that sums to more than the observed
+      // change is a diagnosis that lies.
+      const scale = d ? (c.morale - was) / d : 0;
+      for (const [cause, amount] of terms) {
+        noteCrew(c, cause, { stat: 'morale', delta: amount * scale,
+                             level: amount < -0.05 ? 'notice' : 'info' });
+      }
     }
+    // Fittings bill on the same clock as wages: they are a standing cost of carrying
+    // people, and hiding them somewhere else would let a player buy a level-3 galley and
+    // never notice it was the thing draining the account.
+    const upkeep = comfortUpkeep();
+    if (upkeep > 0) S.credits = Math.max(0, S.credits - upkeep);
+
     if (paid) status(`Payroll — ${due} cr to ${S.crew.length} crew`);
     else { toast('Payroll missed — morale falling', 3000); }
     dirty = true;
@@ -384,7 +444,11 @@ export function retrain(id, role) {
   c.role = role;
   c.post = null;
   c.xp *= (1 - CREW.retrainCost);
-  c.morale = Math.max(CREW.moraleFloor, c.morale - CREW.retrainMorale);
+  {
+    const was = c.morale;
+    c.morale = Math.max(CREW.moraleFloor, c.morale - CREW.retrainMorale);
+    noteCrew(c, 'retraining', { stat: 'morale', delta: c.morale - was, level: 'notice' });
+  }
   recalcStats();
   sfx.ui();
   toast(`${c.name} retrained as ${CREW_ROLES[role].name}`);
@@ -480,7 +544,10 @@ export function crewCasualty(hullDamage) {
     const i = crew.indexOf(c);
     crew.splice(i, 1);
     for (const other of crew) {
-      other.morale = Math.max(CREW.moraleFloor, other.morale - CREW.moraleDeath);
+      const was = other.morale;
+      other.morale = Math.max(CREW.moraleFloor, was - CREW.moraleDeath);
+      noteCrew(other, `${c.name} was killed aboard`, {
+        stat: 'morale', delta: other.morale - was, level: 'warn' });
     }
     toast(`${c.name} was killed at the ${CREW_ROLES[postOf(c)].name} station`, 6000);
     status('Casualty aboard');
@@ -527,6 +594,21 @@ export function treatCrew() {
 export function crewEvent(kind, post = null, scale = 1) {
   const crew = S.crew || [];
   if (!crew.length) return 0;
+
+  // Winning lifts the room. `CREW.moraleWin` has been in config since v1.00.30 and nothing
+  // read it — the crew could be worn down by unpaid wages, bad rations and long watches, and
+  // had no way at all to be cheered up by the thing they are actually aboard for. Only the
+  // crew on watch feel it: somebody asleep in a bunk did not win anything.
+  if (kind === 'kill') {
+    const lift = CREW.moraleWin * scale;
+    for (const c of crew) {
+      if (!onDuty(c)) continue;
+      const was = c.morale ?? 1;
+      c.morale = Math.min(1, was + lift);
+      if (c.morale !== was) noteCrew(c, 'a kill on their watch', { stat: 'morale', delta: c.morale - was });
+    }
+  }
+
   const base = (CREW.xpEvent[kind] || 0) * scale;
   if (base <= 0) return 0;
 

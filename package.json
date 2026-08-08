@@ -1,6 +1,6 @@
 {
   "name": "living-galaxy",
-  "version": "1.01.10",
+  "version": "1.01.40",
   "description": "Browser-based 3D space RPG. Vanilla ES modules, no build step, no runtime dependencies.",
   "type": "module",
   "private": true,
@@ -28,6 +28,8 @@
     "test:npc-tactics": "node test/npc-tactics.mjs",
     "test:npc-comms": "node test/npc-comms.mjs",
     "test:deals": "node test/deals.mjs",
+    "test:crew-log": "node test/crew-log.mjs",
+    "test:welfare": "node test/welfare.mjs",
     "test:reachability": "node test/reachability.mjs",
     "test:engine": "node src/npc-avatar/test/run.mjs",
     "test:soak": "node test/soak.mjs",

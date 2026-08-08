@@ -29,6 +29,7 @@ import { serializeAnomalies, restoreAnomalies } from './lagrange.js';
 import { serializeGroups, restoreGroups } from './groups.js';
 import { serializeNpcComms, restoreNpcComms } from './npc-comms.js';
 import { serializeDeals, restoreDeals } from './deals.js';
+import { serializeWelfare, restoreWelfare } from './welfare.js';
 
 const BAK_KEY = SAVE_KEY + '.bak';
 const BAD_KEY = SAVE_KEY + '.corrupt';
@@ -126,7 +127,11 @@ export function snapshot() {
     npcComms: serializeNpcComms(),
 
     // v1.01.00: open obligations between characters.
-    deals: serializeDeals()
+    deals: serializeDeals(),
+
+    // v1.01.40: crew comfort fittings. Shore-leave and training flags ride on the crew
+    // records themselves, which the crew payload already carries.
+    comfort: serializeWelfare()
   };
 }
 
@@ -267,6 +272,13 @@ const MIGRATIONS = {
     d.deals = d.deals || { open: [], done: 0, failed: 0 };
     d.v = 13;
     return d;
+  },
+  // v13 → v14: crew comfort fittings. An old save has none, which is what every hull comes
+  // with — level 0 is the baseline, not a missing value.
+  13(d) {
+    d.comfort = d.comfort || { quarters: 0, galley: 0, infirmary: 0 };
+    d.v = 14;
+    return d;
   }
 };
 
@@ -393,6 +405,7 @@ export function loadGame() {
   restoreGroups(data.groups || null, ((S.fit && S.fit.weapon) || []).length);
   restoreNpcComms(data.npcComms || null);
   restoreDeals(data.deals || null);
+  restoreWelfare(data.comfort || null);
 
   recalcStats();
   return true;

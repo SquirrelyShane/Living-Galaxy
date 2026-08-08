@@ -52,6 +52,9 @@ export const S = {
   groups: null,              // hardpoint -> weapon group, plus which is live. See systems/groups.js
   npcComms: null,            // pair cooldowns for NPC-to-NPC exchanges. See systems/npc-comms.js
   deals: null,               // open obligations between characters. See systems/deals.js
+  log: null,                 // bounded structured log. See core/log.js — never saved
+  crewLog: null,             // rolling crew samples. See systems/crew-log.js — never saved
+  comfort: null,             // quarters / galley / infirmary levels. See systems/welfare.js
   sites: null,               // planetary sites. See systems/planetary.js
   orders: null,              // standing orders out in the field. See systems/orders.js
   assay: null,               // world name -> permanent survey bonus

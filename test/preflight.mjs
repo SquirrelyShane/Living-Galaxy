@@ -378,7 +378,7 @@ console.log('\n— automated subsystems (experimental) —');
 // ── persistence ──────────────────────────────────────────────────────
 console.log('\n— it all survives a save —');
 {
-  ok('the schema is current', SCHEMA === 13);
+  ok('the schema is current', SCHEMA === 14);
 
   MG.setExperimental(true);
   S.tutorial = null;

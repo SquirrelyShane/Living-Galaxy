@@ -7,6 +7,7 @@ import { fmtCr, aimAngles } from '../core/utils.js';
 import { WEAPON_MODULES } from '../data/weapons.js';
 import { MODULES } from '../data/modules.js';
 import { AMMUNITION } from '../data/crafting/ammo.js';
+import { anyOnShore, recallShore, comfortUpkeep } from './welfare.js';
 import { FEEDS } from './ordnance.js';
 import { addRounds } from './magazine.js';
 import { marketPrice, applyTrade } from './market.js';
@@ -58,6 +59,11 @@ export function dock(station) {
 
 export function undock() {
   if (!S.docked) return;
+  // Leaving is what cuts shore leave short. The clock does not quietly pause when you
+  // undock — the crew are recalled, they keep a fraction of the benefit, and the log
+  // records that it was cut short so a player who wonders why the leave did not help can
+  // find out. See systems/welfare.js.
+  if (anyOnShore()) recallShore(false);
   const st = S.docked, u = st.userData, name = u.name;
   const p = S.player;
 

@@ -54,12 +54,24 @@ const rel = f => path.relative(ROOT, f).replace(/\\/g, '/');
 const VERBS = {
   'src/systems/deals.js':     ['postPlayerJob', 'suggestedFee'],
   'src/systems/lagrange.js':  ['investigate'],
+  // Grew by three in v1.01.20. `installFacility`, `toggleFacility` and `removeFacility` were
+  // unwired the whole time and the hand-written registry did not list them, so nothing was
+  // checking. That is the honest limit of a hand-maintained list, and the reason to widen it
+  // whenever a module is worked on rather than only when something breaks.
   'src/systems/planetary.js': ['foundSite', 'upgradeCentre', 'abandonSite',
-                               'collectFrom', 'deliverTo', 'manufactureAt'],
-  'src/systems/crew.js':      ['hire', 'dismiss', 'retrain', 'setDuty', 'rotateWatch',
-                               'influenceAttempt'],
+                               'collectFrom', 'deliverTo', 'manufactureAt',
+                               'installFacility', 'toggleFacility', 'removeFacility'],
+  // `toggleDuty`, not `setDuty`. The registry must name the *outermost* verb — the one a
+  // panel actually calls — or it reports a gap that is not one: `setDuty` has no direct
+  // caller because `toggleDuty` wraps it inside the same module, and the crew panel has had
+  // an ON WATCH button the whole time. The v1.01.10 audit got this wrong in both crew
+  // entries and listed them as gaps for a slice.
+  'src/systems/crew.js':      ['hire', 'dismiss', 'retrain', 'toggleDuty', 'persuade',
+                               'promote', 'demote', 'assignPost'],
+  'src/systems/welfare.js':   ['upgradeComfort', 'startShoreLeave', 'recallShore',
+                               'startTraining', 'cancelTraining'],
   'src/systems/crafting.js':  ['queueJob', 'cancelJob'],
-  'src/systems/display.js':   ['cyclePalette'],
+  'src/systems/display.js':   ['setDisplay'],
   'src/systems/magazine.js':  ['chamber'],
   'src/systems/groups.js':    ['cycleGroup', 'cycleActive'],
   'src/systems/survey.js':    ['scanPlanet', 'probePlanet'],
@@ -69,18 +81,32 @@ const VERBS = {
 /**
  * Known gaps, each with the audit section that tracks it. Removing a line here is how a
  * gap gets closed; adding one is a deliberate act with a paper trail.
+ *
+ * Empty is the goal and, as of v1.01.20, the state. Every entry that was here at v1.01.10
+ * turned out to be one of three things, and only one of them was a real gap:
+ *
+ *   **genuinely unreachable** — `cancelJob`. A queued job could be started and never
+ *     stopped, with a refund curve nobody could collect. Wired.
+ *   **reachable under another name** — `setDuty`, `rotateWatch`. The registry named an inner
+ *     function; the panel calls a wrapper. That is a registry bug reported as a product bug.
+ *   **not a player verb at all** — `cyclePalette` was a helper nothing needed, since the
+ *     settings panel sets palettes directly; `influenceAttempt` is a hazard applied *to* the
+ *     player, tracked in UNTRIGGERED below rather than here.
+ *
+ * The distinction matters because two of the five entries in the v1.01.10 audit were
+ * overstated, and an audit that cries wolf gets ignored exactly like a flaky test does.
  */
-const BACKLOG = {
-  'upgradeCentre':    'REACHABILITY_AUDIT — planetary operating layer',
-  'abandonSite':      'REACHABILITY_AUDIT — planetary operating layer',
-  'collectFrom':      'REACHABILITY_AUDIT — planetary operating layer',
-  'deliverTo':        'REACHABILITY_AUDIT — planetary operating layer',
-  'manufactureAt':    'REACHABILITY_AUDIT — planetary operating layer',
-  'setDuty':          'REACHABILITY_AUDIT — crew management verbs',
-  'rotateWatch':      'REACHABILITY_AUDIT — crew management verbs',
-  'influenceAttempt': 'REACHABILITY_AUDIT — crew management verbs',
-  'cancelJob':        'REACHABILITY_AUDIT — smaller ones',
-  'cyclePalette':     'REACHABILITY_AUDIT — smaller ones'
+const BACKLOG = {};
+
+/**
+ * Declared behaviour that nothing ever invokes — a different failure from an unreachable
+ * verb, and one the caller-based check cannot see, because the missing caller is not a
+ * button. Nobody is *supposed* to press these; something in the world is supposed to cause
+ * them, and nothing does.
+ */
+const UNTRIGGERED = {
+  'influenceAttempt': 'crew.js — an influence net that degrades your crew. No hostile ' +
+                      'system triggers it, so the hazard exists and cannot happen.'
 };
 
 /**
@@ -129,6 +155,8 @@ console.log('\n— every player-facing verb has a door —');
         if (BACKLOG[v]) gaps.push(`${v} is wired but still listed in BACKLOG`);
       } else if (BACKLOG[v]) {
         ok(`${v} is a known gap (${BACKLOG[v]})`, true);
+      } else if (UNTRIGGERED[v]) {
+        ok(`${v} is declared but nothing triggers it`, true);
       } else {
         gaps.push(`${v} has no caller and is not on the backlog`);
         ok(`${v} is reachable`, false, 'no caller in src/ and no backlog entry');
@@ -138,16 +166,28 @@ console.log('\n— every player-facing verb has a door —');
   ok('the backlog matches reality', gaps.length === 0, gaps.join(' · '));
 }
 
-console.log('\n— the two closed this slice —');
+console.log('\n— the ones the audit was written about —');
 {
-  // Named explicitly rather than left to the loop above, because these are the ones the
-  // audit was written about and a regression on either should say so by name.
+  // Named explicitly rather than left to the loop above, because a regression on any of
+  // these should say which feature went dark rather than which identifier did.
   ok('deep-space anomalies can be worked from the target panel',
      callersOf('src/systems/lagrange.js', 'investigate').includes('src/ui/hud.js'));
   ok('a job can be posted from a dock',
      callersOf('src/systems/deals.js', 'postPlayerJob').includes('src/ui/dock.js'));
   ok('and the fee is quoted before posting',
      callersOf('src/systems/deals.js', 'suggestedFee').includes('src/ui/dock.js'));
+
+  // The planetary layer, end to end: found it, run it, change it, leave it.
+  const planetary = v => callersOf('src/systems/planetary.js', v);
+  for (const v of ['foundSite', 'collectFrom', 'deliverTo', 'manufactureAt',
+                   'installFacility', 'toggleFacility', 'removeFacility',
+                   'upgradeCentre', 'abandonSite']) {
+    ok(`${v} is reachable from the ops panel`, planetary(v).includes('src/ui/ops.js'),
+       planetary(v).join(' ') || 'nowhere');
+  }
+  ok('the blockers are read by the panel too',
+     callersOf('src/systems/planetary.js', 'installBlocker').includes('src/ui/ops.js') &&
+     callersOf('src/systems/planetary.js', 'upgradeBlocker').includes('src/ui/ops.js'));
 }
 
 console.log('\n— config that nothing reads —');

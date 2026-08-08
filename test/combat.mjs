@@ -430,5 +430,54 @@ console.log('\n— locking —');
   S.player.position.set(0, 0, 0);
 }
 
+// ── the reacquire lever ──────────────────────────────────────────────
+// `SEEKER.reacquire` sat in config as `false` from v1.00.40 with nothing reading it — and it
+// could not be read, because `guide()` returned early on a lost seeker before the branch
+// that would have used it. It is a lever now, so both positions need to hold, and the
+// default position needs to be the one that keeps breaking a lock worth doing.
+console.log('\n— seeker reacquisition —');
+{
+  const { SEEKER } = await imp('core/config.js');
+  const P = await imp('systems/projectiles.js');
+  ok('a lost lock stays lost by default', SEEKER.reacquire === false);
+
+  // Fired well away from the origin: a 'ship' round spawned on top of the player hits it on
+  // the first frame and is gone before the seeker has armed, which is why the first version
+  // of this test reported zero seekers rather than a lost lock.
+  const FAR = 50000;
+  const mk = () => {
+    P.inspectProjectiles().length = 0;
+    const tgt = { position: new THREE.Vector3(0, 0, FAR + 600), userData: { hp: 50, vel: new THREE.Vector3() } };
+    P.fire(new THREE.Vector3(0, 0, FAR), new THREE.Vector3(0, 0, 1), 900, 10, 'ship', 0xffffff,
+           { kind: 'missile', track: 2.0, ttl: 6, dtype: 'kinetic', seek: tgt });
+    return tgt;
+  };
+
+  // Slam the target hard behind the missile so the cone check breaks the lock, then put it
+  // back in front and see whether the seeker is allowed to notice.
+  const runWith = flag => {
+    const was = SEEKER.reacquire;
+    SEEKER.reacquire = flag;
+    const tgt = mk();
+    tgt.position.set(9000, 0, FAR - 400);
+    for (let i = 0; i < 20; i++) P.updateProjectiles(1 / 60);
+    const brokeAway = P.inspectProjectiles().some(p => p.lost);
+    tgt.position.set(0, 0, FAR + 900);
+    for (let i = 0; i < 20; i++) P.updateProjectiles(1 / 60);
+    const seekers = P.inspectProjectiles().filter(p => p.seek);
+    const stillLost = seekers.length > 0 && seekers.every(p => p.lost);
+    SEEKER.reacquire = was;
+    return { brokeAway, stillLost, seekers: seekers.length };
+  };
+
+  const off = runWith(false);
+  ok('a hard break loses the lock', off.brokeAway);
+  ok('and with reacquire off it stays lost', off.stillLost, `${off.seekers} seekers`);
+
+  const on = runWith(true);
+  ok('with reacquire on the seeker picks it back up', !on.stillLost, `${on.seekers} seekers`);
+  P.inspectProjectiles().length = 0;
+}
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

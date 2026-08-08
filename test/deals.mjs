@@ -339,7 +339,7 @@ console.log('\n— it survives a save —');
   ok('and both parties still find it', D.dealsFor(hauler.userData.name).length === 1);
   D.restoreDeals({ open: [{ id: null }, { id: 'x', from: 'a', to: 'b' }] });
   ok('a malformed entry is dropped', D.openDeals().length === 1);
-  ok('the schema moved for it', SCHEMA === 13);
+  ok('the schema moved for it', SCHEMA === 14);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

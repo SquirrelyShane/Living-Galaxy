@@ -1,8 +1,9 @@
 # Living Galaxy
 
-**v1.01.10 "Reach"** · save schema 13 · 2,286 checks across twenty-seven suites ·
+**v1.01.40 "Shore"** · save schema 14 · 2,460 checks across twenty-nine suites ·
 `CHANGELOG.md` for the history, `docs/SLICE_PLAN.md` for how it was built,
-`PATCH_v1.01.10.md` for what changed.
+`PATCH_v1.01.40.md` for what changed.
+`docs/CREW_ROADMAP.md` for where the crew work is going.
 `docs/REACHABILITY_AUDIT.md` for what exists and cannot yet be reached.
 `docs/NPC_ROADMAP.md` for where the NPC work is going.
 

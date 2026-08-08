@@ -3,6 +3,13 @@
 // the whole crew is currently adding to the ship.
 
 import { S } from '../core/state.js';
+import { watchReport, crewVitals, crewDiagnosis, crewHistory } from '../systems/crew-log.js';
+import { diagnostics } from '../core/log.js';
+import { COMFORTS, COMFORT_KEYS, comfortLevel, comfortPrice, comfortBlocker, upgradeComfort,
+         comfortEffects, comfortUpkeep, shoreQuote, shoreBlocker, startShoreLeave, recallShore,
+         anyOnShore, onShore, inTraining, trainBlocker, trainingCost, startTraining,
+         cancelTraining } from '../systems/welfare.js';
+import { WELFARE } from '../core/config.js';
 import { CREW } from '../core/config.js';
 import { CREW_ROLES, ROLE_KEYS, CREW_TRAITS, crewBonuses, crewOutput, wageOf,
          postOf, specialtyOf, isCross, onDuty, condition, willpowerOf, needsOf } from '../data/crew.js';
@@ -15,6 +22,7 @@ import { toast } from './toast.js';
 import { sfx } from '../systems/audio.js';
 
 let overlay, body, summary, tabs, tab = 'roster';
+let openWatch = null;
 let openCard = null;
 
 export function initCrewUi() {
@@ -59,7 +67,172 @@ function render() {
 
   if (tab === 'roster') return renderRoster();
   if (tab === 'hire') return renderHire();
+  if (tab === 'watch') return renderWatch();
+  if (tab === 'welfare') return renderWelfare();
   renderDepts();
+}
+
+
+
+// ── welfare ──────────────────────────────────────────────────────────
+//
+// Three things to spend on people rather than on the ship, and none of them is fast and
+// free — that is the design, not a balance pass. See systems/welfare.js.
+function renderWelfare() {
+  if (!(S.crew || []).length) {
+    body.appendChild(el('div', 'dock-note', 'No crew aboard — nothing to spend on.'));
+    return;
+  }
+  const eff = comfortEffects();
+  const up = comfortUpkeep();
+
+  // ── fittings ──
+  body.appendChild(el('div', 'dock-note',
+    `Fittings — ${up ? `${fmtCr(up)} upkeep every ${CREW.wageInterval}s` : 'no upkeep'}. ` +
+    'Bought once, billed forever, and cheaper than replacing people.'));
+
+  for (const key of COMFORT_KEYS) {
+    const c = COMFORTS[key];
+    const lvl = comfortLevel(key);
+    const why = comfortBlocker(key);
+    const r = el('div', 'ops-run');
+    r.innerHTML = `<div class="oh">${c.icon} ${c.name} — level ${lvl}</div>` +
+      `<div class="om">${c.desc}</div>`;
+    const b = el('button', 'buy-btn',
+      lvl >= WELFARE.maxLevel ? 'MAX' : why ? why.toUpperCase() : fmtCr(comfortPrice(key)));
+    b.disabled = !!why;
+    b.addEventListener('click', () => { upgradeComfort(key); render(); });
+    r.appendChild(b);
+    body.appendChild(r);
+  }
+  body.appendChild(el('div', 'cnote',
+    `Off-watch recovery ×${eff.restMult.toFixed(2)} · healing ×${eff.healMult.toFixed(2)}` +
+    `${eff.rationRelief ? ` · short rations ${Math.round(eff.rationRelief * 100)}% softer` : ''}`));
+
+  // ── shore leave ──
+  body.appendChild(el('div', 'led-head', 'Shore leave'));
+  if (anyOnShore()) {
+    const away = S.crew.filter(onShore);
+    const left = Math.max(...away.map(c => c.shoreLeft || 0));
+    body.appendChild(el('div', 'dock-note',
+      `${away.length} ashore — ${left.toFixed(1)}h left. They are off the roster entirely; ` +
+      'undocking recalls them early and wastes most of it.'));
+    const b = el('button', 'buy-btn', 'RECALL NOW');
+    b.addEventListener('click', () => { recallShore(false); render(); });
+    body.appendChild(b);
+  } else {
+    const q = shoreQuote();
+    const why = shoreBlocker();
+    const r = el('div', 'ops-run');
+    r.innerHTML = `<div class="oh">Send ${q.heads} crew ashore — ${q.hours}h</div>` +
+      `<div class="om">No output, no watch, no experience while they are gone. ` +
+      `The cost is the clock, not the money.</div>`;
+    const b = el('button', 'buy-btn', why ? why.toUpperCase() : fmtCr(q.cost));
+    b.disabled = !!why;
+    b.addEventListener('click', () => { startShoreLeave(); render(); });
+    r.appendChild(b);
+    body.appendChild(r);
+  }
+
+  // ── training ──
+  body.appendChild(el('div', 'led-head', 'Training'));
+  body.appendChild(el('div', 'cnote',
+    'Experience is what happens to somebody. A course is something you choose — and it ' +
+    'costs a station off the watch bill for as long as it runs.'));
+  for (const c of S.crew) {
+    const r = el('div', 'trade-row');
+    const busy = inTraining(c);
+    r.appendChild(el('div', '', `<div class="nm">${c.name} — L${c.level}</div>` +
+      `<div class="meta">${busy ? `on a course — ${(c.trainLeft || 0).toFixed(1)}h left`
+                                : onShore(c) ? 'ashore' : CREW_ROLES[c.role].name}</div>`));
+    if (busy) {
+      const b = el('button', 'buy-btn', 'PULL OFF');
+      b.addEventListener('click', () => { cancelTraining(c.id); render(); });
+      r.appendChild(b);
+    } else {
+      const why = trainBlocker(c.id);
+      const b = el('button', 'buy-btn', why ? why.toUpperCase() : fmtCr(trainingCost(c)));
+      b.disabled = !!why;
+      b.addEventListener('click', () => { startTraining(c.id); render(); });
+      r.appendChild(b);
+    }
+    body.appendChild(r);
+  }
+}
+
+// ── watch log ────────────────────────────────────────────────────────
+//
+// The crew simulation has been detailed since v1.00.30 and completely opaque: a player could
+// watch morale sitting at 48% with no way to know whether it was climbing back from 30% or
+// falling from 90%, or what did it. "My crew keep quitting" was not a diagnosable complaint.
+//
+// Ordered by concern rather than by name or by post. A roster sorted alphabetically makes
+// you read all sixteen to find the one that matters; sorted by who is closest to becoming a
+// problem, the answer is the first row. See systems/crew-log.js.
+function renderWatch() {
+  const v = crewVitals();
+  if (!v.count) {
+    body.appendChild(el('div', 'dock-note', 'No crew aboard — nothing to keep watch on.'));
+    return;
+  }
+
+  body.appendChild(el('div', 'dock-note',
+    `Average morale ${Math.round(v.morale * 100)}%, fatigue ${Math.round(v.fatigue * 100)}%. ` +
+    (v.atRisk ? `${v.atRisk} of ${v.count} need attention.` : 'Nobody needs attention.')));
+
+  for (const r of watchReport()) {
+    const card = el('div', 'ops-run' + (openWatch === r.id ? ' open' : ''));
+    const arrow = d => d === 'rising' ? '\u2191' : d === 'falling' ? '\u2193' : '\u2192';
+    card.innerHTML =
+      `<div class="oh">${r.name} — ${CREW_ROLES[r.post] ? CREW_ROLES[r.post].name : r.post}` +
+      `${r.onDuty ? '' : ' (off watch)'}</div>` +
+      `<div class="om">morale ${Math.round(r.morale * 100)}% ${arrow(r.moraleTrend)} · ` +
+      `fatigue ${Math.round(r.fatigue * 100)}% ${arrow(r.fatigueTrend)}` +
+      `${r.injury > 0.05 ? ` · injured ${Math.round(r.injury * 100)}%` : ''}</div>`;
+    card.addEventListener('click', () => { openWatch = openWatch === r.id ? null : r.id; render(); });
+    body.appendChild(card);
+
+    if (openWatch !== r.id) continue;
+
+    // The diagnosis, not the log. A ranked list of causes is what a player can act on; a
+    // chronological dump of everything that happened is what they have to interpret.
+    const d = crewDiagnosis(r.id, 'morale');
+    const detail = el('div', 'site-ops');
+    detail.appendChild(el('div', 'ops-head', `Morale ${d.trend.direction}` +
+      (d.trend.delta ? ` (${d.trend.delta > 0 ? '+' : ''}${(d.trend.delta * 100).toFixed(0)}% recently)` : '')));
+    if (!d.worst.length && !d.best.length) {
+      detail.appendChild(el('div', 'cnote', 'Nothing has moved it lately.'));
+    }
+    for (const w of d.worst) {
+      detail.appendChild(el('div', 'cnote', `${w.cause} — ${(w.delta * 100).toFixed(0)}%`));
+    }
+    for (const w of d.best) {
+      detail.appendChild(el('div', 'cnote', `${w.cause} — +${(w.delta * 100).toFixed(0)}%`));
+    }
+
+    const hist = crewHistory(r.id, 8);
+    if (hist.length) {
+      detail.appendChild(el('div', 'ops-head', 'Recent'));
+      for (const e of hist) {
+        detail.appendChild(el('div', 'cnote',
+          `${(e.data && e.data.cause) || e.msg}` +
+          `${e.data && e.data.delta ? ` (${e.data.delta > 0 ? '+' : ''}${(e.data.delta * 100).toFixed(0)}%)` : ''}`));
+      }
+    }
+    body.appendChild(detail);
+  }
+
+  // Diagnostics live behind the same tab rather than in settings: when something is wrong
+  // with the crew, the log is the next thing you want, and making it a separate screen means
+  // nobody finds it.
+  const diag = diagnostics();
+  body.appendChild(el('div', 'dock-note',
+    `Flight log — ${diag.held} entries of ${diag.cap}` +
+    `${diag.dropped ? `, ${diag.dropped} rolled off` : ''} · level ${diag.level}` +
+    `${diag.problems.length ? ` · ${diag.problems.length} recent problem${diag.problems.length > 1 ? 's' : ''}` : ''}`));
+  for (const p of diag.problems.slice(0, 4)) {
+    body.appendChild(el('div', 'cnote', p.msg));
+  }
 }
 
 // ── roster ───────────────────────────────────────────────────────────

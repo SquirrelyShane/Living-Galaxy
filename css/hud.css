@@ -274,3 +274,11 @@
   .tool-btn{height:22px;width:30px;font-size:9px}
   .act-btn{height:30px;font-size:12px}
 }
+
+/* Site operations — the panel that turns a planetary dashboard into something you run.
+   Indented and edged so an expanded site reads as belonging to the card above it rather
+   than as another card in the list. */
+.site-ops{margin:2px 0 10px 10px;padding:6px 8px;border-left:2px solid var(--edge)}
+.site-ops .ops-head{margin-top:8px;font-size:11px;letter-spacing:.09em;color:var(--dim)}
+.site-ops .trade-row{padding:4px 0}
+.ops-run.open{border-color:var(--edge-hot)}

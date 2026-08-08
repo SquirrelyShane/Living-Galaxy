@@ -340,9 +340,13 @@ export const DAMAGE = {
 // round is only ever judged once.
 export const POINTDEF = {
   range: 260,          // interception envelope, units
-  perRound: true,      // judge each round once, on entry to the envelope
   burst: 6             // sparks drawn on a successful intercept
 };
+// `perRound` used to live here as `true`. It was never read, because it was never a lever:
+// each round is judged exactly once on entry to the envelope, and the alternative — rolling
+// every frame — makes the grid strictly better the slower the round and ties the hit rate to
+// frame rate. A constant that only ever has one correct value is documentation wearing a
+// config key's clothes, and it belongs in the comment on the code that does the thing.
 
 // ── missiles ─────────────────────────────────────────────────────────
 // A missile now carries its own lock rather than steering at whatever the player
@@ -1112,6 +1116,55 @@ export const TUTORIAL = {
 // ── comms ────────────────────────────────────────────────────────────
 // The log is a place people talk, not a place the game prints at you. Traffic is
 // generated from what is actually happening within earshot; replies cost standing.
+// ── crew welfare (v1.01.40) ──────────────────────────────────────────
+// What you spend on people instead of on the ship. Every number here is chosen so that no
+// recovery is both fast and free: the obvious version of "let the player rest the crew" is
+// a button that removes fatigue, and that deletes the watch rotation fatigue exists to
+// force. Each of the three costs something different.
+export const WELFARE = {
+  maxLevel: 3,
+  // Fittings: money up front, and upkeep forever. The standing answer — cheaper than
+  // replacing people, and they never stop billing.
+  fitBase: 9000, fitScale: 2.1, upkeepPerLevel: 140,
+  quartersRest: 0.45,     // + this per level on off-watch recovery
+  galleyRelief: 0.30,     // + this per level off the short-rations morale hit
+  galleyMorale: 0.008,    // ...and a small standing lift per payroll
+  infirmaryHeal: 0.55,    // + this per level on healing rate
+
+  // Shore leave: the cost is *time docked*. You cannot buy your way out of the clock.
+  shoreHours: 8, shoreCostPerHead: 420,
+  shoreMorale: 0.45, shoreFatigue: 0.85,
+  // Undocking early cuts it short. Keeping a fraction rather than nothing means a player who
+  // has to run is not punished into never trying it again — but it is a poor deal, and the
+  // log says it was cut short so they can find out why it did not help.
+  shoreEarlyKeep: 0.45,
+
+  // Training: the cost is a body off the watch bill. On a four-berth hull that is a quarter
+  // of the ship, which is the whole price.
+  trainBase: 3200, trainScale: 1.55, trainHours: 6, trainXp: 90
+};
+
+// ── crew telemetry (v1.01.30) ────────────────────────────────────────
+// The crew simulation has been detailed and opaque since v1.00.30. These are the bounds on
+// giving it a memory of itself — every one is a cap rather than a target, because this runs
+// in a browser tab that may be open for hours and a diagnostic that leaks memory is a bug
+// with a nice UI.
+export const CREWLOG = {
+  sampleEvery: 6,        // s between roster samples. A trend, not a recording.
+  samplesPerCrew: 240,   // ~24 minutes of history each, then the oldest falls off
+  trendWindow: 180,      // s a trend looks back over
+  diagWindow: 600,       // s a diagnosis attributes causes over
+  // A number technically rising by 0.0001 must read as steady, or the readout flickers
+  // between "improving" and "falling" and the player learns to ignore it.
+  deadBand: 0.02,
+
+  // How the "who needs attention" ordering is built. Falling counts for more than low:
+  // somebody at 0.4 and climbing is being handled; somebody at 0.6 in freefall is the one
+  // about to become a problem.
+  weightMorale: 1.0, weightFatigue: 0.8, weightInjury: 1.2, weightFalling: 0.35,
+  riskAt: 0.75           // concern score at which somebody counts as at risk
+};
+
 // ── the deal ledger (v1.01.00) ───────────────────────────────────────
 // An obligation between two named characters. The numbers here are all about one question:
 // what does an offer have to be worth before somebody takes it, and what does breaking one

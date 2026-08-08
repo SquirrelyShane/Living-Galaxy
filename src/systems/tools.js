@@ -34,6 +34,8 @@ import { playerSignature, signatureLabel } from './detection.js';
 import { perfStats } from '../core/clock.js';
 import { netReport } from './net.js';
 import { fieldContacts } from './fields.js';
+import { watchReport, crewVitals, crewDiagnosis } from './crew-log.js';
+import { diagnostics } from '../core/log.js';
 
 const bodyNamed = name => {
   if (!name) return null;
@@ -258,6 +260,66 @@ export const TOOLS = {
         data: p
       };
     }
+  }
+};
+
+// ── crew and diagnostics (v1.01.30) ──────────────────────────────────
+// ARIA is the natural place for this: a player asking "how is my crew" wants an *answer*,
+// and a panel can only show them numbers. These tools return the ranked causes rather than
+// the raw series, because the ranking is the part a person can act on.
+
+TOOLS.crew_watch = {
+  desc: 'Report the roster by who needs attention first, with morale and fatigue trends.',
+  args: [],
+  run() {
+    const v = crewVitals();
+    if (!v.count) return { text: 'No crew aboard — the ship is running on automation.', data: v };
+    const rows = watchReport().slice(0, 4);
+    const line = rows.map(r =>
+      `${r.name} (${r.post}) morale ${Math.round(r.morale * 100)}% ${r.moraleTrend}` +
+      `${r.fatigue > 0.5 ? `, fatigue ${Math.round(r.fatigue * 100)}%` : ''}`).join('; ');
+    return {
+      text: `${v.count} aboard, ${v.onDuty} on watch. Average morale ${Math.round(v.morale * 100)}%. ` +
+            (v.atRisk ? `${v.atRisk} needing attention: ${line}.` : `Nobody needs attention. ${line}.`),
+      data: v
+    };
+  }
+};
+
+TOOLS.crew_why = {
+  desc: 'Explain why a named crew member\'s morale is where it is.',
+  args: ['name'],
+  run(name) {
+    const c = (S.crew || []).find(x => x.name.toLowerCase().includes(String(name || '').toLowerCase()));
+    if (!c) return { text: `Nobody aboard by that name.`, data: null };
+    const d = crewDiagnosis(c.id, 'morale');
+    if (!d.worst.length && !d.best.length) {
+      return { text: `${c.name} is at ${Math.round((c.morale ?? 1) * 100)}% and nothing has moved it lately.`, data: d };
+    }
+    const worst = d.worst.map(w => `${w.cause} (${w.delta.toFixed(2)})`).join(', ');
+    const best = d.best.map(w => `${w.cause} (+${w.delta.toFixed(2)})`).join(', ');
+    return {
+      text: `${c.name} is at ${Math.round((c.morale ?? 1) * 100)}% and ${d.trend.direction}.` +
+            (worst ? ` Costing them: ${worst}.` : '') +
+            (best ? ` Helping: ${best}.` : ''),
+      data: d
+    };
+  }
+};
+
+TOOLS.diagnostics = {
+  desc: 'Report the flight log: what has been recorded and what is going wrong.',
+  args: [],
+  run() {
+    const d = diagnostics();
+    const probs = d.problems.length
+      ? ' Recent problems: ' + d.problems.map(p => p.msg).join('; ') + '.'
+      : ' Nothing at warning level or above.';
+    return {
+      text: `${d.held} entries held of ${d.cap}${d.dropped ? `, ${d.dropped} rolled off` : ''}. ` +
+            `Level ${d.level}.` + probs,
+      data: d
+    };
   }
 };
 

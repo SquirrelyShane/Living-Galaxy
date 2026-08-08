@@ -32,6 +32,8 @@ const SUITES = [
   ['npc-tactics','NPC magazines, heat, nerve, calls for help, and memory that decides'],
   ['npc-comms', 'NPC-to-NPC exchanges, relationships, gossip, overhearing'],
   ['deals',     'the ledger — obligations, reliability, settlement and default'],
+  ['crew-log',  'the flight log, crew telemetry, trends, diagnosis and ARIA readouts'],
+  ['welfare',   'shore leave, quarters, galley, infirmary and training'],
   ['reachability','every player-facing verb has a door — see docs/REACHABILITY_AUDIT.md'],
   ['run',      'simulation: flight, combat, mining, trade, warp, save'],
   ['warp-nav', 'autopilot navigation geometries'],

@@ -20,8 +20,16 @@ import { S } from '../core/state.js';
 import { ORDER_TYPES, ORDER_KEYS, orderReport, dispatch, dispatchBlocker,
          recall, availableCrew, assayOf } from '../systems/orders.js';
 import { payroll, provisionHours, mouths, overseer, crewSummary } from '../systems/crew.js';
-import { empireReport, sites, siteReport, foundSite, foundBlocker } from '../systems/planetary.js';
-import { craftingReport, stockUnits, jobs } from '../systems/crafting.js';
+import { empireReport, sites, siteReport, foundSite, foundBlocker, siteById,
+         collectFrom, deliverTo, manufactureAt, upgradeCentre, upgradeBlocker, abandonSite,
+         installFacility, installBlocker, toggleFacility, removeFacility } from '../systems/planetary.js';
+import { facilitiesFor, facility } from '../data/planetary/index.js';
+import { BRANCH_KEYS } from '../data/planetary/branches/index.js';
+import { buildableAt, materialName, BLUEPRINTS } from '../data/crafting/index.js';
+import { stock, held } from '../systems/crafting.js';
+
+const blueprintName = id => (BLUEPRINTS[id] && BLUEPRINTS[id].name) || id;
+import { craftingReport, stockUnits, jobs, cancelJob } from '../systems/crafting.js';
 import { activeContracts } from '../systems/contracts.js';
 import { reputationReport } from '../systems/reputation.js';
 import { COMMAND_CENTRES, centreFor } from '../data/planetary/centres.js';
@@ -75,6 +83,8 @@ export function tickOps(dt) {
 }
 
 // ── rendering ────────────────────────────────────────────────────────
+
+let openSite = null;   // site id whose operations panel is expanded
 
 function render() {
   if (!body) return;
@@ -172,6 +182,20 @@ function renderLedger() {
   row('Materials held', `${Math.round(stockUnits())} units`);
   row('Jobs in build', String(jobs().length));
 
+  // A queued job could be started and never stopped: `cancelJob()` shipped with a refund
+  // curve nobody could ever collect. Listed here rather than in a panel of its own because
+  // the ledger is where you come to ask what you have committed to.
+  for (const j of jobs()) {
+    const r = el('div', 'trade-row');
+    r.appendChild(el('div', '', `<div class="nm">${blueprintName(j.item)}${j.qty > 1 ? ` \u00d7${j.qty}` : ''}</div>` +
+      `<div class="meta">${hrs(j.remaining)} remaining of ${hrs(j.hours)}` +
+      `${j.site ? ` · on ${j.site}` : ' · aboard'}</div>`));
+    const b = el('button', 'buy-btn', 'CANCEL');
+    b.addEventListener('click', () => { cancelJob(j.id); render(); });
+    r.appendChild(b);
+    body.appendChild(r);
+  }
+
   body.appendChild(el('div', 'led-head', 'Recurring'));
   row('Payroll', `${fmtCr(wages)} / ${CREW.wageInterval}s`, wages ? 'bad' : '');
   row('Site upkeep', `${fmtCr(emp.upkeep)} / cycle`, emp.upkeep ? 'bad' : '');
@@ -211,7 +235,7 @@ function renderHoldings() {
 
   for (const s of list) {
     const r = siteReport(s.id);
-    const card = el('div', 'ops-run');
+    const card = el('div', 'ops-run' + (openSite === s.id ? ' open' : ''));
     card.innerHTML =
       `<div class="oh">${r.body} — ${r.centre}</div>` +
       `<div class="om">${r.ptype} · slots ${r.slots.used}/${r.slots.total} · ` +
@@ -219,7 +243,18 @@ function renderHoldings() {
       (r.building ? `<div class="om urgent">building — ${hrs(r.building)} left</div>` : '') +
       `<div class="om">store ${Math.round(r.storage.used)} / ${r.storage.cap}` +
       (assayOf(r.body) ? ` · assay +${(assayOf(r.body) * 100).toFixed(0)}%` : '') + '</div>';
+
+    // Tap the card to open the site's operations. Everything below this line is the layer
+    // that shipped in v1.00.20 with no way in: you could found a complex and read a dashboard
+    // over it, and never run it. See docs/REACHABILITY_AUDIT.md.
+    const open = el('button', 'buy-btn', openSite === s.id ? 'CLOSE' : 'OPERATE');
+    open.addEventListener('click', () => {
+      openSite = openSite === s.id ? null : s.id;
+      sfx.ui(); render();
+    });
+    card.appendChild(open);
     body.appendChild(card);
+    if (openSite === s.id) renderSiteOps(r);
   }
 
   const emp = empireReport();
@@ -280,6 +315,157 @@ function renderFounding() {
   }
 }
 
+
+// ── site operations ──────────────────────────────────────────────────
+//
+// Five verbs that existed, were tested, and had no caller: `collectFrom`, `deliverTo`,
+// `manufactureAt`, `upgradeCentre`, `abandonSite` — plus `installFacility`,
+// `toggleFacility` and `removeFacility`, which the hand-written audit registry missed
+// entirely. That miss is the honest limit of a hand-maintained list, and it is why the
+// registry in test/reachability.mjs grew by three entries alongside this panel.
+//
+// Ordered by how often a player does it: take the output, feed the fabricators, run a job,
+// change the buildings, then the two irreversible ones at the bottom where a mis-tap cannot
+// reach them.
+function renderSiteOps(r) {
+  const wrap = el('div', 'site-ops');
+
+  if (r.building) {
+    wrap.appendChild(el('div', 'cnote',
+      `Command centre still going up — ${hrs(r.building)} left. Nothing here works until it does.`));
+    body.appendChild(wrap);
+    return;
+  }
+
+  // ── the store ──
+  wrap.appendChild(el('div', 'ops-head', `Ground store — ${Math.round(r.storage.used)} / ${r.storage.cap}`));
+  if (!r.store.length) {
+    wrap.appendChild(el('div', 'cnote', 'Nothing extracted yet.'));
+  } else {
+    for (const m of r.store.slice(0, 6)) {
+      const row = el('div', 'trade-row');
+      row.appendChild(el('div', '', `<div class="nm">${m.name}</div><div class="meta">${m.qty} units on the ground</div>`));
+      const b = el('button', 'buy-btn', 'LIFT');
+      b.addEventListener('click', () => { collectFrom(r.id, m.id); render(); });
+      row.appendChild(b);
+      wrap.appendChild(row);
+    }
+    const all = el('button', 'wide-btn', 'LIFT EVERYTHING');
+    all.addEventListener('click', () => { collectFrom(r.id); render(); });
+    wrap.appendChild(all);
+  }
+
+  // ── feeding it ──
+  // Only what is actually in the hold, and only in a size that fits — a "deliver" button
+  // that fails on press is the thing this whole slice is about.
+  const carrying = Object.keys(stock()).filter(m => held(m) >= 10).slice(0, 5);
+  if (carrying.length) {
+    wrap.appendChild(el('div', 'ops-head', 'Send down'));
+    for (const m of carrying) {
+      const qty = Math.min(Math.floor(held(m)), 100);
+      const row = el('div', 'trade-row');
+      row.appendChild(el('div', '', `<div class="nm">${materialName(m)}</div>` +
+        `<div class="meta">${Math.floor(held(m))} aboard</div>`));
+      const b = el('button', 'buy-btn', `SEND ${qty}`);
+      b.addEventListener('click', () => { deliverTo(r.id, m, qty); render(); });
+      row.appendChild(b);
+      wrap.appendChild(row);
+    }
+  }
+
+  // ── manufacturing ──
+  const lines = r.facilities.filter(f => !f.building && f.on &&
+    (facility(f.id) || {}).manufactures);
+  if (lines.length) {
+    wrap.appendChild(el('div', 'ops-head', 'Fabrication'));
+    const cats = [...new Set(lines.flatMap(f => facility(f.id).manufactures))];
+    for (const cat of cats) {
+      const items = buildableAt(cat, r.tier).slice(0, 4);
+      for (const id of items) {
+        const row = el('div', 'trade-row');
+        row.appendChild(el('div', '', `<div class="nm">${blueprintName(id)}</div>` +
+          `<div class="meta">${cat} · built on the ground, not aboard</div>`));
+        const b = el('button', 'buy-btn', 'QUEUE');
+        b.addEventListener('click', () => { manufactureAt(r.id, id, 1); render(); });
+        row.appendChild(b);
+        wrap.appendChild(row);
+      }
+    }
+  }
+
+  // ── buildings ──
+  wrap.appendChild(el('div', 'ops-head', `Facilities — ${r.slots.used}/${r.slots.total} slots`));
+  for (const f of r.facilities) {
+    const row = el('div', 'trade-row');
+    row.appendChild(el('div', '', `<div class="nm">${f.name}</div>` +
+      `<div class="meta">${f.building ? `building — ${hrs(f.building)}` : f.on ? 'running' : 'idle'}</div>`));
+    const right = el('div', '');
+    if (!f.building) {
+      const t = el('button', 'buy-btn', f.on ? 'STOP' : 'START');
+      t.addEventListener('click', () => { toggleFacility(r.id, f.index); render(); });
+      right.appendChild(t);
+    }
+    const rm = el('button', 'buy-btn', 'SCRAP');
+    rm.addEventListener('click', () => { removeFacility(r.id, f.index); render(); });
+    right.appendChild(rm);
+    row.appendChild(right);
+    wrap.appendChild(row);
+  }
+
+  if (r.slots.used < r.slots.total) {
+    const site = siteById(r.id);
+    for (const b of BRANCH_KEYS) {
+      for (const f of facilitiesFor(b, r.tier)) {
+        if (r.facilities.some(x => x.id === f.id)) continue;
+        const why = installBlocker(r.id, f.id);
+        // Only offer what the ground could take. A list of everything in the catalogue with
+        // most of it greyed out is a catalogue, not a decision.
+        if (why && !/^Short/.test(why)) continue;
+        const row = el('div', 'trade-row');
+        row.appendChild(el('div', '', `<div class="nm">+ ${f.name}</div>` +
+          `<div class="meta">${f.slots} slot${f.slots > 1 ? 's' : ''} · ${b}</div>`));
+        const bt = el('button', 'buy-btn', why ? why.toUpperCase() : 'BUILD');
+        bt.disabled = !!why;
+        bt.addEventListener('click', () => { installFacility(r.id, f.id); render(); });
+        row.appendChild(bt);
+        wrap.appendChild(row);
+      }
+    }
+  }
+
+  // ── the two you cannot undo ──
+  if (r.upgrades.length) {
+    wrap.appendChild(el('div', 'ops-head', 'Upgrade command centre'));
+    for (const key of r.upgrades) {
+      const c = COMMAND_CENTRES[key];
+      const why = upgradeBlocker(r.id, key);
+      const row = el('div', 'trade-row');
+      row.appendChild(el('div', '', `<div class="nm">${c.name}</div>` +
+        `<div class="meta">${c.slots} slots · ${c.hours}h · ` +
+        `${Object.keys(c.build).map(m => `${c.build[m]} ${materialName(m)}`).join(' · ')}</div>`));
+      const b = el('button', 'buy-btn', why ? why.toUpperCase() : 'UPGRADE');
+      b.disabled = !!why;
+      b.addEventListener('click', () => { upgradeCentre(r.id, key); render(); });
+      row.appendChild(b);
+      wrap.appendChild(row);
+    }
+  }
+
+  // Two taps, deliberately. Abandoning is the only action here that destroys work, and a
+  // single button next to LIFT EVERYTHING is a mis-tap away from a complex.
+  const ab = el('button', 'wide-btn', confirmAbandon === r.id
+    ? 'CONFIRM — ABANDON AND RECOVER STORES' : 'Abandon site');
+  ab.addEventListener('click', () => {
+    if (confirmAbandon === r.id) { abandonSite(r.id); openSite = null; confirmAbandon = null; }
+    else confirmAbandon = r.id;
+    render();
+  });
+  wrap.appendChild(ab);
+
+  body.appendChild(wrap);
+}
+
+let confirmAbandon = null;
 
 // ── staff (experimental) ─────────────────────────────────────────────
 //

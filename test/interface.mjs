@@ -210,9 +210,15 @@ console.log('\n— display —');
      (disp.applyDisplay(), document.documentElement.classList.contains('pal-deuter')));
   ok('the previous palette class is removed',
      !document.documentElement.classList.contains('pal-standard'));
-  ok('cycling moves through every palette', (() => {
+  // Was `cyclePalette()`, which was removed in v1.01.20: nothing called it, because the
+  // settings panel sets a palette directly from a card rather than stepping through them.
+  // The property worth keeping is that every palette is actually selectable, which is what
+  // the panel does — so the test now exercises the path the player uses.
+  ok('every palette can be selected', (() => {
     const seen2 = new Set();
-    for (let i = 0; i < disp.PALETTE_KEYS.length; i++) seen2.add(disp.cyclePalette());
+    for (const k of disp.PALETTE_KEYS) {
+      if (disp.setDisplay('palette', k)) seen2.add(disp.display().palette);
+    }
     return seen2.size === disp.PALETTE_KEYS.length;
   })());
 

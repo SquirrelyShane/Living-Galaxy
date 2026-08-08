@@ -470,7 +470,7 @@ const planet = S.world.bodies.find(b => b.userData.kind === 'planet' && !traits(
 
 // ── persistence ──────────────────────────────────────────────────────
 console.log('\n— persistence —');
-ok('the schema is current', SCHEMA === 13);
+ok('the schema is current', SCHEMA === 14);
 {
   save.wipeSave();
   wipe();

@@ -110,6 +110,24 @@ export function foundSite(body, centreKey) {
  * from an outpost — see centres.js. The facilities already installed survive: you are
  * rebuilding the core, not the works around it.
  */
+/**
+ * Why an upgrade would be refused, or null. Same relationship to `upgradeCentre()` as
+ * `foundBlocker()` has to `foundSite()`: a second reader of the rules so a panel can put the
+ * reason on the button, never a replacement for the checks in the verb itself.
+ */
+export function upgradeBlocker(siteId, centreKey) {
+  const site = siteById(siteId);
+  if (!site) return 'no site';
+  if (site.buildRemaining > 0) return 'building';
+  if (!upgradesFrom(site.centre, site.ptype).includes(centreKey)) return 'not a step up';
+  const centre = COMMAND_CENTRES[centreKey];
+  if (!centre) return 'unknown';
+  for (const m in centre.build) {
+    if (held(m) < centre.build[m]) return 'short ' + materialName(m);
+  }
+  return null;
+}
+
 export function upgradeCentre(siteId, centreKey) {
   const site = siteById(siteId);
   if (!site) return false;

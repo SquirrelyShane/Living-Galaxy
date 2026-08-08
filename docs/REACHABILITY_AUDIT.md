@@ -147,3 +147,27 @@ It earned its place immediately: it found `foundSite`, which this document did n
 3. **The planetary operations panel** — the largest, and its own slice.
 4. **Crew duty verbs** — smaller than 3, same shape.
 5. **The two live config knobs** (`POINTDEF.perRound`, `CREW.moraleWin`).
+
+
+---
+
+## Postscript — v1.01.20, after the backlog was cleared
+
+Two of the five entries above were wrong, and the correction matters more than the fixes.
+
+`setDuty` and `rotateWatch` were never unreachable: the crew panel calls `toggleDuty()`,
+which wraps `setDuty()` in the same module, and `rotateWatch()` runs on the crew tick under
+the auto-rotate setting. The registry named the inner function. **A fabricated gap is the
+more expensive failure** — it costs a slice chasing something that already works, and an
+audit that cries wolf gets ignored the way a flaky test does.
+
+`cyclePalette` was a helper nothing needed, not a feature nobody could reach. Same for
+`POINTDEF.perRound`, which was a constant with one correct value rather than a lever.
+
+`test/reachability.mjs` now distinguishes genuinely unreachable, reachable under another
+name, and declared-but-never-triggered. Only the first belongs in a backlog.
+
+The check also found eight planetary verbs that this document missed — `installFacility`,
+`toggleFacility` and `removeFacility` were never in the registry at all. That remains the
+honest limit: **the registry catches a verb that is listed and unwired, not one that is
+written and never listed.**

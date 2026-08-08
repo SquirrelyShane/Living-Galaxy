@@ -2,6 +2,94 @@
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+## v1.01.40 — "Shore" · 2026-08-08
+
+**Rest, recovery and improvement.** Slice A of `docs/CREW_ROADMAP.md`. Save schema 13 → 14
+(migration included). 29 suites, 2,460 checks.
+
+### Added
+- **Shore leave**, costing *time docked* rather than money. Crew ashore leave the roster
+  entirely — no output, no watch, no experience, and they do not wear down or recover on the
+  ship's clock. Undocking recalls them early, keeps a fraction of the benefit, and files
+  "shore leave cut short" as its own cause, so a player who wonders why the leave did not
+  help can find out instead of concluding it is broken.
+- **Quarters, galley and infirmary** — three levels each, bought once and billed forever on
+  the same clock as wages. Quarters speed off-watch recovery, an infirmary speeds healing,
+  and a galley *softens* the short-rations penalty without removing it: it cannot conjure
+  provisions, which is the honest thing a cook can do about an empty hold.
+- **Training**, distinct from experience: experience is what happens to somebody, a course is
+  something you choose. It costs money and a station off the watch bill, and pulling somebody
+  out halfway refunds nothing and teaches nothing.
+
+### Notes
+- The design constraint throughout: **no recovery is both fast and free.** A button that
+  removes fatigue would delete the watch rotation that fatigue exists to force, so each of
+  the three costs something different — the clock, standing upkeep, or a body off the bill.
+
+## v1.01.30 — "Watch" · 2026-08-08
+
+**The crew becomes legible.** Structured logging, crew telemetry with attribution, and the
+readouts for both. No schema change — none of it is saved, deliberately. 28 suites, 2,381
+checks. The rest of the crew plan is in `docs/CREW_ROADMAP.md`.
+
+### Fixed
+- **Every crew number was a snapshot.** Morale is 0.62; nothing recorded that it was 0.91 an
+  hour ago or that it fell because nobody was fed. The simulation has been detailed since
+  v1.00.30 and completely opaque — "my crew keep quitting" was not a diagnosable complaint.
+- **The payroll pass applied one net drift.** Each term is now recorded against its own
+  cause, so the readout says *short rations* rather than *morale fell*. Attribution is scaled
+  to what actually landed: at the morale floor the terms are notional, and a diagnosis that
+  sums to more than the observed change is a diagnosis that lies.
+
+### Added
+- **`src/core/log.js`** — a bounded structured log: `{ t, channel, level, msg, data }`,
+  queryable by channel, level, time and subject. Hard ring-buffer cap, because a tab open for
+  hours cannot hold every event ever recorded, and it reports what it dropped rather than
+  implying it is complete.
+- **`src/systems/crew-log.js`** — a rolling per-person time series on a six-second cadence
+  (a trend, not a recording), trends with a dead band so a number moving by 0.0001 reads as
+  steady, and `crewDiagnosis()`, which ranks *causes by what they cost* rather than listing
+  what happened.
+- **A Watch log tab** ordered by who needs attention first, weighting falling above low:
+  somebody at 40% and climbing is being handled; somebody at 60% in freefall is the problem.
+  Flight-log diagnostics sit behind the same tab, because a separate screen is one nobody
+  finds.
+- **Three ARIA tools** — `crew_watch`, `crew_why`, `diagnostics`. A player asking "how is my
+  crew" wants an answer; a panel can only show numbers.
+
+## v1.01.20 — "Handles" · 2026-08-08
+
+**The rest of the backlog, and an audit of the audit.** No schema change. 27 suites, 2,305
+checks. The reachability backlog is now empty.
+
+### Fixed
+- **The planetary layer can be operated, not just looked at.** Eight verbs had no caller —
+  `collectFrom`, `deliverTo`, `manufactureAt`, `upgradeCentre`, `abandonSite`, plus
+  `installFacility`, `toggleFacility` and `removeFacility`, which the hand-written registry
+  missed entirely. A site card now expands into the whole operating panel, ordered by how
+  often a player does the thing, with the two irreversible actions at the bottom where a
+  mis-tap cannot reach them.
+- **A queued manufacturing job could not be stopped.** `cancelJob()` shipped with a refund
+  curve nobody could collect. The ledger lists jobs with a CANCEL beside each.
+- **Winning a fight did not lift the crew.** `CREW.moraleWin` sat in config since v1.00.30
+  unread: morale could be ground down by unpaid wages, bad rations and long watches, and had
+  no way to be raised by the thing the crew are aboard for. Only the watch on duty feel it.
+- **`SEEKER.reacquire` could not be read even if something had tried.** `guide()` returned
+  early on a lost seeker before reaching the branch the flag would have controlled. It is a
+  real lever now — and stays off by default, because a missile that regains its lock turns
+  the hard turn that beat it into a delay rather than a defence.
+
+### Changed
+- **Two of the five gaps in the v1.01.10 audit were overstated**, and the correction is
+  worth more than either fix. `setDuty` and `rotateWatch` were reported unreachable because
+  the registry named an inner function while the crew panel calls a wrapper — a registry bug
+  reported as a product bug. `cyclePalette` was a helper nothing needed, since the settings
+  panel selects a palette directly; removed, along with `POINTDEF.perRound`, a constant with
+  only one correct value that was documentation wearing a config key's clothes.
+- `test/reachability.mjs` now separates three things it had conflated: genuinely
+  unreachable, reachable under another name, and declared-but-never-triggered. The last is a
+  new category holding `influenceAttempt` — a hazard that exists and cannot happen.
+
 ## v1.01.10 — "Reach" · 2026-08-08
 
 **Features that existed and could not be reached.** No schema change. 27 suites, 2,286

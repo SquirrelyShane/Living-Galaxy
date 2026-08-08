@@ -74,12 +74,6 @@ export function nudgeTextScale(delta) {
   return display().textScale;
 }
 
-export function cyclePalette() {
-  const d = display();
-  const i = PALETTE_KEYS.indexOf(d.palette);
-  setDisplay('palette', PALETTE_KEYS[(i + 1) % PALETTE_KEYS.length]);
-  return display().palette;
-}
 
 /**
  * Whether an effect that moves a lot should run at all. Screen shake, speed streaks and
