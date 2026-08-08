@@ -1,0 +1,233 @@
+// Living Galaxy — single source of truth. Everything else reads and writes this.
+
+import { SHIP_CLASSES, UPGRADES, WEAPONS, SPAWN, WORLD_SEED, PROBE, START_CLASS, ADVANCED, HEAT, ORDNANCE } from './config.js';
+import { clamp } from './utils.js';
+import { WEAPON_MODULES } from '../data/weapons.js';
+import { normalizeFit, fitBonuses, mountedWeapons, budgetLoad } from '../systems/fitting.js';
+import { crewBonuses } from '../data/crew.js';
+
+export const S = {
+  time: 0,          // seconds of simulation since this session booted
+  playtime: 0,      // seconds flown across all sessions — persisted in the save
+  running: false,
+  seed: WORLD_SEED,
+
+  player: {
+    classKey: START_CLASS,
+    position: new THREE.Vector3(SPAWN.x, SPAWN.y, SPAWN.z),
+    velocity: new THREE.Vector3(),
+    yaw: 0, pitch: 0, throttle: 0,
+    energy: 100, shield: 120, armor: 90, hull: 100,
+    twr: 0, accel: 0, expend: 0,
+    speed: 0, drift: 0, slip: 1,      // handling telemetry, written each frame
+    lastHit: -99, lastShot: -99, autoLevel: false, kills: 0,
+    heat: 0, overheat: false
+  },
+
+  credits: 1500,
+  cargo: { ore: 0, salvage: 0, data: 0 },
+  probes: PROBE.start,
+  survey: {},
+  upgrades: { shield: 0, armor: 0, cargo: 0, thrust: 0, weapon: 0, mining: 0,
+              regenField: 0, overclock: 0, deepScan: 0, warpTuner: 0, autoRepair: 0, pointDef: 0 },
+  ownedHulls: { [START_CLASS]: true },
+  weapon: null,              // legacy: primary weapon key (mirrors fit.weapon[0])
+  ownedWeapons: {},
+  ownedModules: {},          // utility/core modules bought at a shipyard
+  fit: null,                 // { weapon:[], utility:[], core:[] } — see systems/fitting.js
+  crew: [],                  // shipboard crew, see systems/crew.js
+  crewPayT: 0,               // seconds since the last payroll run
+  scans: {},                 // name -> highest scan tier ever resolved
+  reputation: {},            // bloc -> standing, -100..100. See systems/reputation.js
+  character: null,           // the pilot. See systems/character.js
+  licences: {},              // hull key -> true. Career grants one; the rest are earned
+  missions: null,            // agent chain progress. See systems/missions.js
+  contracts: null,           // the generated board. See systems/contracts.js
+  recruits: null,            // station name -> { at, list }. See systems/crew.js
+  stock: null,               // material id -> units. See systems/crafting.js
+  jobs: null,                // manufacturing queue
+  locker: null,              // built modules/weapons/kit awaiting fitting
+  ammo: Object.assign({}, ORDNANCE.startingRounds),   // ammo id -> rounds
+  loadout: null,             // feed key -> chambered ammo id. See systems/ordnance.js
+  groups: null,              // hardpoint -> weapon group, plus which is live. See systems/groups.js
+  npcComms: null,            // pair cooldowns for NPC-to-NPC exchanges. See systems/npc-comms.js
+  deals: null,               // open obligations between characters. See systems/deals.js
+  sites: null,               // planetary sites. See systems/planetary.js
+  orders: null,              // standing orders out in the field. See systems/orders.js
+  assay: null,               // world name -> permanent survey bonus
+  anomalies: null,           // Lagrange site key -> worked. See systems/lagrange.js
+  market: null,
+  tutorial: null,            // onboarding progress. See systems/tutorial.js
+  comms: null,               // the interactive log. See systems/comms.js
+  company: null,             // executive start. See systems/company.js
+  managers: null,            // experimental site managers. See systems/managers.js
+  settings: { assist: true, audio: true, chase: false, experimental: false },
+
+  input: { turning: false, dragging: false, firing: false, mining: false },
+
+  warp: { state: 'idle', charge: 0, timer: 0, dest: null, avoid: null, avoidSide: null },
+  approach: null,    // { active, prevAssist, obj, prev } while the autopilot flies
+  orbit: null,       // { body, r, y, angle } while holding a stable orbit
+  docking: null,     // { station, t, from } while the tractor has the ship
+  follow: null,      // { obj, offset } while velocity-matched (station-keeping)
+  dockCooldown: 0,
+  sim: { disabled: null, boarding: null, sites: [], claims: [],
+         contractT: 0, fortTimer: 0, playerContract: null },
+
+  target: null,        // { obj, kind, name, faction }
+  docked: null,        // station group while docked
+  dockCandidate: null, // station in range
+
+  world: { bodies: [], stations: [], asteroids: [], npcs: [], loot: [], belts: [], decoys: [] },
+
+  stats: null
+};
+
+/**
+ * Effective hull stats = class baseline x refits x fitted modules x crew.
+ *
+ * `weaponDef` is now strictly "the gun in hardpoint one", and it is **null** when there
+ * is nothing in hardpoint one. It used to fall back to the pilot's legacy primary key
+ * and then to the hull class's default weapon, which meant an empty fit still produced a
+ * perfectly good weapon definition — and weapons.js fired it. A ship with no gun bolted
+ * on could shoot. The fallback was the bug; removing it is the fix, and systems/preflight
+ * turns the resulting empty state into a sentence the pilot can act on.
+ *
+ * The legacy `S.weapon` key survives as *ownership*, not as armament: it says which
+ * emitter you have in the locker, and creation/economy seat it into the fit explicitly.
+ */
+function resolveWeapon() {
+  const mounted = mountedWeapons(S.fit);
+  return mounted.length ? mounted[0] : null;
+}
+
+/** The weapon key a hull would be issued at a yard — used when seating a starting fit. */
+export function defaultWeaponKey(classKey) {
+  const c = SHIP_CLASSES[classKey] || SHIP_CLASSES[START_CLASS];
+  const key = c && c.weapon;
+  return (key && (WEAPON_MODULES[key] || WEAPONS[key])) ? key : null;
+}
+
+/**
+ * Bolt a weapon into the first free hardpoint. Returns the slot index, or -1 if the
+ * hull has no room. This is the only sanctioned way for a system to arm a ship: it
+ * cannot be done by assigning S.weapon, which is exactly the mistake that let an unarmed
+ * hull fire.
+ */
+export function seatWeapon(key) {
+  if (!key || !WEAPON_MODULES[key]) return -1;
+  S.fit = normalizeFit(S.fit, S.player.classKey);
+  const slots = S.fit.weapon;
+  for (let i = 0; i < slots.length; i++) {
+    if (!slots[i]) { slots[i] = key; recalcStats(); return i; }
+  }
+  return -1;
+}
+
+// systems/character.js registers itself here at import time. state.js cannot import it
+// directly — character.js calls recalcStats(), and a static cycle between the two would
+// leave one of them half-initialised depending on which the entry point loaded first.
+let characterBonusesRef = null;
+let characterSkillRef = null;
+export function registerCharacterBonuses(fn, skillFn) {
+  characterBonusesRef = fn;
+  characterSkillRef = skillFn || null;
+}
+
+export function recalcStats() {
+  const c = SHIP_CLASSES[S.player.classKey];
+  const u = S.upgrades;
+  const adv = u;   // advanced levels (0..max)
+
+  // Slots follow the hull, so a swap re-seats (and may drop) what was fitted.
+  S.fit = normalizeFit(S.fit, S.player.classKey);
+  const f = fitBonuses(S.fit);
+  const w = crewBonuses(S.crew);
+  // The pilot is a third source of bonuses alongside the fit and the crew, deliberately
+  // in the same shape so nothing downstream has to know which one a number came from.
+  // Imported lazily to keep core/state free of a cycle: character.js calls recalcStats.
+  const ch = characterBonusesRef ? characterBonusesRef() : {};
+  const add = (k) => (f[k] || 0) + (w[k] || 0) + (ch[k] || 0);
+
+  const cargoBase = c.cargoCap * (1 + UPGRADES.cargo.step * u.cargo) + add('cargoAdd');
+
+  S.stats = Object.assign({}, c, {
+    key: S.player.classKey,
+    maxThrust: c.maxThrust * (1 + UPGRADES.thrust.step * u.thrust) * (1 + add('thrustMult')),
+    maxSpeed:  c.maxSpeed * (1 + add('speedMult')),
+    turnRate:  c.turnRate * (1 + add('turnMult')),
+    pitchRate: c.pitchRate * (1 + add('turnMult')),
+    cargoCap:  cargoBase * (1 + add('cargoPct')),
+    shieldMax: c.shieldMax * (1 + UPGRADES.shield.step * u.shield) + add('shieldAdd'),
+    armorMax:  c.armorMax  * (1 + UPGRADES.armor.step  * u.armor) + add('armorAdd'),
+    hullMax:   c.hullMax + add('hullAdd'),
+    weaponMult: c.weaponMult * (1 + UPGRADES.weapon.step * u.weapon) * (1 + add('weaponMult')),
+    miningMult: c.miningMult * (1 + UPGRADES.mining.step * u.mining) * (1 + add('miningMult')),
+    weaponDef: resolveWeapon(),
+    mounts: mountedWeapons(S.fit),
+    // -- advanced modules --
+    sensor:      c.sensor * (1 + 0.60 * adv.deepScan) * (1 + add('sensorMult')),
+    warpSpeed:   c.warpSpeed * (1 + 0.35 * adv.warpTuner) * (1 + add('warpSpeedMult')),
+    warpSpool:   (1 / (1 + 0.30 * adv.warpTuner)) * (1 + add('warpSpoolMult')),
+    warpDrain:   add('warpDrainMult'),
+    energyCap:   c.energyCap * (1 + 0.25 * adv.overclock) + add('energyCapAdd'),
+    energyRegen: c.energyRegen * (1 + 0.40 * adv.overclock) * (1 + 0.10 * adv.overclock) + add('energyRegenAdd'),
+    shieldRegen: c.shieldRegen * (1 + 1.4 * adv.regenField) + add('shieldRegenAdd'),
+    shieldDelay: adv.regenField > 0 ? 5 - 2 * adv.regenField : 5, // seconds before shields recover
+    naniteArmor: ADVANCED.naniteArmorPerSec * adv.autoRepair + add('naniteArmorAdd'),
+    naniteHull:  ADVANCED.naniteHullPerSec  * adv.autoRepair + add('naniteHullAdd'),
+    pointDef:    Math.min(0.85, ADVANCED.pointDefChance * adv.pointDef + add('pointDefAdd')),
+    scanTier:    Math.round(add('scanTierAdd')),
+    scanRate:    1 + add('scanRate'),
+    tradeBonus:  add('tradeBonus'),
+    lootRange:   add('lootRangeAdd'),
+    // Heat capacity scales with dry mass — a big hull soaks more before it has to stop
+    // shooting, for the same reason a big hull is slow. `heatSinkAdd` lets a fit buy
+    // headroom the hull did not come with.
+    heatCap:     Math.max(HEAT.capFloor, (c.heatCap || HEAT.capFloor) * (1 + add('heatSinkAdd'))),
+    heatVent:    HEAT.ventRate * (1 + add('heatVentMult')),
+    fitPower:    f.power || 0,
+    fitCpu:      f.cpu || 0
+  });
+
+  // ── overload ───────────────────────────────────────────────────────
+  // Applied after everything else, because it degrades the *result* of a fit rather
+  // than any one module. Power starves the electrical systems; CPU starves the ones
+  // that need to think. Neither can take a ship below BUDGET.maxPenalty of nominal —
+  // a fit you cannot fly home is a soft-lock, not a tradeoff.
+  const load = budgetLoad(S.fit, S.player.classKey, characterSkillRef ? characterSkillRef('engineering') : 0);
+  S.stats.budget = load;
+  if (load.powerPenalty > 0) {
+    const k = 1 - load.powerPenalty;
+    S.stats.shieldRegen *= k;
+    S.stats.energyRegen *= k;
+    S.stats.energyCap *= (1 - load.powerPenalty * 0.4);
+  }
+  if (load.cpuPenalty > 0) {
+    const k = 1 - load.cpuPenalty;
+    S.stats.sensor *= k;
+    S.stats.scanRate *= k;
+    S.stats.weaponMult *= (1 - load.cpuPenalty * 0.5);   // tracking, not power
+    S.stats.pointDef *= k;
+  }
+  // Nothing may end up worse than a bare hull in the ways that would soft-lock a
+  // flight: a negative-thrust or zero-cargo fit is a bug, not a build choice.
+  S.stats.maxThrust = Math.max(S.stats.maxThrust, c.maxThrust * 0.35);
+  S.stats.maxSpeed  = Math.max(S.stats.maxSpeed,  c.maxSpeed * 0.4);
+  S.stats.cargoCap  = Math.max(S.stats.cargoCap, 100);
+
+  const p = S.player;
+  p.shield = clamp(p.shield, 0, S.stats.shieldMax);
+  p.armor  = clamp(p.armor,  0, S.stats.armorMax);
+  p.hull   = clamp(p.hull,   0, S.stats.hullMax);
+  p.energy = clamp(p.energy, 0, S.stats.energyCap);
+  p.heat   = clamp(p.heat || 0, 0, S.stats.heatCap);
+  return S.stats;
+}
+
+export const cargoMass = () => S.cargo.ore + S.cargo.salvage + S.cargo.data;
+export const cargoFree = () => Math.max(0, S.stats.cargoCap - cargoMass());
+export const totalMass = () => S.stats.dryMass + cargoMass();
+
+/** 0.6–1.0 — a beaten-up hull pushes less and recharges slower. */
+export const hullFactor = () => 0.6 + 0.4 * (S.player.hull / S.stats.hullMax);

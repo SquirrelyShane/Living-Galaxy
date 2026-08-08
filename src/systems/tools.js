@@ -1,0 +1,341 @@
+// Living Galaxy — ARIA's hands.
+//
+// Until now the assistant could only *talk*. It knew your cargo, your credits and where
+// the belt was, and the best it could do with any of it was read the number back to you.
+// Asking "where should I sell this ore" got a sentence; you then closed the panel, opened
+// the nav map, found the station and set the course yourself.
+//
+// These are tools: named actions with typed arguments that ARIA can invoke against the
+// live game. Each one does the thing *and* reports what it did, so the answer and the
+// action are the same event rather than a suggestion followed by manual labour.
+//
+// Two rules shape the list.
+//
+// **Nothing here can lose you anything.** Tools plot courses, name markets and read state.
+// None of them sells cargo, buys a hull, accepts a contract or fires a weapon. A model
+// small enough to run on a phone will occasionally misread a request, and the cost of
+// that must never be more than a course you did not want — which is one tap to cancel.
+//
+// **Every tool is callable without the model.** They are ordinary exported functions with
+// a rule-based matcher in front, so the whole feature works before a model is downloaded
+// and on devices that will never run one. The model makes the phrasing flexible; it is
+// not what makes the tool work.
+
+import { S, cargoFree, totalMass } from '../core/state.js';
+import { fmtCr, fmtKm } from '../core/utils.js';
+import { setCourse, toggleWarp, planCourse, courseLength } from './warp.js';
+import { startApproach } from './approach.js';
+import { setTarget } from './targeting.js';
+import { bestMarket, marketPrice, scarcity } from './market.js';
+import { boardFor, activeContracts, contractProgress, timeLeft } from './contracts.js';
+import { reputationReport, standingLabel, standing } from './reputation.js';
+import { characterSheet } from './character.js';
+import { playerSignature, signatureLabel } from './detection.js';
+import { perfStats } from '../core/clock.js';
+import { netReport } from './net.js';
+import { fieldContacts } from './fields.js';
+
+const bodyNamed = name => {
+  if (!name) return null;
+  const want = String(name).toLowerCase();
+  return S.world.bodies.find(b => (b.userData.name || '').toLowerCase() === want) ||
+         S.world.bodies.find(b => (b.userData.name || '').toLowerCase().includes(want)) || null;
+};
+
+const nearest = (kind, list) => {
+  let best = null, bd = Infinity;
+  for (const b of (list || S.world.bodies)) {
+    if (kind && b.userData && b.userData.kind !== kind) continue;
+    const p = b.position || b;
+    const d = p.distanceTo ? p.distanceTo(S.player.position)
+                           : S.player.position.distanceTo(new THREE.Vector3(p.x, p.y, p.z));
+    if (d < bd) { bd = d; best = b; }
+  }
+  return best ? { obj: best, dist: bd } : null;
+};
+
+/**
+ * Nearest point on the nearest belt's mid-orbit, as a contact the rest of the game can
+ * use. Same construction the HUD uses for its contacts list, deliberately — two different
+ * ideas of what "the belt" is would diverge the moment either changed.
+ */
+function nearestBelt() {
+  const list = fieldContacts(S.player.position);
+  if (!list.length) return null;
+  const c = list[0];
+  return { name: c.name, dist: c.d, obj: c.obj };
+}
+
+// ── the tools ────────────────────────────────────────────────────────
+
+export const TOOLS = {
+  status: {
+    desc: 'Report hull, shields, energy, cargo and credits.',
+    args: [],
+    run() {
+      const p = S.player, st = S.stats;
+      const pct = (v, m) => Math.round((v / Math.max(1, m)) * 100);
+      return {
+        text: `Hull ${pct(p.hull, st.hullMax)}%, armour ${pct(p.armor, st.armorMax)}%, ` +
+              `shields ${pct(p.shield, st.shieldMax)}%, bank ${pct(p.energy, st.energyCap)}%. ` +
+              `Hold ${Math.round(st.cargoCap - cargoFree())} of ${Math.round(st.cargoCap)} kg. ` +
+              `${fmtCr(S.credits)} on the books.`,
+        data: { hull: p.hull, shield: p.shield, energy: p.energy, credits: S.credits }
+      };
+    }
+  },
+
+  plotCourse: {
+    desc: 'Set a warp course to a named body or station.',
+    args: ['name'],
+    run(name) {
+      const target = bodyNamed(name);
+      if (!target) return { text: `Nothing in this system called "${name}".`, ok: false };
+      setCourse(target, target.userData.name);
+      const wp = planCourse(S.player.position, target);
+      const len = courseLength(S.player.position, target, wp);
+      return {
+        text: `Course laid to ${target.userData.name} — ${fmtKm(len)}` +
+              (wp.length ? `, ${wp.length} correction${wp.length > 1 ? 's' : ''} around gravity wells.` : ', clear run.'),
+        data: { name: target.userData.name, distance: len, waypoints: wp.length }
+      };
+    }
+  },
+
+  bestPrice: {
+    desc: 'Find the station paying most for a commodity.',
+    args: ['commodity'],
+    run(commodity) {
+      const key = String(commodity || 'ore').toLowerCase();
+      if (!['ore', 'salvage', 'data'].includes(key)) return { text: `I do not price "${commodity}".`, ok: false };
+      const best = bestMarket(key);
+      if (!best) return { text: 'No market data.', ok: false };
+      const sc = scarcity(best.station, key);
+      const why = sc > 0.4 ? ' — they are short of it' : sc < -0.4 ? ' — though their stores are full' : '';
+      const d = best.station.position.distanceTo(S.player.position);
+      return {
+        text: `${best.station.userData.name} pays ${fmtCr(best.price)} per unit for ${key}${why}. ` +
+              `${fmtKm(d)} out.`,
+        data: { station: best.station.userData.name, price: best.price, distance: d }
+      };
+    }
+  },
+
+  sellHere: {
+    desc: 'What the docked or nearest station pays for what is in the hold.',
+    args: [],
+    run() {
+      const st = S.docked || (nearest('station') || {}).obj;
+      if (!st) return { text: 'No station in range.', ok: false };
+      const lines = ['ore', 'salvage', 'data']
+        .filter(k => S.cargo[k] > 0)
+        .map(k => `${Math.round(S.cargo[k])} kg ${k} at ${fmtCr(marketPrice(st, k))}`);
+      if (!lines.length) return { text: `${st.userData.name} is buying, but the hold is empty.` };
+      return { text: `${st.userData.name}: ${lines.join(', ')}.`, data: { station: st.userData.name } };
+    }
+  },
+
+  findBelt: {
+    desc: 'Point at the nearest minable field and optionally fly there.',
+    args: ['approach'],
+    run(approach) {
+      // A belt is not an object in the world — it is an orbital band, stored as an
+      // inner radius and a width. The HUD already turns that into a synthetic contact at
+      // the nearest point of the mid-orbit, and the tool has to build the *same* shape:
+      // handing setTarget a raw band record gives the target panel something with no
+      // position, and it fails several frames later somewhere that looks unrelated.
+      const belt = nearestBelt();
+      if (!belt) return { text: 'No field on the chart.', ok: false };
+      // setTarget takes (obj, kind, name) and builds the descriptor itself — passing it
+      // a ready-made descriptor wraps it a second time, and the double-wrapped target
+      // then fails in the HUD several frames later reading a position that is one level
+      // deeper than anything looks for it.
+      setTarget(belt.obj, 'belt', belt.name);
+      if (approach) startApproach();
+      return {
+        text: `${belt.name}, ${fmtKm(belt.dist)} out. ` + (approach ? 'Taking us in.' : 'Targeted.'),
+        data: { name: belt.name, distance: belt.dist }
+      };
+    }
+  },
+
+  threats: {
+    desc: 'Hostiles within sensor range, and how visible you are.',
+    args: [],
+    run() {
+      const sig = playerSignature();
+      const range = S.stats.sensor || 2000;
+      const near = S.world.npcs
+        .filter(n => n.userData.faction === 'hostile' && n.userData.hp > 0)
+        .map(n => ({ n, d: n.position.distanceTo(S.player.position) }))
+        .filter(x => x.d < range)
+        .sort((a, b) => a.d - b.d);
+      if (!near.length) {
+        return { text: `Nothing hostile inside ${fmtKm(range)}. You are running ${signatureLabel(sig)}.`,
+                 data: { count: 0, signature: sig } };
+      }
+      const first = near[0];
+      return {
+        text: `${near.length} hostile${near.length > 1 ? 's' : ''} in range — nearest is ` +
+              `${first.n.userData.name} at ${fmtKm(first.d)}. You are running ${signatureLabel(sig)}.`,
+        data: { count: near.length, nearest: first.n.userData.name, signature: sig }
+      };
+    }
+  },
+
+  contracts: {
+    desc: 'Accepted work, deadlines and progress.',
+    args: [],
+    run() {
+      const held = activeContracts();
+      if (!held.length) {
+        const st = S.docked;
+        const offers = st ? boardFor(st).length : 0;
+        return { text: st ? `Nothing accepted. ${offers} posting${offers === 1 ? '' : 's'} on this board.`
+                          : 'Nothing accepted. Dock somewhere to see a board.' };
+      }
+      return {
+        text: held.map(c =>
+          `${c.title} — ${Math.round(contractProgress(c) * 100)}%, ${Math.round(timeLeft(c))}s left`).join('. '),
+        data: { count: held.length }
+      };
+    }
+  },
+
+  standing: {
+    desc: 'Where you stand with each bloc.',
+    args: [],
+    run() {
+      const rows = reputationReport();
+      return {
+        text: rows.map(r => `${r.faction}: ${r.label}${r.hostile ? ' (shoot on sight)' : ''}`).join('. ') + '.',
+        data: rows
+      };
+    }
+  },
+
+  pilot: {
+    desc: 'Your own record — level, skills, licences.',
+    args: [],
+    run() {
+      const sheet = characterSheet();
+      if (!sheet) return { text: 'No pilot record on file.', ok: false };
+      const top = sheet.skills.slice().sort((a, b) => b.rank - a.rank)[0];
+      return {
+        text: `${sheet.name}, ${sheet.lineage} ${sheet.career}, level ${sheet.level}. ` +
+              `Strongest skill is ${top.key} at rank ${top.rank}. ` +
+              `${sheet.points ? `${sheet.points} point${sheet.points > 1 ? 's' : ''} unspent. ` : ''}` +
+              `Licensed for ${sheet.licences.join(', ') || 'nothing'}.`,
+        data: sheet
+      };
+    }
+  },
+
+  link: {
+    desc: 'Multiplayer link quality and who is simulating the system.',
+    args: [],
+    run() {
+      const n = netReport();
+      if (!n.connected) return { text: 'Flying solo — no relay.' };
+      return {
+        text: `Linked with ${n.pilots} other pilot${n.pilots === 1 ? '' : 's'}. ` +
+              `Round trip ${n.rtt} ms. ` +
+              (n.isHost ? 'You are simulating the system for everyone.'
+                        : `Pilot ${n.host} is simulating the system.`),
+        data: n
+      };
+    }
+  },
+
+  performance: {
+    desc: 'Frame rate and where the time is going.',
+    args: [],
+    run() {
+      const p = perfStats();
+      return {
+        text: `${p.fps} fps, ${p.avg} ms average, ${p.p95} ms at the 95th percentile.` +
+              (p.stalls ? ` ${p.stalls} dropped catch-up.` : ''),
+        data: p
+      };
+    }
+  }
+};
+
+export const TOOL_KEYS = Object.keys(TOOLS);
+
+/**
+ * Invoke a tool by name. Never throws: a tool that fails returns a sentence saying so,
+ * because an assistant that crashes the panel is worse than one that says "I cannot".
+ */
+export function callTool(name, args = []) {
+  const tool = TOOLS[name];
+  if (!tool) return { text: `No such instrument: ${name}.`, ok: false, tool: name };
+  try {
+    const out = tool.run.apply(null, args);
+    return Object.assign({ ok: true, tool: name }, out);
+  } catch (e) {
+    return { text: `The ${name} instrument is not responding.`, ok: false, tool: name,
+             error: e && e.message };
+  }
+}
+
+// ── matching without a model ─────────────────────────────────────────
+// Ordered most specific first. This is a matcher, not a parser: it exists so the tools
+// work on a device that will never download a model, and so the panel answers instantly
+// while one is still loading. The model's job is to make the phrasing flexible, not to
+// make the feature exist.
+
+const PATTERNS = [
+  // Mining comes before course-plotting on purpose: "take me to the belt" matches both,
+  // and the specific answer is the useful one. Ordering is the whole disambiguation
+  // strategy here — a matcher that tried to score every pattern would be a parser, and a
+  // parser is what the model is for.
+  [/\b(belt|asteroids?|rocks?|mining?)\b.*\b(take|fly|go|approach|head)\b/i, () => ['findBelt', [true]]],
+  [/\b(take|fly|go|head)\b.*\b(belt|asteroids?|rocks?|mine|mining)\b/i, () => ['findBelt', [true]]],
+  [/\b(belt|asteroids?|rocks?)\b|\bwhere\b.*\bmine\b/i, () => ['findBelt', [false]]],
+
+  [/\b(course|plot|navigate|set course|take me|fly|head)\b.*?\b(?:to|for)\s+([a-z0-9' -]+)/i,
+   m => ['plotCourse', [m[2].trim().replace(/[.?!]+$/, '')]]],
+
+  [/\b(where|who|best)\b.*\b(sell|price|buy|pays?|paying)\b.*\b(ore|salvage|data)\b/i,
+   m => ['bestPrice', [m[3]]]],
+  [/\b(ore|salvage|data)\b.*\b(sell|price|worth|pays?)\b/i, m => ['bestPrice', [m[1]]]],
+  [/\b(sell|price|pays?|paying|buying|market)\b.*\b(here|this station|docked|local)\b/i,
+   () => ['sellHere', []]],
+  [/\b(here|this station|local)\b.*\b(sell|price|pays?|paying|buying|worth)\b/i,
+   () => ['sellHere', []]],
+
+  [/\b(threats?|hostiles?|pirates?|drones?|danger|enemies|enemy)\b/i, () => ['threats', []]],
+  [/\b(am i (seen|visible|hidden)|signature|how loud)\b/i, () => ['threats', []]],
+  [/\b(contracts?|jobs?|work|deadlines?|board|assignments?)\b/i, () => ['contracts', []]],
+  [/\b(standing|reputation|factions?|blocs?|who likes)\b/i, () => ['standing', []]],
+  [/\b(skills?|levels?|licen[cs]es?|my record|who am i|my pilot)\b/i, () => ['pilot', []]],
+  [/\b(links?|multiplayer|relays?|pings?|hosts?|latency)\b/i, () => ['link', []]],
+  [/\b(fps|frames?|performance|lag|stutter)\b/i, () => ['performance', []]],
+  [/\b(status|report|how are we|ship state|hulls?|shields?|armou?r)\b/i, () => ['status', []]]
+];
+
+/** @returns {{tool:string, args:Array}|null} */
+export function matchTool(text) {
+  const q = String(text || '');
+  for (const [re, build] of PATTERNS) {
+    const m = q.match(re);
+    if (m) {
+      const [tool, args] = build(m);
+      return { tool, args };
+    }
+  }
+  return null;
+}
+
+/** Try to answer with a tool. Returns null when nothing matches, so the caller falls through. */
+export function tryTool(text) {
+  const hit = matchTool(text);
+  if (!hit) return null;
+  return callTool(hit.tool, hit.args);
+}
+
+/** The tool list, for a model prompt or for a help panel. */
+export function toolManifest() {
+  return TOOL_KEYS.map(k => ({ name: k, desc: TOOLS[k].desc, args: TOOLS[k].args }));
+}

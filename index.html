@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#00060f"/>
+<title>Living Galaxy — Space RPG</title>
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/hud.css"/>
+<link rel="stylesheet" href="css/panels.css"/>
+<link rel="stylesheet" href="css/overlays.css"/>
+</head>
+<body>
+
+<canvas id="game-canvas"></canvas>
+<div id="speed-streaks"></div>
+<div id="cockpit-frame"></div>
+<div id="engine-glow"></div>
+<div id="damage-vignette"></div>
+<div id="crosshair"></div>
+<div id="pitch-readout"><span id="pitch-num">0.0°</span><span id="pitch-tick">—</span></div>
+<div id="velocity-marker" class="hidden"></div>
+<div id="warp-overlay"></div>
+<div id="reticle" class="hidden"></div>
+<div id="scan-sweep"></div>
+
+<!-- ── top ───────────────────────────────────────────── -->
+<div id="top-hud">
+  <div id="system-name">SOLARIS SYSTEM</div>
+  <div id="status-line">Navigation core online</div>
+  <div id="wallet"><span id="credits-val">0 cr</span><span class="sep">·</span><span id="cargo-val">0 / 0 kg</span></div>
+</div>
+<div id="threat-alert">⚠ HOSTILE CONTACTS</div>
+<div id="claim-alert">☠ PIRATE-CLAIMED SPACE</div>
+<div id="scan-bar"><div id="scan-bar-fill"></div></div>
+
+<!-- ── left column ───────────────────────────────────── -->
+<div id="left-stack">
+
+  <section class="panel" id="systems-panel">
+    <h3>Ship systems</h3>
+    <div class="bar-row"><span class="bar-label">Energy</span><div class="bar-track"><div class="bar-fill energy" id="energy-fill"></div></div><span class="bar-val" id="energy-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Shield</span><div class="bar-track"><div class="bar-fill shield" id="shield-fill"></div></div><span class="bar-val" id="shield-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Armor</span><div class="bar-track"><div class="bar-fill armor" id="armor-fill"></div></div><span class="bar-val" id="armor-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Hull</span><div class="bar-track"><div class="bar-fill hull" id="hull-fill"></div></div><span class="bar-val" id="hull-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Heat</span><div class="bar-track"><div class="bar-fill heat" id="heat-fill"></div></div><span class="bar-val" id="heat-val">0</span></div>
+    <div class="bar-row"><span class="bar-label">Warp</span><div class="bar-track"><div class="bar-fill warp" id="warp-fill"></div></div><span class="bar-val" id="warp-val">0</span></div>
+    <div class="micro" id="hull-status">Hull integrity: nominal</div>
+    <div class="micro" id="mass-info">Mass 12.4 t · cargo 0 kg</div>
+    <div class="micro" id="expend-info">Draw 0 MW</div>
+    <div class="micro" id="ammo-info">Magazines —</div>
+    <div class="micro" id="crew-info">Crew 0 · payroll 0 cr</div>
+  </section>
+
+  <section class="panel collapsible" id="info-panel">
+    <h3 data-collapse="info-body">Flight data <span class="chev">▾</span></h3>
+    <div id="info-body">
+      <div class="row"><span>Heading</span><span class="val" id="heading-val">000°</span></div>
+      <div class="row"><span>Pitch</span><span class="val" id="pitch-info">0.0°</span></div>
+      <div class="row"><span>Speed</span><span class="val" id="spd-info">0 m/s</span></div>
+      <div class="row"><span>TWR</span><span class="val" id="twr-info">0.00</span></div>
+      <div class="row"><span>Accel</span><span class="val" id="accel-info">0.0 m/s²</span></div>
+      <div class="row"><span>Drift</span><span class="val" id="drift-info">0 m/s</span></div>
+      <div class="row"><span>Signature</span><span class="val" id="sig-info">nominal</span></div>
+      <div class="row"><span>From star</span><span class="val" id="alt-info">—</span></div>
+      <div class="row"><span>Hull</span><span class="val" id="ship-info">Military</span></div>
+    </div>
+  </section>
+
+  <section class="panel" id="nearest-panel">
+    <h3>Contacts <span class="count" id="contact-count">0</span></h3>
+    <div id="contact-tabs">
+      <button class="ctab active" data-cat="all" title="All">◈</button>
+      <button class="ctab" data-cat="ship" title="Ships">✦</button>
+      <button class="ctab" data-cat="station" title="Stations">▣</button>
+      <button class="ctab" data-cat="body" title="Celestial bodies">◐</button>
+      <button class="ctab" data-cat="belt" title="Asteroid belts">⛏</button>
+      <button class="ctab" data-cat="deep" title="Lagrange points">⊹</button>
+    </div>
+    <div id="nearest-list"><div class="near-item empty">Scanning…</div></div>
+  </section>
+
+</div>
+
+<!-- ── target readout ────────────────────────────────── -->
+<section class="panel hidden" id="target-panel">
+  <h3>Locked <button id="target-clear" class="mini-btn">✕</button></h3>
+  <div id="target-name">—</div>
+  <div class="bar-track slim"><div class="bar-fill hull" id="target-hp"></div></div>
+  <div class="row"><span id="target-kind">—</span><span class="val" id="target-dist">—</span></div>
+  <div id="target-actions">
+    <button id="target-approach" class="tiny-btn">APPROACH</button>
+    <button id="target-match" class="tiny-btn">MATCH</button>
+    <button id="target-scan" class="tiny-btn">SCAN</button>
+    <button id="target-probe" class="tiny-btn hidden">PROBE</button>
+    <button id="target-expand" class="mini-btn">▾</button>
+  </div>
+  <div id="target-detail" class="hidden"></div>
+</section>
+
+<!-- ── right tools ───────────────────────────────────── -->
+<div id="tool-column">
+  <button id="btn-assist" class="tool-btn on" title="Flight assist">FA</button>
+  <button id="btn-level" class="tool-btn" title="Level the nose">⌃</button>
+  <button id="btn-cycle" class="tool-btn" title="Cycle target">◎</button>
+  <button id="btn-cam" class="tool-btn" title="Chase cam">▣</button>
+  <button id="btn-audio" class="tool-btn on" title="Sound">♪</button>
+  <button id="btn-ops" class="tool-btn" title="Standing orders">◈</button>
+  <button id="btn-ledger" class="tool-btn" title="Finance &amp; trade">⚖</button>
+  <button id="btn-settings" class="tool-btn" title="Settings &amp; diagnostics">⚙</button>
+  <button id="btn-aria" class="tool-btn" title="Ship AI">◆</button>
+  <button id="btn-comms" class="tool-btn" title="Comms log">☏<span id="comms-badge" class="hidden">0</span></button>
+  <button id="btn-save" class="tool-btn" title="Save">💾</button>
+</div>
+
+<!-- ── docking prompt ────────────────────────────────── -->
+<button id="dock-prompt" class="hidden">⚓ Dock — <span id="dock-target">—</span></button>
+
+<!-- ── bottom ────────────────────────────────────────── -->
+<div id="bottom-dock">
+  <div id="speed-panel">
+    <div id="speed-header"><span>THROTTLE</span><span><span id="speed-value">0%</span><span id="real-speed"> · 0 m/s</span></span></div>
+    <div id="speed-track-wrap"><div id="speed-track"><div id="speed-fill"></div></div></div>
+    <div id="speed-presets">
+      <button class="preset-btn reverse" data-pct="-25">REV</button>
+      <button class="preset-btn" data-pct="0">0</button>
+      <button class="preset-btn" data-pct="25">25</button>
+      <button class="preset-btn" data-pct="50">50</button>
+      <button class="preset-btn" data-pct="100">MAX</button>
+    </div>
+  </div>
+
+  <button id="group-chip" class="hidden">GRP <b>ALL</b></button>
+  <div id="action-grid">
+    <button id="btn-mine" class="act-btn">⛏<span>MINE</span></button>
+    <button id="btn-fire" class="act-btn fire">✦<span id="fire-label">FIRE</span></button>
+    <button id="warp-btn" class="act-btn">✧<span>WARP</span></button>
+    <button id="btn-nav" class="act-btn">🗺<span>NAV</span></button>
+    <button id="btn-fit" class="act-btn">⛭<span>FIT</span></button>
+    <button id="btn-crew" class="act-btn">☗<span>CREW</span></button>
+  </div>
+</div>
+
+<div id="warp-core-visual"><div id="warp-core-fill"></div></div>
+<div id="warp-status-text">WARP CORE</div>
+<div id="ship-panel" class="hidden"></div>
+<div id="tut-card" class="hidden">
+  <div id="tut-track"><div id="tut-bar"></div></div>
+  <div id="tut-head"><span id="tut-step">Training 1/7</span>
+    <span><button id="tut-hide" class="mini-btn">–</button><button id="tut-skip" class="mini-btn">✕</button></span></div>
+  <div id="tut-title">—</div>
+  <div id="tut-body">—</div>
+  <div id="tut-hint" class="hidden">—</div>
+</div>
+
+<div id="tut-done" class="overlay hidden">
+  <div class="overlay-head"><span>Flight training</span></div>
+  <div id="tut-done-body"></div>
+  <div class="overlay-actions">
+    <button id="tut-continue" class="wide-btn">Carry on flying</button>
+    <button id="tut-newgame" class="wide-btn ghost">Start a new game</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="touch-hint">Drag to steer · throttle below · NAV for the system chart</div>
+
+<!-- ── overlays ──────────────────────────────────────── -->
+<div id="navmap-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>System chart</span><button class="mini-btn" id="navmap-close">✕</button></div>
+  <div id="navmap-tools">
+    <button class="chip on" data-filter="planet">Bodies</button>
+    <button class="chip on" data-filter="station">Stations</button>
+    <button class="chip on" data-filter="belt">Belts</button>
+    <button class="chip on" data-filter="ship">Ships</button>
+    <button class="chip" id="navmap-zoom-out">−</button>
+    <button class="chip" id="navmap-zoom-in">+</button>
+    <button class="chip" id="navmap-recenter">⌖</button>
+  </div>
+  <canvas id="navmap-canvas"></canvas>
+  <div id="navmap-info">Tap a body to select it. Drag to pan, pinch to zoom.</div>
+  <div id="navmap-scan" class="hidden"></div>
+  <div id="orbit-menu" class="hidden"><div class="om-head">Orbit band</div><div id="orbit-menu-list"></div></div>
+  <div class="overlay-actions">
+    <button id="navmap-course" class="wide-btn">Warp</button>
+    <button id="navmap-approach" class="wide-btn ghost">Approach</button>
+    <button id="navmap-scanbtn" class="wide-btn ghost">Scan</button>
+    <button id="navmap-orbit" class="wide-btn ghost">Orbit ▲</button>
+    <button id="navmap-target" class="wide-btn ghost">Lock</button>
+  </div>
+</div>
+
+<div id="fit-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Ship fit</span><button class="mini-btn" id="fit-close">✕</button></div>
+  <div id="fit-summary"></div>
+  <div id="fit-tabs">
+    <button class="tab active" data-fittab="slots">Hardpoints</button>
+    <button class="tab" data-fittab="mag">Magazine</button>
+    <button class="tab" data-fittab="locker">Locker</button>
+    <button class="tab" data-fittab="stats">Readout</button>
+  </div>
+  <div id="fit-body"></div>
+  <div class="overlay-actions"><button id="fit-done" class="wide-btn">Done</button></div>
+</div>
+
+<div id="crew-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Crew</span><button class="mini-btn" id="crew-close">✕</button></div>
+  <div id="crew-summary"></div>
+  <div id="crew-tabs">
+    <button class="tab active" data-crewtab="roster">Roster</button>
+    <button class="tab" data-crewtab="hire">Recruit</button>
+    <button class="tab" data-crewtab="depts">Departments</button>
+  </div>
+  <div id="crew-body"></div>
+  <div class="overlay-actions"><button id="crew-done" class="wide-btn">Done</button></div>
+</div>
+
+<div id="dock-overlay" class="overlay hidden">
+  <div class="overlay-head"><span id="dock-name">Station</span><button class="mini-btn" id="dock-close">✕</button></div>
+  <div id="dock-tabs">
+    <button class="tab active" data-tab="trade">Trade</button>
+    <button class="tab" data-tab="service">Service</button>
+    <button class="tab" data-tab="refit">Refit</button>
+    <button class="tab" data-tab="hulls">Ships</button>
+    <button class="tab" data-tab="modules">Modules</button>
+    <button class="tab" data-tab="board">Board</button>
+    <button class="tab" data-tab="pilot">Pilot</button>
+    <button class="tab" data-tab="crew">Crew</button>
+    <button class="tab" data-tab="station">Station</button>
+  </div>
+  <div id="dock-body"></div>
+  <div class="overlay-actions"><button id="dock-undock" class="wide-btn">Undock</button></div>
+</div>
+
+<div id="hail-overlay" class="overlay hidden">
+  <div class="overlay-head"><span id="hail-name">Station</span><button class="mini-btn" id="hail-close">✕</button></div>
+  <div id="hail-text"></div>
+  <div class="overlay-actions">
+    <button id="hail-dock" class="wide-btn">Request docking clearance</button>
+    <button id="hail-break" class="wide-btn ghost">Break off</button>
+  </div>
+</div>
+
+<div id="aria-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>ARIA · ship AI</span><button class="mini-btn" id="aria-close">✕</button></div>
+  <div id="aria-status">Rule-based mode. Load the local model for freeform answers — it runs off the render thread, so the game won't stutter.</div>
+  <div id="aria-log"></div>
+  <div id="aria-input-row">
+    <input id="aria-input" maxlength="120" placeholder="Ask ARIA — hull, cargo, threats, where to sell…" autocomplete="off"/>
+    <button id="aria-send" class="mini-btn send">➤</button>
+  </div>
+  <div class="overlay-actions">
+    <button id="aria-load" class="wide-btn">Load local model (SmolLM2-360M)</button>
+  </div>
+</div>
+
+<div id="comms-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Comms log</span><button class="mini-btn" id="comms-close">✕</button></div>
+  <div id="comms-channels"></div>
+  <div id="comms-log"></div>
+  <div id="comms-replies" class="hidden"></div>
+</div>
+
+<div id="mind-overlay" class="overlay hidden">
+  <div class="overlay-head"><span id="mind-name">Mind</span><button class="mini-btn" id="mind-close">✕</button></div>
+  <div id="mind-body"></div>
+</div>
+
+<!-- ── character creation ────────────────────────────── -->
+<!-- ── settings & diagnostics ─────────────────────────── -->
+<!-- ── operations & ledger ────────────────────────────── -->
+<div id="ops-overlay" class="hidden">
+  <div id="ops-card">
+    <h2>OPERATIONS</h2>
+    <div id="ops-tabs"></div>
+    <div id="ops-body"></div>
+    <div class="overlay-actions"><button id="ops-close" class="wide-btn">Close</button></div>
+  </div>
+</div>
+
+<div id="settings-overlay" class="hidden">
+  <div id="settings-card">
+    <h2>SETTINGS</h2>
+    <div id="settings-tabs"></div>
+    <div id="settings-body"></div>
+    <div class="overlay-actions"><button id="settings-close" class="wide-btn">Close</button></div>
+  </div>
+</div>
+
+<div id="create-overlay" class="hidden">
+  <div id="create-card">
+    <h2>WHO ARE YOU</h2>
+    <div id="create-steps"></div>
+    <div id="create-body"></div>
+    <div id="create-nav">
+      <button id="create-back" class="ghost hidden">Back</button>
+      <button id="create-next">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div id="boot-overlay">
+  <div id="boot-card">
+    <h1>LIVING GALAXY</h1>
+    <p>Solaris System · pick a life, take a hull, find out what it costs.</p>
+    <input id="mp-name" maxlength="16" placeholder="Callsign (optional)" autocomplete="off"/>
+    <input id="mp-url" placeholder="Multiplayer — ws://host:8765 (optional)" autocomplete="off"/>
+    <button id="boot-start">Power up</button>
+    <button id="boot-wipe" class="ghost">Wipe saved flight</button>
+    <div id="boot-version">v1.01.10 · Reach</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

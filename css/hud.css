@@ -1,0 +1,276 @@
+/* Living Galaxy — HUD layer */
+
+.panel{position:relative;background:var(--panel);border:1px solid var(--edge);
+  padding:9px 10px 8px;backdrop-filter:blur(6px);font-size:10px;z-index:20;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+/* top-left corner bracket accent on every panel */
+.panel::before{content:'';position:absolute;left:-1px;top:-1px;width:12px;height:12px;
+  border-left:2px solid var(--edge-hot);border-top:2px solid var(--edge-hot)}
+.panel h3{font-size:8px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;
+  margin-bottom:7px;padding-bottom:4px;position:relative;
+  border-bottom:1px solid var(--edge-dim);
+  display:flex;justify-content:space-between;align-items:center}
+.panel h3::after{content:'';position:absolute;left:0;bottom:-1px;width:24px;height:1px;background:var(--amber)}
+.panel .row{display:flex;justify-content:space-between;color:var(--ink-dim);line-height:1.55}
+.panel .val{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.micro{margin-top:3px;font-size:9px;color:var(--ink-dim);font-variant-numeric:tabular-nums;letter-spacing:.3px}
+#expend-info.warning{color:var(--hostile)}
+/* Drift goes amber when the RCS has run out of authority to hold your nose and your
+   velocity together — you are flying sideways whether or not you meant to. */
+.panel .val.warn{color:var(--amber)}
+
+#top-hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:20;
+  display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;
+  text-shadow:0 0 8px rgba(0,140,255,.6);max-width:96vw}
+#system-name{font-size:11px;letter-spacing:5px;color:var(--edge-hot);font-weight:600;
+  text-shadow:0 0 10px rgba(55,185,212,.5)}
+#status-line{font-size:9px;color:var(--ink-dim);letter-spacing:1px;text-transform:uppercase;
+  max-width:92vw;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  padding:1px 10px;border-top:1px solid var(--edge-dim);border-bottom:1px solid var(--edge-dim)}
+#wallet{font-size:10px;color:var(--amber);font-variant-numeric:tabular-nums;letter-spacing:1px}
+#wallet .sep{opacity:.4;margin:0 6px}
+
+#threat-alert{position:absolute;top:58px;left:50%;transform:translateX(-50%);z-index:25;
+  font-size:10px;letter-spacing:2px;color:#fff;background:rgba(60,10,6,.85);
+  border:1px solid var(--hostile);padding:3px 12px;text-transform:uppercase;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+  opacity:0;pointer-events:none;box-shadow:0 0 14px rgba(255,60,40,.4)}
+#threat-alert.show{opacity:1;animation:blink .8s steps(2,end) infinite}
+#threat-alert.locked{background:rgba(90,8,4,.95);border-color:#ff4422;
+  box-shadow:0 0 18px rgba(255,40,20,.65);animation:blink .45s steps(2,end) infinite}
+#claim-alert{position:absolute;top:74px;left:50%;transform:translateX(-50%);z-index:25;
+  font-size:10px;letter-spacing:2px;color:var(--gold);text-shadow:0 0 10px #a60;
+  opacity:0;pointer-events:none}
+#claim-alert.show{opacity:1;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* The stack is bounded by the viewport, not by hope. Before this it was an unbounded
+   column pinned at the top, so on a short phone screen the bottom panel simply ran off
+   under the throttle dock and its last rows were unreachable. Anchoring both edges lets
+   the contacts panel below take whatever is actually left. */
+#left-stack{position:absolute;left:8px;top:64px;z-index:20;width:154px;
+  bottom:calc(var(--dock-h) + var(--safe-b));
+  display:flex;flex-direction:column;gap:6px;
+  pointer-events:none}
+#left-stack>*{pointer-events:auto}
+
+.bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.bar-label{width:44px;color:var(--ink-dim);font-size:8px;letter-spacing:1px;text-transform:uppercase}
+.bar-track{flex:1;height:8px;background:rgba(2,10,12,.9);overflow:hidden;
+  border:1px solid var(--edge-dim);position:relative}
+/* segment ticks overlaid on every gauge */
+.bar-track::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 7px,rgba(4,7,9,.9) 7px,rgba(4,7,9,.9) 8px)}
+.bar-track.slim{height:5px;margin:3px 0}
+.bar-fill{height:100%;width:100%;transition:width .12s linear}
+.bar-fill.energy{background:linear-gradient(90deg,#0a6a86,var(--edge-hot))}
+.bar-fill.shield{background:linear-gradient(90deg,#1560a0,#4aa8ff)}
+.bar-fill.armor{background:linear-gradient(90deg,#7a4a00,var(--amber))}
+.bar-fill.hull{background:linear-gradient(90deg,#7a1508,var(--hostile))}
+.bar-fill.warp{background:linear-gradient(90deg,#5a2a8a,#c060ff);width:0}
+.bar-fill.heat{background:linear-gradient(90deg,#7a3a00,#ff8c2a);width:0}
+#ammo-info.dry{color:var(--hostile)}
+.bar-row.overheat .bar-fill.heat{background:linear-gradient(90deg,#a01500,#ff3a1a)}
+.bar-val{width:26px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:.5px}
+
+.collapsible h3{cursor:pointer}
+.collapsible .chev{transition:transform .2s}
+.collapsible.closed .chev{transform:rotate(-90deg)}
+.collapsible.closed>div{display:none}
+
+/* ── contacts list ────────────────────────────────────────────────
+   Three separate things conspired to cut the list short, and all three are fixed here.
+
+   1. The panel and the list each carried their own hard-coded max-height (172 / 106).
+      Two magic numbers that have to add up correctly across every screen size never
+      will: with the header and the tab strip taking their share, the list's own box
+      overflowed the panel's, and `overflow:hidden` on the panel chopped the bottom off
+      the scroll viewport. You could scroll, but the last row scrolled into a region
+      that had already been clipped away. The panel is a flex column now and the list
+      simply takes the space that is left, so there is nothing to keep in sync.
+
+   2. `min-height:0` is what actually lets it scroll. A flex child defaults to
+      `min-height:auto`, which refuses to shrink below its content — so the list would
+      grow the panel instead of scrolling inside it, and the growth got clipped.
+
+   3. `body` sets `touch-action:none` so drags fly the ship rather than panning the
+      page. That also killed touch scrolling on this list — on a phone it could not be
+      scrolled at all, which is the part that reads as "cut off". `pan-y` gives the
+      list back vertical scrolling without giving up the flight drag anywhere else.  */
+#nearest-panel{display:flex;flex-direction:column;min-height:0;flex:1 1 auto;
+  max-height:340px;overflow:hidden}
+#nearest-panel h3,#nearest-panel #contact-tabs{flex:0 0 auto}
+#nearest-list{flex:1 1 auto;min-height:44px;overflow-y:auto;pointer-events:auto;
+  touch-action:pan-y;                    /* re-enable touch scroll inside the list */
+  overscroll-behavior:contain;           /* don't hand the scroll up to the document */
+  -webkit-overflow-scrolling:touch;
+  /* the panel's clip-path bites the bottom-left corner — keep the last row out of it */
+  padding-bottom:8px;
+  scrollbar-width:thin;scrollbar-color:var(--edge) transparent}
+#nearest-list::-webkit-scrollbar{width:4px}
+#nearest-list::-webkit-scrollbar-track{background:transparent}
+#nearest-list::-webkit-scrollbar-thumb{background:var(--edge);border-radius:2px}
+#nearest-list::-webkit-scrollbar-thumb:active{background:var(--edge-hot)}
+.near-item{display:flex;justify-content:space-between;gap:6px;color:var(--ink-dim);padding:3px 4px;
+  cursor:pointer;font-size:9px;border-left:2px solid transparent;letter-spacing:.3px;
+  flex:0 0 auto}
+.near-item:active{background:rgba(55,185,212,.18)}
+.near-item:hover{border-left-color:var(--edge-dim)}
+.near-item.hostile{color:var(--hostile);border-left-color:var(--hostile)}
+.near-item.friendly{color:var(--good);border-left-color:var(--good)}
+.near-item.rock{color:var(--amber)}
+.near-item.locked{background:rgba(55,185,212,.22);color:var(--ink);border-left-color:var(--edge-hot)}
+.near-item.empty{opacity:.5;cursor:default}
+.near-item .dist{color:#7bf;font-variant-numeric:tabular-nums;flex:none}
+.near-item .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+#target-panel{position:absolute;top:64px;right:8px;width:150px;z-index:23}
+#target-name{color:#fff;font-size:11px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#target-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;align-items:center}
+.tiny-btn{flex:1 1 40px;min-width:40px;font-size:8px;letter-spacing:1px;padding:6px 2px;background:rgba(10,26,32,.9);
+  border:1px solid var(--edge);color:var(--edge-hot);cursor:pointer;font-family:inherit;
+  text-transform:uppercase;clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
+.tiny-btn:active{background:var(--edge-hot);color:var(--void)}
+#target-expand{padding:2px 6px;font-size:12px;transition:transform .2s}
+#target-expand.open{transform:rotate(180deg)}
+#target-detail{margin-top:6px;padding-top:5px;border-top:1px solid rgba(40,100,180,.32);font-size:9px;
+  max-height:132px;overflow-y:auto}
+#target-detail .row{line-height:1.6}
+#target-detail .note{color:#7ea8c4;line-height:1.45;margin-top:3px}
+
+.mini-btn{background:none;border:none;color:var(--amber);font-size:11px;cursor:pointer;padding:0 2px}
+
+/* Bounded at both edges, exactly like #left-stack. This column was pinned at the top and
+   left to grow downward, so once it reached eleven buttons the last few — ARIA and comms
+   among them — ran underneath the throttle dock and were simply unreachable. Anchoring
+   the bottom to the dock reserve means the column can never extend past it; the media
+   queries below tighten the buttons on short screens so it rarely needs to scroll, and
+   overflow is the guarantee that nothing is ever hidden even when it does. */
+#tool-column{position:absolute;right:8px;top:212px;z-index:20;
+  bottom:calc(var(--dock-h) + var(--safe-b));
+  display:flex;flex-direction:column;gap:5px;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+#tool-column::-webkit-scrollbar{display:none}
+.tool-btn{width:34px;height:30px;flex:0 0 auto;background:var(--panel);border:1px solid var(--edge);
+  color:var(--ink-dim);font-size:11px;cursor:pointer;
+  clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.tool-btn.on{border-color:var(--edge-hot);color:var(--edge-hot);box-shadow:inset 0 0 8px rgba(55,185,212,.25)}
+.tool-btn:active{background:var(--edge-hot);color:var(--void)}
+
+#dock-prompt{position:absolute;bottom:calc(var(--dock-h) + 8px + var(--safe-b));left:50%;transform:translateX(-50%);z-index:24;
+  padding:8px 16px;border-radius:20px;background:rgba(4,30,20,.92);border:1px solid var(--good);
+  color:var(--good);font-size:12px;cursor:pointer;font-family:inherit;animation:blink 2.2s ease-in-out infinite}
+
+#speed-panel{width:100%;background:var(--panel);border:1px solid var(--edge);
+  padding:5px 10px 6px;backdrop-filter:blur(6px);
+  clip-path:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
+#speed-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;
+  font-size:9px;color:#8bc8ff}
+#speed-value{font-size:12px;color:#fff;font-variant-numeric:tabular-nums}
+#real-speed{font-size:10px;color:#6cf;font-variant-numeric:tabular-nums}
+#speed-track-wrap{position:relative;height:13px;margin-bottom:5px}
+#speed-track{position:absolute;inset:0;background:rgba(0,22,45,.9);border-radius:7px;
+  border:1px solid rgba(45,110,190,.5);overflow:hidden;cursor:pointer;touch-action:none}
+#speed-fill{height:100%;width:0;background:linear-gradient(90deg,#0a5a4a,#1aa888,var(--edge-hot))}
+#speed-fill.reverse{background:linear-gradient(90deg,#7a1508,var(--hostile))}
+#speed-presets{display:flex;gap:4px}
+.preset-btn{flex:1;font-size:9px;letter-spacing:.5px;padding:4px 0;background:rgba(10,22,28,.85);
+  border:1px solid var(--edge);color:var(--ink-dim);cursor:pointer;font-family:inherit}
+.preset-btn:active,.preset-btn.active{background:var(--edge-hot);color:var(--void);border-color:var(--edge-hot)}
+.preset-btn.reverse{background:rgba(40,10,6,.85);border-color:rgba(190,70,35,.5);color:#fca}
+.preset-btn.reverse.active{background:var(--hostile);color:#fff}
+
+#action-grid{display:flex;gap:4px}
+/* The group chip only exists when a fit actually has two groups in it — a control that
+   changes a label and nothing else invites a tap and teaches nothing. */
+#group-chip{position:absolute;top:-26px;right:0;padding:3px 9px;font-size:11px;letter-spacing:.08em;
+  background:rgba(10,18,26,.9);border:1px solid var(--edge);color:var(--dim);border-radius:3px}
+#group-chip b{color:var(--edge-hot)}
+#group-chip.hidden{display:none}
+.grp-tag{display:inline-block;min-width:18px;text-align:center;padding:1px 5px;margin-left:6px;
+  border:1px solid var(--edge);border-radius:2px;font-size:10px;color:var(--edge-hot)}
+.mag-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mag-row.chambered{border-color:var(--edge-hot)}
+.act-btn{flex:1;min-width:0;height:42px;background:linear-gradient(160deg,rgba(14,30,38,.95),rgba(6,14,18,.95));
+  border:1px solid var(--edge);color:var(--edge-hot);font-size:15px;cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.act-btn span{font-size:7px;letter-spacing:.5px;margin-top:2px;opacity:.85}
+.act-btn:active,.act-btn.active{background:var(--edge-hot);color:var(--void)}
+.act-btn.fire{border-color:var(--hostile);color:var(--hostile)}
+.act-btn.fire:active,.act-btn.fire.active{background:var(--hostile);color:#fff}
+.act-btn.disabled{opacity:.35;pointer-events:none}
+#warp-btn.spooling{border-color:var(--edge-hot);color:var(--edge-hot);box-shadow:0 0 18px rgba(55,185,212,.5)}
+#warp-btn.warping{border-color:#f0f;color:#faf;background:radial-gradient(circle at 35% 25%,#40a,#206)}
+
+#ship-panel{position:absolute;bottom:calc(6px + var(--safe-b));left:6px;right:6px;z-index:20;
+  display:flex;gap:4px;padding:4px;background:rgba(0,8,20,.8);border-radius:9px;
+  border:1px solid rgba(45,110,190,.32);overflow-x:auto;touch-action:pan-x;scrollbar-width:none}
+#ship-panel::-webkit-scrollbar{display:none}
+.ship-btn{flex:1;min-width:62px;padding:5px 4px 4px;background:rgba(10,22,28,.9);
+  border:1px solid var(--edge);color:var(--ink-dim);font-size:8px;letter-spacing:.5px;cursor:pointer;
+  font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;
+  clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.ship-btn .icon{font-size:14px}
+.ship-btn.active{background:linear-gradient(160deg,#0a4480,#052850);color:#fff;box-shadow:0 0 10px rgba(0,160,255,.4)}
+.ship-btn.locked{opacity:.6}
+.ship-btn.locked .icon{filter:grayscale(1)}
+.ship-btn .price{font-size:7px;color:var(--gold);margin-top:1px}
+.ship-btn[data-class="military"].active{border-color:#f55}
+.ship-btn[data-class="industrial"].active{border-color:#fa0}
+.ship-btn[data-class="logistics"].active{border-color:#5f5}
+.ship-btn[data-class="economic"].active{border-color:#f5f}
+.ship-btn[data-class="civilian"].active{border-color:#8cf}
+
+@media (pointer:coarse){
+  .act-btn{height:46px}
+  .tool-btn{width:38px;height:32px}
+  .preset-btn{padding:7px 0}
+  .near-item{padding:4px 3px}
+}
+@media (max-width:400px){
+  #left-stack{width:132px}
+  #target-panel{width:128px}
+  .act-btn{font-size:13px}
+  .act-btn span{font-size:6px}
+}
+@media (max-height:700px){
+  #info-panel{display:none}
+  /* No max-height override needed any more — the flex column already gives the list
+     exactly what is left over. Overriding it here is what made a short screen show two
+     and a half contacts out of eleven. */
+  .act-btn{height:38px}
+}
+/* Very short screens: keep the list usable rather than letting it collapse to nothing. */
+@media (max-height:560px){
+  #systems-panel .micro{display:none}
+  #nearest-list{min-height:36px}
+}
+
+
+/* ── short screens ───────────────────────────────────────────────────
+   A phone in portrait with browser chrome top and bottom leaves far less height than a
+   desktop window, and the tool column is the first thing to run out of room. Rather than
+   scroll it — which hides buttons behind a gesture nobody knows is available — tighten
+   the buttons and reclaim a little more from the dock, so all eleven still fit. */
+@media (max-height:860px){
+  :root{--dock-h:128px}
+  #tool-column{gap:4px}
+  .tool-btn{height:27px;font-size:10px}
+  .act-btn{height:38px}
+}
+@media (max-height:740px){
+  :root{--dock-h:120px}
+  #tool-column{gap:3px;top:196px}
+  .tool-btn{height:24px;width:32px;font-size:10px}
+  .act-btn{height:34px;font-size:13px}
+  #speed-track-wrap{height:11px;margin-bottom:4px}
+}
+/* Landscape, or a phone with an unusually greedy browser chrome. Below this the column
+   scrolls rather than shrinking further — a 20px tap target is already the floor. */
+@media (max-height:640px){
+  :root{--dock-h:112px}
+  #tool-column{gap:2px;top:176px}
+  .tool-btn{height:22px;width:30px;font-size:9px}
+  .act-btn{height:30px;font-size:12px}
+}

@@ -1,0 +1,14 @@
+# nothing here is built — this list is for what a device leaves behind
+node_modules/
+# vendor/ is deliberately tracked — a vendored three.min.js is what makes the
+# game work offline on a phone. Delete this comment, not the rule, if that changes.
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+dist/
+patches/*.zip

@@ -1,0 +1,145 @@
+/* Living Galaxy — base layer: reset, viewport, cockpit shell */
+
+:root{
+  /* ── mil-tech tactical palette ──
+     glass-cockpit cyan/steel primaries, phosphor-amber as the data/caution accent,
+     hard edges. Deliberately NOT black+acid-green (the AI default). */
+  --void:#040709;
+  --panel:rgba(8,16,20,.86);          /* gunmetal glass */
+  --glass:rgba(8,16,20,.86);          /* alias for legacy refs */
+  --panel-2:rgba(12,22,28,.92);
+  --edge:rgba(96,150,168,.42);        /* hairline steel */
+  --edge-hot:#37b9d4;                 /* live cyan */
+  --edge-dim:rgba(96,150,168,.22);
+  --ink:#cfe4ea;                      /* cold white */
+  --ink-dim:#7f9aa4;                  /* steel grey label */
+  --ink-label:#4fa8be;
+  --amber:#ffb43a;                    /* primary data / caution accent */
+  --amber-dim:rgba(255,180,58,.6);
+  --hostile:#ff5a48;                  /* threat red */
+  --good:#54e0a0;                     /* nominal green */
+  --gold:#ffb43a;                     /* alias → amber, keeps old refs consistent */
+  --grid:rgba(80,150,170,.05);        /* faint HUD grid wash */
+  --r:2px;                            /* near-square, hardware feel */
+  --safe-b:env(safe-area-inset-bottom,0px);
+  /* Height reserved for the bottom dock (throttle + action row). Three panels used to
+     hardcode their own guess at this — 150px in one place, 158px in another — so
+     trimming the throttle meant hunting them down and they drifted apart anyway. One
+     number, referenced everywhere, is why the tool column can no longer end up under it. */
+  --dock-h:136px;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--void);color:var(--ink);
+  font-family:var(--mono);font-size:14px;touch-action:none;letter-spacing:.2px}
+
+#game-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:1}
+
+#cockpit-frame{position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:
+    radial-gradient(ellipse 84% 74% at 50% 47%,transparent 54%,rgba(2,6,9,.72) 100%),
+    linear-gradient(to bottom,rgba(3,8,10,.7) 0,transparent 10%,transparent 90%,rgba(3,8,10,.75) 100%),
+    repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(120,180,200,.018) 3px)}
+#cockpit-frame::before{content:'';position:absolute;inset:6px;border:1px solid var(--edge-dim);
+  clip-path:polygon(0 14px,14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px))}
+/* corner registration ticks */
+#cockpit-frame::after{content:'';position:absolute;inset:6px;pointer-events:none;
+  background:
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 0 0/22px 1px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 0 0/1px 22px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 100% 0/22px 1px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 100% 0/1px 22px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 0 100%/22px 1px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 0 100%/1px 22px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 100% 100%/22px 1px no-repeat,
+    linear-gradient(var(--edge-hot),var(--edge-hot)) 100% 100%/1px 22px no-repeat;
+  opacity:.5}
+
+/* Engine wash on the canopy — throttle feedback without geometry near the near plane. */
+#engine-glow{position:absolute;left:0;right:0;bottom:0;height:36%;z-index:6;pointer-events:none;
+  opacity:0;transition:opacity .1s linear;
+  background:radial-gradient(ellipse 130% 100% at 50% 132%,
+    rgba(90,190,255,.5),rgba(30,90,200,.15) 45%,transparent 72%)}
+#engine-glow.reverse{background:radial-gradient(ellipse 130% 100% at 50% 132%,
+  rgba(255,150,70,.45),rgba(200,70,20,.14) 45%,transparent 72%)}
+
+#crosshair{position:absolute;top:47%;left:50%;transform:translate(-50%,-50%);z-index:6;
+  width:30px;height:30px;pointer-events:none;opacity:.7;
+  border:1px solid var(--edge-hot);border-radius:50%;
+  box-shadow:0 0 6px rgba(55,185,212,.4),inset 0 0 4px rgba(55,185,212,.3)}
+#crosshair::before,#crosshair::after{content:'';position:absolute;background:var(--edge-hot)}
+#crosshair::before{width:1px;height:10px;left:50%;top:-13px;transform:translateX(-50%)}
+#crosshair::after{width:1px;height:10px;left:50%;bottom:-13px;transform:translateX(-50%)}
+
+/* target lock reticle, positioned by targeting.js */
+#reticle{position:absolute;z-index:7;width:46px;height:46px;margin:-23px 0 0 -23px;pointer-events:none;
+  border:1px solid var(--hostile);border-radius:4px;box-shadow:0 0 10px rgba(255,90,60,.5);
+  clip-path:polygon(0 0,32% 0,32% 8%,8% 8%,8% 32%,0 32%,0 68%,8% 68%,8% 92%,32% 92%,32% 100%,0 100%,
+    100% 100%,68% 100%,68% 92%,92% 92%,92% 68%,100% 68%,100% 32%,92% 32%,92% 8%,68% 8%,68% 0,100% 0)}
+#reticle.friendly{border-color:#5ce08a;box-shadow:0 0 10px rgba(90,224,138,.5)}
+#reticle.rock{border-color:var(--gold);box-shadow:0 0 10px rgba(255,200,87,.4)}
+
+.hidden{display:none !important}
+
+#touch-hint{position:absolute;top:56%;left:50%;transform:translate(-50%,-50%);z-index:15;
+  font-size:12px;color:rgba(140,190,255,.45);text-align:center;pointer-events:none;transition:opacity .8s}
+
+#toast{position:absolute;top:calc(50% - 128px);left:50%;transform:translateX(-50%);z-index:60;
+  padding:6px 16px;background:var(--panel-2);border:1px solid var(--amber-dim);
+  border-left:3px solid var(--amber);
+  font-size:11px;letter-spacing:.6px;color:#ffe0a8;text-transform:uppercase;white-space:nowrap;
+  opacity:0;transition:opacity .2s;pointer-events:none;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+#toast.show{opacity:1}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
+
+
+/* ── access ───────────────────────────────────────────────────────────
+   Every alternative palette is a redefinition of the same four custom properties, so
+   nothing in the JavaScript branches on which one is active. A colour scheme cannot
+   introduce a logic bug if no logic reads it.
+
+   The hostile/friendly pair is the one that matters: those two colours carry the single
+   most important distinction in the game, and in the standard palette they are red and
+   blue — which is exactly the pair that red-green colour blindness collapses. */
+html.pal-deuter{
+  --hostile:#ff8c1a;                  /* orange, not red */
+  --good:#3fb8f5;
+  --amber:#ffd400;
+}
+html.pal-trit{
+  --hostile:#ff4fa3;                  /* magenta */
+  --good:#2fd6c4;
+  --amber:#ff9d3f;
+}
+html.pal-mono{
+  --hostile:#ffffff;
+  --good:#9ad0ff;
+  --amber:#ffffff;
+  --ink:#ffffff;
+  --ink-dim:#b8ccdd;
+}
+/* In high contrast, hostility is carried by weight and outline as well as by colour,
+   because a palette that only brightens things is no help to anyone who cannot see the
+   difference between two bright things. */
+html.pal-mono .near-item.hostile{border-left-width:4px;font-weight:700}
+html.pal-mono .near-item.friendly{border-left-style:dashed}
+
+/* A glyph in front of every contact, so colour is never the *only* cue. Off by default —
+   it costs a character of width, and that is a real cost on a phone. */
+html.shape-markers .near-item.hostile .nm::before{content:'▲ '}
+html.shape-markers .near-item.friendly .nm::before{content:'● '}
+html.shape-markers .near-item.rock .nm::before{content:'◆ '}
+
+/* Reduced motion. Anything that moves without being asked to stops moving. Transitions
+   are shortened rather than removed: an instant state change is its own kind of jarring. */
+html.reduced-motion *{animation:none !important}
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after{transition-duration:.01s !important}
+html.reduced-motion #speed-streaks,
+html.reduced-motion #scan-sweep{display:none}
+
+html.no-vignette #damage-vignette{display:none !important}
