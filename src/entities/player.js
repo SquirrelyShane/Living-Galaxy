@@ -3,7 +3,7 @@
 import { scene, camera } from '../world/scene.js';
 import { S, totalMass, hullFactor } from '../core/state.js';
 import { UNIT_M, G0, WORLD_RADIUS, MAX_PITCH, FLIGHT, STAR } from '../core/config.js';
-import { clamp, damp, forward } from '../core/utils.js';
+import { clamp, damp, forward, aimAngles } from '../core/utils.js';
 import { toast } from '../ui/toast.js';
 import { damagePlayer } from '../systems/combat.js';
 import { buildShip } from './shipmesh.js';
@@ -11,6 +11,10 @@ import { buildShip } from './shipmesh.js';
 const _fwd = new THREE.Vector3();
 const _tmp = new THREE.Vector3();
 const _back = new THREE.Vector3();
+const _right = new THREE.Vector3();
+const _up = new THREE.Vector3();
+const _aim = new THREE.Vector3();
+const WORLD_UP = new THREE.Vector3(0, 1, 0);
 
 const THRUSTER_COUNT = 120;
 let thrusters, thrusterPos;
@@ -188,15 +192,41 @@ export function updatePlayer(dt) {
     shipMesh.visible = true;
     shipMesh.position.copy(p.position);
     shipMesh.rotation.set(p.pitch, p.yaw, 0);
-    _tmp.copy(p.position).addScaledVector(_fwd, -42);
-    _tmp.y += 13;
+
+    // Offset along the *ship's* up, not world up. With world up the rise shrinks as
+    // you pitch — at the 86° pitch limit it collapsed to nothing and the camera ended
+    // up on the nose axis, staring at the hull end-on.
+    _right.copy(_fwd).cross(WORLD_UP);
+    if (_right.lengthSq() < 1e-6) _right.set(1, 0, 0);   // nose within a whisker of vertical
+    _right.normalize();
+    _up.copy(_right).cross(_fwd).normalize();
+
+    _tmp.copy(p.position)
+        .addScaledVector(_fwd, -FLIGHT.chaseBack)
+        .addScaledVector(_up, FLIGHT.chaseUp);
     camera.position.copy(_tmp);
+
+    // And then actually look at the ship. The old code left the cockpit orientation
+    // in place, which is why the chase view read as the forward view: the camera was
+    // behind the hull but aimed straight over it. Aiming at a point ahead of the nose
+    // rather than at the hull itself keeps the ship in the lower third and leaves the
+    // space you are flying into on screen.
+    _aim.copy(p.position).addScaledVector(_fwd, FLIGHT.chaseLead).sub(camera.position);
+    if (_aim.lengthSq() > 1e-9) {
+      _aim.normalize();
+      const a = aimAngles(_aim);
+      camera.rotation.y = a.yaw;
+      camera.rotation.x = a.pitch;
+    } else {
+      camera.rotation.y = p.yaw;
+      camera.rotation.x = p.pitch;
+    }
   } else {
     if (shipMesh) shipMesh.visible = false;
     camera.position.copy(p.position);
+    camera.rotation.y = p.yaw;
+    camera.rotation.x = p.pitch;
   }
-  camera.rotation.y = p.yaw;
-  camera.rotation.x = p.pitch;
   const wantFov = warping ? FLIGHT.fovWarp : FLIGHT.fovCruise;
   if (Math.abs(camera.fov - wantFov) > 0.05) {
     camera.fov = damp(camera.fov, wantFov, 5, dt);

@@ -38,6 +38,8 @@ const SUITES = [
   ['cargo',     'real holds — spills, interception, short deliveries, manifests'],
   ['wear',      'module condition — per-event accrual, degraded output, servicing'],
   ['command',   'the executive command tree, the shared resolver, the NPC knowledge base'],
+  ['camera',    'chase camera framing — standoff, aim, the pitch limit'],
+  ['screens',   'static screens drawn as text — labels, widths, what the panels say'],
   ['reachability','every player-facing verb has a door — see docs/REACHABILITY_AUDIT.md'],
   ['run',      'simulation: flight, combat, mining, trade, warp, save'],
   ['warp-nav', 'autopilot navigation geometries'],
@@ -48,10 +50,15 @@ const SUITES = [
 
 const wanted = only ? only.slice(7).split(',') : SUITES.map(s => s[0]);
 
+// Some suites take flags when run under the aggregate. `screens` draws coloured panels
+// for a phone terminal; that is the point of running it alone, and noise inside a 33-suite
+// log. It still asserts either way.
+const SUITE_ARGS = { screens: ['--plain', '--quiet'] };
+
 function run(name) {
   return new Promise(resolve => {
     const started = Date.now();
-    const child = spawn(process.execPath, [join(HERE, name + '.mjs')], {
+    const child = spawn(process.execPath, [join(HERE, name + '.mjs'), ...(SUITE_ARGS[name] || [])], {
       stdio: quiet ? ['ignore', 'pipe', 'pipe'] : 'inherit'
     });
     let out = '';

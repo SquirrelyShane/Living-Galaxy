@@ -201,6 +201,17 @@ export const FLIGHT = {
   reverseCap: 0.40,       // reverse speed as fraction of maxSpeed
   fovCruise: 68, fovWarp: 96,
 
+  // ── chase camera framing (1.01.76) ───────────────────────────────
+  // The chase cam used to be the cockpit camera translated backward and 13 units up
+  // in *world* Y, with the cockpit's own orientation kept unchanged. It therefore
+  // never looked at the ship: it looked straight past it, so the hull and its plume
+  // sat low in the frame and the view was, to a pilot, the forward view with a
+  // thruster in it. These three numbers frame it deliberately instead.
+  chaseBack: 42,          // distance behind the ship, along the nose axis
+  chaseUp: 13,            // offset along the ship's own up, not world up
+  chaseLead: 18,          // aim point ahead of the ship — keeps the hull low-centre
+                          // and the space you are flying into still on screen
+
   // ── assist authority (0.3) ───────────────────────────────────────
   // Assist is a *powered* system now, not a rule that edits velocity for free.
   // Its two jobs are separated because they are different pieces of hardware:

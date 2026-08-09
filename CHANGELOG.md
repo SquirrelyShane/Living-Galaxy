@@ -2,6 +2,40 @@
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+## v1.01.76 — "Over the Shoulder" · 2026-08-09
+
+Full notes: `Patch-Notes/PATCH_v1.01.76.md`. Schema unchanged (16).
+
+### Fixed
+- **The chase camera had a position but no aim.** It was the cockpit camera translated
+  back along the nose and 13 units up in *world* Y, with the cockpit's own orientation
+  left in place — so it looked straight past the ship rather than at it. At level flight
+  the hull sat 17.2° below the view axis, which is why the chase view read as the forward
+  view with a thruster in the bottom of the frame. The world-Y rise also fought the
+  along-nose setback as you pitched: standoff swung between 29 and 55 units against a
+  nominal 42. Now offset along the ship's own up, aimed with `aimAngles()` at a point
+  ahead of the nose. Standoff holds at 44.0 across the whole envelope; worst off-axis 5.0°.
+  Framing is tunable via `FLIGHT.chaseBack` / `chaseUp` / `chaseLead`.
+
+### Added
+- **`test/camera.mjs`** (33 checks). The chase branch had no coverage and could not have
+  had any — the stub's `Euler` had no `.set()`, so `shipMesh.rotation.set()` threw the
+  moment a suite enabled chase. `Euler.set`, `Vector3.cross` and `Vector3.dot` added to
+  `test/stub.mjs`.
+- **`test/screens.mjs`** (29 checks). Draws the static screens — title, character
+  creation, the Ops staff desk in both its states, the command dialogue tree, a live fleet
+  board — as coloured box-drawn panels sized for a phone terminal, so a slice can be
+  eyeballed in Termux without serving the game. Asserts what the walk turns up: careers
+  with a hull class that exists, branches with submenus, leaf labels inside the 34-char
+  portrait budget, every drawn line inside the panel. `--plain` and `--width=` supported;
+  runs `--plain --quiet` under `all.mjs`.
+
+### Filed as open
+- **No way to incorporate after character creation.** `foundCompany()` is reachable only
+  from `createCharacter()` with the `executive` career, so one choice at creation
+  permanently decides whether a save can reach the executive layer at all — and every
+  pre-v1.01.72 save is outside it. Wants a station-side charter registration.
+
 ## v1.01.75 — "Audit" · 2026-08-09
 
 Full notes: `Patch-Notes/PATCH_v1.01.75.md`. Schema unchanged (16). Build

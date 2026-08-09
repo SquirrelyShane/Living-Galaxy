@@ -1,8 +1,8 @@
 # Open items — single source of truth
 
-Compiled at **v1.01.60 "Assay"**, revised at **v1.01.75 "Audit"** (schema 16).
+Compiled at **v1.01.60 "Assay"**, revised at **v1.01.76 "Over the Shoulder"** (schema 16).
 Everything below was cross-checked against the live tree, not copied from the patch notes:
-`node test/all.mjs` re-run green (**33/33 suites, 2,736 checks**), `test/reachability.mjs`
+`node test/all.mjs` re-run green (**35/35 suites, 2,798 checks**), `test/reachability.mjs`
 re-run (70 checks, `BACKLOG` empty, four inert config keys printed), and every carried gap
 grepped in `src/` before it was written down.
 
@@ -60,6 +60,12 @@ Fleet objective types, timers, Ops Staff surface, ARIA company/fleet/NPC diagnos
   `globalThis.__LG_DIAG__` rather than in `S`, so it is absent from the save payload and
   survives a new game started in the same page load. Moving it into `S` is a schema bump
   and wants doing before the self-training loop treats the log as a corpus worth keeping
+- **No way to incorporate after character creation.** `foundCompany()` is called from
+  exactly one place — `createCharacter()`, when the career carries a charter — and
+  `executive` is the only career that does. Everything in v1.01.72–74 is gated on
+  `hasCompany()`, so a non-executive character and every save made before v1.01.72 are
+  permanently outside the executive layer with no in-game surface to change it. Wants a
+  station-side charter registration, which is a design decision rather than a fix
 - **Fleet order ids are built from `Date.now()` and `Math.random()`** (`systems/orders.js`).
   Neither is seeded, so a dispatch is not reproducible across a save/replay and two peers
   in a shared galaxy will not agree on an id. Same class as the `npc-comms` RNG fix in

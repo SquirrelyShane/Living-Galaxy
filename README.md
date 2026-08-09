@@ -1,8 +1,8 @@
 # Living Galaxy
 
-**v1.01.75 "Audit"** · save schema 16 · 2,736 checks across thirty-three suites ·
+**v1.01.76 "Over the Shoulder"** · save schema 16 · 2,798 checks across thirty-five suites ·
 `CHANGELOG.md` for the history, `docs/SLICE_PLAN.md` for how it was built,
-`PATCH_v1.01.75.md` for what changed.
+`PATCH_v1.01.76.md` for what changed.
 `docs/OPEN_ITEMS.md` for everything still open, in one list.
 `docs/CREW_ROADMAP.md` for where the crew work is going.
 `docs/REACHABILITY_AUDIT.md` for what exists and cannot yet be reached.

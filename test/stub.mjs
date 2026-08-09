@@ -132,17 +132,24 @@ function makeThree() {
     addScaledVector(v, s) { this.x += v.x * s; this.y += v.y * s; this.z += v.z * s; return this; }
     multiplyScalar(s) { this.x *= s; this.y *= s; this.z *= s; return this; }
     divideScalar(s) { return this.multiplyScalar(1 / s); }
+    cross(v) {
+      const { x, y, z } = this;
+      this.x = y * v.z - z * v.y;
+      this.y = z * v.x - x * v.z;
+      this.z = x * v.y - y * v.x;
+      return this;
+    }
+    dot(v) { return this.x * v.x + this.y * v.y + this.z * v.z; }
     lengthSq() { return this.x ** 2 + this.y ** 2 + this.z ** 2; }
     length() { return Math.sqrt(this.lengthSq()); }
     normalize() { const l = this.length() || 1; return this.divideScalar(l); }
-    dot(v) { return this.x * v.x + this.y * v.y + this.z * v.z; }
     distanceToSquared(v) { return (this.x - v.x) ** 2 + (this.y - v.y) ** 2 + (this.z - v.z) ** 2; }
     distanceTo(v) { return Math.sqrt(this.distanceToSquared(v)); }
     lerp(v, t) { this.x += (v.x - this.x) * t; this.y += (v.y - this.y) * t; this.z += (v.z - this.z) * t; return this; }
     lerpVectors(a, b, t) { this.x = a.x + (b.x - a.x) * t; this.y = a.y + (b.y - a.y) * t; this.z = a.z + (b.z - a.z) * t; return this; }
     project() { this.x = 0.1; this.y = 0.1; this.z = 0.5; return this; }
   }
-  class Euler { constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; this.order = 'XYZ'; } copy(e) { this.x = e.x; this.y = e.y; this.z = e.z; return this; } }
+  class Euler { constructor(x = 0, y = 0, z = 0, order = 'XYZ') { this.x = x; this.y = y; this.z = z; this.order = order; } set(x, y, z, order) { this.x = x; this.y = y; this.z = z; if (order) this.order = order; return this; } copy(e) { this.x = e.x; this.y = e.y; this.z = e.z; this.order = e.order; return this; } }
   class Quaternion { rotateTowards() { return this; } copy() { return this; } }
   class Color {
     constructor(hex = 0xffffff) { this.setHex(hex); }
