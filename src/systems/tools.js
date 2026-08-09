@@ -36,9 +36,11 @@ import { netReport } from './net.js';
 import { fieldContacts } from './fields.js';
 import { watchReport, crewVitals, crewDiagnosis } from './crew-log.js';
 import { diagnostics } from '../core/log.js';
-import { commandFromText, commandRecall, commandCatalogue } from './command.js';
+import { commandFromText, commandRecall, commandCatalogue,
+         commandHullMode, fleetRoster, hullsAvailable, fleetBrief } from './command.js';
 import { fleetOrderReport } from './orders.js';
-import { hasCompany } from './company.js';
+import { hasCompany, registerCharter, registrarBrief } from './company.js';
+import { trainingBrief } from '../data/npc-kb/index.js';
 
 const bodyNamed = name => {
   if (!name) return null;
@@ -381,6 +383,92 @@ TOOLS.command_menu = {
     };
   }
 };
+
+// ── the executive surface (v1.01.80) ─────────────────────────────────
+// ARIA reaches the whole executive layer, but not with the same authority the Ops panel
+// has, and the split is deliberate.
+//
+// The rule the tool list has followed since it existed: a small model will occasionally
+// misread a request, and the cost of that must never be more than a course you did not
+// want. Registering a charter spends the pilot's own credits and signing a hull spends the
+// treasury, so neither is a tool — they are *reports* that tell you what is on offer and
+// where to commit it. Ending a contract is the same shape in reverse: undoing it costs the
+// signing fee again, so it stays in Ops too.
+//
+// What ARIA does execute is everything reversible: dispatching an objective, recalling
+// one, and setting the mode a hull defaults to. `test/tools.mjs` enforces the split by
+// name and by running every tool and checking no resource moved.
+
+TOOLS.charter_options = {
+  desc: 'Report the charters the current station will register, and what registration costs.',
+  args: [],
+  run() {
+    if (hasCompany()) return { text: 'You already hold a charter.', data: null };
+    const reg = registrarBrief();
+    if (!reg.ok) return { text: reg.reason, ok: false };
+    return {
+      text: `Charters available at ${reg.station}: ` +
+            reg.charters.map(c => `${c.key} (${c.name})`).join(', ') +
+            `. ${fmtCr(reg.fee)} from your own credits, ${fmtCr(reg.treasury)} of it into the ` +
+            `treasury. Register from Ops → Staff.`,
+      data: reg
+    };
+  }
+};
+
+TOOLS.fleet_roster = {
+  desc: 'List hulls under company contract, their roles, modes and whether they are on an objective.',
+  args: [],
+  run() {
+    if (!hasCompany()) return { text: 'No company on file — register a charter first.', ok: false };
+    const list = fleetRoster();
+    if (!list.length) return { text: fleetBrief(), data: [] };
+    return {
+      text: list.map(h =>
+        `${h.name} (${h.role}, ${h.mode})` + (h.busy ? ' — on objective' : ' — idle')
+      ).join(' · '),
+      data: list
+    };
+  }
+};
+
+TOOLS.fleet_candidates = {
+  desc: 'Report which hulls in sensor range would sign a company contract, and what each would cost.',
+  args: [],
+  run() {
+    if (!hasCompany()) return { text: 'No company on file — register a charter first.', ok: false };
+    const open = hullsAvailable(8);
+    if (!open.length) return { text: 'No hulls in range will sign right now. Hostiles do not take company work.', data: [] };
+    return {
+      text: 'Will sign: ' + open.map(c => `${c.npcName} (${c.role}, ${fmtKm(c.dist)}, ${fmtCr(c.fee)})`).join(' · ') +
+            '. Sign them from Ops → Staff.',
+      data: open
+    };
+  }
+};
+
+TOOLS.fleet_mode = {
+  desc: 'Set the mode a contracted hull defaults to on its next objective — active or passive.',
+  args: ['name', 'mode'],
+  run(name, mode) {
+    if (!hasCompany()) return { text: 'No company on file — incorporate first.', ok: false };
+    const q = String(name || '').toLowerCase();
+    const hit = fleetRoster().find(h => h.name.toLowerCase() === q) ||
+                fleetRoster().find(h => h.name.toLowerCase().includes(q));
+    if (!hit) return { text: `No contracted hull called "${name}".`, ok: false };
+    const r = commandHullMode(hit.id, String(mode || '').toLowerCase() === 'passive' ? 'passive' : 'active');
+    return { text: r.text, ok: r.ok };
+  }
+};
+
+TOOLS.aria_corpus = {
+  desc: 'Report what the self-training loop has to work with — written examples versus harvested ones.',
+  args: [],
+  run() {
+    return { text: trainingBrief() };
+  }
+};
+
 
 export const TOOL_KEYS = Object.keys(TOOLS);
 

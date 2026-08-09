@@ -1,8 +1,8 @@
 # Open items — single source of truth
 
-Compiled at **v1.01.60 "Assay"**, revised at **v1.01.76 "Over the Shoulder"** (schema 16).
+Compiled at **v1.01.60 "Assay"**, revised at **v1.01.80 "Articles"** (schema 17).
 Everything below was cross-checked against the live tree, not copied from the patch notes:
-`node test/all.mjs` re-run green (**35/35 suites, 2,798 checks**), `test/reachability.mjs`
+`node test/all.mjs` re-run green (**36/36 suites, 2,922 checks**), `test/reachability.mjs`
 re-run (70 checks, `BACKLOG` empty, four inert config keys printed), and every carried gap
 grepped in `src/` before it was written down.
 
@@ -45,31 +45,22 @@ despawns, flagged at v1.00.80 and still true.
 | C | **Relationships** | bonds from shared watches and shared fights, friction from promotions and blame; effects through channels that already exist. **Reuse `npc-avatar/core/memory.js` and derive as `npc-comms.js` does** — a second relationship table is the failure mode | B is not strictly required |
 | D | **Generations** | `served` accrues and nothing reads it — careers need a span first; then pairings, inheritance that is a trait/affinity rather than a stat roll, and berths as the constraint. Needs death, retirement and departure or it is a population graph | C |
 
-### Executive command console (partial in v1.01.72–73)
+### Executive command console — **closed in v1.01.80**
 
-Fleet objective types, timers, Ops Staff surface, ARIA company/fleet/NPC diagnostic awareness,
-`src/data/npc-kb/`, and the curated command dialogue menu are in. Still open for a full HQ mode:
+Every line that was open in this section is now shipped and covered by `test/executive.mjs`
+(124 checks) and `test/command.mjs` (99). Kept here as the record rather than deleted, so a
+future slice can see what the shape was.
 
-- ~~Dedicated HQ interior / spawn-at-office when career is executive~~ **closed in v1.01.74** — `placeAtHQ()` docks the founder at a charter-matched station, records `company.hqStation`, opens the station surface as the office; Ops/ARIA read `atHQ()` / `hqBrief()`
-- Binding fleet orders to *real* owned / contracted hulls (demo wing assets only today)
-- Live nav-map entity layer driven by HQ / ship scan radius while commanding
-- ~~Curated dialogue menu tree that emits the same structured orders ARIA already understands~~ **closed in v1.01.73** — `data/command-menu.js` + `systems/command.js`; Ops walks the tree, ARIA tools (`fleet_dispatch` / `fleet_recall` / `fleet_status` / `command_menu`) share the resolver
-- Active/passive is selectable inside the menu leaves; a per-asset toggle strip is still open
-- Self-training loop that consumes `npc-kb` diagnostics into few-shot / fine-tune batches
-- **The `npc-kb` diagnostic log is not persisted and not reset.** It lives on
-  `globalThis.__LG_DIAG__` rather than in `S`, so it is absent from the save payload and
-  survives a new game started in the same page load. Moving it into `S` is a schema bump
-  and wants doing before the self-training loop treats the log as a corpus worth keeping
-- **No way to incorporate after character creation.** `foundCompany()` is called from
-  exactly one place — `createCharacter()`, when the career carries a charter — and
-  `executive` is the only career that does. Everything in v1.01.72–74 is gated on
-  `hasCompany()`, so a non-executive character and every save made before v1.01.72 are
-  permanently outside the executive layer with no in-game surface to change it. Wants a
-  station-side charter registration, which is a design decision rather than a fix
-- **Fleet order ids are built from `Date.now()` and `Math.random()`** (`systems/orders.js`).
-  Neither is seeded, so a dispatch is not reproducible across a save/replay and two peers
-  in a shared galaxy will not agree on an id. Same class as the `npc-comms` RNG fix in
-  v1.01.75 — wants a seeded stream or a monotonic counter
+- ~~Dedicated HQ interior / spawn-at-office when career is executive~~ **closed in v1.01.74**
+- ~~Curated dialogue menu tree that emits the same structured orders ARIA already understands~~ **closed in v1.01.73**
+- ~~Binding fleet orders to *real* owned / contracted hulls~~ **closed in v1.01.80** — `systems/fleet.js`. A contract points at a live NPC in `S.world.npcs`; one hull flies one objective; role gating refuses a gunship a mining order; recall and expiry both free the hull; hulls that die or despawn reconcile after a grace period rather than dangling
+- ~~Live nav-map entity layer driven by HQ / ship scan radius while commanding~~ **closed in v1.01.80** — contracted hulls plot on the nav map regardless of sensor range, brighter and ringed while on objective. The company knows where its own ships are
+- ~~Active/passive per-asset toggle strip~~ **closed in v1.01.80** — mode is a standing property of a hull, set from Ops or by ARIA, and a leaf that does not specify one inherits it
+- ~~Self-training loop that consumes `npc-kb` diagnostics into few-shot / fine-tune batches~~ **closed in v1.01.80** — `data/npc-kb/training.js`. `harvest()` turns salient diagnostics into examples, `buildBatch()` merges them behind the hand-written seeds, `fewShotBlock()` renders prompt text. Harvested quality is capped below the seed floor so the loop cannot outrank its own written standard, and identical events dedupe
+- ~~The `npc-kb` diagnostic log is not persisted and not reset~~ **closed in v1.01.80** — lives on `S.npcKb`, serialised into the save at schema 17, restored with its subject index rebuilt, and cleared on new game
+- ~~No way to incorporate after character creation~~ **closed in v1.01.80** — `registerCharter()` at any non-bastion station. Costs the pilot's own credits, capitalises less treasury and fewer founder shares than the career start, and records the signing station as the office. Every pre-v1.01.72 save now has a way in
+- ~~Fleet order ids built from `Date.now()` and `Math.random()`~~ **closed in v1.01.80** — monotonic counter plus a seeded stream, with the counter carried past whatever a restored save holds. Contract ids are built the same way
+- ~~Fleet objectives were never persisted~~ **closed in v1.01.80** — they ride in the orders payload and restore bound to their hull
 
 ### Structural, from the 1.0 "still missing" list
 
@@ -98,6 +89,21 @@ Fleet objective types, timers, Ops Staff surface, ARIA company/fleet/NPC diagnos
 | **Findings are all-or-nothing** | v1.01.50 | a project takes its full requirement or none, so gathering past the next project's need is dead inventory |
 | **Thermal scarcity is unsignposted** | v1.01.60 | 3 hot bodies against 45 geologic. The tree closes on every seed tested, but a pilot who probes the wrong three worlds early has a long detour and nothing warns them thermal is rare |
 | **v14 saves lose seven blueprints** | v1.01.50 | a pre-research save arrives with nothing researched, so the tier-5 antimatter/exotics entries are locked until the projects are done. Recoverable by playing, but it is a loss |
+
+### Found and fixed while closing the executive console (v1.01.80)
+
+- **The charter bonus was applied backwards to spending.** `book()` multiplied by
+  `(1 + charterBonus)` regardless of sign, so operating inside your own charter made
+  revenue 15% better *and everything you bought 15% dearer*. The config comment says
+  in-charter operations run better; they now do in both directions. Surfaced by
+  `test/executive.mjs` asserting what a hull contract actually cost the treasury.
+- **Eleven suites pinned `SCHEMA === 16`** — each written at the slice that last moved the
+  schema. Every future bump would have broken all eleven at once, and the v1.01.80 bump
+  did. They now assert `SCHEMA >= 16`, which is what they meant: the payload that slice
+  added is present.
+- **`test/command.mjs` cleared the diagnostic log by writing `globalThis.__LG_DIAG__`** —
+  the exact location this slice moved the log away from. It now calls `resetDiagnostics()`,
+  so the helper cannot drift from the real one again.
 
 ### Corrections — items other docs still list as open that are not
 

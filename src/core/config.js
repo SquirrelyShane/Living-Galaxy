@@ -1278,7 +1278,27 @@ export const COMPANY = {
   founderShares: 620,        // you keep control, but not all of it
   reportInterval: 900,       // s between board reports
   dividendRate: 0.08,        // fraction of retained profit paid out per report
-  charterBonus: 0.15         // in-charter operations run this much better
+  charterBonus: 0.15,        // in-charter operations run this much better
+
+  // ── late incorporation (1.01.80) ─────────────────────────────────
+  // Registering a charter after character creation. It costs the pilot's own credits,
+  // not the treasury — there is no treasury until the registration goes through — and
+  // it is deliberately more than the executive career's head start is worth, so the
+  // career is still the cheap way in rather than a trap.
+  registerFee: 18000,        // cr from the pilot's wallet
+  registerTreasury: 12000,   // cr the fee capitalises into the new treasury
+  registerShares: 1000,
+  registerFounderShares: 540, // less than a career founder's 620 — you bought in late
+
+  // ── contracted hulls (1.01.80) ───────────────────────────────────
+  // Fleet objectives used to run on synthetic `wing-<leafid>` assets: a name and a role,
+  // no ship. A contracted hull is a real NPC in the world that has agreed to fly for the
+  // company, and it is the thing an objective is now bound to.
+  fleetCap: 6,               // hulls under contract at once. Matches the objective cap
+  hireFee: 2400,             // one-off, from the treasury
+  hireUpkeep: 14,            // cr per hull per upkeep tick
+  upkeepInterval: 120,       // s between upkeep charges
+  hireRange: 90000           // km — a hull has to be inside company sensor range to sign
 };
 
 // ── NPC brains ───────────────────────────────────────────────────────

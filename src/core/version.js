@@ -4,8 +4,8 @@
 // Patch slices bump VERSION. SCHEMA only moves when the save payload changes shape,
 // and every bump must land with a migration in systems/save.js.
 
-export const VERSION = '1.01.76';
-export const CODENAME = 'Over the Shoulder';
+export const VERSION = '1.01.80';
+export const CODENAME = 'Articles';
 export const BUILD_DATE = '2026-08-09';
 
 /** Save payload schema.
@@ -30,7 +30,7 @@ export const BUILD_DATE = '2026-08-09';
  *  claims, stations you financed, and which rocks you have already mined out.
  *  0.3 and 0.4 changed no persisted field and deliberately did not move the schema —
  *  bumping it without a reason forces every save through a pointless rewrite. */
-export const SCHEMA = 16;
+export const SCHEMA = 17;
 
 export const BUILD = Object.freeze({
   version: VERSION,

@@ -281,7 +281,7 @@ console.log('\n— the model is opt-in —');
 // ── persistence ──────────────────────────────────────────────────────
 console.log('\n— minds survive a save —');
 {
-  ok('the schema moved', SCHEMA === 16);
+  ok('the schema is at or past the one this slice needed', SCHEMA >= 16);
 
   S.brains = { personas: {} };
   NB.noteEvent({ name: 'Remembered', faction: 'hostile', role: 'merc' },

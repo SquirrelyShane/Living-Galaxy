@@ -40,11 +40,13 @@ import { sfx } from '../systems/audio.js';
 import { enabled as experimentalOn, managersReport, auditions, installManager,
          dismissManager, setAutonomy, managerFor } from '../systems/managers.js';
 import { AUTONOMY } from '../data/managers.js';
-import { companyReport, transfer, hqBrief } from '../systems/company.js';
+import { companyReport, transfer, hqBrief, registrarBrief, registerCharter } from '../systems/company.js';
 import { fleetOrderReport, recallFleet } from '../systems/orders.js';
-import { diagnoseBoard } from '../data/npc-kb/diagnostics.js';
+import { diagnoseBoard } from '../data/npc-kb/index.js';
 import { COMMAND_MENU } from '../data/command-menu.js';
-import { commandByPath, commandById, commandRecall } from '../systems/command.js';
+import { commandByPath, commandById, commandRecall, commandHire, commandRelease,
+         commandHullMode, fleetRoster, hullsAvailable } from '../systems/command.js';
+import { trainingStatus } from '../data/npc-kb/index.js';
 
 let overlay, body, tabs;
 let tab = 'orders';
@@ -536,6 +538,7 @@ let confirmAbandon = null;
 
 function renderStaff() {
   const co = companyReport();
+  if (!co) renderRegistrar(body);
   if (co) {
     const office = hqBrief();
     body.appendChild(el('div', 'led-head',
@@ -599,8 +602,17 @@ function renderStaff() {
       }
     }
 
+    // Contracted hulls — the assets objectives actually bind to.
+    renderFleetRoster(body);
+
     // Curated dialogue menu — same structured orders ARIA emits.
     renderCommandMenu(body);
+
+    // What the self-training loop has to work with.
+    const tr = trainingStatus();
+    body.appendChild(el('div', 'cnote',
+      `ARIA corpus: ${tr.seeds} written examples, ${tr.harvested} harvested from ` +
+      `${tr.events} recorded events. Written examples always outrank harvested ones.`));
   }
 
   if (!experimentalOn()) {
@@ -675,6 +687,123 @@ function renderStaff() {
 // ── executive command dialogue menu ──────────────────────────────────
 // Walks COMMAND_MENU. Leaves call commandByPath so the UI and ARIA share one
 // resolver. cmdPath is the stack of selected node ids; empty = top level.
+
+// ── the registrar's desk ─────────────────────────────────────────────
+// The way into the executive layer for a pilot who did not take the career. Before
+// v1.01.80 this panel simply had nothing in it for them and no explanation of why.
+
+function renderRegistrar(parent) {
+  const reg = registrarBrief();
+  parent.appendChild(el('div', 'led-head', 'Companies register'));
+
+  if (!reg.ok) {
+    parent.appendChild(el('div', 'cnote',
+      reg.reason + ' A charter is what opens fleet objectives, the command tree and the board.'));
+    return;
+  }
+
+  parent.appendChild(el('div', 'cnote',
+    `Register a charter at ${reg.station}. ${fmtCr(reg.fee)} from your own credits, of which ` +
+    `${fmtCr(reg.treasury)} capitalises the treasury. You would hold ` +
+    `${Math.round(reg.ownership * 100)}% — less than a founder who started with the career.`));
+
+  for (const c of reg.charters) {
+    const card = el('div', 'mgr-card');
+    card.innerHTML =
+      `<div class="mgr-head"><span class="mgr-name">${c.name}</span>` +
+      `<span class="mgr-obj">${c.key}</span></div>` +
+      `<div class="mgr-blurb">${c.desc}</div>`;
+    const row = el('div', 'mgr-row');
+    const go = el('button', 'buy-btn', 'REGISTER');
+    go.addEventListener('click', () => {
+      const r = registerCharter(c.key);
+      cmdFlash = r.ok ? `${r.company.name} registered.` : r.reason;
+      sfx.ui();
+      render();
+    });
+    row.appendChild(go);
+    card.appendChild(row);
+    parent.appendChild(card);
+  }
+}
+
+// ── contracted hulls ─────────────────────────────────────────────────
+// One hull to one objective. The per-hull ACTIVE/PASSIVE pair is the toggle strip that
+// OPEN_ITEMS carried from v1.01.73 — mode was selectable inside a menu leaf and nowhere
+// else, so you could not say "this ship holds passive" as a standing property of the ship.
+
+function renderFleetRoster(parent) {
+  const hulls = fleetRoster();
+  parent.appendChild(el('div', 'led-head', `Contracted hulls · ${hulls.length}`));
+
+  if (!hulls.length) {
+    parent.appendChild(el('div', 'cnote',
+      'No hulls under contract. Objectives bind to a real ship, so the command tree has ' +
+      'nothing to dispatch until you sign one. Candidates in sensor range are listed below.'));
+  }
+
+  for (const h of hulls) {
+    const card = el('div', 'mgr-card');
+    const state = h.busy ? 'on objective' : 'idle';
+    card.innerHTML =
+      `<div class="mgr-head"><span class="mgr-name">${h.name}</span>` +
+      `<span class="mgr-obj">${h.role} · ${state}</span></div>` +
+      `<div class="mgr-blurb">` +
+      (h.alive
+        ? `Hull ${h.hp}/${h.maxHp} · ${fmtKm(h.dist)} out · upkeep ${fmtCr(h.upkeep)}/cycle`
+        : 'Out of contact — the contract closes if it stays that way') +
+      `</div>` +
+      `<div class="mgr-score">Default mode: ${h.mode}</div>`;
+
+    const row = el('div', 'mgr-row');
+    for (const m of ['active', 'passive']) {
+      const b = el('button', 'buy-btn' + (h.mode === m ? ' on' : ''), m.toUpperCase());
+      b.addEventListener('click', () => {
+        commandHullMode(h.id, m);
+        sfx.ui();
+        render();
+      });
+      row.appendChild(b);
+    }
+    const rel = el('button', 'buy-btn', 'RELEASE');
+    rel.addEventListener('click', () => {
+      const r = commandRelease(h.id);
+      cmdFlash = r.text;
+      sfx.ui();
+      render();
+    });
+    row.appendChild(rel);
+    card.appendChild(row);
+    parent.appendChild(card);
+  }
+
+  const open = hullsAvailable(6);
+  if (!open.length) {
+    parent.appendChild(el('div', 'cnote',
+      'No hulls in range will sign right now. Hostiles do not take company work.'));
+    return;
+  }
+
+  parent.appendChild(el('div', 'led-head', 'Will sign'));
+  for (const c of open) {
+    const card = el('div', 'mgr-card');
+    card.innerHTML =
+      `<div class="mgr-head"><span class="mgr-name">${c.npcName}</span>` +
+      `<span class="mgr-obj">${c.role}</span></div>` +
+      `<div class="mgr-blurb">${c.faction} · hull ${c.hp}/${c.maxHp} · ${fmtKm(c.dist)} out</div>`;
+    const row = el('div', 'mgr-row');
+    const hire = el('button', 'buy-btn', `SIGN ${fmtCr(c.fee)}`);
+    hire.addEventListener('click', () => {
+      const r = commandHire(c.npcName);
+      cmdFlash = r.text;
+      sfx.ui();
+      render();
+    });
+    row.appendChild(hire);
+    card.appendChild(row);
+    parent.appendChild(card);
+  }
+}
 
 function renderCommandMenu(parent) {
   parent.appendChild(el('div', 'led-head', 'Command dialogue'));

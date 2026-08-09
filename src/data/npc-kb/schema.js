@@ -76,7 +76,9 @@ export const PROFILE_REQUIRED = [
 ];
 
 export const DIAGNOSTIC_KINDS = [
-  'decision', 'dialogue', 'performance', 'incident', 'board', 'order', 'manager'
+  'decision', 'dialogue', 'performance', 'incident', 'board', 'order', 'manager',
+  // v1.01.80: hulls signing, losing and leaving company contracts.
+  'contract'
 ];
 
 export const TRAINING_PURPOSES = [

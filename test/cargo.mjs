@@ -220,7 +220,7 @@ console.log('\n— holds are deliberately not persisted —');
   // the cargo did — the station stock a miner sold into, and the ledger record.
   const snap = JSON.stringify(await imp('systems/save.js').then(m => m.snapshot()));
   ok('the save carries no NPC holds', !/"hold"/.test(snap));
-  ok('the schema moved for the slice', SCHEMA === 16);
+  ok('the schema moved for the slice', SCHEMA >= 16);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

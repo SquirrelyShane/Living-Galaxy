@@ -10,7 +10,8 @@ import { dispatchFleet, recallFleet, fleetOrderReport, FLEET_ORDER_TYPES } from 
 import {
   COMMAND_MENU, resolveMenuPath, intentFromUtterance, findNode, allLeaves, branchLabels
 } from '../data/command-menu.js';
-import { recordDiagnostic } from '../data/npc-kb/diagnostics.js';
+import { recordDiagnostic } from '../data/npc-kb/index.js';
+import { pickHull, freeHulls, roster, hireHull, releaseHull, setHullMode, fleetRoster } from './fleet.js';
 
 /**
  * Execute a resolved menu payload (from resolveMenuPath or intentFromUtterance).
@@ -27,6 +28,54 @@ export function executeResolved(resolved, overrides = {}) {
   const orderSpec = Object.assign({}, resolved.order, overrides.order || {});
   const asset = Object.assign({}, resolved.asset, overrides.asset || {});
 
+  // Bind a real contracted hull.
+  //
+  // Until v1.01.80 the asset was always synthetic — `wing-mil-patrol-30`, a name and a
+  // role and no ship in the world. Now the roster is consulted first: an explicit
+  // `contractId` wins, otherwise the best free hull whose role the order type accepts.
+  // Only if the company has no roster at all do we fall back to the synthetic wing, and
+  // that fallback exists purely so a save from v1.01.72–76 keeps working.
+  const spec = FLEET_ORDER_TYPES[orderSpec.type];
+  let contract = null;
+  if (overrides.contractId) {
+    contract = roster().find(c => c.id === overrides.contractId) || null;
+    if (!contract) {
+      return { ok: false, text: 'That hull is not under contract.', error: 'no-contract' };
+    }
+    if (contract.orderId) {
+      return { ok: false, text: `${contract.name} is already on an objective.`, error: 'hull-busy' };
+    }
+    if (spec && spec.requires && !spec.requires.includes(contract.role)) {
+      return {
+        ok: false,
+        error: 'hull-role',
+        text: `${contract.name} is a ${contract.role} hull — ${spec.name} needs ${spec.requires.join(' or ')}.`
+      };
+    }
+  } else if (roster().length) {
+    contract = pickHull(spec && spec.requires);
+    if (!contract) {
+      const idle = freeHulls().length;
+      const need = (spec && spec.requires) ? spec.requires.join('/') : 'a';
+      return {
+        ok: false,
+        error: 'no-hull',
+        text: idle
+          ? `No free ${need} hull under contract — ${idle} idle, none of the right class.`
+          : 'Every contracted hull is already on an objective.'
+      };
+    }
+  }
+
+  if (contract) {
+    asset.id = contract.id;
+    asset.name = contract.name;
+    asset.role = contract.role;
+    asset.contractId = contract.id;
+    // A hull's own default mode wins unless the leaf or the caller said otherwise.
+    if (!overrides.mode && !resolved.order.mode && contract.mode) orderSpec.mode = contract.mode;
+  }
+
   // Optional: bind a real named asset if the caller supplied one.
   if (overrides.assetId) asset.id = overrides.assetId;
   if (overrides.assetName) asset.name = overrides.assetName;
@@ -34,6 +83,8 @@ export function executeResolved(resolved, overrides = {}) {
   if (overrides.mode) orderSpec.mode = overrides.mode;
   if (overrides.durationSec != null) orderSpec.durationSec = overrides.durationSec;
   if (overrides.target) orderSpec.target = overrides.target;
+
+  asset.contractId = contract ? contract.id : (asset.contractId || null);
 
   const result = dispatchFleet(orderSpec.type, asset, {
     durationSec: orderSpec.durationSec,
@@ -54,7 +105,10 @@ export function executeResolved(resolved, overrides = {}) {
     summary: `${asset.name} dispatched: ${FLEET_ORDER_TYPES[orderSpec.type]?.name || orderSpec.type}` +
       (orderSpec.durationSec > 0 ? ` (${orderSpec.durationSec}s)` : ' (until recalled)') +
       (orderSpec.mode === 'passive' ? ' [passive]' : ''),
-    context: { orderId: result.id, type: orderSpec.type, mode: orderSpec.mode, target: orderSpec.target },
+    context: {
+      orderId: result.id, type: orderSpec.type, mode: orderSpec.mode,
+      target: orderSpec.target, contractId: contract ? contract.id : null
+    },
     salience: 0.7,
     tags: ['fleet', orderSpec.type, orderSpec.mode || 'active', resolved.node?.branch || '']
   });
@@ -134,8 +188,37 @@ export function commandCatalogue() {
       durationSec: n.order.durationSec,
       target: n.order.target
     })),
-    active: fleetOrderReport()
+    active: fleetOrderReport(),
+    hulls: fleetRoster()
   };
 }
 
 export { COMMAND_MENU, resolveMenuPath, intentFromUtterance, findNode, allLeaves, branchLabels };
+
+/** Hire a hull by NPC name, through the same module Ops and ARIA already talk to. */
+export function commandHire(npcName) {
+  const r = hireHull(npcName);
+  return r.ok
+    ? { ok: true, text: `${r.contract.name} signed — ${r.contract.role} hull.`, contract: r.contract }
+    : { ok: false, text: r.reason, error: 'hire' };
+}
+
+/** End a contract, recalling the hull's objective first if it has one. */
+export function commandRelease(id) {
+  const c = roster().find(x => x.id === id || x.name.toLowerCase() === String(id).toLowerCase());
+  if (!c) return { ok: false, text: 'No such contract.', error: 'not-found' };
+  if (c.orderId) recallFleet(c.orderId);
+  const r = releaseHull(c.id);
+  return r.ok ? { ok: true, text: `${c.name} released.` } : { ok: false, text: r.reason, error: 'release' };
+}
+
+/** Set the mode a hull's next objective defaults to. */
+export function commandHullMode(id, mode) {
+  const c = roster().find(x => x.id === id);
+  if (!c) return { ok: false, text: 'No such contract.', error: 'not-found' };
+  setHullMode(c.id, mode);
+  return { ok: true, text: `${c.name} defaults to ${c.mode}.`, mode: c.mode };
+}
+
+export { fleetRoster };
+export { hullsAvailable, fleetBrief } from './fleet.js';

@@ -2,6 +2,50 @@
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+## v1.01.80 — "Articles" · 2026-08-09
+
+Full notes: `Patch-Notes/PATCH_v1.01.80.md`. **Save schema 16 → 17**, additive. Closes the
+executive command console section of `docs/OPEN_ITEMS.md` entirely.
+
+### Added
+- **Late incorporation.** `registerCharter()` at any non-bastion station. Costs the pilot's
+  own credits, capitalises less treasury and fewer founder shares than the career start,
+  and records the signing station as the office. `foundCompany()` was previously reachable
+  only from character creation on one career, so one choice permanently decided whether a
+  save could reach the executive layer — and every save written before v1.01.72 was locked
+  out with no surface telling them why.
+- **Contracted hulls** (`systems/fleet.js`). Objectives bound to synthetic `wing-<leaf>`
+  assets; they now bind to a live NPC. One hull one objective, role gating with a refusal
+  that names the class, upkeep per cycle that sheds a hull rather than going negative, and
+  reconciliation in both directions — a ship that dies, and a company restored before the
+  world exists.
+- **Nav-map fleet layer.** Contracted hulls plot regardless of sensor range, ringed while
+  on objective.
+- **Per-hull standing mode.** Mode is a property of the contract, not only of a menu leaf.
+- **The self-training loop** (`data/npc-kb/training.js`). Harvests salient diagnostics into
+  few-shot examples behind the hand-written seeds, renders them as prompt text, dedupes
+  identical events, and caps harvested quality below the seed floor so the loop cannot
+  outrank its own written standard.
+- **Executive ARIA surface**: `charter_options`, `fleet_candidates`, `fleet_roster`,
+  `fleet_mode`, `aria_corpus`. Spending stays in Ops — registering, signing and releasing
+  all move money, and `test/tools.mjs` enforces that no tool can.
+- **`test/executive.mjs`** (124 checks).
+
+### Fixed
+- **The charter bonus was applied backwards to spending.** `book()` scaled by
+  `(1 + charterBonus)` regardless of sign, so operating inside your own charter made
+  revenue better *and everything you bought dearer*.
+- **The `npc-kb` diagnostic log lived on `globalThis`** — absent from the save, and
+  inherited by the next game in the same page load. Now on `S`, persisted at schema 17,
+  reset on new game.
+- **Fleet objectives were never persisted.** Dispatch, save, and the patrol was gone while
+  the hull came back idle.
+- **Fleet order ids** were `Date.now()` + `Math.random()`. Monotonic counter plus a seeded
+  stream, carried past whatever a restored save holds.
+- **Eleven suites pinned `SCHEMA === 16`**, so every future bump broke all eleven at once.
+  Now `SCHEMA >= 16`.
+- All deep `npc-kb/*` imports route through the barrel, as its own header always said.
+
 ## v1.01.76 — "Over the Shoulder" · 2026-08-09
 
 Full notes: `Patch-Notes/PATCH_v1.01.76.md`. Schema unchanged (16).

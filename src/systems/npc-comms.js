@@ -38,7 +38,7 @@ import { recall } from '../npc-avatar/core/memory.js';
 import { TOPICS, availableTopics } from '../data/npc-topics.js';
 import { propose, dealValue } from './deals.js';
 import { COMMODITIES, DEALS } from '../core/config.js';
-import { recordDialogue } from '../data/npc-kb/diagnostics.js';
+import { recordDialogue } from '../data/npc-kb/index.js';
 
 /**
  * Turn a haul offer into a real obligation. The miner picks a destination and names a fee;

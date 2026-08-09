@@ -69,7 +69,10 @@ export function foundCompany(ch, opts = {}) {
     // Headquarters: the station the office is registered against. Set by placeAtHQ()
     // on first incorporation; persisted with the company so reloads keep the address.
     hqStation: null,
-    hqType: null
+    hqType: null,
+    // Contracted hulls and the clock that bills for them. See systems/fleet.js.
+    fleet: [],
+    upkeepT: 0
   };
   status(`${name} incorporated — ${CHARTERS[charter].name}`);
   toast(`${name} is registered. Treasury ${fmtCr(COMPANY.startingTreasury)}, ` +
@@ -136,6 +139,94 @@ export function placeAtHQ() {
   return st;
 }
 
+/**
+ * Register a charter after character creation.
+ *
+ * Until v1.01.80 `foundCompany()` was reachable from exactly one place — character
+ * creation, on the one career that carries a charter — so a single choice at creation
+ * permanently decided whether a save could ever reach the executive layer, and every save
+ * made before v1.01.72 was outside it with no way in. This is the way in.
+ *
+ * It is deliberately not free and not available anywhere: you register at a station, with
+ * your own credits, and the fee capitalises less treasury than the career start hands a
+ * founder. Picking the career is still the cheap route; this is the late one.
+ *
+ * @returns {{ok: boolean, reason?: string, company?: object}}
+ */
+export function registerCharter(charterKey, opts = {}) {
+  const gate = canRegisterCharter();
+  if (!gate.ok) { toast(gate.reason); return gate; }
+
+  const charter = CHARTERS[charterKey] ? charterKey : 'economic';
+  const name = (opts.name || suggestName(S.character)).slice(0, 28);
+
+  S.credits -= COMPANY.registerFee;
+  S.company = {
+    founded: true,
+    name,
+    charter,
+    treasury: COMPANY.registerTreasury,
+    shares: COMPANY.registerShares,
+    held: COMPANY.registerFounderShares,
+    retained: 0,
+    revenue: 0, spend: 0, dividends: 0,
+    inCharter: 0, outCharter: 0,
+    reportT: 0, reports: 0,
+    confidence: 0.5,
+    managers: 0,
+    hqStation: null,
+    hqType: null,
+    fleet: [],
+    upkeepT: 0,
+    registeredLate: true
+  };
+
+  // The office is the station you registered at, not a charter-preferred one. You signed
+  // the articles here; this is the address on them.
+  const st = S.docked;
+  if (st && st.userData) {
+    S.company.hqStation = st.userData.name;
+    S.company.hqType = st.userData.stype || null;
+  }
+
+  status(`${name} incorporated — ${CHARTERS[charter].name}`);
+  toast(`${name} is registered at ${S.company.hqStation || 'this station'}. ` +
+        `Treasury ${fmtCr(COMPANY.registerTreasury)}, you hold ` +
+        `${Math.round(COMPANY.registerFounderShares / COMPANY.registerShares * 100)}%. ` +
+        `Command from Ops → Staff or ask ARIA.`, 6400);
+  return { ok: true, company: S.company };
+}
+
+/**
+ * Whether the registrar's office will take the application right now, and if not, the
+ * sentence to show the pilot. Split out so the dock UI can grey the button with a reason
+ * rather than failing on the press.
+ */
+export function canRegisterCharter() {
+  if (hasCompany()) return { ok: false, reason: 'You already hold a charter.' };
+  if (!S.docked) return { ok: false, reason: 'Charters are registered at a station — dock first.' };
+  const stype = S.docked.userData && S.docked.userData.stype;
+  if (stype === 'bastion') return { ok: false, reason: 'No registrar here. Pirates do not keep a companies register.' };
+  if (S.credits < COMPANY.registerFee) {
+    return { ok: false, reason: `Registration costs ${fmtCr(COMPANY.registerFee)} — you have ${fmtCr(Math.round(S.credits))}.` };
+  }
+  return { ok: true };
+}
+
+/** What the registrar's desk offers: the charters, the fee, and whether you can sign. */
+export function registrarBrief() {
+  const gate = canRegisterCharter();
+  return {
+    fee: COMPANY.registerFee,
+    treasury: COMPANY.registerTreasury,
+    ownership: COMPANY.registerFounderShares / COMPANY.registerShares,
+    charters: charters(),
+    station: (S.docked && S.docked.userData && S.docked.userData.name) || null,
+    ok: gate.ok,
+    reason: gate.reason || null
+  };
+}
+
 /** True when the pilot is docked at the company's registered office. */
 export function atHQ() {
   const co = S.company;
@@ -178,8 +269,15 @@ export function book(amount, branch = null) {
   if (!co || !co.founded || !(amount === amount)) return 0;
   let value = amount;
   if (branch) {
-    if (branch === co.charter) { value *= (1 + COMPANY.charterBonus); co.inCharter++; }
-    else co.outCharter++;
+    if (branch === co.charter) {
+      // The bonus has to be applied in the direction that helps, and it was not: the old
+      // line was `value *= (1 + charterBonus)` regardless of sign, so in-charter revenue
+      // was 15% better and in-charter *spending* was 15% worse. Operating inside your own
+      // charter made everything you bought cost more, which is the opposite of what the
+      // charter is for and the opposite of what the config comment says.
+      value *= value >= 0 ? (1 + COMPANY.charterBonus) : (1 - COMPANY.charterBonus);
+      co.inCharter++;
+    } else co.outCharter++;
   }
   co.treasury += value;
   if (value > 0) { co.revenue += value; co.retained += value; }
@@ -278,6 +376,9 @@ export function companyReport() {
     focus: total > 0 ? co.inCharter / total : null,
     confidence: confidence(),
     managers: co.managers,
+    hulls: (co.fleet || []).length,
+    hullsBusy: (co.fleet || []).filter(h => h.orderId).length,
+    registeredLate: !!co.registeredLate,
     board: BOARD.map(b => ({ name: b.name, role: b.role, line: b.line }))
   };
 }
@@ -291,7 +392,10 @@ export function restoreCompany(data) {
   S.company = Object.assign({
     treasury: 0, shares: COMPANY.startingShares, held: COMPANY.founderShares,
     retained: 0, revenue: 0, spend: 0, dividends: 0,
-    inCharter: 0, outCharter: 0, reportT: 0, reports: 0, confidence: 0.5, managers: 0
+    inCharter: 0, outCharter: 0, reportT: 0, reports: 0, confidence: 0.5, managers: 0,
+    fleet: [], upkeepT: 0
   }, data);
+  // A company saved before v1.01.80 has no roster key at all.
+  if (!Array.isArray(S.company.fleet)) S.company.fleet = [];
   return true;
 }

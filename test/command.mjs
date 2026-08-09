@@ -38,8 +38,9 @@ createSystem();
 initMarket();
 
 const clearFleet = () => { S.fleetOrders = []; };
-// The diagnostic log lives on globalThis, not in S — see the note in the bounded section.
-const clearDiagnostics = () => { globalThis.__LG_DIAG__ = { events: [], bySubject: {} }; };
+// The diagnostic log lives on S as of schema 17 — resetDiagnostics() is the supported way
+// to clear it, and using it here means this helper cannot drift from the real one again.
+const clearDiagnostics = () => KB.resetDiagnostics();
 const reset = () => { clearFleet(); clearDiagnostics(); S.time = 1000; };
 
 // ── the tree itself ──────────────────────────────────────────────────

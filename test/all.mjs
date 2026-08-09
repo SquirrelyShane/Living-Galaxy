@@ -38,6 +38,7 @@ const SUITES = [
   ['cargo',     'real holds — spills, interception, short deliveries, manifests'],
   ['wear',      'module condition — per-event accrual, degraded output, servicing'],
   ['command',   'the executive command tree, the shared resolver, the NPC knowledge base'],
+  ['executive', 'late incorporation, contracted hulls, the self-training loop'],
   ['camera',    'chase camera framing — standoff, aim, the pitch limit'],
   ['screens',   'static screens drawn as text — labels, widths, what the panels say'],
   ['reachability','every player-facing verb has a door — see docs/REACHABILITY_AUDIT.md'],

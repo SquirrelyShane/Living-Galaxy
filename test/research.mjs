@@ -331,7 +331,7 @@ console.log('\n— it survives a save —');
   // A project both completed and in the lab is a contradiction; completion wins.
   R.restoreResearch({ done: ['sensorTuning'], active: { id: 'sensorTuning', left: 2 } });
   ok('a completed project cannot also be in the lab', R.activeProject() === null);
-  ok('the schema moved for it', SCHEMA === 16);
+  ok('the schema moved for it', SCHEMA >= 16);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

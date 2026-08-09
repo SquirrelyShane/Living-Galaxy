@@ -70,6 +70,8 @@ import { sweepDeals } from './systems/deals.js';
 import { updateResearch } from './systems/research.js';
 import { updateTutorial, tutorialReport, startTutorial, skipTutorial } from './systems/tutorial.js';
 import { updateCompany, companyReport, hasCompany } from './systems/company.js';
+import { updateFleet } from './systems/fleet.js';
+import { resetDiagnostics } from './data/npc-kb/index.js';
 import { updateManagers, managersReport, auditions, installManager, setExperimental,
          enabled as experimentalOn } from './systems/managers.js';
 import { interlockReport, interlockLine, resetAnnounce } from './systems/preflight.js';
@@ -175,6 +177,9 @@ function finishBoot(seed, age, online) {
   createAsteroids();
   createNpcs();
   resetReputation();       // defaults; a save overwrites them below
+  // The diagnostic log is world state, not application state. Before schema 17 it lived
+  // on globalThis and a new game inherited the previous one's record of who did what.
+  resetDiagnostics();
   initWorldSim();
   initMarket();
   initContracts();
@@ -291,6 +296,8 @@ function phaseSim(dt) {
   updateResearch(dt);
   updateTutorial(dt);
   updateCompany(dt);
+  // Contracted hulls: upkeep, and reconciliation against ships that died or despawned.
+  updateFleet(dt);
   updateCrew(dt);
   updateMissions();
   updateContracts(dt);

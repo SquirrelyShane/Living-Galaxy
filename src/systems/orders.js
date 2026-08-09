@@ -31,6 +31,7 @@ import { resourcesFor } from '../data/planetary/index.js';
 import { materialName } from '../data/crafting/index.js';
 import { toast, status } from '../ui/toast.js';
 import { sfx } from './audio.js';
+import { bindHull, unbindHull } from './fleet.js';
 
 export const orders = () => (S.orders = S.orders || []);
 const rng = () => stream('orders');
@@ -130,6 +131,16 @@ export const FLEET_ORDER_KEYS = Object.keys(FLEET_ORDER_TYPES);
 
 export const fleetOrders = () => (S.fleetOrders = S.fleetOrders || []);
 
+// Fleet order ids were `fo-${Date.now()}-${Math.random()}`. Neither half is seeded, so a
+// dispatch was not reproducible across a save/replay and two peers in a shared galaxy
+// would never agree on an id. Monotonic counter, seeded stream for the suffix, and
+// restoreFleet() carries the counter past whatever is already on file.
+let nextFleetSeq = 1;
+function nextFleetId() {
+  const n = nextFleetSeq++;
+  return `fo-${n.toString(36)}-${Math.floor(stream('fleet-orders').next() * 1296).toString(36).padStart(2, '0')}`;
+}
+
 /**
  * Dispatch a fleet objective. Returns the order record or a string blocker.
  * `asset` is a minimal descriptor { id, role, name? }; full ship binding is left
@@ -150,12 +161,15 @@ export function dispatchFleet(type, asset, opts = {}) {
   const mode = opts.mode === 'passive' ? 'passive' : 'active';
 
   const order = {
-    id: `fo-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e4)}`,
+    id: nextFleetId(),
     type,
     branch: spec.branch,
     assetId: asset.id,
     assetRole: asset.role || null,
     assetName: asset.name || asset.id,
+    // Set when the asset is a real contracted hull rather than a synthetic wing. Kept
+    // separate from assetId so a save written before hulls existed still restores.
+    contractId: asset.contractId || null,
     mode,
     durationSec: duration,
     remainingSec: duration,
@@ -166,6 +180,7 @@ export function dispatchFleet(type, asset, opts = {}) {
     progress: 0
   };
   fleetOrders().push(order);
+  if (order.contractId) bindHull(order.contractId, order.id);
   status(`${order.assetName}: ${spec.name}` +
     (duration > 0 ? ` · ${duration}s` : ' · until recalled') +
     (mode === 'passive' ? ' (passive)' : ''));
@@ -178,6 +193,7 @@ export function recallFleet(orderId) {
   if (i < 0) return false;
   list[i].status = 'recalled';
   list[i].remainingSec = 0;
+  unbindHull(list[i].id);
   status(`${list[i].assetName} recalled from ${FLEET_ORDER_TYPES[list[i].type]?.name || list[i].type}`);
   list.splice(i, 1);
   return true;
@@ -196,6 +212,10 @@ export function updateFleetOrders(dt) {
       if (o.remainingSec <= 0) {
         o.status = 'complete';
         o.progress = 1;
+        // The hull comes home. Without this the contract stayed marked busy forever and
+        // the roster slowly filled with ships that had nothing to do and could not be
+        // given anything.
+        unbindHull(o.id);
         status(`${o.assetName} completed ${FLEET_ORDER_TYPES[o.type]?.name || o.type}`);
         list.splice(i, 1);
       }
@@ -213,7 +233,8 @@ export function fleetOrderReport() {
     remaining: Math.max(0, Math.round(o.remainingSec)),
     progress: o.progress,
     target: o.target,
-    branch: o.branch
+    branch: o.branch,
+    contractId: o.contractId || null
   }));
 }
 
@@ -410,12 +431,27 @@ export function orderReport() {
 /** Assay bonus a world has accumulated from survey crews. */
 export const assayOf = world => (S.assay && S.assay[world]) || 0;
 
-export const serializeOrders = () => ({ orders: orders(), assay: S.assay || {} });
+export const serializeOrders = () => ({
+  orders: orders(),
+  assay: S.assay || {},
+  // Fleet objectives were never persisted: dispatching a patrol and saving lost the
+  // patrol, and the contract that hull was flying under came back idle with no objective.
+  fleet: fleetOrders()
+});
 
 export function restoreOrders(d) {
   S.orders = (d && Array.isArray(d.orders) ? d.orders : []).filter(o => ORDER_TYPES[o.type]);
   S.assay = (d && d.assay) || {};
   nextOrder = S.orders.length ? Math.max(...S.orders.map(o => o.id)) + 1 : 1;
+
+  // Fleet objectives. Filtered the same way as ground orders — an objective whose type no
+  // longer exists is dropped rather than restored into a tick that cannot resolve it.
+  S.fleetOrders = (d && Array.isArray(d.fleet) ? d.fleet : []).filter(o => FLEET_ORDER_TYPES[o.type]);
+  nextFleetSeq = 1;
+  for (const o of S.fleetOrders) {
+    const m = /^fo-([0-9a-z]+)-/.exec(o.id || '');
+    if (m) nextFleetSeq = Math.max(nextFleetSeq, (parseInt(m[1], 36) || 0) + 1);
+  }
   // Crew flagged as dispatched by an order that no longer exists would be off the roster
   // forever with nothing to bring them back.
   const out = new Set(S.orders.flatMap(o => o.crew));

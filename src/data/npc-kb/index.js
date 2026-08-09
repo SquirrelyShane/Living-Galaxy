@@ -25,7 +25,10 @@ export {
   diagnose,
   recordManagerDecision,
   recordDialogue,
-  diagnoseBoard
+  diagnoseBoard,
+  serializeDiagnostics,
+  restoreDiagnostics,
+  resetDiagnostics
 } from './diagnostics.js';
 
 export {
@@ -34,3 +37,14 @@ export {
   examplesByPurpose,
   examplesByTag
 } from './training-corpus.js';
+
+// The self-training loop — the live diagnostic log harvested back into few-shot batches.
+export {
+  HARVEST_QUALITY_CAP,
+  exampleFrom,
+  harvest,
+  buildBatch,
+  fewShotBlock,
+  trainingStatus,
+  trainingBrief
+} from './training.js';

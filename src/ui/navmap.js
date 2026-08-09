@@ -14,6 +14,7 @@ import { setTarget } from '../systems/targeting.js';
 import { beginScan, scanReport, liveTier, TIER_NAME } from '../systems/scanner.js';
 import { sfx } from '../systems/audio.js';
 import { fieldTarget, fieldMid, parentOf } from '../systems/fields.js';
+import { fleetRoster } from '../systems/fleet.js';
 
 const MAX_R = 34000;
 let overlay, canvas, ctx, info, scanBox, orbitMenu;
@@ -282,11 +283,33 @@ function draw() {
 
   // ships — hostiles as red blips, everything else faint, all now tappable
   if (filters.ship) {
+    // Contracted hulls are plotted whatever the sensor says. The company knows where its
+    // own ships are — that is what a contract is — and an executive commanding a fleet
+    // they cannot see on the chart was the last thing in the command console that only
+    // existed as a list. On objective they are drawn brighter with a ring; idle ones are
+    // marked but quiet.
+    const contracted = new Map();
+    for (const c of fleetRoster()) contracted.set(c.name, c);
+
     for (const n of S.world.npcs) {
       const u = n.userData;
+      const mine = contracted.get(u.name);
       if (u.hp <= 0 || (u.ambush && !u.triggered)) continue;
       const hostile = u.faction === 'hostile';
       const [x, y] = project(n.position.x, n.position.z, cx, cy, sr);
+
+      if (mine) {
+        ctx.fillStyle = mine.busy ? 'rgba(120,255,170,.95)' : 'rgba(120,255,170,.55)';
+        ctx.fillRect(x - 2, y - 2, 4, 4);
+        if (mine.busy) {
+          ctx.strokeStyle = 'rgba(120,255,170,.7)';
+          ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.stroke();
+        }
+        points.push({ x, y, obj: n, name: u.name, kind: 'ship', faction: u.faction,
+                      contract: mine.id, objective: mine.busy });
+        continue;
+      }
+
       ctx.fillStyle = hostile ? 'rgba(255,90,60,.7)' : 'rgba(110,200,255,.45)';
       ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
       if (n.position.distanceToSquared(S.player.position) < S.stats.sensor * S.stats.sensor)

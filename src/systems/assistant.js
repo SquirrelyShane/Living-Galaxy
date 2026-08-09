@@ -8,7 +8,7 @@ import { fmtCr, fmtKm, fmtMass } from '../core/utils.js';
 import { tryTool, toolManifest } from './tools.js';
 import { hasCompany, companyReport } from './company.js';
 import { fleetOrderReport } from './orders.js';
-import { diagnose, diagnoseBoard, diagnosticsFor } from '../data/npc-kb/diagnostics.js';
+import { diagnose, diagnoseBoard, diagnosticsFor } from '../data/npc-kb/index.js';
 import { personaFor } from './npc-brain.js';
 
 const state = {

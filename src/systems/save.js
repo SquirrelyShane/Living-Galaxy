@@ -32,6 +32,8 @@ import { serializeDeals, restoreDeals } from './deals.js';
 import { serializeWelfare, restoreWelfare } from './welfare.js';
 import { serializeResearch, restoreResearch } from './research.js';
 import { serializeWear, restoreWear } from './wear.js';
+import { serializeDiagnostics, restoreDiagnostics } from '../data/npc-kb/index.js';
+import { seedContractSeq } from './fleet.js';
 
 const BAK_KEY = SAVE_KEY + '.bak';
 const BAD_KEY = SAVE_KEY + '.corrupt';
@@ -142,7 +144,10 @@ export function snapshot() {
     // the fit it describes — the same reason `groups` is keyed that way. NPC holds are
     // deliberately *not* here: ships are not persisted, so a hold lives and dies with one.
     // What survives is what the cargo did — station stock, and the ledger.
-    wear: serializeWear()
+    wear: serializeWear(),
+    // The NPC knowledge-base diagnostic log. New in schema 17 — before this it lived on
+    // globalThis and never reached the save at all.
+    npcKb: serializeDiagnostics()
   };
 }
 
@@ -309,6 +314,25 @@ const MIGRATIONS = {
     d.wear = d.wear || { weapon: [], utility: [], core: [] };
     d.v = 16;
     return d;
+  },
+  // v16 → v17: the NPC knowledge-base diagnostic log, contracted hulls, and fleet
+  // objectives all become part of the payload. All three arrive empty, and all three are
+  // *additions* — nothing an older save carried is dropped or reinterpreted.
+  //
+  // The company is the one that needs touching rather than defaulting: a v16 company was
+  // written before hulls existed, so it has no roster key at all, and code that reads
+  // `co.fleet.length` would throw rather than see zero.
+  16(d) {
+    d.npcKb = d.npcKb || { seq: 1, events: [] };
+    if (d.orders && typeof d.orders === 'object' && !Array.isArray(d.orders.fleet)) {
+      d.orders.fleet = [];
+    }
+    if (d.company && typeof d.company === 'object') {
+      if (!Array.isArray(d.company.fleet)) d.company.fleet = [];
+      if (typeof d.company.upkeepT !== 'number') d.company.upkeepT = 0;
+    }
+    d.v = 17;
+    return d;
   }
 };
 
@@ -320,7 +344,7 @@ export function migrate(data) {
   let hops = 0;
   while (v < SCHEMA) {
     const step = MIGRATIONS[v];
-    if (!step || ++hops > 16) return null;          // unknown vintage — refuse rather than guess
+    if (!step || ++hops > 17) return null;          // unknown vintage — refuse rather than guess
     d = step(d);
     v = d.v;
   }
@@ -438,6 +462,8 @@ export function loadGame() {
   restoreWelfare(data.comfort || null);
   restoreResearch(data.research || null);
   restoreWear(data.wear || null);
+  restoreDiagnostics(data.npcKb || null);
+  seedContractSeq((S.company && S.company.fleet) || []);
 
   recalcStats();
   return true;

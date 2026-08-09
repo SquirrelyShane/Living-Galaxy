@@ -275,7 +275,7 @@ console.log('\n— persistence —');
   const snap = snapshot();
   ok('the snapshot carries condition', snap.wear && snap.wear.core[0] > 0);
   ok('rounded, not to fourteen places', String(snap.wear.core[0]).length <= 5);
-  ok('and the schema moved for it', snap.v === SCHEMA && SCHEMA === 16);
+  ok('and the schema moved for it', snap.v === SCHEMA && SCHEMA >= 16);
 
   W.restoreWear(snap.wear);
   ok('it round-trips', Math.abs(W.conditionAt('core', 0) - 0.42) < 0.002);
