@@ -37,6 +37,7 @@ import { crewEvent } from './crew.js';
 import { cargoFree } from '../core/state.js';
 import { toast, status } from '../ui/toast.js';
 import { sfx } from './audio.js';
+import { fileExotic } from './research.js';
 
 function hash(str) {
   let h = 2166136261;
@@ -228,6 +229,9 @@ export function investigate(lp) {
   S.cargo.data += data;
   S.credits += credits;
   practice('sensors', 22);
+  // Anomalies are the only source of exotic findings — which is what makes a Lagrange
+  // point worth the trip rather than a curiosity on the chart.
+  fileExotic(def.name);
   crewEvent('scan', 'survey', 1.5);
   sfx.pickup();
 

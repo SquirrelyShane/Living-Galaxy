@@ -55,6 +55,7 @@ export const S = {
   log: null,                 // bounded structured log. See core/log.js — never saved
   crewLog: null,             // rolling crew samples. See systems/crew-log.js — never saved
   comfort: null,             // quarters / galley / infirmary levels. See systems/welfare.js
+  research: null,            // findings, completed projects, the active one. See systems/research.js
   sites: null,               // planetary sites. See systems/planetary.js
   orders: null,              // standing orders out in the field. See systems/orders.js
   assay: null,               // world name -> permanent survey bonus
@@ -137,6 +138,13 @@ export function registerCharacterBonuses(fn, skillFn) {
   characterSkillRef = skillFn || null;
 }
 
+// Research registers the same way and for the same reason — `research.js` calls
+// `recalcStats()` when a project completes, so a static import here would be a cycle.
+// A fourth source of bonuses in the same shape as the other three: nothing downstream has
+// to know whether a number came from a module, the crew, the pilot or a finished project.
+let researchBonusesRef = null;
+export function registerResearchBonuses(fn) { researchBonusesRef = fn; }
+
 export function recalcStats() {
   const c = SHIP_CLASSES[S.player.classKey];
   const u = S.upgrades;
@@ -150,7 +158,8 @@ export function recalcStats() {
   // in the same shape so nothing downstream has to know which one a number came from.
   // Imported lazily to keep core/state free of a cycle: character.js calls recalcStats.
   const ch = characterBonusesRef ? characterBonusesRef() : {};
-  const add = (k) => (f[k] || 0) + (w[k] || 0) + (ch[k] || 0);
+  const rs = researchBonusesRef ? researchBonusesRef() : {};
+  const add = (k) => (f[k] || 0) + (w[k] || 0) + (ch[k] || 0) + (rs[k] || 0);
 
   const cargoBase = c.cargoCap * (1 + UPGRADES.cargo.step * u.cargo) + add('cargoAdd');
 

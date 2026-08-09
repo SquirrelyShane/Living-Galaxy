@@ -66,6 +66,7 @@ import { initTutorial, offerTutorial, reopenTutorial } from './ui/tutorial.js';
 import { initComms, updateComms, commsReport, transmit } from './systems/comms.js';
 import { updateNpcComms } from './systems/npc-comms.js';
 import { sweepDeals } from './systems/deals.js';
+import { updateResearch } from './systems/research.js';
 import { updateTutorial, tutorialReport, startTutorial, skipTutorial } from './systems/tutorial.js';
 import { updateCompany, companyReport, hasCompany } from './systems/company.js';
 import { updateManagers, managersReport, auditions, installManager, setExperimental,
@@ -277,6 +278,8 @@ function phaseSim(dt) {
   updateNpcComms(dt);
   // Obligations expire and parties die. See systems/deals.js — every deal can fail.
   sweepDeals(dt);
+  // The lab runs on game hours, like the fabricator and the galley.
+  updateResearch(dt);
   updateTutorial(dt);
   updateCompany(dt);
   updateCrew(dt);

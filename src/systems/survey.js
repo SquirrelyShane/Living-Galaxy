@@ -30,6 +30,7 @@ import { FEATURES, eligibleFeatures } from '../data/features.js';
 import { CELESTIAL } from '../core/config.js';
 import { toast } from '../ui/toast.js';
 import { sfx } from './audio.js';
+import { fileFindings } from './research.js';
 
 function hash(str) {
   let h = 2166136261;
@@ -186,6 +187,10 @@ export function probePlanet(body) {
   if (kg <= 0) { toast('Cargo hold full — no room for telemetry'); sfx.deny(); return null; }
   S.probes--;
   S.survey[name] = 2;
+  // A probe is now the supply line for research, not just a cargo of telemetry to sell.
+  // Once per body: probing the same moon eight times has not taught you eight times as
+  // much about cold. See systems/research.js.
+  fileFindings(body, 'probe');
   S.cargo.data += kg;
   sfx.pickup();
   // The probe is what turns a class into a place: everything on the ground is now known.

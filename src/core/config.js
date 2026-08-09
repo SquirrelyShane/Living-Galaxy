@@ -1116,6 +1116,16 @@ export const TUTORIAL = {
 // ── comms ────────────────────────────────────────────────────────────
 // The log is a place people talk, not a place the game prints at you. Traffic is
 // generated from what is actually happening within earshot; replies cost standing.
+// ── research (v1.01.50) ──────────────────────────────────────────────
+// Survey data had exactly one sink — selling it — and blueprints had no gate at all. These
+// are the thresholds that decide what a world *teaches*, and they are temperatures rather
+// than a list of planet names on purpose: the planet table has grown twice, and a whitelist
+// would have quietly stopped covering it.
+export const RESEARCH = {
+  hotAbove: 120,    // °C at or above which a body files a thermal finding
+  coldBelow: -80    // ...and at or below which it files a cryogenic one
+};
+
 // ── crew welfare (v1.01.40) ──────────────────────────────────────────
 // What you spend on people instead of on the ship. Every number here is chosen so that no
 // recovery is both fast and free: the obvious version of "let the player rest the crew" is

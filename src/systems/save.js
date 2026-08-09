@@ -30,6 +30,7 @@ import { serializeGroups, restoreGroups } from './groups.js';
 import { serializeNpcComms, restoreNpcComms } from './npc-comms.js';
 import { serializeDeals, restoreDeals } from './deals.js';
 import { serializeWelfare, restoreWelfare } from './welfare.js';
+import { serializeResearch, restoreResearch } from './research.js';
 
 const BAK_KEY = SAVE_KEY + '.bak';
 const BAD_KEY = SAVE_KEY + '.corrupt';
@@ -131,7 +132,10 @@ export function snapshot() {
 
     // v1.01.40: crew comfort fittings. Shore-leave and training flags ride on the crew
     // records themselves, which the crew payload already carries.
-    comfort: serializeWelfare()
+    comfort: serializeWelfare(),
+
+    // v1.01.50: findings gathered, projects completed, and the one in the lab.
+    research: serializeResearch()
   };
 }
 
@@ -279,6 +283,16 @@ const MIGRATIONS = {
     d.comfort = d.comfort || { quarters: 0, galley: 0, infirmary: 0 };
     d.v = 14;
     return d;
+  },
+  // v14 → v15: research. An old save has no findings and nothing researched, which locks
+  // the seven tier-5 blueprints it could previously have queued. That is the one place this
+  // slice takes something away, and it is why nothing below tier 5 is gated: the loss is
+  // seven exotic entries a pilot almost certainly had not built, recoverable by doing the
+  // research, rather than a catalogue that silently shrank.
+  14(d) {
+    d.research = d.research || { findings: {}, done: [], active: null, seen: {} };
+    d.v = 15;
+    return d;
   }
 };
 
@@ -406,6 +420,7 @@ export function loadGame() {
   restoreNpcComms(data.npcComms || null);
   restoreDeals(data.deals || null);
   restoreWelfare(data.comfort || null);
+  restoreResearch(data.research || null);
 
   recalcStats();
   return true;

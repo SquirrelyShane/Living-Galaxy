@@ -68,6 +68,7 @@ const VERBS = {
   // entries and listed them as gaps for a slice.
   'src/systems/crew.js':      ['hire', 'dismiss', 'retrain', 'toggleDuty', 'persuade',
                                'promote', 'demote', 'assignPost'],
+  'src/systems/research.js':  ['startProject', 'cancelProject'],
   'src/systems/welfare.js':   ['upgradeComfort', 'startShoreLeave', 'recallShore',
                                'startTraining', 'cancelTraining'],
   'src/systems/crafting.js':  ['queueJob', 'cancelJob'],

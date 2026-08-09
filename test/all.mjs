@@ -34,6 +34,7 @@ const SUITES = [
   ['deals',     'the ledger — obligations, reliability, settlement and default'],
   ['crew-log',  'the flight log, crew telemetry, trends, diagnosis and ARIA readouts'],
   ['welfare',   'shore leave, quarters, galley, infirmary and training'],
+  ['research',  'findings, projects, permanent effects and the blueprint gate'],
   ['reachability','every player-facing verb has a door — see docs/REACHABILITY_AUDIT.md'],
   ['run',      'simulation: flight, combat, mining, trade, warp, save'],
   ['warp-nav', 'autopilot navigation geometries'],

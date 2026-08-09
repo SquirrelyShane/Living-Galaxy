@@ -27,6 +27,8 @@ import { facilitiesFor, facility } from '../data/planetary/index.js';
 import { BRANCH_KEYS } from '../data/planetary/branches/index.js';
 import { buildableAt, materialName, BLUEPRINTS } from '../data/crafting/index.js';
 import { stock, held } from '../systems/crafting.js';
+import { researchReport, projectList, startProject, cancelProject } from '../systems/research.js';
+import { FINDINGS } from '../data/research.js';
 
 const blueprintName = id => (BLUEPRINTS[id] && BLUEPRINTS[id].name) || id;
 import { craftingReport, stockUnits, jobs, cancelJob } from '../systems/crafting.js';
@@ -59,7 +61,7 @@ export function initOps() {
   if (led) led.addEventListener('click', () => { tab = 'ledger'; toggle(); });
 
   if (tabs) {
-    for (const t of ['orders', 'ledger', 'holdings', 'staff']) {
+    for (const t of ['orders', 'ledger', 'holdings', 'staff', 'research']) {
       const b = el('button', 'tab' + (t === tab ? ' active' : ''), t);
       b.dataset.otab = t;
       b.addEventListener('click', () => { tab = t; sfx.ui(); render(); });
@@ -95,6 +97,7 @@ function render() {
   if (tab === 'orders') renderOrders();
   else if (tab === 'ledger') renderLedger();
   else if (tab === 'staff') renderStaff();
+  else if (tab === 'research') renderResearch();
   else renderHoldings();
 }
 
@@ -315,6 +318,56 @@ function renderFounding() {
   }
 }
 
+
+
+// ── research ─────────────────────────────────────────────────────────
+//
+// Survey data had exactly one sink before this — you sold it. The findings row at the top is
+// the important part of the screen: it is what tells a player that *where they went* decides
+// what they can learn, rather than how much telemetry they happened to accumulate.
+function renderResearch() {
+  const r = researchReport();
+
+  body.appendChild(el('div', 'led-head', 'Findings'));
+  body.appendChild(el('div', 'cnote',
+    'Gathered by putting probes down and working anomalies. What a world teaches depends ' +
+    'on what it is — you cannot research cryogenics without having been anywhere cold.'));
+  for (const f of r.findings) {
+    row(f.name, String(f.held), f.held ? '' : 'bad');
+  }
+  row('Survey data in hold', `${r.data} kg`);
+  row('Projects complete', `${r.done} of ${r.total}`);
+
+  if (r.active) {
+    body.appendChild(el('div', 'led-head', 'In the lab'));
+    const p = el('div', 'ops-run open');
+    p.innerHTML = `<div class="oh">${r.active.name}</div>` +
+      `<div class="om">${r.active.left.toFixed(1)}h of ${r.active.hours}h remaining</div>`;
+    const b = el('button', 'buy-btn', 'ABANDON');
+    b.addEventListener('click', () => { cancelProject(); render(); });
+    p.appendChild(b);
+    body.appendChild(p);
+  }
+
+  body.appendChild(el('div', 'led-head', 'Projects'));
+  for (const p of projectList()) {
+    const card = el('div', 'ops-run' + (p.done ? ' open' : ''));
+    const needs = Object.keys(p.needs || {})
+      .map(k => `${p.needs[k]} ${FINDINGS[k].name.toLowerCase()}`).join(', ');
+    card.innerHTML =
+      `<div class="oh">${p.name}${p.done ? ' \u2014 complete' : ''}</div>` +
+      `<div class="om">${p.desc}</div>` +
+      `<div class="om">${needs ? `${needs} · ` : ''}${p.data} kg data · ${p.hours}h` +
+      `${(p.unlocks || []).length ? ` · releases ${p.unlocks.length} blueprints` : ''}</div>`;
+    if (!p.done) {
+      const b = el('button', 'buy-btn', p.blocker ? p.blocker.toUpperCase() : 'BEGIN');
+      b.disabled = !!p.blocker;
+      b.addEventListener('click', () => { startProject(p.id); render(); });
+      card.appendChild(b);
+    }
+    body.appendChild(card);
+  }
+}
 
 // ── site operations ──────────────────────────────────────────────────
 //

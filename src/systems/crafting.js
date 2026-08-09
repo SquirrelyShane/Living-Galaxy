@@ -28,6 +28,7 @@ import { BLUEPRINTS, blueprint, craftable, billOfMaterials, rawCost, manufHours,
 import { skill } from './character.js';
 import { toast, status } from '../ui/toast.js';
 import { sfx } from './audio.js';
+import { lockReason } from './research.js';
 import { serializeLoadout, restoreLoadout } from './magazine.js';
 
 // ── stock ────────────────────────────────────────────────────────────
@@ -122,6 +123,10 @@ export function queueJob(id, { qty = 1, where = 'ship', speed = 1, facility = nu
   if (!craftable(id)) {
     toast(`${bp.name} is traded, not manufactured`); sfx.deny(); return null;
   }
+  // The seven tier-5 entries are the only gated ones, and only by the project that names
+  // them. See systems/research.js for why the whole catalogue is not gated retroactively.
+  const locked = lockReason(id);
+  if (locked) { toast(`${bp.name} — ${locked}`); sfx.deny(); return null; }
 
   const check = checkMaterials(id, qty);
   if (!check.ok) { toast(shortfallText(id, qty)); sfx.deny(); return null; }

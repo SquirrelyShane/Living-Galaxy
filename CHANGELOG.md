@@ -2,6 +2,37 @@
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+## v1.01.50 — "Findings" · 2026-08-08
+
+**Research.** Save schema 14 → 15 (migration included). 30 suites, 2,531 checks.
+
+### Fixed
+- **Survey data had exactly one sink — you sold it.** Probes, surface features and anomaly
+  telemetry have produced it since v1.00.40, and every scan anyone ever ran resolved to a
+  commodity price.
+- **Blueprints had no gate at all.** A fresh pilot with the materials could queue a tier-5
+  antimatter torpedo in their first hour; what you could build was decided entirely by what
+  you could afford.
+
+### Added
+- **`src/data/research.js` and `src/systems/research.js`** — nine projects consuming *typed
+  findings* rather than a generic currency. A finding's kind depends on what you were looking
+  at, so you cannot research cryogenics without having been somewhere cold, and the exotic
+  tier needs anomaly telemetry — which finally makes a Lagrange point a destination. The
+  suite asserts the converse: unlimited raw data does not unlock a project you lack evidence
+  for.
+- Findings are **derived from a body's own traits and features**, not from a name lookup, so
+  a new planet type files findings on its own — the failure that left `planetInfo()` speaking
+  a dead vocabulary until v1.00.40. Filed once per body: probing the same moon eight times has
+  not taught you eight times as much about cold.
+- **Permanent effects** registered through the same path a module bonus takes, so nothing
+  downstream has to know whether a number came from a module or a finished project.
+- **A blueprint gate on the seven tier-5 entries only.** Gating the catalogue retroactively
+  would take things away from a pilot who already had them, and a slice that makes an existing
+  save worse is one that should have been designed differently.
+- **A Research tab** in the ops panel, leading with the findings ledger — the part that tells
+  a player where they went decides what they can learn.
+
 ## v1.01.40 — "Shore" · 2026-08-08
 
 **Rest, recovery and improvement.** Slice A of `docs/CREW_ROADMAP.md`. Save schema 13 → 14
