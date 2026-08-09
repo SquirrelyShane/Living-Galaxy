@@ -23,6 +23,7 @@ import { currentMission } from '../systems/missions.js';
 import { boardFor, activeContracts, acceptContract, acceptBlocker, abandonContract,
          contractProgress, timeLeft, issuerOf } from '../systems/contracts.js';
 import { CONTRACTS } from '../core/config.js';
+import { hasCompany, atHQ, company } from '../systems/company.js';
 
 let overlay, body, tabs, nameEl, tab = 'trade';
 
@@ -43,13 +44,26 @@ export function initDock() {
 
 export function openDock() {
   if (!S.docked) return;
-  nameEl.textContent = S.docked.userData.name;
+  S.viewOutside = false;
+  // Executive office: surface the company name so the pad reads as headquarters.
+  if (hasCompany() && atHQ()) {
+    const co = company();
+    nameEl.textContent = `${co.name} · Office — ${S.docked.userData.name}`;
+  } else {
+    nameEl.textContent = S.docked.userData.name;
+  }
   overlay.classList.remove('hidden');
   render();
   saveGame(true);
 }
 
 export function closeDock() {
+  // Closing the station UI while docked is "View Outside". The ship stays docked;
+  // movement and combat remain locked. A return path is required so the pilot is
+  // never stranded without the Undock / station services surface.
+  if (S.docked) {
+    S.viewOutside = true;
+  }
   overlay.classList.add('hidden');
 }
 
@@ -83,6 +97,11 @@ function row(title, meta, btnLabel, enabled, onClick, priceText) {
 
 function renderTrade() {
   const st = S.docked;
+  if (hasCompany() && atHQ()) {
+    const co = company();
+    body.appendChild(el('div', 'dock-note',
+      `${co.name} headquarters · ${st.userData.name} · command from Ops or ARIA · balance ${fmtCr(S.credits)}`));
+  }
   body.appendChild(el('div', 'dock-note',
     `${st.userData.category} hub · hold ${fmtMass(cargoMass())} of ${fmtMass(S.stats.cargoCap)} · balance ${fmtCr(S.credits)}`));
 
@@ -129,6 +148,10 @@ function renderService() {
     'Buy 1', S.credits >= PROBE.cost, () => buyProbe(), fmtCr(PROBE.cost));
 
   row('Save flight', 'Writes progress to this device', 'Save', true, () => saveGame(false), '');
+
+  row('View Outside',
+    'Look at the exterior while remaining docked. Station services stay a keypress or HUD return away — you cannot undock from the canopy.',
+    'Look', true, () => { S.viewOutside = true; closeDock(); }, '');
 
   renderFreight();
 }

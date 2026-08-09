@@ -160,6 +160,9 @@
 #dock-prompt{position:absolute;bottom:calc(var(--dock-h) + 8px + var(--safe-b));left:50%;transform:translateX(-50%);z-index:24;
   padding:8px 16px;border-radius:20px;background:rgba(4,30,20,.92);border:1px solid var(--good);
   color:var(--good);font-size:12px;cursor:pointer;font-family:inherit;animation:blink 2.2s ease-in-out infinite}
+#station-return{position:absolute;bottom:calc(var(--dock-h) + 8px + var(--safe-b));left:50%;transform:translateX(-50%);z-index:24;
+  padding:8px 16px;border-radius:20px;background:rgba(20,30,50,.94);border:1px solid var(--edge);
+  color:#9cf;font-size:12px;cursor:pointer;font-family:inherit}
 
 #speed-panel{width:100%;background:var(--panel);border:1px solid var(--edge);
   padding:5px 10px 6px;backdrop-filter:blur(6px);

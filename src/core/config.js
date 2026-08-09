@@ -757,6 +757,21 @@ export const ORDERS = {
   maxAssay: 0.4
 };
 
+// Executive fleet objectives — idle command from HQ / ops.
+// Distinct from crew standing orders: these target *owned or contracted ships*
+// and carry visible timers + auto-return. Designed so ARIA and the command menu
+// emit the same structured objects.
+export const FLEET = {
+  maxActive: 6,
+  defaultPatrolSec: 30,
+  defaultExtractSec: 120,
+  defaultLogisticsSec: 90,
+  // Active = ship is under an objective and reports progress.
+  // Passive = ship holds last instruction and only alerts on exception.
+  modes: ['active', 'passive'],
+  branches: ['industrial', 'logistic', 'economic', 'civilian', 'military']
+};
+
 export const ADVANCED = {
   pointDefChance: 0.28,     // per level: fraction of incoming rounds intercepted
   naniteArmorPerSec: 1.4,   // per level, out of combat

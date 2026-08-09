@@ -1,8 +1,8 @@
 # Open items — single source of truth
 
-Compiled at **v1.01.60 "Assay"**, revised at **v1.01.70 "Consignment"** (schema 16).
+Compiled at **v1.01.60 "Assay"**, revised at **v1.01.75 "Audit"** (schema 16).
 Everything below was cross-checked against the live tree, not copied from the patch notes:
-`node test/all.mjs` re-run green (**32/32 suites, 2,637 checks**), `test/reachability.mjs`
+`node test/all.mjs` re-run green (**33/33 suites, 2,736 checks**), `test/reachability.mjs`
 re-run (70 checks, `BACKLOG` empty, four inert config keys printed), and every carried gap
 grepped in `src/` before it was written down.
 
@@ -44,6 +44,26 @@ despawns, flagged at v1.00.80 and still true.
 | B | **ARIA keeps the watch** *(next in that doc)* | a scheduling model over posts and people respecting fatigue, speciality, cross-penalty and morale *trend*; `crew_plan` and `crew_rotate` alongside the existing `crew_watch` / `crew_why`; a standing report at the top of the watch; autonomy on the site-manager rung ladder — suggest / ask / act-and-report, never silent | nothing — the telemetry (v1.01.30) and the verbs (v1.01.40) are both in |
 | C | **Relationships** | bonds from shared watches and shared fights, friction from promotions and blame; effects through channels that already exist. **Reuse `npc-avatar/core/memory.js` and derive as `npc-comms.js` does** — a second relationship table is the failure mode | B is not strictly required |
 | D | **Generations** | `served` accrues and nothing reads it — careers need a span first; then pairings, inheritance that is a trait/affinity rather than a stat roll, and berths as the constraint. Needs death, retirement and departure or it is a population graph | C |
+
+### Executive command console (partial in v1.01.72–73)
+
+Fleet objective types, timers, Ops Staff surface, ARIA company/fleet/NPC diagnostic awareness,
+`src/data/npc-kb/`, and the curated command dialogue menu are in. Still open for a full HQ mode:
+
+- ~~Dedicated HQ interior / spawn-at-office when career is executive~~ **closed in v1.01.74** — `placeAtHQ()` docks the founder at a charter-matched station, records `company.hqStation`, opens the station surface as the office; Ops/ARIA read `atHQ()` / `hqBrief()`
+- Binding fleet orders to *real* owned / contracted hulls (demo wing assets only today)
+- Live nav-map entity layer driven by HQ / ship scan radius while commanding
+- ~~Curated dialogue menu tree that emits the same structured orders ARIA already understands~~ **closed in v1.01.73** — `data/command-menu.js` + `systems/command.js`; Ops walks the tree, ARIA tools (`fleet_dispatch` / `fleet_recall` / `fleet_status` / `command_menu`) share the resolver
+- Active/passive is selectable inside the menu leaves; a per-asset toggle strip is still open
+- Self-training loop that consumes `npc-kb` diagnostics into few-shot / fine-tune batches
+- **The `npc-kb` diagnostic log is not persisted and not reset.** It lives on
+  `globalThis.__LG_DIAG__` rather than in `S`, so it is absent from the save payload and
+  survives a new game started in the same page load. Moving it into `S` is a schema bump
+  and wants doing before the self-training loop treats the log as a corpus worth keeping
+- **Fleet order ids are built from `Date.now()` and `Math.random()`** (`systems/orders.js`).
+  Neither is seeded, so a dispatch is not reproducible across a save/replay and two peers
+  in a shared galaxy will not agree on an id. Same class as the `npc-comms` RNG fix in
+  v1.01.75 — wants a seeded stream or a monotonic counter
 
 ### Structural, from the 1.0 "still missing" list
 

@@ -2,6 +2,99 @@
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+## v1.01.75 — "Audit" · 2026-08-09
+
+Full notes: `Patch-Notes/PATCH_v1.01.75.md`. Schema unchanged (16). Build
+`1.01.75 · Audit`. Merges the `living-galaxy-74` line onto `main`.
+
+### Fixed
+- **`npc-comms.js` drew from `Math.random()` outside the sweep.** `rng` was initialised
+  only inside `updateNpcComms()`, so any other path into `exchange()` ran unseeded — the
+  cause of `test/deals.mjs` failing about one run in seven, on `main` as well as the
+  branch. The cached stream object was a second bug underneath: `seedWorld()` clears the
+  stream table, so a reseed would have left this system on the previous world's numbers.
+  Now fetched per draw, as `orders.js` and `contracts.js` already do.
+- **`deals.js` carried dead RNG plumbing** — imported, declared, assigned, never drawn
+  from. Removed; it implied `willAccept()` was stochastic when it is not.
+
+### Added
+- **`test/command.mjs`** (99 checks). The v1.01.72–74 command tree, shared resolver and
+  NPC knowledge base shipped with no suite touching them. Guards the menu against leaves
+  whose hull role the order type would refuse, utterance patterns pointing at node ids the
+  menu no longer holds, and — the point of v1.01.73 — that a click and a sentence produce
+  the same order.
+- `test/static.mjs` now derives audited stylesheets from the `<link>` tags in `index.html`
+  (`panels.css` was outside the audit) and checks re-export barrels, which are not import
+  statements and were never verified.
+
+### Reconciled
+- `package.json` version said `1.01.70` against `version.js` at `1.01.74`; synced.
+- `test:cargo`, `test:wear`, `test:command` npm scripts added.
+- `PATCH_v1.01.71.md` and `PATCH_v1.01.72.md` backfilled — both versions were in this
+  changelog with no matching note.
+- README build line; `docs/OPEN_ITEMS.md` header.
+
+### Filed as open
+- The `npc-kb` diagnostic log lives on `globalThis`, not in `S` — not saved, not reset.
+- Fleet order ids use `Date.now()` + `Math.random()`; not reproducible, not peer-stable.
+
+## v1.01.74 — "Office" · 2026-08-09
+
+Full notes: `Patch-Notes/PATCH_v1.01.74.md`. Schema unchanged (16). Build
+`1.01.74 · Office`.
+
+### Added
+- **Executive HQ spawn.** New founders dock at a charter-matched station (trade hub,
+  foundry, depot, fortress, or habitat). Company records `hqStation`; dock/Ops/ARIA
+  treat that pad as the office. First frame after creation opens the station surface.
+
+## v1.01.73 — "Dispatch" · 2026-08-09
+
+Full notes: `Patch-Notes/PATCH_v1.01.73.md`. Schema unchanged (16). Build identity
+bumped to `1.01.73 · Dispatch`.
+
+### Added
+- **Command dialogue menu** (`src/data/command-menu.js`). Hierarchical desks — Military,
+  Industrial, Logistical, Economic, Civilian — with submenus for patrol / escort /
+  extract / logistics / survey / station-keep. Every leaf is a structured fleet order
+  (type, duration, active|passive, target, params).
+- **Shared resolver** (`src/systems/command.js`). `commandByPath`, `commandById`, and
+  `commandFromText` all call the same `dispatchFleet` path, so Ops clicks and ARIA
+  utterances cannot diverge. Dispatches write diagnostic events into `npc-kb`.
+- **Ops Staff** walks the menu with breadcrumb back/top navigation and Dispatch on leaves.
+- **ARIA tools**: `fleet_dispatch`, `fleet_recall`, `fleet_status`, `command_menu`, with
+  rule-matcher patterns so "patrol the sector 30 seconds" and "recall last" work without
+  the local model.
+- Carries v1.01.71 dock exterior-view fix, NPC check-in self-ack fix, v1.01.72 NPC
+  knowledge base, and fleet objective timers into one shipped build.
+
+## v1.01.72 — executive command + NPC knowledge base · 2026-08-09
+
+### Added
+- **NPC knowledge base** (`src/data/npc-kb/`). Schema, rich role profiles, diagnostic event
+  log, and a seed training corpus designed for future onboard ARIA self-training / few-shot
+  / RAG. Profiles carry speech patterns, heuristics, loyalties, red lines, and KPI defaults.
+  Diagnostics record decisions, dialogue, manager policy fires, and board state with salience.
+- **Fleet objectives** for executive idle command: patrol (default 30 s), extract, logistics,
+  escort, survey pass, station-keep — with active/passive modes, visible timers, and auto-return.
+  Wired into the sim tick and the Ops → Staff panel when a company exists.
+- **ARIA executive awareness.** Context line and rule answers now cover company books, board
+  confidence, live fleet objectives, and per-NPC diagnostic briefs ("who is X?", "diagnose…").
+
+### Fixed (carried)
+- Dock exterior view + return path; NPC check-in self-acknowledgement.
+
+## v1.01.71 — dock view / NPC self-ack · 2026-08-09
+
+### Fixed
+- **Docked pilots could close the station overlay and become stranded.** Closing the dock UI
+  (or selecting Service → View Outside) now enters a deliberate exterior view while still
+  docked. A HUD "Return to Station" button and the Dock key both restore the full station
+  interface (including Undock). Movement remains locked until true undock.
+- **NPC check-in replies acknowledged the speaker instead of the other party.** The reply
+  template after the a/b swap used `${a.name}` (self) rather than `${b.name}` (the ship that
+  just marked them on the board).
+
 ## v1.01.70 — "Consignment" · 2026-08-09
 
 **Cargo that is actually aboard something, and modules that wear out.** Two items off the

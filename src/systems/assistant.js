@@ -6,6 +6,10 @@
 import { S, totalMass, cargoFree } from '../core/state.js';
 import { fmtCr, fmtKm, fmtMass } from '../core/utils.js';
 import { tryTool, toolManifest } from './tools.js';
+import { hasCompany, companyReport } from './company.js';
+import { fleetOrderReport } from './orders.js';
+import { diagnose, diagnoseBoard, diagnosticsFor } from '../data/npc-kb/diagnostics.js';
+import { personaFor } from './npc-brain.js';
 
 const state = {
   worker: null, ready: false, loading: false, device: null,
@@ -87,14 +91,33 @@ export function ask(prompt) {
 function contextLine() {
   const p = S.player, st = S.stats;
   const near = nearestOf('station'), rock = beltState();
-  return [
+  const parts = [
     `Ship: ${st.name} hull, hull ${Math.round(p.hull)}/${Math.round(st.hullMax)},`,
     `shield ${Math.round(p.shield)}, energy ${Math.round(p.energy)}.`,
     `Credits ${fmtCr(S.credits)}. Cargo ${fmtMass(totalMass() - st.dryMass)} (${Math.round(cargoFree())} kg free).`,
     `Probes ${S.probes}.`,
     near ? `Nearest station ${near.name} ${fmtKm(near.d)}.` : 'No station in sensor range.',
     rock
-  ].join(' ');
+  ];
+  // Executive / company context — only when a company exists so non-executive
+  // pilots do not carry irrelevant tokens into the prompt.
+  if (hasCompany()) {
+    const co = companyReport();
+    if (co) {
+      parts.push(
+        `Company ${co.name || 'holdings'}, ${co.charter} charter, treasury ${fmtCr(co.treasury)}, ` +
+        `board confidence ${Math.round((co.confidence || 0) * 100)}%.` +
+        (co.hqStation ? ` Office at ${co.hqStation}${co.atHQ ? ' (you are here)' : ''}.` : '')
+      );
+    }
+    const fleet = fleetOrderReport();
+    if (fleet.length) {
+      parts.push(`Fleet objectives: ${fleet.map(f =>
+        `${f.asset} ${f.name}${f.remaining ? ' ' + f.remaining + 's' : ''}`).join('; ')}.`);
+    }
+  }
+  if (S.docked) parts.push('Pilot is docked.');
+  return parts.join(' ');
 }
 
 // ── rule-based fallback: covers the common questions with real numbers ──
@@ -127,7 +150,57 @@ function ruleAnswer(qRaw) {
     return 'Lock a station, hit APPROACH — control hails you at range, then the tractor lands you.';
   if (has('help', 'what', 'how', 'tip'))
     return 'Mine the belt, sell at a station, refit, survive. APPROACH and MATCH do the flying; NAV plots warp.';
+
+  // Executive / company
+  if (hasCompany() && has('company', 'treasury', 'board', 'charter', 'executive', 'holdings')) {
+    const board = diagnoseBoard(S.company);
+    if (board) return board.brief;
+    const co = companyReport();
+    return co
+      ? `${co.name}: ${co.charter} charter, treasury ${fmtCr(co.treasury)}, confidence ${Math.round((co.confidence || 0) * 100)}%.`
+      : 'Company books are not online.';
+  }
+  if (hasCompany() && has('fleet', 'objective', 'patrol', 'dispatch', 'order')) {
+    const fleet = fleetOrderReport();
+    if (!fleet.length) return 'No fleet objectives running. Dispatch patrol, extract, logistics or escort from Ops.';
+    return fleet.map(f =>
+      `${f.asset}: ${f.name}` +
+      (f.remaining ? ` · ${f.remaining}s left` : ' · until recalled') +
+      (f.mode === 'passive' ? ' (passive)' : '')
+    ).join(' · ');
+  }
+
+  // Per-NPC diagnostic / "who is X"
+  if (has('who is', "who's", 'tell me about', 'diagnose', 'profile')) {
+    const name = extractName(qRaw);
+    if (name) {
+      const npc = findNpcByName(name);
+      if (npc) {
+        const persona = personaFor(npc.userData);
+        const report = diagnose(Object.assign({}, npc.userData, persona || {}));
+        return report.brief;
+      }
+      const events = diagnosticsFor(name, 3);
+      if (events.length) {
+        return `${name} — recent: ${events.map(e => e.summary).join('; ')}.`;
+      }
+    }
+  }
+
   return `Systems nominal. Hull ${Math.round(p.hull)}, energy ${Math.round(p.energy)}, ${fmtCr(S.credits)}. Ask about cargo, threats, or where to sell.`;
+}
+
+function extractName(q) {
+  const m = q.match(/(?:who is|who's|tell me about|diagnose|profile)\s+([A-Za-z0-9][A-Za-z0-9 \-]{1,24})/i);
+  return m ? m[1].trim().replace(/[?.!]+$/, '') : null;
+}
+
+function findNpcByName(name) {
+  const lower = name.toLowerCase();
+  for (const n of S.world.npcs || []) {
+    if (n.userData && n.userData.name && n.userData.name.toLowerCase() === lower) return n;
+  }
+  return null;
 }
 
 function nearestOf(kind) {

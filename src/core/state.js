@@ -81,6 +81,7 @@ export const S = {
   target: null,        // { obj, kind, name, faction }
   docked: null,        // station group while docked
   dockCandidate: null, // station in range
+  viewOutside: false,  // true while docked and looking at the exterior (space view)
 
   world: { bodies: [], stations: [], asteroids: [], npcs: [], loot: [], belts: [], decoys: [] },
 

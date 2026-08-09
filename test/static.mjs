@@ -18,7 +18,11 @@ function walk(dir, out = []) {
 
 const files = walk(join(ROOT, 'src'));
 const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-const css = ['base', 'hud', 'overlays'].map(n => readFileSync(join(ROOT, 'css', n + '.css'), 'utf8')).join('\n');
+// Read whatever index.html actually links, rather than a hand-kept list — a stylesheet
+// added to the markup and forgotten here silently drops out of the selector audit.
+const sheets = [...html.matchAll(/href="([^"]+\.css)"/g)].map(m => m[1]);
+const css = sheets.filter(p => existsSync(join(ROOT, p)))
+                  .map(p => readFileSync(join(ROOT, p), 'utf8')).join('\n');
 
 // ── exports per file ─────────────────────────────────────────────────
 const exportsOf = new Map();
@@ -50,7 +54,25 @@ for (const f of files) {
     }
   }
 }
-console.log(`  checked ${importCount} import statements across ${files.length} modules`);
+// Barrels re-export without importing, so the loop above never sees them. An `export { x }
+// from './y.js'` that names something y.js does not export only fails at runtime, and only
+// for whoever imports the barrel — which, for a barrel nothing imports yet, is nobody.
+let reexportCount = 0;
+for (const f of files) {
+  const src = readFileSync(f, 'utf8');
+  for (const m of src.matchAll(/export\s*\{([^}]+)\}\s*from\s*'([^']+)'/g)) {
+    const target = resolve(dirname(f), m[2]);
+    reexportCount++;
+    if (!existsSync(target)) { bad(`${relative(ROOT, f)} re-exports from missing file ${m[2]}`); continue; }
+    const have = exportsOf.get(target);
+    for (const raw of m[1].split(',')) {
+      const name = raw.trim().split(/\s+as\s+/)[0].trim();
+      if (name && have && !have.has(name))
+        bad(`${relative(ROOT, f)} re-exports {${name}} which ${m[2]} does not export`);
+    }
+  }
+}
+console.log(`  checked ${importCount} import statements and ${reexportCount} re-exports across ${files.length} modules`);
 
 // ── DOM ids ──────────────────────────────────────────────────────────
 console.log('\n— element ids —');

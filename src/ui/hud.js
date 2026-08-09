@@ -13,6 +13,7 @@ import { setTarget, clearTarget } from '../systems/targeting.js';
 import { playerSignature, signatureLabel } from '../systems/detection.js';
 import { switchClass, buyHull, ownsHull, hullPrice } from '../systems/economy.js';
 import { status } from './toast.js';
+import { openDock } from './dock.js';
 import { net } from '../systems/net.js';
 import { startApproach, matchTarget } from '../systems/approach.js';
 import { inClaimedSpace } from '../systems/worldsim.js';
@@ -37,7 +38,7 @@ const IDS = ['system-name','status-line','credits-val','cargo-val','threat-alert
   'pitch-readout','pitch-num','pitch-tick','speed-value','real-speed','speed-fill',
   'warp-core-visual','warp-core-fill','warp-status-text','warp-overlay','warp-btn',
   'target-approach','target-match','target-scan','target-probe','target-expand','target-detail','engine-glow',
-  'dock-prompt','dock-target','ship-panel','btn-mine','btn-assist','btn-audio',
+  'dock-prompt','dock-target','station-return','ship-panel','btn-mine','btn-assist','btn-audio',
   'speed-streaks','damage-vignette','velocity-marker','scan-sweep','scan-bar','scan-bar-fill'];
 
 
@@ -147,6 +148,14 @@ const _v = new THREE.Vector3();
 
 export function initHud() {
   IDS.forEach(id => { E[id] = $(id); });
+
+  // Return from "View Outside" back into the station interface. openDock clears
+  // viewOutside and re-shows the full dock overlay (including Undock).
+  if (E['station-return']) {
+    E['station-return'].addEventListener('click', () => {
+      if (S.docked) openDock();
+    });
+  }
 
   E['nearest-list'].addEventListener('click', e => {
     const row = e.target.closest('.near-item');
@@ -513,6 +522,13 @@ function updateDockPrompt() {
     el2.classList.remove('hidden');
   } else {
     el2.classList.add('hidden');
+  }
+  // While docked and viewing the exterior, surface a clear return path so the pilot
+  // can never be stranded without the station interface (and therefore without Undock).
+  const ret = E['station-return'];
+  if (ret) {
+    if (S.docked && S.viewOutside) ret.classList.remove('hidden');
+    else ret.classList.add('hidden');
   }
   setFlag('btn-mine', 'disabled', !!S.docked);
 }

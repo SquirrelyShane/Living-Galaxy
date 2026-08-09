@@ -25,7 +25,6 @@
 
 import { S } from '../core/state.js';
 import { DEALS } from '../core/config.js';
-import { stream } from '../core/rng.js';
 import { personaFor, noteEvent } from './npc-brain.js';
 import { relation } from './npc-comms.js';
 import { recall } from '../npc-avatar/core/memory.js';
@@ -35,7 +34,6 @@ import { transmit } from './comms.js';
 import { toast } from '../ui/toast.js';
 import { unloadHold } from './holds.js';
 
-let rng = null;
 let sweepT = 0;
 let seq = 1;
 
@@ -114,7 +112,6 @@ export function propose(fromU, toU, spec) {
   if (!fromU || !toU || !fromU.name || !toU.name || fromU === toU) return null;
   if (dealsFor(toU.name).length >= DEALS.maxPerCharacter) return null;
 
-  if (!rng) rng = stream('deals');
   const deal = Object.assign({
     id: `d${seq++}`,
     kind: 'haul',

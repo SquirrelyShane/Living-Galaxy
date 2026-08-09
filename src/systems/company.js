@@ -19,6 +19,7 @@ import { COMPANY, MANAGERS } from '../core/config.js';
 import { BRANCH_KEYS } from '../data/planetary/branches/index.js';
 import { fmtCr } from '../core/utils.js';
 import { toast, status } from '../ui/toast.js';
+import { dock } from './economy.js';
 
 export const company = () => S.company;
 export const hasCompany = () => !!(S.company && S.company.founded);
@@ -64,12 +65,100 @@ export function foundCompany(ch, opts = {}) {
     inCharter: 0, outCharter: 0,
     reportT: 0, reports: 0,
     confidence: 0.5,
-    managers: 0
+    managers: 0,
+    // Headquarters: the station the office is registered against. Set by placeAtHQ()
+    // on first incorporation; persisted with the company so reloads keep the address.
+    hqStation: null,
+    hqType: null
   };
   status(`${name} incorporated — ${CHARTERS[charter].name}`);
   toast(`${name} is registered. Treasury ${fmtCr(COMPANY.startingTreasury)}, ` +
         `you hold ${Math.round(COMPANY.founderShares / COMPANY.startingShares * 100)}% of it.`, 5600);
   return S.company;
+}
+
+/**
+ * Charter → preferred station type for the registered office.
+ * Economic founders want a trade hub; industrial a foundry/refinery; etc.
+ */
+const HQ_PREFERENCE = {
+  economic:   ['tradeHub', 'depot', 'habitat'],
+  industrial: ['foundry', 'refinery', 'depot'],
+  logistic:   ['depot', 'tradeHub', 'foundry'],
+  military:   ['fortress', 'depot', 'tradeHub'],
+  civilian:   ['habitat', 'relay', 'tradeHub']
+};
+
+/** Pick the best living station for this company's charter. */
+export function pickHQStation(charter) {
+  const stations = S.world && S.world.stations;
+  if (!stations || !stations.length) return null;
+  const prefs = HQ_PREFERENCE[charter] || HQ_PREFERENCE.economic;
+  for (const type of prefs) {
+    const hit = stations.find(st => st.userData && st.userData.stype === type);
+    if (hit) return hit;
+  }
+  // Fallback: any station that is not a pirate bastion.
+  return stations.find(st => st.userData && st.userData.stype !== 'bastion') || stations[0];
+}
+
+/**
+ * Place the founder at the company office: move the ship to the HQ station,
+ * dock, and record the address on the company. Call once after foundCompany
+ * on a new executive career — not on every load.
+ *
+ * Returns the station group, or null if the world has no stations yet.
+ */
+export function placeAtHQ() {
+  const co = S.company;
+  if (!co || !co.founded) return null;
+
+  let st = null;
+  if (co.hqStation) {
+    st = (S.world.stations || []).find(s => s.userData && s.userData.name === co.hqStation) || null;
+  }
+  if (!st) st = pickHQStation(co.charter);
+  if (!st) return null;
+
+  co.hqStation = st.userData.name;
+  co.hqType = st.userData.stype || null;
+
+  // Put the ship on the pad geometry before docking so undock later has a real outward vector.
+  const r = (st.userData.radius || 30) * 1.2;
+  S.player.position.copy(st.position);
+  S.player.position.y += r * 0.3;
+  S.player.velocity.set(0, 0, 0);
+  S.player.throttle = 0;
+
+  dock(st);
+  status(`Office registered at ${co.hqStation} — command from Ops or ARIA`);
+  toast(`${co.name} headquarters: ${co.hqStation}. You are docked at the office.`, 5200);
+  return st;
+}
+
+/** True when the pilot is docked at the company's registered office. */
+export function atHQ() {
+  const co = S.company;
+  if (!co || !co.founded || !co.hqStation || !S.docked) return false;
+  return S.docked.userData && S.docked.userData.name === co.hqStation;
+}
+
+/** One-line office descriptor for dock UI / ARIA. */
+export function hqBrief() {
+  const co = S.company;
+  if (!co || !co.founded) return null;
+  const here = atHQ();
+  return {
+    name: co.hqStation || 'unregistered',
+    type: co.hqType,
+    charter: co.charter,
+    here,
+    line: co.hqStation
+      ? (here
+          ? `You are in the ${co.name} office at ${co.hqStation}.`
+          : `${co.name} office is registered at ${co.hqStation}.`)
+      : `${co.name} has no registered office yet.`
+  };
 }
 
 function suggestName(ch) {
@@ -178,6 +267,9 @@ export function companyReport() {
     name: co.name,
     charter: CHARTERS[co.charter].name,
     charterKey: co.charter,
+    hqStation: co.hqStation || null,
+    hqType: co.hqType || null,
+    atHQ: atHQ(),
     treasury: Math.round(co.treasury),
     ownership: co.held / co.shares,
     revenue: Math.round(co.revenue),

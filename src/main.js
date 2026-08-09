@@ -33,7 +33,8 @@ import { netReport } from './systems/net.js';
 import { callTool, toolManifest } from './systems/tools.js';
 import { updateJobs, craftingReport, queueJob, blueprintDetail, buildableNow } from './systems/crafting.js';
 import { updateSites, empireReport, siteReport, foundSite, sites } from './systems/planetary.js';
-import { updateOrders, orderReport, dispatch, ORDER_TYPES } from './systems/orders.js';
+import { updateOrders, orderReport, dispatch, ORDER_TYPES,
+         updateFleetOrders, fleetOrderReport, dispatchFleet, FLEET_ORDER_TYPES } from './systems/orders.js';
 import { CRAFT } from './core/config.js';
 import { characterSheet, spendPoint, buyLicence, hasCharacter } from './systems/character.js';
 import { initCreation, openCreation } from './ui/creation.js';
@@ -209,7 +210,15 @@ function finishBoot(seed, age, online) {
   // null rather than inventing a lineage the player never chose.
   if (!hasCharacter()) {
     const preset = ($('mp-name') && $('mp-name').value || '').trim();
-    openCreation(preset, () => { S.running = true; setAudioEnabled(S.settings.audio); startMusic(); saveGame(true); });
+    openCreation(preset, () => {
+      S.running = true;
+      setAudioEnabled(S.settings.audio);
+      startMusic();
+      // Executive founders start docked at the registered office — open the station
+      // surface so the first frame is the headquarters, not empty space.
+      if (S.docked) openDock();
+      saveGame(true);
+    });
     return;
   }
 
@@ -291,6 +300,7 @@ function phaseSim(dt) {
   updateJobs(gh);
   updateSites(gh);
   updateOrders(gh);
+  updateFleetOrders(dt);
   updateManagers(gh);
   updateScan(dt);
   updateDocking(dt);

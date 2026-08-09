@@ -67,6 +67,156 @@ export const ORDER_TYPES = {
 };
 export const ORDER_KEYS = Object.keys(ORDER_TYPES);
 
+// ── executive fleet objectives ───────────────────────────────────────
+// These are ship-level, not crew-team, orders. They exist so an executive at HQ
+// (or ARIA on their behalf) can keep owned / contracted hulls busy with visible
+// timers and auto-return. Active vs passive is a flag the sim can read cheaply.
+
+export const FLEET_ORDER_TYPES = {
+  patrol: {
+    name: 'Patrol', icon: '👁',
+    branch: 'military',
+    desc: 'Hold a sector or corridor for a fixed duration, then return. Default 30 s.',
+    defaultDurationSec: 30,
+    requires: ['combat', 'merc', 'patrol'],
+    modes: ['active', 'passive']
+  },
+  extract: {
+    name: 'Extract', icon: '⛏',
+    branch: 'industrial',
+    desc: 'Mine a belt or face until quota or timer. Supports multi-trip and single-load.',
+    defaultDurationSec: 120,
+    requires: ['mine'],
+    modes: ['active', 'passive'],
+    params: ['quotaKg', 'singleLoad']
+  },
+  logistics: {
+    name: 'Logistics run', icon: '📦',
+    branch: 'logistic',
+    desc: 'Move cargo or people between stations / sites. Optional return leg.',
+    defaultDurationSec: 90,
+    requires: ['haul', 'trade'],
+    modes: ['active', 'passive'],
+    params: ['dest', 'commodity', 'returnAfter']
+  },
+  escort: {
+    name: 'Escort', icon: '🛡',
+    branch: 'military',
+    desc: 'Match and protect a designated hull until the leg completes or timer ends.',
+    defaultDurationSec: 60,
+    requires: ['combat', 'merc', 'patrol'],
+    modes: ['active'],
+    params: ['protectId']
+  },
+  survey_pass: {
+    name: 'Survey pass', icon: '◎',
+    branch: 'civilian',
+    desc: 'One or more passes over a body to deepen assay data without committing a ground team.',
+    defaultDurationSec: 45,
+    requires: ['mine', 'trade'],
+    modes: ['active'],
+    params: ['bodyName']
+  },
+  station_keep: {
+    name: 'Station-keep', icon: '◐',
+    branch: 'economic',
+    desc: 'Hold position relative to a station or site and report contacts inside scan radius.',
+    defaultDurationSec: 0, // until recalled
+    requires: ['combat', 'haul', 'trade', 'mine'],
+    modes: ['passive', 'active']
+  }
+};
+export const FLEET_ORDER_KEYS = Object.keys(FLEET_ORDER_TYPES);
+
+export const fleetOrders = () => (S.fleetOrders = S.fleetOrders || []);
+
+/**
+ * Dispatch a fleet objective. Returns the order record or a string blocker.
+ * `asset` is a minimal descriptor { id, role, name? }; full ship binding is left
+ * to the sim / future HQ layer.
+ */
+export function dispatchFleet(type, asset, opts = {}) {
+  const spec = FLEET_ORDER_TYPES[type];
+  if (!spec) return 'No such fleet order';
+  if (!asset || !asset.id) return 'No asset specified';
+  if (fleetOrders().length >= 6) return 'Fleet order cap reached';
+  if (spec.requires && asset.role && !spec.requires.includes(asset.role)) {
+    return `${spec.name} needs a ${spec.requires.join('/')} hull`;
+  }
+
+  const duration = opts.durationSec != null
+    ? opts.durationSec
+    : (spec.defaultDurationSec || 30);
+  const mode = opts.mode === 'passive' ? 'passive' : 'active';
+
+  const order = {
+    id: `fo-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e4)}`,
+    type,
+    branch: spec.branch,
+    assetId: asset.id,
+    assetRole: asset.role || null,
+    assetName: asset.name || asset.id,
+    mode,
+    durationSec: duration,
+    remainingSec: duration,
+    target: opts.target || null,
+    params: Object.assign({}, opts.params || {}),
+    startedAt: S.time || 0,
+    status: 'running',
+    progress: 0
+  };
+  fleetOrders().push(order);
+  status(`${order.assetName}: ${spec.name}` +
+    (duration > 0 ? ` · ${duration}s` : ' · until recalled') +
+    (mode === 'passive' ? ' (passive)' : ''));
+  return order;
+}
+
+export function recallFleet(orderId) {
+  const list = fleetOrders();
+  const i = list.findIndex(o => o.id === orderId);
+  if (i < 0) return false;
+  list[i].status = 'recalled';
+  list[i].remainingSec = 0;
+  status(`${list[i].assetName} recalled from ${FLEET_ORDER_TYPES[list[i].type]?.name || list[i].type}`);
+  list.splice(i, 1);
+  return true;
+}
+
+/** Tick fleet orders. Call from sim with real seconds. */
+export function updateFleetOrders(dt) {
+  if (!(dt > 0)) return;
+  const list = fleetOrders();
+  for (let i = list.length - 1; i >= 0; i--) {
+    const o = list[i];
+    if (o.status !== 'running') continue;
+    if (o.durationSec > 0) {
+      o.remainingSec -= dt;
+      o.progress = Math.min(1, 1 - (o.remainingSec / o.durationSec));
+      if (o.remainingSec <= 0) {
+        o.status = 'complete';
+        o.progress = 1;
+        status(`${o.assetName} completed ${FLEET_ORDER_TYPES[o.type]?.name || o.type}`);
+        list.splice(i, 1);
+      }
+    }
+  }
+}
+
+export function fleetOrderReport() {
+  return fleetOrders().map(o => ({
+    id: o.id,
+    type: o.type,
+    name: FLEET_ORDER_TYPES[o.type]?.name || o.type,
+    asset: o.assetName,
+    mode: o.mode,
+    remaining: Math.max(0, Math.round(o.remainingSec)),
+    progress: o.progress,
+    target: o.target,
+    branch: o.branch
+  }));
+}
+
 // ── dispatch ─────────────────────────────────────────────────────────
 
 /** Crew who are aboard, on watch, unhurt, and not already out on an errand. */

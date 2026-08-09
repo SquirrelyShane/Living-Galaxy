@@ -36,6 +36,9 @@ import { netReport } from './net.js';
 import { fieldContacts } from './fields.js';
 import { watchReport, crewVitals, crewDiagnosis } from './crew-log.js';
 import { diagnostics } from '../core/log.js';
+import { commandFromText, commandRecall, commandCatalogue } from './command.js';
+import { fleetOrderReport } from './orders.js';
+import { hasCompany } from './company.js';
 
 const bodyNamed = name => {
   if (!name) return null;
@@ -323,6 +326,62 @@ TOOLS.diagnostics = {
   }
 };
 
+// ── executive fleet command (v1.01.73) ───────────────────────────────
+// These tools share the command-menu resolver with the Ops dialogue tree.
+// A button click and a spoken request therefore emit identical structured orders.
+
+TOOLS.fleet_status = {
+  desc: 'List running fleet objectives with timers and modes.',
+  args: [],
+  run() {
+    if (!hasCompany()) return { text: 'No company on file — fleet command is an executive surface.', ok: false };
+    const list = fleetOrderReport();
+    if (!list.length) return { text: 'No fleet objectives running.', data: [] };
+    return {
+      text: list.map(f =>
+        `${f.asset}: ${f.name}` +
+        (f.remaining > 0 ? ` · ${f.remaining}s left` : ' · until recalled') +
+        (f.mode === 'passive' ? ' (passive)' : '')
+      ).join(' · '),
+      data: list
+    };
+  }
+};
+
+TOOLS.fleet_dispatch = {
+  desc: 'Dispatch a fleet objective from plain language (patrol, extract, logistics, escort, survey, station-keep).',
+  args: ['request'],
+  run(request) {
+    if (!hasCompany()) return { text: 'No company on file — incorporate first.', ok: false };
+    const r = commandFromText(String(request || ''));
+    return { text: r.text, ok: r.ok, data: r.order || null };
+  }
+};
+
+TOOLS.fleet_recall = {
+  desc: 'Recall a running fleet objective by asset name, type, or "last".',
+  args: ['query'],
+  run(query) {
+    if (!hasCompany()) return { text: 'No company on file.', ok: false };
+    const r = commandRecall(query);
+    return { text: r.text, ok: r.ok, data: r.orderId || null };
+  }
+};
+
+TOOLS.command_menu = {
+  desc: 'Summarise the executive command dialogue desks and available leaves.',
+  args: [],
+  run() {
+    const cat = commandCatalogue();
+    const desks = cat.branches.map(b => b.label).join(', ');
+    return {
+      text: `Command desks: ${desks}. ${cat.leaves.length} dispatchable orders. ` +
+            `${cat.active.length} objective(s) running.`,
+      data: cat
+    };
+  }
+};
+
 export const TOOL_KEYS = Object.keys(TOOLS);
 
 /**
@@ -348,6 +407,23 @@ export function callTool(name, args = []) {
 // make the feature exist.
 
 const PATTERNS = [
+  // Executive fleet commands — specific enough not to steal pilot navigation phrases
+  // like "send me to the belt". Require a fleet verb or an objective noun.
+  [/\b(recall|cancel|abort)\b.*\b(fleet|patrol|escort|hauler|cutter|objective|order|wing)\b/i,
+   m => ['fleet_recall', [m[0]]]],
+  [/\b(recall|cancel)\b\s+(last|all|patrol|escort|extract|logistics|hauler|cutter)\b/i,
+   m => ['fleet_recall', [m[2] || 'last']]],
+  [/\b(fleet status|objectives? running|what is the fleet doing)\b/i, () => ['fleet_status', []]],
+  [/\b(command menu|command desks?|what can i dispatch)\b/i, () => ['command_menu', []]],
+  [/\b(dispatch|assign)\b.+\b(patrol|escort|extract|haul|logistics|survey|station[- ]?keep|wing|cutter|hauler)\b/i,
+   m => ['fleet_dispatch', [m[0]]]],
+  [/\b(send|order)\b.+\b(patrol|escort|cutter|hauler|wing|fleet)\b.+/i,
+   m => ['fleet_dispatch', [m[0]]]],
+  [/\b(patrol the|start a patrol|escort the|station[- ]?keep|logistics run|haul cargo|extract ore|mining quota|survey pass|lane watch)\b.+/i,
+   m => ['fleet_dispatch', [m[0]]]],
+  [/\b(patrol|escort)\b.*\b(sector|station|lane|30|90|seconds?|minutes?)\b/i,
+   m => ['fleet_dispatch', [m[0]]]],
+
   // Mining comes before course-plotting on purpose: "take me to the belt" matches both,
   // and the specific answer is the useful one. Ordering is the whole disambiguation
   // strategy here — a matcher that tried to score every pattern would be a parser, and a

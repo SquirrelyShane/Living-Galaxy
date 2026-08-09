@@ -185,7 +185,12 @@ function keys() {
       case 'target': cycleTarget(); break;
       case 'cutThrottle': S.player.throttle = 0; break;
       case 'level': S.player.autoLevel = true; break;
-      case 'dock': if (dock()) openDock(); break;
+      case 'dock':
+        // While docked and looking outside, the same binding returns to the station UI.
+        // This is the recovery path if the HUD return button is missed.
+        if (S.docked) { openDock(); break; }
+        if (dock()) openDock();
+        break;
       case 'settings': isSettingsOpen() ? closeSettings() : openSettings(); break;
     }
   };

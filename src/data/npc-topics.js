@@ -44,9 +44,11 @@ export const TOPICS = {
       ({ a, b, rel }) => known(rel)
         ? `${b.name}, ${a.name}. Still on station?`
         : `${b.name}, this is ${a.name}. Marking you on my board.`,
-      ({ a, rel }) => known(rel)
+      // After the swap in exchange(), `a` is the responder and `b` is the original speaker.
+      // Acknowledge the other party, not ourselves.
+      ({ a, b, rel }) => known(rel)
         ? `Where I said I'd be. Nothing moving.`
-        : `Copy ${a.name}. Logged.`
+        : `Copy ${b.name}. Logged.`
     ],
     filesFrom: { type: 'spoke-with', weight: 0.4 },
     filesTo:   { type: 'spoke-with', weight: 0.4 }

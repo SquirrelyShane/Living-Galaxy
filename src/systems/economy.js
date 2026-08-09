@@ -86,6 +86,7 @@ export function undock() {
   S.follow = null; S.orbit = null; S.approach = null; S.docking = null;
   S.dockCooldown = 6;                  // long enough to clear the dock trigger
   S.docked = null;
+  S.viewOutside = false;
   p.energy = S.stats.energyCap;
   status(`Departing ${name} — throttle is yours`);
   sfx.ui();

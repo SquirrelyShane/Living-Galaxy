@@ -20,7 +20,7 @@
 
 import { S, recalcStats, registerCharacterBonuses, seatWeapon } from '../core/state.js';
 import { CHAR } from '../core/config.js';
-import { foundCompany } from './company.js';
+import { foundCompany, placeAtHQ } from './company.js';
 import { SKILL_KEYS, LINEAGES, CORPORATIONS, CAREERS, agentFor } from '../data/origins.js';
 import { toast, status } from '../ui/toast.js';
 
@@ -84,8 +84,12 @@ export function createCharacter({ name, lineage, corp, career }) {
   }
 
   // An executive does not launch as a pilot with a job; they launch as a founder with a
-  // charter, a treasury and a board that will want to hear from them.
-  if (K.company) foundCompany(ch, K.company);
+  // charter, a treasury and a board that will want to hear from them — and they start
+  // already docked at the registered office, not drifting in open space.
+  if (K.company) {
+    foundCompany(ch, K.company);
+    placeAtHQ();
+  }
 
   recalcStats();
   return ch;

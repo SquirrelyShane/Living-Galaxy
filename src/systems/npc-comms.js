@@ -38,6 +38,7 @@ import { recall } from '../npc-avatar/core/memory.js';
 import { TOPICS, availableTopics } from '../data/npc-topics.js';
 import { propose, dealValue } from './deals.js';
 import { COMMODITIES, DEALS } from '../core/config.js';
+import { recordDialogue } from '../data/npc-kb/diagnostics.js';
 
 /**
  * Turn a haul offer into a real obligation. The miner picks a destination and names a fee;
@@ -55,10 +56,14 @@ function offerHaul(a, b) {
   return propose(a, b, spec);
 }
 
-// `stream()` hands back an rng *object*, not a bare function — `.next()` is the draw. The
-// difference is invisible until the first call, which is exactly when a social sweep runs.
-let rng = null;
-const roll = () => (rng ? rng.next() : Math.random());
+// `stream()` hands back an rng *object*, not a bare function — `.next()` is the draw.
+//
+// Fetch the stream per draw rather than caching it. Two reasons, both bugs that were live:
+// caching meant any path into `exchange()` that did not come through the sweep drew from
+// `Math.random()` instead of the world seed, and `seedWorld()` clears the stream table, so a
+// cached object would keep generating from the *previous* world after a reseed. `stream()`
+// is a Map lookup — this is the same shape orders.js and contracts.js already use.
+const roll = () => stream('npc-comms').next();
 let sweepT = 0;
 
 const clock = () => (S.npcComms = S.npcComms || { pairs: {}, exchanges: 0 });
@@ -192,6 +197,14 @@ export function exchange(an, bn, topicKey) {
                          kind: 'chatter', speaker: b.name, text: back });
   }
 
+  // High-detail diagnostic trail for ARIA / future self-training. Cheap, bounded.
+  if (open) {
+    recordDialogue(a.name, pick, `${a.name}: ${open}`, null, null, S.time);
+  }
+  if (back) {
+    recordDialogue(b.name, pick + ':reply', `${b.name}: ${back}`, null, null, S.time);
+  }
+
   return { topic: pick, from: a.name, to: b.name, channel: topic.channel,
            lines: [open, back], overheard: heard, deal };
 }
@@ -232,7 +245,6 @@ export function updateNpcComms(dt) {
 
   const npcs = S.world.npcs;
   if (npcs.length < 2) return 0;
-  if (!rng) rng = stream('npc-comms');
 
   let ran = 0;
   for (let attempt = 0; attempt < NPCCOMMS.attemptsPerSweep; attempt++) {

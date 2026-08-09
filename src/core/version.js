@@ -4,12 +4,13 @@
 // Patch slices bump VERSION. SCHEMA only moves when the save payload changes shape,
 // and every bump must land with a migration in systems/save.js.
 
-export const VERSION = '1.01.70';
-export const CODENAME = 'Consignment';
+export const VERSION = '1.01.75';
+export const CODENAME = 'Audit';
 export const BUILD_DATE = '2026-08-09';
 
 /** Save payload schema.
  *  v16 = v1.01.70, which persists the condition of every fitted module.
+ *  (v1.01.71–75 did not change the save payload; schema stays 16.)
  *  v15 = v1.01.50, which persists research findings and completed projects.
  *  v14 = v1.01.40, which persists crew comfort fittings.
  *  v13 = v1.01.00, which persists open obligations between characters.

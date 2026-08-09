@@ -40,11 +40,18 @@ import { sfx } from '../systems/audio.js';
 import { enabled as experimentalOn, managersReport, auditions, installManager,
          dismissManager, setAutonomy, managerFor } from '../systems/managers.js';
 import { AUTONOMY } from '../data/managers.js';
-import { companyReport, transfer } from '../systems/company.js';
+import { companyReport, transfer, hqBrief } from '../systems/company.js';
+import { fleetOrderReport, recallFleet } from '../systems/orders.js';
+import { diagnoseBoard } from '../data/npc-kb/diagnostics.js';
+import { COMMAND_MENU } from '../data/command-menu.js';
+import { commandByPath, commandById, commandRecall } from '../systems/command.js';
 
 let overlay, body, tabs;
 let tab = 'orders';
 let timer = 0;
+/** Path of command-menu node ids for the executive dialogue tree. */
+let cmdPath = [];
+let cmdFlash = '';
 
 export function initOps() {
   overlay = $('ops-overlay');
@@ -530,13 +537,23 @@ let confirmAbandon = null;
 function renderStaff() {
   const co = companyReport();
   if (co) {
-    body.appendChild(el('div', 'led-head', co.name));
+    const office = hqBrief();
+    body.appendChild(el('div', 'led-head',
+      office && office.here ? `${co.name} · Headquarters` : co.name));
+    if (office) {
+      body.appendChild(el('div', 'cnote', office.line +
+        (office.here
+          ? ' Command dialogue and fleet objectives below are the idle desk.'
+          : '')));
+    }
     const card = el('div', 'mgr-card');
     card.innerHTML =
       `<div class="mgr-head"><span class="mgr-name">${co.charter}</span>` +
       `<span class="mgr-obj">${Math.round(co.ownership * 100)}% held</span></div>` +
       `<div class="mgr-blurb">Treasury ${fmtCr(co.treasury)} · revenue ${fmtCr(co.revenue)} · ` +
-      `paid out ${fmtCr(co.dividends)}</div>` +
+      `paid out ${fmtCr(co.dividends)}` +
+      (co.hqStation ? ` · office ${co.hqStation}` : '') +
+      `</div>` +
       `<div class="mgr-score">Board confidence ${Math.round(co.confidence * 100)}%` +
       (co.focus == null ? '' : ` · ${Math.round(co.focus * 100)}% of activity inside the charter`) +
       `</div>`;
@@ -551,6 +568,39 @@ function renderStaff() {
     row.appendChild(draw);
     card.appendChild(row);
     body.appendChild(card);
+
+    // Board diagnostic one-liner for the executive.
+    const board = diagnoseBoard(S.company, co.board || []);
+    if (board && board.alerts && board.alerts.length) {
+      body.appendChild(el('div', 'cnote', 'Board: ' + board.alerts.join(' · ')));
+    }
+
+    // Live fleet objectives with timers — the idle-command surface for executive play.
+    const fleet = fleetOrderReport();
+    body.appendChild(el('div', 'led-head', `Fleet objectives · ${fleet.length}`));
+    if (!fleet.length) {
+      body.appendChild(el('div', 'cnote',
+        'No ships on objective. Fleet orders (patrol, extract, logistics, escort) can be ' +
+        'dispatched from here or by asking ARIA. Timers auto-return the hull when complete.'));
+    } else {
+      for (const f of fleet) {
+        const cardF = el('div', 'mgr-card');
+        const pct = Math.round((f.progress || 0) * 100);
+        cardF.innerHTML =
+          `<div class="mgr-head"><span class="mgr-name">${f.asset}</span>` +
+          `<span class="mgr-obj">${f.name}${f.mode === 'passive' ? ' · passive' : ''}</span></div>` +
+          `<div class="mgr-blurb">${f.target ? 'Target ' + f.target + ' · ' : ''}` +
+          (f.remaining > 0 ? `${f.remaining}s remaining · ${pct}%` : 'Until recalled') +
+          `</div>`;
+        const recallBtn = el('button', 'buy-btn', 'Recall');
+        recallBtn.addEventListener('click', () => { recallFleet(f.id); render(); });
+        cardF.appendChild(recallBtn);
+        body.appendChild(cardF);
+      }
+    }
+
+    // Curated dialogue menu — same structured orders ARIA emits.
+    renderCommandMenu(body);
   }
 
   if (!experimentalOn()) {
@@ -620,4 +670,96 @@ function renderStaff() {
       body.appendChild(card);
     }
   }
+}
+
+// ── executive command dialogue menu ──────────────────────────────────
+// Walks COMMAND_MENU. Leaves call commandByPath so the UI and ARIA share one
+// resolver. cmdPath is the stack of selected node ids; empty = top level.
+
+function renderCommandMenu(parent) {
+  parent.appendChild(el('div', 'led-head', 'Command dialogue'));
+  if (cmdFlash) {
+    parent.appendChild(el('div', 'cnote', cmdFlash));
+    cmdFlash = '';
+  }
+
+  // Breadcrumb / back
+  if (cmdPath.length) {
+    const crumb = el('div', 'mgr-row');
+    const back = el('button', 'buy-btn', '← Back');
+    back.addEventListener('click', () => { cmdPath.pop(); render(); });
+    crumb.appendChild(back);
+    const root = el('button', 'buy-btn', 'Top');
+    root.addEventListener('click', () => { cmdPath = []; render(); });
+    crumb.appendChild(root);
+    parent.appendChild(crumb);
+    parent.appendChild(el('div', 'cnote', trailLabel(cmdPath)));
+  } else {
+    parent.appendChild(el('div', 'cnote',
+      'Choose a desk. Every option ends in a structured fleet order — the same object ARIA emits when you ask in plain language.'));
+  }
+
+  const nodes = currentMenuNodes();
+  if (!nodes.length) {
+    parent.appendChild(el('div', 'cnote', 'No further options on this path.'));
+    return;
+  }
+
+  for (const n of nodes) {
+    const card = el('div', 'mgr-card');
+    const isLeaf = !!n.order;
+    card.innerHTML =
+      `<div class="mgr-head"><span class="mgr-name">${n.label}</span>` +
+      `<span class="mgr-obj">${isLeaf ? orderTag(n) : '›'}</span></div>` +
+      (n.prompt ? `<div class="mgr-blurb">${n.prompt}</div>` : '');
+
+    if (isLeaf) {
+      const row = el('div', 'mgr-row');
+      const go = el('button', 'buy-btn', 'Dispatch');
+      go.addEventListener('click', () => {
+        const path = cmdPath.concat(n.id);
+        const r = commandByPath(path);
+        cmdFlash = r.text;
+        if (r.ok) cmdPath = [];
+        render();
+      });
+      row.appendChild(go);
+      card.appendChild(row);
+    } else {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => { cmdPath = cmdPath.concat(n.id); render(); });
+    }
+    parent.appendChild(card);
+  }
+}
+
+function currentMenuNodes() {
+  let nodes = COMMAND_MENU;
+  for (const id of cmdPath) {
+    const hit = nodes.find(n => n.id === id);
+    if (!hit) return [];
+    nodes = hit.children || [];
+  }
+  return nodes;
+}
+
+function trailLabel(path) {
+  const labels = [];
+  let nodes = COMMAND_MENU;
+  for (const id of path) {
+    const hit = nodes.find(n => n.id === id);
+    if (!hit) break;
+    labels.push(hit.label);
+    nodes = hit.children || [];
+  }
+  return labels.join(' › ');
+}
+
+function orderTag(n) {
+  const o = n.order || {};
+  const bits = [o.type];
+  if (o.durationSec > 0) bits.push(o.durationSec + 's');
+  else bits.push('hold');
+  if (o.mode === 'passive') bits.push('passive');
+  return bits.join(' · ');
 }
