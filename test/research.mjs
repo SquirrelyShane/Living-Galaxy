@@ -30,6 +30,8 @@ const { probePlanet } = await imp('systems/survey.js');
 const { queueJob, addMaterial } = await imp('systems/crafting.js');
 const { BLUEPRINTS } = await imp('data/crafting/index.js');
 const { CRAFT, RESEARCH } = await imp('core/config.js');
+const { scanReport } = await imp('systems/scanner.js');
+const { FINDINGS } = await imp('data/research.js');
 const { SCHEMA } = await imp('core/version.js');
 
 initScene();
@@ -118,6 +120,55 @@ console.log('\n— what a world teaches —');
   ok('an anomaly does', R.findingCount('exotic') === 1);
 }
 
+
+console.log('\n— the tree is completable —');
+{
+  // The check that would have caught v1.01.50's mistake, and the reason it is a property
+  // rather than a number: any project whose largest single requirement exceeds what the
+  // system can physically supply is a dead end, however the costs are later tuned.
+  const peak = {};
+  for (const k of PROJECT_KEYS) {
+    for (const n in (PROJECTS[k].needs || {})) peak[n] = Math.max(peak[n] || 0, PROJECTS[k].needs[n]);
+  }
+  const supply = {};
+  for (const b of bodies) {
+    if (b.userData.kind === 'star') continue;
+    for (const k of R.kindsOf(b)) supply[k] = (supply[k] || 0) + 1;
+  }
+  const short = Object.keys(peak).filter(k => k !== 'exotic' && (supply[k] || 0) < peak[k]);
+  ok('every worldly finding kind is supplied in the quantity some project needs at once',
+     short.length === 0, short.map(k => `${k}: need ${peak[k]}, system has ${supply[k] || 0}`).join('; '));
+
+  // Exotic comes from anomalies, which are one-shot — so the constraint is how many Lagrange
+  // points hold something, not how many bodies exist.
+  ok('exotic is demanded in a quantity anomalies could supply', peak.exotic <= 4, `${peak.exotic}`);
+
+  // And the whole tree, not just each project: holding every finding at once must be
+  // possible, since nothing is spent.
+  const holdable = Object.keys(peak).every(k => k === 'exotic' || (supply[k] || 0) >= peak[k]);
+  ok('a pilot can hold every qualification at once', holdable);
+}
+
+console.log('\n— the scan says what a world would teach —');
+{
+  reset();
+  const body = planets[4];
+  S.player.position.copy(body.position);
+  S.player.position.z += body.userData.radius * 1.7;
+  const rep = scanReport(body, 'planet', body.userData.name);
+  const row = rep.rows.find(r => r[0] === 'Research');
+  ok('the scan report names the findings on offer', !!row, JSON.stringify(rep.rows.map(r => r[0])));
+  ok('and they match what a probe would file',
+     !!row && R.kindsOf(body).every(k => row[1].includes(FINDINGS[k].name)));
+
+  ok('a world not yet probed is not on file', !R.alreadyFiled(body));
+  R.fileFindings(body);
+  ok('and is once it has been', R.alreadyFiled(body));
+  const rep2 = scanReport(body, 'planet', body.userData.name);
+  ok('the scan then says so rather than advertising it again',
+     rep2.rows.find(r => r[0] === 'Research')[1] === 'already on file');
+}
+
 console.log('\n— probing files findings —');
 {
   reset();
@@ -170,7 +221,11 @@ console.log('\n— starting a project —');
   ok('with both, it is clear', R.projectBlocker(id) === null);
   ok('it starts', R.startProject(id));
   ok('the telemetry is consumed', S.cargo.data === 40);
-  ok('the findings are consumed', R.findingCount('geologic') === 0);
+  // Findings are evidence, not currency. v1.01.50 consumed them, which measured out as an
+  // *uncompletable tree*: the projects want six thermal findings in total and Solaris has
+  // three to five hot bodies depending on seed. What gates progress is the largest single
+  // requirement, not the sum.
+  ok('the findings are not consumed', R.findingCount('geologic') === p.needs.geologic);
   ok('the lab is busy', !!R.activeProject());
   ok('a second project is refused while it runs', R.projectBlocker('thermalPlating') === 'lab busy');
 
@@ -276,7 +331,7 @@ console.log('\n— it survives a save —');
   // A project both completed and in the lab is a contradiction; completion wins.
   R.restoreResearch({ done: ['sensorTuning'], active: { id: 'sensorTuning', left: 2 } });
   ok('a completed project cannot also be in the lab', R.activeProject() === null);
-  ok('the schema moved for it', SCHEMA === 15);
+  ok('the schema moved for it', SCHEMA === 16);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

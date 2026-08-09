@@ -76,7 +76,12 @@ const VERBS = {
   'src/systems/magazine.js':  ['chamber'],
   'src/systems/groups.js':    ['cycleGroup', 'cycleActive'],
   'src/systems/survey.js':    ['scanPlanet', 'probePlanet'],
-  'src/systems/economy.js':   ['buyAmmo', 'buyProbe', 'buyWeapon', 'fitSlot']
+  'src/systems/economy.js':   ['buyAmmo', 'buyProbe', 'buyWeapon', 'fitSlot'],
+  // v1.01.70. Both are wired twice on purpose — per-hardpoint in the fitting screen for the
+  // pilot who can afford one thing and has to choose, and as one row on the dock's service
+  // tab beside armour and hull, because a pilot who docks to repair should not have to know
+  // that a second, differently-named kind of damage lives on another screen.
+  'src/systems/wear.js':      ['serviceModule', 'serviceAll']
 };
 
 /**

@@ -46,28 +46,37 @@ export const FINDINGS = {
 export const FINDING_KEYS = Object.keys(FINDINGS);
 
 /**
- * `needs` is finding kind → count. `data` is kilograms of raw survey telemetry, which is the
- * generic half — you need both the specific evidence and the bulk to work through.
+ * `needs` is finding kind → count, and it is a **qualification, not a price**: findings are
+ * evidence you hold, not currency you spend. Having been somewhere hot stays true after the
+ * project finishes.
+ *
+ * That distinction is not cosmetic. v1.01.50 consumed them, and measuring the result showed
+ * the tree was uncompletable on every seed tested — the projects want six thermal findings
+ * in total and Solaris contains three to five hot bodies. What gates progress is the largest
+ * single requirement, not the sum.
+ *
+ * `data` is the consumable: kilograms of raw survey telemetry, the generic half. You need
+ * both the specific evidence and the bulk to work through.
  */
 export const PROJECTS = {
   // ── tier 1: the things a working ship wants ──────────────────────
   sensorTuning: {
     name: 'Sensor calibration', tier: 1, hours: 4,
-    data: 120, needs: { geologic: 2 },
+    data: 320, needs: { geologic: 2 },
     effects: { sensorMult: 0.12 },
     desc: 'Enough resolved bodies to know what the dish is lying about. Everything reads ' +
           'further out once you have corrected for it.'
   },
   thermalPlating: {
     name: 'Thermal plating', tier: 1, hours: 5,
-    data: 140, needs: { thermal: 2 },
+    data: 360, needs: { thermal: 2 },
     effects: { heatSinkAdd: 0.18 },
     desc: 'Ablative layering copied off worlds that survive their own star. The emitters ' +
           'run longer before the cutout.'
   },
   cryoStorage: {
     name: 'Cryogenic storage', tier: 1, hours: 5,
-    data: 140, needs: { cryo: 2 },
+    data: 360, needs: { cryo: 2 },
     effects: { cargoMult: 0.10 },
     desc: 'Denser volatile packing, learned from ice that has held its own for four billion ' +
           'years. More fits in the same hold.'
@@ -76,21 +85,21 @@ export const PROJECTS = {
   // ── tier 2: needs the tier below and a wider survey ──────────────
   atmosDynamics: {
     name: 'Atmospheric dynamics', tier: 2, hours: 8,
-    data: 260, needs: { atmos: 3, geologic: 1 }, requires: ['sensorTuning'],
+    data: 700, needs: { atmos: 3, geologic: 1 }, requires: ['sensorTuning'],
     effects: { scanTier: 1 },
     desc: 'Modelling what a gas envelope does to a return, rather than accepting it. A ' +
           'greenhouse resolves like a bare rock.'
   },
   bioSynthesis: {
     name: 'Biotic synthesis', tier: 2, hours: 9,
-    data: 280, needs: { biotic: 3 }, requires: ['cryoStorage'],
+    data: 760, needs: { biotic: 3 }, requires: ['cryoStorage'],
     effects: { craftSpeed: 0.15 },
     desc: 'Catalysts that work at ship temperatures, from organisms that had no choice. ' +
           'The fabricator runs faster on everything.'
   },
   hardenedAlloys: {
     name: 'Hardened alloys', tier: 2, hours: 9,
-    data: 280, needs: { thermal: 2, geologic: 2 }, requires: ['thermalPlating'],
+    data: 760, needs: { thermal: 2, geologic: 2 }, requires: ['thermalPlating'],
     effects: { armorMult: 0.14 },
     desc: 'Grain structures from cores that cooled under pressure nothing in a foundry can ' +
           'reproduce. You can reproduce the result.'
@@ -99,21 +108,21 @@ export const PROJECTS = {
   // ── tier 3: the exotic end, and the only gated blueprints ────────
   fieldTheory: {
     name: 'Applied field theory', tier: 3, hours: 16,
-    data: 520, needs: { exotic: 2, atmos: 2 }, requires: ['atmosDynamics'],
+    data: 1400, needs: { exotic: 2, atmos: 2 }, requires: ['atmosDynamics'],
     effects: { warpSpeedMult: 0.10 },
     desc: 'A standing distortion with nothing at the middle of it turns out to be a very ' +
           'good teacher, once you stop assuming it is broken instrumentation.'
   },
   exoticOrdnance: {
     name: 'Exotic ordnance', tier: 3, hours: 20,
-    data: 640, needs: { exotic: 3, thermal: 2 }, requires: ['hardenedAlloys', 'fieldTheory'],
+    data: 1750, needs: { exotic: 3, thermal: 2 }, requires: ['hardenedAlloys', 'fieldTheory'],
     unlocks: ['WPN-022', 'WPN-034', 'WPN-048', 'WPN-049'],
     desc: 'Containment that holds long enough to be delivered. Nobody sells this over a ' +
           'counter and there is a reason for that.'
   },
   exoticSystems: {
     name: 'Exotic systems', tier: 3, hours: 18,
-    data: 600, needs: { exotic: 2, biotic: 1, cryo: 1 }, requires: ['bioSynthesis', 'fieldTheory'],
+    data: 1650, needs: { exotic: 2, biotic: 1, cryo: 1 }, requires: ['bioSynthesis', 'fieldTheory'],
     unlocks: ['MOD-004', 'MOD-012'],
     desc: 'The same containment problem, pointed inward at something you intend to keep ' +
           'aboard permanently.'

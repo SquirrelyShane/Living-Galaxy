@@ -532,7 +532,7 @@ console.log('\n— groups survive a save —');
   ok('a nonsense selection falls back to ALL', GRP.activeGroup() === GRP.ALL);
   GRP.restoreGroups(null, 4);
   ok('an absent payload restores clean', !GRP.hasSplit() && GRP.activeGroup() === GRP.ALL);
-  ok('the schema moved for it', SCHEMA === 15);
+  ok('the schema moved for it', SCHEMA === 16);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

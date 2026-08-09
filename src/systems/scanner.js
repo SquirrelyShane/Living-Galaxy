@@ -14,8 +14,11 @@ import { planetInfo, asteroidDetail, surveyLevel, knownFeatures, featureScan } f
 import { FEATURES } from '../data/features.js';
 import { transferRows } from './ephemeris.js';
 import { lagrangePoints, anomalyAt, isWorked, pointDistance } from './lagrange.js';
+import { kindsOf, alreadyFiled } from './research.js';
+import { FINDINGS } from '../data/research.js';
 import { toast, status } from '../ui/toast.js';
 import { sfx } from './audio.js';
+import { holdCap, holdMass, manifestOf } from './holds.js';
 
 function hash(str) {
   let h = 2166136261;
@@ -172,6 +175,16 @@ function planet(obj, nm, tier, rows) {
     rows.push(['Unresolved', `${total - found.length} surface return${total - found.length > 1 ? 's' : ''}`]);
   }
 
+  // What a probe here would teach. A pilot deciding where to spend one of a limited number
+  // of probes should be able to see that this world is the cold evidence they are short of,
+  // rather than finding out afterwards — and a world already on file says so, because
+  // probing it twice teaches nothing.
+  if (tier >= 2) {
+    const kinds = kindsOf(obj);
+    rows.push(['Research', alreadyFiled(obj) ? 'already on file'
+      : kinds.map(k => FINDINGS[k].name).join(', ')]);
+  }
+
   const note = total > found.length && surveyLevel(nm) < 2
       ? 'Unresolved surface returns — put a probe down to read them.'
     : surveyLevel(nm) >= 2 ? 'Probe telemetry archived — sells best at economic hubs.'
@@ -214,7 +227,19 @@ function ship(obj, tier, rows) {
   const u = obj.userData || {};
   rows.push(['Drive signature', u.faction === 'hostile' ? 'unregistered' : 'registered']);
   if (tier >= 2) rows.push(['Faction', u.faction || 'unknown'], ['Class', u.name || '—']);
+  // v1.01.70. Mass shows a deck earlier than the manifest does, and the split is the point:
+  // at tier 2 you can tell a laden ship from an empty one, which is the decision a raider
+  // actually makes at range. *What* it is carrying is worth closing for.
+  const cap = holdCap(u);
+  if (tier >= 2 && cap) {
+    const m = holdMass(u);
+    rows.push(['Load', m >= 1 ? `${Math.round(m)} kg of ${Math.round(cap)} kg` : 'running empty']);
+  }
   if (tier >= 3) rows.push(['Structure', Math.round(u.hp || 0) + ' / ' + (u.maxHp || 0)]);
+  if (tier >= 3 && cap) {
+    const man = manifestOf(u);
+    if (man) rows.push(['Manifest', man]);
+  }
   if (tier >= 4) rows.push(['Bounty', (u.bounty || 0) + ' cr'], ['Salvage', (u.salvage || 0) + ' kg']);
   return { tier, live: tier, rows,
     note: tier < 3 ? 'Close the range to read structure and bounty.' : 'Full profile resolved.' };

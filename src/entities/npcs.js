@@ -11,6 +11,9 @@ import { damageNpc } from '../systems/combat.js';
 import { rangeScale } from '../systems/damage.js';
 import { appraise, spendShot, support, bandScale, callForHelp } from '../systems/npc-tactics.js';
 import { dealsFor, settle } from '../systems/deals.js';
+import { loadHold, holdCap, holdMass, holdFree, unloadHold } from '../systems/holds.js';
+import { applyTrade } from '../systems/market.js';
+import { HOLD } from '../core/config.js';
 import { sfx } from '../systems/audio.js';
 import { track as trackInterp, untrack as untrackInterp } from '../world/interpolate.js';
 import { playerSignature, ambushRange, detectionRange } from '../systems/detection.js';
@@ -467,9 +470,21 @@ function haulerStep(n, u, step) {
   if (mine.stage === 'pickup') {
     const src = S.world.npcs.find(x => x.userData && x.userData.name === mine.from);
     // A pickup whose counterparty is gone is not a pickup. The sweep will default it; in
-    // the meantime the hauler stops flying to a corpse.
-    if (!src) { mine.stage = 'deliver'; return; }
-    if (moveToward(n, u, src.position, step, 1) < LOAD_RANGE) mine.stage = 'deliver';
+    // the meantime the hauler stops flying to a corpse. A player job has no ship to fly to
+    // — the pilot handed the load over at the dock, and their hold was debited then.
+    const from = src ? src.position : null;
+    if (!from) { loadRun(u, mine); mine.stage = 'deliver'; return; }
+    if (moveToward(n, u, from, step, 1) < LOAD_RANGE) {
+      // The cargo goes *aboard* here. Until v1.01.70 this stage was a waypoint and nothing
+      // more: the mass appeared at the destination on settlement whether or not the ship
+      // that was supposed to be carrying it ever existed.
+      if (src.userData && holdMass(src.userData) > 0) {
+        const off = unloadHold(src.userData, mine.commodity, mine.kg);
+        if (off > 0) loadHold(u, mine.commodity, off);
+      }
+      loadRun(u, mine);
+      mine.stage = 'deliver';
+    }
     return;
   }
 
@@ -480,7 +495,50 @@ function haulerStep(n, u, step) {
 
 const LOAD_RANGE = 260;
 
+/**
+ * Top the hauler up to what the deal says it is carrying.
+ *
+ * A deal is an obligation, not a manifest, and a hauler taking one from a station or from a
+ * player at a dock has nowhere to lift the mass *from* — the goods exist, they are simply
+ * not modelled as a source hold. So the run is loaded here, capped by the ship's own
+ * capacity, which is the property that matters downstream: an overweight job is carried
+ * short and delivers short rather than teleporting.
+ */
+function loadRun(u, deal) {
+  const have = ((u.hold || {})[deal.commodity]) || 0;
+  const want = Math.max(0, deal.kg - have);
+  if (want > 0) loadHold(u, deal.commodity, Math.min(want, holdFree(u)));
+}
+
+/**
+ * A miner's shift, in two halves.
+ *
+ * The old version had one: park on a rock and accumulate `u.mined`, a counter nothing ever
+ * read. The ore came out of the belt — `mineAsteroid()` really does deplete it — and then
+ * ceased to exist. So the belt was being worked by ships whose work had no destination, and
+ * the market never saw a kilogram of it.
+ *
+ * Now the ore goes into a hold, and a full hold goes to a station and is sold, which moves
+ * that station's book the same way the player's load does. That is the difference between a
+ * populated belt and a decorative one — and it is also what makes a laden miner worth
+ * intercepting, since the hold is real from the moment the beam is on.
+ */
 function minerStep(n, u, step) {
+  // ── the run to market ──
+  if (u.runningIn) {
+    const berth = u.berth;
+    if (!berth) { u.runningIn = false; return; }
+    if (moveToward(n, u, berth.position, step, 1) < HOLD.sellRange) {
+      const sold = unloadHold(u, 'ore', (u.hold || {}).ore || 0);
+      // `selling: true` from the station's side — its stock rises and its price comes down.
+      // The same flag, and the same easy mistake, as settlement in systems/deals.js.
+      if (sold > 0) applyTrade(berth, 'ore', sold, true);
+      u.runningIn = false;
+      u.berth = null;
+    }
+    return;
+  }
+
   if (!u.rock || u.rock.ore <= 0) {
     u.locked = null;
     u.repick = (u.repick || 0) - step;
@@ -493,9 +551,20 @@ function minerStep(n, u, step) {
     // and this is the same problem the ship's MATCH feature solves for the player
     if (!u.locked) u.locked = n.position.clone().sub(u.rock.position);
     n.position.copy(u.rock.position).add(u.locked);
-    u.mined = (u.mined || 0) + mineAsteroid(u.rock, 6 * step);
+    const cut = mineAsteroid(u.rock, HOLD.minerRate * step);
+    loadHold(u, 'ore', cut);
     addBeam(n.position, u.rock.position);
     if (u.rock.ore <= 0) { u.rock = null; u.locked = null; }
+    // Full enough to be worth the trip. Not *completely* full, so the last rock does not
+    // have to line up exactly with the last kilogram of capacity.
+    if (holdMass(u) >= holdCap(u) * HOLD.minerRunAt) {
+      const list = S.world.stations;
+      if (list.length) {
+        u.berth = list[Math.floor(wnext() * list.length)];
+        u.runningIn = true;
+        u.locked = null;
+      }
+    }
   } else {
     moveToward(n, u, u.rock.position, step);
   }

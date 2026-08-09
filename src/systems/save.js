@@ -31,6 +31,7 @@ import { serializeNpcComms, restoreNpcComms } from './npc-comms.js';
 import { serializeDeals, restoreDeals } from './deals.js';
 import { serializeWelfare, restoreWelfare } from './welfare.js';
 import { serializeResearch, restoreResearch } from './research.js';
+import { serializeWear, restoreWear } from './wear.js';
 
 const BAK_KEY = SAVE_KEY + '.bak';
 const BAD_KEY = SAVE_KEY + '.corrupt';
@@ -135,7 +136,13 @@ export function snapshot() {
     comfort: serializeWelfare(),
 
     // v1.01.50: findings gathered, projects completed, and the one in the lab.
-    research: serializeResearch()
+    research: serializeResearch(),
+
+    // v1.01.70: how worn each fitted hardpoint is. Keyed by slot index, so it travels with
+    // the fit it describes — the same reason `groups` is keyed that way. NPC holds are
+    // deliberately *not* here: ships are not persisted, so a hold lives and dies with one.
+    // What survives is what the cargo did — station stock, and the ledger.
+    wear: serializeWear()
   };
 }
 
@@ -293,6 +300,15 @@ const MIGRATIONS = {
     d.research = d.research || { findings: {}, done: [], active: null, seen: {} };
     d.v = 15;
     return d;
+  },
+  // v15 → v16: module condition. An old save arrives with everything yard-fresh, which is
+  // the generous reading and the correct one: a pilot cannot be billed for wear the build
+  // that wrote their save had no way to accrue. Unlike the v14 → v15 step, this migration
+  // takes nothing away.
+  15(d) {
+    d.wear = d.wear || { weapon: [], utility: [], core: [] };
+    d.v = 16;
+    return d;
   }
 };
 
@@ -421,6 +437,7 @@ export function loadGame() {
   restoreDeals(data.deals || null);
   restoreWelfare(data.comfort || null);
   restoreResearch(data.research || null);
+  restoreWear(data.wear || null);
 
   recalcStats();
   return true;

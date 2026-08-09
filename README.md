@@ -1,8 +1,9 @@
 # Living Galaxy
 
-**v1.01.50 "Findings"** · save schema 15 · 2,531 checks across thirty suites ·
+**v1.01.70 "Consignment"** · save schema 16 · 2,637 checks across thirty-two suites ·
 `CHANGELOG.md` for the history, `docs/SLICE_PLAN.md` for how it was built,
-`PATCH_v1.01.50.md` for what changed.
+`PATCH_v1.01.70.md` for what changed.
+`docs/OPEN_ITEMS.md` for everything still open, in one list.
 `docs/CREW_ROADMAP.md` for where the crew work is going.
 `docs/REACHABILITY_AUDIT.md` for what exists and cannot yet be reached.
 `docs/NPC_ROADMAP.md` for where the NPC work is going.
@@ -260,6 +261,44 @@ available runs about 20% over on both and has to choose; an industrial hull carr
 loadout comfortably. Engineering rank raises both ceilings.
 
 The Refit screen shows both as fractions, amber when tight and red when over.
+
+## Modules wear out
+
+Condition runs per hardpoint, and it only moves when you do something. A shot fired wears
+that barrel and no other; a hit that reaches structure shakes core and utility; a second of
+warp cruise wears the drive; a second on the beam wears the mining rack. A pilot who docks
+and trades wears nothing out. **There is no clock** — a rate that ticks whether you fought or
+sat at a berth is rent, not a mechanic.
+
+A worn module gives less *and* draws more. The second half matters more: rising draw pushes a
+comfortable fit toward the overload curve above, so neglect makes a penalty you already
+understand arrive early rather than introducing a new one. Nothing is ever destroyed — a
+module bottoms out at 55% of rated output and stays there.
+
+Heat multiplies all of it, so running a rack at the thermal cutout costs you after the fight
+as well as during it. An engineer on watch prevents about a third, which is what that post
+does when nothing is happening.
+
+You will not hear about it until it matters: below 72% the fitting screen says so, below 40%
+the ship does. Service one hardpoint from the Refit screen or the lot from any station's
+service tab, priced against what the module is worth and how far gone it is.
+
+Roughly: 1,100 rounds of continuous fire, sixteen minutes of warp cruise, or half an hour of
+mining before the first warning.
+
+## Cargo is aboard something
+
+Every hauler and miner in the system carries a real hold. A hauler loads at pickup and
+delivers what it actually has — raid one and it still completes its contract, still gets
+paid, and arrives light. Miners fill up, run to a station, and sell into that station's price
+book, so the belt feeds the market whether or not you are watching.
+
+Kill a laden ship and it spills about half of what it was carrying, as containers coloured
+by commodity. Roughly eleven times what an empty hull of the same type is worth. If somebody
+other than you made the kill, whoever is standing over the wreck takes a share first — so a
+pirate who has been working the lane is a richer target than one that just spawned.
+
+Scan a ship at medium range to see how laden it is; close in to read the manifest.
 
 ## Advanced upgrades
 

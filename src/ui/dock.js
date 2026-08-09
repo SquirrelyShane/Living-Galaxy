@@ -1,6 +1,6 @@
 // Living Galaxy — station interface. Rebuilt from state each time a tab is opened.
 
-import { S, cargoMass } from '../core/state.js';
+import { S, cargoMass, recalcStats } from '../core/state.js';
 import { COMMODITIES, UPGRADES, UPGRADE_ORDER, REPAIR_COST, PROBE, SHIP_CLASSES, CLASS_ORDER } from '../core/config.js';
 import { WEAPON_MODULES, WEAPON_KEYS } from '../data/weapons.js';
 import { STATION_MODULES } from '../data/stations.js';
@@ -9,6 +9,7 @@ import { describeMods } from '../systems/fitting.js';
 import { CREW_ROLES, CREW_TRAITS, crewOutput, wageOf } from '../data/crew.js';
 import { berths, payroll, recruitPool, hire, hireCost, medicalQuote, treatCrew } from '../systems/crew.js';
 import { openFit } from './fitting.js';
+import { serviceAll, serviceQuote } from '../systems/wear.js';
 import { openCrew } from './crew.js';
 import { $, el, fmtCr, fmtMass } from '../core/utils.js';
 import { priceFor, sell, sellAll, repair, repairQuote, upgradeCost, buyUpgrade, undock, buyProbe, buyHull, ownsHull, hullPrice, upgradeLocked, upgradeReqText, buyWeapon, ownsWeapon, buyModule, ownsModule, sellModule } from '../systems/economy.js';
@@ -108,6 +109,17 @@ function renderService() {
       ? `${Math.round(q.armor)} armor at ${REPAIR_COST.armor} cr · ${Math.round(q.hull)} hull at ${REPAIR_COST.hull} cr`
       : 'Nothing to fix',
     'Repair', q.cost > 0 && S.credits >= q.cost, () => repair(), q.cost > 0 ? fmtCr(q.cost) : '—');
+
+  // Wear is a station bill like armour and hull are, and it belongs on the same tab as
+  // them rather than only inside the fitting screen — a pilot who docks to repair should
+  // not have to know that a second, differently-named kind of damage lives elsewhere.
+  const sq = serviceQuote();
+  row('Subsystem service',
+    sq.count ? `${sq.count} module${sq.count === 1 ? '' : 's'} out of tolerance — worn kit gives less and draws more`
+             : 'Everything in tolerance',
+    'Service', sq.count > 0 && S.credits >= sq.cost,
+    () => { serviceAll(); recalcStats(); },
+    sq.count ? fmtCr(sq.cost) : '—');
 
   row('Recharge core', 'Tops the energy bank and shields', 'Recharge',
     S.player.energy < S.stats.energyCap - 1,

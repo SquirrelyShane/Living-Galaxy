@@ -2,6 +2,69 @@
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+## v1.01.70 — "Consignment" · 2026-08-09
+
+**Cargo that is actually aboard something, and modules that wear out.** Two items off the
+carried list, both named in patch notes written slices ago. Schema 15 → 16. 32 suites,
+2,637 checks.
+
+### Added
+- **NPC holds.** A hauler's cargo used to be notional — a deal named a mass, and it appeared
+  at the destination on settlement. Cargo is now aboard a ship, loaded at pickup, and a wreck
+  spills roughly half of it. A laden hauler is worth about eleven times an empty one to
+  whoever shoots it, where before the two were identical targets.
+- **Module condition.** Per hardpoint, accrued only by things the pilot chose to do — a shot
+  fired, a hit taken, a second of cruise, a second of beam. A worn module gives less *and*
+  draws more, which feeds the overload curve v0.7 already built rather than inventing a
+  second penalty. Nothing is ever destroyed.
+- **Servicing** on the dock's service tab beside armour and hull, and per hardpoint in the
+  fitting screen. An engineer on watch slows wear, which is the first thing that post does
+  outside a fight.
+- **Scanner reports load at tier 2, manifest at tier 3** — the split is the decision a raider
+  makes at range, and answering it at one tier would collapse two decisions into one.
+
+### Fixed
+- **Miners were extracting ore into nowhere.** `u.mined` was a counter nothing read: the belt
+  really was being depleted, and the ore ceased to exist. It now fills a hold, runs to a
+  station, and sells into that station's book.
+- **A raided hauler used to deliver in full.** Settlement delivers what the carrier actually
+  has. The deal still discharges and still pays — they flew the run; what is missing is the
+  cargo the raider took.
+- **A test that had been passing for the wrong reason.** `test/run.mjs` asserted a cumulative
+  counter inside a scoped window, and NPC mining does not run while the player is parked far
+  away to stay out of the way — so the window it claimed to measure extracted zero.
+
+### Tuned
+- **Every wear rate, by roughly an order of magnitude.** The first cut warned after 24 seconds
+  of continuous fire, 2.7 minutes of cruise and 2.2 minutes of mining. Written by feel,
+  measured afterwards, and wrong in the direction that makes the whole system a chore on a
+  two-minute timer. Now 213 s, 16.4 min and 27.3 min respectively.
+
+## v1.01.60 — "Assay" · 2026-08-08
+
+**Measuring the slice I had just shipped.** No schema change. 30 suites, 2,539 checks.
+
+### Fixed
+- **The research tree could not be completed.** Projects demand six thermal findings in
+  total; Solaris contains three to five hot bodies depending on seed. A pilot could research
+  two of the three thermal projects and then be permanently stuck with no hot world left to
+  probe. Found by measuring supply against demand across four seeds — not by reading the
+  table, where it is invisible.
+- **Findings were being consumed, which made them a currency while every comment in the file
+  called them evidence.** They are a qualification now: data is the consumable, and having
+  been somewhere hot stays true after the project finishes. What gates progress is the
+  largest single requirement rather than the sum, which is both satisfiable and the thing a
+  player can reason about.
+- **The costs were roughly one probe per project.** My own patch note estimated a probe at
+  30–90 kg of telemetry; measured, it averages 134. Data costs are ~2.7× higher, putting the
+  whole tree at about 60 probes and 153,000 credits of forgone sales.
+
+### Added
+- **The scan report says what a world would teach** before you spend a probe on it, and says
+  "already on file" for one you have surveyed — because probing it twice teaches nothing.
+- A suite check that every finding kind is supplied in the quantity some project needs at
+  once, so a dead end cannot be re-introduced by a later tuning pass.
+
 ## v1.01.50 — "Findings" · 2026-08-08
 
 **Research.** Save schema 14 → 15 (migration included). 30 suites, 2,531 checks.

@@ -23,6 +23,7 @@ const { initPlayerFx, updatePlayer } = await imp('entities/player.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
 const { initProjectiles, updateProjectiles, fire, activeProjectiles } = await imp('systems/projectiles.js');
 const { initCombat, updateCombat, damagePlayer, damageNpc } = await imp('systems/combat.js');
+const { holdMass } = await imp('systems/holds.js');
 const { updateWeapons } = await imp('systems/weapons.js');
 const { initMining, updateMining } = await imp('systems/mining.js');
 const { updateWarp, toggleWarp, setCourse } = await imp('systems/warp.js');
@@ -46,6 +47,10 @@ seedWorld(20260728);
 createStarfield(200);
 createSystem();
 createAsteroids();
+// Baseline for the belt-depletion check far below. NPC mining only runs while the sector is
+// being simulated, so the honest measurement is across the whole session rather than inside
+// one 60-second window with the player parked deliberately far away.
+const BELT_AT_START = S.world.asteroids.reduce((t, r) => t + (r.ore || 0), 0);
 initProjectiles();
 initCombat();
 initMining();
@@ -361,9 +366,17 @@ console.log('\n— living world —');
   ok('miners on shift', !!miner);
   S.player.position.set(0, 0, 45000);   // stay out of everyone's way
   step(1 / 60, 3600);                   // 60 s of the world running itself
-  const mined = S.world.npcs.filter(n => n.userData.role === 'mine')
-    .reduce((t, n) => t + (n.userData.mined || 0), 0);
+  // Measured against the belt rather than a per-ship counter, and across the whole session
+  // rather than this window. `u.mined` used to hold this and nothing anywhere read it, which
+  // was the tell: the ore left the rock and ceased to exist. v1.01.70 puts it in a hold and
+  // runs it to a station, so the honest question is what the *field* lost.
+  const mined = BELT_AT_START - S.world.asteroids.reduce((t, r) => t + (r.ore || 0), 0);
   ok('belt is being worked', mined > 20, `${mined.toFixed(0)} kg extracted by NPCs`);
+  // And it went somewhere. A belt that depletes into nothing is the bug this replaced: the
+  // ore is aboard a miner or has already been sold into a station's book.
+  const aboard = S.world.npcs.filter(n => n.userData.role === 'mine')
+    .reduce((t, n) => t + holdMass(n.userData), 0);
+  ok('the ore went into holds', aboard > 0, `${aboard.toFixed(0)} kg aboard miners`);
 
   // construction: deliveries complete a habitat (a real station appears)…
   const civ = S.sim.sites.find(x => x.kind !== 'fort');

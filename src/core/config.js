@@ -1275,3 +1275,101 @@ export const AVATAR = {
   maxWitnesses: 5,           // ships that file a memory per event, newest-nearest first
   claimRange: 900            // km — close enough to a rock that a miner calls it theirs
 };
+
+// ── NPC holds (v1.01.70) ─────────────────────────────────────────────
+// Until this slice a hauler's cargo was notional: a deal named a commodity and a mass, and
+// both appeared at the destination on settlement. Nothing was ever *aboard* anything, so a
+// laden hauler could not be intercepted for what it was carrying — you could shoot one, but
+// only for the salvage every wreck drops, which is the same reward as shooting an empty one.
+//
+// Capacity is per NPC type rather than derived from hull size, for the reason SHIP_CLASSES
+// declares heat capacity: how much a ship carries is a design property of the ship, and
+// deriving it from a display radius would make the bastion the best freighter in the game.
+export const HOLD = {
+  // kg by NPC type. A type absent from this table has no hold and cannot be laden — which
+  // is the honest answer for a drone, and it keeps the spill path from inventing cargo on
+  // ships that were never carrying any.
+  cap: { hauler: 9000, miner: 2600, pirate: 900, merc: 700, builderC: 1200, builderP: 1200 },
+
+  // What a wreck spills, as a fraction of what was aboard. Never all of it: a ship that
+  // comes apart at closing speed scatters more than a pilot can chase down, and a full
+  // recovery would make interception strictly better than trading.
+  spillFraction: 0.55,
+  // Below this the spill is not worth a container — it rounds to nothing rather than
+  // littering the belt with 3 kg motes.
+  spillFloor: 25,
+  // Containers a single wreck can produce, so a fat hauler does not shed one per commodity
+  // plus salvage and blow the loot cap on its own.
+  spillMax: 3,
+
+  // Miners work until the hold is this full, then run it to a station and sell. That sale
+  // moves the station's book the same way a player's does — an NPC economy that does not
+  // touch a price is a story about an economy.
+  minerRunAt: 0.9,
+  minerRate: 34,          // kg/s at the rock — a shift, not an instant fill
+  sellRange: 300,         // km from the berth at which a load is handed over
+  // Pirates and mercs keep what they scoop, up to their hold, which is what makes a raider
+  // that has been working the lane a richer kill than one that just spawned.
+  scoopFraction: 0.5
+};
+
+// ── module wear (v1.01.70) ───────────────────────────────────────────
+// The third item deferred out of v1.00.20, and the last one. Ammunition and heat landed in
+// v1.00.60; condition never did.
+//
+// The design constraint, and the reason this is not a clock: **wear must be a consequence of
+// what you did, not a tax on having played.** A module that degrades on a timer is rent —
+// you pay it whether you fought or docked, and the only decision it creates is a chore. So
+// every channel below is an event the pilot chose: a shot fired, a hit taken, a cruise
+// flown, a beam held on a rock.
+//
+// The effect reuses the budget system rather than inventing a second penalty. A worn module
+// gives less *and* draws more, which pushes a fit that was comfortable toward the overload
+// curve v0.7 already built. A pilot who has been ignoring maintenance does not get a new
+// error message; they find their existing one arriving sooner.
+export const WEAR = {
+  // Condition runs 1 (yard-fresh) down to 0 (worn out). Nothing is ever destroyed — a dead
+  // module is a soft-lock at the worst possible moment, and "degrade rather than refuse" is
+  // the rule the fitting budgets already follow.
+  floor: 0.55,            // effectiveness of a module at zero condition
+  drawAtZero: 0.35,       // extra power/CPU draw at zero condition, as a fraction
+
+  // Per-channel rates, all per event rather than per second unless stated.
+  //
+  // These are the second set. The first was written by feel and measured afterwards, and it
+  // was wrong by roughly an order of magnitude in every channel: 24 seconds of continuous
+  // fire to reach the warning threshold, 2.2 minutes of mining, 2.7 minutes of cruise. That
+  // is not wear, it is a chore on a two-minute timer — and it fails the test this whole
+  // block is written against, because a bill that arrives every few minutes is rent whether
+  // or not the clock driving it is called an event.
+  //
+  // Calibrated instead against a *session*: roughly half an hour of doing the thing before
+  // the fitting screen says anything, and about an hour before it is worth a detour. The
+  // figures below are what a measurement script reports, not what they look like.
+  perShot: 0.00025,       // per round out of a barrel, on that hardpoint only
+  perHullHit: 0.0012,     // per hit that reaches structure, spread across core and utility
+  perArmorHit: 0.00035,   // armour absorbs; it is gentler on the ship's systems
+  perWarpSecond: 0.00015, // core subsystems, while actually cruising
+  // Mining is gentler per second than anything else here, because it is the only channel a
+  // pilot runs *continuously* — a fight is seconds of trigger inside minutes of manoeuvre,
+  // and a cruise ends when you arrive, but a belt session is an unbroken half hour of beam.
+  // At the same rate as the others it was warning after two hold-fills.
+  perMineSecond: 0.00009, // utility, while the beam is on a rock
+
+  // Heat multiplies everything. Running a rack at the cutout is how a gun gets destroyed in
+  // every navy that has ever had one, and it gives the thermal budget a second consequence
+  // beyond the tempo one v1.00.60 built.
+  heatMult: 1.9,          // at full heat; scales linearly from 1 at cold
+  // An engineer on watch slows it. This is the crew tie-in that makes the speciality worth
+  // posting outside a fight.
+  engineerRelief: 0.35,   // fraction of wear an on-watch engineer prevents
+
+  // Servicing, at a station. Priced against the module's own value so a cheap module is
+  // cheap to keep and a capital-grade core is a commitment.
+  serviceFraction: 0.22,  // of list price, to take a module from 0 to 1
+  serviceMin: 45,         // nobody opens a panel for less
+  // Below this the fitting screen says so and preflight mentions it once. Above it, wear is
+  // real and invisible, which is correct: a 3% loss is not news.
+  warnAt: 0.72,
+  badAt: 0.40
+};

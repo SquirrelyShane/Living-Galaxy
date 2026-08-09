@@ -96,6 +96,12 @@ export function fileFindings(body, source = 'probe') {
   return kinds;
 }
 
+/** Has this body already been filed? A second probe teaches nothing, and the scan says so. */
+export function alreadyFiled(body) {
+  const name = (body && body.userData && body.userData.name) || null;
+  return !!(name && lab().seen && lab().seen[name]);
+}
+
 /** File an exotic finding directly. Anomalies are the one source that is not a world. */
 export function fileExotic(label) {
   const l = lab();
@@ -135,9 +141,20 @@ export function startProject(id) {
   // The telemetry is consumed. Research is what survey data is *for*, and a project that
   // left the cargo in the hold to be sold afterwards would be a free upgrade.
   S.cargo.data = Math.max(0, S.cargo.data - p.data);
-  for (const kind in (p.needs || {})) {
-    lab().findings[kind] -= p.needs[kind];
-  }
+
+  // Findings are *not* consumed, and the first version of this got that wrong.
+  //
+  // v1.01.50 subtracted them, which quietly made them a currency while every comment in the
+  // file called them evidence. Measured against the actual system, that made the tree
+  // **uncompletable**: the projects demand six thermal findings in total and Solaris
+  // contains three to five hot bodies depending on seed, so a pilot could research two of
+  // the three thermal projects and then be permanently stuck with no hot world left to
+  // probe.
+  //
+  // The right model is the one the comments already claimed: data is the consumable, a
+  // finding is a qualification. Having been somewhere hot is a thing that stays true. What
+  // gates the tree is now the *largest single* requirement rather than the sum, which is
+  // both satisfiable and the thing a player can reason about.
   lab().active = { id, left: p.hours };
   logNotice(CH, `Research begun — ${p.name}`, { id, hours: p.hours });
   status(`Research — ${p.name}`);

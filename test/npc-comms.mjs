@@ -286,7 +286,7 @@ console.log('\n— it survives a save —');
   ok('a restored payload keeps the cooldown', NC.exchange(a, b, 'oreTip') === null);
   ok('what the characters know is not in this payload — it rides with the personas',
      hasFact(b.userData, 'got-tip', a.userData.name));
-  ok('the schema moved for it', SCHEMA === 15);
+  ok('the schema moved for it', SCHEMA === 16);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

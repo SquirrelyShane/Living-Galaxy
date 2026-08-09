@@ -24,12 +24,13 @@
 // FIRE button says one thing once rather than screaming sixty times a second.
 
 import { S } from '../core/state.js';
-import { MINING, INTERLOCK, HEAT } from '../core/config.js';
+import { MINING, INTERLOCK, HEAT, WEAR } from '../core/config.js';
 import { feedOf, feedLoaded } from './magazine.js';
 import { firingSlots, activeLabel } from './groups.js';
 import { WEAPON_MODULES } from '../data/weapons.js';
 import { status } from '../ui/toast.js';
 import { sfx } from './audio.js';
+import { worstFitted } from './wear.js';
 
 const OK = Object.freeze({ ok: true, code: 'ok', reason: '' });
 const no = (code, reason) => ({ ok: false, code, reason });
@@ -226,7 +227,11 @@ export function interlockReport() {
     dock: canDock(),
     probe: canProbe(),
     armed: armed(),
-    mounts: ((S.stats && S.stats.mounts) || []).map(w => (w ? w.name : null))
+    mounts: ((S.stats && S.stats.mounts) || []).map(w => (w ? w.name : null)),
+    // v1.01.70. Wear never *blocks* anything — degrade rather than refuse — so it is
+    // reported here rather than gated. It is the one preflight item that is advice instead
+    // of an interlock, and ARIA reads the same field the HUD does.
+    wear: worstFitted()
   };
 }
 
@@ -237,5 +242,6 @@ export function interlockLine() {
   if (!r.fire.ok) out.push('WPN ' + r.fire.code);
   if (!r.mine.ok && r.mine.code !== 'warp') out.push('CUT ' + r.mine.code);
   if (!r.warp.ok) out.push('WRP ' + r.warp.code);
+  if (r.wear && r.wear.condition <= WEAR.badAt) out.push('SVC ' + Math.round(r.wear.condition * 100) + '%');
   return out.join(' · ');
 }

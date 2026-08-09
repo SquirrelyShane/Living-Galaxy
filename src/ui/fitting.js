@@ -4,11 +4,13 @@
 // Fitting is allowed anywhere (it's your ship), but *buying* still needs a station —
 // that's the line the shipyard tab enforces.
 
-import { S } from '../core/state.js';
+import { S, recalcStats } from '../core/state.js';
 import { HULL_SLOTS, SHIP_CLASSES } from '../core/config.js';
 import { MODULES, MODULE_KEYS } from '../data/modules.js';
 import { WEAPON_MODULES, WEAPON_KEYS } from '../data/weapons.js';
 import { slotsFor, describeMods, fitBonuses, mountScale } from '../systems/fitting.js';
+import { conditionAt, effectiveness, serviceCost, serviceModule, serviceAll, serviceQuote } from '../systems/wear.js';
+import { WEAR } from '../core/config.js';
 import { ownsWeapon, ownsModule, buyModule, buyWeapon, sellModule, fitSlot } from '../systems/economy.js';
 import { $, el, fmtCr, fmtMass } from '../core/utils.js';
 import { toast } from './toast.js';
@@ -78,6 +80,25 @@ function renderSlots() {
   group('Weapon mounts', 'weapon');
   group('Utility hardpoints', 'utility');
   group('Core subsystems', 'core');
+  // The row a pilot will actually press. Per-slot servicing exists for the case where you
+  // can afford one thing and have to choose; this is for the case where you cannot be
+  // bothered to choose, which is most of them.
+  const q = serviceQuote();
+  if (q.count) {
+    const line = el('div', 'trade-row');
+    line.appendChild(el('div', '',
+      `<div class="nm">Service everything</div><div class="meta">${q.count} subsystem${q.count === 1 ? '' : 's'} out of tolerance` +
+      (S.docked ? '' : ' · dock to have it done') + `</div>`));
+    const right = el('div', '', `<div class="price">${fmtCr(q.cost)}</div>`);
+    right.style.textAlign = 'right';
+    const b = el('button', 'buy-btn', 'Service');
+    b.disabled = !S.docked || S.credits < q.cost;
+    b.addEventListener('click', () => { if (serviceAll()) { recalcStats(); render(); sfx.pickup(); } });
+    right.appendChild(b);
+    line.appendChild(right);
+    body.appendChild(line);
+  }
+
   const groups = populatedGroups();
   body.appendChild(el('div', 'dock-note',
     'Tap a hardpoint to change it, or its GRP tag to move it between triggers. ' +
@@ -110,6 +131,23 @@ function group(title, kind) {
     // Tapping a hardpoint means "change what is in it" everywhere else in this screen, and
     // overloading that tap to sometimes mean "change which trigger it answers" would make
     // the most common action ambiguous.
+    // Servicing lives beside the slot for the same reason the group tag does: tapping a
+    // hardpoint means "change what is in it" everywhere else on this screen, and a tap that
+    // sometimes means "spend money repairing it" would make the common action ambiguous.
+    // It only appears when there is something to fix and you are somewhere that can fix it.
+    if (def && S.docked) {
+      const cost = serviceCost(kind, i);
+      if (cost > 0) {
+        const sv = el('button', 'mini-btn', `SERVICE ${fmtCr(cost)}`);
+        sv.disabled = S.credits < cost;
+        sv.addEventListener('click', ev => {
+          if (ev && ev.stopPropagation) ev.stopPropagation();
+          if (serviceModule(kind, i)) { recalcStats(); render(); sfx.pickup(); }
+        });
+        right.appendChild(sv);
+      }
+    }
+
     if (kind === 'weapon' && def) {
       const g = el('button', 'mini-btn grp-tag', `GRP ${groupOf(i) === 2 ? 'II' : 'I'}`);
       g.addEventListener('click', ev => {
@@ -129,12 +167,29 @@ function group(title, kind) {
   body.appendChild(wrap);
 }
 
+/**
+ * Condition, said out loud only when it is news.
+ *
+ * A module at 97% is not information — it is noise on every row of the screen forever. The
+ * thresholds are the same two `WEAR` uses to decide when to speak, so what the panel shows
+ * and what the ship warns about cannot drift apart.
+ */
+function wearTag(kind, i) {
+  const c = conditionAt(kind, i);
+  if (c > WEAR.warnAt) return '';
+  const pct = Math.round(c * 100);
+  return c <= WEAR.badAt ? ` · <b class="bad">worn ${pct}%</b>` : ` · worn ${pct}%`;
+}
+
 function metaFor(kind, def, i) {
   if (kind === 'weapon') {
-    const eff = Math.round(def.damage * S.stats.weaponMult * mountScale(i));
-    return `${def.kind} · ${eff} dmg · ${(1 / def.cooldown).toFixed(1)}/s · ${def.energy} MW/shot`;
+    // The damage shown is the damage the gun will actually do, condition included. A readout
+    // that quotes the rated figure while the barrel delivers less is a lie the pilot has no
+    // way to catch — they would simply conclude the damage numbers are wrong.
+    const eff = Math.round(def.damage * S.stats.weaponMult * mountScale(i) * effectiveness(conditionAt(kind, i)));
+    return `${def.kind} · ${eff} dmg · ${(1 / def.cooldown).toFixed(1)}/s · ${def.energy} MW/shot` + wearTag(kind, i);
   }
-  return describeMods(def.mods).join(' · ') + (def.power ? ` · ${def.power} MW` : '');
+  return describeMods(def.mods).join(' · ') + (def.power ? ` · ${def.power} MW` : '') + wearTag(kind, i);
 }
 
 

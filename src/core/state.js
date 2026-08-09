@@ -145,6 +145,14 @@ export function registerCharacterBonuses(fn, skillFn) {
 let researchBonusesRef = null;
 export function registerResearchBonuses(fn) { researchBonusesRef = fn; }
 
+// systems/wear.js registers the condition table the same way, and for the same reason: it
+// imports state.js for the fit it describes, so a static edge back would be a cycle. When
+// nothing has registered — a suite exercising the fitting arithmetic on its own — every
+// module reads yard-fresh, which is the honest default for a ship nobody has flown.
+let wearConditionsRef = null;
+export function registerWearConditions(fn) { wearConditionsRef = fn; }
+const conditionTable = () => (wearConditionsRef ? wearConditionsRef() : null);
+
 export function recalcStats() {
   const c = SHIP_CLASSES[S.player.classKey];
   const u = S.upgrades;
@@ -152,7 +160,8 @@ export function recalcStats() {
 
   // Slots follow the hull, so a swap re-seats (and may drop) what was fitted.
   S.fit = normalizeFit(S.fit, S.player.classKey);
-  const f = fitBonuses(S.fit);
+  const cond = conditionTable();
+  const f = fitBonuses(S.fit, cond);
   const w = crewBonuses(S.crew);
   // The pilot is a third source of bonuses alongside the fit and the crew, deliberately
   // in the same shape so nothing downstream has to know which one a number came from.
@@ -207,7 +216,8 @@ export function recalcStats() {
   // than any one module. Power starves the electrical systems; CPU starves the ones
   // that need to think. Neither can take a ship below BUDGET.maxPenalty of nominal —
   // a fit you cannot fly home is a soft-lock, not a tradeoff.
-  const load = budgetLoad(S.fit, S.player.classKey, characterSkillRef ? characterSkillRef('engineering') : 0);
+  const load = budgetLoad(S.fit, S.player.classKey,
+                         characterSkillRef ? characterSkillRef('engineering') : 0, cond);
   S.stats.budget = load;
   if (load.powerPenalty > 0) {
     const k = 1 - load.powerPenalty;

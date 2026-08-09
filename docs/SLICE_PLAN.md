@@ -201,7 +201,8 @@ answer. Numbered v1.00.10, v1.00.20, and so on, so they sort cleanly against 1.0
 | 8 | **v1.00.80** | NPC tactics & a brain that decides | **shipped** |
 | 9 | **v1.00.90** | NPC exchange layer | **shipped** |
 | 10 | **v1.01.00** | The deal ledger | **shipped** |
-| 11+ | — | see `docs/NPC_ROADMAP.md` | planned |
+| 11 | **v1.01.70** | Real cargo & module wear | **shipped** |
+| 12+ | — | see `docs/NPC_ROADMAP.md` and `docs/OPEN_ITEMS.md` | planned |
 | 7 | v1.00.70 | — | planned |
 | 8 | v1.00.80 | — | planned |
 | 9 | v1.00.90 | — | planned |
@@ -417,3 +418,29 @@ Two patterns worth carrying:
   entries only ever complete is a queue.
 
 Subsequent NPC slices are planned in `docs/NPC_ROADMAP.md` rather than here.
+
+## 11 — Real cargo & module wear (v1.01.70, shipped)
+
+Two carried items that turned out to be the same complaint from opposite ends: the ship and
+the world were both stateless in a way that made choices not matter. Delivered: NPC holds, so
+a laden hauler is a different target from an empty one; settlement that delivers what the
+carrier actually has; miners whose ore reaches a market instead of ceasing to exist; and
+module condition accrued per event rather than per second. Schema 16. `test/cargo.mjs`,
+`test/wear.mjs`. See `PATCH_v1.01.70.md`.
+
+Three patterns worth carrying:
+
+- **A counter nothing reads is a system that does not exist.** `u.mined` accumulated
+  correctly for six slices while the ore it counted was being deleted. Same shape as the
+  persona memory in v1.00.80 — worth asking of any state a slice adds: what *reads* this?
+- **A bill that arrives every few minutes is rent whether or not the clock driving it is
+  called an event.** Every wear rate shipped in the first cut was written by feel and was an
+  order of magnitude too harsh. The design was right and the numbers would have made it feel
+  exactly like the thing it was designed not to be.
+- **A cumulative assertion inside a scoped window measures the wrong scope.** The belt check
+  in `test/run.mjs` had been green for slices while measuring nothing, because the counter it
+  read was lifetime and the window it claimed was sixty seconds.
+
+Still carried: NPCs do not wear, which is the same asymmetry ammunition had before v1.00.80.
+And nothing yet *decides* to raid a trade lane — the payoff is built, the behaviour belongs
+in the NPC line.

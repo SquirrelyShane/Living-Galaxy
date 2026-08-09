@@ -290,7 +290,7 @@ console.log('\n— it survives a save —');
   ok('a level past the ceiling is clamped', W.comfortLevel('galley') === WELFARE.maxLevel);
   ok('a negative level is clamped', W.comfortLevel('quarters') === 0);
   ok('a nonsense level is dropped', W.comfortLevel('infirmary') === 0);
-  ok('the schema moved for it', SCHEMA === 15);
+  ok('the schema moved for it', SCHEMA === 16);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

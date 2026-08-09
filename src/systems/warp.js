@@ -10,6 +10,7 @@ import { practice } from './character.js';
 import { crewEvent } from './crew.js';
 import { canWarp, announce } from './preflight.js';
 import { intercept } from './ephemeris.js';
+import { wearWarp } from './wear.js';
 
 const _dir = new THREE.Vector3();
 const _fwd = new THREE.Vector3();
@@ -163,6 +164,9 @@ export function updateWarp(dt) {
   const drain = WARP.drainCruise * loadFactor * Math.max(0.35, coreEfficiency);
   p.energy -= drain * dt;
   p.expend += drain;
+  // Cruise is the only warp state that wears the core. Spooling and cooling are the drive
+  // being asked to do something; this is the drive doing it.
+  wearWarp(dt);
   practice('navigation', dt * 1.4);
   if (p.energy <= 1) { p.energy = 0; dropOut('Warp collapsed — energy exhausted'); return; }
 

@@ -12,6 +12,7 @@ import { toast, status } from '../ui/toast.js';
 import { canMine, announce } from './preflight.js';
 import { witnessClaimJump } from './npc-brain.js';
 import { AVATAR } from '../core/config.js';
+import { wearMining } from './wear.js';
 
 let beam, beamPos;
 let sound = 0, warned = 0;
@@ -86,6 +87,10 @@ export function updateMining(dt) {
   const kg = Math.min(MINING.rate * S.stats.miningMult * dt, free);
   const got = mineAsteroid(rock, kg);
   S.cargo.ore += got;
+  // The beam is a utility hardpoint doing work, and it wears like one. A mining session is
+  // the longest continuous load a peaceful pilot ever puts on a fit, which is why the
+  // rate here is per second rather than per event.
+  wearMining(dt);
   practice('extraction', got * 0.02);
   crewEvent('oreLoad', 'rigger', got / 400);
   p.energy -= MINING.energy * dt;

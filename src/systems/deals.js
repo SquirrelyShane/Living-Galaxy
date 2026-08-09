@@ -33,6 +33,7 @@ import { COMMODITIES } from '../core/config.js';
 import { applyTrade, marketPrice } from './market.js';
 import { transmit } from './comms.js';
 import { toast } from '../ui/toast.js';
+import { unloadHold } from './holds.js';
 
 let rng = null;
 let sweepT = 0;
@@ -165,11 +166,24 @@ export function settle(deal) {
   const { fromU, toU } = partiesOf(deal);
 
   const st = S.world.stations.find(s => s.userData.name === deal.dest);
-  if (st && deal.kg > 0 && COMMODITIES[deal.commodity]) {
+  // v1.01.70: what arrives is what the carrier is actually carrying, not what the paperwork
+  // says. Before this the mass was conjured onto the destination market at settlement, which
+  // meant a hauler that had been raided down to an empty hold still delivered in full — the
+  // one place where making cargo real had to change an existing rule rather than add one.
+  //
+  // A carrier that has been emptied still *settles*. The deal is discharged, both parties
+  // file the memory, and the pay is the pay: they flew the run. What is missing is the
+  // cargo, which is exactly the thing the raider took.
+  let landed = deal.kg;
+  if (toU && toU.name !== PLAYER && toU.hold) {
+    landed = unloadHold(toU, deal.commodity, deal.kg);
+    deal.landed = landed;
+  }
+  if (st && landed > 0 && COMMODITIES[deal.commodity]) {
     // `selling: true` from the *station's* point of view — cargo arrived, so its stock
     // rises and its price for that commodity comes down. Reading this flag as "the player
     // is selling" is the easy mistake: it made a delivery drain the destination.
-    applyTrade(st, deal.commodity, deal.kg, true);
+    applyTrade(st, deal.commodity, landed, true);
   }
 
   deal.state = 'done';
@@ -184,6 +198,9 @@ export function settle(deal) {
   // The player's side is credits rather than memory.
   if (deal.from === PLAYER) S.credits -= deal.pay;
   if (deal.to === PLAYER) { S.credits += deal.pay; toast(`Delivered — ${deal.pay} cr`); }
+  if (deal.from === PLAYER && landed < deal.kg - 1) {
+    toast(`${deal.to} arrived light — ${Math.round(landed)} of ${Math.round(deal.kg)} kg`);
+  }
   return true;
 }
 

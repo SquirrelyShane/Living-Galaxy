@@ -3,7 +3,7 @@
 import { scene } from '../world/scene.js';
 import { S, cargoFree, recalcStats } from '../core/state.js';
 import { rand, fmtCr } from '../core/utils.js';
-import { SPAWN, POINTDEF } from '../core/config.js';
+import { SPAWN, POINTDEF, COMMODITIES, HOLD } from '../core/config.js';
 import { applyDamage, damageType, resistance } from './damage.js';
 import { toast, status } from '../ui/toast.js';
 import { sfx } from './audio.js';
@@ -14,6 +14,8 @@ import { callForHelp } from './npc-tactics.js';
 import { practice } from './character.js';
 import { untrack as untrackInterp } from '../world/interpolate.js';
 import { crewCasualty, crewEvent } from './crew.js';
+import { wearHit } from './wear.js';
+import { spillOf, loadHold, holdFree, holdCap } from './holds.js';
 
 const MAX_PARTICLES = 720;
 const LOOT_LIMIT = 26;
@@ -21,7 +23,7 @@ const LOOT_PICKUP = 70;
 
 const parts = [];
 let pPoints, pPos, pCol;
-let lootGeo, lootMat;
+let lootGeo, lootMat;   // lootMat is keyed by commodity — see initCombat()
 const _v = new THREE.Vector3();
 
 export function initCombat() {
@@ -39,9 +41,17 @@ export function initCombat() {
   scene.add(pPoints);
 
   lootGeo = new THREE.IcosahedronGeometry(6, 0);
-  lootMat = new THREE.MeshStandardMaterial({
-    color: 0x66ffcc, emissive: 0x22aa88, emissiveIntensity: 0.7, metalness: 0.6, roughness: 0.35
-  });
+  // One material per commodity. A pilot deciding whether to break off a chase to scoop
+  // something needs to know what it is from the cockpit, and the alternative — a panel that
+  // names it once you are already on top of it — is information arriving after the decision.
+  lootMat = {
+    salvage: new THREE.MeshStandardMaterial({
+      color: 0x66ffcc, emissive: 0x22aa88, emissiveIntensity: 0.7, metalness: 0.6, roughness: 0.35 }),
+    ore: new THREE.MeshStandardMaterial({
+      color: 0xc8a86a, emissive: 0x6a4f22, emissiveIntensity: 0.6, metalness: 0.5, roughness: 0.55 }),
+    data: new THREE.MeshStandardMaterial({
+      color: 0x7fb8ff, emissive: 0x2255aa, emissiveIntensity: 0.8, metalness: 0.3, roughness: 0.3 })
+  };
 }
 
 // ── player ───────────────────────────────────────────────────────────
@@ -74,6 +84,10 @@ export function damagePlayer(amount, type) {
     const hurt = crewCasualty(res.hull);
     if (hurt) crewEvent('casualty', 'medic');
   }
+  // Being shot shakes the whole fit, and structure hits cost more than armour ones — which
+  // is what makes plating a layer rather than a stat. Filed here rather than in damage.js so
+  // the resolver stays a pure cascade with no opinion about who owns the ship.
+  wearHit(res.armor, res.hull);
 
   if (p.hull <= 0) { destroyPlayer(); return res; }
   if (res.hull > 0 && p.hull / st.hullMax < 0.3) status('CRITICAL HULL DAMAGE');
@@ -217,18 +231,58 @@ export function damageNpc(npc, amount, byPlayer, type, pierce = 0) {
     }
   }
   if (u.salvage) dropLoot(npc.position, u.salvage);
+  // v1.01.70: and whatever it was actually carrying. This is the line that makes a laden
+  // hauler a different target from an empty one — before it, the trade lanes two slices went
+  // into building were worth precisely the fixed salvage figure to anybody who shot at them.
+  //
+  // If somebody other than the player did the killing, whoever is standing over the wreck
+  // takes a share first, and only the rest scatters. That is what makes a raider who has
+  // been working the lane a richer kill than one that just spawned — the loot on a pirate is
+  // no longer a fixed number, it is the last hour of that pirate's afternoon.
+  if (!byPlayer) scoopFrom(npc, u);
+  for (const lot of spillOf(u)) dropLoot(npc.position, lot.kg, lot.commodity);
+  u.hold = null;
+}
+
+const SCOOP_RANGE = 1400;
+
+/** The nearest ship with a hold, hostile to the deceased, helps itself. */
+function scoopFrom(npc, u) {
+  if (!u.hold) return;
+  let best = null, bd = SCOOP_RANGE * SCOOP_RANGE;
+  for (const other of S.world.npcs) {
+    const o = other.userData;
+    if (!o || o === u || o.hp <= 0 || !holdCap(o) || holdFree(o) <= 0) continue;
+    if (blocOf(o.faction) === blocOf(u.faction)) continue;   // you do not rob your own
+    const d = other.position.distanceToSquared(npc.position);
+    if (d < bd) { bd = d; best = o; }
+  }
+  if (!best) return;
+  const h = u.hold;
+  for (const k of Object.keys(h)) {
+    const take = (h[k] || 0) * HOLD.scoopFraction;
+    if (take < 1) continue;
+    const got = loadHold(best, k, take);
+    h[k] -= got;
+    if (h[k] < 0.001) delete h[k];
+  }
 }
 
 // ── loot ─────────────────────────────────────────────────────────────
-function dropLoot(pos, kg) {
+function dropLoot(pos, kg, commodity = 'salvage') {
   if (S.world.loot.length >= LOOT_LIMIT) {
     const old = S.world.loot.shift();
     scene.remove(old.mesh);
   }
-  const mesh = new THREE.Mesh(lootGeo, lootMat);
+  const mesh = new THREE.Mesh(lootGeo, lootMat[commodity] || lootMat.salvage);
   mesh.position.copy(pos);
+  // Containers from one wreck are scattered rather than stacked, so three lots do not read
+  // as one object and a pilot can see there is more than one thing to collect.
+  mesh.position.x += rand(-26, 26);
+  mesh.position.y += rand(-14, 14);
+  mesh.position.z += rand(-26, 26);
   scene.add(mesh);
-  S.world.loot.push({ mesh, kg, spin: rand(0.6, 1.8), life: 0 });
+  S.world.loot.push({ mesh, kg, commodity, spin: rand(0.6, 1.8), life: 0 });
 }
 
 function updateLoot(dt) {
@@ -241,10 +295,12 @@ function updateLoot(dt) {
     const d = l.mesh.position.distanceTo(S.player.position);
     if (d < LOOT_PICKUP) {
       const take = Math.min(l.kg, cargoFree());
+      const key = l.commodity || 'salvage';
       if (take > 0) {
-        S.cargo.salvage += take;
+        S.cargo[key] = (S.cargo[key] || 0) + take;
         sfx.pickup();
-        toast(`Salvage +${Math.round(take)} kg${take < l.kg ? ' (hold full)' : ''}`);
+        const nm = (COMMODITIES[key] || {}).name || key;
+        toast(`${nm} +${Math.round(take)} kg${take < l.kg ? ' (hold full)' : ''}`);
       } else {
         toast('Cargo hold full');
       }

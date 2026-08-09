@@ -81,11 +81,15 @@ failure state that files a memory, or the ledger becomes a leak.
 
 ---
 
-> **Shipped in v1.01.00**, with two gaps carried forward: there is no UI for posting a job,
-> and a hauler's cargo is notional — it names a commodity and a mass that appear at the
-> destination on settlement, so a laden hauler cannot yet be intercepted *for* what it is
-> carrying. Making cargo real is the small piece that turns the trade lanes into something
-> worth raiding, and it belongs at the front of slice 11.
+> **Shipped in v1.01.00**, with two gaps carried forward. Both are now closed: the freight
+> board landed in v1.01.10, and cargo became real in **v1.01.70** — a hauler loads at pickup,
+> delivers what it actually has, and spills about half of it when shot. A laden hauler is
+> worth roughly eleven times an empty one.
+>
+> What that leaves for slice 11 is the *other* half: nothing decides to raid a trade lane.
+> `appraise()` reads physical budgets and grudges, not cargo. The payoff exists and no NPC
+> takes it, which makes "a hauler worth intercepting" a fact about the world that only the
+> player can act on.
 
 ## Slice 11 — Standing: corporate business and the shape of a faction
 

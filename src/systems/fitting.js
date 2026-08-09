@@ -5,7 +5,7 @@
 // it for recalcStats() without a circular graph. Callers pass the fit object in.
 
 import { HULL_SLOTS, MULTI_GUN_FALLOFF } from '../core/config.js';
-import { BUDGET } from '../core/config.js';
+import { BUDGET, WEAR } from '../core/config.js';
 import { MODULES } from '../data/modules.js';
 import { WEAPON_MODULES } from '../data/weapons.js';
 
@@ -41,17 +41,49 @@ export function mountedWeapons(fit) {
 /** Per-mount damage scale — barrel 1 at full, each extra at a falloff. */
 export const mountScale = i => Math.pow(MULTI_GUN_FALLOFF, i);
 
-/** Everything fitted, summed into one bonus bag. Unknown mod keys are ignored. */
-export function fitBonuses(fit) {
+// ── condition ────────────────────────────────────────────────────────
+// v1.01.70. Wear is owned by systems/wear.js, which knows about game state; this file stays
+// pure, so a condition table is *passed in* rather than reached for. Callers that do not
+// have one — a fitting preview, a test of the arithmetic — get yard-fresh behaviour, which
+// is the right default for a screen that is asking "what would this fit do".
+
+/** What fraction of its rated output a module at condition `c` delivers. */
+export const effectivenessOf = c =>
+  (typeof c === 'number' && isFinite(c))
+    ? WEAR.floor + (1 - WEAR.floor) * Math.max(0, Math.min(1, c))
+    : 1;
+
+/** And how much more it draws. Worn kit is inefficient before it is weak. */
+export const drawOf = c =>
+  (typeof c === 'number' && isFinite(c))
+    ? 1 + WEAR.drawAtZero * (1 - Math.max(0, Math.min(1, c)))
+    : 1;
+
+const condAt = (cond, kind, i) => (cond && cond[kind] && cond[kind][i] !== undefined) ? cond[kind][i] : 1;
+
+/**
+ * Everything fitted, summed into one bonus bag. Unknown mod keys are ignored.
+ *
+ * `cond` is optional. When given, each module's mods are scaled by its effectiveness and its
+ * power and CPU draw by its inefficiency — which is the half of wear that matters most,
+ * because it feeds the budget curve v0.7 already built instead of inventing a second one.
+ *
+ * A *negative* mod is scaled the same way, deliberately: the afterburner's recharge penalty
+ * shrinking as the afterburner wears out is correct. It is doing less of everything.
+ */
+export function fitBonuses(fit, cond = null) {
   const b = { power: 0, cpu: 0 };
   if (!fit) return b;
   for (const kind of ['utility', 'core']) {
-    for (const key of (fit[kind] || [])) {
-      const m = MODULES[key];
+    const bay = fit[kind] || [];
+    for (let i = 0; i < bay.length; i++) {
+      const m = MODULES[bay[i]];
       if (!m) continue;
-      b.power += m.power || 0;
-      b.cpu += m.cpu || 0;
-      for (const k in m.mods) b[k] = (b[k] || 0) + m.mods[k];
+      const c = condAt(cond, kind, i);
+      const eff = effectivenessOf(c), draw = drawOf(c);
+      b.power += (m.power || 0) * draw;
+      b.cpu += (m.cpu || 0) * draw;
+      for (const k in m.mods) b[k] = (b[k] || 0) + m.mods[k] * eff;
     }
   }
   return b;
@@ -76,8 +108,8 @@ export function budgetFor(hullKey, engineeringRank = 0) {
  * @returns {{power:number,cpu:number,powerCap:number,cpuCap:number,
  *            powerOver:number,cpuOver:number,powerPenalty:number,cpuPenalty:number}}
  */
-export function budgetLoad(fit, hullKey, engineeringRank = 0) {
-  const f = fitBonuses(fit);
+export function budgetLoad(fit, hullKey, engineeringRank = 0, cond = null) {
+  const f = fitBonuses(fit, cond);
   const cap = budgetFor(hullKey, engineeringRank);
   const ratio = (use, max) => (max > 0 ? use / max : 0);
 

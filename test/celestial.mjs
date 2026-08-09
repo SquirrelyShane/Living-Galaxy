@@ -811,7 +811,7 @@ console.log('\n— deep-space anomalies —');
      scanReport(obj, 'lagrange', lp3.name).rows.some(r => r[1] === 'worked out'));
 
   // Persistence: one flag per site, and that is the whole of schema 10.
-  ok('the schema moved for it', SCHEMA === 15);
+  ok('the schema moved for it', SCHEMA === 16);
   const packed = LG.serializeAnomalies();
   ok('serialising captures the worked set', packed[lp3.key] === true);
   LG.restoreAnomalies(null);

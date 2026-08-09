@@ -17,6 +17,7 @@ import { noteCrew, sampleCrew } from './crew-log.js';
 import { comfortEffects, updateWelfare, onShore, inTraining, comfortUpkeep } from './welfare.js';
 import { held, takeMaterial } from './crafting.js';
 import { sfx } from './audio.js';
+import { registerEngineerCheck } from './wear.js';
 
 let nextId = 1;
 
@@ -751,3 +752,15 @@ export function postReport() {
 }
 
 export { postOf, specialtyOf, isCross, onDuty, condition, manning };
+
+
+// ── module wear (v1.01.70) ───────────────────────────────────────────
+// An engineer on watch slows the rate at which fitted kit wears out. Registered rather than
+// imported the other way round, because wear.js must not depend on the crew simulation to
+// work — a ship with nobody aboard still wears its modules, it simply wears them faster.
+//
+// This is the answer to a question the crew slices left open: what is an engineer *for*
+// outside a fight? Damage control is reactive. This is the post paying for itself while
+// nothing at all is happening, which is what a real engineering watch does.
+registerEngineerCheck(() => (S.crew || []).some(c => onDuty(c) && postOf(c) === 'engineer' &&
+                                                     !c.onBreak && (c.injury || 0) < 0.8));

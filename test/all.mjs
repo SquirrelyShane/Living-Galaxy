@@ -35,6 +35,8 @@ const SUITES = [
   ['crew-log',  'the flight log, crew telemetry, trends, diagnosis and ARIA readouts'],
   ['welfare',   'shore leave, quarters, galley, infirmary and training'],
   ['research',  'findings, projects, permanent effects and the blueprint gate'],
+  ['cargo',     'real holds — spills, interception, short deliveries, manifests'],
+  ['wear',      'module condition — per-event accrual, degraded output, servicing'],
   ['reachability','every player-facing verb has a door — see docs/REACHABILITY_AUDIT.md'],
   ['run',      'simulation: flight, combat, mining, trade, warp, save'],
   ['warp-nav', 'autopilot navigation geometries'],

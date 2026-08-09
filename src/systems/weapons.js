@@ -20,6 +20,7 @@ import { chambered, drawRounds, feedOf } from './magazine.js';
 import { dtypeOf, isAP, yieldOf } from './ordnance.js';
 import { firingSlots, activeLabel } from './groups.js';
 import { WEAPON_MODULES } from '../data/weapons.js';
+import { wearShot, weaponEffect } from './wear.js';
 
 const _dir = new THREE.Vector3();
 const _aim = new THREE.Vector3();
@@ -161,7 +162,11 @@ export function updateWeapons(dt) {
     // a round is as good as the shot you took, and a target that runs after you pull
     // the trigger does not make the slug you already fired weaker.
     const reach = t ? p.position.distanceTo(t.obj.position) : 0;
-    const power = w.damage * st.weaponMult * mountScale(n) * ammoMult * (t ? rangeScale(w, reach) : 1);
+    // v1.01.70: and by how worn this particular barrel is. Condition is per hardpoint, so a
+    // pilot who has been leaning on group I all session finds group I hitting softer while
+    // the untouched rack beside it does not.
+    const power = w.damage * st.weaponMult * mountScale(n) * ammoMult
+                  * weaponEffect(i) * (t ? rangeScale(w, reach) : 1);
 
     fire(_muzzle, dir, w.speed, power, 'player', w.color, opts);
     sendFire(_muzzle, dir, w.speed, w.color);
@@ -181,6 +186,10 @@ export function updateWeapons(dt) {
       sfx.deny();
     }
     cd[i] = S.time;
+    // Wear is filed after the shot is away and against this hardpoint only. Heat multiplies
+    // it inside wearShot(), which is why it is called here rather than before the heat above
+    // is added: the round that pushed the rack to the cutout should be charged at the cutout.
+    wearShot(i);
     fired++;
     if (w.kind === 'missile') missileShot = true;
     else if (w.damage > 15) heavy = true;
