@@ -1,6 +1,11 @@
-# Cloudflare Pages routing — mirrors the galaxy server's own ROUTES table, so the
-# static deployment and the laptop deployment answer the same addresses.
-/       /web/portal.html   200
-/play   /index.html        200
-/forum  /web/forum.html    200
-/admin  /web/admin.html    200
+# Routing for the CDN deployment (Workers static assets honor this file; the galaxy
+# server has the same table in its ROUTES). html_handling is "none" in wrangler.jsonc,
+# so each rule serves exactly the named file — including the trailing-slash spellings,
+# which nothing normalizes for us any more.
+/        /web/portal.html   200
+/play    /index.html        200
+/play/   /index.html        200
+/forum   /web/forum.html    200
+/forum/  /web/forum.html    200
+/admin   /web/admin.html    200
+/admin/  /web/admin.html    200

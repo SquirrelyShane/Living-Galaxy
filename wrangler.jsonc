@@ -15,6 +15,10 @@
   "observability": { "enabled": true },
   "assets": {
     "directory": ".",
-    "html_handling": "auto-trailing-slash"
+    // "none", deliberately: with auto-trailing-slash, the `/play → /index.html`
+    // rewrite gets normalized BACK to `/` (index.html always does under auto), and `/`
+    // rewrites to the portal — so /play showed the portal and the game was unreachable.
+    // With none, every route in _redirects serves exactly the file it names.
+    "html_handling": "none"
   }
 }
