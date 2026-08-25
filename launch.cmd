@@ -41,7 +41,7 @@ rem text-selection mode (title becomes "Select ...") which can pause output - pr
 rem Esc in it if that happens. Close that window to stop the galaxy.
 echo Starting the galaxy server...
 del living-galaxy.log >nul 2>nul
-start "Living Galaxy server" node server\main.js --port=%PORT% --name=%GALAXY_NAME% --logfile=living-galaxy.log
+   start "Living Galaxy server" node server\main.js --port=%PORT% --name=%GALAXY_NAME% --admin=Shane --web-origin=https://living-galaxy.com --logfile=living-galaxy.log
 
 rem Ready means answering, not merely running. The server speaks https (it just made
 rem its own certificate); probe http too so a plain run is still detected and reported.
