@@ -61,6 +61,50 @@ export function makeRegistry(vault) {
       vault.put(accKey, acc);
     },
 
+    // ── email verification (v1.04) ───────────────────────────────────
+    // The account carries an email and a 6-digit code. Whether the code travels by
+    // real SMTP or by the admin reading it off the panel is mail.js's problem — the
+    // registry only knows codes, expiry, and the verified bit.
+
+    issueCode(accKey, email) {
+      const acc = vault.get(accKey);
+      if (!acc) return { err: 'no account' };
+      if (email !== undefined) {
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { err: 'that does not look like an email address' };
+        acc.email = email || null;
+        acc.verified = false;
+      }
+      if (!acc.email) return { err: 'no email on the account' };
+      acc.code = String(Math.floor(100000 + Math.random() * 900000));
+      acc.codeAt = Date.now();
+      vault.put(accKey, acc);
+      return { ok: true, email: acc.email, code: acc.code };
+    },
+
+    verifyCode(accKey, code) {
+      const acc = vault.get(accKey);
+      if (!acc || !acc.code) return { err: 'no code pending' };
+      if (Date.now() - acc.codeAt > 24 * 3600_000) return { err: 'code expired — request a new one' };
+      if (String(code).trim() !== acc.code) return { err: 'wrong code' };
+      acc.verified = true; acc.code = null;
+      vault.put(accKey, acc);
+      return { ok: true };
+    },
+
+    /** Grant (or confirm) admin on a callsign. Creating the account is the caller's job. */
+    setAdmin(user, on = true) {
+      const k = 'accounts/' + String(user || '').toLowerCase();
+      const acc = vault.get(k);
+      if (!acc) return { err: 'no such account' };
+      acc.admin = !!on;
+      vault.put(k, acc);
+      return { ok: true };
+    },
+
+    account(user) {
+      return vault.get('accounts/' + String(user || '').toLowerCase());
+    },
+
     // ── the wallet ───────────────────────────────────────────────────
     // Deposits are clamped per call rather than trusted: the client is a rendering and
     // input device that occasionally lies, and a lie should cost it a rejected message,

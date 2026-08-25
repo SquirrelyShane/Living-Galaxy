@@ -1,0 +1,9 @@
+# The vault is the galaxy's private life — accounts, wallets, world history, the
+# TLS keys — encrypted, but encrypted-on-GitHub is still the wrong place for it.
+# NEVER commit it.
+galaxy-data/
+
+# Run-time leavings
+living-galaxy.log
+living-galaxy.pid
+node_modules/

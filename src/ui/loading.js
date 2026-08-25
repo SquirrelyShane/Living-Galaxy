@@ -35,6 +35,7 @@
 
 import { $, el } from '../core/utils.js';
 import { makeRng } from '../core/rng.js';
+import { LOADING_TIPS } from '../data/loading-tips.js';
 
 let overlay, art, ctx, barFill, barPct, feed, headline, sub;
 let raf = 0, t = 0, dpr = 1;
@@ -77,6 +78,7 @@ export function initLoading() {
   }
   seedStars();
   running = true;
+  startTips();
   loop();
   return true;
 }
@@ -134,12 +136,33 @@ export function setProgress(v) {
 
 export function setHeadline(main, subtitle) {
   if (headline) headline.textContent = main;
-  if (sub && subtitle != null) sub.textContent = subtitle;
+  if (sub && subtitle != null) { sub.textContent = subtitle; subHeldUntil = now() + 4000; }
 }
+
+// ── the voice (v1.04) ────────────────────────────────────────────────
+// A rotating tip/lore line in the sub slot, shuffled once per boot so a returning
+// player is not greeted by the same first sentence forever. A *real* subtitle from
+// the pipeline always wins: setHeadline holds the slot for a few seconds and the
+// rotation only writes into silence.
+let subHeldUntil = 0, tipTimer = null, tipOrder = [];
+const now = () => Date.now();
+
+function startTips() {
+  tipOrder = LOADING_TIPS.map((t, i) => i).sort(() => Math.random() - 0.5);
+  let at = 0;
+  const show = () => {
+    if (!sub || now() < subHeldUntil) return;
+    sub.textContent = LOADING_TIPS[tipOrder[at++ % tipOrder.length]];
+  };
+  show();
+  tipTimer = setInterval(show, 5000);
+}
+function stopTips() { if (tipTimer) { clearInterval(tipTimer); tipTimer = null; } }
 
 /** Hand the screen over. The art keeps running until the fade finishes. */
 export function finishLoading() {
   setProgress(1);
+  stopTips();
   if (!overlay) return;
   overlay.classList.add('done');
   setTimeout(() => {

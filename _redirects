@@ -1,0 +1,6 @@
+# Cloudflare Pages routing — mirrors the galaxy server's own ROUTES table, so the
+# static deployment and the laptop deployment answer the same addresses.
+/       /web/portal.html   200
+/play   /index.html        200
+/forum  /web/forum.html    200
+/admin  /web/admin.html    200

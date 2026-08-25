@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Living Galaxy — Forum</title>
+<!-- The community, one file. Client-side hash routing: #/ boards · #/b/slug board ·
+     #/t/id thread. Every piece of user text is rendered with textContent — no HTML
+     ever passes from a post into the page, which is the whole XSS story. -->
+<style>
+:root{
+  --void:#040709; --panel:rgba(8,16,20,.86); --panel-2:rgba(12,22,28,.92);
+  --edge:rgba(96,150,168,.42); --edge-hot:#37b9d4; --edge-dim:rgba(96,150,168,.22);
+  --ink:#cfe4ea; --ink-dim:#7f9aa4; --ink-label:#4fa8be;
+  --amber:#ffb43a; --hostile:#ff5a48; --good:#54e0a0;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);color:var(--ink);font-family:var(--mono);min-height:100vh}
+header{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid var(--edge);
+  background:var(--panel-2);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header a.home{color:var(--edge-hot);text-decoration:none;letter-spacing:.35em;font-weight:600;font-size:15px;
+  text-shadow:0 0 16px rgba(55,185,212,.5)}
+header .crumb{color:var(--ink-dim);font-size:12px;letter-spacing:.12em}
+header .who{margin-left:auto;font-size:11px;color:var(--ink-label)}
+header .who b{color:var(--amber)}
+header .who a{color:var(--ink-dim)}
+main{max-width:860px;margin:0 auto;padding:24px 18px 80px}
+.board,.thread-row,.post{background:var(--panel);border:1px solid var(--edge);border-radius:2px;
+  padding:14px 16px;margin-bottom:10px}
+.board{cursor:pointer;transition:border-color .12s}
+.board:hover,.thread-row:hover{border-color:var(--edge-hot)}
+.board h3{color:var(--edge-hot);font-size:14px;letter-spacing:.12em;margin-bottom:5px}
+.board p{color:var(--ink-dim);font-size:12px;line-height:1.5}
+.board .n{float:right;color:var(--ink-label);font-size:11px}
+.thread-row{cursor:pointer;display:flex;gap:12px;align-items:baseline}
+.thread-row .t{flex:1;font-size:13px;color:var(--ink)}
+.thread-row .meta{font-size:11px;color:var(--ink-dim);white-space:nowrap}
+.badge{font-size:9px;letter-spacing:.15em;border:1px solid var(--edge-dim);color:var(--ink-label);
+  padding:2px 6px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.badge.pin{border-color:var(--amber);color:var(--amber)}
+.badge.lock{border-color:var(--hostile);color:var(--hostile)}
+.badge.adm{border-color:var(--amber);color:var(--amber)}
+.post .head{display:flex;gap:10px;align-items:baseline;margin-bottom:8px;border-bottom:1px solid var(--edge-dim);padding-bottom:7px}
+.post .head b{color:var(--edge-hot);font-size:13px;letter-spacing:.08em}
+.post .head span{color:var(--ink-dim);font-size:11px}
+.post .body{font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+h2.page{font-size:12px;letter-spacing:.25em;color:var(--ink-label);margin:6px 0 16px}
+h2.page em{color:var(--ink);font-style:normal}
+button{font-family:var(--mono);font-size:11px;letter-spacing:.15em;padding:9px 16px;cursor:pointer;
+  background:rgba(10,26,32,.9);border:1px solid var(--edge-hot);color:var(--edge-hot);border-radius:2px}
+button:hover{background:var(--edge-hot);color:var(--void)}
+button.ghost{border-color:var(--edge);color:var(--ink-dim)}
+button.danger{border-color:var(--hostile);color:var(--hostile)}
+input,textarea{width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;margin-bottom:10px;
+  background:rgba(4,16,30,.9);border:1px solid var(--edge);color:var(--ink);border-radius:2px}
+textarea{min-height:110px;resize:vertical}
+input:focus,textarea:focus{outline:none;border-color:var(--edge-hot)}
+.composer{background:var(--panel-2);border:1px solid var(--edge);padding:16px;border-radius:2px;margin-top:18px}
+.composer h4{font-size:11px;letter-spacing:.2em;color:var(--ink-label);margin-bottom:12px}
+.err{color:var(--hostile);font-size:12px;min-height:15px}
+.hint{color:var(--ink-dim);font-size:11px;line-height:1.6;margin-top:14px}
+.hint a{color:var(--ink-label)}
+.modrow{display:flex;gap:8px;margin:4px 0 14px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home" href="/">LIVING GALAXY</a>
+  <span class="crumb" id="crumb">/ FORUM</span>
+  <span class="who" id="who">…</span>
+</header>
+<main id="main"></main>
+
+<script src="/web/config.js"></script>
+<script>
+// Where the galaxy lives (web/config.js). With a CDN-hosted static build, every
+// /api call is rerouted to the configured host, with credentials — one shim here
+// instead of a prefix on thirty fetch calls.
+const API_HOST = (window.GALAXY && window.GALAXY.host)
+  ? 'https://' + String(window.GALAXY.host).replace(/^[a-z]+:\/\//, '').replace(/\/.*$/, '') : '';
+const _fetch = window.fetch.bind(window);
+window.fetch = (u, o) => _fetch(
+  (typeof u === 'string' && u.startsWith('/api')) ? API_HOST + u : u,
+  { credentials: 'include', ...(o || {}) });
+
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const post = (url, body) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+const ago = t => { const s = (Date.now() - t) / 1000;
+  return s < 90 ? 'just now' : s < 3600 ? `${Math.floor(s / 60)}m ago` : s < 86400 ? `${Math.floor(s / 3600)}h ago` : `${Math.floor(s / 86400)}d ago`; };
+
+let ME = { guest: true }, ADMIN = false;
+
+async function whoami() {
+  ME = await (await fetch('/api/me')).json();
+  ADMIN = !!ME.admin;
+  const w = $('#who');
+  w.textContent = '';
+  if (ME.guest) { w.append('viewing as guest · '); const a = el('a', null, 'log in on the portal'); a.href = '/'; w.append(a); }
+  else { const b = el('b', null, ME.user); w.append('signed in as '); w.append(b); if (ADMIN) w.append(' · ADMIN'); }
+}
+
+// ── views ────────────────────────────────────────────────────────────
+async function viewBoards() {
+  $('#crumb').textContent = '/ FORUM';
+  const m = $('#main'); m.textContent = '';
+  m.append(el('h2', 'page', 'COMMS BOARDS'));
+  const { boards } = await (await fetch('/api/forum')).json();
+  for (const b of boards) {
+    const card = el('div', 'board');
+    card.append(el('span', 'n', `${b.threads.length} thread${b.threads.length === 1 ? '' : 's'}`));
+    card.append(el('h3', null, b.title));
+    card.append(el('p', null, b.desc));
+    card.onclick = () => location.hash = '#/b/' + b.slug;
+    m.append(card);
+  }
+  const hint = el('div', 'hint');
+  hint.append('Same account as the game — register or log in on the ');
+  const a = el('a', null, 'portal'); a.href = '/'; hint.append(a); hint.append('.');
+  m.append(hint);
+}
+
+async function viewBoard(slug) {
+  const { boards } = await (await fetch('/api/forum')).json();
+  const b = boards.find(x => x.slug === slug);
+  if (!b) return viewBoards();
+  $('#crumb').textContent = '/ FORUM / ' + b.title.toUpperCase();
+  const m = $('#main'); m.textContent = '';
+  const h = el('h2', 'page'); h.append('BOARD · '); h.append(el('em', null, b.title)); m.append(h);
+
+  if (!b.threads.length) m.append(el('p', 'hint', 'Silence on this channel. Open it.'));
+  for (const t of b.threads) {
+    const row = el('div', 'thread-row');
+    const title = el('span', 't');
+    if (t.pinned) title.append(el('span', 'badge pin', 'PINNED'));
+    if (t.locked) title.append(el('span', 'badge lock', 'LOCKED'));
+    title.append(t.title);
+    row.append(title);
+    row.append(el('span', 'meta', `${t.author} · ${t.posts} post${t.posts === 1 ? '' : 's'} · ${ago(t.last)}`));
+    row.onclick = () => location.hash = '#/t/' + t.id;
+    m.append(row);
+  }
+
+  const c = el('div', 'composer');
+  c.append(el('h4', null, 'OPEN A NEW THREAD'));
+  if (ME.guest) { c.append(el('p', 'hint', 'Log in on the portal to post.')); }
+  else {
+    const err = el('div', 'err');
+    const ti = el('input'); ti.placeholder = 'Title'; ti.maxLength = 120;
+    const bo = el('textarea'); bo.placeholder = 'Say it plainly. Plain text only.'; bo.maxLength = 4000;
+    const go = el('button', null, 'TRANSMIT');
+    go.onclick = async () => {
+      const r = await post('/api/forum/thread', { board: slug, title: ti.value, body: bo.value });
+      if (r.err) err.textContent = r.err; else location.hash = '#/t/' + r.id;
+    };
+    c.append(err, ti, bo, go);
+  }
+  m.append(c);
+}
+
+async function viewThread(id) {
+  const r = await (await fetch('/api/forum/thread?id=' + (id | 0))).json();
+  if (r.err) return viewBoards();
+  const t = r.thread;
+  $('#crumb').textContent = '/ FORUM / THREAD';
+  const m = $('#main'); m.textContent = '';
+  const h = el('h2', 'page');
+  if (t.pinned) h.append(el('span', 'badge pin', 'PINNED'));
+  if (t.locked) h.append(el('span', 'badge lock', 'LOCKED'));
+  h.append(el('em', null, t.title));
+  m.append(h);
+
+  if (ADMIN) {
+    const mod = el('div', 'modrow');
+    for (const [op, label, cls] of [['pin', t.pinned ? 'UNPIN' : 'PIN', 'ghost'], ['lock', t.locked ? 'UNLOCK' : 'LOCK', 'ghost'], ['delete', 'DELETE', 'danger']]) {
+      const btn = el('button', cls, label);
+      btn.onclick = async () => {
+        if (op === 'delete' && !confirm('Delete this thread for everyone?')) return;
+        await post('/api/forum/mod', { id: t.id, op });
+        op === 'delete' ? (location.hash = '#/b/' + t.board) : viewThread(t.id);
+      };
+      mod.append(btn);
+    }
+    m.append(mod);
+  }
+
+  for (const p of t.posts) {
+    const card = el('div', 'post');
+    const head = el('div', 'head');
+    const name = el('b', null, p.author);
+    head.append(name);
+    if (p.admin) head.append(el('span', 'badge adm', 'ADMIN'));
+    head.append(el('span', null, ago(p.at)));
+    card.append(head);
+    card.append(el('div', 'body', p.body));
+    m.append(card);
+  }
+
+  const c = el('div', 'composer');
+  c.append(el('h4', null, 'REPLY'));
+  if (ME.guest) c.append(el('p', 'hint', 'Log in on the portal to post.'));
+  else if (t.locked && !ADMIN) c.append(el('p', 'hint', 'This thread is locked.'));
+  else {
+    const err = el('div', 'err');
+    const bo = el('textarea'); bo.maxLength = 4000; bo.placeholder = 'Plain text.';
+    const go = el('button', null, 'TRANSMIT');
+    go.onclick = async () => {
+      const rr = await post('/api/forum/reply', { id: t.id, body: bo.value });
+      if (rr.err) err.textContent = rr.err; else viewThread(t.id);
+    };
+    c.append(err, bo, go);
+  }
+  m.append(c);
+}
+
+async function route() {
+  const h = location.hash;
+  let mB, mT;
+  if ((mT = /^#\/t\/(\d+)/.exec(h))) return viewThread(+mT[1]);
+  if ((mB = /^#\/b\/([a-z0-9-]+)/.exec(h))) return viewBoard(mB[1]);
+  viewBoards();
+}
+addEventListener('hashchange', route);
+whoami().then(route);
+</script>
+</body>
+</html>

@@ -4,8 +4,8 @@
 // Patch slices bump VERSION. SCHEMA only moves when the save payload changes shape,
 // and every bump must land with a migration in systems/save.js.
 
-export const VERSION = '1.03.04';
-export const CODENAME = 'Same Sky';
+export const VERSION = '1.04.00';
+export const CODENAME = 'The Front Door';
 export const BUILD_DATE = '2026-08-25';
 
 /** Save payload schema.

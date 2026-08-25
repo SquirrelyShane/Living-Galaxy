@@ -80,6 +80,7 @@ const SUITES = [
   ['galaxy-server', 'the durable galaxy — accounts, the wallet, world deltas across restarts'],
   ['beacon',   'galaxy.local — the mDNS responder, packet maths and a live answer'],
   ['certs',    'self-issued TLS — DER generator, real handshake, half-state healing'],
+  ['portal',   'the web suite — routes, gzip/cache, accounts over http, forum, admin gate'],
   ['soak',     'two hours of game time — leaks, drift, bounded lists']
 ];
 

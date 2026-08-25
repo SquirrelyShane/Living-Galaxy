@@ -242,6 +242,17 @@ function boot() {
       : versionString();
   }
 
+  // The boot screen knows its own galaxy (v1.04): reached over the web, the server
+  // field prefills with the host that served the page — or the one web/config.js
+  // names, when the static build lives on a CDN and the galaxy behind a tunnel.
+  // Prefilled, never forced: a typed address always wins, and file:// sees nothing.
+  const mpUrl = $('mp-url');
+  if (mpUrl && !mpUrl.value && typeof location !== 'undefined' && /^https?:$/.test(location.protocol || '')) {
+    const cfg = (typeof window !== 'undefined' && window.GALAXY && window.GALAXY.host) || '';
+    if (cfg) mpUrl.value = 'wss://' + String(cfg).replace(/^[a-z]+:\/\//, '').replace(/\/.*$/, '');
+    else if (location.host) mpUrl.value = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  }
+
   start.addEventListener('click', () => {
     if (booted) return;
     resumeAudio();

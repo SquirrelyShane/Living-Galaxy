@@ -41,6 +41,10 @@ import { makeRooms, enterSystem, leaveAll, peersOf, systemOf, hostOf, occupancy,
          makeMotionGuard, checkMotion, clearMotion } from './rooms.js';
 import { startBeacon, localIPs } from './beacon.js';
 import { ensureCerts } from './certs.js';
+import { makeForum } from './forum.js';
+import { makeApi } from './api.js';
+import crypto from 'node:crypto';
+import zlib from 'node:zlib';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -105,6 +109,41 @@ const age = () => serverDoc.age + (Date.now() / 1000 - started);
 // Persist accumulated age so the galaxy's clock survives restarts — a pilot who banked
 // their flight yesterday should not find the world younger than they left it.
 setInterval(() => registry.saveAge(serverDoc, Date.now() / 1000 - started), 60_000).unref();
+
+// ── the web suite (v1.04) ────────────────────────────────────────────
+
+const forum = makeForum(vault);
+
+// `--admin=Shane` makes that callsign the galaxy's administrator. If the account does
+// not exist yet it is created with a one-time generated passphrase, printed exactly
+// once — an admin credential must never be a default the whole internet knows.
+const ADMIN = arg('admin', process.env.GALAXY_ADMIN || null);
+if (ADMIN) {
+  if (!registry.account(ADMIN)) {
+    const pw = crypto.randomBytes(9).toString('base64url');
+    const made = registry.register(ADMIN, pw);
+    if (made.err) console.log(`admin: could not create "${ADMIN}" — ${made.err}`);
+    else console.log(`admin account "${ADMIN}" created — passphrase: ${pw}   (write it down; it is not stored in the clear and will never be shown again)`);
+  }
+  const g = registry.setAdmin(ADMIN, true);
+  if (g.ok) console.log(`admin: "${ADMIN}" has the keys`);
+}
+
+// `--web-origin=https://living-galaxy.com` — set when the static site is served from
+// a CDN (GitHub → Cloudflare Pages) and only the galaxy runs here: the API then
+// answers that one cross-origin site, with credentials.
+const WEB_ORIGIN = arg('web-origin', process.env.WEB_ORIGIN || null);
+
+const api = makeApi({
+  registry, vault, forum, secret: SECRET, webOrigin: WEB_ORIGIN,
+  live: () => ({
+    galaxy: 'living', seed: serverDoc.seed, age: +age().toFixed(1),
+    online: [...clients.values()].map(c => ({ name: c.name, sys: c.sys, user: c.user || null })),
+    systems: occupancy(rooms), tls: !!tlsOpts,
+    name: beacon ? beacon.fqdn : null,
+    suspects: Object.fromEntries(guard.suspects)
+  })
+});
 
 // ── live state ───────────────────────────────────────────────────────
 
@@ -316,10 +355,33 @@ const MIME = {
   '.md': 'text/plain'
 };
 
+// The routes people type. `/` is the portal now — the front door of the galaxy — and
+// the game lives at `/play` (served as index.html; its relative asset paths already
+// resolve against `/`, so nothing inside the game moved).
+const ROUTES = {
+  '/': 'web/portal.html',
+  '/play': 'index.html',
+  '/forum': 'web/forum.html',
+  '/admin': 'web/admin.html'
+};
+
+// ── static serving that respects distance ────────────────────────────
+// The game is ~300 small ES modules. Served naively over the tunnel, that is ~300
+// uncached, uncompressed round trips through Cloudflare — the whole reason "it takes
+// a while to load". Three fixes, all standard:
+//   * gzip for text (JS compresses ~4×), cached in memory per file mtime;
+//   * ETag + If-None-Match so a warm browser revalidates for free;
+//   * Cache-Control so Cloudflare's edge keeps the modules close to the players —
+//     max-age 600 for assets (a patch is visible within ten minutes; the version
+//     stamp on the boot screen says which build actually loaded), no-cache for HTML.
+const gzCache = new Map();               // file -> {mtime, buf}
+
 function onRequest(req, res) {
   const url = new URL(req.url, 'http://x');
-  if (url.pathname === '/api/status') {
-    res.writeHead(200, { 'content-type': 'application/json' });
+  const pathname = path.posix.normalize('/' + decodeURIComponent(url.pathname));
+
+  if (pathname === '/api/status') {
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
     return res.end(JSON.stringify({
       galaxy: 'living', seed: serverDoc.seed, age: +age().toFixed(1),
       online: clients.size, systems: occupancy(rooms),
@@ -327,13 +389,45 @@ function onRequest(req, res) {
       suspects: Object.fromEntries(guard.suspects)
     }));
   }
-  // The game itself. Root-relative, traversal-proof, and the vault directory is
-  // unreachable however the path is spelled because we resolve and compare prefixes.
-  let file = path.resolve(ROOT, '.' + path.posix.normalize('/' + decodeURIComponent(url.pathname)));
+  if (pathname.startsWith('/api/')) {
+    api(req, res, { pathname, tls: !!tlsOpts }).catch(e => {
+      console.error('api:', e.message);
+      try { res.writeHead(500, { 'content-type': 'application/json' }); res.end('{"err":"server error"}'); } catch { }
+    });
+    return;
+  }
+
+  // Traversal-proof, vault unreachable however the path is spelled.
+  const routed = ROUTES[pathname];
+  let file = path.resolve(ROOT, routed || ('.' + pathname));
   if (!file.startsWith(ROOT) || file.startsWith(DATA)) { res.writeHead(403); return res.end(); }
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
   if (!fs.existsSync(file)) { res.writeHead(404); return res.end('not found'); }
-  res.writeHead(200, { 'content-type': MIME[path.extname(file)] || 'application/octet-stream' });
+
+  const st = fs.statSync(file);
+  const ext = path.extname(file);
+  const etag = `"${st.mtimeMs}-${st.size}"`;
+  const isHtml = ext === '.html';
+  const headers = {
+    'content-type': MIME[ext] || 'application/octet-stream',
+    etag,
+    'cache-control': isHtml ? 'no-cache' : 'public, max-age=600'
+  };
+  if (req.headers['if-none-match'] === etag) { res.writeHead(304, headers); return res.end(); }
+
+  const wantsGz = /\bgzip\b/.test(req.headers['accept-encoding'] || '');
+  const textual = ['.html', '.js', '.mjs', '.css', '.json', '.svg', '.md'].includes(ext);
+  if (wantsGz && textual && st.size > 512) {
+    let e = gzCache.get(file);
+    if (!e || e.mtime !== st.mtimeMs) {
+      e = { mtime: st.mtimeMs, buf: zlib.gzipSync(fs.readFileSync(file)) };
+      gzCache.set(file, e);
+      if (gzCache.size > 600) gzCache.clear();       // a patch touched everything; start over
+    }
+    res.writeHead(200, { ...headers, 'content-encoding': 'gzip', vary: 'accept-encoding' });
+    return res.end(e.buf);
+  }
+  res.writeHead(200, headers);
   fs.createReadStream(file).pipe(res);
 }
 

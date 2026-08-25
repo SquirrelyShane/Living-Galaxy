@@ -615,6 +615,11 @@
   </div>
 </div>
 
+<!-- Where the galaxy lives. On a CDN-hosted static build web/config.js names the
+     tunnel host; served by the galaxy server itself it names nothing and the boot
+     screen uses its own origin. Loaded best-effort: a file:// solo player without it
+     just gets an empty server field, exactly as before. -->
+<script src="web/config.js" onerror="window.GALAXY={host:''}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>

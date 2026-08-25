@@ -1,3 +1,50 @@
+## 1.04.00 — the front door
+
+The galaxy got a web suite, and the slow load got its actual cause fixed.
+
+**Why it was slow:** the game is ~300 small ES modules, served uncompressed and
+uncacheable — through the tunnel, ~300 full round trips per visitor. Now: gzip on the
+wire (JS shrinks ~4×, cached per file mtime), ETags (a warm browser revalidates for
+free), and `Cache-Control: max-age=600` so Cloudflare's edge keeps the modules near the
+players. HTML stays `no-cache` so a patch is always current.
+
+**The portal** (`/` — the game moved to `/play`, its relative paths untouched): animated
+starfield, live status off `/api/status` (pilots flying, systems occupied, galaxy age),
+ENTER THE GALAXY, and the pilot registry — log in / register with optional email, wallet
+and verification state, one account shared by the boot screen, the forum and the bank.
+The boot screen now **prefills the server address** from wherever the page came from —
+players click Power Up, nothing to type.
+
+**Email auth, honestly.** `server/mail.js` is a stdlib SMTP-over-TLS client: configure
+any relay (env `SMTP_HOST/USER/PASS`) and codes are really mailed. Unconfigured, the
+code appears in the server console and on the admin deck — the operator hands it out,
+which at home-galaxy scale IS the verification. Codes are 6 digits, 24 h, single-use.
+
+**The forum** (`/forum`): four seeded boards, threads/posts in the vault (encrypted like
+everything else), hard caps so spam falls off the tail instead of filling a disk, plain
+text stored raw and rendered with textContent — no HTML ever crosses. Posting requires
+an account; admin gets pin / lock / delete.
+
+**The admin deck** (`/admin`): pilots online with systems, occupancy, motion-guard
+suspects, account count, SMTP state, pending verification codes, forum moderation.
+`--admin=Shane` names the operator; if the account doesn't exist it is created with a
+one-time generated passphrase printed exactly once at boot.
+
+**Sessions** are the same HMAC tickets the game uses, in an HttpOnly cookie; auth
+endpoints are rate-limited per address (scrypt is deliberately slow — unthrottled login
+attempts would be a CPU faucet). The admin bit is re-checked against the account on
+every admin call, so revoking actually revokes.
+
+**Deploy split supported** (`docs/DOMAIN.md` Option B): push the repo to GitHub, serve
+the static build from Cloudflare Pages (`_redirects` included), keep the galaxy behind
+the tunnel on `api.living-galaxy.com` — `web/config.js` names the host, the server's
+`--web-origin` answers cross-origin with credentialed CORS (one exact origin, never a
+wildcard). `.gitignore` keeps the vault off GitHub, permanently.
+
+Also: the loading screen found its voice — 22 rotating lore/tip lines
+(`data/loading-tips.js`) under the headline, shuffled per boot; a real pipeline subtitle
+always outranks a tip. New suite `portal` (36). **71/71 green.** Schema unchanged.
+
 ## 1.03.04 — same sky
 
 The first two-device session found the deepest hole yet: **a resumed save kept its own

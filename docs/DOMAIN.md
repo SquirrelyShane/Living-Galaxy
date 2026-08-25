@@ -21,11 +21,21 @@ it.
    Tunnels → Create a tunnel** → type **Cloudflared** → name it `living-galaxy`.
 
 3. **Install the connector on the Legion.** On the next screen pick **Windows (64-bit)**.
-   It shows a single command containing your tunnel token. Download the installer it
-   offers (or `winget install --id Cloudflare.cloudflared`), then run the shown command
-   in an **Administrator** PowerShell — it installs `cloudflared` as a Windows service,
-   so the tunnel starts with the laptop from now on. The dashboard shows the connector
-   as **Connected**.
+   It shows a single command containing your tunnel **token** (the long `eyJ...` string).
+
+   Install cloudflared itself first — `winget install --id Cloudflare.cloudflared` — then
+   **double-click `tunnel.cmd`** in the game folder and paste the token when it asks.
+   It handles the part the dashboard doesn't mention: installing a Windows service needs
+   an elevated shell, so `tunnel.cmd` re-launches itself with a UAC prompt.
+
+   > Running Cloudflare's command in an ordinary PowerShell fails with
+   > **"Cannot establish a connection to the service control manager: Access is denied."**
+   > That is the missing right-click, not a broken download. Either use `tunnel.cmd`, or
+   > open an admin shell yourself: **Win+X → Terminal (Admin)** / *Windows PowerShell
+   > (Admin)*, `cd` to the folder, and run the dashboard's command there.
+
+   The dashboard then shows the connector as **Connected**. `tunnel.cmd --status` reports
+   the service state; `tunnel.cmd --uninstall` removes it.
 
 4. **Route the hostname.** Still in the tunnel wizard, **Public Hostnames → Add**:
    - Subdomain: *(leave empty)* · Domain: `living-galaxy.com` · Path: *(empty)*
@@ -39,6 +49,37 @@ it.
    **https://living-galaxy.com** — the server serves the game — and put
    **wss://living-galaxy.com** in the boot screen's server field. Real certificate,
    no warnings, no port numbers.
+
+## Option B — static site from GitHub + Cloudflare Pages, galaxy through the tunnel
+
+The load-time upgrade: Cloudflare's edge serves the game's ~300 modules worldwide, and
+the laptop only carries the live galaxy (WebSocket + API). The repo already contains
+everything this needs.
+
+1. **Push the game folder to a GitHub repo.** `.gitignore` already excludes
+   `galaxy-data/` — the vault (accounts, wallets, TLS keys) must NEVER be committed.
+   Check the first push does not contain it.
+2. **Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git** → pick
+   the repo. Framework preset **None**, build command *empty*, output directory `/`.
+   The `_redirects` file in the repo gives Pages the same routes the server has
+   (`/` portal, `/play` game, `/forum`, `/admin`).
+3. **Split the DNS**: point `living-galaxy.com` at the Pages project (Pages → Custom
+   domains → add `living-galaxy.com`), and give the tunnel a subdomain instead — in the
+   tunnel's Public Hostnames change the hostname to **`api.living-galaxy.com`** (same
+   service: HTTPS → localhost:8765, No TLS Verify).
+4. **Tell the static build where the galaxy lives**: edit `web/config.js` in the repo —
+   `host: 'api.living-galaxy.com'` — and commit. Pages redeploys on push.
+5. **Tell the galaxy who may call cross-origin**: start the server with
+   `--web-origin=https://living-galaxy.com` (add it in `launch.cmd`'s node line or set
+   `WEB_ORIGIN`). Sessions then work across the split (SameSite=None cookies).
+
+Players still just open **https://living-galaxy.com** — pages and game arrive from the
+edge, the boot screen prefills `wss://api.living-galaxy.com`, and the laptop only ever
+sees the live traffic. Patching becomes `git push` (static) + replacing the server files
+on the laptop (galaxy).
+
+Option A (everything through the tunnel, no GitHub) keeps working unchanged — v1.04's
+gzip + edge-cache headers already cut the module transfer dramatically even there.
 
 ## How the pieces coexist
 

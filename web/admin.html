@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Living Galaxy — Admin Deck</title>
+<!-- The operator's chair. Everything here is read from /api/admin (admin ticket
+     required — the page is public, the data is not) and refreshed on a timer. -->
+<style>
+:root{
+  --void:#040709; --panel:rgba(8,16,20,.86); --panel-2:rgba(12,22,28,.92);
+  --edge:rgba(96,150,168,.42); --edge-hot:#37b9d4; --edge-dim:rgba(96,150,168,.22);
+  --ink:#cfe4ea; --ink-dim:#7f9aa4; --ink-label:#4fa8be;
+  --amber:#ffb43a; --hostile:#ff5a48; --good:#54e0a0;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);color:var(--ink);font-family:var(--mono);min-height:100vh}
+header{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid var(--edge);
+  background:var(--panel-2);flex-wrap:wrap}
+header a{color:var(--edge-hot);text-decoration:none;letter-spacing:.35em;font-weight:600}
+header .t{color:var(--amber);font-size:12px;letter-spacing:.2em}
+header .who{margin-left:auto;font-size:11px;color:var(--ink-label)}
+main{max-width:960px;margin:0 auto;padding:24px 18px 80px;display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:2px;padding:16px}
+.card.wide{grid-column:1/-1}
+.card h3{font-size:11px;letter-spacing:.22em;color:var(--ink-label);margin-bottom:12px}
+.stat{font-size:26px;color:var(--amber);font-weight:600}
+.stat small{font-size:11px;color:var(--ink-dim);font-weight:400;display:block;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{color:var(--ink-label);text-align:left;font-weight:400;letter-spacing:.1em;font-size:10px;
+  border-bottom:1px solid var(--edge-dim);padding:4px 6px}
+td{padding:6px;border-bottom:1px solid rgba(96,150,168,.12)}
+td b{color:var(--edge-hot)}
+td .code{color:var(--amber);letter-spacing:.2em}
+.ok{color:var(--good)}.bad{color:var(--hostile)}
+button{font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:6px 10px;cursor:pointer;
+  background:rgba(10,26,32,.9);border:1px solid var(--edge);color:var(--ink-dim);border-radius:2px}
+button:hover{border-color:var(--edge-hot);color:var(--edge-hot)}
+button.danger:hover{border-color:var(--hostile);color:var(--hostile)}
+input{font-family:var(--mono);font-size:13px;padding:10px 12px;margin-bottom:10px;width:100%;
+  background:rgba(4,16,30,.9);border:1px solid var(--edge);color:var(--ink);border-radius:2px}
+input:focus{outline:none;border-color:var(--edge-hot)}
+#gate{max-width:380px;margin:14vh auto;padding:0 18px}
+.err{color:var(--hostile);font-size:12px;min-height:16px}
+.hint{color:var(--ink-dim);font-size:11px;line-height:1.6}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <a href="/">LIVING GALAXY</a><span class="t">ADMIN DECK</span>
+  <span class="who" id="who"></span>
+</header>
+
+<div id="gate">
+  <div class="card">
+    <h3>OPERATOR AUTHENTICATION</h3>
+    <div class="err" id="g-err"></div>
+    <input id="g-user" placeholder="Admin callsign"/>
+    <input id="g-pass" type="password" placeholder="Passphrase"/>
+    <button id="g-go" style="width:100%;padding:12px;font-size:12px">AUTHENTICATE</button>
+    <p class="hint" style="margin-top:10px">The admin account is named at server start
+      (<b>--admin=callsign</b>); its first passphrase is printed in the server window.</p>
+  </div>
+</div>
+
+<main id="deck" class="hide"></main>
+
+<script src="/web/config.js"></script>
+<script>
+// Where the galaxy lives (web/config.js). With a CDN-hosted static build, every
+// /api call is rerouted to the configured host, with credentials — one shim here
+// instead of a prefix on thirty fetch calls.
+const API_HOST = (window.GALAXY && window.GALAXY.host)
+  ? 'https://' + String(window.GALAXY.host).replace(/^[a-z]+:\/\//, '').replace(/\/.*$/, '') : '';
+const _fetch = window.fetch.bind(window);
+window.fetch = (u, o) => _fetch(
+  (typeof u === 'string' && u.startsWith('/api')) ? API_HOST + u : u,
+  { credentials: 'include', ...(o || {}) });
+
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const post = (url, body) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+
+$('#g-go').onclick = async () => {
+  const r = await post('/api/login', { user: $('#g-user').value.trim(), pass: $('#g-pass').value });
+  if (r.err) return $('#g-err').textContent = r.err;
+  if (!r.admin) return $('#g-err').textContent = 'that account is not an administrator';
+  boot();
+};
+$('#g-pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('#g-go').click(); });
+
+async function boot() {
+  const me = await (await fetch('/api/me')).json();
+  if (me.guest || !me.admin) { $('#gate').classList.remove('hide'); $('#deck').classList.add('hide'); return; }
+  $('#who').textContent = 'operator: ' + me.user;
+  $('#gate').classList.add('hide'); $('#deck').classList.remove('hide');
+  refresh();
+}
+
+async function refresh() {
+  const r = await (await fetch('/api/admin')).json();
+  if (r.err) return boot();
+  const deck = $('#deck'); deck.textContent = '';
+
+  // headline stats
+  const stats = [
+    [r.online.length, 'pilots flying now'],
+    [Object.keys(r.systems || {}).length, 'systems occupied'],
+    [r.accounts, 'registered accounts'],
+    [`${Math.floor(r.age / 86400)}d`, 'galaxy age']
+  ];
+  for (const [v, label] of stats) {
+    const c = el('div', 'card');
+    const s = el('div', 'stat', String(v)); s.append(el('small', null, label));
+    c.append(el('h3', null, 'GALAXY'), s);
+    deck.append(c);
+  }
+
+  // link + security state
+  const sec = el('div', 'card');
+  sec.append(el('h3', null, 'LINK'));
+  const tls = el('div', null, ''); tls.append('transport: ', Object.assign(el('span', r.tls ? 'ok' : 'bad', r.tls ? 'ENCRYPTED (wss)' : 'PLAIN'), {}));
+  const smtp = el('div', null, ''); smtp.append('mail: ', el('span', r.smtp ? 'ok' : 'bad', r.smtp ? 'SMTP configured' : 'not configured — codes appear below'));
+  sec.append(tls, smtp);
+  if (r.name) sec.append(el('div', 'hint', 'LAN name: ' + r.name));
+  deck.append(sec);
+
+  // motion-guard suspects
+  const sus = el('div', 'card');
+  sus.append(el('h3', null, 'MOTION GUARD'));
+  const entries = Object.entries(r.suspects || {});
+  if (!entries.length) sus.append(el('div', 'ok', 'no kinematic anomalies'));
+  else for (const [id, n] of entries) sus.append(el('div', 'bad', `pilot #${id} — ${n} impossible move${n === 1 ? '' : 's'}`));
+  deck.append(sus);
+
+  // who's flying
+  const fly = el('div', 'card wide');
+  fly.append(el('h3', null, 'PILOTS ONLINE'));
+  if (!r.online.length) fly.append(el('div', 'hint', 'empty sky'));
+  else {
+    const tb = el('table'); const hr = el('tr');
+    for (const h of ['CALLSIGN', 'ACCOUNT', 'SYSTEM']) hr.append(el('th', null, h));
+    tb.append(hr);
+    for (const p of r.online) {
+      const tr = el('tr');
+      const n = el('td'); n.append(el('b', null, p.name)); tr.append(n);
+      tr.append(el('td', null, p.user || 'guest'));
+      tr.append(el('td', null, '#' + p.sys));
+      tb.append(tr);
+    }
+    fly.append(tb);
+  }
+  deck.append(fly);
+
+  // pending verification codes — the honest fallback when SMTP is not configured
+  const pend = el('div', 'card wide');
+  pend.append(el('h3', null, 'PENDING VERIFICATION CODES'));
+  if (!r.pending.length) pend.append(el('div', 'hint', 'none pending'));
+  else {
+    const tb = el('table'); const hr = el('tr');
+    for (const h of ['ACCOUNT', 'EMAIL', 'CODE']) hr.append(el('th', null, h));
+    tb.append(hr);
+    for (const p of r.pending) {
+      const tr = el('tr');
+      const n = el('td'); n.append(el('b', null, p.user)); tr.append(n);
+      tr.append(el('td', null, p.email || '—'));
+      tr.append(el('td', 'code', p.code));
+      tb.append(tr);
+    }
+    pend.append(tb, el('div', 'hint', 'Without SMTP, hand these to their owners yourself — that IS the verification.'));
+  }
+  deck.append(pend);
+
+  // forum moderation
+  const mod = el('div', 'card wide');
+  mod.append(el('h3', null, 'FORUM MODERATION'));
+  const { boards } = await (await fetch('/api/forum')).json();
+  const tb = el('table'); const hr = el('tr');
+  for (const h of ['BOARD', 'THREAD', 'BY', 'POSTS', '']) hr.append(el('th', null, h));
+  tb.append(hr);
+  let any = false;
+  for (const b of boards) for (const t of b.threads) {
+    any = true;
+    const tr = el('tr');
+    tr.append(el('td', null, b.title));
+    const tt = el('td'); const a = el('b', null, t.title); tt.append(a);
+    if (t.pinned) tt.append(' 📌'); if (t.locked) tt.append(' 🔒');
+    tr.append(tt);
+    tr.append(el('td', null, t.author));
+    tr.append(el('td', null, String(t.posts)));
+    const ops = el('td');
+    for (const [op, label, cls] of [['pin', t.pinned ? 'unpin' : 'pin', ''], ['lock', t.locked ? 'unlock' : 'lock', ''], ['delete', 'delete', 'danger']]) {
+      const btn = el('button', cls, label);
+      btn.onclick = async () => {
+        if (op === 'delete' && !confirm(`Delete "${t.title}"?`)) return;
+        await post('/api/forum/mod', { id: t.id, op });
+        refresh();
+      };
+      ops.append(btn, ' ');
+    }
+    tr.append(ops);
+    tb.append(tr);
+  }
+  mod.append(any ? tb : el('div', 'hint', 'no threads yet'));
+  deck.append(mod);
+}
+
+boot();
+setInterval(() => { if (!$('#deck').classList.contains('hide')) refresh(); }, 12000);
+</script>
+</body>
+</html>

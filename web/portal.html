@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Living Galaxy</title>
+<!-- The front door. One file, no dependencies, the game's own mil-tech palette —
+     glass-cockpit cyan/steel with phosphor-amber data accents. Everything live on this
+     page (pilot count, occupancy, account state) comes from /api; everything static is
+     inline so the portal is one request. -->
+<style>
+:root{
+  --void:#040709; --panel:rgba(8,16,20,.86); --panel-2:rgba(12,22,28,.92);
+  --edge:rgba(96,150,168,.42); --edge-hot:#37b9d4; --edge-dim:rgba(96,150,168,.22);
+  --ink:#cfe4ea; --ink-dim:#7f9aa4; --ink-label:#4fa8be;
+  --amber:#ffb43a; --hostile:#ff5a48; --good:#54e0a0;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--void);color:var(--ink);font-family:var(--mono);overflow-x:hidden}
+canvas#stars{position:fixed;inset:0;z-index:0}
+main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:8vh 20px 60px;
+     display:flex;flex-direction:column;gap:26px;align-items:center}
+h1{font-size:clamp(26px,6vw,44px);letter-spacing:.45em;font-weight:600;color:var(--edge-hot);
+   text-shadow:0 0 26px rgba(55,185,212,.55);text-align:center;padding-left:.45em}
+.tag{color:var(--ink-dim);font-size:12px;letter-spacing:.18em;text-align:center}
+#status{font-size:12px;color:var(--ink-label);letter-spacing:.08em;text-align:center;min-height:16px}
+#status b{color:var(--amber);font-weight:600}
+#status .ok{color:var(--good)}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:2px;
+      padding:18px 20px;width:100%;max-width:520px;
+      background-image:linear-gradient(var(--edge-hot),var(--edge-hot)),linear-gradient(var(--edge-hot),var(--edge-hot));
+      background-size:22px 1px,1px 22px;background-repeat:no-repeat;background-position:0 0,0 0}
+.card h2{font-size:11px;letter-spacing:.25em;color:var(--ink-label);margin-bottom:14px;font-weight:600}
+button,.btn{display:inline-block;font-family:var(--mono);font-size:13px;letter-spacing:.14em;
+  padding:13px 26px;background:rgba(10,26,32,.9);border:1px solid var(--edge-hot);color:var(--edge-hot);
+  border-radius:2px;cursor:pointer;text-decoration:none;text-align:center;transition:background .12s,color .12s}
+button:hover,.btn:hover{background:var(--edge-hot);color:var(--void)}
+.btn-big{font-size:16px;padding:18px 44px;letter-spacing:.3em;text-shadow:0 0 14px rgba(55,185,212,.5)}
+.ghost{border-color:var(--edge);color:var(--ink-dim);font-size:11px;padding:9px 14px}
+input{width:100%;font-family:var(--mono);font-size:13px;padding:11px 12px;margin-bottom:10px;
+  background:rgba(4,16,30,.9);border:1px solid var(--edge);color:var(--ink);border-radius:2px}
+input::placeholder{color:#5e84a4}
+input:focus{outline:none;border-color:var(--edge-hot)}
+.tabs{display:flex;gap:2px;margin-bottom:14px}
+.tabs button{flex:1;padding:9px 0;font-size:11px;letter-spacing:.2em;border-color:var(--edge);color:var(--ink-dim)}
+.tabs button.on{border-color:var(--edge-hot);color:var(--edge-hot)}
+.err{color:var(--hostile);font-size:12px;min-height:15px;margin-bottom:6px}
+.good{color:var(--good)}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.chip{font-size:11px;color:var(--ink-dim);border:1px solid var(--edge-dim);padding:6px 12px;border-radius:2px}
+.chip b{color:var(--amber)}
+.addr{display:flex;gap:8px;align-items:center}
+.addr code{flex:1;background:rgba(4,16,30,.9);border:1px solid var(--edge);padding:10px 12px;
+  font-size:12px;color:var(--amber);overflow-x:auto;white-space:nowrap}
+.links{display:flex;gap:22px;font-size:12px;letter-spacing:.15em}
+.links a{color:var(--ink-label);text-decoration:none;border-bottom:1px solid var(--edge-dim);padding-bottom:2px}
+.links a:hover{color:var(--edge-hot);border-color:var(--edge-hot)}
+footer{color:#44606c;font-size:10px;letter-spacing:.12em;text-align:center;margin-top:12px}
+.hide{display:none}
+small.note{display:block;color:var(--ink-dim);font-size:10.5px;line-height:1.6;margin-top:8px}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<main>
+  <div>
+    <h1>LIVING GALAXY</h1>
+    <div class="tag">A PROCEDURAL GALAXY · LIVING ON ONE MACHINE · YOURS TO FLY</div>
+  </div>
+
+  <div id="status">contacting the galaxy…</div>
+
+  <a class="btn btn-big" href="/play">ENTER THE GALAXY</a>
+
+  <!-- account -->
+  <div class="card" id="acct-card">
+    <h2>PILOT REGISTRY</h2>
+
+    <div id="acct-forms">
+      <div class="tabs">
+        <button id="tab-login" class="on">LOG IN</button>
+        <button id="tab-register">REGISTER</button>
+      </div>
+      <div class="err" id="acct-err"></div>
+      <input id="f-user" maxlength="24" placeholder="Callsign" autocomplete="username"/>
+      <input id="f-pass" type="password" maxlength="64" placeholder="Passphrase" autocomplete="current-password"/>
+      <input id="f-email" class="hide" type="email" maxlength="120" placeholder="Email (optional — for account verification)"/>
+      <button id="f-go" style="width:100%">LOG IN</button>
+      <small class="note">One account everywhere: the boot screen, the forum, the bank.
+        Registration is instant; the passphrase decides everything after that.</small>
+    </div>
+
+    <div id="acct-me" class="hide">
+      <div class="err" id="me-err"></div>
+      <div class="row" style="justify-content:flex-start;margin-bottom:12px">
+        <span class="chip">CALLSIGN <b id="me-user">—</b></span>
+        <span class="chip">BANKED <b id="me-wallet">0</b> CR</span>
+        <span class="chip" id="me-verified">UNVERIFIED</span>
+        <span class="chip hide" id="me-admin" style="border-color:var(--amber);color:var(--amber)">ADMIN</span>
+      </div>
+      <div id="verify-row" class="hide">
+        <input id="v-code" maxlength="6" placeholder="6-digit verification code"/>
+        <div class="row" style="justify-content:flex-start">
+          <button class="ghost" id="v-go">VERIFY</button>
+          <button class="ghost" id="v-resend">RESEND CODE</button>
+        </div>
+      </div>
+      <div class="row" style="justify-content:flex-start;margin-top:10px">
+        <a class="btn ghost" href="/play">FLY AS <span id="me-user2"></span></a>
+        <a class="btn ghost hide" id="me-adminlink" href="/admin">ADMIN DECK</a>
+        <button class="ghost" id="me-out">LOG OUT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- how to join -->
+  <div class="card">
+    <h2>JOINING THIS GALAXY</h2>
+    <div class="addr"><code id="join-addr">wss://…</code><button class="ghost" id="copy">COPY</button></div>
+    <small class="note">Open <b>ENTER THE GALAXY</b>, pick a callsign, and put this address in
+      the server field — the boot screen fills it in automatically when you got here through
+      this page. First visit on a new device may ask you to accept the server's certificate once.</small>
+  </div>
+
+  <div class="links">
+    <a href="/forum">COMMUNITY FORUM</a>
+    <a href="/api/status">SERVER STATUS</a>
+    <a href="/CHANGELOG.md">CHANGELOG</a>
+  </div>
+
+  <footer id="foot">LIVING GALAXY</footer>
+</main>
+
+<script src="/web/config.js"></script>
+<script>
+// Where the galaxy lives (web/config.js). With a CDN-hosted static build, every
+// /api call is rerouted to the configured host, with credentials — one shim here
+// instead of a prefix on thirty fetch calls.
+const API_HOST = (window.GALAXY && window.GALAXY.host)
+  ? 'https://' + String(window.GALAXY.host).replace(/^[a-z]+:\/\//, '').replace(/\/.*$/, '') : '';
+const _fetch = window.fetch.bind(window);
+window.fetch = (u, o) => _fetch(
+  (typeof u === 'string' && u.startsWith('/api')) ? API_HOST + u : u,
+  { credentials: 'include', ...(o || {}) });
+
+// ── starfield: three parallax layers + the odd warp streak ───────────
+const cv = document.getElementById('stars'), cx = cv.getContext('2d');
+let W, H, stars = [], streak = null;
+function sizeCv() {
+  W = cv.width = innerWidth * devicePixelRatio; H = cv.height = innerHeight * devicePixelRatio;
+  stars = Array.from({ length: Math.min(420, W * H / 6000) }, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    z: 0.25 + Math.random() * 0.75,                 // depth = speed = brightness
+    tw: Math.random() * Math.PI * 2
+  }));
+}
+addEventListener('resize', sizeCv); sizeCv();
+(function frame(t) {
+  cx.fillStyle = '#040709'; cx.fillRect(0, 0, W, H);
+  for (const s of stars) {
+    s.x -= s.z * 0.25 * devicePixelRatio;
+    if (s.x < 0) { s.x = W; s.y = Math.random() * H; }
+    const a = s.z * (0.55 + 0.45 * Math.sin(t / 900 + s.tw));
+    cx.fillStyle = `rgba(${170 + 60 * s.z},${210 + 30 * s.z},235,${a})`;
+    cx.fillRect(s.x, s.y, s.z * 1.7 * devicePixelRatio, s.z * 1.7 * devicePixelRatio);
+  }
+  if (!streak && Math.random() < 0.004) streak = { x: W + 60, y: Math.random() * H * 0.8, v: 14 + Math.random() * 20 };
+  if (streak) {
+    cx.strokeStyle = 'rgba(55,185,212,.5)'; cx.lineWidth = 1.2 * devicePixelRatio;
+    cx.beginPath(); cx.moveTo(streak.x, streak.y); cx.lineTo(streak.x + 90 * devicePixelRatio, streak.y); cx.stroke();
+    streak.x -= streak.v * devicePixelRatio;
+    if (streak.x < -120) streak = null;
+  }
+  requestAnimationFrame(frame);
+})(0);
+
+// ── live status ──────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const wsAddr = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+$('join-addr').textContent = wsAddr;
+$('copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(wsAddr); $('copy').textContent = 'COPIED'; setTimeout(() => $('copy').textContent = 'COPY', 1400); };
+
+async function refreshStatus() {
+  try {
+    const s = await (await fetch('/api/status')).json();
+    const sys = Object.keys(s.systems || {}).length;
+    const days = Math.floor((s.age || 0) / 86400);
+    $('status').innerHTML = `<span class="ok">◉ GALAXY ONLINE</span> · <b>${s.online}</b> pilot${s.online === 1 ? '' : 's'} flying` +
+      (sys ? ` · <b>${sys}</b> system${sys === 1 ? '' : 's'} occupied` : '') +
+      ` · galaxy age <b>${days}d ${Math.floor(((s.age || 0) % 86400) / 3600)}h</b>` +
+      (s.tls ? '' : ' · <span style="color:var(--hostile)">UNENCRYPTED LINK</span>');
+    $('foot').textContent = `LIVING GALAXY · seed ${s.seed}` + (s.name ? ` · LAN: https://${s.name}:${location.port || 8765}` : '');
+  } catch (e) { $('status').textContent = 'galaxy unreachable — is the server running?'; }
+}
+refreshStatus(); setInterval(refreshStatus, 15000);
+
+// ── account ──────────────────────────────────────────────────────────
+let mode = 'login';
+const post = (url, body) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+
+function setMode(m) {
+  mode = m;
+  $('tab-login').classList.toggle('on', m === 'login');
+  $('tab-register').classList.toggle('on', m === 'register');
+  $('f-email').classList.toggle('hide', m === 'login');
+  $('f-go').textContent = m === 'login' ? 'LOG IN' : 'REGISTER';
+  $('acct-err').textContent = '';
+}
+$('tab-login').onclick = () => setMode('login');
+$('tab-register').onclick = () => setMode('register');
+
+function showMe(me) {
+  $('acct-forms').classList.add('hide');
+  $('acct-me').classList.remove('hide');
+  $('me-user').textContent = me.user; $('me-user2').textContent = me.user;
+  $('me-wallet').textContent = me.wallet ?? 0;
+  const v = $('me-verified');
+  if (me.verified) { v.textContent = 'VERIFIED'; v.classList.add('good'); $('verify-row').classList.add('hide'); }
+  else if (me.email) { v.textContent = 'VERIFY PENDING'; $('verify-row').classList.remove('hide'); }
+  else v.textContent = 'NO EMAIL SET';
+  $('me-admin').classList.toggle('hide', !me.admin);
+  $('me-adminlink').classList.toggle('hide', !me.admin);
+}
+function showForms() { $('acct-forms').classList.remove('hide'); $('acct-me').classList.add('hide'); }
+
+$('f-go').onclick = async () => {
+  const body = { user: $('f-user').value.trim(), pass: $('f-pass').value, email: $('f-email').value.trim() || undefined };
+  const r = await post(mode === 'login' ? '/api/login' : '/api/register', body);
+  if (r.err) { $('acct-err').textContent = r.err; return; }
+  const me = await (await fetch('/api/me')).json();
+  if (!me.guest) showMe(me);
+};
+$('f-pass').addEventListener('keydown', e => { if (e.key === 'Enter') $('f-go').click(); });
+
+$('me-out').onclick = async () => { await post('/api/logout', {}); showForms(); };
+$('v-go').onclick = async () => {
+  const r = await post('/api/verify', { code: $('v-code').value });
+  $('me-err').textContent = r.err || '';
+  if (r.ok) { $('me-verified').textContent = 'VERIFIED'; $('me-verified').classList.add('good'); $('verify-row').classList.add('hide'); }
+};
+$('v-resend').onclick = async () => {
+  const r = await post('/api/resend', {});
+  $('me-err').textContent = r.err ? r.err : (r.mailed ? 'code sent — check your email' : 'code issued — ask the galaxy operator for it');
+};
+
+fetch('/api/me').then(r => r.json()).then(me => { if (!me.guest) showMe(me); });
+</script>
+</body>
+</html>

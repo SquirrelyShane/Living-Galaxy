@@ -1,6 +1,6 @@
 {
   "name": "living-galaxy",
-  "version": "1.03.04",
+  "version": "1.04.00",
   "description": "Browser-based 3D space RPG. Vanilla ES modules, no build step, no runtime dependencies.",
   "type": "module",
   "private": true,
@@ -60,6 +60,7 @@
     "test:galaxy-server": "node test/galaxy-server.mjs",
     "test:beacon": "node test/beacon.mjs",
     "test:certs": "node test/certs.mjs",
+    "test:portal": "node test/portal.mjs",
     "test:nav": "node test/warp-nav.mjs",
     "serve": "python3 -m http.server 8080",
     "galaxy": "node server/main.js",
