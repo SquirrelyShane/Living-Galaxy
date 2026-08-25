@@ -1,10 +1,6 @@
 {
   "name": "living-galaxy",
-<<<<<<< HEAD
   "version": "1.04.00",
-=======
-  "version": "1.02.30",
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "description": "Browser-based 3D space RPG. Vanilla ES modules, no build step, no runtime dependencies.",
   "type": "module",
   "private": true,
