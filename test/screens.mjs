@@ -143,7 +143,6 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
-<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { VERSION, CODENAME, SCHEMA, BUILD_DATE } = await imp('core/version.js');
 const { LINEAGES, CORPORATIONS, CAREERS, CAREER_KEYS, LINEAGE_KEYS } = await imp('data/origins.js');
@@ -151,15 +150,6 @@ const { createCharacter } = await imp('systems/crew/character.js');
 const { companyReport, hasCompany, hqBrief } = await imp('systems/company/company.js');
 const CMD = await imp('systems/company/command.js');
 const { fleetOrderReport } = await imp('systems/company/orders.js');
-=======
-const { initMarket } = await imp('systems/market.js');
-const { VERSION, CODENAME, SCHEMA, BUILD_DATE } = await imp('core/version.js');
-const { LINEAGES, CORPORATIONS, CAREERS, CAREER_KEYS, LINEAGE_KEYS } = await imp('data/origins.js');
-const { createCharacter } = await imp('systems/character.js');
-const { companyReport, hasCompany, hqBrief } = await imp('systems/company.js');
-const CMD = await imp('systems/command.js');
-const { fleetOrderReport } = await imp('systems/orders.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { SHIP_CLASSES } = await imp('core/config.js');
 
 initScene();

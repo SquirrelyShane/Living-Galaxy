@@ -27,7 +27,6 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { ORDERS } = await imp('core/config.js');
 const G = await imp('data/npc-kb/grammar.js');
@@ -41,17 +40,6 @@ const FW = await imp('systems/company/fleet-work.js');
 const CMD = await imp('systems/company/command.js');
 const { fleetOrderReport, updateFleetOrders, FLEET_ORDER_TYPES } = await imp('systems/company/orders.js');
 const { createCharacter } = await imp('systems/crew/character.js');
-=======
-const { initMarket } = await imp('systems/market.js');
-const { ORDERS } = await imp('core/config.js');
-const G = await imp('data/npc-grammar.js');
-const { TOPICS, TOPIC_KEYS, utter } = await imp('data/npc-topics.js');
-const FL = await imp('systems/fleet.js');
-const FW = await imp('systems/fleet-work.js');
-const CMD = await imp('systems/command.js');
-const { fleetOrderReport, updateFleetOrders, FLEET_ORDER_TYPES } = await imp('systems/orders.js');
-const { createCharacter } = await imp('systems/character.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(11);
 createSystem(); createAsteroids(); createNpcs(); initMarket();

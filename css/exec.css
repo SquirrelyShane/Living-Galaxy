@@ -93,13 +93,9 @@ body.command-surface #fleet-alert{top:6px;left:50%;transform:translateX(-50%);z-
 .er-s{flex:1 1 auto;color:var(--ink-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .er-d{flex:0 0 auto;color:var(--amber-dim);font-variant-numeric:tabular-nums}
 
-<<<<<<< HEAD
 /* The column count follows the button count and is restated at the end of this file, where
    the boardroom section sets it to five for the ten buttons the deck now carries. */
 #exec-actions{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
-=======
-#exec-actions{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 .exec-btn{padding:11px 2px;background:rgba(8,18,22,.85);border:1px solid var(--edge);
   border-radius:var(--r);color:var(--ink);font-family:var(--mono);font-size:9px;
   letter-spacing:1.2px}
@@ -159,7 +155,6 @@ body.command-surface #fleet-alert{top:6px;left:50%;transform:translateX(-50%);z-
   .xn-ico{font-size:18px}
   #exec-foot{display:none}
 }
-<<<<<<< HEAD
 
 /* ── 5. the boardroom (v1.02.40) ───────────────────────────────────── */
 /* Every desk in the system on one screen. Categorical colour identifies the power, the
@@ -263,5 +258,3 @@ body.galaxy-open #galaxy-overlay::before{content:'';position:absolute;inset:0;
 
 /* Eleven deck buttons now. Still five columns; the last row simply runs one short, which is
    an even grid with a gap rather than an orphan pushed onto a row of its own. */
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

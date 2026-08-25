@@ -16,13 +16,8 @@
 
 import { $, el } from '../core/utils.js';
 import { AXES } from '../npc-avatar/core/traits.js';
-<<<<<<< HEAD
 import { personaReport } from '../systems/npc/npc-brain.js';
 import { sfx } from '../systems/platform/audio.js';
-=======
-import { personaReport } from '../systems/npc-brain.js';
-import { sfx } from '../systems/audio.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 let overlay, body, nameEl;
 

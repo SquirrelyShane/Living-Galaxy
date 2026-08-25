@@ -27,19 +27,11 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
-<<<<<<< HEAD
 const W = await imp('systems/crew/welfare.js');
 const CL = await imp('systems/crew/crew-log.js');
 const L = await imp('core/log.js');
 const { initCrew, updateCrew, makeCrew } = await imp('systems/crew/crew.js');
 const { undock } = await imp('systems/trade/economy.js');
-=======
-const W = await imp('systems/welfare.js');
-const CL = await imp('systems/crew-log.js');
-const L = await imp('core/log.js');
-const { initCrew, updateCrew, makeCrew } = await imp('systems/crew.js');
-const { undock } = await imp('systems/economy.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { WELFARE, CREW, CRAFT } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 

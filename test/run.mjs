@@ -13,11 +13,7 @@ const ok = (name, cond, extra = '') => {
 const imp = p => import(new URL('src/' + p, ROOT).href);
 
 const { S, recalcStats, totalMass, cargoFree, seatWeapon } = await imp('core/state.js');
-<<<<<<< HEAD
 const preflight = await imp('systems/platform/preflight.js');
-=======
-const preflight = await imp('systems/preflight.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { seedWorld, makeRng, wrand } = await imp('core/rng.js');
 const { initScene, render } = await imp('world/scene.js');
 const { createStarfield, updateStarfield } = await imp('world/starfield.js');
@@ -25,7 +21,6 @@ const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids, updateAsteroids, nearestAsteroid } = await imp('world/asteroids.js');
 const { initPlayerFx, updatePlayer } = await imp('entities/player.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 // The entity factories are a boot step rather than an import side effect, so that a system
 // asking `spawn('npc', …)` gets a null it can handle instead of depending on which modules
 // happened to be loaded. See `core/spawn.js`. A suite that exercises spawning boots them.
@@ -49,26 +44,6 @@ const { initHail } = await imp('systems/flight/approach.js');
 const { initMarket, updateMarket, marketPrice, applyTrade, bestMarket } = await imp('systems/trade/market.js');
 const { initWorldSim, updateWorldSim, deliverToSite, inClaimedSpace, captureNpc } = await imp('systems/platform/worldsim.js');
 const { damagePlayerDisabling } = await imp('systems/combat/combat.js');
-=======
-const { initProjectiles, updateProjectiles, fire, activeProjectiles } = await imp('systems/projectiles.js');
-const { initCombat, updateCombat, damagePlayer, damageNpc } = await imp('systems/combat.js');
-const { holdMass } = await imp('systems/holds.js');
-const { updateWeapons } = await imp('systems/weapons.js');
-const { initMining, updateMining } = await imp('systems/mining.js');
-const { updateWarp, toggleWarp, setCourse } = await imp('systems/warp.js');
-const { startApproach, updateApproach, matchTarget, requestDocking, hailOpen, closeHail } = await imp('systems/approach.js');
-const { scanPlanet, probePlanet, asteroidDetail, surveyLevel } = await imp('systems/survey.js');
-const { updateTargeting, cycleTarget, setTarget, clearTarget } = await imp('systems/targeting.js');
-const { repairQuote, updateDocking, dock, undock, sell, sellAll, repair, buyUpgrade, upgradeCost, switchClass, buyHull, ownsHull, hullPrice, upgradeLocked, canUpgrade } = await imp('systems/economy.js');
-const { saveGame, loadGame, hasSave, wipeSave } = await imp('systems/save.js');
-const { initAudio } = await imp('systems/audio.js');
-const { initHud } = await imp('ui/hud.js');
-const { initDock } = await imp('ui/dock.js');
-const { initHail } = await imp('systems/approach.js');
-const { initMarket, updateMarket, marketPrice, applyTrade, bestMarket } = await imp('systems/market.js');
-const { initWorldSim, updateWorldSim, deliverToSite, inClaimedSpace, captureNpc } = await imp('systems/worldsim.js');
-const { damagePlayerDisabling } = await imp('systems/combat.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 console.log('\n— boot —');
 initScene();
@@ -257,7 +232,6 @@ ok('cargo mass raises total mass', totalMass() > S.stats.dryMass);
 ok('cargo free space shrinks', cargoFree() < S.stats.cargoCap);
 
 console.log('\n— docking and economy —');
-<<<<<<< HEAD
 const { DOCK } = await imp('core/config.js');
 const station = S.world.stations[2];
 const berthR = (station.userData && station.userData.radius) || 30;
@@ -274,11 +248,6 @@ ok('no pad from well off the hull', S.dockCandidate === null,
    String(S.dockCandidate && S.dockCandidate.userData.name));
 
 S.player.position.copy(station.position).x += berthR + DOCK.reach * 0.6;
-=======
-const station = S.world.stations[2];
-S.player.position.copy(station.position).x += 100;
-S.player.velocity.set(0, 0, 0);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 updateDocking();
 ok('dock candidate detected', S.dockCandidate === station, String(S.dockCandidate && S.dockCandidate.userData.name));
 ok('docking succeeds', dock() === true);
@@ -597,11 +566,7 @@ console.log('\n— approach & velocity match —');
 
 console.log('\n— planetary bodies —');
 {
-<<<<<<< HEAD
   const { PLANET_TYPES } = await imp('data/planetary/planets.js');
-=======
-  const { PLANET_TYPES } = await imp('data/planets.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const planets = S.world.bodies.filter(b => b.userData.kind === 'planet');
   ok('20 planetary classes defined', Object.keys(PLANET_TYPES).length === 20,
      String(Object.keys(PLANET_TYPES).length));
@@ -621,11 +586,7 @@ console.log('\n— planetary bodies —');
 
 console.log('\n— gravity wells & warp —');
 {
-<<<<<<< HEAD
   const { wellRadius, inGravityWell } = await imp('systems/flight/warp.js');
-=======
-  const { wellRadius, inGravityWell } = await imp('systems/warp.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const giant = S.world.bodies.find(b => b.userData.ptype === 'gasGiant');
   const rock  = S.world.bodies.find(b => b.userData.ptype === 'barren');
   ok('massive bodies project a larger well', wellRadius(giant.userData) > wellRadius(rock.userData) * 1.5,
@@ -715,11 +676,7 @@ console.log('\n— market —');
 console.log('\n— weapon modules —');
 {
   const { WEAPON_MODULES, WEAPON_KEYS } = await imp('data/weapons.js');
-<<<<<<< HEAD
   const { buyWeapon, ownsWeapon } = await imp('systems/trade/economy.js');
-=======
-  const { buyWeapon, ownsWeapon } = await imp('systems/economy.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('weapon module database populated', WEAPON_KEYS.length >= 9, String(WEAPON_KEYS.length));
   const kinds = new Set(WEAPON_KEYS.map(k => WEAPON_MODULES[k].kind));
   ok('energy, projectile, missile and utility all present',
@@ -821,15 +778,9 @@ console.log('\n— hull ownership —');
 }
 
 console.log('\n— fitting —');
-<<<<<<< HEAD
 const { slotsFor, normalizeFit, mountedWeapons, fitBonuses, mountScale } = await imp('systems/industry/fitting.js');
 const { MODULES } = await imp('data/modules.js');
 const { buyModule, ownsModule, fitSlot, sellModule, buyWeapon } = await imp('systems/trade/economy.js');
-=======
-const { slotsFor, normalizeFit, mountedWeapons, fitBonuses, mountScale } = await imp('systems/fitting.js');
-const { MODULES } = await imp('data/modules.js');
-const { buyModule, ownsModule, fitSlot, sellModule, buyWeapon } = await imp('systems/economy.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 {
   S.player.classKey = 'military';
   recalcStats();
@@ -883,11 +834,7 @@ const { buyModule, ownsModule, fitSlot, sellModule, buyWeapon } = await imp('sys
 
 console.log('\n— crew —');
 const { initCrew, updateCrew, berths, xpNeeded, payroll, hire, hireCost, dismiss, reassign, recruitPool } =
-<<<<<<< HEAD
   await imp('systems/crew/crew.js');
-=======
-  await imp('systems/crew.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { crewBonuses, crewOutput } = await imp('data/crew.js');
 {
   S.crew = [];
@@ -939,11 +886,7 @@ const { crewBonuses, crewOutput } = await imp('data/crew.js');
 }
 
 console.log('\n— scanner —');
-<<<<<<< HEAD
 const { tierAt, liveTier, beginScan, updateScan, scanReport, knownTier, TIER_NAME } = await imp('systems/industry/scanner.js');
-=======
-const { tierAt, liveTier, beginScan, updateScan, scanReport, knownTier, TIER_NAME } = await imp('systems/scanner.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 {
   const sensor = 5000;
   ok('nothing resolves beyond sensor reach', tierAt(sensor * 3, sensor) === 0);
@@ -982,11 +925,7 @@ const { tierAt, liveTier, beginScan, updateScan, scanReport, knownTier, TIER_NAM
 }
 
 console.log('\n— orbit bands —');
-<<<<<<< HEAD
 const { startOrbit, holdDistance } = await imp('systems/flight/approach.js');
-=======
-const { startOrbit, holdDistance } = await imp('systems/approach.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 {
   const { ORBIT_BANDS } = await imp('core/config.js');
   const planet = S.world.bodies.find(b => b.userData.kind === 'planet');

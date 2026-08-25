@@ -22,15 +22,9 @@ const { S } = await imp('core/state.js');
 const { updateHud, setThreat, markShipButtons } = await imp('ui/hud.js');
 const { openNavmap, closeNavmap, tickNavmap } = await imp('ui/navmap.js');
 const { openDock, closeDock } = await imp('ui/dock.js');
-<<<<<<< HEAD
 const { dock } = await imp('systems/trade/economy.js');
 const { setTarget } = await imp('systems/flight/targeting.js');
 const { toggleWarp } = await imp('systems/flight/warp.js');
-=======
-const { dock } = await imp('systems/economy.js');
-const { setTarget } = await imp('systems/targeting.js');
-const { toggleWarp } = await imp('systems/warp.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 ok('LG debug handle exposed', !!global.window.LG && !!global.window.LG.S);
 ok('world deferred until power-up', S.world.npcs.length === 0);
@@ -42,11 +36,7 @@ tryIt('power-up button responds', () => nodes.get('boot-start').dispatch('click'
 ok('creation opens for a pilotless flight', S.running === false);
 
 console.log('\n— character creation —');
-<<<<<<< HEAD
 const { hasCharacter } = await imp('systems/crew/character.js');
-=======
-const { hasCharacter } = await imp('systems/character.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 // The creation cards are built at runtime rather than declared in index.html, so they
 // are found by walking the body node the way a player's thumb would find them on screen.
 const cards = () => (nodes.get('create-body').children || [])
@@ -103,11 +93,7 @@ tryIt('warp disengages cleanly', () => { toggleWarp(); updateHud(0.2, true); });
 // with no way to look at the system they are giving orders about.
 console.log('\n— observation chart —');
 {
-<<<<<<< HEAD
   const SC = await imp('systems/industry/scanner.js');
-=======
-  const SC = await imp('systems/scanner.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const wasDocked = S.docked;
 
   S.docked = S.world.stations[0];
@@ -135,13 +121,8 @@ console.log('\n— observation chart —');
 console.log('\n— ops panel —');
 {
   const { openOps, closeOps, tickOps } = await imp('ui/ops.js');
-<<<<<<< HEAD
   const FL = await imp('systems/company/fleet.js');
   const { createCharacter } = await imp('systems/crew/character.js');
-=======
-  const FL = await imp('systems/fleet.js');
-  const { createCharacter } = await imp('systems/character.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   tryIt('ops opens on staff with no company at all', () => { openOps('staff'); tickOps(2); });
 
@@ -251,11 +232,7 @@ tryIt('orbit menu opens and closes', () => {
 tryIt('nav map closes', () => closeNavmap());
 
 console.log('\n— target actions & hail —');
-<<<<<<< HEAD
 const { openHail, hailOpen, updateApproach } = await imp('systems/flight/approach.js');
-=======
-const { openHail, hailOpen, updateApproach } = await imp('systems/approach.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 setTarget(S.world.asteroids[3], 'asteroid', S.world.asteroids[3].name, 'rock');
 tryIt('approach button responds', () => nodes.get('target-approach').dispatch('click'));
 tryIt('match button responds', () => nodes.get('target-match').dispatch('click'));
@@ -319,11 +296,7 @@ const { openFit, closeFit, fitOpen } = await imp('ui/fitting.js');
 
 console.log('\n— crew quarters —');
 const { openCrew, crewOpen } = await imp('ui/crew.js');
-<<<<<<< HEAD
 const { initCrew } = await imp('systems/crew/crew.js');
-=======
-const { initCrew } = await imp('systems/crew.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 {
   initCrew();
   tryIt('crew overlay opens', () => nodes.get('btn-crew').dispatch('click'));
@@ -335,11 +308,7 @@ const { initCrew } = await imp('systems/crew.js');
 }
 
 console.log('\n— ARIA assistant —');
-<<<<<<< HEAD
 const { ask, modelReady } = await imp('systems/npc/assistant.js');
-=======
-const { ask, modelReady } = await imp('systems/assistant.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ok('starts in rule-based mode (no model)', modelReady() === false);
 tryIt('aria opens', () => nodes.get('btn-aria').dispatch('click'));
 {
@@ -379,11 +348,7 @@ const canvas = nodes.get('game-canvas');
 // is still in force, then put a pilot back for the flight-control checks below. Before
 // the lock existed this suite was silently steering a founder's non-existent hull.
 {
-<<<<<<< HEAD
   const { canPilot, isExecutive } = await imp('systems/company/career.js');
-=======
-  const { canPilot, isExecutive } = await imp('systems/career.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('the founder left by the ops section is an executive', isExecutive());
   ok('an executive holds no flight licence', canPilot() === false);
 
@@ -397,11 +362,7 @@ const canvas = nodes.get('game-canvas');
      S.player.yaw === lockYaw && S.player.pitch === lockPitch);
   ok('and left no drag flag behind', S.input.dragging === false);
 
-<<<<<<< HEAD
   const { createCharacter } = await imp('systems/crew/character.js');
-=======
-  const { createCharacter } = await imp('systems/character.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   createCharacter({ name: 'V', lineage: 'core', corp: 'meridian', career: 'prospector' });
   ok('a prospector is licensed to fly', canPilot() === true);
 }

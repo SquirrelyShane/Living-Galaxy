@@ -9,16 +9,11 @@ import { VERSION, BUILD, versionString } from './core/version.js';
 import { clock, advance, sample, perfStats, nowMs, resetClock } from './core/clock.js';
 import { guard, diagnostics, unpark, setFaultHandler, installGlobalHandlers,
          downloadLog, formatLog, logFilePath } from './core/diagnostics.js';
-<<<<<<< HEAD
 import { initScene, render, camera, scene } from './world/scene.js';
-=======
-import { initScene, render, camera } from './world/scene.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { createStarfield, updateStarfield, createSkybox, createDust } from './world/starfield.js';
 import { createSystem, updateSystem } from './world/system.js';
 import { createAsteroids, updateAsteroids } from './world/asteroids.js';
 import { initPlayerFx, updatePlayer } from './entities/player.js';
-<<<<<<< HEAD
 import { createNpcs, updateNpcs, registerNpcFactories } from './entities/npcs.js';
 import { createShoal, updateShoal, resetShoal, shoalReport } from './systems/npc/shoal.js';
 import { registerHullFactory } from './entities/shipmesh.js';
@@ -56,44 +51,11 @@ import { initOps, tickOps, openOps } from './ui/ops.js';
 import { applyDisplay, display, setDisplay } from './systems/platform/display.js';
 import { initQuality, updateQuality, qualityState, setQualityLevel, setAuto,
          LEVELS as QUALITY_LEVELS } from './world/quality.js';
-=======
-import { createNpcs, updateNpcs } from './entities/npcs.js';
-import { initProjectiles, updateProjectiles } from './systems/projectiles.js';
-import { initCombat, updateCombat } from './systems/combat.js';
-import { updateWeapons } from './systems/weapons.js';
-import { initMining, updateMining } from './systems/mining.js';
-import { updateWarp } from './systems/warp.js';
-import { updateApproach, initHail } from './systems/approach.js';
-import { updateTargeting } from './systems/targeting.js';
-import { updateDocking } from './systems/economy.js';
-import { loadGame, hasSave, wipeSave, autosave, saveGame, savedSeed, savedLayout,
-         saveInfo, exportSave, importSave, restoreBackup } from './systems/save.js';
-import { planFor, systemLine, generateSystem, solarisPlan } from './world/genesis.js';
-import { connectNet, updateNet } from './systems/net.js';
-import { initWorldSim, updateWorldSim } from './systems/worldsim.js';
-import { updateMissions, agentBriefing, beginAgentChain } from './systems/missions.js';
-import { initContracts, updateContracts, activeContracts } from './systems/contracts.js';
-import { netReport } from './systems/net.js';
-import { callTool, toolManifest } from './systems/tools.js';
-import { updateJobs, craftingReport, queueJob, blueprintDetail, buildableNow } from './systems/crafting.js';
-import { updateSites, empireReport, siteReport, foundSite, sites } from './systems/planetary.js';
-import { updateOrders, orderReport, dispatch, ORDER_TYPES,
-         updateFleetOrders, fleetOrderReport, dispatchFleet, FLEET_ORDER_TYPES } from './systems/orders.js';
-import { CRAFT } from './core/config.js';
-import { characterSheet, spendPoint, buyLicence, hasCharacter } from './systems/character.js';
-import { initCreation, openCreation } from './ui/creation.js';
-import { initSettings, tickSettings, openSettings, diagnosticReport } from './ui/settings.js';
-import { initOps, tickOps, openOps } from './ui/ops.js';
-import { applyDisplay, display, setDisplay } from './systems/display.js';
-import { initQuality, updateQuality, qualityState, setQualityLevel, setAuto,
-         LEVELS as QUALITY_LEVELS } from './systems/quality.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { commitStep, applyInterpolation, restoreAfterRender, track,
          trackedCount } from './world/interpolate.js';
 import { updateLod, lodReport } from './world/lod.js';
 import { initLightRig, updateLightRig, lightRigReport } from './world/lightrig.js';
 import { startMusic, stopMusic, updateAudio, setBusLevel, busLevel, applyMix,
-<<<<<<< HEAD
          setAudioEnabled, audioRunning } from './systems/platform/audio.js';
 import { resetReputation, reputationReport } from './systems/company/reputation.js';
 import { initMarket, updateMarket } from './systems/trade/market.js';
@@ -134,30 +96,11 @@ import { parkPilot, resumePilot, beginNewPilot, listPilots } from './systems/pla
 import { loadModel } from './systems/npc/assistant.js';
 import { AVATAR } from './core/config.js';
 import { durable } from './core/store.js';
-=======
-         setAudioEnabled, audioRunning } from './systems/audio.js';
-import { resetReputation, reputationReport } from './systems/reputation.js';
-import { initMarket, updateMarket } from './systems/market.js';
-import { initAssistant } from './systems/assistant.js';
-import { initCrew, updateCrew } from './systems/crew.js';
-import { updateScan } from './systems/scanner.js';
-import { initAudio, resumeAudio } from './systems/audio.js';
-import { initHud, updateHud, setThreat, setFleetAlert, markShipButtons, hudStats, invalidateHud,
-         refreshSystemName } from './ui/hud.js';
-import { initControls, keyPoll } from './ui/controls.js';
-import { initNavmap, tickNavmap, navmapOpen } from './ui/navmap.js';
-import { initExecDeck, tickExecDeck, enterCommandSurface, showDeck, hideDeck,
-         execHudActive } from './ui/execdeck.js';
-import { isExecutive, canPilot, careerLine } from './systems/career.js';
-import { initDock, openDock } from './ui/dock.js';
-import { initAria } from './ui/aria.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { initFit } from './ui/fitting.js';
 import { initCrewUi } from './ui/crew.js';
 import { initComms as initCommsUi, tickComms, openComms } from './ui/comms.js';
 import { initMind, openMind } from './ui/mind.js';
 import { initTutorial, offerTutorial, reopenTutorial } from './ui/tutorial.js';
-<<<<<<< HEAD
 import { initCommsSystem, updateComms, commsReport, transmit } from './systems/npc/comms.js';
 import { updateNpcComms } from './systems/npc/npc-comms.js';
 import { sweepDeals } from './systems/trade/deals.js';
@@ -174,23 +117,6 @@ import { initBrains, loadBrainModel, setBrainsEnabled, brainsReport, personaRepo
          knownPersonas } from './systems/npc/npc-brain.js';
 import { status, toast, initToast } from './ui/toast.js';
 import { registerScreen } from './core/screens.js';
-=======
-import { initComms, updateComms, commsReport, transmit } from './systems/comms.js';
-import { updateNpcComms } from './systems/npc-comms.js';
-import { sweepDeals } from './systems/deals.js';
-import { updateResearch } from './systems/research.js';
-import { updateTutorial, tutorialReport, startTutorial, skipTutorial } from './systems/tutorial.js';
-import { updateCompany, companyReport, hasCompany } from './systems/company.js';
-import { updateFleet, fleetUnderFire } from './systems/fleet.js';
-import { resetDiagnostics } from './data/npc-kb/index.js';
-import { resetGrammarMemory } from './data/npc-grammar.js';
-import { updateManagers, managersReport, auditions, installManager, setExperimental,
-         enabled as experimentalOn } from './systems/managers.js';
-import { interlockReport, interlockLine, resetAnnounce } from './systems/preflight.js';
-import { initBrains, loadBrainModel, setBrainsEnabled, brainsReport, personaReport,
-         knownPersonas } from './systems/npc-brain.js';
-import { status, toast } from './ui/toast.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { $ } from './core/utils.js';
 
 let booted = false;
@@ -225,27 +151,20 @@ function boot() {
   initCombat();
   initMining();
   initPlayerFx();
-<<<<<<< HEAD
   initPointField(scene);
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   initAudio();
   initHud();
   initControls();
   initNavmap();
-<<<<<<< HEAD
   // Contact brackets on the canopy. After the controls, because the canopy's tap handler
   // asks the marker overlay what is under the finger — see ui/markers.js.
   initMarkers();
   // The autopilot handoff overlay. Pure presentation — see ui/conn.js.
   initConn();
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // After the chart: the deck's primary control opens it, and binding a handler that
   // calls into an uninitialised module is the kind of ordering bug that only shows up on
   // the one career nobody tests by hand.
   initExecDeck();
-<<<<<<< HEAD
   initDossier();
   initGalaxyMap();
   initBoardroom();
@@ -282,12 +201,6 @@ function boot() {
   initWarpMenu();
   initDoctrine();
   registerScreen('contact', obj => openContact(obj));
-=======
-  initDock();
-  initFit();
-  initCrewUi();
-  initHail();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   initAria();
   initCommsUi();
   initMind();
@@ -297,7 +210,6 @@ function boot() {
   const start = $('boot-start');
   start.textContent = hasSave() ? 'Resume flight' : 'Power up';
 
-<<<<<<< HEAD
   // ── the loading sequence ──────────────────────────────────────────
   //
   // Everything above this line is instrument wiring: modules finding their DOM nodes and
@@ -316,8 +228,6 @@ function boot() {
   });
   runLoadSequence();
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const info = saveInfo();
   const stamp = $('boot-version');
   if (stamp) {
@@ -332,7 +242,6 @@ function boot() {
       : versionString();
   }
 
-<<<<<<< HEAD
   // The boot screen knows its own galaxy (v1.04): reached over the web, the server
   // field prefills with the host that served the page — or the one web/config.js
   // names, when the static build lives on a CDN and the galaxy behind a tunnel.
@@ -344,26 +253,17 @@ function boot() {
     else if (location.host) mpUrl.value = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
   }
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   start.addEventListener('click', () => {
     if (booted) return;
     resumeAudio();
     start.textContent = 'Powering up…';
     const name = ($('mp-name') && $('mp-name').value || '').trim();
     const url = ($('mp-url') && $('mp-url').value || '').trim();
-<<<<<<< HEAD
     const pass = ($('mp-pass') && $('mp-pass').value || '').trim();
 
     if (url) {
       connectNet(url, name, pass).then(res => {
         if (res) finishBoot(res.seed, res.age, true, res.density);
-=======
-
-    if (url) {
-      connectNet(url, name).then(res => {
-        if (res) finishBoot(res.seed, res.age, true);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
         else finishBoot(savedSeed() ?? WORLD_SEED, 0, false);   // solo fallback, told via toast
       });
     } else {
@@ -377,17 +277,12 @@ function boot() {
   });
 
   addEventListener('visibilitychange', () => {
-<<<<<<< HEAD
     if (document.hidden && S.running) { saveGame(true); parkPilot(); }
-=======
-    if (document.hidden && S.running) saveGame(true);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   });
 
   requestAnimationFrame(frame);
 }
 
-<<<<<<< HEAD
 /** A line on the menu, without dragging the toast system into the boot path. */
 function status0(text) {
   const n = $('gen-archive');
@@ -508,14 +403,10 @@ function resumeFromRoster(id) {
 }
 
 function finishBoot(seed, age, online, serverDensity) {
-=======
-function finishBoot(seed, age, online) {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   if (booted) return;
   booted = true;
 
   // phase 2 — the world itself
-<<<<<<< HEAD
   //
   // **Where in the galaxy this is.** Since v1.02.44 the rendered system is a node on a real
   // chart rather than an unplaced seed — the galaxy stopped being a library and became a fact
@@ -549,9 +440,6 @@ function finishBoot(seed, age, online) {
     S.seed = home.seed;
   }
   S.seed = S.seed >>> 0;
-=======
-  S.seed = seed >>> 0;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   seedWorld(S.seed);
   // The system itself, before anything is built out of it.
   //
@@ -560,7 +448,6 @@ function finishBoot(seed, age, online) {
   // the world is keyed by name. A new game generates. `planFor` is deterministic, so the
   // same seed produces the same system on every device and on every load, which is also
   // what makes a shared galaxy agree with itself.
-<<<<<<< HEAD
   // Density is an *argument* to generation, so a resumed flight uses the one it was written
   // with and a new one uses whatever the menu is set to. Getting this backwards would move
   // the worlds under a returning player the first time they touched the slider — the same
@@ -583,15 +470,11 @@ function finishBoot(seed, age, online) {
   // one place that knows where this system is, so the HUD, the chart header and the telemetry
   // cannot disagree about it.
   S.systemPlan.designation = designation(nodeAt(S.galaxy.seed, S.galaxy.node));
-=======
-  S.systemPlan = planFor(S.seed, savedLayout() || 'procedural');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   createSkybox();
   createStarfield();
   createDust();
   createSystem();
   createAsteroids();
-<<<<<<< HEAD
   // After the bodies exist and before anything flies: a shell is built from `wellRadius()` of
   // a body that has to be there to have a radius. No teardown is needed on the new-game path
   // because `restartForNewGame()` reloads the page, and `buildWells()` clears its own shells
@@ -603,9 +486,6 @@ function finishBoot(seed, age, online) {
   // from its own RNG stream, so the roster above is byte-identical to what it was.
   resetShoal();
   createShoal();
-=======
-  createNpcs();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   resetReputation();       // defaults; a save overwrites them below
   // The diagnostic log is world state, not application state. Before schema 17 it lived
   // on globalThis and a new game inherited the previous one's record of who did what.
@@ -613,7 +493,6 @@ function finishBoot(seed, age, online) {
   // The radio's anti-repetition memory is world state too — a new game should not start
   // mid-way through the previous one's rotation of phrasings.
   resetGrammarMemory();
-<<<<<<< HEAD
   resetAutopilot();
   resetGroupwork();
   // ARIA's tactical picture holds a derivative map keyed by hull, and her advisory file
@@ -631,12 +510,6 @@ function finishBoot(seed, age, online) {
   initMarket();
   initContracts();
   initCommsSystem();
-=======
-  initWorldSim();
-  initMarket();
-  initContracts();
-  initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // Tiers 1–2 of the NPC brains come up with the world; the language-model tier is
   // permitted but downloads nothing until the player asks for it in Settings → Lab.
   initBrains();
@@ -679,13 +552,10 @@ function finishBoot(seed, age, online) {
       if (enterCommandSurface()) status(careerLine());
       else if (S.docked) openDock();
       saveGame(true);
-<<<<<<< HEAD
       // File the new character. Until this runs they are a flight with a name on it; after
       // it they are a record that survives the next new game — which is the whole point of
       // `systems/platform/pilots.js`.
       parkPilot();
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     });
     return;
   }
@@ -746,21 +616,17 @@ function phaseWorld(dt) {
   updateSystem(dt);
   updateAsteroids(dt);
   updateStarfield(dt);
-<<<<<<< HEAD
   // Before the live roster steps, not after. `updateShoal` is what promotes a record into a
   // hull, and a hull promoted after `updateNpcs` has run spends its first frame in the world
   // without having been given a chance to think — which is one frame of a ship sitting
   // perfectly still with its nose pointed nowhere, right at the moment it comes into view.
   updateShoal(dt);
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   threat = updateNpcs(dt) || threat;
 }
 
 function phaseCombat(dt) {
   updateProjectiles(dt);
   updateCombat(dt);
-<<<<<<< HEAD
   // Particles step with the simulation and are *written* to the GPU here, once, for every
   // emitter in the game. Inside the sim phase rather than the render phase deliberately: an
   // executive's render is skipped entirely (see the gate below) and a spark that kept
@@ -774,8 +640,6 @@ function phaseCombat(dt) {
     refreshWells(dt);
     updatePointField();
   }
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 function phaseSim(dt) {
@@ -797,7 +661,6 @@ function phaseSim(dt) {
   const hit = fleetUnderFire();
   setFleetAlert(hit ? hit.name : null, hit ? hit.hullFrac : null);
   updateCrew(dt);
-<<<<<<< HEAD
   // ...and the people aboard saying something about all of it. One decision per frame and
   // a rate limiter in front of it; see systems/crew/crew-talk.js.
   updateCrewTalk(dt);
@@ -808,9 +671,6 @@ function phaseSim(dt) {
   // late — invisible, but the kind of off-by-one that turns into a real bug the first time
   // something else depends on the ordering.
   updateBoardroom();
-=======
-  updateMissions();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   updateContracts(dt);
   // Industry runs on game hours. One conversion, here, so nothing downstream has to know
   // the rate — the factory thinks in shifts and the frame loop thinks in seconds.
@@ -822,7 +682,6 @@ function phaseSim(dt) {
   updateManagers(gh);
   updateScan(dt);
   updateDocking(dt);
-<<<<<<< HEAD
   // Arrays and hydroponics. Before the autopilot, because the drive lock the arrays impose
   // is an input to what ARIA is allowed to decide this frame rather than a consequence of
   // it — see systems/industry/habitat.js.
@@ -835,8 +694,6 @@ function phaseSim(dt) {
   updateAutopilot(dt);
   // Who is working near whom. On its own timer inside; this is one add and a compare.
   updateGroupwork(dt);
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   updateTargeting();
 }
 
@@ -850,7 +707,6 @@ function phaseUi(dt) {
   // the screen an executive actually looks at.
   if (execHudActive()) tickExecDeck(dt);
   else updateHud(dt);
-<<<<<<< HEAD
   // Before the chart, and cheap when suppressed: the overlay clears itself and returns as
   // soon as there is no canopy to draw on (docked, warping, on the command deck).
   updateMarkers(dt);
@@ -865,9 +721,6 @@ function phaseUi(dt) {
   // The chart draws its own scene into the shared renderer, and the world render is skipped
   // while it is up — see the gate below. Exactly one scene is drawn per frame, never two.
   tickGalaxyMap(dt);
-=======
-  tickNavmap(dt);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 /** One fixed slice of simulation. Rendering deliberately stays outside it. */
@@ -884,11 +737,8 @@ function step(dt) {
   guard('interp', commitStep);
 }
 
-<<<<<<< HEAD
 let parkT = 0;
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 function frame(now) {
   requestAnimationFrame(frame);
   const t0 = nowMs();
@@ -906,7 +756,6 @@ function frame(now) {
   guard('ops', tickOps, frameDt);
   guard('comms', tickComms, frameDt);
   guard('save', autosave, frameDt);
-<<<<<<< HEAD
   // The pilot database is a *copy* of the flight slot, refreshed on a slow cadence — see
   // the header of `systems/platform/pilots.js` for why the flight slot stays the master.
   // Two minutes rather than thirty seconds because this one is an IndexedDB write and a
@@ -914,8 +763,6 @@ function frame(now) {
   // comes back to.
   parkT += frameDt;
   if (parkT >= 120) { parkT = 0; if (S.running) parkPilot(); }
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   guard('audio', updateAudio, frameDt);
 
@@ -929,11 +776,7 @@ function frame(now) {
   // The simulation is untouched — the world above this line has already stepped. Only
   // *presentation* is skipped, which is the whole of what "detached from the main game"
   // has to mean for it to be safe: the galaxy keeps living, nobody is rendering it.
-<<<<<<< HEAD
   if (!execHudActive() && !galaxyMapOpen()) {
-=======
-  if (!execHudActive()) {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     // Presentation, in order. Quality decides how much work the frame is allowed, LOD
     // decides which meshes take part, interpolation decides where they are drawn — and
     // then the authoritative transforms go straight back, so nothing downstream ever

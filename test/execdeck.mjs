@@ -40,11 +40,7 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
-=======
-const { initMarket } = await imp('systems/market.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 recalcStats();
@@ -55,15 +51,9 @@ createAsteroids();
 createNpcs();
 initMarket();
 
-<<<<<<< HEAD
 const CAREER = await imp('systems/company/career.js');
 const { createCharacter } = await imp('systems/crew/character.js');
 const TEL = await imp('systems/platform/telemetry.js');
-=======
-const CAREER = await imp('systems/career.js');
-const { createCharacter } = await imp('systems/character.js');
-const TEL = await imp('systems/telemetry.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 // ── 1. the lock ──────────────────────────────────────────────────────
 console.log('\n— the career lock —');
@@ -114,11 +104,7 @@ ok('the deck header was written',
    (global.document.getElementById('exec-co').textContent || '').length > 0);
 
 // With a company on the books, every cell has a number behind it rather than an em dash.
-<<<<<<< HEAD
 const { registerCharter } = await imp('systems/company/company.js');
-=======
-const { registerCharter } = await imp('systems/company.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 S.credits = 400000;
 S.docked = S.world.stations[0];
 tryIt('a charter is registered', () => registerCharter('economic', 'Okarie Holdings'));
@@ -185,13 +171,8 @@ ok('stations are always listed too', f.counts.stations > 0, String(f.counts.stat
 
 // Charted objects are listed whatever the range. Traffic is not: the count has to agree
 // with what the detection maths says is visible, not with how many ships exist.
-<<<<<<< HEAD
 const { detectionRange, npcSignature } = await imp('systems/combat/detection.js');
 const { scanOrigin } = await imp('systems/industry/scanner.js');
-=======
-const { detectionRange, npcSignature } = await imp('systems/detection.js');
-const { scanOrigin } = await imp('systems/scanner.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 {
   const o = scanOrigin();
   const visible = S.world.npcs.filter(n => {

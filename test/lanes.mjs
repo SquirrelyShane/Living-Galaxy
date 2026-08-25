@@ -35,7 +35,6 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 // The entity factories are a boot step rather than an import side effect, so that a system
 // asking `spawn('npc', …)` gets a null it can handle instead of depending on which modules
 // happened to be loaded. See `core/spawn.js`. A suite that exercises spawning boots them.
@@ -47,14 +46,6 @@ const FL = await imp('systems/company/fleet.js');
 const { dispatchFleet, updateFleetOrders } = await imp('systems/company/orders.js');
 const { WORK } = await imp('systems/company/fleet-work.js');
 const CREW = await imp('systems/crew/crew.js');
-=======
-const { initMarket, updateMarket } = await imp('systems/market.js');
-const { createCharacter } = await imp('systems/character.js');
-const FL = await imp('systems/fleet.js');
-const { dispatchFleet, updateFleetOrders } = await imp('systems/orders.js');
-const { WORK } = await imp('systems/fleet-work.js');
-const CREW = await imp('systems/crew.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 recalcStats();

@@ -41,7 +41,6 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 // The entity factories are a boot step rather than an import side effect, so that a system
 // asking `spawn('npc', …)` gets a null it can handle instead of depending on which modules
 // happened to be loaded. See `core/spawn.js`. A suite that exercises spawning boots them.
@@ -55,16 +54,6 @@ const { dispatchFleet, updateFleetOrders } = await imp('systems/company/orders.j
 const { WORK } = await imp('systems/company/fleet-work.js');
 const NP = await imp('systems/flight/navplan.js');
 const { wellRadius, inGravityWell } = await imp('systems/flight/warp.js');
-=======
-const { initMarket, updateMarket } = await imp('systems/market.js');
-const { createCharacter } = await imp('systems/character.js');
-const G = await imp('world/genesis.js');
-const FL = await imp('systems/fleet.js');
-const { dispatchFleet, updateFleetOrders } = await imp('systems/orders.js');
-const { WORK } = await imp('systems/fleet-work.js');
-const NP = await imp('systems/navplan.js');
-const { wellRadius, inGravityWell } = await imp('systems/warp.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 recalcStats();
@@ -326,16 +315,12 @@ console.log('\n— the route cache —');
   run(2);
   const first = JSON.stringify(order.route || []);
   const firstLeg = order.__routeLeg;
-<<<<<<< HEAD
   // 900 seconds, not 400. v1.02.53 put a berth on every mining field, and a logistics leg
   // picks its source and market on price rather than proximity — so the best pair in a
   // system can now legitimately be a belt berth out past 20,000 units. The assertion is
   // about the *cache*, not about how fast a hauler is; the window only has to be long
   // enough for one leg change to happen.
   run(900);
-=======
-  run(400);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('the leg key changed as the run progressed', order.__routeLeg !== firstLeg ||
      JSON.stringify(order.route || []) !== first, `${firstLeg} → ${order.__routeLeg}`);
   ok('the route is a plain serialisable array',

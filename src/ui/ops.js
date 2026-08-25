@@ -18,7 +18,6 @@
 import { $, el, fmtCr, fmtKm } from '../core/utils.js';
 import { S } from '../core/state.js';
 import { ORDER_TYPES, ORDER_KEYS, orderReport, dispatch, dispatchBlocker,
-<<<<<<< HEAD
          recall, availableCrew, assayOf } from '../systems/company/orders.js';
 import { payroll, provisionHours, mouths, overseer, crewSummary } from '../systems/crew/crew.js';
 import { empireReport, sites, siteReport, foundSite, foundBlocker, siteById,
@@ -50,39 +49,6 @@ import { commandByPath, commandById, commandRecall, commandHire, commandRelease,
          commandHullMode, commandTransfer, fleetRoster, hullsAvailable } from '../systems/company/command.js';
 import { refitOptions, refitHull, commissionOptions, commissionHull,
          canCommission, hullPerformance } from '../systems/company/fleet.js';
-=======
-         recall, availableCrew, assayOf } from '../systems/orders.js';
-import { payroll, provisionHours, mouths, overseer, crewSummary } from '../systems/crew.js';
-import { empireReport, sites, siteReport, foundSite, foundBlocker, siteById,
-         collectFrom, deliverTo, manufactureAt, upgradeCentre, upgradeBlocker, abandonSite,
-         installFacility, installBlocker, toggleFacility, removeFacility } from '../systems/planetary.js';
-import { facilitiesFor, facility } from '../data/planetary/index.js';
-import { BRANCH_KEYS } from '../data/planetary/branches/index.js';
-import { buildableAt, materialName, BLUEPRINTS } from '../data/crafting/index.js';
-import { stock, held } from '../systems/crafting.js';
-import { researchReport, projectList, startProject, cancelProject } from '../systems/research.js';
-import { FINDINGS } from '../data/research.js';
-
-const blueprintName = id => (BLUEPRINTS[id] && BLUEPRINTS[id].name) || id;
-import { craftingReport, stockUnits, jobs, cancelJob } from '../systems/crafting.js';
-import { activeContracts } from '../systems/contracts.js';
-import { reputationReport } from '../systems/reputation.js';
-import { COMMAND_CENTRES, centreFor } from '../data/planetary/centres.js';
-import { CREW } from '../core/config.js';
-import { sfx } from '../systems/audio.js';
-import { openNavmap } from './navmap.js';
-import { enabled as experimentalOn, managersReport, auditions, installManager,
-         dismissManager, setAutonomy, managerFor } from '../systems/managers.js';
-import { AUTONOMY } from '../data/managers.js';
-import { companyReport, transfer, hqBrief, registrarBrief, registerCharter } from '../systems/company.js';
-import { fleetOrderReport, recallFleet } from '../systems/orders.js';
-import { diagnoseBoard } from '../data/npc-kb/index.js';
-import { COMMAND_MENU } from '../data/command-menu.js';
-import { commandByPath, commandById, commandRecall, commandHire, commandRelease,
-         commandHullMode, commandTransfer, fleetRoster, hullsAvailable } from '../systems/command.js';
-import { refitOptions, refitHull, commissionOptions, commissionHull,
-         canCommission, hullPerformance } from '../systems/fleet.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { trainingStatus } from '../data/npc-kb/index.js';
 
 // Ground-store send amounts. 'all' is one tap for the common case; the fixed steps are for

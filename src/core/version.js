@@ -4,7 +4,6 @@
 // Patch slices bump VERSION. SCHEMA only moves when the save payload changes shape,
 // and every bump must land with a migration in systems/save.js.
 
-<<<<<<< HEAD
 export const VERSION = '1.04.00';
 export const CODENAME = 'The Front Door';
 export const BUILD_DATE = '2026-08-25';
@@ -23,13 +22,6 @@ export const BUILD_DATE = '2026-08-25';
  *  pinned old saves to Solaris — and is *placed* on the chart at a node whose star class matches
  *  the one it is actually orbiting, so the marker and the sky agree.
  *  v21 = v1.02.39, which persists a contract's issuing power and its tier.
-=======
-export const VERSION = '1.02.36';
-export const CODENAME = 'Papers';
-export const BUILD_DATE = '2026-08-14';
-
-/** Save payload schema.
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
  *  v20 = v1.02.36, which persists individual dossiers — standing with each of the nine
  *  powers, earned qualifications, career rung and seeded traits, for the player and for
  *  every NPC who has done something worth remembering. Derived NPC records are not saved:
@@ -67,11 +59,7 @@ export const BUILD_DATE = '2026-08-14';
  *  claims, stations you financed, and which rocks you have already mined out.
  *  0.3 and 0.4 changed no persisted field and deliberately did not move the schema —
  *  bumping it without a reason forces every save through a pointless rewrite. */
-<<<<<<< HEAD
 export const SCHEMA = 23;
-=======
-export const SCHEMA = 20;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 export const BUILD = Object.freeze({
   version: VERSION,

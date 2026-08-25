@@ -171,11 +171,7 @@ export const PLANET_RESOURCES = {
  }
 };
 
-<<<<<<< HEAD
 const RESOURCE_WORLDS = {};
-=======
-export const RESOURCE_WORLDS = {};
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 for (const type in PLANET_RESOURCES) {
   for (const mat in PLANET_RESOURCES[type]) {
     (RESOURCE_WORLDS[mat] = RESOURCE_WORLDS[mat] || []).push(type);

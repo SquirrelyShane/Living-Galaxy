@@ -18,7 +18,6 @@ const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
 const { createNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
@@ -29,27 +28,11 @@ const { resetReputation } = await imp('systems/company/reputation.js');
 const { createCharacter } = await imp('systems/crew/character.js');
 const tools = await imp('systems/platform/tools.js');
 const { ask } = await imp('systems/npc/assistant.js');
-=======
-const { initProjectiles } = await imp('systems/projectiles.js');
-const { initCombat } = await imp('systems/combat.js');
-const { initMining } = await imp('systems/mining.js');
-const { initWorldSim } = await imp('systems/worldsim.js');
-const { initMarket } = await imp('systems/market.js');
-const { initContracts } = await imp('systems/contracts.js');
-const { resetReputation } = await imp('systems/reputation.js');
-const { createCharacter } = await imp('systems/character.js');
-const tools = await imp('systems/tools.js');
-const { ask } = await imp('systems/assistant.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();
 resetReputation(); initWorldSim(); initMarket(); initContracts();
-<<<<<<< HEAD
 createCharacter({ name: 'Tool', lineage: 'rim', corp: 'kestrel', career: 'pathfinder' });
-=======
-createCharacter({ name: 'Tool', lineage: 'rim', corp: 'long-dark', career: 'pathfinder' });
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 updateSystem(1);
 S.running = true;
 

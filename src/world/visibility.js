@@ -20,7 +20,6 @@
 //
 // Reasons are bits rather than a Set because there will never be many of them and the mask
 // lives on hot objects; an integer costs nothing to store or test.
-<<<<<<< HEAD
 //
 // ── why `range` is not `lod` ─────────────────────────────────────────
 // The fourth reason arrived in 1.02.49 and looks at first like a duplicate of the second.
@@ -48,14 +47,6 @@ export const HIDE = {
   lod:   1 << 1,    // too small on screen to draw
   fx:    1 << 2,    // held by a presentation effect (warp tunnel, cutscene, editor)
   range: 1 << 3     // beyond the distance at which this class of thing is drawn at all
-=======
-
-/** Reasons something might be hidden. Add here, not inline at the call site. */
-export const HIDE = {
-  dock: 1 << 0,     // parked inside a station ring
-  lod:  1 << 1,     // too small on screen to draw
-  fx:   1 << 2      // held by a presentation effect (warp tunnel, cutscene, editor)
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 };
 
 /**

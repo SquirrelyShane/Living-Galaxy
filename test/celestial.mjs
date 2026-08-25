@@ -25,20 +25,14 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld, makeRng } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
-<<<<<<< HEAD
 const { PLANET_TYPES, SYSTEM_PLANETS } = await imp('data/planetary/planets.js');
 const { MOON_TYPES, MOON_KEYS, moonCandidates, moonClassFor } = await imp('data/planetary/moons.js');
-=======
-const { PLANET_TYPES, SYSTEM_PLANETS } = await imp('data/planets.js');
-const { MOON_TYPES, MOON_KEYS, moonCandidates, moonClassFor } = await imp('data/moons.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { FEATURES, FEATURE_KEYS, featureFits, eligibleFeatures } = await imp('data/features.js');
 const { traits } = await imp('data/planetary/traits.js');
 const { PLANET_RESOURCES } = await imp('data/planetary/resources.js');
 const { MATERIALS } = await imp('data/crafting/index.js');
 const { COMMAND_CENTRES, centreFor } = await imp('data/planetary/centres.js');
 const { planetInfo, worldOf, featuresOf, knownFeatures, featureAssay, featureAssayOf,
-<<<<<<< HEAD
         surveyLevel, probePlanet, bodyNamed } = await imp('systems/industry/survey.js');
 const { tierAt, liveTier, attenuation, scanReport } = await imp('systems/industry/scanner.js');
 const { predict, intercept, transfer, separationAt, rateOf, orbitRadiusOf,
@@ -52,21 +46,6 @@ const { RING_PROFILE, ringFieldFor, BELTS } = await imp('data/belts.js');
 const { collectObstacles, escapesWell, clipGoal, planRoute, routeClear, testRadius, clearRadius } = await imp('systems/flight/navplan.js');
 const { wellRadius, arrivalRadius } = await imp('systems/flight/warp.js');
 const LG = await imp('systems/flight/lagrange.js');
-=======
-        surveyLevel, probePlanet, bodyNamed } = await imp('systems/survey.js');
-const { tierAt, liveTier, attenuation, scanReport } = await imp('systems/scanner.js');
-const { predict, intercept, transfer, separationAt, rateOf, orbitRadiusOf,
-        transferRows, closingRate } = await imp('systems/ephemeris.js');
-const { foundSite, sites } = await imp('systems/planetary.js');
-const { CELESTIAL, SCAN, ORBIT_BANDS, NAV, WARP } = await imp('core/config.js');
-const { createAsteroids, updateAsteroids, nearestAsteroid } = await imp('world/asteroids.js');
-const { fields, isRing, fieldMid, parentOf, fieldPoint, fieldDistance, fieldTarget,
-        refreshFieldTarget, fieldContacts } = await imp('systems/fields.js');
-const { RING_PROFILE, ringFieldFor, BELTS } = await imp('data/belts.js');
-const { collectObstacles, escapesWell, clipGoal, planRoute, routeClear, testRadius, clearRadius } = await imp('systems/navplan.js');
-const { wellRadius, arrivalRadius } = await imp('systems/warp.js');
-const LG = await imp('systems/lagrange.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { ANOMALY_TYPES, ANOMALY_KEYS, rollAnomaly } = await imp('data/anomalies.js');
 const { LAGRANGE } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
@@ -132,11 +111,7 @@ ok('a giant\'s moons are not all the same class',
 {
   // Give the yard the materials and check the refusal is gone. Before this slice the
   // refusal was "a Survey Outpost cannot be built on a undefined world".
-<<<<<<< HEAD
   const { addMaterial } = await imp('systems/industry/crafting.js');
-=======
-  const { addMaterial } = await imp('systems/crafting.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   for (const m in COMMAND_CENTRES.outpost.build) addMaterial(m, COMMAND_CENTRES.outpost.build[m] * 2);
   const site = foundSite(ggMoons[0], 'outpost');
   ok('a command centre can actually be founded on a moon', !!site);
@@ -722,7 +697,6 @@ console.log('\n— Lagrange points —');
   const t = LG.lagrangeTarget(lp4);
   ok('a point produces a targetable object', !!t.position && t.userData.kind === 'lagrange');
   ok('a point projects no gravity well', !t.userData.gravity);
-<<<<<<< HEAD
   // v1.02.62: a body with no well no longer gets the 240-unit floor. That floor existed to
   // keep you out of a gravity well, and a Lagrange point has none — applying it anyway is
   // what put every arrival a four-minute sublight burn short of where it was aimed. What a
@@ -733,9 +707,6 @@ console.log('\n— Lagrange points —');
      arrivalRadius(t.userData, 400) === 400);
   ok('...but a body with a well still overrides it',
      arrivalRadius({ gravity: true, radius: 300 }, 10) > 10);
-=======
-  ok('an arrival at a point is the plain floor', arrivalRadius(t.userData) === WARP.arriveRadius);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   {
     const before = t.position.clone();
     for (let i = 0; i < 400; i++) updateSystem(1);

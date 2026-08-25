@@ -74,11 +74,7 @@ console.log('\n— layout —');
      /\.tool-btn\{[^}]*flex:0 0 auto/.test(css));
 }
 
-<<<<<<< HEAD
 // ── thirteen buttons actually fit ────────────────────────────────────
-=======
-// ── eleven buttons actually fit ──────────────────────────────────────
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const buttons = (html.match(/<div id="tool-column">([\s\S]*?)<\/div>/) || ['', ''])[1]
   .match(/<button/g) || [];
 
@@ -94,7 +90,6 @@ function fits(label, viewportH, scope) {
   return { need, have };
 }
 
-<<<<<<< HEAD
 // Thirteen since v1.02.47, when FILE joined the column. The number is pinned on purpose,
 // and it is *not* the check that the column fits — `fits()` does that arithmetically at
 // three viewport heights, and it stayed green when the twelfth button landed. This one
@@ -103,9 +98,6 @@ function fits(label, viewportH, scope) {
 ok('the tool column has the expected number of buttons', buttons.length === 13, String(buttons.length));
 ok('the dossier button is one of them', /id="btn-file"/.test(html));
 ok('the chart button is one of them', /id="btn-chart"/.test(html));
-=======
-ok('the tool column has the expected number of buttons', buttons.length === 11, String(buttons.length));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ok('the ARIA button is one of them', /id="btn-aria"/.test(html));
 ok('the comms button is one of them', /id="btn-comms"/.test(html));
 
@@ -116,7 +108,6 @@ fits('tall phone (860 CSS px)', 860, mediaBlock(860));
 fits('short phone (740 CSS px)', 740, mediaBlock(740));
 fits('very short (620 CSS px)', 620, mediaBlock(640));
 
-<<<<<<< HEAD
 // ── the throttle is a target, not a hairline ─────────────────────────
 //
 // This block used to assert the *opposite*: that the track had been trimmed to 14px or
@@ -142,13 +133,6 @@ fits('very short (620 CSS px)', 620, mediaBlock(640));
   ok('the track carries a thumb to grab', /id="speed-thumb"/.test(html));
   ok('and steppers either side of it',
      /id="thr-down"/.test(html) && /id="thr-up"/.test(html));
-=======
-// ── the throttle actually got smaller ────────────────────────────────
-{
-  const track = px('#speed-track-wrap', 'height');
-  ok('the throttle track is trimmed from its original 18px', track != null && track <= 14,
-     String(track));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const shortTrack = px('#speed-track-wrap', 'height', mediaBlock(740));
   ok('and trimmed further on short screens', shortTrack != null && shortTrack < track,
      `${track} → ${shortTrack}`);

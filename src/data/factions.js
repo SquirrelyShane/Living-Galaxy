@@ -101,15 +101,11 @@ export const POWERS = {
     short: 'Freewake',
     bloc: 'independent',
     color: 0x54e0a0,
-<<<<<<< HEAD
     // 'logistics', not 'logistic'. It was the singular until v1.02.39, which was harmless
     // for as long as `charter` was read by nobody and silently wrong the moment it decided
     // which desk a depot belongs to: the one power in the galaxy whose whole charter is
     // freight would not have been offered a logistics station.
     charter: 'logistics',
-=======
-    charter: 'logistic',
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     temper: { gain: 1.3, loss: 0.8, memory: 0.3 },
     seat: 'the free ports',
     blurb: 'Not a company — a standing agreement between several thousand crews that they ' +
@@ -374,11 +370,7 @@ export const historyOf = power =>
   HISTORY.filter(e => (e.powers || []).includes(power)).slice().reverse();
 
 /** The power a station's issuer key resolves to, tolerating a bloc name. */
-<<<<<<< HEAD
 function powerFor(key) {
-=======
-export function powerFor(key) {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   if (POWERS[key]) return key;
   const list = powersOf(key);
   return list.length ? list[0] : null;

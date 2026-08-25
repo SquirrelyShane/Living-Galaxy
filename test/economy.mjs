@@ -18,7 +18,6 @@ const { seedWorld } = await imp('core/rng.js');
 const { CONTRACTS, BUDGET, SUPPLY, REP, SHIP_CLASSES } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 const { MODULES, MODULE_KEYS } = await imp('data/modules.js');
-<<<<<<< HEAD
 const fit = await imp('systems/industry/fitting.js');
 const co = await imp('systems/trade/contracts.js');
 const mk = await imp('systems/trade/market.js');
@@ -26,30 +25,15 @@ const rep = await imp('systems/company/reputation.js');
 const dos = await imp('systems/company/dossier.js');
 const { POWERS, POWER_KEYS } = await imp('data/factions.js');
 const ch = await imp('systems/crew/character.js');
-=======
-const fit = await imp('systems/fitting.js');
-const co = await imp('systems/contracts.js');
-const mk = await imp('systems/market.js');
-const rep = await imp('systems/reputation.js');
-const ch = await imp('systems/character.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
-<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
 const { initWorldSim } = await imp('systems/platform/worldsim.js');
 const save = await imp('systems/platform/save.js');
-=======
-const { initProjectiles } = await imp('systems/projectiles.js');
-const { initCombat } = await imp('systems/combat.js');
-const { initMining } = await imp('systems/mining.js');
-const { initWorldSim } = await imp('systems/worldsim.js');
-const save = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx();
@@ -228,7 +212,6 @@ console.log('\n— the board —');
   ok('every offer has a title, a brief and a fee',
      board.every(c => c.title && c.brief && c.pay > 0));
   ok('every offer has a target worth doing', board.every(c => c.target >= 1));
-<<<<<<< HEAD
   // A power since v1.02.39, not a bloc. The whole of `test/desks.mjs` is about what that
   // buys; this is the one line here that pins the vocabulary.
   ok('every offer names its issuer and skill',
@@ -236,13 +219,6 @@ console.log('\n— the board —');
   ok('every offer has an expiry in the future', board.every(c => c.expires > S.time));
   ok('offer ids are unique', new Set(board.map(c => c.id)).size === board.length);
   ok('a station posts as a power', POWER_KEYS.includes(co.issuerOf(st)));
-=======
-  ok('every offer names its issuer and skill',
-     board.every(c => ['coalition', 'pirate', 'independent'].includes(c.issuer) && c.skill));
-  ok('every offer has an expiry in the future', board.every(c => c.expires > S.time));
-  ok('offer ids are unique', new Set(board.map(c => c.id)).size === board.length);
-  ok('a station posts as a bloc', ['coalition', 'independent'].includes(co.issuerOf(st)));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   // generation is deterministic off the world seed
   seedWorld(1337); co.initContracts();
@@ -252,7 +228,6 @@ console.log('\n— the board —');
   ok('the board is deterministic for a seed', a === b2);
 }
 {
-<<<<<<< HEAD
   // Standing gates the work, and pays for itself. Standing with the *desk* now — the
   // station's own issuing power — rather than with the third of the galaxy it sits in.
   seedWorld(1337); co.initContracts();
@@ -279,30 +254,6 @@ console.log('\n— the board —');
   ok('good standing pays better for the same board', likedPay > neutralPay,
      `${neutralPay} → ${likedPay}`);
   me.standing[desk] = 0;
-=======
-  // standing gates the work, and pays for itself
-  seedWorld(1337); co.initContracts();
-  rep.resetReputation();
-  S.reputation.coalition = REP.min;
-  const st = S.world.stations.find(x => co.issuerOf(x) === 'coalition');
-  if (st) {
-    co.refreshBoard(st);
-    ok('a hated bloc will not deal with you', co.boardFor(st).every(c => c.locked));
-    ok('a locked offer explains itself',
-       typeof co.acceptBlocker(co.boardFor(st)[0]) === 'string');
-    ok('a locked offer cannot be accepted', co.acceptContract(co.boardFor(st)[0]) === false);
-  } else ok('a hated bloc will not deal with you', false, 'no coalition station');
-
-  rep.resetReputation();
-  S.reputation.coalition = 0;
-  if (st) { co.refreshBoard(st); }
-  const neutralPay = st ? co.boardFor(st)[0].pay : 0;
-  S.reputation.coalition = REP.max;
-  if (st) { co.refreshBoard(st); }
-  const likedPay = st ? co.boardFor(st)[0].pay : 0;
-  ok('good standing pays better for the same board', likedPay > neutralPay,
-     `${neutralPay} → ${likedPay}`);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   rep.resetReputation();
 }
 {
@@ -310,21 +261,16 @@ console.log('\n— the board —');
   seedWorld(1337); co.initContracts();
   rep.resetReputation();
   const st = S.world.stations[0];
-<<<<<<< HEAD
   // The floor tier is free, but a board is a mix of tiers and the top of it may be sealed
   // work this character has not earned. Take the first thing they actually qualify for —
   // which is also how a player reads a board.
   const offer = co.boardFor(st).find(c => !co.acceptBlocker(c)) || co.boardFor(st)[0];
-=======
-  const offer = co.boardFor(st)[0];
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('an offer can be accepted', co.acceptContract(offer) === true);
   ok('the accepted offer is held', co.activeContracts().length === 1);
   ok('accepting sets a deadline', offer.deadline > S.time);
   ok('accepting removes it from the board', !co.boardFor(st).some(c => c.id === offer.id));
   ok('accepting the same one twice is refused', co.acceptContract(offer) === false);
 
-<<<<<<< HEAD
   // Walk the system to fill the slate, rather than one station's board. Since v1.02.39 a
   // board is guaranteed *one* job anybody can take and no more than that — the rest are
   // tiered — so a fresh character genuinely has to visit three desks to hold three jobs,
@@ -341,35 +287,16 @@ console.log('\n— the board —');
   const spare = S.world.stations.flatMap(s => co.boardFor(s)).find(c => co.eligibility(c).ok);
   ok('a full slate refuses more', spare ? co.acceptContract(spare) === false : false);
   ok('the blocker says why', !!spare && co.acceptBlocker(spare).includes(String(CONTRACTS.maxActive)));
-=======
-  while (co.activeContracts().length < CONTRACTS.maxActive) {
-    const next = co.boardFor(S.world.stations[1]).find(c => !co.acceptBlocker(c));
-    if (!next) break;
-    co.acceptContract(next);
-  }
-  ok('holding is capped', co.activeContracts().length === CONTRACTS.maxActive);
-  const spare = co.boardFor(S.world.stations[2])[0];
-  ok('a full slate refuses more', co.acceptContract(spare) === false);
-  ok('the blocker says why', co.acceptBlocker(spare).includes(String(CONTRACTS.maxActive)));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 {
   // ...and abandoning costs, which is what stops accept-everything being optimal
   const c = co.activeContracts()[0];
-<<<<<<< HEAD
   const before = { credits: S.credits, standing: dos.standingWith(dos.playerDossier(), c.issuer) };
-=======
-  const before = { credits: S.credits, standing: rep.standing(c.issuer) };
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   co.abandonContract(c);
   ok('abandoning drops the contract', !co.activeContracts().some(x => x.id === c.id));
   ok('abandoning costs credits', S.credits < before.credits,
      `${before.credits} → ${S.credits}`);
-<<<<<<< HEAD
   ok('abandoning costs standing', dos.standingWith(dos.playerDossier(), c.issuer) < before.standing);
-=======
-  ok('abandoning costs standing', rep.standing(c.issuer) < before.standing);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('the failure is recorded', S.contracts.history.failed >= 1);
   ok('abandoning something you do not hold is a no-op',
      co.abandonContract({ id: 'nope' }) === false);
@@ -378,24 +305,15 @@ console.log('\n— the board —');
   // completion by each route
   seedWorld(1337); co.initContracts(); rep.resetReputation();
   S.contracts.active = [];
-<<<<<<< HEAD
   const bounty = { id: 'b1', type: 'bounty', issuer: 'aurelian', station: 'x', skill: 'gunnery',
                    pay: 2000, rep: 4, target: 2, progress: 0, expires: S.time + 999,
                    deadline: S.time + 999, base: { kills: S.player.kills } };
   S.contracts.active.push(bounty);
   const credits0 = S.credits, stand0 = dos.standingWith(dos.playerDossier(), 'aurelian');
-=======
-  const bounty = { id: 'b1', type: 'bounty', issuer: 'coalition', station: 'x', skill: 'gunnery',
-                   pay: 2000, rep: 4, target: 2, progress: 0, expires: S.time + 999,
-                   deadline: S.time + 999, base: { kills: S.player.kills } };
-  S.contracts.active.push(bounty);
-  const credits0 = S.credits, stand0 = rep.standing('coalition');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.player.kills += 2;
   co.updateContracts(0.1);
   ok('a bounty completes on kills', !co.activeContracts().some(c => c.id === 'b1'));
   ok('completion pays', S.credits === credits0 + 2000, String(S.credits - credits0));
-<<<<<<< HEAD
   ok('completion raises standing', dos.standingWith(dos.playerDossier(), 'aurelian') > stand0);
   ok('completion is recorded', S.contracts.history.done >= 1);
 
@@ -412,24 +330,6 @@ console.log('\n— the board —');
   // Supply is credited by the sell hook — you source the goods and sell them where they
   // are short, so a sale *is* the delivery.
   const supply = { id: 's1', type: 'supply', issuer: 'freewake', station: 'x', skill: 'commerce',
-=======
-  ok('completion raises standing', rep.standing('coalition') > stand0);
-  ok('completion is recorded', S.contracts.history.done >= 1);
-
-  // deadline
-  const late = { id: 'l1', type: 'bounty', issuer: 'independent', station: 'x', skill: 'gunnery',
-                 pay: 1000, rep: 3, target: 99, progress: 0, expires: S.time + 999,
-                 deadline: S.time - 1, base: { kills: S.player.kills } };
-  S.contracts.active.push(late);
-  const stand1 = rep.standing('independent');
-  co.updateContracts(0.1);
-  ok('an overdue contract fails', !co.activeContracts().some(c => c.id === 'l1'));
-  ok('failing costs standing', rep.standing('independent') < stand1);
-
-  // Supply is credited by the sell hook — you source the goods and sell them where they
-  // are short, so a sale *is* the delivery.
-  const supply = { id: 's1', type: 'supply', issuer: 'independent', station: 'x', skill: 'commerce',
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
                    commodity: 'ore', dest: S.world.stations[1].userData.name,
                    pay: 1500, rep: 3, target: 100, progress: 0, expires: S.time + 999,
                    deadline: S.time + 999, base: { sold: 0 } };
@@ -445,11 +345,7 @@ console.log('\n— the board —');
 
   // Haul is a consignment: the load is handed over, not sold. Selling cannot credit it,
   // because the goods were never the pilot's — that path was worth more than the fee.
-<<<<<<< HEAD
   const haul = { id: 'h1', type: 'haul', issuer: 'freewake', station: 'x', skill: 'commerce',
-=======
-  const haul = { id: 'h1', type: 'haul', issuer: 'independent', station: 'x', skill: 'commerce',
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
                  commodity: 'ore', dest: S.world.stations[1].userData.name,
                  pay: 1500, rep: 3, target: 100, progress: 0, loaded: 100,
                  expires: S.time + 999, deadline: S.time + 999, base: { sold: 0 } };

@@ -21,19 +21,11 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
 const { initPlayerFx, updatePlayer } = await imp('entities/player.js');
 const { updateWarp, toggleWarp, setCourse, clearCourse, wellRadius,
-<<<<<<< HEAD
         planCourse, courseLength, courseClear, inGravityWell } = await imp('systems/flight/warp.js');
 const { planRoute, routeClear, routeLength, segmentDistance, collectObstacles } = await imp('systems/flight/navplan.js');
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
-=======
-        planCourse, courseLength, courseClear, inGravityWell } = await imp('systems/warp.js');
-const { planRoute, routeClear, routeLength, segmentDistance, collectObstacles } = await imp('systems/navplan.js');
-const { initProjectiles } = await imp('systems/projectiles.js');
-const { initCombat } = await imp('systems/combat.js');
-const { initMining } = await imp('systems/mining.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem();
 initProjectiles(); initCombat(); initMining(); initPlayerFx();
@@ -381,7 +373,6 @@ console.log('\n— world seating —');
                       < m.userData.orbitRadius * 1.2 + 1));
 }
 
-<<<<<<< HEAD
 
 // ── selecting a place is setting a course ────────────────────────────
 //
@@ -453,7 +444,5 @@ console.log('\n— selecting a place sets the course —');
   ok('clearing a place clears its course', !S.warp.dest);
 }
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

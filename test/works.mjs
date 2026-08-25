@@ -28,7 +28,6 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { COMPANY, FLEET_ROLES } = await imp('core/config.js');
 const FL = await imp('systems/company/fleet.js');
@@ -39,14 +38,6 @@ registerNpcFactories(); registerHullFactory();
 const CMD = await imp('systems/company/command.js');
 const { fleetOrderReport, updateFleetOrders, FLEET_ORDER_TYPES } = await imp('systems/company/orders.js');
 const { createCharacter } = await imp('systems/crew/character.js');
-=======
-const { initMarket } = await imp('systems/market.js');
-const { COMPANY, FLEET_ROLES } = await imp('core/config.js');
-const FL = await imp('systems/fleet.js');
-const CMD = await imp('systems/command.js');
-const { fleetOrderReport, updateFleetOrders, FLEET_ORDER_TYPES } = await imp('systems/orders.js');
-const { createCharacter } = await imp('systems/character.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(9);
 createSystem(); createAsteroids(); createNpcs(); initMarket();
@@ -223,11 +214,7 @@ console.log('\n— an active quota finishes —');
   ok('the quota travelled from the menu leaf', o.quotaKg === 2000, String(o.quotaKg));
   ok('it does not also carry a countdown', o.remaining === 0);
 
-<<<<<<< HEAD
   const { creditFleetProgress } = await imp('systems/company/orders.js');
-=======
-  const { creditFleetProgress } = await imp('systems/orders.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   creditFleetProgress(o.id, 900);
   updateFleetOrders(0.1);
   ok('partial delivery does not complete it', fleetOrderReport().length === 1);

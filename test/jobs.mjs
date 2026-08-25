@@ -37,7 +37,6 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem, attachModule } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initMarket, updateMarket } = await imp('systems/trade/market.js');
 const { createCharacter } = await imp('systems/crew/character.js');
 const { initWorldSim } = await imp('systems/platform/worldsim.js');
@@ -50,16 +49,6 @@ const { registerHullFactory } = await imp('entities/shipmesh.js');
 registerNpcFactories(); registerHullFactory();
 const PR = await imp('systems/company/fleet-projects.js');
 const { WORK } = await imp('systems/company/fleet-work.js');
-=======
-const { initMarket, updateMarket } = await imp('systems/market.js');
-const { createCharacter } = await imp('systems/character.js');
-const { initWorldSim } = await imp('systems/worldsim.js');
-const { FLEET_ROLES, COMPANY } = await imp('core/config.js');
-const { FLEET_ORDER_TYPES, FLEET_ORDER_KEYS, dispatchFleet, updateFleetOrders } = await imp('systems/orders.js');
-const FL = await imp('systems/fleet.js');
-const PR = await imp('systems/fleet-projects.js');
-const { WORK } = await imp('systems/fleet-work.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const G = await imp('world/genesis.js');
 
 initScene();
@@ -257,11 +246,7 @@ console.log('\n— construction —');
   // Cancelling is not a free undo.
   const open = PR.projectReport().find(p => !p.done);
   if (open) {
-<<<<<<< HEAD
     const c = PR.cancelConstruction(open.id);
-=======
-    const c = PR.cancelProject(open.id);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     ok('a project can be cancelled', c.ok === true);
     ok('and what was spent is stated, not refunded', typeof c.spent === 'number');
   } else {

@@ -38,7 +38,6 @@ for (const f of files) {
   exportsOf.set(f, names);
 }
 
-<<<<<<< HEAD
 // `export * from './y.js'` republishes y's whole surface, so a barrel that uses it has
 // exports this file never sees written down. Resolve those transitively — depth-capped
 // and cycle-guarded, because a barrel that re-exports a module which imports the barrel
@@ -59,8 +58,6 @@ const resolveStars = (f, seen = new Set()) => {
 };
 for (const f of files) resolveStars(f);
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 console.log('\n— imports —');
 let importCount = 0;
 for (const f of files) {

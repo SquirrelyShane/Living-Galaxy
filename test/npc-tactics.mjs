@@ -26,15 +26,9 @@ const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { spawnNpc, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const T = await imp('systems/npc/npc-tactics.js');
 const { personaFor, noteEvent, witnessKill } = await imp('systems/npc/npc-brain.js');
 const { damageNpc } = await imp('systems/combat/combat.js');
-=======
-const T = await imp('systems/npc-tactics.js');
-const { personaFor, noteEvent, witnessKill } = await imp('systems/npc-brain.js');
-const { damageNpc } = await imp('systems/combat.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { NPCAI, NPC_TYPES, ENGAGE } = await imp('core/config.js');
 
 initScene();

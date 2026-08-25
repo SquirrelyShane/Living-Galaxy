@@ -11,13 +11,8 @@
 
 import { $, el } from '../core/utils.js';
 import { tutorialState, awaitingChoice, dismissTutorial, resumeTutorial,
-<<<<<<< HEAD
          skipTutorial, startTutorial, finish, onTutorial, tutorialDone } from '../systems/platform/tutorial.js';
 import { sfx } from '../systems/platform/audio.js';
-=======
-         skipTutorial, startTutorial, finish, onTutorial, tutorialDone } from '../systems/tutorial.js';
-import { sfx } from '../systems/audio.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 let card, done, onNewGame = null;
 

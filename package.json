@@ -65,9 +65,5 @@
     "serve": "python3 -m http.server 8080",
     "galaxy": "node server/main.js",
     "certs": "node tools/make-certs.mjs"
-    "test:nav": "node test/warp-nav.mjs",
-    "serve": "python3 -m http.server 8080",
-    "relay": "python3 server.py"
-
   }
 }

@@ -3,40 +3,23 @@
 // the whole crew is currently adding to the ship.
 
 import { S } from '../core/state.js';
-<<<<<<< HEAD
 import { watchReport, crewVitals, crewDiagnosis, crewHistory } from '../systems/crew/crew-log.js';
 import { logDiagnostics } from '../core/log.js';
 import { COMFORTS, COMFORT_KEYS, comfortLevel, comfortPrice, comfortBlocker, upgradeComfort,
          comfortEffects, comfortUpkeep, shoreQuote, shoreBlocker, startShoreLeave, recallShore,
          anyOnShore, onShore, inTraining, trainBlocker, trainingCost, startTraining,
          cancelTraining } from '../systems/crew/welfare.js';
-=======
-import { watchReport, crewVitals, crewDiagnosis, crewHistory } from '../systems/crew-log.js';
-import { diagnostics } from '../core/log.js';
-import { COMFORTS, COMFORT_KEYS, comfortLevel, comfortPrice, comfortBlocker, upgradeComfort,
-         comfortEffects, comfortUpkeep, shoreQuote, shoreBlocker, startShoreLeave, recallShore,
-         anyOnShore, onShore, inTraining, trainBlocker, trainingCost, startTraining,
-         cancelTraining } from '../systems/welfare.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { WELFARE } from '../core/config.js';
 import { CREW } from '../core/config.js';
 import { CREW_ROLES, ROLE_KEYS, CREW_TRAITS, crewBonuses, crewOutput, wageOf,
          postOf, specialtyOf, isCross, onDuty, condition, willpowerOf, needsOf } from '../data/crew.js';
 import { berths, xpNeeded, payroll, recruitPool, hire, hireCost, dismiss, retrain,
          assignPost, toggleDuty, postReport, medicalQuote, treatCrew,
-<<<<<<< HEAD
          promote, demote, overseer, persuade, provisionHours } from '../systems/crew/crew.js';
 import { describeMods } from '../systems/industry/fitting.js';
 import { $, el, fmtCr, clamp } from '../core/utils.js';
 import { toast } from './toast.js';
 import { sfx } from '../systems/platform/audio.js';
-=======
-         promote, demote, overseer, persuade, provisionHours } from '../systems/crew.js';
-import { describeMods } from '../systems/fitting.js';
-import { $, el, fmtCr, clamp } from '../core/utils.js';
-import { toast } from './toast.js';
-import { sfx } from '../systems/audio.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 let overlay, body, summary, tabs, tab = 'roster';
 let openWatch = null;
@@ -66,11 +49,7 @@ export function openCrew() {
   sfx.ui();
 }
 
-<<<<<<< HEAD
 function closeCrew() {
-=======
-export function closeCrew() {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   if (overlay) overlay.classList.add('hidden');
 }
 
@@ -246,11 +225,7 @@ function renderWatch() {
   // Diagnostics live behind the same tab rather than in settings: when something is wrong
   // with the crew, the log is the next thing you want, and making it a separate screen means
   // nobody finds it.
-<<<<<<< HEAD
   const diag = logDiagnostics();
-=======
-  const diag = diagnostics();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   body.appendChild(el('div', 'dock-note',
     `Flight log — ${diag.held} entries of ${diag.cap}` +
     `${diag.dropped ? `, ${diag.dropped} rolled off` : ''} · level ${diag.level}` +

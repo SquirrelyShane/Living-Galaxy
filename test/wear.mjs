@@ -25,19 +25,11 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
-<<<<<<< HEAD
 const W = await imp('systems/combat/wear.js');
 const { fitBonuses, budgetLoad, effectivenessOf, drawOf } = await imp('systems/industry/fitting.js');
 const { MODULES } = await imp('data/modules.js');
 const { WEAR, HEAT } = await imp('core/config.js');
 const { snapshot, migrate } = await imp('systems/platform/save.js');
-=======
-const W = await imp('systems/wear.js');
-const { fitBonuses, budgetLoad, effectivenessOf, drawOf } = await imp('systems/fitting.js');
-const { MODULES } = await imp('data/modules.js');
-const { WEAR, HEAT } = await imp('core/config.js');
-const { snapshot, migrate } = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { SCHEMA } = await imp('core/version.js');
 
 initScene();
@@ -67,11 +59,7 @@ console.log('\n— wear is a consequence, not a clock —');
   // is that there is nothing *to* advance. If a tick is ever added to this system, this is
   // the assertion that should stop it.
   const { promises: fsp } = await import('fs');
-<<<<<<< HEAD
   const text = await fsp.readFile(new URL('src/systems/combat/wear.js', ROOT).pathname, 'utf8');
-=======
-  const text = await fsp.readFile(new URL('src/systems/wear.js', ROOT).pathname, 'utf8');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('there is no update tick in the module', !/export function update\w*\(/.test(text));
   ok('and nothing in it is scheduled off the clock', !/S\.time\s*-/.test(text));
 }

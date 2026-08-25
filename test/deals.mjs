@@ -24,21 +24,12 @@ const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { spawnNpc, updateNpcs, populationTargets } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const D = await imp('systems/trade/deals.js');
 const NC = await imp('systems/npc/npc-comms.js');
 const { TOPICS, TOPIC_KEYS } = await imp('data/npc-kb/topics.js');
 const { personaFor, noteEvent } = await imp('systems/npc/npc-brain.js');
 const { bookFor } = await imp('systems/trade/market.js');
 const { initMarket } = await imp('systems/trade/market.js');
-=======
-const D = await imp('systems/deals.js');
-const NC = await imp('systems/npc-comms.js');
-const { TOPICS, TOPIC_KEYS } = await imp('data/npc-topics.js');
-const { personaFor, noteEvent } = await imp('systems/npc-brain.js');
-const { bookFor } = await imp('systems/market.js');
-const { initMarket } = await imp('systems/market.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { NPC_TYPES, DEALS, COMMODITIES } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 

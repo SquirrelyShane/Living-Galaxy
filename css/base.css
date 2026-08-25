@@ -26,11 +26,7 @@
      hardcode their own guess at this — 150px in one place, 158px in another — so
      trimming the throttle meant hunting them down and they drifted apart anyway. One
      number, referenced everywhere, is why the tool column can no longer end up under it. */
-<<<<<<< HEAD
   --dock-h:145px;
-=======
-  --dock-h:136px;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
 
@@ -92,14 +88,11 @@ html,body{width:100%;height:100%;height:100dvh;overflow:hidden;background:var(--
 
 .hidden{display:none !important}
 
-<<<<<<< HEAD
 /* Contact brackets. Between the canopy frame and the reticle: it must sit over the world
    and under the panels, and it never takes a pointer — ui/controls.js hit-tests it on a
    tap that did not become a drag. */
 #contact-markers{position:absolute;inset:0;z-index:6;pointer-events:none}
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 #touch-hint{position:absolute;top:56%;left:50%;transform:translate(-50%,-50%);z-index:15;
   font-size:12px;color:rgba(140,190,255,.45);text-align:center;pointer-events:none;transition:opacity .8s}
 

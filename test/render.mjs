@@ -16,20 +16,12 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { QUALITY, INTERP, LOD, AUDIO, CLOCK } = await imp('core/config.js');
 const { clock, advance, sample, perfStats, resetClock } = await imp('core/clock.js');
-<<<<<<< HEAD
 const q = await imp('world/quality.js');
-=======
-const q = await imp('systems/quality.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const interp = await imp('world/interpolate.js');
 const lod = await imp('world/lod.js');
 const rig = await imp('world/lightrig.js');
 const vis = await imp('world/visibility.js');
-<<<<<<< HEAD
 const audio = await imp('systems/platform/audio.js');
-=======
-const audio = await imp('systems/audio.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 // Destructuring `camera` here would capture `undefined` — it is an `export let` that
 // initScene() assigns, and a destructured binding is a snapshot rather than a live view.
 const sceneMod = await imp('world/scene.js');
@@ -38,17 +30,10 @@ const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
 const { createNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
 const save = await imp('systems/platform/save.js');
-=======
-const { initProjectiles } = await imp('systems/projectiles.js');
-const { initCombat } = await imp('systems/combat.js');
-const { initMining } = await imp('systems/mining.js');
-const save = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); rig.initLightRig(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();
@@ -278,7 +263,6 @@ console.log('\n— level of detail —');
      report.culled + report.buckets.reduce((x, y) => x + y, 0) === report.tracked);
   ok('distant bodies are culled from the origin', report.culled > 0,
      `${report.culled} of ${report.tracked}`);
-<<<<<<< HEAD
 }
 
 // ── point-shader scale ───────────────────────────────────────────────
@@ -407,8 +391,6 @@ console.log('\n— acquisition range —');
   lod.updateLod(800);
   ok('a body with no range cap is never hidden by range', !hiddenBy(giant, HIDE.range));
   lod.unregister(giant);
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   // stand next to something and it should come back
   const planet = S.world.bodies.find(b => b.userData.kind === 'planet');
@@ -491,17 +473,12 @@ console.log('\n— silence —');
   ok('and back on', audio.setAudioEnabled(true) === true && audio.audioEnabled() === true);
 
   audio.setAudioEnabled(false);
-<<<<<<< HEAD
   // Asserts that nothing started, not which flavour of falsy the refusal returns. The old
   // form pinned `=== undefined` and failed the moment `startMusic` was rewritten to return
   // the bed it created (and therefore `null` when it creates none) — a test of the return
   // convention wearing the name of a test about silence.
   ok('the music bed will not start while muted',
      !audio.startMusic() && audio.musicMood() === null);
-=======
-  ok('the music bed will not start while muted',
-     audio.startMusic() === undefined && audio.musicMood() === null);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   audio.setAudioEnabled(true);
   ok('a mood can be set once sound is on again', typeof audio.moodFor() === 'string');

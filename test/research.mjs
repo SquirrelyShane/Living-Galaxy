@@ -23,7 +23,6 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
-<<<<<<< HEAD
 const R = await imp('systems/industry/research.js');
 const { PROJECTS, PROJECT_KEYS, FINDING_KEYS, GATED } = await imp('data/research.js');
 const { traits } = await imp('data/planetary/traits.js');
@@ -32,16 +31,6 @@ const { queueJob, addMaterial } = await imp('systems/industry/crafting.js');
 const { BLUEPRINTS } = await imp('data/crafting/index.js');
 const { CRAFT, RESEARCH } = await imp('core/config.js');
 const { scanReport } = await imp('systems/industry/scanner.js');
-=======
-const R = await imp('systems/research.js');
-const { PROJECTS, PROJECT_KEYS, FINDING_KEYS, GATED } = await imp('data/research.js');
-const { traits } = await imp('data/planetary/traits.js');
-const { probePlanet } = await imp('systems/survey.js');
-const { queueJob, addMaterial } = await imp('systems/crafting.js');
-const { BLUEPRINTS } = await imp('data/crafting/index.js');
-const { CRAFT, RESEARCH } = await imp('core/config.js');
-const { scanReport } = await imp('systems/scanner.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { FINDINGS } = await imp('data/research.js');
 const { SCHEMA } = await imp('core/version.js');
 

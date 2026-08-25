@@ -24,7 +24,6 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { AMMUNITION } = await imp('data/crafting/ammo.js');
 const { WEAPON_MODULES, WEAPON_KEYS } = await imp('data/weapons.js');
-<<<<<<< HEAD
 const ORD = await imp('systems/combat/ordnance.js');
 const MAG = await imp('systems/combat/magazine.js');
 const { updateWeapons, heatFraction } = await imp('systems/combat/weapons.js');
@@ -37,20 +36,6 @@ const { SCHEMA } = await imp('core/version.js');
 const GRP = await imp('systems/combat/groups.js');
 const { activeGuns } = await imp('systems/platform/preflight.js');
 const { mountScale } = await imp('systems/industry/fitting.js');
-=======
-const ORD = await imp('systems/ordnance.js');
-const MAG = await imp('systems/magazine.js');
-const { updateWeapons, heatFraction } = await imp('systems/weapons.js');
-const { canFire, canFireMount } = await imp('systems/preflight.js');
-const { npcResist } = await imp('systems/combat.js');
-const { buyWeapon, buyAmmo, ammoForSale, ammoStackPrice, fitSlot } = await imp('systems/economy.js');
-const { serializeCrafting, restoreCrafting } = await imp('systems/crafting.js');
-const { ORDNANCE, HEAT, SHIP_CLASSES, MULTI_GUN_FALLOFF } = await imp('core/config.js');
-const { SCHEMA } = await imp('core/version.js');
-const GRP = await imp('systems/groups.js');
-const { activeGuns } = await imp('systems/preflight.js');
-const { mountScale } = await imp('systems/fitting.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 recalcStats();

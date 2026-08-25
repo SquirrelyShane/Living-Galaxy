@@ -76,21 +76,13 @@ export function attachGlow(host, color, intensity = 0.5, distance = 120) {
 }
 
 /** Explicit removal. Rarely needed — see the pruning note in `updateLightRig`. */
-<<<<<<< HEAD
 function detachGlow(e) {
-=======
-export function detachGlow(e) {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const i = emitters.indexOf(e);
   if (i >= 0) { emitters.splice(i, 1); dirty = true; }
 }
 
 /** Drop every emitter belonging to a host. Used when a composite is torn down. */
-<<<<<<< HEAD
 function detachGlowsFor(host) {
-=======
-export function detachGlowsFor(host) {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   for (let i = emitters.length - 1; i >= 0; i--) {
     if (emitters[i].host === host) { emitters.splice(i, 1); dirty = true; }
   }
@@ -184,11 +176,7 @@ export function updateLightRig(dt = 0) {
 }
 
 /** Reset for a new world. The pool survives; only the registrations go. */
-<<<<<<< HEAD
 function resetLightRig() {
-=======
-export function resetLightRig() {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   emitters.length = 0;
   for (const l of pool) l.intensity = 0;
   dirty = true;

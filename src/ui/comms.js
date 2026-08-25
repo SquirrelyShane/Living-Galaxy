@@ -11,20 +11,12 @@
 
 import { $, el } from '../core/utils.js';
 import { COMMS } from '../core/config.js';
-<<<<<<< HEAD
 import { commsLog, unread, pending, reply, markRead, setChannel, onComms } from '../systems/npc/comms.js';
 import { S } from '../core/state.js';
 import { tutorialEvent } from '../systems/platform/tutorial.js';
 import { sfx } from '../systems/platform/audio.js';
 import { openMind } from './mind.js';
 import { type as typeLine, voiceOf, finishAll } from './typewriter.js';
-=======
-import { commsLog, unread, pending, reply, markRead, setChannel, onComms } from '../systems/comms.js';
-import { S } from '../core/state.js';
-import { tutorialEvent } from '../systems/tutorial.js';
-import { sfx } from '../systems/audio.js';
-import { openMind } from './mind.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 let overlay, logEl, chanEl, replyEl, badge;
 
@@ -113,7 +105,6 @@ export function render() {
     const ch = el('span', 'comms-chan', '');
     ch.textContent = e.channel;
     const txt = el('div', 'comms-text', '');
-<<<<<<< HEAD
     // Typed out, once, the first time this entry is rendered. The list is rebuilt in full on
     // every update, so the key is what stops eight lines of history re-typing themselves
     // every time somebody new says something — see the second rule in ui/typewriter.js.
@@ -123,9 +114,6 @@ export function render() {
           : e.kind === 'system' ? 'system' : 'chatter',
       voice: voiceOf(e.speaker || e.from)
     });
-=======
-    txt.textContent = e.text;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     const head = el('div', 'comms-head', '');
     head.appendChild(who);
     head.appendChild(ch);
@@ -134,7 +122,6 @@ export function render() {
     logEl.appendChild(row);
   }
   logEl.scrollTop = logEl.scrollHeight;
-<<<<<<< HEAD
   // A tap anywhere in the log finishes whatever is still arriving. Bound once per render is
   // wrong — the node is the same node across renders — so it is bound on the element the
   // first time and remembered.
@@ -142,8 +129,6 @@ export function render() {
     logEl.__skipBound = true;
     logEl.addEventListener('click', () => finishAll());
   }
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   renderReplies();
   renderBadge();
 }

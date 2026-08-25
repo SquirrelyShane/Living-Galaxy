@@ -1,16 +1,9 @@
 // Living Galaxy — single source of truth. Everything else reads and writes this.
 
-<<<<<<< HEAD
 import { SHIP_CLASSES, UPGRADES, WEAPONS, SPAWN, WORLD_SEED, PROBE, START_CLASS, ADVANCED, HEAT, ORDNANCE, ORBIT_SCALE, SCAN } from './config.js';
 import { clamp } from './utils.js';
 import { WEAPON_MODULES } from '../data/weapons.js';
 import { normalizeFit, fitBonuses, mountedWeapons, budgetLoad } from '../systems/industry/fitting.js';
-=======
-import { SHIP_CLASSES, UPGRADES, WEAPONS, SPAWN, WORLD_SEED, PROBE, START_CLASS, ADVANCED, HEAT, ORDNANCE, ORBIT_SCALE } from './config.js';
-import { clamp } from './utils.js';
-import { WEAPON_MODULES } from '../data/weapons.js';
-import { normalizeFit, fitBonuses, mountedWeapons, budgetLoad } from '../systems/fitting.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { crewBonuses } from '../data/crew.js';
 
 export const S = {
@@ -18,13 +11,10 @@ export const S = {
   playtime: 0,      // seconds flown across all sessions — persisted in the save
   running: false,
   seed: WORLD_SEED,
-<<<<<<< HEAD
   // Where in the galaxy this flight is (v1.02.44). `seed` above is the *system* seed and is
   // still the thing every generator reads; this is what it is derived from and where it sits.
   // Two integers — see world/galaxy.js on why fifty thousand systems cost no more than that.
   galaxy: { seed: WORLD_SEED, node: 0 },
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   player: {
     classKey: START_CLASS,
@@ -79,7 +69,6 @@ export const S = {
   comms: null,               // the interactive log. See systems/comms.js
   company: null,             // executive start. See systems/company.js
   managers: null,            // experimental site managers. See systems/managers.js
-<<<<<<< HEAD
   // `typewriter` and `systemsDetail` are interface preferences rather than simulation state,
   // and they live here because everything in `S.settings` is persisted by one line in
   // `save.js`. Defaults: dialogue is spoken (see ui/typewriter.js), the systems drawer is
@@ -97,13 +86,6 @@ export const S = {
   // null is WARP TO — as close as the geometry allows. See systems/flight/warp.js.
   warp: { state: 'idle', charge: 0, timer: 0, dest: null, avoid: null, avoidSide: null,
           standoff: null },
-=======
-  settings: { assist: true, audio: true, chase: false, experimental: false },
-
-  input: { turning: false, dragging: false, firing: false, mining: false },
-
-  warp: { state: 'idle', charge: 0, timer: 0, dest: null, avoid: null, avoidSide: null },
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   approach: null,    // { active, prevAssist, obj, prev } while the autopilot flies
   orbit: null,       // { body, r, y, angle } while holding a stable orbit
   docking: null,     // { station, t, from } while the tractor has the ship
@@ -112,13 +94,10 @@ export const S = {
   sim: { disabled: null, boarding: null, sites: [], claims: [],
          contractT: 0, fortTimer: 0, playerContract: null },
 
-<<<<<<< HEAD
   // Solar arrays and hydroponics. Shape lives in systems/industry/habitat.js — this is
   // only the default, so a hull that has never deployed anything still reads cleanly.
   habitat: null,
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   target: null,        // { obj, kind, name, faction }
   docked: null,        // station group while docked
   dockCandidate: null, // station in range
@@ -225,15 +204,12 @@ export function recalcStats() {
 
   const cargoBase = c.cargoCap * (1 + UPGRADES.cargo.step * u.cargo) + add('cargoAdd');
 
-<<<<<<< HEAD
   // The scanner tier the fit carries, and what fraction of the hull's *rated* array that
   // buys. Computed before the stat block rather than inside it because `sensor` needs it and
   // an object literal cannot read its own fields — see `SCAN.tierReach` for the argument.
   const scanTier = Math.round(add('scanTierAdd'));
   const reach = SCAN.tierReach[Math.max(0, Math.min(SCAN.tierReach.length - 1, scanTier))];
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.stats = Object.assign({}, c, {
     key: S.player.classKey,
     maxThrust: c.maxThrust * (1 + UPGRADES.thrust.step * u.thrust) * (1 + add('thrustMult')),
@@ -249,16 +225,12 @@ export function recalcStats() {
     weaponDef: resolveWeapon(),
     mounts: mountedWeapons(S.fit),
     // -- advanced modules --
-<<<<<<< HEAD
     sensor:      Math.max(SCAN.reachFloor,
                           c.sensor * reach * (1 + 0.60 * adv.deepScan) * (1 + add('sensorMult'))),
     // The rated figure, kept so the fitting screen and the chart can say what the hull
     // *would* reach with its bays full — "1.9 Mm of 4.6 Mm rated" is a sentence that makes
     // the next module purchase obvious, and "1.9 Mm" on its own is not.
     sensorRated: c.sensor,
-=======
-    sensor:      c.sensor * (1 + 0.60 * adv.deepScan) * (1 + add('sensorMult')),
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     // Warp speed scales with the system. A hop is energy-limited, not distance-limited —
     // one charge buys a fixed number of *seconds* in the bubble — so widening Solaris
     // without touching this would have meant the same eight-hop crossing turning into
@@ -274,7 +246,6 @@ export function recalcStats() {
     naniteArmor: ADVANCED.naniteArmorPerSec * adv.autoRepair + add('naniteArmorAdd'),
     naniteHull:  ADVANCED.naniteHullPerSec  * adv.autoRepair + add('naniteHullAdd'),
     pointDef:    Math.min(0.85, ADVANCED.pointDefChance * adv.pointDef + add('pointDefAdd')),
-<<<<<<< HEAD
     scanTier,
     scanRate:    1 + add('scanRate'),
     tradeBonus:  add('tradeBonus'),
@@ -283,11 +254,6 @@ export function recalcStats() {
     // no number in the game. See systems/economy.js for where they are now spent.
     upgradeDiscount: add('upgradeDiscount'),
     dockDiscount:    add('dockDiscount'),
-=======
-    scanTier:    Math.round(add('scanTierAdd')),
-    scanRate:    1 + add('scanRate'),
-    tradeBonus:  add('tradeBonus'),
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     lootRange:   add('lootRangeAdd'),
     // Heat capacity scales with dry mass — a big hull soaks more before it has to stop
     // shooting, for the same reason a big hull is slow. `heatSinkAdd` lets a fit buy

@@ -16,13 +16,8 @@ const imp = p => import(new URL('src/' + p, ROOT).href);
 const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { DAMAGE, SEEKER, DECOY, POINTDEF, ENGAGE, NPC_TYPES } = await imp('core/config.js');
-<<<<<<< HEAD
 const { applyDamage, resistance, damageType, rangeScale, typeSummary } = await imp('systems/combat/damage.js');
 const { rebuild, querySegment, queryRadius, resetBroadphase, bucketCount, cellSize } = await imp('systems/combat/broadphase.js');
-=======
-const { applyDamage, resistance, damageType, rangeScale, typeSummary } = await imp('systems/damage.js');
-const { rebuild, querySegment, queryRadius, resetBroadphase, bucketCount, cellSize } = await imp('systems/broadphase.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { WEAPON_MODULES, weaponsOfType } = await imp('data/weapons.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
@@ -30,15 +25,9 @@ const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
 const { initProjectiles, updateProjectiles, fire, activeProjectiles, deployDecoy,
-<<<<<<< HEAD
         inspectProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat, updateCombat, damagePlayer, damageNpc, npcResist } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
-=======
-        inspectProjectiles } = await imp('systems/projectiles.js');
-const { initCombat, updateCombat, damagePlayer, damageNpc, npcResist } = await imp('systems/combat.js');
-const { initMining } = await imp('systems/mining.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();
@@ -449,11 +438,7 @@ console.log('\n— locking —');
 console.log('\n— seeker reacquisition —');
 {
   const { SEEKER } = await imp('core/config.js');
-<<<<<<< HEAD
   const P = await imp('systems/combat/projectiles.js');
-=======
-  const P = await imp('systems/projectiles.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('a lost lock stays lost by default', SEEKER.reacquire === false);
 
   // Fired well away from the origin: a 'ship' round spawned on top of the player hits it on

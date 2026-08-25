@@ -13,11 +13,7 @@ const ok = (name, cond, extra = '') => {
 const imp = p => import(new URL('src/' + p, ROOT).href);
 
 const { NET } = await imp('core/config.js');
-<<<<<<< HEAD
 const ns = await imp('systems/platform/netsync.js');
-=======
-const ns = await imp('systems/netsync.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 // ── clock sync ───────────────────────────────────────────────────────
 console.log('\n— clock synchronisation —');

@@ -34,7 +34,6 @@ const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids, updateAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx, updatePlayer } = await imp('entities/player.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initProjectiles, updateProjectiles, activeProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat, updateCombat } = await imp('systems/combat/combat.js');
 const { updateWeapons } = await imp('systems/combat/weapons.js');
@@ -56,38 +55,11 @@ const { updateQuality } = await imp('world/quality.js');
 const { updateAudio } = await imp('systems/platform/audio.js');
 const hud = await imp('ui/hud.js');
 const save = await imp('systems/platform/save.js');
-=======
-const { initProjectiles, updateProjectiles, activeProjectiles } = await imp('systems/projectiles.js');
-const { initCombat, updateCombat } = await imp('systems/combat.js');
-const { updateWeapons } = await imp('systems/weapons.js');
-const { initMining, updateMining } = await imp('systems/mining.js');
-const { initWorldSim, updateWorldSim } = await imp('systems/worldsim.js');
-const { initMarket, updateMarket, bookFor } = await imp('systems/market.js');
-const { initContracts, updateContracts, boardFor, activeContracts } = await imp('systems/contracts.js');
-const { resetReputation, standing } = await imp('systems/reputation.js');
-const { initCrew, updateCrew } = await imp('systems/crew.js');
-const { createCharacter, skill } = await imp('systems/character.js');
-const { beginAgentChain, updateMissions } = await imp('systems/missions.js');
-const { updateScan } = await imp('systems/scanner.js');
-const { updateWarp } = await imp('systems/warp.js');
-const { updateTargeting } = await imp('systems/targeting.js');
-const { updateDocking } = await imp('systems/economy.js');
-const { trackedCount, commitStep } = await imp('world/interpolate.js');
-const { lodCount, updateLod } = await imp('world/lod.js');
-const { updateQuality } = await imp('systems/quality.js');
-const { updateAudio } = await imp('systems/audio.js');
-const hud = await imp('ui/hud.js');
-const save = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();
 resetReputation(); initWorldSim(); initMarket(); initContracts(); initCrew();
-<<<<<<< HEAD
 createCharacter({ name: 'Soak', lineage: 'belter', corp: 'freewake', career: 'prospector' });
-=======
-createCharacter({ name: 'Soak', lineage: 'belter', corp: 'meridian-collective', career: 'prospector' });
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 beginAgentChain();
 hud.initHud();
 S.running = true;

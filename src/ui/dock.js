@@ -5,7 +5,6 @@ import { COMMODITIES, UPGRADES, UPGRADE_ORDER, REPAIR_COST, PROBE, SHIP_CLASSES,
 import { WEAPON_MODULES, WEAPON_KEYS } from '../data/weapons.js';
 import { STATION_MODULES } from '../data/stations.js';
 import { MODULES, MODULE_KEYS } from '../data/modules.js';
-<<<<<<< HEAD
 import { describeMods } from '../systems/industry/fitting.js';
 import { CREW_ROLES, CREW_TRAITS, crewOutput, wageOf } from '../data/crew.js';
 import { berths, payroll, recruitPool, hire, hireCost, medicalQuote, treatCrew } from '../systems/crew/crew.js';
@@ -28,28 +27,6 @@ import { POWERS } from '../data/factions.js';
 import { playerDossier, standingWith } from '../systems/company/dossier.js';
 import { CONTRACTS } from '../core/config.js';
 import { hasCompany, atHQ, company } from '../systems/company/company.js';
-=======
-import { describeMods } from '../systems/fitting.js';
-import { CREW_ROLES, CREW_TRAITS, crewOutput, wageOf } from '../data/crew.js';
-import { berths, payroll, recruitPool, hire, hireCost, medicalQuote, treatCrew } from '../systems/crew.js';
-import { openFit } from './fitting.js';
-import { serviceAll, serviceQuote } from '../systems/wear.js';
-import { openCrew } from './crew.js';
-import { $, el, fmtCr, fmtMass } from '../core/utils.js';
-import { priceFor, sell, sellAll, repair, repairQuote, upgradeCost, buyUpgrade, undock, buyProbe, buyHull, ownsHull, hullPrice, upgradeLocked, upgradeReqText, buyWeapon, ownsWeapon, buyModule, ownsModule, sellModule } from '../systems/economy.js';
-import { saveGame } from '../systems/save.js';
-import { postPlayerJob, suggestedFee, openDeals, PLAYER } from '../systems/deals.js';
-import { CHAR } from '../core/config.js';
-import { SKILLS } from '../data/origins.js';
-import { characterSheet, spendPoint, hasLicence, licenceReq, licencePrice,
-         licenceBlocker, buyLicence } from '../systems/character.js';
-import { currentMission } from '../systems/missions.js';
-import { boardFor, activeContracts, acceptContract, acceptBlocker, abandonContract,
-         contractProgress, timeLeft, issuerOf, sellableOf, deliverableAt,
-         deliverConsignment } from '../systems/contracts.js';
-import { CONTRACTS } from '../core/config.js';
-import { hasCompany, atHQ, company } from '../systems/company.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { openOps } from './ops.js';
 
 let overlay, body, tabs, nameEl, tab = 'trade';
@@ -214,11 +191,7 @@ function renderService() {
     () => { S.player.energy = S.stats.energyCap; S.player.shield = S.stats.shieldMax; }, 'free');
 
   row('Probe resupply', `${S.probes} aboard · deep-survey drones for planetary work`,
-<<<<<<< HEAD
     'Buy 1', S.credits >= probeCost(), () => buyProbe(), fmtCr(probeCost()));
-=======
-    'Buy 1', S.credits >= PROBE.cost, () => buyProbe(), fmtCr(PROBE.cost));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   row('Save flight', 'Writes progress to this device', 'Save', true, () => saveGame(false), '');
 
@@ -542,11 +515,7 @@ function renderBoard() {
       const r = el('div', 'trade-row');
       r.appendChild(el('div', '',
         `<div class="nm">${c.title}</div>` +
-<<<<<<< HEAD
         `<div class="meta">${deskName(c.issuer)} · ${c.progress|0}/${c.target} · ` +
-=======
-        `<div class="meta">${c.issuer} · ${c.progress|0}/${c.target} · ` +
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
         `<span class="${late ? 'urgent' : ''}">${clock(timeLeft(c))} left</span></div>` +
         `<div class="bar-track slim"><div class="bar-fill ${late ? 'hullbar' : 'shield'}" ` +
         `style="width:${pct}%"></div></div>`));
@@ -564,7 +533,6 @@ function renderBoard() {
   if (!st) { body.appendChild(el('div', 'empty-note', 'Dock at a station to see its board.')); return; }
 
   const offers = boardFor(st);
-<<<<<<< HEAD
   const desk = issuerOf(st);
   const power = POWERS[desk];
 
@@ -578,16 +546,12 @@ function renderBoard() {
   body.appendChild(el('div', 'empty-note',
     `<i>${power.doctrine}</i> — ${power.seat}. Standing ${signed(standingWith(playerDossier(), desk))}.`));
 
-=======
-  body.appendChild(el('div', 'sec-head', `${st.userData.name} · posting as ${issuerOf(st)}`));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   if (!offers.length) {
     body.appendChild(el('div', 'empty-note', 'Nothing posted right now. The board turns over every few minutes.'));
     return;
   }
 
   for (const c of offers) {
-<<<<<<< HEAD
     const gate = eligibility(c);
     const blocked = acceptBlocker(c);
     // The lock states its price. `gate.why` already lists every missing claim — the skill
@@ -599,12 +563,6 @@ function renderBoard() {
     row(
       c.title,
       `${c.brief}<br><span class="meta">${note}</span>`,
-=======
-    const blocked = acceptBlocker(c);
-    row(
-      c.title,
-      `${c.brief}<br><span class="meta">expires in ${clock(timeLeft(c))} · +${c.rep} standing · ${c.skill}</span>`,
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       blocked ? 'LOCKED' : 'ACCEPT',
       !blocked,
       () => acceptContract(c),
@@ -612,12 +570,9 @@ function renderBoard() {
     );
   }
 }
-<<<<<<< HEAD
 
 const hex = n => '#' + (n >>> 0).toString(16).padStart(6, '0');
 const signed = v => (v > 0 ? '+' : '') + Math.round(v);
 
 /** A stored contract names a power; print what a person would call it. */
 const deskName = key => (POWERS[key] && POWERS[key].short) || key;
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

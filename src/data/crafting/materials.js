@@ -965,11 +965,7 @@ export const material = id => MATERIALS[id] || null;
 export const materialName = id => (MATERIALS[id] && MATERIALS[id].name) || id;
 
 /** Tier of a material, inferred from its group. Drives what tier of industry can make it. */
-<<<<<<< HEAD
 const MATERIAL_TIER = {
-=======
-export const MATERIAL_TIER = {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   raw_mined_extracted: 0, grown_cultured_biological: 0,
   refined_materials: 1, intermediate_components: 2
 };

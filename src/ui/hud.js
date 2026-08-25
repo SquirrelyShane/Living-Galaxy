@@ -9,7 +9,6 @@ import { S, totalMass, cargoMass } from '../core/state.js';
 import { SHIP_CLASSES, CLASS_ORDER, UNIT_M, SHIP_PRICE, FLIGHT, DAMAGE } from '../core/config.js';
 import { $, el, fmtCr, fmtKm, fmtMass, clamp, forward } from '../core/utils.js';
 import { camera } from '../world/scene.js';
-<<<<<<< HEAD
 import { setTarget, clearTarget } from '../systems/flight/targeting.js';
 import { playerSignature, signatureLabel } from '../systems/combat/detection.js';
 import { switchClass, buyHull, ownsHull, hullPrice } from '../systems/trade/economy.js';
@@ -34,50 +33,21 @@ import { playConn, abortConn } from './conn.js';
 import { canPilot } from '../systems/company/career.js';
 import { habitatReport, habitatLine } from '../systems/industry/habitat.js';
 import { doctrinePrompt, refreshDoctrineChip } from './doctrine.js';
-=======
-import { setTarget, clearTarget } from '../systems/targeting.js';
-import { playerSignature, signatureLabel } from '../systems/detection.js';
-import { switchClass, buyHull, ownsHull, hullPrice } from '../systems/economy.js';
-import { status } from './toast.js';
-import { openDock } from './dock.js';
-import { net } from '../systems/net.js';
-import { startApproach, matchTarget } from '../systems/approach.js';
-import { inClaimedSpace } from '../systems/worldsim.js';
-import { scanPlanet, probePlanet, surveyLevel, planetInfo, asteroidDetail } from '../systems/survey.js';
-import { beginScan, scanReport, scanProgress, liveTier, TIER_NAME, scanOrigin } from '../systems/scanner.js';
-import { fieldContacts } from '../systems/fields.js';
-import { lagrangeContacts, lagrangePoints, investigate, charted, isWorked, pointDistance } from '../systems/lagrange.js';
-import { heatFraction } from '../systems/weapons.js';
-import { fittedFeeds, magazineReport } from '../systems/magazine.js';
-import { HEAT, LAGRANGE } from '../core/config.js';
-import { payroll } from '../systems/crew.js';
-import { setCourse } from '../systems/warp.js';
-import { sfx } from '../systems/audio.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 const E = {};
 const IDS = ['system-name','status-line','credits-val','cargo-val','threat-alert','fleet-alert',
   'energy-fill','energy-val','shield-fill','shield-val','armor-fill','armor-val',
   'heat-fill','heat-val','ammo-info',
   'hull-fill','hull-val','warp-fill','warp-val','hull-status','mass-info','expend-info','crew-info',
-<<<<<<< HEAD
   'array-row','array-fill','array-val','farm-info',
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   'heading-val','pitch-info','spd-info','twr-info','accel-info','drift-info','sig-info','alt-info','ship-info',
   'nearest-list','contact-count','target-panel','target-name','target-kind','target-dist','target-hp','claim-alert',
   'pitch-readout','pitch-num','pitch-tick','speed-value','real-speed','speed-fill',
   'warp-core-visual','warp-core-fill','warp-status-text','warp-overlay','warp-btn',
-<<<<<<< HEAD
   'target-approach','target-match','target-warp','target-scan','target-probe','target-file','target-expand','target-detail','engine-glow',
   'systems-more','systems-extra',
   'dock-prompt','dock-target','station-return','ship-panel','btn-mine','btn-assist','btn-audio',
   'ap-toggle','ap-led','ap-label','ap-line','ap-doctrine','speed-thumb','speed-streaks','damage-vignette','velocity-marker','scan-sweep','scan-bar','scan-bar-fill'];
-=======
-  'target-approach','target-match','target-scan','target-probe','target-expand','target-detail','engine-glow',
-  'dock-prompt','dock-target','station-return','ship-panel','btn-mine','btn-assist','btn-audio',
-  'speed-streaks','damage-vignette','velocity-marker','scan-sweep','scan-bar','scan-bar-fill'];
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 
 // ── write budget ─────────────────────────────────────────────────────
@@ -224,7 +194,6 @@ export function initHud() {
     h.addEventListener('click', () => h.parentElement.classList.toggle('closed'));
   });
 
-<<<<<<< HEAD
   if (E['ap-toggle']) E['ap-toggle'].addEventListener('click', () => {
     const on = toggleAutopilot();
     refreshAutopilot();
@@ -274,10 +243,6 @@ export function initHud() {
   // The file on whoever is under the reticle. Shown only for ships, because a rock has
   // no career and an empty dossier is worse than an absent button.
   E['target-file'].addEventListener('click', () => openLockedDossier());
-=======
-  E['target-approach'].addEventListener('click', () => startApproach());
-  E['target-match'].addEventListener('click', () => matchTarget());
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   E['target-expand'].addEventListener('click', () => {
     expanded = !expanded;
     setFlag('target-expand', 'open', expanded);
@@ -358,10 +323,7 @@ export function updateHud(dt, force = false) {
   frames++;
 
   // per-frame: only the pieces that would visibly stutter otherwise
-<<<<<<< HEAD
   refreshAutopilot();
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   updateThrottleBar();
   updatePitchReadout();
   updateWarpVisuals();
@@ -393,7 +355,6 @@ export function updateHud(dt, force = false) {
     setWidth('warp-fill', S.warp.charge);
     setText('warp-val', Math.round(S.warp.charge));
 
-<<<<<<< HEAD
     // ── the arrays ────────────────────────────────────────────────
     //
     // The row hides itself on a hull with none fitted. Two decimals because the pilot is
@@ -410,8 +371,6 @@ export function updateHud(dt, force = false) {
     setFlag('farm-info', 'hidden', !hab.beds && !hab.crew);
     if (hab.beds || hab.crew) setText('farm-info', habitatLine());
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     const hp = (p.hull / st.hullMax) * 100;
     setText('hull-status', 'Hull integrity: ' +
       (hp <= 0 ? 'breached' : hp < 20 ? 'critical' : hp < 40 ? 'structural stress' :
@@ -493,7 +452,6 @@ function bar(name, val, max) {
   setText(name + '-val', Math.round(pct));
 }
 
-<<<<<<< HEAD
 /**
  * ARIA's switch and her status line.
  *
@@ -531,13 +489,6 @@ function updateThrottleBar() {
       writes++;
     } else skipped++;
   }
-=======
-function updateThrottleBar() {
-  const t = S.player.throttle;
-  setText('speed-value', Math.round(t * 100) + '%');
-  setWidth('speed-fill', clamp(((t + 0.25) / 1.25) * 100, 0, 100));
-  setFlag('speed-fill', 'reverse', t < 0);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   const glow = E['engine-glow'];
   if (glow) {
@@ -645,7 +596,6 @@ function updateTargetPanel() {
   const planetish = t.kind === 'planet' || t.kind === 'moon';
   const orbitingIt = !!(S.orbit && S.orbit.body === t.obj);
   setFlag('target-scan', 'hidden', liveTier(t.obj) <= 0);
-<<<<<<< HEAD
   setFlag('target-file', 'hidden', t.kind !== 'ship');
   // WARP is offered for places, not for ships. You do not warp to a hull — the drive drops
   // out on approach to anything that moves — and a button that is present but always refuses
@@ -654,8 +604,6 @@ function updateTargetPanel() {
   const flyable = t.kind !== 'ship' && t.kind !== 'pilot';
   setFlag('target-warp', 'hidden', !flyable);
   if (E['target-warp']) E['target-warp'].disabled = !!S.docked || !canPilot();
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   if (t.kind === 'lagrange') {
     // Offered only when the site is resolved, unworked, and close enough to work — the same
@@ -737,7 +685,6 @@ function updateDockPrompt() {
 }
 
 function scanContacts() {
-<<<<<<< HEAD
   // One walk, in `systems/flight/contacts.js`, shared with the chart and the canopy
   // brackets. This used to be that walk, with a rock cap of 900 units bolted onto it that
   // no other surface knew about — the chart plotted rocks out to full sensor range and
@@ -745,57 +692,6 @@ function scanContacts() {
   // cockpit. Docked, the eye is the station's array rather than the ship's dish; that
   // decision lives in `scanOrigin()` and is now made in exactly one place.
   contacts = sensorContacts();
-=======
-  // Docked, the contact list is the station's watch, not the ship's — same eye the chart
-  // and the scanner use. See `scanOrigin()` in systems/scanner.js: the array on a station
-  // reaches further than the dish on a hull, and a founder standing on the office deck
-  // with no ship at all still has something to look through.
-  const o = scanOrigin();
-  const p = o.pos;
-  const range = o.range;
-  const r2 = range * range;
-  contacts = [];
-
-  for (const n of S.world.npcs) {
-    const u = n.userData;
-    if (u.hp <= 0 || (u.ambush && !u.triggered)) continue;   // lurkers stay dark
-    const d2 = n.position.distanceToSquared(p);
-    if (d2 < r2) contacts.push({ obj: n, kind: 'ship', name: u.name,
-      faction: u.faction, d: Math.sqrt(d2) });
-  }
-  for (const b of S.world.bodies) {
-    const d2 = b.position.distanceToSquared(p);
-    if (d2 < r2) contacts.push({ obj: b, kind: b.userData.kind, name: b.userData.name,
-      faction: 'neutral', d: Math.sqrt(d2) });
-  }
-  for (const r of net.remotes.values()) {
-    const d2 = r.group.position.distanceToSquared(p);
-    if (d2 < r2) contacts.push({ obj: r.group, kind: 'pilot', name: '◈ ' + r.name,
-      faction: 'friendly', d: Math.sqrt(d2) });
-  }
-  const rockR2 = Math.min(r2, 900 * 900);
-  for (const a of S.world.asteroids) {
-    const d2 = a.position.distanceToSquared(p);
-    if (d2 < rockR2) contacts.push({ obj: a, kind: 'asteroid', name: a.name,
-      faction: 'rock', d: Math.sqrt(d2), ore: a.ore });
-  }
-
-  // Named fields as whole-field contacts so they appear in the list and can be locked or
-  // warped to. The geometry lives in systems/fields.js — a ring is centred on its planet
-  // and a belt on the star, and this file no longer needs to know which.
-  for (const c of fieldContacts(p, range * 2.2)) {
-    contacts.push({ obj: c.obj, kind: 'belt', name: c.name,
-      faction: 'neutral', d: c.d, beltMid: c.obj.userData.beltMid });
-  }
-
-  // Lagrange points are places, not bodies — derived, mesh-free, and always on the charts
-  // whether or not anything is on station. See systems/lagrange.js.
-  for (const c of lagrangeContacts(p, range * 2.2)) {
-    contacts.push({ obj: c.obj, kind: 'lagrange', name: c.name, faction: 'neutral', d: c.d });
-  }
-
-  contacts.sort((a, b) => a.d - b.d);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 function renderContacts() {
@@ -805,11 +701,7 @@ function renderContacts() {
   // On the "all" tab, cap each bucket so a dense belt can't bury the stations.
   let list;
   if (!want) {
-<<<<<<< HEAD
     const caps = { asteroid: 3, ship: 3, station: 2, planet: 2, moon: 1, star: 1, belt: 1, pilot: 2, lagrange: 2 };
-=======
-    const caps = { asteroid: 2, ship: 3, station: 2, planet: 2, moon: 1, star: 1, belt: 1, pilot: 2, lagrange: 2 };
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     const seen = {};
     list = pool.filter(c => {
       const k = c.kind;
@@ -833,7 +725,6 @@ function renderContacts() {
     const cls = c.faction === 'hostile' ? 'hostile' : c.faction === 'friendly' ? 'friendly'
       : (c.kind === 'asteroid' || c.kind === 'belt') ? 'rock' : '';
     const lock = c.obj === locked ? ' locked' : '';
-<<<<<<< HEAD
     // A hull of yours is marked in the list as well as on the canopy. The list is what a
     // player actually reads before locking, and until v1.02.57 it could not tell you that
     // the ship you were about to shoot was one you were paying upkeep on.
@@ -841,18 +732,9 @@ function renderContacts() {
     return `<div class="near-item ${cls}${lock}${own}" data-i="${i}">` +
       `<span class="nm">${c.name}${c.owner ? `<span class="own">${c.owner}</span>` : ''}</span>` +
       `<span class="dist">${fmtKm(c.d)}</span></div>`;
-=======
-    return `<div class="near-item ${cls}${lock}" data-i="${i}">` +
-      `<span class="nm">${c.name}</span><span class="dist">${fmtKm(c.d)}</span></div>`;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }).join(''));
 }
 
 /** Exposed for the nav map and tests. */
-<<<<<<< HEAD
 const contactList = () => contacts;
 const contactCategory = () => cat;
-=======
-export const contactList = () => contacts;
-export const contactCategory = () => cat;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

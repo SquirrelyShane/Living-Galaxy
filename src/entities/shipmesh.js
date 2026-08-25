@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Living Galaxy — a visible hull.
 //
 // This file used to *be* the ship: a cone, two boxes and a colour lookup keyed by career,
@@ -62,19 +61,10 @@ const HOSTILE_POOL = {
 
 /** Fallback tint, still keyed by career. Used for the glow, which is not the hull. */
 const GLOW = {
-=======
-// Living Galaxy — a visible hull. Used by the chase cam for your own ship and by
-// the multiplayer layer for other pilots. Nose points -Z to match the flight basis.
-
-import { attachGlow } from '../world/lightrig.js';
-
-const COLORS = {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   military: 0xff5555, industrial: 0xffaa22, logistics: 0x55ff77,
   economic: 0xff66ff, civilian: 0x88ccff
 };
 
-<<<<<<< HEAD
 /** Default hull length in world units — what the old cone measured, so nothing jumps. */
 const DEFAULT_LENGTH = 11;
 
@@ -133,32 +123,3 @@ export { CATS };
 export function registerHullFactory() {
   registerFactory('hull', buildShip);
 }
-=======
-export function buildShip(classKey) {
-  const col = COLORS[classKey] || 0x88ccff;
-  const g = new THREE.Group();
-  g.rotation.order = 'YXZ';
-
-  const hull = new THREE.Mesh(
-    new THREE.ConeGeometry(3.2, 11, 6),
-    new THREE.MeshStandardMaterial({ color: col, metalness: 0.6, roughness: 0.35,
-      emissive: col, emissiveIntensity: 0.15 })
-  );
-  hull.rotation.x = -Math.PI / 2;          // tip +Y → -Z
-  g.add(hull);
-
-  const dark = new THREE.MeshStandardMaterial({ color: 0x223347, metalness: 0.8, roughness: 0.3 });
-  const wing = new THREE.Mesh(new THREE.BoxGeometry(12, 0.7, 3.4), dark);
-  wing.position.z = 2.2;
-  g.add(wing);
-  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.7, 4.5, 3), dark);
-  fin.position.set(0, 2, 2.4);
-  g.add(fin);
-
-  // Registered with the light rig rather than owning a light: in multiplayer this builder
-  // runs once per remote pilot, and a busy system should not cost a shader recompile per
-  // arrival. See `world/lightrig.js`.
-  attachGlow(g, col, 0.5, 60);
-  return g;
-}
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

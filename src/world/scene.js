@@ -5,11 +5,7 @@ import { FLIGHT } from '../core/config.js';
 
 export let scene, camera, renderer;
 
-<<<<<<< HEAD
 // Current quality profile. Held here rather than imported from world/quality.js so the
-=======
-// Current quality profile. Held here rather than imported from systems/quality.js so the
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 // dependency runs one way: quality decides, the scene obeys, and the scene can be brought
 // up before the controller exists.
 let profile = { pixelRatio: 1.5, antialias: true, effects: 1, starfield: 1, lodBias: 1.25 };

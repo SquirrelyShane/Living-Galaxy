@@ -18,11 +18,7 @@ const { clock, advance, sample, perfStats, resetClock, nowMs } = await imp('core
 const { guard, diagnostics, unpark, record, isParked, setFaultHandler } = await imp('core/diagnostics.js');
 const { CLOCK, DIAG, SAVE_KEY } = await imp('core/config.js');
 const { S, recalcStats } = await imp('core/state.js');
-<<<<<<< HEAD
 const save = await imp('systems/platform/save.js');
-=======
-const save = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 // ── version ──────────────────────────────────────────────────────────
 console.log('\n— build identity —');

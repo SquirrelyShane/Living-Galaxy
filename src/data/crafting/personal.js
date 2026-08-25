@@ -6,10 +6,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-001",
   "name": "Laser Pistol (Standard)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 1.2,
   "cost": 850,
@@ -27,10 +24,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-002",
   "name": "Heavy Laser Pistol",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 1.6,
   "cost": 1600,
@@ -49,10 +43,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-003",
   "name": "Ballistic Handgun",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 1.0,
   "cost": 450,
@@ -69,10 +60,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-004",
   "name": "Machine Pistol",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 1.8,
   "cost": 780,
@@ -89,10 +77,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-005",
   "name": "Assault Carbine (Hybrid)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 3.8,
   "cost": 3200,
@@ -111,10 +96,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-006",
   "name": "Battle Rifle (Ballistic)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 4.2,
   "cost": 2800,
@@ -132,10 +114,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-007",
   "name": "Sniper Rifle (Rail)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 6.5,
   "cost": 8500,
@@ -154,10 +133,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-008",
   "name": "Shotgun (Combat)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 3.5,
   "cost": 950,
@@ -174,10 +150,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-009",
   "name": "Plasma Rifle",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 5.0,
   "cost": 7200,
@@ -196,10 +169,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-010",
   "name": "Vibroblade",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Melee",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 1.5,
   "cost": 1800,
@@ -217,10 +187,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-011",
   "name": "Energy Sword / Plasma Cutter",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Melee",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 2.0,
   "cost": 4500,
@@ -239,10 +206,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-012",
   "name": "Monomolecular Knife",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Melee",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 0.3,
   "cost": 650,
@@ -258,10 +222,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-013",
   "name": "Light Combat Armor",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 8.0,
   "cost": 2200,
@@ -279,10 +240,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-014",
   "name": "Medium Combat Armor",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 14.0,
   "cost": 5500,
@@ -301,10 +259,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-015",
   "name": "Heavy Powered Armor",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 45.0,
   "cost": 28000,
@@ -324,10 +279,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-016",
   "name": "Powered Exoskeleton Frame",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 28.0,
   "cost": 18500,
@@ -346,10 +298,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-017",
   "name": "Personal Shield Generator",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor/Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 2.5,
   "cost": 9500,
@@ -367,10 +316,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-018",
   "name": "Environmental / EVA Suit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Environmental",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 12.0,
   "cost": 4500,
@@ -390,10 +336,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-019",
   "name": "Hard Suit (Heavy EVA)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Environmental",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 28.0,
   "cost": 12000,
@@ -412,10 +355,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-020",
   "name": "Multitool / Omni-tool",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 0.8,
   "cost": 2800,
@@ -433,10 +373,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-021",
   "name": "Advanced Engineering Toolkit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 4.0,
   "cost": 1800,
@@ -455,10 +392,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-022",
   "name": "Portable Sensor Pack",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 1.8,
   "cost": 3200,
@@ -476,10 +410,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-023",
   "name": "Data Spike / Hacking Tool",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 0.4,
   "cost": 4200,
@@ -496,10 +427,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-024",
   "name": "Grapple Launcher & Line",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 2.2,
   "cost": 1100,
@@ -517,10 +445,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-025",
   "name": "Portable Fabricator (Personal)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 6.0,
   "cost": 8500,
@@ -539,10 +464,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-026",
   "name": "Advanced Medkit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Medical",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 2.0,
   "cost": 1600,
@@ -560,10 +482,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-027",
   "name": "Medical Nanite Injector",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Medical",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 0.3,
   "cost": 1200,
@@ -580,10 +499,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-028",
   "name": "Stimpack / Combat Stim",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 0.1,
   "cost": 180,
@@ -599,10 +515,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-029",
   "name": "Nutrient Ration Pack (7-day)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 3.5,
   "cost": 45,
@@ -619,10 +532,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-030",
   "name": "Water Purification Tablets / Filter",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.2,
   "cost": 15,
@@ -638,10 +548,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-031",
   "name": "Oxygen Candle / Emergency O2",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 1.0,
   "cost": 40,
@@ -657,10 +564,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-032",
   "name": "Portable Power Cell",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.6,
   "cost": 120,
@@ -677,10 +581,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-033",
   "name": "High-Capacity Power Pack",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 2.5,
   "cost": 450,
@@ -698,10 +599,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-034",
   "name": "Data Crystal (Blank)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.05,
   "cost": 65,
@@ -715,10 +613,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-035",
   "name": "Encrypted Data Core",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 0.3,
   "cost": 800,
@@ -734,10 +629,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-036",
   "name": "Luxury Trade Goods (Spices/Art)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Trade Good",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 2.0,
   "cost": 2500,
@@ -750,10 +642,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-037",
   "name": "Rare Earth Sample Case",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Trade Good",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 5.0,
   "cost": 3200,
@@ -767,10 +656,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-038",
   "name": "Hydroponic Seed Bank",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Biological",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 1.0,
   "cost": 300,
@@ -786,10 +672,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-039",
   "name": "Bioreactor Starter Kit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Biological",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 8.0,
   "cost": 4500,
@@ -808,10 +691,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-040",
   "name": "Repair Nanite Canister",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 1.5,
   "cost": 2800,
@@ -828,10 +708,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-041",
   "name": "Personal Computer / Tablet",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.4,
   "cost": 350,
@@ -848,10 +725,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-042",
   "name": "Radiation Suit Liner",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Environmental",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 2.0,
   "cost": 600,
@@ -867,10 +741,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-043",
   "name": "Magnetic Boots",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 2.5,
   "cost": 480,
@@ -887,10 +758,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-044",
   "name": "Emergency Beacon / Locator",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.3,
   "cost": 200,
@@ -907,10 +775,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-045",
   "name": "Xeno-Sample Containment Unit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Scientific",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 4.0,
   "cost": 2200,
@@ -928,10 +793,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-046",
   "name": "Plasma Pistol",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 1.8,
   "cost": 3800,
@@ -950,10 +812,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-047",
   "name": "Ion Pistol",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 1.4,
   "cost": 2400,
@@ -971,10 +830,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-048",
   "name": "Needler / Flechette Pistol",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 1.1,
   "cost": 1600,
@@ -991,10 +847,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-049",
   "name": "Grenade Launcher (Personal)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 4.5,
   "cost": 3200,
@@ -1011,10 +864,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-050",
   "name": "Anti-Materiel Rifle",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Personal Weapon",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 12.0,
   "cost": 12500,
@@ -1032,10 +882,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-051",
   "name": "Stun Baton / Shock Prod",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Melee",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 1.0,
   "cost": 350,
@@ -1052,10 +899,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-052",
   "name": "Power Fist / Impact Gauntlet",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Melee",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 3.5,
   "cost": 2800,
@@ -1073,10 +917,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-053",
   "name": "Scout Armor (Light Stealth)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 7.0,
   "cost": 4800,
@@ -1094,10 +935,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-054",
   "name": "Boarding Armor",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 18.0,
   "cost": 7500,
@@ -1115,10 +953,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-055",
   "name": "Hazard Environment Suit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Environmental",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 15.0,
   "cost": 6200,
@@ -1136,10 +971,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-056",
   "name": "Rebreather / Filter Mask",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Environmental",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.8,
   "cost": 180,
@@ -1155,10 +987,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-057",
   "name": "Portable Shield Pack",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor/Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 4.0,
   "cost": 11000,
@@ -1176,10 +1005,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-058",
   "name": "Hacking Deck (Advanced)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 1.2,
   "cost": 6500,
@@ -1197,10 +1023,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-059",
   "name": "Field Survey Kit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 3.5,
   "cost": 2100,
@@ -1218,10 +1041,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-060",
   "name": "Welding / Cutting Torch (Plasma)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Tool",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 2.5,
   "cost": 650,
@@ -1239,10 +1059,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-061",
   "name": "Portable Life Support Unit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 5.0,
   "cost": 1200,
@@ -1260,10 +1077,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-062",
   "name": "Emergency Shelter Module",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 12.0,
   "cost": 1800,
@@ -1280,10 +1094,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-063",
   "name": "Personal Drone (Scout)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 2.0,
   "cost": 2800,
@@ -1302,10 +1113,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-064",
   "name": "Personal Drone (Combat)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 4.5,
   "cost": 6500,
@@ -1324,10 +1132,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-065",
   "name": "Medi-Gel / Trauma Foam",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Medical",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.4,
   "cost": 120,
@@ -1343,10 +1148,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-066",
   "name": "Antidote / Broad-Spectrum Antitoxin",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Medical",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 0.2,
   "cost": 280,
@@ -1362,10 +1164,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-067",
   "name": "Radiation Treatment Kit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Medical",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 1.0,
   "cost": 650,
@@ -1382,10 +1181,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-068",
   "name": "Cryo-Sleep Pod (Personal)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 180.0,
   "cost": 45000,
@@ -1405,10 +1201,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-069",
   "name": "Adaptive Camouflage Cloak",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Armor/Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 3,
   "mass_kg": 1.5,
   "cost": 7800,
@@ -1426,10 +1219,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-070",
   "name": "Zero-G Maneuvering Unit",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Utility",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 8.0,
   "cost": 3200,
@@ -1447,10 +1237,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-071",
   "name": "Fragmentation Grenade",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.4,
   "cost": 80,
@@ -1466,10 +1253,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-072",
   "name": "EMP Grenade",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 0.5,
   "cost": 220,
@@ -1486,10 +1270,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-073",
   "name": "Smoke Grenade",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.3,
   "cost": 40,
@@ -1505,10 +1286,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-074",
   "name": "Flashbang / Stun Grenade",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 1,
   "mass_kg": 0.3,
   "cost": 60,
@@ -1524,10 +1302,7 @@ export const PERSONAL_ITEMS = {
   "id": "ITM-075",
   "name": "Demo Charge (Shaped)",
   "category": "Personal item",
-<<<<<<< HEAD
   "subcategory": "Consumable",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   "tier": 2,
   "mass_kg": 2.0,
   "cost": 450,

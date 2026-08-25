@@ -8,7 +8,6 @@ import { S, recalcStats } from '../core/state.js';
 import { HULL_SLOTS, SHIP_CLASSES } from '../core/config.js';
 import { MODULES, MODULE_KEYS } from '../data/modules.js';
 import { WEAPON_MODULES, WEAPON_KEYS } from '../data/weapons.js';
-<<<<<<< HEAD
 import { slotsFor, describeMods, fitBonuses, mountScale } from '../systems/industry/fitting.js';
 import { conditionAt, effectiveness, serviceCost, serviceModule, serviceAll, serviceQuote } from '../systems/combat/wear.js';
 import { WEAR } from '../core/config.js';
@@ -21,20 +20,6 @@ import { groupOf, cycleGroup, activeGroup, cycleActive, activeLabel, hasSplit, p
 import { ammoForSale, ammoStackPrice, buyAmmo } from '../systems/trade/economy.js';
 import { AMMUNITION } from '../data/crafting/ammo.js';
 import { sfx } from '../systems/platform/audio.js';
-=======
-import { slotsFor, describeMods, fitBonuses, mountScale } from '../systems/fitting.js';
-import { conditionAt, effectiveness, serviceCost, serviceModule, serviceAll, serviceQuote } from '../systems/wear.js';
-import { WEAR } from '../core/config.js';
-import { ownsWeapon, ownsModule, buyModule, buyWeapon, sellModule, fitSlot } from '../systems/economy.js';
-import { $, el, fmtCr, fmtMass } from '../core/utils.js';
-import { toast } from './toast.js';
-import { magazineReport, chamber, fittedFeeds, roundsHeld } from '../systems/magazine.js';
-import { FEEDS, roundsFor, dtypeOf, isAP, yieldOf } from '../systems/ordnance.js';
-import { groupOf, cycleGroup, activeGroup, cycleActive, activeLabel, hasSplit, populatedGroups, ALL } from '../systems/groups.js';
-import { ammoForSale, ammoStackPrice, buyAmmo } from '../systems/economy.js';
-import { AMMUNITION } from '../data/crafting/ammo.js';
-import { sfx } from '../systems/audio.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { refreshGroupChip } from './controls.js';
 
 let overlay, body, summary, tabs, tab = 'slots';

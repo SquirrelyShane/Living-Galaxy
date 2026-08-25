@@ -39,41 +39,29 @@
 
 import { makeRng } from '../core/rng.js';
 import { ORBIT_SCALE } from '../core/config.js';
-<<<<<<< HEAD
 import { PLANET_TYPES } from '../data/planetary/planets.js';
 import { classifyWorld } from './taxonomy.js';
 import { renderTypeFor } from '../data/worldgen/render-map.js';
 import { insolation, initStar, lifespanMyr, massFromLuminosity } from './stellar.js';
 import { lengthAU } from '../core/units.js';
 import { initEpoch } from './epoch.js';
-=======
-import { PLANET_TYPES } from '../data/planets.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { STATION_TYPES } from '../data/stations.js';
 // The warp well formula, so the generator can place worlds *outside* the star's own well.
 // `wellRadius` is a pure function of `{ gravity, radius }`; importing it is what stops this
 // file and systems/warp.js disagreeing about how big a star is.
-<<<<<<< HEAD
 import { wellRadius } from '../systems/flight/warp.js';
 import { SYSTEM_PLANETS } from '../data/planetary/planets.js';
-=======
-import { wellRadius } from '../systems/warp.js';
-import { SYSTEM_PLANETS } from '../data/planets.js';
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { SYSTEM_STATIONS } from '../data/stations.js';
 import { BELTS } from '../data/belts.js';
 
 /**
  * Bumped whenever the generator's output changes for an unchanged seed.
  *
-<<<<<<< HEAD
  * v3 (1.02.49) — classify-by-condition. The generator no longer draws a planet's kind from
  * a weighted list; it draws a mass, and `world/taxonomy.js` derives the class from the
  * conditions that mass at that orbit actually produces. Stars also carry an age now, so a
  * given class's luminosity is no longer one fixed number. Both move every world for every
  * seed, which is exactly what this field is for.
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
  * v2 (1.02.34) — `innerLimit()`: planets and berths are placed outside the star's own warp
  * well. That moves the innermost orbits for every seed, so a system generated at v1 is not
  * the system that seed generates now. This is exactly what the field is for: a save records
@@ -81,11 +69,7 @@ import { BELTS } from '../data/belts.js';
  * quietly waking up somewhere subtly different.
  * v1 (1.02.33) — the first generator.
  */
-<<<<<<< HEAD
 export const GENESIS_VERSION = 4;
-=======
-export const GENESIS_VERSION = 2;
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 // The outer wall. The nav map's radial scale is built against this and the warp planner
 // assumes the system fits inside it; a generator free to place a world at 90,000 units
@@ -138,7 +122,6 @@ export const STAR_CLASSES = [
 // lava, lava, desert, terrestrial, ice, ice — where the overlap gives you the occasional
 // iron world sitting where you expected an ocean, which is what makes a system worth
 // looking at rather than parsing.
-<<<<<<< HEAD
 // ── how massive a world at this orbit is ─────────────────────────────
 //
 // The BANDS table that used to live here is gone, and what replaced it is the point of this
@@ -169,16 +152,6 @@ const MASS_BANDS = [
   { max: 3.60, mass: [0.40, 12 ],  giant: 0.45 },   // frost line: giants become likely
   { max: 7.00, mass: [8,    900],  giant: 0.70 },
   { max: Infinity, mass: [3,  240], giant: 0.55 }   // outer system: ice giants
-=======
-const BANDS = [
-  { max: 0.32, pick: [['molten', 4], ['lava', 5], ['ironCore', 2], ['barren', 2]] },
-  { max: 0.58, pick: [['lava', 2], ['sulfur', 3], ['barren', 3], ['ironCore', 3], ['carbon', 2]] },
-  { max: 0.82, pick: [['desert', 4], ['toxic', 3], ['barren', 2], ['radioactive', 2], ['carbon', 1]] },
-  { max: 1.28, pick: [['terrestrial', 5], ['ocean', 4], ['desert', 2], ['superEarth', 2], ['tundra', 2]] },
-  { max: 1.90, pick: [['tundra', 4], ['ice', 3], ['barren', 2], ['crystalline', 2], ['superEarth', 1]] },
-  { max: 3.20, pick: [['gasGiant', 4], ['ice', 3], ['methaneIce', 3], ['crystalline', 1]] },
-  { max: Infinity, pick: [['methaneGiant', 3], ['heliumGiant', 3], ['methaneIce', 3], ['ice', 3], ['methaneSea', 2]] }
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ];
 
 // Station archetypes and how common each is. The guarantees below matter more than the
@@ -210,7 +183,6 @@ const STATION_TAIL = ['Station', 'Reach', 'Post', 'Yard', 'Halt', 'Works', 'Hold
   'Terminal', 'Platform', 'Relay', 'Complex', 'Ring'];
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
-<<<<<<< HEAD
 // What a berth on a field is called. Deliberately *derived from the belt* rather than drawn
 // from the general station namer: a station called "Meridian Quarry" tells a pilot which
 // field it is on before they have opened anything, and "Vault Terminal" sitting at 11,300
@@ -225,8 +197,6 @@ function beltBerthName(beltName, volatile, rng) {
   return head + ' ' + table[Math.floor(rng.next() * table.length)];
 }
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 /** Weighted pick from `[[value, weight], ...]`. Deterministic given the rng. */
 function weighted(rng, table) {
   let total = 0;
@@ -261,7 +231,6 @@ function namer(rng, heads, tails, join = '') {
  * Generate a system from a seed.
  *
  * @param {number} seed
-<<<<<<< HEAD
  * @param {object} [opts]
  * @param {number} [opts.density] multiplier on how much is in the system — worlds, berths
  *   and fields. Applied *after* each count is drawn, never to the stream itself, so a
@@ -273,11 +242,6 @@ export function generateSystem(seed, opts) {
   // Clamped rather than trusted: this arrives from a slider, from a save, and from the
   // network, and a density of zero is a system with no worlds in it.
   const density = Math.max(0.4, Math.min(3, (opts && opts.density) || 1));
-=======
- * @returns {object} plan — { version, seed, layout, star, planets, stations, belts }
- */
-export function generateSystem(seed) {
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // Four independent streams, drawn in a fixed order. Separate streams mean adding a
   // station rule later cannot shift every planet in every existing seed.
   const rStar = makeRng((seed ^ 0x51a2) >>> 0);
@@ -301,7 +265,6 @@ export function generateSystem(seed) {
     lum: cls.lum
   };
   star.corona = Math.round(star.radius * 2.44);
-<<<<<<< HEAD
 
   // ── how old is it ──────────────────────────────────────────────────
   //
@@ -324,8 +287,6 @@ export function generateSystem(seed) {
   initStar(star, lifespanMyr(massFromLuminosity(cls.lum)) * ageFrac);
   star.ageFrac = ageFrac;
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // Where water freezes, and where it does not boil. Everything about planet class is
   // measured against this one distance, which is why a dim star's whole system is
   // compressed inward rather than simply colder.
@@ -335,12 +296,8 @@ export function generateSystem(seed) {
   // Bode-like geometric spacing with jitter: each orbit is a multiplier on the last, so
   // the inner system is tight and the outer system is sparse, which is both what real
   // systems look like and what makes the square-root nav chart readable.
-<<<<<<< HEAD
   const wanted = Math.max(3, Math.min(30,
     Math.round((8 + Math.floor(rPlanet.next() * 11)) * density)));   // 8..18 at density 1
-=======
-  const wanted = 8 + Math.floor(rPlanet.next() * 11);         // 8..18
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const planets = [];
   const floorR = innerLimit(star);
   let orbit = floorR * (1.0 + rPlanet.next() * 0.35);
@@ -349,7 +306,6 @@ export function generateSystem(seed) {
     // How far out this orbit is in units of "where liquid water would sit". Below 1 is
     // inside the habitable zone and hot, above 1 is outside it and cold.
     const ratio = orbit / habitable;
-<<<<<<< HEAD
     const band = MASS_BANDS.find(b => ratio <= b.max) || MASS_BANDS[MASS_BANDS.length - 1];
 
     // The generator's whole remaining say in what a world is: where, and how heavy. Mass is
@@ -375,26 +331,16 @@ export function generateSystem(seed) {
       orbit: at,
       massEarth
     }, c));
-=======
-    const band = BANDS.find(b => ratio <= b.max) || BANDS[BANDS.length - 1];
-    const rolled = weighted(rPlanet, band.pick);
-    const type = PLANET_TYPES[rolled] ? rolled : 'barren';
-    planets.push({ name: bodyName(), type, orbit: Math.round(orbit) });
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     orbit *= 1.16 + rPlanet.next() * 0.30;                    // 1.16x .. 1.46x
   }
   // A system with nothing in it is not a system. Cannot happen with the numbers above, but
   // the generator should not be one tuning pass away from producing an empty map.
   if (!planets.length) {
-<<<<<<< HEAD
     const at = Math.round(floorR);
     const rand = () => rPlanet.next();
     const c = classifyWorld({ simMass: 1, S: insolation(star.lum, lengthAU(at)), rand });
     planets.push(Object.assign({ name: bodyName(), type: renderTypeFor(c.classId),
                                  orbit: at, massEarth: 1 }, c));
-=======
-    planets.push({ name: bodyName(), type: 'barren', orbit: Math.round(floorR) });
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }
 
   // ── stations ──
@@ -402,11 +348,7 @@ export function generateSystem(seed) {
   // is somewhere you can see a reason for, and it makes the nav map read as a system with
   // traffic instead of as two unrelated rings of dots.
   const stationCount = Math.max(STATION_GUARANTEE.length,
-<<<<<<< HEAD
     Math.min(26, Math.round((6 + Math.floor(rStation.next() * 8)) * density)));  // 7..14 at density 1
-=======
-    Math.min(14, 6 + Math.floor(rStation.next() * 8)));       // 7..14, floored by guarantees
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const stations = [];
   const types = STATION_GUARANTEE.slice();
   while (types.length < stationCount) types.push(weighted(rStation, STATION_WEIGHTS));
@@ -444,12 +386,8 @@ export function generateSystem(seed) {
     gaps.push({ lo, hi, span: hi - lo, mid: (lo + hi) / 2 });
   }
   gaps.sort((a, b) => b.span - a.span);
-<<<<<<< HEAD
   const beltCount = Math.min(gaps.length,
     Math.max(1, Math.round((2 + Math.floor(rBelt.next() * 3)) * density)));   // 2..4 at density 1
-=======
-  const beltCount = Math.min(gaps.length, 2 + Math.floor(rBelt.next() * 3));   // 2..4
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const belts = [];
   for (let i = 0; i < beltCount; i++) {
     const g = gaps[i];
@@ -462,11 +400,7 @@ export function generateSystem(seed) {
       name: bodyName() + ' ' + (heat > 1.2 ? 'Belt' : heat > 0.45 ? 'Reach' : 'Rime'),
       inner, width,
       count: Math.round(90 + rBelt.next() * 220),
-<<<<<<< HEAD
       rockR: [3.5, 12 + rBelt.next() * 11],
-=======
-      rockR: [2.5, 11 + rBelt.next() * 11],
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       hue: heat > 0.6 ? 0.06 + rBelt.next() * 0.05 : 0.5 + rBelt.next() * 0.08,
       sat: 0.10 + rBelt.next() * 0.12,
       light: [0.20 + rBelt.next() * 0.16, 0.42 + rBelt.next() * 0.20],
@@ -489,7 +423,6 @@ export function generateSystem(seed) {
     outer.hue = 0.5 + rBelt.next() * 0.08;
   }
 
-<<<<<<< HEAD
   // ── berths on the belts ──
   //
   // Stations were placed against *planets* only, which produced systems where the mining
@@ -526,8 +459,6 @@ export function generateSystem(seed) {
   }
   stations.sort((a, b) => a.orbit - b.orbit);
 
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   return {
     version: GENESIS_VERSION,
     seed: seed >>> 0,
@@ -605,28 +536,19 @@ export function solarisPlan() {
  * save that says `procedural` and carries `version: 1` can be detected and told so, rather
  * than silently loading into a system that is subtly not the one it was written in.
  */
-<<<<<<< HEAD
 export function planFor(seed, layout, opts) {
   return layout === 'solaris' ? solarisPlan() : generateSystem(seed, opts);
-=======
-export function planFor(seed, layout) {
-  return layout === 'solaris' ? solarisPlan() : generateSystem(seed);
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 /** One line for the boot screen and the nav chart header. */
 export function systemLine(plan) {
   if (!plan) return '';
   const p = plan.planets.length, s = plan.stations.length, b = plan.belts.length;
-<<<<<<< HEAD
   // The designation, when the plan has been placed. Attached by the boot path rather than
   // computed here, because this module must not depend on the galaxy — genesis says what a
   // system *is*, the galaxy says where it is, and the arrow between them points one way only.
   const where = plan.designation ? `${plan.designation} · ` : '';
   return `${where}${plan.star.name} · ${plan.star.className} · ` +
-=======
-  return `${plan.star.name} · ${plan.star.className} · ` +
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
          `${p} world${p === 1 ? '' : 's'} · ${s} station${s === 1 ? '' : 's'} · ` +
          `${b} field${b === 1 ? '' : 's'}`;
 }

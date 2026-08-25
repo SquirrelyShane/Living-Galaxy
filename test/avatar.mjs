@@ -22,21 +22,12 @@ const { seedWorld, makeRng, hashString } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createNpcs } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 const { initAudio } = await imp('systems/platform/audio.js');
 const CM = await imp('systems/npc/comms.js');
 const NB = await imp('systems/npc/npc-brain.js');
 const { AVATAR } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 const save = await imp('systems/platform/save.js');
-=======
-const { initAudio } = await imp('systems/audio.js');
-const CM = await imp('systems/comms.js');
-const NB = await imp('systems/npc-brain.js');
-const { AVATAR } = await imp('core/config.js');
-const { SCHEMA } = await imp('core/version.js');
-const save = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 // engine internals, for the seam tests
 const { createPersona, say, rememberEvent } = await imp('npc-avatar/core/persona.js');
@@ -50,11 +41,7 @@ recalcStats();
 createSystem();
 createNpcs();
 initAudio();
-<<<<<<< HEAD
 CM.initCommsSystem();
-=======
-CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 NB.initBrains();
 S.running = true;
 S.time = 1000;
@@ -153,11 +140,7 @@ console.log('\n— memory changes the line —');
 console.log('\n— hails —');
 {
   S.brains = { personas: {} };
-<<<<<<< HEAD
   CM.initCommsSystem();
-=======
-  CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.time = 2000;
 
   const merc = { userData: { name: 'Bray', faction: 'hostile', role: 'merc' } };
@@ -192,11 +175,7 @@ console.log('\n— hails —');
 
 // ── an unnamed or persona-less speaker still says something ──────────
 {
-<<<<<<< HEAD
   CM.initCommsSystem();
-=======
-  CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.time = 6000;
   const h = NB.hailDistress({ userData: { faction: 'neutral' } });   // no name at all
   ok('a nameless ship can still raise a distress call', !!h);
@@ -208,11 +187,7 @@ console.log('\n— hails —');
 // ── log entry enrichment ─────────────────────────────────────────────
 console.log('\n— the upgrade path —');
 {
-<<<<<<< HEAD
   CM.initCommsSystem();
-=======
-  CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const e = CM.transmit({ from: 'X', faction: 'neutral', text: 'original line' });
   ok('updateEntryText rewrites the named entry', CM.updateEntryText(e.id, 'better line') === true);
   ok('the log now shows the better line',
@@ -298,11 +273,7 @@ console.log('\n— the model is opt-in —');
   ok('brains can be switched off', NB.setBrainsEnabled(false) === false);
   ok('a disabled tier reports off', NB.brainsReport().llm.status === 'off');
   ok('and switching off does not break hailing',
-<<<<<<< HEAD
      (CM.initCommsSystem(), S.time = 9000, !!NB.hailMercContract({ userData: { name: 'Zed', faction: 'hostile', role: 'merc' } })));
-=======
-     (CM.initComms(), S.time = 9000, !!NB.hailMercContract({ userData: { name: 'Zed', faction: 'hostile', role: 'merc' } })));
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   CM.reply(-1);
   ok('brains can be switched back on', NB.setBrainsEnabled(true) === true);
 }
@@ -404,11 +375,7 @@ console.log('\n— the belt has voices —');
 // ── a broken voice provider must not silence the radio ───────────────
 {
   CM.setVoiceProvider({ line: () => { throw new Error('boom'); }, reply: () => { throw new Error('boom'); } });
-<<<<<<< HEAD
   CM.initCommsSystem();
-=======
-  CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.time = 12000;
   let threw = null;
   try { for (let i = 0; i < 12; i++) { S.time += 80; CM.updateComms(80); } }
@@ -416,11 +383,7 @@ console.log('\n— the belt has voices —');
   ok('a throwing voice provider does not break ambient traffic', threw === null, threw && threw.message);
 
   CM.setVoiceProvider({ line: () => null, reply: () => null });
-<<<<<<< HEAD
   CM.initCommsSystem();
-=======
-  CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.time = 14000;
   for (let i = 0; i < 12; i++) { S.time += 80; CM.updateComms(80); }
   ok('a provider returning null falls back to the static tables rather than going quiet',
@@ -501,11 +464,7 @@ console.log('\n— people notice what you do —');
 // ── log rows carry a persona key ─────────────────────────────────────
 console.log('\n— you can open a mind —');
 {
-<<<<<<< HEAD
   CM.initCommsSystem();
-=======
-  CM.initComms();
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.time = 20000;
   NB.hailMercContract({ userData: { name: 'Opener', faction: 'hostile', role: 'merc' } });
   const row = CM.commsLog().find(e => e.kind === 'hail');

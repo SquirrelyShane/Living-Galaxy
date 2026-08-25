@@ -17,19 +17,13 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld, stream } = await imp('core/rng.js');
 const { REP, DETECT, POP, SIM } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
-<<<<<<< HEAD
 const rep = await imp('systems/company/reputation.js');
 const det = await imp('systems/combat/detection.js');
-=======
-const rep = await imp('systems/reputation.js');
-const det = await imp('systems/detection.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids, mineAsteroid, nearestAsteroid, serializeBelt, restoreBelt } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
 const { createNpcs, updateNpcs, spawnNpc, populationTargets } = await imp('entities/npcs.js');
-<<<<<<< HEAD
 // The entity factories are a boot step rather than an import side effect, so that a system
 // asking `spawn('npc', …)` gets a null it can handle instead of depending on which modules
 // happened to be loaded. See `core/spawn.js`. A suite that exercises spawning boots them.
@@ -43,16 +37,6 @@ const { initWorldSim, updateWorldSim, deliverToSite, inClaimedSpace,
 const { initMarket } = await imp('systems/trade/market.js');
 const { dock } = await imp('systems/trade/economy.js');
 const save = await imp('systems/platform/save.js');
-=======
-const { initProjectiles } = await imp('systems/projectiles.js');
-const { initCombat, damageNpc } = await imp('systems/combat.js');
-const { initMining } = await imp('systems/mining.js');
-const { initWorldSim, updateWorldSim, deliverToSite, inClaimedSpace,
-        serializeSim, restoreSim } = await imp('systems/worldsim.js');
-const { initMarket } = await imp('systems/market.js');
-const { dock } = await imp('systems/economy.js');
-const save = await imp('systems/save.js');
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();
