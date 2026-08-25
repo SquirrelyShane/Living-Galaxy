@@ -12,6 +12,7 @@ export const MINERALS = {
   volatiles: {name:'Volatiles', value:22,  color:0x88ccdd}
 };
 
+<<<<<<< HEAD
 // The smallest rock got a floor in v1.02.53 — 2.5 units is a lump you cannot see and cannot
 // profitably cut, and half the field was made of them.
 //
@@ -28,21 +29,38 @@ export const MINERALS = {
 export const BELTS = [
   { key:'inner', name:'Cinder Belt', inner:6900, width:900, count:150,
     rockR:[3.5,11], hue:0.06, sat:0.22, light:[0.20,0.42],
+=======
+export const BELTS = [
+  { key:'inner', name:'Cinder Belt', inner:6900, width:900, count:150,
+    rockR:[2.5,11], hue:0.06, sat:0.22, light:[0.20,0.42],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     // hot inner belt: common metal, almost no rares
     mix:{ iron:44, silicate:34, nickel:14, copper:6, titanium:1.6, platinum:0.3, iridium:0.05, volatiles:0 } },
 
   { key:'main', name:'Meridian Belt', inner:10500, width:2600, count:300,
+<<<<<<< HEAD
     rockR:[3.5,18], hue:0.07, sat:0.18, light:[0.22,0.50],
+=======
+    rockR:[2.5,18], hue:0.07, sat:0.18, light:[0.22,0.50],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     // the workhorse field — balanced, where most miners sit
     mix:{ iron:34, silicate:26, nickel:18, copper:11, titanium:7, platinum:2.6, iridium:0.5, volatiles:0.9 } },
 
   { key:'trojan', name:'Kharon Trojans', inner:19000, width:1100, count:90,
+<<<<<<< HEAD
     rockR:[5,22], hue:0.10, sat:0.10, light:[0.26,0.55],
+=======
+    rockR:[4,22], hue:0.10, sat:0.10, light:[0.26,0.55],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     // sparse but rich: the rare-metal field worth the trip and the pirates
     mix:{ iron:16, silicate:12, nickel:14, copper:12, titanium:22, platinum:15, iridium:7, volatiles:2 } },
 
   { key:'outer', name:'Obscura Rime', inner:29000, width:2400, count:120,
+<<<<<<< HEAD
     rockR:[4,16], hue:0.54, sat:0.16, light:[0.34,0.62],
+=======
+    rockR:[3,16], hue:0.54, sat:0.16, light:[0.34,0.62],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     // cold field: ices and volatiles, little metal
     mix:{ iron:12, silicate:14, nickel:5, copper:3, titanium:4, platinum:1.4, iridium:0.4, volatiles:60 } }
 ];

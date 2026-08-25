@@ -4,11 +4,17 @@ import { scene, camera } from '../world/scene.js';
 import { S, totalMass, hullFactor } from '../core/state.js';
 import { UNIT_M, G0, WORLD_RADIUS, MAX_PITCH, FLIGHT, STAR } from '../core/config.js';
 import { clamp, damp, forward, aimAngles } from '../core/utils.js';
+<<<<<<< HEAD
 import { toast } from '../core/notify.js';
 import { damagePlayer } from '../systems/combat/combat.js';
 import { buildShip } from './shipmesh.js';
 import { initParticles, plume } from '../world/particles.js';
 import { throttleLocked } from '../systems/industry/habitat.js';
+=======
+import { toast } from '../ui/toast.js';
+import { damagePlayer } from '../systems/combat.js';
+import { buildShip } from './shipmesh.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 const _fwd = new THREE.Vector3();
 const _tmp = new THREE.Vector3();
@@ -18,21 +24,42 @@ const _up = new THREE.Vector3();
 const _aim = new THREE.Vector3();
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
 
+<<<<<<< HEAD
+=======
+const THRUSTER_COUNT = 120;
+let thrusters, thrusterPos;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 let lastStarWarn = -99;
 let shipMesh = null, shipCls = '';
 
 export function initPlayerFx() {
+<<<<<<< HEAD
   // The private thruster buffer is gone — see `updateThrusters` and `world/particles.js`.
   initParticles(scene);
+=======
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(THRUSTER_COUNT * 3), 3));
+  thrusterPos = geo.attributes.position;
+  thrusters = new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0x44aaff, size: 5, transparent: true, opacity: 0.7,
+    depthWrite: false, blending: THREE.AdditiveBlending, fog: false
+  }));
+  thrusters.frustumCulled = false;
+  thrusters.visible = false;
+  scene.add(thrusters);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 export function updatePlayer(dt) {
   const p = S.player, st = S.stats;
   if (S.sim.disabled) p.throttle = 0;      // drives are dark
+<<<<<<< HEAD
   // ...and so is a hull with its arrays out. Same shape as the disabled case on purpose:
   // both are "the drive is not available", and the flight model should not have to know
   // which of the two it is. See systems/industry/habitat.js.
   if (throttleLocked()) p.throttle = 0;
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const warping = S.warp.state === 'warping';
 
   if (p.autoLevel) {
@@ -181,11 +208,15 @@ export function updatePlayer(dt) {
   if (S.settings.chase) {
     if (!shipMesh || shipCls !== p.classKey) {
       if (shipMesh) scene.remove(shipMesh);
+<<<<<<< HEAD
       // Identity is the ship's own name, not the career class — so your hull is *your*
       // hull across sessions, and two pilots of the same career do not fly the same mesh.
       // `noseMinusZ` because the chase cam's basis is the opposite of the forge's.
       shipMesh = buildShip(p.classKey, p.shipName || S.shipName || p.classKey,
                            { noseMinusZ: true });
+=======
+      shipMesh = buildShip(p.classKey);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       shipCls = p.classKey;
       scene.add(shipMesh);
     }
@@ -236,6 +267,7 @@ export function updatePlayer(dt) {
   updateThrusters();
 }
 
+<<<<<<< HEAD
 /**
  * The drive plume.
  *
@@ -260,4 +292,27 @@ function updateThrusters() {
   const dir = p.throttle > 0 ? _back : _fwd;
   const heat = Math.min(1, (S.stats.heat || 0) / Math.max(1, S.stats.heatMax || 100));
   plume(_tmp, dir, Math.min(1, Math.abs(p.throttle)), heat);
+=======
+function updateThrusters() {
+  if (!thrusters) return;
+  const p = S.player;
+  // From the cockpit the plume sits behind the camera; only the chase cam can see it.
+  if (!S.settings.chase || Math.abs(p.throttle) < 0.05 || S.warp.state === 'warping' || S.docked) {
+    thrusters.visible = false;
+    return;
+  }
+  thrusters.visible = true;
+  const a = thrusterPos.array;
+  _back.copy(_fwd).multiplyScalar(-1);
+  _tmp.copy(p.position).addScaledVector(_back, 8);
+  for (let i = 0; i < THRUSTER_COUNT; i++) {
+    const t = Math.random() * 18;
+    a[i * 3]     = _tmp.x + _back.x * t + (Math.random() - 0.5) * 4;
+    a[i * 3 + 1] = _tmp.y + _back.y * t + (Math.random() - 0.5) * 4;
+    a[i * 3 + 2] = _tmp.z + _back.z * t + (Math.random() - 0.5) * 4;
+  }
+  thrusterPos.needsUpdate = true;
+  thrusters.material.color.setHex(p.throttle > 0 ? 0x44aaff : 0xff6633);
+  thrusters.material.opacity = 0.35 + Math.abs(p.throttle) * 0.55;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }

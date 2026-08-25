@@ -6,6 +6,7 @@
 // number lives beside the crosshair where the eye already is.
 
 import { S, recalcStats } from '../core/state.js';
+<<<<<<< HEAD
 import { ACTIONS, actionFor, pollGamepad } from '../systems/platform/input.js';
 import { openSettings, closeSettings, isOpen as isSettingsOpen } from './settings.js';
 import { SHIP_CLASSES, MAX_PITCH } from '../core/config.js';
@@ -30,15 +31,38 @@ import { warpButton, initWarpMenu, closeWarpMenu, warpMenuOpen } from './warpmen
 import { initContact, openContact, contactOpen } from './contact.js';
 import { toast } from './toast.js';
 import { canPilot } from '../systems/company/career.js';
+=======
+import { ACTIONS, actionFor, pollGamepad } from '../systems/input.js';
+import { openSettings, closeSettings, isOpen as isSettingsOpen } from './settings.js';
+import { SHIP_CLASSES, MAX_PITCH } from '../core/config.js';
+import { $, clamp } from '../core/utils.js';
+import { toggleWarp } from '../systems/warp.js';
+import { cycleTarget, clearTarget } from '../systems/targeting.js';
+import { dock, undock } from '../systems/economy.js';
+import { saveGame } from '../systems/save.js';
+import { openNavmap } from './navmap.js';
+import { openAria } from './aria.js';
+import { openFit } from './fitting.js';
+import { openCrew } from './crew.js';
+import { openDock, dockOpen, closeDock } from './dock.js';
+import { sfx, resumeAudio, setAudioEnabled, startMusic } from '../systems/audio.js';
+import { cycleActive, activeLabel, hasSplit } from '../systems/groups.js';
+import { toast } from './toast.js';
+import { canPilot } from '../systems/career.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 const DRAG_GAIN = 0.0042;
 
 function breakAutopilot() {
+<<<<<<< HEAD
   // Manual input always wins. Approach, orbit hold and velocity-match all yield — and, since
   // v1.02.58, so does ARIA. She hands the stick back the instant a finger lands on anything
   // rather than fighting for it: there is no state in which the player is pushing against
   // something invisible, which is the failure mode every autopilot in every game has.
   yieldAutopilot();
+=======
+  // Manual input always wins. Approach, orbit hold and velocity-match all yield.
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   if (S.approach) S.approach = null;
   if (S.orbit) S.orbit = null;
   if (S.follow) S.follow = null;
@@ -46,12 +70,27 @@ function breakAutopilot() {
 
 export function initControls() {
   steering();
+<<<<<<< HEAD
   throttleControl();
+=======
+  slider($('speed-track'), (t, rect, e) => {
+    breakAutopilot();
+    const x = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+    S.player.throttle = -0.25 + x * 1.25;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   document.querySelectorAll('.preset-btn').forEach(b => {
     b.addEventListener('click', () => {
       breakAutopilot();
+<<<<<<< HEAD
       setThrottle(parseFloat(b.dataset.pct) / 100);
+=======
+      S.player.throttle = parseFloat(b.dataset.pct) / 100;
+      document.querySelectorAll('.preset-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       sfx.ui();
     });
   });
@@ -69,9 +108,13 @@ export function initControls() {
   refreshGroupChip();
   hold($('btn-mine'), v => { S.input.mining = v; });
 
+<<<<<<< HEAD
   // The warp button opens a menu now — how close to arrive, and whether to talk to the
   // thing first. Mid-flight it still just drops out; see `warpButton` for why.
   tap($('warp-btn'), warpButton);
+=======
+  tap($('warp-btn'), toggleWarp);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   tap($('btn-nav'), openNavmap);
   tap($('btn-fit'), openFit);
   tap($('btn-crew'), openCrew);
@@ -105,15 +148,19 @@ export function initControls() {
     toast(S.settings.chase ? 'Chase camera' : 'Cockpit camera');
   });
   tap($('btn-aria'), openAria);
+<<<<<<< HEAD
   // Your own file. Deliberately reachable from the flight HUD and not only from the
   // office deck: standing and the career ladder are what every career is climbing, and
   // a pilot who has to dock to see the gate they are working toward will not look.
   tap($('btn-file'), () => openDossier());
   tap($('btn-chart'), () => openGalaxyMap());
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   keys();
 }
 
+<<<<<<< HEAD
 // ── the throttle ─────────────────────────────────────────────────────
 //
 // The old control was an absolute slider: wherever your finger landed on a 13-pixel-tall
@@ -245,11 +292,20 @@ function stepper(node, dir) {
 function steering() {
   const canvas = $('game-canvas');
   let id = null, lx = 0, ly = 0, moved = 0, downX = 0, downY = 0;
+=======
+// ── steering ─────────────────────────────────────────────────────────
+function steering() {
+  const canvas = $('game-canvas');
+  let id = null, lx = 0, ly = 0;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   canvas.addEventListener('pointerdown', e => {
     if (id !== null || !canPilot()) return;
     id = e.pointerId; lx = e.clientX; ly = e.clientY;
+<<<<<<< HEAD
     downX = e.clientX; downY = e.clientY; moved = 0;
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     S.input.dragging = true;
     S.player.autoLevel = false;
     breakAutopilot();
@@ -261,13 +317,17 @@ function steering() {
     S.player.yaw -= (e.clientX - lx) * DRAG_GAIN * st.turnRate;
     S.player.pitch = clamp(S.player.pitch - (e.clientY - ly) * DRAG_GAIN * st.pitchRate,
                            -MAX_PITCH, MAX_PITCH);
+<<<<<<< HEAD
     moved += Math.abs(e.clientX - lx) + Math.abs(e.clientY - ly);
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     lx = e.clientX; ly = e.clientY;
   });
   const end = e => {
     if (e.pointerId !== id) return;
     id = null;
     S.input.dragging = false;
+<<<<<<< HEAD
     // A tap that never became a drag is a selection. The canopy keeps the pointer — see the
     // header of ui/markers.js for why the bracket overlay does not take one — so this is
     // where a tap gets offered to it. Anything the sensor can see and the screen is showing
@@ -288,6 +348,30 @@ function steering() {
 }
 
 // ── widget helpers ───────────────────────────────────────────────────
+=======
+  };
+  canvas.addEventListener('pointerup', end);
+  canvas.addEventListener('pointercancel', end);
+}
+
+// ── widget helpers ───────────────────────────────────────────────────
+function slider(node, apply) {
+  if (!node) return;
+  let id = null;
+  const run = e => apply(null, node.getBoundingClientRect(), e);
+  node.addEventListener('pointerdown', e => {
+    id = e.pointerId;
+    node.setPointerCapture(id);
+    run(e);
+    e.preventDefault();
+  });
+  node.addEventListener('pointermove', e => { if (e.pointerId === id) run(e); });
+  const end = e => { if (e.pointerId === id) id = null; };
+  node.addEventListener('pointerup', end);
+  node.addEventListener('pointercancel', end);
+}
+
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 function hold(node, set) {
   if (!node) return;
   const on = e => {
@@ -319,7 +403,11 @@ function keys() {
   // the crew roster are all readable from a desk; the drive, the stick and the docking
   // clamps are not. Listed as an allow-list rather than a set of `if (canPilot())` guards
   // scattered through the switch, so the next action added has to make a decision.
+<<<<<<< HEAD
   const GROUNDED_OK = new Set(['navmap', 'fitting', 'crew', 'settings']);   // not 'autopilot': no hull, no stick to take
+=======
+  const GROUNDED_OK = new Set(['navmap', 'fitting', 'crew', 'settings']);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   const press = (action) => {
     if (!canPilot() && !GROUNDED_OK.has(action)) return;
@@ -330,7 +418,10 @@ function keys() {
       case 'crew': openCrew(); break;
       case 'target': cycleTarget(); break;
       case 'cutThrottle': S.player.throttle = 0; break;
+<<<<<<< HEAD
       case 'panels': togglePanels(); break;
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       case 'level': S.player.autoLevel = true; break;
       case 'dock':
         // While docked and looking outside, the same binding returns to the station UI.
@@ -339,7 +430,10 @@ function keys() {
         if (dock()) openDock();
         break;
       case 'settings': isSettingsOpen() ? closeSettings() : openSettings(); break;
+<<<<<<< HEAD
       case 'autopilot': toggleAutopilot(); break;
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     }
   };
 

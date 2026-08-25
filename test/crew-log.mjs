@@ -27,10 +27,17 @@ const imp = p => import(new URL('src/' + p, ROOT).href);
 const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const L = await imp('core/log.js');
+<<<<<<< HEAD
 const CL = await imp('systems/crew/crew-log.js');
 const { initCrew, updateCrew, retrain, crewEvent, makeCrew } = await imp('systems/crew/crew.js');
 const { CREWLOG, CREW } = await imp('core/config.js');
 const { callTool, TOOL_KEYS } = await imp('systems/platform/tools.js');
+=======
+const CL = await imp('systems/crew-log.js');
+const { initCrew, updateCrew, retrain, crewEvent, makeCrew } = await imp('systems/crew.js');
+const { CREWLOG, CREW } = await imp('core/config.js');
+const { callTool, TOOL_KEYS } = await imp('systems/tools.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 recalcStats();
 seedWorld(20260808);
@@ -79,7 +86,11 @@ console.log('\n— the log —');
   ok('the oldest fell off', L.logEntries()[0].msg !== 'e0');
   ok('the newest is kept', L.logEntries()[L.logEntries().length - 1].msg === 'e' + (L.LOG_CAP + 249));
   // And it says so, rather than implying the log is complete.
+<<<<<<< HEAD
   ok('dropped entries are counted', L.logDiagnostics().dropped === 250, `${L.logDiagnostics().dropped}`);
+=======
+  ok('dropped entries are counted', L.diagnostics().dropped === 250, `${L.diagnostics().dropped}`);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 console.log('\n— querying —');
@@ -100,7 +111,11 @@ console.log('\n— querying —');
   ok('a limit is respected', L.logQuery({ limit: 1 }).length === 1);
   ok('an unmatched filter returns nothing', L.logQuery({ channel: 'nope' }).length === 0);
 
+<<<<<<< HEAD
   const d = L.logDiagnostics();
+=======
+  const d = L.diagnostics();
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('diagnostics count by level', d.byLevel.error === 1 && d.byLevel.warn === 1);
   ok('diagnostics count by channel', d.byChannel.a === 2);
   ok('diagnostics surface problems', d.problems.length === 2);

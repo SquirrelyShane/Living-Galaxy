@@ -15,13 +15,19 @@ const imp = p => import(new URL('src/' + p, ROOT).href);
 const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { DISPLAY, FATIGUE, CREW } = await imp('core/config.js');
+<<<<<<< HEAD
 const inp = await imp('systems/platform/input.js');
 const disp = await imp('systems/platform/display.js');
+=======
+const inp = await imp('systems/input.js');
+const disp = await imp('systems/display.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx, updatePlayer } = await imp('entities/player.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
@@ -33,6 +39,19 @@ const { initCrew, updateCrew } = await imp('systems/crew/crew.js');
 const { crewOutput } = await imp('data/crew.js');
 const hud = await imp('ui/hud.js');
 const save = await imp('systems/platform/save.js');
+=======
+const { initProjectiles } = await imp('systems/projectiles.js');
+const { initCombat } = await imp('systems/combat.js');
+const { initMining } = await imp('systems/mining.js');
+const { initWorldSim } = await imp('systems/worldsim.js');
+const { initMarket } = await imp('systems/market.js');
+const { initContracts } = await imp('systems/contracts.js');
+const { resetReputation } = await imp('systems/reputation.js');
+const { initCrew, updateCrew } = await imp('systems/crew.js');
+const { crewOutput } = await imp('data/crew.js');
+const hud = await imp('ui/hud.js');
+const save = await imp('systems/save.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();

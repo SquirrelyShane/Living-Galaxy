@@ -19,22 +19,36 @@
 
 import { S } from '../core/state.js';
 import { $, el, fmtCr, fmtKm } from '../core/utils.js';
+<<<<<<< HEAD
 import { isExecutive, careerLine } from '../systems/company/career.js';
 import { companyReport } from '../systems/company/company.js';
 import { fleetRoster } from '../systems/company/fleet.js';
 import { fleetOrderReport } from '../systems/company/orders.js';
 import { activeContracts } from '../systems/trade/contracts.js';
 import { summaryLine } from '../systems/platform/telemetry.js';
+=======
+import { isExecutive, careerLine } from '../systems/career.js';
+import { companyReport } from '../systems/company.js';
+import { fleetRoster } from '../systems/fleet.js';
+import { fleetOrderReport } from '../systems/orders.js';
+import { activeContracts } from '../systems/contracts.js';
+import { summaryLine } from '../systems/telemetry.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { openNavmap } from './navmap.js';
 import { openOps } from './ops.js';
 import { openSettings } from './settings.js';
 import { openComms } from './comms.js';
 import { openAria } from './aria.js';
+<<<<<<< HEAD
 import { openDossier } from './dossier.js';
 import { openBoardroom } from './boardroom.js';
 import { openGalaxyMap } from './galaxymap.js';
 import { saveGame } from '../systems/platform/save.js';
 import { sfx } from '../systems/platform/audio.js';
+=======
+import { saveGame } from '../systems/save.js';
+import { sfx } from '../systems/audio.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 let deck, head, sub, stats, board, foot;
 let visible = false, timer = 0;
@@ -62,6 +76,7 @@ export function initExecDeck() {
   // chart, not a path through two menus that lands back where it started.
   bind('exec-nav', () => openNavmap({ pane: 'telemetry', returnTo: showDeck, hideFlight: true }));
   bind('exec-chart', () => openNavmap({ pane: 'chart', returnTo: showDeck, hideFlight: true }));
+<<<<<<< HEAD
 
   // The galaxy chart, and it is a *different chart* from the one above.
   //
@@ -73,15 +88,20 @@ export function initExecDeck() {
   // Two charts is right. Two buttons called CHART is not.
   bind('exec-galaxy', () => openGalaxyMap());
   bind('exec-board', () => openBoardroom());
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   bind('exec-ops', () => openOps('orders'));
   bind('exec-ledger', () => openOps('ledger'));
   bind('exec-staff', () => openOps('staff'));
   bind('exec-comms', () => openComms());
   bind('exec-aria', () => openAria());
+<<<<<<< HEAD
   // No `returnTo`: the deck is a base surface at z-index 40, not an overlay, so it is
   // still underneath when the file closes. Handing it a restore callback would show it
   // a second time.
   bind('exec-dossier', () => openDossier());
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   bind('exec-settings', () => openSettings());
   bind('exec-save', () => saveGame(false));
 }

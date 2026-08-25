@@ -5,8 +5,12 @@ import { scene } from './scene.js';
 import { S } from '../core/state.js';
 import { TAU } from '../core/utils.js';
 import { wrand, makeRng } from '../core/rng.js';
+<<<<<<< HEAD
 import { ORBITAL_V, ORBIT_SCALE, BANDS, CLUTTER } from '../core/config.js';
 import { setField, clearField, ringBand } from './pointfield.js';
+=======
+import { ORBITAL_V, ORBIT_SCALE } from '../core/config.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { BELTS, ringFieldFor, rollComposition, compositionValue } from '../data/belts.js';
 
 const VARIANTS = 3;
@@ -14,7 +18,10 @@ const dummy = new THREE.Object3D();
 const ORIGIN = { x: 0, y: 0, z: 0 };
 const color = new THREE.Color();
 let meshes = [];
+<<<<<<< HEAD
 const bands = [];
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 export function createAsteroids() {
   meshes = [];
@@ -91,6 +98,7 @@ export function createAsteroids() {
     buckets.forEach((bucket, v) => {
       if (!bucket.length) return;
       const geo = lumpyRock(v);
+<<<<<<< HEAD
       // The emissive floor is not decoration. Rock is lit by the star and nothing else, and
       // an outer field sits far enough out that a MeshStandardMaterial with no emissive
       // resolves to very nearly black — which is indistinguishable from "there are no rocks
@@ -98,6 +106,9 @@ export function createAsteroids() {
       // belt is still lit by the sun rather than by itself.
       const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.94, metalness: 0.2,
         emissive: 0x0a0906, emissiveIntensity: 1,
+=======
+      const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.94, metalness: 0.2,
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
         transparent: false, depthWrite: true });
       const mesh = new THREE.InstancedMesh(geo, mat, bucket.length);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -108,13 +119,18 @@ export function createAsteroids() {
         mesh.setColorAt(i, color);
       });
       scene.add(mesh);
+<<<<<<< HEAD
       // `belt` is carried so the band tier can hide exactly this belt's meshes and no others.
       meshes.push({ mesh, bucket, belt });
+=======
+      meshes.push({ mesh, bucket });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     });
   }
 
   S.world.asteroids = records;
   S.world.belts = fields;
+<<<<<<< HEAD
   buildBands(fields);
   buildClutter();
   updateAsteroids(0);
@@ -331,6 +347,11 @@ function updateBands(dt, camPos) {
   }
 }
 
+=======
+  updateAsteroids(0);
+}
+
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 function lumpyRock(seed) {
   const geo = new THREE.DodecahedronGeometry(1, 0);
   const p = geo.attributes.position;
@@ -343,6 +364,7 @@ function lumpyRock(seed) {
 }
 
 export function updateAsteroids(dt) {
+<<<<<<< HEAD
   updateBands(dt, S.player.position);
   updateClutter(dt, S.player.position);
   for (const { mesh, bucket } of meshes) {
@@ -358,6 +380,9 @@ export function updateAsteroids(dt) {
     // What the band tier actually saves is the second half: four hundred `setMatrixAt` calls
     // and a full instance-matrix upload per belt per frame, for meshes nobody is looking at.
     const drawing = mesh.visible;
+=======
+  for (const { mesh, bucket } of meshes) {
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     for (let i = 0; i < bucket.length; i++) {
       const r = bucket[i];
       r.angle += r.orbitSpeed * dt;
@@ -366,14 +391,21 @@ export function updateAsteroids(dt) {
                      p.y + r.y,
                      p.z + Math.sin(r.angle) * r.orbitRadius);
       r.rot.x += r.spin.x * dt; r.rot.y += r.spin.y * dt; r.rot.z += r.spin.z * dt;
+<<<<<<< HEAD
       if (!drawing) continue;
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       dummy.position.copy(r.position);
       dummy.rotation.copy(r.rot);
       dummy.scale.setScalar(r.radius * (r.ore > 0 ? 1 : 0.7));
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
     }
+<<<<<<< HEAD
     if (drawing) mesh.instanceMatrix.needsUpdate = true;
+=======
+    mesh.instanceMatrix.needsUpdate = true;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }
 }
 

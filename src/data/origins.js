@@ -11,6 +11,7 @@
 // and affinities (how fast a skill improves from doing the thing), never as flat bonuses,
 // so a lineage decides where you *begin* and how fast you climb, not where you can end.
 
+<<<<<<< HEAD
 // ── who you are, before any of the rest of it ────────────────────────
 //
 // A frame is presentation and pronoun, and it is *not* a stat block. That is deliberate and
@@ -55,6 +56,8 @@ export const DEFAULT_FRAME = 'andro';
 export const pronounsOf = key =>
   (FRAMES[key] || FRAMES[DEFAULT_FRAME]).pronouns;
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 export const SKILLS = {
   gunnery:     { name: 'Gunnery',     desc: 'Weapon damage and tracking' },
   engineering: { name: 'Engineering', desc: 'Power plant output and repair' },
@@ -79,7 +82,11 @@ export const LINEAGES = {
     standing: { coalition: 20, pirate: -10, independent: 0 },
     signature: 1.00,
     credits: 2200,
+<<<<<<< HEAD
     corps: ['meridian', 'aurelian', 'severance']
+=======
+    corps: ['meridian', 'solaris-authority']
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   },
 
   belter: {
@@ -94,7 +101,11 @@ export const LINEAGES = {
     standing: { coalition: -5, pirate: 0, independent: 25 },
     signature: 1.00,
     credits: 1400,
+<<<<<<< HEAD
     corps: ['freewake', 'halloway', 'drossgate']
+=======
+    corps: ['meridian-collective', 'freewake']
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   },
 
   rim: {
@@ -109,7 +120,11 @@ export const LINEAGES = {
     standing: { coalition: -10, pirate: 10, independent: 10 },
     signature: 0.92,
     credits: 1600,
+<<<<<<< HEAD
     corps: ['kestrel', 'freewake', 'vosk']
+=======
+    corps: ['long-dark', 'freewake']
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   },
 
   // The one that is not quite human. Nexis built minds to run its drone shoals; a small
@@ -130,7 +145,11 @@ export const LINEAGES = {
     // changes how easy you are to see, and it is the reason to take it.
     signature: 0.80,
     credits: 1800,
+<<<<<<< HEAD
     corps: ['severance', 'drossgate', 'kessler']
+=======
+    corps: ['severance', 'long-dark']
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }
 };
 export const LINEAGE_KEYS = Object.keys(LINEAGES);
@@ -138,6 +157,7 @@ export const LINEAGE_KEYS = Object.keys(LINEAGES);
 // ── corporations ─────────────────────────────────────────────────────
 // Who trained you and who still has your file. A corp is a smaller, sharper choice than
 // a lineage: it moves standing and starting kit, not how fast you learn.
+<<<<<<< HEAD
 // ── corporations ─────────────────────────────────────────────────────
 //
 // Who trained you and who still has your file. A corp is a smaller, sharper choice than
@@ -222,10 +242,54 @@ export const CORPORATIONS = {
     desc: 'Not a company so much as an agreement between crews who would rather not be ' +
           'bought. Shares tools, shares claims, remembers debts.',
     standing: { independent: 18, coalition: -5 },
+=======
+export const CORPORATIONS = {
+  'solaris-authority': {
+    name: 'Solaris Authority',
+    bloc: 'coalition',
+    motto: 'Order is a service.',
+    desc: 'System government. Customs, patrol licensing, the pads at Meridian High. ' +
+          'A file with them opens stations and closes belts.',
+    standing: { coalition: 15, pirate: -12 },
+    credits: 900, probes: 1,
+    perk: 'Coalition pads and a clean record',
+    bonus: { dockDiscount: 0.08 }
+  },
+  meridian: {
+    name: 'Meridian Shipwrights',
+    bloc: 'coalition',
+    motto: 'We build the thing you are standing in.',
+    desc: 'The yard that fits most of the hulls in this system. Staff rates on refits, ' +
+          'and a standing invitation to any shipyard pad.',
+    standing: { coalition: 8 },
+    credits: 1500,
+    perk: 'Staff rates on refits and repairs',
+    bonus: { repairDiscount: 0.25, upgradeDiscount: 0.10 }
+  },
+  'meridian-collective': {
+    name: 'Belt Collective',
+    bloc: 'independent',
+    motto: 'The rock does not care who owns it.',
+    desc: 'Not a company so much as an agreement between crews who would rather not be ' +
+          'bought. Shares tools, shares claims, remembers debts.',
+    standing: { independent: 18, coalition: -5 },
+    credits: 700,
+    perk: 'Collective tooling — better yield per cycle',
+    bonus: { miningMult: 0.12 }
+  },
+  freewake: {
+    name: 'Freewake Haulage',
+    bloc: 'independent',
+    motto: 'Anything, anywhere, no questions on the manifest.',
+    desc: 'Independent freight. Thin margins, long legs, and a habit of not looking too ' +
+          'hard at what is in the hold.',
+    standing: { independent: 12, pirate: 5, coalition: -8 },
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     credits: 1200,
     perk: 'Overbuilt holds',
     bonus: { cargoPct: 0.15 }
   },
+<<<<<<< HEAD
   kestrel: {
     name: 'Kestrel Guild',
     bloc: 'independent',
@@ -269,10 +333,34 @@ export const CORPORATIONS = {
     credits: 1000,
     perk: 'Recovery rigging — a bigger hold and a longer reach',
     bonus: { cargoPct: 0.10, sensorMult: 0.08 }
+=======
+  'long-dark': {
+    name: 'The Long Dark',
+    bloc: 'independent',
+    motto: 'Someone has to go first.',
+    desc: 'A survey outfit that is mostly three people and a very good sensor package. ' +
+          'They map the rim on speculation and sell what they find.',
+    standing: { independent: 10 },
+    credits: 1000, probes: 3,
+    perk: 'Survey package — deeper scans, spare probes',
+    bonus: { scanRate: 0.30, sensorMult: 0.10 }
+  },
+  severance: {
+    name: 'Severance',
+    bloc: 'independent',
+    motto: 'We were all something else first.',
+    desc: 'A mutual-aid network of Nexis defectors that officially does not exist. ' +
+          'Cold-running hardware, forged transponders, and nobody who will testify.',
+    standing: { independent: 8, pirate: -10 },
+    credits: 1300,
+    perk: 'Emissions discipline — harder to see',
+    bonus: { signatureMult: -0.12 }
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }
 };
 export const CORP_KEYS = Object.keys(CORPORATIONS);
 
+<<<<<<< HEAD
 /**
  * Employers that no longer exist under that name, and where their people went.
  *
@@ -302,6 +390,8 @@ export const CORP_ALIASES = {
 /** Canonical employer key, tolerating a retired one from an old save. */
 export const resolveCorp = key => (CORPORATIONS[key] ? key : (CORP_ALIASES[key] || key));
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 // ── where a birth and an employer actually leave you (v1.02.36) ──────
 //
 // Lineage and corporation used to grant standing with a whole *bloc* — twenty points of
@@ -319,6 +409,7 @@ export const LINEAGE_POWERS = {
 };
 
 export const CORP_POWERS = {
+<<<<<<< HEAD
   // A straight identity plus the rivalries the employment implies. Because every employer
   // *is* a power now, there is nothing here that can disagree with `data/factions.js` —
   // which is the whole reason the table was rewritten.
@@ -331,6 +422,14 @@ export const CORP_POWERS = {
   drossgate: { drossgate: 20, halloway: 8, aurelian: -6 },
   kessler:   { kessler: 22, aurelian: -20, meridian: -10 },
   vosk:      { vosk: 20, kessler: 10, halloway: -12 }
+=======
+  'solaris-authority':  { aurelian: 16, meridian: 10, kessler: -18 },
+  'meridian':           { meridian: 20, severance: -10 },
+  'meridian-collective':{ freewake: 16, meridian: 8, severance: -12 },
+  'freewake':           { freewake: 20, kestrel: 8, severance: -14 },
+  'long-dark':          { vosk: 14, drossgate: 10, aurelian: -14 },
+  'severance':          { severance: 22, freewake: -18, aurelian: -10 }
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 };
 
 /** The creation head start for a lineage + corporation, merged. */

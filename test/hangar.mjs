@@ -33,6 +33,7 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { holdCap, holdMass, loadHold } = await imp('systems/trade/holds.js');
 const FL = await imp('systems/company/fleet.js');
@@ -44,6 +45,15 @@ const FW = await imp('systems/company/fleet-work.js');
 const CMD = await imp('systems/company/command.js');
 const { fleetOrderReport, updateFleetOrders } = await imp('systems/company/orders.js');
 const { createCharacter } = await imp('systems/crew/character.js');
+=======
+const { initMarket } = await imp('systems/market.js');
+const { holdCap, holdMass, loadHold } = await imp('systems/holds.js');
+const FL = await imp('systems/fleet.js');
+const FW = await imp('systems/fleet-work.js');
+const CMD = await imp('systems/command.js');
+const { fleetOrderReport, updateFleetOrders } = await imp('systems/orders.js');
+const { createCharacter } = await imp('systems/character.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(21);
 createSystem(); createAsteroids(); createNpcs(); initMarket();
@@ -228,7 +238,11 @@ console.log('\n— a founder owns no hull —');
   // The path a founder actually has to walk, end to end. Asserted because reasoning about
   // it got it wrong: the first version of this change left them certified for a freighter
   // they could not afford, holding no hull, unable to undock, with no legal way out.
+<<<<<<< HEAD
   const EC = await imp('systems/trade/economy.js');
+=======
+  const EC = await imp('systems/economy.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('a founder cannot undock with no hull of their own', !EC.ownsCurrentHull());
   ok('the shuttle is free', (SHIP_PRICE.civilian || 0) === 0);
   ok('and they are licensed for it', !!(S.licences && S.licences.civilian));
@@ -241,7 +255,11 @@ console.log('\n— a founder owns no hull —');
 console.log('\n— the commands still dispatch —');
 {
   exec();
+<<<<<<< HEAD
   const { FLEET_ORDER_TYPES } = await imp('systems/company/orders.js');
+=======
+  const { FLEET_ORDER_TYPES } = await imp('systems/orders.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const need = new Set();
   for (const k of Object.keys(FLEET_ORDER_TYPES)) {
     for (const r of FLEET_ORDER_TYPES[k].requires || []) need.add(r);

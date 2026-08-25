@@ -11,6 +11,7 @@ const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids, updateAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx, updatePlayer } = await imp('entities/player.js');
 const { createNpcs, updateNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initProjectiles, updateProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat, updateCombat } = await imp('systems/combat/combat.js');
 const { updateWeapons } = await imp('systems/combat/weapons.js');
@@ -18,6 +19,15 @@ const { initMining, updateMining } = await imp('systems/industry/mining.js');
 const { updateWarp, toggleWarp, setCourse, wellRadius } = await imp('systems/flight/warp.js');
 const { updateTargeting } = await imp('systems/flight/targeting.js');
 const { updateDocking } = await imp('systems/trade/economy.js');
+=======
+const { initProjectiles, updateProjectiles } = await imp('systems/projectiles.js');
+const { initCombat, updateCombat } = await imp('systems/combat.js');
+const { updateWeapons } = await imp('systems/weapons.js');
+const { initMining, updateMining } = await imp('systems/mining.js');
+const { updateWarp, toggleWarp, setCourse, wellRadius } = await imp('systems/warp.js');
+const { updateTargeting } = await imp('systems/targeting.js');
+const { updateDocking } = await imp('systems/economy.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 initScene(); recalcStats(); seedWorld(20260728); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs(); S.running = true;
 const step = dt => { S.time += dt; updateWarp(dt); updatePlayer(dt); updateWeapons(dt); updateMining(dt);
@@ -65,8 +75,13 @@ function arriveBand(dest) {
 // seed proved nothing. This plans (not flies — flying 100 trips would take minutes)
 // across many seeds and asserts every returned course is geometrically clear.
 async function sweep(seeds) {
+<<<<<<< HEAD
   const { planCourse, wellRadius: wr } = await imp('systems/flight/warp.js');
   const { routeClear } = await imp('systems/flight/navplan.js');
+=======
+  const { planCourse, wellRadius: wr } = await imp('systems/warp.js');
+  const { routeClear } = await imp('systems/navplan.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   let plans = 0, clear = 0, direct = 0;
   const worst = [];
   for (const seed of seeds) {

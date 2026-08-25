@@ -12,20 +12,34 @@
 import { $, el } from '../core/utils.js';
 import { S } from '../core/state.js';
 import { PALETTES, PALETTE_KEYS, display, setDisplay, applyDisplay,
+<<<<<<< HEAD
          nudgeTextScale } from '../systems/platform/display.js';
+=======
+         nudgeTextScale } from '../systems/display.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { diagnostics, unpark, downloadLog, formatLog } from '../core/diagnostics.js';
 import { perfStats, clock } from '../core/clock.js';
 import { hudStats, resetHudStats } from './hud.js';
 import { VERSION, CODENAME, SCHEMA } from '../core/version.js';
 import { ACTIONS, ACTION_KEYS, bindings, bind, resetBindings, keyLabel,
+<<<<<<< HEAD
          gamepad } from '../systems/platform/input.js';
 import { qualityState, setQualityLevel, setAuto, LEVELS } from '../world/quality.js';
+=======
+         gamepad } from '../systems/input.js';
+import { qualityState, setQualityLevel, setAuto, LEVELS } from '../systems/quality.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { renderProfile } from '../world/scene.js';
 import { lodReport } from '../world/lod.js';
 import { trackedCount } from '../world/interpolate.js';
 import { AUDIO } from '../core/config.js';
+<<<<<<< HEAD
 import { sfx, setBusLevel, busLevel } from '../systems/platform/audio.js';
 import { netReport } from '../systems/platform/net.js';
+=======
+import { sfx, setBusLevel, busLevel } from '../systems/audio.js';
+import { netReport } from '../systems/net.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 let overlay, body, tabs;
 let tab = 'display';
@@ -113,6 +127,7 @@ function renderDisplay() {
 
   toggleRow('Reduced motion', 'Stops streaks, sweeps and screen effects',
     d.reducedMotion, () => setDisplay('reducedMotion', !d.reducedMotion));
+<<<<<<< HEAD
   // Sits with reduced motion rather than with audio, because that is what it is: an
   // animation on text. Somebody who turns reduced motion on is usually about to want this
   // off too, and having to hunt another tab for it is the wrong answer.
@@ -127,6 +142,10 @@ function renderDisplay() {
   toggleRow('Autopilot handoff', 'ARIA\u2019s lattice claims each system when AP engages',
     S.settings.connSeq !== false,
     () => { S.settings.connSeq = S.settings.connSeq === false; render(); });
+=======
+  toggleRow('Damage vignette', 'Red edge flash when the hull is hit',
+    !d.hideVignette, () => setDisplay('hideVignette', !d.hideVignette));
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 function renderAccess() {

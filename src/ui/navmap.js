@@ -8,6 +8,7 @@
 import { S } from '../core/state.js';
 import { $, el, fmtKm, clamp } from '../core/utils.js';
 import { ORBIT_BANDS } from '../core/config.js';
+<<<<<<< HEAD
 import { setCourse, toggleWarp } from '../systems/flight/warp.js';
 import { startApproach, startOrbit } from '../systems/flight/approach.js';
 import { setTarget } from '../systems/flight/targeting.js';
@@ -15,6 +16,13 @@ import { beginScan, scanReport, liveTier, TIER_NAME, scanOrigin } from '../syste
 import { detectionRange, npcSignature } from '../systems/combat/detection.js';
 import { ROCK_CAP } from '../systems/flight/contacts.js';
 import { ownerOfHull, OWN } from '../systems/company/ownership.js';
+=======
+import { setCourse, toggleWarp } from '../systems/warp.js';
+import { startApproach, startOrbit } from '../systems/approach.js';
+import { setTarget } from '../systems/targeting.js';
+import { beginScan, scanReport, liveTier, TIER_NAME, scanOrigin } from '../systems/scanner.js';
+import { detectionRange, npcSignature } from '../systems/detection.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 /**
  * The eye the chart is drawn from. Docked, that is the station and its array; flying, the
@@ -22,11 +30,19 @@ import { ownerOfHull, OWN } from '../systems/company/ownership.js';
  * the rocks, the traffic and the scan all agree about what can be seen from where.
  */
 const eye = () => scanOrigin();
+<<<<<<< HEAD
 import { sfx } from '../systems/platform/audio.js';
 import { fieldTarget, fieldMid, parentOf } from '../systems/flight/fields.js';
 import { fleetRoster } from '../systems/company/fleet.js';
 import { feed, detail } from '../systems/platform/telemetry.js';
 import { canPilot } from '../systems/company/career.js';
+=======
+import { sfx } from '../systems/audio.js';
+import { fieldTarget, fieldMid, parentOf } from '../systems/fields.js';
+import { fleetRoster } from '../systems/fleet.js';
+import { feed, detail } from '../systems/telemetry.js';
+import { canPilot } from '../systems/career.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 const MAX_R = 34000;
 let overlay, canvas, ctx, info, scanBox, orbitMenu;
@@ -162,9 +178,12 @@ function zoomBy(f) {
  * @param {'chart'|'detail'|'telemetry'} [opts.pane]  which pane to land on
  * @param {Function} [opts.returnTo]  what to show when the chart is closed
  * @param {boolean} [opts.hideFlight] the opener has no flight HUD behind it
+<<<<<<< HEAD
  * @param {string}  [opts.only]      plot only this class — 'belt', 'station', 'ship', 'planet'
  * @param {object}  [opts.focus]     { obj, kind, name } to select and centre the view on
  * @param {number}  [opts.zoom]      zoom level to use when focusing
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
  */
 export function openNavmap(opts) {
   // v1.02.20: this refused to open while docked, which made the chart a cockpit instrument
@@ -179,6 +198,7 @@ export function openNavmap(opts) {
   overlay.classList.toggle('detached', detached);
   hideOrbitMenu();
   showPane(o.pane || 'chart');
+<<<<<<< HEAD
   // Opening the chart *at* something. ARIA uses this: asked to take the ship to a rock, it
   // opens the chart filtered to mineable contacts and centred on the one it picked, so the
   // pilot sees the decision rather than only its consequence. The chart is the instrument
@@ -186,10 +206,13 @@ export function openNavmap(opts) {
   // teleport button.
   if (o.only) setOnlyFilter(o.only);
   if (o.focus && o.focus.obj) focusOn(o.focus, o.zoom);
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   draw();
   sfx.ui();
 }
 
+<<<<<<< HEAD
 /** Turn every filter off except one, and make the chips say so. */
 function setOnlyFilter(only) {
   for (const k in filters) filters[k] = (k === only);
@@ -226,6 +249,8 @@ export function focusOn(focus, zoom) {
   return true;
 }
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 export function closeNavmap() {
   open = false;
   hideOrbitMenu();
@@ -286,9 +311,12 @@ function renderTelemetry() {
   if (telHead) {
     telHead.innerHTML =
       `<b>Live telemetry</b> — watching from ${f.from} · array ${fmtKm(f.range)}` +
+<<<<<<< HEAD
       (S.stats.sensorRated && !S.docked
         ? ` <span class="tel-sub">of ${fmtKm(S.stats.sensorRated)} rated · scanner tier ${S.stats.scanTier || 0}</span>`
         : '') +
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       `<br><span class="tel-sub">Charted objects are always listed. Traffic appears when ` +
       `the array can resolve it, so an empty traffic list is a quiet lane, not a fault.</span>`;
   }
@@ -528,10 +556,14 @@ function draw() {
       if (a.position.distanceToSquared(pp) > scan * scan) continue;
       const [x, y] = project(a.position.x, a.position.z, cx, cy, sr);
       ctx.fillRect(x - 1, y - 1, 2, 2);
+<<<<<<< HEAD
       // The same cap the contact list carries, so a rock you can tap here is a rock you
       // can lock from the cockpit. Two different caps is how the chart and the list drifted
       // apart in the first place.
       if (shown < ROCK_CAP) points.push({ x, y, obj: a, name: a.name, kind: 'asteroid' });
+=======
+      if (shown < 40) points.push({ x, y, obj: a, name: a.name, kind: 'asteroid' });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       shown++;
     }
     if (shown) {
@@ -608,6 +640,7 @@ function draw() {
       if (n.position.distanceToSquared(o.pos) >
           detectionRange(o.range, npcSignature(u)) ** 2) continue;
 
+<<<<<<< HEAD
       // Somebody else's hull is still somebody's. A corp-owned ship gets a ring, so the
       // chart distinguishes "a raider" from "a Kessler raider" and "a hauler" from "a
       // Kestrel hauler" — which is what decides whether shooting it is a job or an incident.
@@ -620,6 +653,11 @@ function draw() {
       }
       points.push({ x, y, obj: n, name: u.name, kind: 'ship', faction: u.faction,
                     owner: own.label });
+=======
+      ctx.fillStyle = hostile ? 'rgba(255,90,60,.7)' : 'rgba(110,200,255,.45)';
+      ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+      points.push({ x, y, obj: n, name: u.name, kind: 'ship', faction: u.faction });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     }
   }
 
@@ -740,7 +778,10 @@ function onTap(e) {
       : best.kind === 'asteroid' ? ` · ore ${Math.round(best.obj.ore)} kg`
       : best.kind === 'planet' ? ' · orbit to scan & probe' : '';
     info.innerHTML = `<b>${best.name}</b> — ${cat || best.kind} · ${fmtKm(dist)} out${extra}` +
+<<<<<<< HEAD
       (best.owner ? ` · <span style="color:var(--amber)">${best.owner}</span>` : '') +
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       `<br><span style="color:var(--good)">sensor: ${TIER_NAME[tier]}</span>`;
   }
   setButtons(true);

@@ -17,9 +17,12 @@
 <!-- The executive command surface. Last, because it wins over the flight HUD by
      hiding it — see body.command-surface. -->
 <link rel="stylesheet" href="css/exec.css"/>
+<<<<<<< HEAD
 <link rel="stylesheet" href="css/dossier.css"/>
 <link rel="stylesheet" href="css/loading.css"/>
 <link rel="stylesheet" href="css/conn.css"/>
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 </head>
 <body>
 
@@ -33,9 +36,12 @@
 <div id="velocity-marker" class="hidden"></div>
 <div id="warp-overlay"></div>
 <div id="reticle" class="hidden"></div>
+<<<<<<< HEAD
 <!-- Contact brackets. One canvas rather than forty positioned nodes, and pointer-transparent
      so the canopy keeps the drag; see ui/markers.js for both decisions. -->
 <canvas id="contact-markers"></canvas>
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 <div id="scan-sweep"></div>
 
 <!-- ── top ───────────────────────────────────────────── -->
@@ -60,6 +66,7 @@
     <div class="bar-row"><span class="bar-label">Hull</span><div class="bar-track"><div class="bar-fill hull" id="hull-fill"></div></div><span class="bar-val" id="hull-val">100</span></div>
     <div class="bar-row"><span class="bar-label">Heat</span><div class="bar-track"><div class="bar-fill heat" id="heat-fill"></div></div><span class="bar-val" id="heat-val">0</span></div>
     <div class="bar-row"><span class="bar-label">Warp</span><div class="bar-track"><div class="bar-fill warp" id="warp-fill"></div></div><span class="bar-val" id="warp-val">0</span></div>
+<<<<<<< HEAD
     <!-- Solar arrays. Hidden entirely on a hull with none fitted, because a bar that is
          always at zero teaches a pilot to stop reading that row. Two decimal places: the
          drive is locked for the whole width of this bar and the pilot is watching it. -->
@@ -76,6 +83,13 @@
       <div class="micro" id="crew-info">Crew 0 · payroll 0 cr</div>
       <div class="micro hidden" id="farm-info">No farm</div>
     </div>
+=======
+    <div class="micro" id="hull-status">Hull integrity: nominal</div>
+    <div class="micro" id="mass-info">Mass 12.4 t · cargo 0 kg</div>
+    <div class="micro" id="expend-info">Draw 0 MW</div>
+    <div class="micro" id="ammo-info">Magazines —</div>
+    <div class="micro" id="crew-info">Crew 0 · payroll 0 cr</div>
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   </section>
 
   <section class="panel collapsible" id="info-panel">
@@ -114,6 +128,7 @@
   <div id="target-name">—</div>
   <div class="bar-track slim"><div class="bar-fill hull" id="target-hp"></div></div>
   <div class="row"><span id="target-kind">—</span><span class="val" id="target-dist">—</span></div>
+<<<<<<< HEAD
   <!-- WARP sits with the other two ways of getting there rather than on the flight bar,
        because "approach, match or warp" is one decision and it was previously split across
        two surfaces. The chevron moved out of the button flow into its own end cell so SCAN
@@ -125,6 +140,13 @@
     <button id="target-scan" class="tiny-btn">SCAN</button>
     <button id="target-probe" class="tiny-btn hidden">PROBE</button>
     <button id="target-file" class="tiny-btn">FILE</button>
+=======
+  <div id="target-actions">
+    <button id="target-approach" class="tiny-btn">APPROACH</button>
+    <button id="target-match" class="tiny-btn">MATCH</button>
+    <button id="target-scan" class="tiny-btn">SCAN</button>
+    <button id="target-probe" class="tiny-btn hidden">PROBE</button>
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     <button id="target-expand" class="mini-btn">▾</button>
   </div>
   <div id="target-detail" class="hidden"></div>
@@ -140,8 +162,11 @@
   <button id="btn-ops" class="tool-btn" title="Ops — orders, ledger, company">OPS</button>
   <button id="btn-ledger" class="tool-btn" title="Finance &amp; trade">LDG</button>
   <button id="btn-settings" class="tool-btn" title="Settings &amp; diagnostics">⚙</button>
+<<<<<<< HEAD
   <button id="btn-file" class="tool-btn" title="Dossier — standing, skills, career">FILE</button>
   <button id="btn-chart" class="tool-btn" title="Galactic chart — jump between systems">MAP</button>
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   <button id="btn-aria" class="tool-btn" title="ARIA — ship AI">ARIA</button>
   <button id="btn-comms" class="tool-btn" title="Comms log">☏<span id="comms-badge" class="hidden">0</span></button>
   <button id="btn-save" class="tool-btn" title="Save">💾</button>
@@ -155,6 +180,7 @@
 <div id="bottom-dock">
   <div id="speed-panel">
     <div id="speed-header"><span>THROTTLE</span><span><span id="speed-value">0%</span><span id="real-speed"> · 0 m/s</span></span></div>
+<<<<<<< HEAD
     <!-- The track is a relative control, not an absolute one: grabbing the thumb moves the
          throttle by how far the thumb moves, and dragging away from the bar drops into a
          fine gain. The steppers either side are the reason a 5% change no longer needs a
@@ -172,10 +198,17 @@
       <button class="preset-btn reverse" data-pct="-25">REV</button>
       <button class="preset-btn" data-pct="0">0</button>
       <button class="preset-btn" data-pct="10">10</button>
+=======
+    <div id="speed-track-wrap"><div id="speed-track"><div id="speed-fill"></div></div></div>
+    <div id="speed-presets">
+      <button class="preset-btn reverse" data-pct="-25">REV</button>
+      <button class="preset-btn" data-pct="0">0</button>
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
       <button class="preset-btn" data-pct="25">25</button>
       <button class="preset-btn" data-pct="50">50</button>
       <button class="preset-btn" data-pct="100">MAX</button>
     </div>
+<<<<<<< HEAD
     <div id="speed-fine" class="hidden">FINE</div>
   </div>
 
@@ -185,6 +218,10 @@
   <div id="ap-line" class="hidden">—</div>
   <!-- What she is for, while she has the ship. Hidden unless the autopilot is on. -->
   <button id="ap-doctrine" class="hidden">◈ Balanced</button>
+=======
+  </div>
+
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   <button id="group-chip" class="hidden">GRP <b>ALL</b></button>
   <div id="action-grid">
     <button id="btn-mine" class="act-btn">⛏<span>MINE</span></button>
@@ -196,6 +233,7 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- ── the handoff ────────────────────────────────────────
      What flipping AP ON looks like. Presentation only: the autopilot is
      already flying by the time the first frame draws, and this whole
@@ -222,6 +260,8 @@
   </div>
 </div>
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 <div id="warp-core-visual"><div id="warp-core-fill"></div></div>
 <div id="warp-status-text">WARP CORE</div>
 <div id="ship-panel" class="hidden"></div>
@@ -263,12 +303,18 @@
   <div id="exec-board"></div>
   <div id="exec-actions">
     <button class="exec-btn" id="exec-chart">CHART</button>
+<<<<<<< HEAD
     <button class="exec-btn" id="exec-galaxy">GALAXY</button>
     <button class="exec-btn" id="exec-board">BOARD</button>
     <button class="exec-btn" id="exec-ops">OPS</button>
     <button class="exec-btn" id="exec-staff">FLEET</button>
     <button class="exec-btn" id="exec-ledger">LEDGER</button>
     <button class="exec-btn" id="exec-dossier">FILE</button>
+=======
+    <button class="exec-btn" id="exec-ops">OPS</button>
+    <button class="exec-btn" id="exec-staff">FLEET</button>
+    <button class="exec-btn" id="exec-ledger">LEDGER</button>
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     <button class="exec-btn" id="exec-comms">COMMS</button>
     <button class="exec-btn" id="exec-aria">ARIA</button>
     <button class="exec-btn" id="exec-settings">⚙</button>
@@ -324,6 +370,7 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <div id="galaxy-overlay" class="hidden">
   <div id="galaxy-view"></div>
   <div id="galaxy-head">—</div>
@@ -400,6 +447,8 @@
   </div></div>
 </div>
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 <div id="fit-overlay" class="overlay hidden">
   <div class="overlay-head"><span>Ship fit</span><button class="mini-btn" id="fit-close">✕</button></div>
   <div id="fit-summary"></div>
@@ -466,6 +515,7 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- ── ARIA's advisory ────────────────────────────────────
      She has concluded the ship is short of something and she is making the case for it,
      with the readings that led her there. Opened by `systems/npc/advisor.js` through the
@@ -512,6 +562,8 @@
   </div>
 </div>
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 <div id="comms-overlay" class="overlay hidden">
   <div class="overlay-head"><span>Comms log</span><button class="mini-btn" id="comms-close">✕</button></div>
   <div id="comms-channels"></div>
@@ -557,6 +609,7 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- ── the loading screen ──────────────────────────────────────────
      Sits over the menu, not instead of it: the menu cannot be honest about how many
      systems are charted or which pilots are on file until the archive has been read, so
@@ -603,6 +656,14 @@
          just a guest the galaxy forgets. Created on first use; the passphrase decides
          everything after that. -->
     <input id="mp-pass" type="password" maxlength="64" placeholder="Account passphrase (optional)" autocomplete="off"/>
+=======
+<div id="boot-overlay">
+  <div id="boot-card">
+    <h1>LIVING GALAXY</h1>
+    <p>Solaris System · pick a life, take a hull, find out what it costs.</p>
+    <input id="mp-name" maxlength="16" placeholder="Callsign (optional)" autocomplete="off"/>
+    <input id="mp-url" placeholder="Multiplayer — ws://host:8765 (optional)" autocomplete="off"/>
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     <button id="boot-start">Power up</button>
     <button id="boot-wipe" class="ghost">Wipe saved flight</button>
     <!-- Deliberately empty. main.js fills this in from core/version.js the moment the
@@ -615,11 +676,14 @@
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- Where the galaxy lives. On a CDN-hosted static build web/config.js names the
      tunnel host; served by the galaxy server itself it names nothing and the boot
      screen uses its own origin. Loaded best-effort: a file:// solo player without it
      just gets an empty server field, exactly as before. -->
 <script src="web/config.js" onerror="window.GALAXY={host:''}"></script>
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>

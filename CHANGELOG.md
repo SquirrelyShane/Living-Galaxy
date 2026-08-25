@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## 1.04.00 — the front door
 
 The galaxy got a web suite, and the slow load got its actual cause fixed.
@@ -851,10 +852,13 @@ transitively, depth-capped and cycle-guarded — `crafting/derived.js` imports t
 re-exports it, which is legal and load-bearing here.
 
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 # Changelog
 
 Newest first. One entry per slice; full detail lives in the matching `PATCH_vX.Y.md`.
 
+<<<<<<< HEAD
 ## v1.02.47 — "The Chart" · 2026-08-16
 
 The galactic map, and the jump. Full notes: `Patch-Notes/PATCH_v1.02.47.md`. Schema unchanged (22).
@@ -1145,6 +1149,8 @@ A data-folder pass. Full notes: `Patch-Notes/PATCH_v1.02.37.md`. Schema unchange
   that silently fails to rebuild.
 - **`serviceScale()` / `probeCost()`** in `systems/economy.js`.
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ## v1.02.36 — "Papers" · 2026-08-14
 
 Individuals, not categories. Full notes: `Patch-Notes/PATCH_v1.02.36.md`. **Schema 19 → 20.**

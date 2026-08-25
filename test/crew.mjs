@@ -16,13 +16,19 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { CREW, FATIGUE } = await imp('core/config.js');
 const D = await imp('data/crew.js');
+<<<<<<< HEAD
 const C = await imp('systems/crew/crew.js');
 const CR = await imp('systems/industry/crafting.js');
+=======
+const C = await imp('systems/crew.js');
+const CR = await imp('systems/crafting.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
 const { createNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat, damagePlayer } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
@@ -31,6 +37,16 @@ const { initMarket } = await imp('systems/trade/market.js');
 const { initContracts } = await imp('systems/trade/contracts.js');
 const { resetReputation } = await imp('systems/company/reputation.js');
 const save = await imp('systems/platform/save.js');
+=======
+const { initProjectiles } = await imp('systems/projectiles.js');
+const { initCombat, damagePlayer } = await imp('systems/combat.js');
+const { initMining } = await imp('systems/mining.js');
+const { initWorldSim } = await imp('systems/worldsim.js');
+const { initMarket } = await imp('systems/market.js');
+const { initContracts } = await imp('systems/contracts.js');
+const { resetReputation } = await imp('systems/reputation.js');
+const save = await imp('systems/save.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx(); createNpcs();

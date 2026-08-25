@@ -55,6 +55,7 @@ class Node2 {
 
 const ctx2d = new Proxy({}, {
   get: (t, k) => {
+<<<<<<< HEAD
     // Both gradient constructors, because a proxy that answers every property with a no-op
     // function hands back `undefined` where a CanvasGradient belongs — and the first
     // `.addColorStop()` on it takes the whole boot down. `ui/loading.js` draws with both.
@@ -65,6 +66,9 @@ const ctx2d = new Proxy({}, {
     // finite, which is the property that matters: `NaN` propagates into a position and the
     // failure surfaces three files away.
     if (k === 'measureText') return () => ({ width: 0 });
+=======
+    if (k === 'createRadialGradient') return () => ({ addColorStop() {} });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     if (k === 'getImageData') return () => ({ data: new Uint8ClampedArray(16) });
     if (k === 'putImageData') return () => {};
     if (typeof t[k] === 'undefined') return () => {};   // any other ctx method is a no-op
@@ -197,12 +201,16 @@ export function installGlobals(htmlPath) {
   global.addEventListener = () => {};
   global.setTimeout = setTimeout;
   global.clearTimeout = clearTimeout;
+<<<<<<< HEAD
   // Actually fires. It used to return 0 and never call back, which is fine for a game loop
   // the suite drives by hand and fatal for anything that *awaits* a frame — the chunked
   // pregeneration in systems/platform/codex.js hands the frame back between batches, and a
   // rAF that never resolves is a top-level await that never settles.
   global.requestAnimationFrame = fn => setTimeout(() => fn(Date.now()), 0);
   global.cancelAnimationFrame = id => clearTimeout(id);
+=======
+  global.requestAnimationFrame = () => 0;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   global.AudioContext = undefined;
   global.THREE = makeThree();
   return { doc, nodes };
@@ -264,6 +272,7 @@ function makeThree() {
     lookAt() {}
     updateMatrix() {}
     updateProjectionMatrix() {}
+<<<<<<< HEAD
 
     // Added at v1.02.49 with the ship forge. `entities/npcs.js` mints one hull per
     // (type, variant) and clones it per ship, which is what keeps sixty-seven raiders from
@@ -280,11 +289,14 @@ function makeThree() {
       for (const child of this.children) c.add(child.clone());
       return c;
     }
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }
   class BufferAttribute {
     constructor(array, itemSize) { this.array = array; this.itemSize = itemSize; this.count = array.length / itemSize; this.needsUpdate = false; }
     setXYZ(i, x, y, z) { this.array[i * 3] = x; this.array[i * 3 + 1] = y; this.array[i * 3 + 2] = z; }
     getX(i) { return this.array[i * 3]; } getY(i) { return this.array[i * 3 + 1]; } getZ(i) { return this.array[i * 3 + 2]; }
+<<<<<<< HEAD
     setX(i, x) { this.array[i * this.itemSize] = x; }
     setXY(i, x, y) { this.array[i * 2] = x; this.array[i * 2 + 1] = y; }
     setUsage() { return this; }
@@ -299,6 +311,13 @@ function makeThree() {
     }
     setAttribute(n, a) { this.attributes[n] = a; return this; }
     setIndex(i) { this.index = i; return this; }
+=======
+    setUsage() { return this; }
+  }
+  class BufferGeometry {
+    constructor() { this.attributes = {}; this.drawRange = { start: 0, count: Infinity }; }
+    setAttribute(n, a) { this.attributes[n] = a; return this; }
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     setDrawRange(s, c) { this.drawRange = { start: s, count: c }; }
     computeVertexNormals() {}
     dispose() {}
@@ -368,6 +387,7 @@ function makeThree() {
     OctahedronGeometry: class { constructor() { return geo(); } },
     IcosahedronGeometry: class { constructor() { return geo(); } },
     DodecahedronGeometry: class { constructor() { return geo(20); } },
+<<<<<<< HEAD
     // Added at v1.02.49 for the ship forge. A lofted hull is a real BufferGeometry built
     // vertex by vertex rather than one of three.js's primitives, so the suite has to be able
     // to construct the attribute types it writes — otherwise the one module whose output IS
@@ -391,6 +411,11 @@ function makeThree() {
         this.dispose = () => {};
       }
     },
+=======
+    MeshStandardMaterial: class { constructor(o) { return matWithColor(o); } },
+    MeshBasicMaterial: class { constructor(o) { return matWithColor(o); } },
+    PointsMaterial: class { constructor() { return matWithColor(); } },
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     LineBasicMaterial: class { constructor() { return matWithColor(); } },
     MathUtils: { clamp: (v, a, b) => Math.min(Math.max(v, a), b), lerp: (a, b, t) => a + (b - a) * t, degToRad: d => d * Math.PI / 180, radToDeg: r => r * 180 / Math.PI }
   };

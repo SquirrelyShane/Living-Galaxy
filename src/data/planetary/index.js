@@ -26,9 +26,15 @@
 // Each level lives in its own file. The branch files in ./branches are the ones that will
 // grow, and keeping them separate means adding a facility never touches the planet table.
 
+<<<<<<< HEAD
 import { PLANET_TYPES } from './planets.js';
 import { COMMAND_CENTRES, centreFor, CENTRE_KEYS, upgradesFrom } from './centres.js';
 import { BRANCHES, BRANCH_KEYS } from './branches.js';
+=======
+import { PLANET_TYPES } from '../planets.js';
+import { COMMAND_CENTRES, centreFor, CENTRE_KEYS, upgradesFrom } from './centres.js';
+import { BRANCHES, BRANCH_KEYS } from './branches/index.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { PLANET_RESOURCES, resourcesFor, richnessOf, worldsWith } from './resources.js';
 import { traits } from './traits.js';
 
@@ -81,7 +87,11 @@ export function canBuild(facilityId, planetType, site) {
 }
 
 /** Headline numbers for a world, for the survey panel. */
+<<<<<<< HEAD
 function planetaryProfile(planetType) {
+=======
+export function planetaryProfile(planetType) {
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const t = PLANET_TYPES[planetType];
   if (!t) return null;
   const tr = traits(planetType);

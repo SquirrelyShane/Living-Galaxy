@@ -328,7 +328,11 @@ Locked modules show their prerequisite in the shipyard. Everything persists in y
 
 ## Celestial bodies
 
+<<<<<<< HEAD
 Twenty planetary classes in `src/data/planetary/planets.js` — lava, molten, barren, iron, carbon,
+=======
+Twenty planetary classes in `src/data/planets.js` — lava, molten, barren, iron, carbon,
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 terrestrial, ocean, desert, tundra, ice, methane ice, liquid-methane sea, sulfur, toxic
 greenhouse, irradiated, crystalline, super-Earth, and gas/helium/methane giants. Each
 class fixes a radius range, surface colour, atmosphere (colour, opacity, thickness),
@@ -692,6 +696,7 @@ that moves between calm, working, tense and combat without ever cutting.
 
 # Other people
 
+<<<<<<< HEAD
 ## The galaxy server
 
 As of v1.03 the galaxy has a home: one Node process that serves the game, terminates the
@@ -743,6 +748,41 @@ pilot and surfaced in `/api/status`.
 
 The Diagnostics panel has a Link section — system, account, host, round trip, clock offset,
 buffer depth and traffic.
+=======
+## Multiplayer
+
+Run the relay next to the HTTP server:
+
+```sh
+python3 server.py                # ws://0.0.0.0:8765, seed 1337
+python3 server.py --port=9000 --seed=42
+```
+
+Other pilots on your network join by putting `ws://<your-ip>:8765` in the boot screen. The
+server owns the world seed, so every client generates the identical Solaris from it.
+
+**Shared NPCs.** As of 0.10 the oldest connected pilot is the **host**: their client
+simulates the world and broadcasts it, and everyone else receives it. If the host leaves,
+the next-oldest takes over — and because every client already generates the same world from
+the same seed, the handover is a change of who is authoritative rather than a
+resynchronisation. Before this, every pilot fought their own private Nexis.
+
+The relay still contains **no game logic**, and that is deliberate: its entire contribution
+is knowing which client is allowed to send NPC updates. That is what keeps it a stdlib
+Python file you can run in Termux with nothing installed, which is why anyone can host.
+
+**Remote pilots are drawn 280 ms in the past**, blended between two snapshots that have
+*both already arrived*, with clocks synchronised against the relay. The lag is invisible;
+the benefit is that nothing ever snaps. Lose signal and your slot is held for 90 seconds,
+so a phone that goes through a tunnel comes back as itself.
+
+**What is not shared:** pilot-versus-pilot damage. Remote tracers are visual, and shots
+resolve on the shooter's own client. Shared *hostile* NPCs are what 0.10 delivers;
+authoritative PvP is a different design with different failure modes.
+
+The Diagnostics panel has a Link section — host, round trip, clock offset, buffer depth
+and traffic.
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 
 # Under the hood
@@ -775,7 +815,11 @@ src/core/diagnostics.js frame-phase error guards, fault log
 src/world/scene.js      renderer / camera / scene singletons
 src/world/starfield.js  background sky
 src/world/system.js     star, planets, moons, stations + orbits
+<<<<<<< HEAD
 src/data/planetary/moons.js       moon classes — moons are typed worlds, not grey spheres
+=======
+src/data/moons.js       moon classes — moons are typed worlds, not grey spheres
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 src/data/features.js    surface features, requirement-declared
 src/systems/ephemeris.js analytic orbital prediction, intercept, transfer windows
 src/systems/fields.js   belts and rings — the one place that knows the difference
@@ -925,9 +969,13 @@ node test/soak.mjs     # 38 checks: two hours of game time, hunting leaks and dr
 node test/run.mjs      # 205 simulation checks
 node test/warp-nav.mjs # autopilot navigation, 5 approach geometries
 node test/ui.mjs       # 109 UI checks, boots main.js as the browser would
+<<<<<<< HEAD
 node test/net.mjs      # real galaxy server + real WebSocket clients
 node test/vault.mjs    # encryption, tickets, rooms, motion guard — the server's pure parts
 node test/galaxy-server.mjs # accounts, wallet and world deltas across a server restart
+=======
+node test/net.mjs      # real relay server + real WebSocket clients
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ```
 
 1,531 checks across eighteen suites, plus a two-hour soak. There is no npm install — `package.json`
@@ -943,9 +991,14 @@ amount of time, that a throwing phase does not stop the loop, and that a save wr
 by v0.1 still loads.
 
 The world is seeded, so every suite is deterministic and reproducible. `net.mjs`
+<<<<<<< HEAD
 starts a real `server/main.js` subprocess and drives genuine WebSocket clients through the
 full join / state / fire / roster / rooms / resume flow; `galaxy-server.mjs` kills the
 process and demands everything durable back from the vault.
+=======
+starts a real `server.py` subprocess and drives three genuine WebSocket clients
+through the full join / state / fire / roster / leave flow.
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 **Autopilot, honestly.** As of 0.3 the planner is a visibility graph over gravity wells
 searched with A*, not the old greedy recursion. `warp-nav.mjs` passes 5/5 with every trip

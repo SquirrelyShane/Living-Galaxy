@@ -10,6 +10,7 @@
 // fabricator can make ammunition and not reactors; a planetary complex can make refined
 // metal and not personal sidearms. Who can build what is a per-category question, so
 // category is a first-class division rather than a string on a record.
+<<<<<<< HEAD
 //
 // Four blueprint sets, one materials table, and `derived.js` — the provenance, taxonomy,
 // ammunition compatibility and integrity checks that are computed from those rather than
@@ -17,17 +18,28 @@
 // list, because a re-exported name that has to be typed twice is a name that drifts.
 
 import { MATERIALS, MATERIAL_KEYS, materialTier } from './materials.js';
+=======
+
+import { MATERIALS, MATERIAL_KEYS, MATERIAL_GROUPS, materialsIn, material,
+         materialName, materialTier } from './materials.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { SHIP_MODULES, SHIP_MODULES_KEYS } from './modules.js';
 import { SHIP_WEAPONS, SHIP_WEAPONS_KEYS } from './weapons.js';
 import { AMMUNITION, AMMUNITION_KEYS } from './ammo.js';
 import { PERSONAL_ITEMS, PERSONAL_ITEMS_KEYS } from './personal.js';
 
+<<<<<<< HEAD
 export * from './materials.js';
 export * from './modules.js';
 export * from './weapons.js';
 export * from './ammo.js';
 export * from './personal.js';
 export * from './derived.js';
+=======
+export { MATERIALS, MATERIAL_KEYS, MATERIAL_GROUPS, materialsIn, material,
+         materialName, materialTier,
+         SHIP_MODULES, SHIP_WEAPONS, AMMUNITION, PERSONAL_ITEMS };
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 /** Every craftable thing, by id. Ids are globally unique across categories by design. */
 export const BLUEPRINTS = Object.assign({}, SHIP_MODULES, SHIP_WEAPONS, AMMUNITION, PERSONAL_ITEMS);
@@ -39,8 +51,12 @@ export const CATEGORIES = {
   ammo:   { name: 'Ammunition',   keys: AMMUNITION_KEYS,   set: AMMUNITION },
   personal: { name: 'Personal kit', keys: PERSONAL_ITEMS_KEYS, set: PERSONAL_ITEMS }
 };
+<<<<<<< HEAD
 const CATEGORY_KEYS = Object.keys(CATEGORIES);
 export { CATEGORY_KEYS };
+=======
+export const CATEGORY_KEYS = Object.keys(CATEGORIES);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 export const blueprint = id => BLUEPRINTS[id] || null;
 
@@ -70,6 +86,7 @@ export function categoryOf(id) {
   return null;
 }
 
+<<<<<<< HEAD
 /**
  * The fine-grained group inside a category, whatever the record calls it: modules and
  * personal kit say `subcategory`, weapons say `type`, ammunition sorts by `damage_type`.
@@ -100,12 +117,19 @@ export const inputTier = id =>
   MATERIALS[id] ? materialTier(id) : (BLUEPRINTS[id] ? (BLUEPRINTS[id].tier || 1) : 0);
 
 /** The bill of materials for one item: [{ id, name, qty, tier, sub }]. */
+=======
+/** The bill of materials for one item: [{ id, name, qty }]. */
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 export function billOfMaterials(id) {
   const bp = BLUEPRINTS[id];
   if (!bp || !bp.materials) return [];
   return Object.keys(bp.materials).map(m => ({
+<<<<<<< HEAD
     id: m, name: inputName(m), qty: bp.materials[m],
     tier: inputTier(m), sub: isSubAssembly(m)
+=======
+    id: m, name: materialName(m), qty: bp.materials[m], tier: materialTier(m)
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   })).sort((a, b) => b.qty - a.qty);
 }
 
@@ -160,6 +184,7 @@ export const manufHours = id => {
   return bp.manuf_hours || bp.manuf_hours_per_stack || 0;
 };
 
+<<<<<<< HEAD
 /** Unit price, whichever field the category uses. */
 export const costOf = id => {
   const bp = BLUEPRINTS[id];
@@ -167,6 +192,8 @@ export const costOf = id => {
   return bp.cost ?? bp.unit_cost ?? 0;
 };
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 /** Tier of a blueprint — how advanced an industry has to be to build it. */
 export const tierOf = id => (BLUEPRINTS[id] && BLUEPRINTS[id].tier) || 1;
 
@@ -177,6 +204,7 @@ export const buildableAt = (category, tier) => {
   return c.keys.filter(k => tierOf(k) <= tier);
 };
 
+<<<<<<< HEAD
 /**
  * Can this be built from a given stock right now? Returns what is missing rather than a
  * bare boolean, because the crafting panel always wants to show the shortfall.
@@ -201,6 +229,8 @@ export function buildableFrom(stock = {}, { category = null, tier = Infinity } =
   return keys.filter(k => tierOf(k) <= tier && canBuild(k, stock));
 }
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 export const catalogueSize = () => ({
   materials: MATERIAL_KEYS.length,
   blueprints: BLUEPRINT_KEYS.length,

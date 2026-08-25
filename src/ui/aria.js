@@ -2,21 +2,32 @@
 // work is in the worker; this just renders the chat and the load/status line.
 
 import { $, el } from '../core/utils.js';
+<<<<<<< HEAD
 import { initAssistant, loadModel, ask, modelReady, modelLoading } from '../systems/npc/assistant.js';
 import { sfx } from '../systems/platform/audio.js';
 import { type as typeLine, voiceOf, finishAll } from './typewriter.js';
 
 let overlay, log, input, statusEl, loadBtn, greeted = false;
 let msgSeq = 1;
+=======
+import { initAssistant, loadModel, ask, modelReady, modelLoading } from '../systems/assistant.js';
+import { sfx } from '../systems/audio.js';
+
+let overlay, log, input, statusEl, loadBtn, greeted = false;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 export function initAria() {
   overlay = $('aria-overlay'); log = $('aria-log'); input = $('aria-input');
   statusEl = $('aria-status'); loadBtn = $('aria-load');
 
   initAssistant(onStatus);
+<<<<<<< HEAD
   $('aria-close').addEventListener('click', () => { finishAll(); overlay.classList.add('hidden'); });
   // Tapping the transcript skips ahead, exactly like the comms log.
   log.addEventListener('click', () => finishAll());
+=======
+  $('aria-close').addEventListener('click', () => overlay.classList.add('hidden'));
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   $('aria-send').addEventListener('click', send);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
   loadBtn.addEventListener('click', () => { loadModel(); loadBtn.disabled = true; loadBtn.textContent = 'Loading…'; });
@@ -27,7 +38,11 @@ export function openAria() {
   sfx.ui();
   if (!greeted) {
     greeted = true;
+<<<<<<< HEAD
     add('ai', 'ARIA online. Ask about the ship, the belt, threats, or where to sell — or say \u201Ctake the conn\u201D and I will fly her. I answer from live telemetry either way.');
+=======
+    add('ai', 'ARIA online. Ask about the ship, the belt, threats, or where to sell. I answer from live telemetry — load the local model if you want freeform conversation.');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   }
   setTimeout(() => input.focus && input.focus(), 50);
 }
@@ -38,6 +53,7 @@ function send() {
   input.value = '';
   add('you', q);
   const thinking = add('ai think', modelReady() ? 'ARIA is thinking…' : '…');
+<<<<<<< HEAD
   ask(q).then(txt => {
     thinking.classList.remove('think');
     // ARIA speaks rather than printing. Keyed per message so a re-render cannot restart it,
@@ -46,6 +62,9 @@ function send() {
                               onDone: scroll });
     scroll();
   });
+=======
+  ask(q).then(txt => { thinking.textContent = txt; thinking.classList.remove('think'); scroll(); });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 function add(cls, text) {

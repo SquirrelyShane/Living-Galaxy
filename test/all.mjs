@@ -11,7 +11,10 @@ const quiet = process.argv.includes('--quiet');
 const only = process.argv.find(a => a.startsWith('--only='));
 
 const SUITES = [
+<<<<<<< HEAD
   ['architecture','the layer contract — dependency direction, ports, cycles and shape'],
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['static',   'import resolution, exports, element ids, asset paths'],
   ['core',     'version, rng streams, clock, fault guards, save schema'],
   ['flight',   'flight model, assist authority, course planner geometry'],
@@ -19,13 +22,17 @@ const SUITES = [
   ['world',    'reputation matrix, detection, population pressure, persistence'],
   ['character','lineage/corp/career creation, two progression tracks, licences, agents'],
   ['dossier',  'individuals — nine powers, derived corp wars, zero standing, the career ladder'],
+<<<<<<< HEAD
   ['desks',    'a station posts for a named power; tiers, gates, and the loop from work to rung'],
   ['boardroom','contracting as a company — every desk on one screen, a hull on every job'],
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['crew',     'speciality vs post, watches, morale, casualties, recruiting'],
   ['economy',  'contract board, fitting budgets, station supply chains'],
   ['industry', 'blueprints, bills of materials, manufacturing, planetary sites'],
   ['interface','hud write budget, bindings, gamepad, display settings, fatigue'],
   ['render',   'adaptive quality, interpolation, level of detail, audio mix'],
+<<<<<<< HEAD
   ['particles','one pool, a real budget, and colour that means something'],
   ['fields',   'gravity wells you can see, and belts as bands beyond mesh range'],
   ['netsync',  'clock sync, snapshot buffer, delta encoding'],
@@ -38,17 +45,28 @@ const SUITES = [
   ['parley',   'opening a channel, how close a jump stops, and what the ship is for'],
   ['boot',     'durable storage, the pregenerated archive, and pilots that outlive a flight'],
   ['audio',    'the drive, the generative bed, and dialogue that arrives at a speed'],
+=======
+  ['netsync',  'clock sync, snapshot buffer, delta encoding'],
+  ['tools',    'ARIA instruments against live game state'],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['preflight','interlocks, training, comms, companies, automated managers'],
   ['avatar',   'NPC personas, memory-driven dialogue, the language-model tier'],
   ['layout',   'HUD geometry — nothing hides behind the bottom dock'],
   ['genesis',  'procedural systems — determinism, playability guarantees, and that a plan builds'],
+<<<<<<< HEAD
   ['galaxy',   'the galaxy as an index over genesis — one integer, fifty thousand systems'],
   ['chart',    'the galactic chart, and jumping — a refusal with a number, an arrival that is whole'],
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['celestial','moon classes, surface features, atmospheric interference, ephemeris'],
   ['ordnance', 'ammunition feeds, magazines, armour penetration, thermal load, weapon groups'],
   ['npc-tactics','NPC magazines, heat, nerve, calls for help, and memory that decides'],
   ['npc-comms', 'NPC-to-NPC exchanges, relationships, gossip, overhearing'],
   ['deals',     'the ledger — obligations, reliability, settlement and default'],
+<<<<<<< HEAD
+=======
+  ['forge',     'station layouts — archetypes, determinism and the pinned output'],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['crew-log',  'the flight log, crew telemetry, trends, diagnosis and ARIA readouts'],
   ['welfare',   'shore leave, quarters, galley, infirmary and training'],
   ['research',  'findings, projects, permanent effects and the blueprint gate'],
@@ -67,20 +85,27 @@ const SUITES = [
   ['haul',      'haul consignments — loading, selling, delivery, failure; tool-button labels'],
   ['camera',    'chase camera framing — standoff, aim, the pitch limit'],
   ['screens',   'static screens drawn as text — labels, widths, what the panels say'],
+<<<<<<< HEAD
   ['grammar',   'NPC speech — typed slots, frame selection and the sentence sweep'],
   ['missions',  'the mission board — landmarks, graveyards, salvage and the template gate'],
   ['worldgen',  'the world catalogue, classify-by-condition, real units and deep time'],
   ['shipforge', 'procedural hulls — proportion, determinism, scaling and the career seam'],
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['reachability','every player-facing verb has a door — see docs/REACHABILITY_AUDIT.md'],
   ['run',      'simulation: flight, combat, mining, trade, warp, save'],
   ['warp-nav', 'autopilot navigation geometries'],
   ['ui',       'panels and controls through simulated pointer events'],
+<<<<<<< HEAD
   ['vault',    'the encrypted store — seal/unseal, tamper rejection, tickets, rooms, motion'],
   ['net',      'galaxy server protocol — rooms, host per system, resume, with real clients'],
   ['galaxy-server', 'the durable galaxy — accounts, the wallet, world deltas across restarts'],
   ['beacon',   'galaxy.local — the mDNS responder, packet maths and a live answer'],
   ['certs',    'self-issued TLS — DER generator, real handshake, half-state healing'],
   ['portal',   'the web suite — routes, gzip/cache, accounts over http, forum, admin gate'],
+=======
+  ['net',      'relay server, host authority, resume, with real WebSocket clients'],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ['soak',     'two hours of game time — leaks, drift, bounded lists']
 ];
 

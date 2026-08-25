@@ -26,11 +26,19 @@ const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { spawnNpc } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const NC = await imp('systems/npc/npc-comms.js');
 const { TOPICS, TOPIC_KEYS, availableTopics } = await imp('data/npc-kb/topics.js');
 const { personaFor, noteEvent } = await imp('systems/npc/npc-brain.js');
 const { wariness } = await imp('systems/npc/npc-tactics.js');
 const { commsLog, initCommsSystem } = await imp('systems/npc/comms.js');
+=======
+const NC = await imp('systems/npc-comms.js');
+const { TOPICS, TOPIC_KEYS, availableTopics } = await imp('data/npc-topics.js');
+const { personaFor, noteEvent } = await imp('systems/npc-brain.js');
+const { wariness } = await imp('systems/npc-tactics.js');
+const { commsLog, initComms } = await imp('systems/comms.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { NPCCOMMS } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 
@@ -38,7 +46,11 @@ initScene();
 recalcStats();
 seedWorld(20260808);
 createSystem();
+<<<<<<< HEAD
 initCommsSystem();
+=======
+initComms();
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 const reset = () => {
   for (const n of S.world.npcs) n.userData.hp = 0;
@@ -71,7 +83,11 @@ console.log('\n— topics —');
 {
   ok('every topic declares a channel', TOPIC_KEYS.every(k => !!TOPICS[k].channel));
   ok('every topic has a condition', TOPIC_KEYS.every(k => typeof TOPICS[k].when === 'function'));
+<<<<<<< HEAD
   // A topic speaks through `say` (semantic records, realised by data/npc-kb/grammar.js) or,
+=======
+  // A topic speaks through `say` (semantic records, realised by data/npc-grammar.js) or,
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // for anything not yet converted, through the legacy `lines`. Either is valid; having
   // neither means the topic can fire and produce silence.
   ok('every topic has an opener and a reply',

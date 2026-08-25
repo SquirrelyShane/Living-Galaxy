@@ -31,7 +31,11 @@ const ok = (name, cond, extra = '') => {
 const imp = p => import(new URL('src/' + p, ROOT).href);
 
 const G = await imp('world/genesis.js');
+<<<<<<< HEAD
 const { PLANET_TYPES } = await imp('data/planetary/planets.js');
+=======
+const { PLANET_TYPES } = await imp('data/planets.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { STATION_TYPES } = await imp('data/stations.js');
 const { MINERALS } = await imp('data/belts.js');
 const { S, recalcStats } = await imp('core/state.js');
@@ -282,7 +286,11 @@ console.log('\n— the plan builds a world —');
 // seed would silently reopen in whatever the current generator produces for it.
 console.log('\n— a save reopens in the system it was written in —');
 {
+<<<<<<< HEAD
   const SV = await imp('systems/platform/save.js');
+=======
+  const SV = await imp('systems/save.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const { SCHEMA } = await imp('core/version.js');
 
   S.character = { name: 'X', created: true, career: 'executive', lineage: 'core',
@@ -308,7 +316,11 @@ console.log('\n— a save reopens in the system it was written in —');
 // are mined out. Regenerating its seed would rename every one of those at once.
 console.log('\n— an old save keeps its world —');
 {
+<<<<<<< HEAD
   const SV = await imp('systems/platform/save.js');
+=======
+  const SV = await imp('systems/save.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const { SCHEMA: SCHEMA_NOW } = await imp('core/version.js');
   const legacy = { v: 17, build: '1.02.30', seed: 20260814, playtime: 10,
                    classKey: 'civilian', pos: [0, 0, 3400], yaw: 0, pitch: 0, credits: 5000 };

@@ -52,13 +52,32 @@ const rel = f => path.relative(ROOT, f).replace(/\\/g, '/');
  * sure a new feature cannot ship without a door.
  */
 const VERBS = {
+<<<<<<< HEAD
   'src/systems/trade/deals.js':     ['postPlayerJob', 'suggestedFee'],
   'src/systems/flight/lagrange.js':  ['investigate'],
+=======
+  'src/systems/deals.js':     ['postPlayerJob', 'suggestedFee'],
+  // v1.01.99: the whole editing surface, so the six unreachable ones are checked against
+  // BACKLOG every run rather than being remembered. The five above them are wired — by the
+  // generator, not by a panel, which is exactly the distinction this file exists to make.
+  // v1.01.99. Outermost verbs only, per the `toggleDuty`/`setDuty` lesson above:
+  // `ensureBerths`, `attachPoints`, `canPlace`, `placeModule` and `refreshLayout` are all
+  // called by `generateLayout` inside this module, so listing them would report gaps that
+  // are not gaps.
+  'src/world/station-forge.js': ['generateLayout', 'layoutForStation',
+                                 'moveModule', 'removeModule', 'cycleModulePort',
+                                 'fittingKeys', 'snapshotGraph', 'restoreGraph'],
+  'src/systems/lagrange.js':  ['investigate'],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // Grew by three in v1.01.20. `installFacility`, `toggleFacility` and `removeFacility` were
   // unwired the whole time and the hand-written registry did not list them, so nothing was
   // checking. That is the honest limit of a hand-maintained list, and the reason to widen it
   // whenever a module is worked on rather than only when something breaks.
+<<<<<<< HEAD
   'src/systems/industry/planetary.js': ['foundSite', 'upgradeCentre', 'abandonSite',
+=======
+  'src/systems/planetary.js': ['foundSite', 'upgradeCentre', 'abandonSite',
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
                                'collectFrom', 'deliverTo', 'manufactureAt',
                                'installFacility', 'toggleFacility', 'removeFacility'],
   // `toggleDuty`, not `setDuty`. The registry must name the *outermost* verb — the one a
@@ -66,6 +85,7 @@ const VERBS = {
   // caller because `toggleDuty` wraps it inside the same module, and the crew panel has had
   // an ON WATCH button the whole time. The v1.01.10 audit got this wrong in both crew
   // entries and listed them as gaps for a slice.
+<<<<<<< HEAD
   'src/systems/crew/crew.js':      ['hire', 'dismiss', 'retrain', 'toggleDuty', 'persuade',
                                'promote', 'demote', 'assignPost'],
   'src/systems/industry/research.js':  ['startProject', 'cancelProject'],
@@ -77,11 +97,28 @@ const VERBS = {
   'src/systems/combat/groups.js':    ['cycleGroup', 'cycleActive'],
   'src/systems/industry/survey.js':    ['scanPlanet', 'probePlanet'],
   'src/systems/trade/economy.js':   ['buyAmmo', 'buyProbe', 'buyWeapon', 'fitSlot'],
+=======
+  'src/systems/crew.js':      ['hire', 'dismiss', 'retrain', 'toggleDuty', 'persuade',
+                               'promote', 'demote', 'assignPost'],
+  'src/systems/research.js':  ['startProject', 'cancelProject'],
+  'src/systems/welfare.js':   ['upgradeComfort', 'startShoreLeave', 'recallShore',
+                               'startTraining', 'cancelTraining'],
+  'src/systems/crafting.js':  ['queueJob', 'cancelJob'],
+  'src/systems/display.js':   ['setDisplay'],
+  'src/systems/magazine.js':  ['chamber'],
+  'src/systems/groups.js':    ['cycleGroup', 'cycleActive'],
+  'src/systems/survey.js':    ['scanPlanet', 'probePlanet'],
+  'src/systems/economy.js':   ['buyAmmo', 'buyProbe', 'buyWeapon', 'fitSlot'],
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // v1.01.70. Both are wired twice on purpose — per-hardpoint in the fitting screen for the
   // pilot who can afford one thing and has to choose, and as one row on the dock's service
   // tab beside armour and hull, because a pilot who docks to repair should not have to know
   // that a second, differently-named kind of damage lives on another screen.
+<<<<<<< HEAD
   'src/systems/combat/wear.js':      ['serviceModule', 'serviceAll']
+=======
+  'src/systems/wear.js':      ['serviceModule', 'serviceAll']
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 };
 
 /**
@@ -103,10 +140,36 @@ const VERBS = {
  * overstated, and an audit that cries wolf gets ignored exactly like a flaky test does.
  */
 const BACKLOG = {
+<<<<<<< HEAD
   // Empty, and that is the point: the backlog is asserted to be accurate, so an entry that
   // has since been wired must be removed or this suite fails. The Station Forge entries
   // lived here for eight patch levels describing an editor with no panel; the module was
   // reaped in 1.02.49 rather than carried further, and the list went with it.
+=======
+  // v1.01.99. The Station Forge port brought a working layout editor with it. Half of it is
+  // not idle — `generateLayout` reaches `ensureBerths`, `attachPoints`, `canPlace`,
+  // `placeModule` and `refreshLayout` on every station it grows, which is how a station is
+  // guaranteed its docking arms. The six below are the *player's* half, and nothing can
+  // reach them: there is no panel that lets you extend a station you own.
+  //
+  // Deliberately kept rather than deleted, and deliberately listed rather than left quiet.
+  // Reconstructing them later out of the generator's internals would be harder than keeping
+  // them beside it. Before any of them gets a button: an edited layout is no longer
+  // derivable from its seed, so it becomes save state and the schema moves.
+  // The generator itself. Nothing in src/ imports world/station-forge.js yet — v1.01.99
+  // brought the module in, unified its rng with core/rng.js and put a test around it, and
+  // deliberately did not wire it. `world/system.js` still builds stations from boxes. The
+  // slice that swaps the geometry in ("Landfall") is what removes these two lines, and this
+  // check is what will fail if it forgets to.
+  'generateLayout':   'station-forge.js — the module is not imported yet; Landfall wires it.',
+  'layoutForStation': 'station-forge.js — the world-gen seam, waiting on Landfall.',
+  'moveModule':      'station-forge.js — the player-side station editor has no panel.',
+  'removeModule':    'station-forge.js — the player-side station editor has no panel.',
+  'cycleModulePort': 'station-forge.js — the player-side station editor has no panel.',
+  'fittingKeys':     'station-forge.js — the player-side station editor has no panel.',
+  'snapshotGraph':   'station-forge.js — undo for an editor that has no panel.',
+  'restoreGraph':    'station-forge.js — undo for an editor that has no panel.'
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 };
 
 /**
@@ -132,6 +195,7 @@ const UNTRIGGERED = {
  * registry now, including from inside the assistant worker), and `NET.interp`, whose own
  * comment called it legacy.
  *
+<<<<<<< HEAD
  * The ones left are decisions rather than deletions: each names a behaviour somebody wanted
  * and would have to be *wired* to keep, not just tidied away.
  *
@@ -144,13 +208,22 @@ const UNTRIGGERED = {
  * asserted as an exact set **in both directions**. A key that quietly became live is as much a
  * drift as one that quietly went dead, and the only correct way to close an item is to close it
  * here at the same time.
+=======
+ * The six left are decisions rather than deletions: each names a behaviour somebody wanted
+ * and would have to be *wired* to keep, not just tidied away.
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
  */
 const INERT = [
   'POP.interval',
   'SUPPLY.interval',
   'ADVANCED.outOfCombat',
   'ORDNANCE.stackScale',
+<<<<<<< HEAD
   'MANAGERS.upkeep'
+=======
+  'MANAGERS.upkeep',
+  'COMPANY.commissionRange'
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ];
 // `services.sensorRange` came off this list at v1.02.20. It had sat on every station since
 // the service table was written, with the `sensor` module upgrading it by +2,200 and
@@ -227,6 +300,7 @@ console.log('\n— the ones the audit was written about —');
   // Named explicitly rather than left to the loop above, because a regression on any of
   // these should say which feature went dark rather than which identifier did.
   ok('deep-space anomalies can be worked from the target panel',
+<<<<<<< HEAD
      callersOf('src/systems/flight/lagrange.js', 'investigate').includes('src/ui/hud.js'));
   ok('a job can be posted from a dock',
      callersOf('src/systems/trade/deals.js', 'postPlayerJob').includes('src/ui/dock.js'));
@@ -235,6 +309,16 @@ console.log('\n— the ones the audit was written about —');
 
   // The planetary layer, end to end: found it, run it, change it, leave it.
   const planetary = v => callersOf('src/systems/industry/planetary.js', v);
+=======
+     callersOf('src/systems/lagrange.js', 'investigate').includes('src/ui/hud.js'));
+  ok('a job can be posted from a dock',
+     callersOf('src/systems/deals.js', 'postPlayerJob').includes('src/ui/dock.js'));
+  ok('and the fee is quoted before posting',
+     callersOf('src/systems/deals.js', 'suggestedFee').includes('src/ui/dock.js'));
+
+  // The planetary layer, end to end: found it, run it, change it, leave it.
+  const planetary = v => callersOf('src/systems/planetary.js', v);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   for (const v of ['foundSite', 'collectFrom', 'deliverTo', 'manufactureAt',
                    'installFacility', 'toggleFacility', 'removeFacility',
                    'upgradeCentre', 'abandonSite']) {
@@ -242,8 +326,13 @@ console.log('\n— the ones the audit was written about —');
        planetary(v).join(' ') || 'nowhere');
   }
   ok('the blockers are read by the panel too',
+<<<<<<< HEAD
      callersOf('src/systems/industry/planetary.js', 'installBlocker').includes('src/ui/ops.js') &&
      callersOf('src/systems/industry/planetary.js', 'upgradeBlocker').includes('src/ui/ops.js'));
+=======
+     callersOf('src/systems/planetary.js', 'installBlocker').includes('src/ui/ops.js') &&
+     callersOf('src/systems/planetary.js', 'upgradeBlocker').includes('src/ui/ops.js'));
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 
 console.log('\n— config that nothing reads —');
@@ -269,6 +358,7 @@ console.log('\n— config that nothing reads —');
   // And the assertion is an exact set rather than a ceiling, the same way BACKLOG is: a
   // newly inert key fails, and so does a listed key that something has since started
   // reading. A ceiling only ever catches half of the rot.
+<<<<<<< HEAD
   // Config is a directory since v1.02.52 — twelve files under `core/config/` mirroring the
   // `systems/` domains, with `config.js` reduced to a barrel that re-exports them. Reading
   // only the barrel found no blocks at all, which made every key on the INERT list look as
@@ -277,6 +367,10 @@ console.log('\n— config that nothing reads —');
   const cfgFiles = srcFiles.filter(f => /^src\/core\/config(\/|\.js$)/.test(rel(f)));
   const cfg = cfgFiles.map(read).join('\n');
   const rest = srcFiles.filter(f => !/^src\/core\/config(\/|\.js$)/.test(rel(f))).map(read).join('\n');
+=======
+  const cfg = read(path.join(ROOT, 'src/core/config.js'));
+  const rest = srcFiles.filter(f => rel(f) !== 'src/core/config.js').map(read).join('\n');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const lines = cfg.split('\n');
   const inert = [];
   for (let i = 0; i < lines.length; i++) {

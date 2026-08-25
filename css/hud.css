@@ -88,6 +88,7 @@
 #ammo-info.dry{color:var(--hostile)}
 .bar-row.overheat .bar-fill.heat{background:linear-gradient(90deg,#a01500,#ff3a1a)}
 .bar-val{width:26px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:.5px}
+<<<<<<< HEAD
 /* Two decimal places need room the integer readouts do not, and they need it without
    pushing the track narrower — so the value gets the width and gives back the letter
    spacing, which is what was buying the integers their legibility in the first place. */
@@ -108,6 +109,8 @@
 .panel-more.open .chev{transform:rotate(180deg)}
 #systems-extra{display:none}
 #systems-extra.open{display:block}
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 .collapsible h3{cursor:pointer}
 .collapsible .chev{transition:transform .2s}
@@ -160,6 +163,7 @@
 .near-item .dist{color:#7bf;font-variant-numeric:tabular-nums;flex:none}
 .near-item .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+<<<<<<< HEAD
 /* 166, not 150. Two columns of action buttons plus a chevron does not fit in 150 at a font
    size anybody can read — APPROACH clipped to APPROA, which is the sort of thing that reads
    as a broken build rather than as a tight layout. The panel is on the right edge with
@@ -192,6 +196,17 @@
 #target-warp{border-color:var(--edge-hot);color:#dff4ff;
   background:linear-gradient(180deg,rgba(14,52,64,.95),rgba(10,26,32,.95))}
 #target-warp:disabled{border-color:var(--edge);color:#4e7591;background:rgba(10,26,32,.6)}
+=======
+#target-panel{position:absolute;top:64px;right:8px;width:150px;z-index:23}
+#target-name{color:#fff;font-size:11px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#target-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;align-items:center}
+.tiny-btn{flex:1 1 40px;min-width:40px;font-size:8px;letter-spacing:1px;padding:6px 2px;background:rgba(10,26,32,.9);
+  border:1px solid var(--edge);color:var(--edge-hot);cursor:pointer;font-family:inherit;
+  text-transform:uppercase;clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
+.tiny-btn:active{background:var(--edge-hot);color:var(--void)}
+#target-expand{padding:2px 6px;font-size:12px;transition:transform .2s}
+#target-expand.open{transform:rotate(180deg)}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 #target-detail{margin-top:6px;padding-top:5px;border-top:1px solid rgba(40,100,180,.32);font-size:9px;
   max-height:132px;overflow-y:auto}
 #target-detail .row{line-height:1.6}
@@ -235,6 +250,7 @@
   font-size:9px;color:#8bc8ff}
 #speed-value{font-size:12px;color:#fff;font-variant-numeric:tabular-nums}
 #real-speed{font-size:10px;color:#6cf;font-variant-numeric:tabular-nums}
+<<<<<<< HEAD
 /* ── the throttle ────────────────────────────────────────────────────
    Three changes, all of them about thumbs. The track is 22px instead of 13 so the bar is
    a target rather than a hairline. It is flanked by steppers, which are the only control
@@ -262,6 +278,13 @@
 #speed-fine{position:absolute;right:0;top:-13px;font-size:8px;letter-spacing:.12em;
   color:var(--edge-hot)}
 #speed-fine.hidden{display:none}
+=======
+#speed-track-wrap{position:relative;height:13px;margin-bottom:5px}
+#speed-track{position:absolute;inset:0;background:rgba(0,22,45,.9);border-radius:7px;
+  border:1px solid rgba(45,110,190,.5);overflow:hidden;cursor:pointer;touch-action:none}
+#speed-fill{height:100%;width:0;background:linear-gradient(90deg,#0a5a4a,#1aa888,var(--edge-hot))}
+#speed-fill.reverse{background:linear-gradient(90deg,#7a1508,var(--hostile))}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 #speed-presets{display:flex;gap:4px}
 .preset-btn{flex:1;font-size:9px;letter-spacing:.5px;padding:4px 0;background:rgba(10,22,28,.85);
   border:1px solid var(--edge);color:var(--ink-dim);cursor:pointer;font-family:inherit}
@@ -269,6 +292,7 @@
 .preset-btn.reverse{background:rgba(40,10,6,.85);border-color:rgba(190,70,35,.5);color:#fca}
 .preset-btn.reverse.active{background:var(--hostile);color:#fff}
 
+<<<<<<< HEAD
 /* Ownership on the contact list. A hull you are paying for should not read the same as
    ambient traffic on the one screen you check before locking something. */
 .near-item .own{display:block;font:8px/1.3 ui-monospace,monospace;color:#6f9dbe;
@@ -300,6 +324,8 @@
   pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,.9)}
 #ap-line.hidden{display:none}
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 #action-grid{display:flex;gap:4px}
 /* The group chip only exists when a fit actually has two groups in it — a control that
    changes a label and nothing else invites a tap and teaches nothing. */
@@ -350,7 +376,11 @@
 }
 @media (max-width:400px){
   #left-stack{width:132px}
+<<<<<<< HEAD
   #target-panel{width:150px}
+=======
+  #target-panel{width:128px}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   .act-btn{font-size:13px}
   .act-btn span{font-size:6px}
 }
@@ -363,9 +393,13 @@
 }
 /* Very short screens: keep the list usable rather than letting it collapse to nothing. */
 @media (max-height:560px){
+<<<<<<< HEAD
   /* Superseded by the detail drawer: the lines are already closed by default, and a
      rule that hid them outright meant a short screen could not open them at all. */
   #systems-extra .micro{font-size:8px;line-height:1.35}
+=======
+  #systems-panel .micro{display:none}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   #nearest-list{min-height:36px}
 }
 
@@ -376,26 +410,42 @@
    scroll it — which hides buttons behind a gesture nobody knows is available — tighten
    the buttons and reclaim a little more from the dock, so all eleven still fit. */
 @media (max-height:860px){
+<<<<<<< HEAD
   :root{--dock-h:136px}
+=======
+  :root{--dock-h:128px}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   #tool-column{gap:4px}
   .tool-btn{height:27px;font-size:10px}
   .act-btn{height:38px}
 }
 @media (max-height:740px){
+<<<<<<< HEAD
   :root{--dock-h:128px}
   #tool-column{gap:3px;top:196px}
   .tool-btn{height:24px;width:32px;font-size:9px}
   .act-btn{height:34px;font-size:13px}
   #speed-track-wrap{height:19px;margin-bottom:4px}
   .thr-step{flex-basis:30px;font-size:14px}
+=======
+  :root{--dock-h:120px}
+  #tool-column{gap:3px;top:196px}
+  .tool-btn{height:24px;width:32px;font-size:9px}
+  .act-btn{height:34px;font-size:13px}
+  #speed-track-wrap{height:11px;margin-bottom:4px}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 }
 /* Landscape, or a phone with an unusually greedy browser chrome. Below this the column
    scrolls rather than shrinking further — a 20px tap target is already the floor. */
 @media (max-height:640px){
+<<<<<<< HEAD
   :root{--dock-h:119px}
   /* The status line is the first thing to go on a short screen: the switch itself still
      says on or off, and that is the part you cannot do without. */
   #ap-line{display:none}
+=======
+  :root{--dock-h:112px}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   #tool-column{gap:2px;top:176px}
   .tool-btn{height:22px;width:30px;font-size:8px}
   .act-btn{height:30px;font-size:12px}
@@ -408,6 +458,7 @@
 .site-ops .ops-head{margin-top:8px;font-size:11px;letter-spacing:.09em;color:var(--dim)}
 .site-ops .trade-row{padding:4px 0}
 .ops-run.open{border-color:var(--edge-hot)}
+<<<<<<< HEAD
 
 /* ── the doctrine chip (v1.02.62) ────────────────────────────────────
    Sits under ARIA's switch and only exists while she has the ship. It is a readout first and
@@ -418,3 +469,5 @@
   text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #ap-doctrine.hidden{display:none}
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

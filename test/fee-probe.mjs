@@ -14,10 +14,17 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
+<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { spawnNpc } = await imp('entities/npcs.js');
 const { COMMODITIES, DEALS } = await imp('core/config.js');
 const D = await imp('systems/trade/deals.js');
+=======
+const { initMarket } = await imp('systems/market.js');
+const { spawnNpc } = await imp('entities/npcs.js');
+const { COMMODITIES, DEALS } = await imp('core/config.js');
+const D = await imp('systems/deals.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 recalcStats();

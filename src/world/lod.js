@@ -14,7 +14,11 @@
 
 import { LOD } from '../core/config.js';
 import { camera } from './scene.js';
+<<<<<<< HEAD
 import { lodBias } from './quality.js';
+=======
+import { lodBias } from '../systems/quality.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { hide, HIDE } from './visibility.js';
 
 const _v = new THREE.Vector3();
@@ -23,6 +27,7 @@ const registry = [];
 /**
  * Register a body for LOD. `levels` is an array of meshes ordered best-first; exactly one
  * is visible at a time. Anything without levels is still tracked for culling.
+<<<<<<< HEAD
  *
  * `maxRange` is optional and is *not* a level of detail: it is the distance past which this
  * object is not drawn at all, whatever its screen size. Zero means no limit, which is the
@@ -34,6 +39,14 @@ export function register(obj, radius, levels, maxRange = 0) {
   if (obj.__lod) return obj;      // idempotent: a re-registered body would tick twice
   obj.__lod = { radius: radius || 1, levels: levels || null, current: -1, screen: 0,
     seen: !!obj.parent, maxRange: maxRange || 0 };
+=======
+ */
+export function register(obj, radius, levels) {
+  if (!obj) return obj;
+  if (obj.__lod) return obj;      // idempotent: a re-registered body would tick twice
+  obj.__lod = { radius: radius || 1, levels: levels || null, current: -1, screen: 0,
+    seen: !!obj.parent };
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   registry.push(obj);
   return obj;
 }
@@ -101,12 +114,15 @@ export function updateLod(viewportH) {
     const wanted = l.screen >= LOD.cull;
     const was = obj.visible;
     hide(obj, HIDE.lod, !wanted);
+<<<<<<< HEAD
 
     // Acquisition range, independently of size. A station stays a contact on the scanner
     // and a row in the target list at any distance — this hides the *mesh*, which is the
     // thing that had no business being resolvable from the far side of the system.
     if (l.maxRange > 0) hide(obj, HIDE.range, dist > l.maxRange);
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     if (obj.visible !== was) changes++;
     if (!obj.visible || !l.levels) continue;
 

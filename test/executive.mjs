@@ -32,6 +32,7 @@ const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { COMPANY } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
@@ -44,6 +45,16 @@ registerNpcFactories(); registerHullFactory();
 const CMD = await imp('systems/company/command.js');
 const { fleetOrderReport, updateFleetOrders, FLEET_ORDER_TYPES } = await imp('systems/company/orders.js');
 const { createCharacter } = await imp('systems/crew/character.js');
+=======
+const { initMarket } = await imp('systems/market.js');
+const { COMPANY } = await imp('core/config.js');
+const { SCHEMA } = await imp('core/version.js');
+const CO = await imp('systems/company.js');
+const FL = await imp('systems/fleet.js');
+const CMD = await imp('systems/command.js');
+const { fleetOrderReport, updateFleetOrders, FLEET_ORDER_TYPES } = await imp('systems/orders.js');
+const { createCharacter } = await imp('systems/character.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const KB = await imp('data/npc-kb/index.js');
 
 initScene();
@@ -335,7 +346,11 @@ console.log('\n— it all survives a save —');
   const dispatched = CMD.commandFromText('patrol the sector');
   ok('there is something to save', dispatched.ok && FL.fleetRoster().length === 1);
 
+<<<<<<< HEAD
   const { serializeOrders, restoreOrders } = await imp('systems/company/orders.js');
+=======
+  const { serializeOrders, restoreOrders } = await imp('systems/orders.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const orderSnap = JSON.parse(JSON.stringify(serializeOrders()));
   ok('the fleet board is in the orders payload', Array.isArray(orderSnap.fleet));
   ok('and it has the objective in it', orderSnap.fleet.length === 1);
@@ -462,7 +477,11 @@ console.log('\n— Ops and ARIA see the same fleet —');
   ok('the roster it carries is the real one',
      cat.hulls[0].id === FL.fleetRoster()[0].id);
 
+<<<<<<< HEAD
   const tools = await imp('systems/platform/tools.js');
+=======
+  const tools = await imp('systems/tools.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const roster = tools.callTool('fleet_roster');
   ok('ARIA can read the roster', roster.text.includes(c.npcName), roster.text);
 

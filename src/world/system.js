@@ -6,12 +6,21 @@ import { scene } from './scene.js';
 import { S } from '../core/state.js';
 import { register as registerLod, resetLod } from './lod.js';
 import { attachGlow } from './lightrig.js';
+<<<<<<< HEAD
 import { LOD, ORBIT_SCALE, RENDER_RANGE } from '../core/config.js';
 import { TAU } from '../core/utils.js';
 import { wrand, wnext, makeRng } from '../core/rng.js';
 import { STAR, ORBITAL_V } from '../core/config.js';
 import { PLANET_TYPES } from '../data/planetary/planets.js';
 import { MOON_TYPES, moonClassFor } from '../data/planetary/moons.js';
+=======
+import { LOD, ORBIT_SCALE } from '../core/config.js';
+import { TAU } from '../core/utils.js';
+import { wrand, wnext, makeRng } from '../core/rng.js';
+import { STAR, ORBITAL_V } from '../core/config.js';
+import { PLANET_TYPES } from '../data/planets.js';
+import { MOON_TYPES, moonClassFor } from '../data/moons.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 import { STATION_TYPES, STATION_MODULES, MODULE_BONUS, baseServices } from '../data/stations.js';
 import { solarisPlan } from './genesis.js';
 import { planetTexture, cloudTexture, glowTexture } from './textures.js';
@@ -332,6 +341,7 @@ function createStation(st, i, all) {
   // Stations have no geometry levels — they are built from many small parts and swapping
   // tessellation on each would cost more bookkeeping than it saves. They are registered
   // for culling only, which is where nearly all of the win is anyway.
+<<<<<<< HEAD
   //
   // The fourth argument is acquisition range, and it is the reason a station no longer
   // hangs in the sky from the far side of the system. Screen-space culling never fired for
@@ -339,6 +349,9 @@ function createStation(st, i, all) {
   // two thousand units out, so by LOD's own measure it was worth drawing. It was the
   // measure that was wrong for a built object. See RENDER_RANGE in core/config.js.
   registerLod(g, size * 2, null, RENDER_RANGE.station);
+=======
+  registerLod(g, size * 2, null);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.world.bodies.push(g);
   S.world.stations.push(g);
 

@@ -17,6 +17,7 @@ const { seedWorld } = await imp('core/rng.js');
 const { CHAR, REP, SHIP_CLASSES } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 const O = await imp('data/origins.js');
+<<<<<<< HEAD
 const F = await imp('data/factions.js');
 
 // The bonus keys `characterBonuses()` actually sums *and* something downstream spends.
@@ -30,23 +31,42 @@ const ch = await imp('systems/crew/character.js');
 const mi = await imp('systems/trade/missions.js');
 const rep = await imp('systems/company/reputation.js');
 const det = await imp('systems/combat/detection.js');
+=======
+const ch = await imp('systems/character.js');
+const mi = await imp('systems/missions.js');
+const rep = await imp('systems/reputation.js');
+const det = await imp('systems/detection.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
+<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
 const { initWorldSim } = await imp('systems/platform/worldsim.js');
 const { switchClass } = await imp('systems/trade/economy.js');
 const save = await imp('systems/platform/save.js');
+=======
+const { initProjectiles } = await imp('systems/projectiles.js');
+const { initCombat } = await imp('systems/combat.js');
+const { initMining } = await imp('systems/mining.js');
+const { initWorldSim } = await imp('systems/worldsim.js');
+const { switchClass } = await imp('systems/economy.js');
+const save = await imp('systems/save.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx();
 rep.resetReputation(); initWorldSim();
 
 const make = (over = {}) => ch.createCharacter(Object.assign(
+<<<<<<< HEAD
   { name: 'Test', lineage: 'belter', corp: 'freewake', career: 'prospector' }, over));
+=======
+  { name: 'Test', lineage: 'belter', corp: 'meridian-collective', career: 'prospector' }, over));
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 // ── data integrity ───────────────────────────────────────────────────
 console.log('\n— origins data —');
@@ -98,6 +118,7 @@ console.log('\n— creation —');
   ok('the career licence is issued', ch.hasLicence('industrial'));
   ok('no other licence is issued', Object.keys(S.licences).length === 1);
   ok('credits combine lineage and corporation',
+<<<<<<< HEAD
      S.credits === O.LINEAGES.belter.credits + O.CORPORATIONS['freewake'].credits,
      String(S.credits));
   ok('standing combines lineage and corporation',
@@ -159,6 +180,18 @@ ok('a corporation outside the lineage is refused',
      O.CORP_KEYS.flatMap(k => Object.keys(O.CORPORATIONS[k].bonus || {}))
        .filter(b => !LIVE_BONUS.has(b)).join(','));
 }
+=======
+     S.credits === O.LINEAGES.belter.credits + O.CORPORATIONS['meridian-collective'].credits,
+     String(S.credits));
+  ok('standing combines lineage and corporation',
+     rep.standing('independent') ===
+       (O.LINEAGES.belter.standing.independent + O.CORPORATIONS['meridian-collective'].standing.independent),
+     String(rep.standing('independent')));
+  ok('starting points are granted', c.points === CHAR.startingPoints);
+}
+ok('a corporation outside the lineage is refused',
+   make({ lineage: 'core', corp: 'severance' }) === null);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 ok('an unknown lineage is refused', make({ lineage: 'martian' }) === null);
 ok('an unknown career is refused', make({ career: 'poet' }) === null);
 ok('a blank name still produces a pilot', (() => {
@@ -192,7 +225,11 @@ for (const key of O.CAREER_KEYS) {
 // ── skills from use ──────────────────────────────────────────────────
 console.log('\n— practice —');
 {
+<<<<<<< HEAD
   make({ lineage: 'belter', corp: 'freewake', career: 'prospector' });
+=======
+  make({ lineage: 'belter', corp: 'meridian-collective', career: 'prospector' });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const before = ch.skill('extraction');
   // 1.0 slowed progression considerably, so a fixture that ranked up in 200 small calls
   // no longer does. The assertion is "work raises the skill", not "one rank per 1000
@@ -207,7 +244,11 @@ console.log('\n— practice —');
 }
 {
   // affinity: the same practice goes further for the lineage built for it
+<<<<<<< HEAD
   make({ lineage: 'belter', corp: 'freewake', career: 'prospector' });
+=======
+  make({ lineage: 'belter', corp: 'meridian-collective', career: 'prospector' });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   for (let i = 0; i < 400; i++) ch.practice('extraction', 5);
   const belterRank = ch.skill('extraction');
   make({ lineage: 'core', corp: 'meridian', career: 'prospector' });
@@ -272,14 +313,22 @@ console.log('\n— what a rank is worth —');
   ok('gunnery raises weapon output', S.stats.weaponMult > weak,
      `${weak.toFixed(3)} → ${S.stats.weaponMult.toFixed(3)}`);
 
+<<<<<<< HEAD
   make({ lineage: 'belter', corp: 'freewake', career: 'prospector' });
+=======
+  make({ lineage: 'belter', corp: 'meridian-collective', career: 'prospector' });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   recalcStats();
   const dull = S.stats.miningMult;
   for (let i = 0; i < 400; i++) ch.practice('extraction', 10);
   recalcStats();
   ok('extraction raises mining yield', S.stats.miningMult > dull);
 
+<<<<<<< HEAD
   make({ lineage: 'rim', corp: 'kestrel', career: 'pathfinder' });
+=======
+  make({ lineage: 'rim', corp: 'long-dark', career: 'pathfinder' });
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   recalcStats();
   const near = S.stats.sensor;
   for (let i = 0; i < 400; i++) ch.practice('sensors', 10);

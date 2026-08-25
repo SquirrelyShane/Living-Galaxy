@@ -34,6 +34,7 @@ export const MODULES = {
     desc: 'Slags tailings in the hold — faster fill, denser cargo',
     mods: { miningMult: 0.40, cargoAdd: 900 } },
 
+<<<<<<< HEAD
   // ── the long-haul pair (v1.02.60) ────────────────────────────────
   // Both are *decisions*, not bonuses, which is why they carry no `mods` at all: an array
   // does nothing to a stat sheet and everything to how a voyage is planned. See
@@ -46,6 +47,8 @@ export const MODULES = {
     desc: 'Grows provisions from water and light — enough beds and the crew feed themselves',
     mods: {} },
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   tractor: { name: 'Salvage tractor', slot: 'utility', price:8700, power: 1.5, cpu: 4.8,
     desc: 'Reels in wrecks from further out',
     mods: { lootRangeAdd: 220, cargoAdd: 400 } },
@@ -89,6 +92,7 @@ export const MODULES = {
     desc: 'Structural reinforcement through the keel',
     mods: { hullAdd: 30, armorAdd: 40, thrustMult: -0.06 } },
 
+<<<<<<< HEAD
   // ── two the mod table already knew about (v1.02.60) ──────────────
   // `heatSinkAdd`, `heatVentMult` and `energyCapAdd` have been switch cases in
   // systems/industry/fitting.js since the budgets were written, and nothing in the game
@@ -103,11 +107,18 @@ export const MODULES = {
     desc: 'Deep reserve spliced across the bus — a bigger bank and a faster refill',
     mods: { energyCapAdd: 40, energyRegenAdd: 0.7, cargoAdd: -300 } },
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   gyros: { name: 'Gyro package', slot: 'core', price:10800, power: 0.7, cpu: 4.5,
     desc: 'Snappier yaw and pitch response',
     mods: { turnMult: 0.30 } }
 };
 
 export const MODULE_KEYS = Object.keys(MODULES);
+<<<<<<< HEAD
 const utilityKeys = () => MODULE_KEYS.filter(k => MODULES[k].slot === 'utility');
 const coreKeys    = () => MODULE_KEYS.filter(k => MODULES[k].slot === 'core');
+=======
+export const utilityKeys = () => MODULE_KEYS.filter(k => MODULES[k].slot === 'utility');
+export const coreKeys    = () => MODULE_KEYS.filter(k => MODULES[k].slot === 'core');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

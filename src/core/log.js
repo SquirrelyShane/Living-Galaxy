@@ -25,9 +25,15 @@
 // log is deliberately *not* in the save payload — a diagnostic that survives a reload would
 // have to be migrated forever for no gain.
 
+<<<<<<< HEAD
 import { S } from './state.js';
 
 export const LOG_LEVELS = ['debug', 'info', 'notice', 'warn', 'error'];
+=======
+import { S } from '../core/state.js';
+
+export const LEVELS = ['debug', 'info', 'notice', 'warn', 'error'];
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const RANK = { debug: 0, info: 1, notice: 2, warn: 3, error: 4 };
 
 /** Hard cap on entries held. Roughly an hour of ordinary play at typical rates. */
@@ -66,11 +72,19 @@ export const logError  = (ch, m, d) => log(ch, 'error', m, d);
 
 /** Raise or lower what gets recorded. `debug` is off by default and costs nothing when off. */
 export function setLogLevel(level) {
+<<<<<<< HEAD
   if (!LOG_LEVELS.includes(level)) return false;
   state().min = level;
   return true;
 }
 const logLevel = () => state().min;
+=======
+  if (!LEVELS.includes(level)) return false;
+  state().min = level;
+  return true;
+}
+export const logLevel = () => state().min;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 /**
  * Query. Every filter is optional and they compose, because the two consumers want
@@ -99,7 +113,11 @@ export function logQuery({ channel, level, since, subject, limit = 50 } = {}) {
  * thing you were looking for is worse than no diagnostic, so the panel can say "and 1,400
  * older entries have rolled off" rather than implying the log is complete.
  */
+<<<<<<< HEAD
 export function logDiagnostics() {
+=======
+export function diagnostics() {
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const s = state();
   const byLevel = {};
   const byChannel = {};

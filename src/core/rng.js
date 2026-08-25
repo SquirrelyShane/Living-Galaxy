@@ -76,4 +76,8 @@ export function resetStream(name) {
   return stream(name);
 }
 
+<<<<<<< HEAD
 const streamNames = () => [...streams.keys()];
+=======
+export const streamNames = () => [...streams.keys()];
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

@@ -21,6 +21,7 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initAudio } = await imp('systems/platform/audio.js');
 const { initHud } = await imp('ui/hud.js');
 const { updateWeapons } = await imp('systems/combat/weapons.js');
@@ -43,6 +44,30 @@ const { TUTORIAL, COMMS, MANAGERS } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 const save = await imp('systems/platform/save.js');
 const CR = await imp('systems/industry/crafting.js');
+=======
+const { initAudio } = await imp('systems/audio.js');
+const { initHud } = await imp('ui/hud.js');
+const { updateWeapons } = await imp('systems/weapons.js');
+const { activeProjectiles, initProjectiles } = await imp('systems/projectiles.js');
+const { initCombat } = await imp('systems/combat.js');
+const { initMining } = await imp('systems/mining.js');
+const { initPlayerFx } = await imp('entities/player.js');
+const PF = await imp('systems/preflight.js');
+const TU = await imp('systems/tutorial.js');
+const CM = await imp('systems/comms.js');
+const CO = await imp('systems/company.js');
+const MG = await imp('systems/managers.js');
+const WS = await imp('systems/worldsim.js');
+const PL = await imp('systems/planetary.js');
+const CH = await imp('systems/character.js');
+const O = await imp('data/origins.js');
+const { MANAGER_ARCHETYPES, MANAGER_KEYS } = await imp('data/managers.js');
+const { BRANCH_KEYS, BRANCH_FOR_CAREER } = await imp('data/planetary/branches/index.js');
+const { TUTORIAL, COMMS, MANAGERS } = await imp('core/config.js');
+const { SCHEMA } = await imp('core/version.js');
+const save = await imp('systems/save.js');
+const CR = await imp('systems/crafting.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 seedWorld(20260806);
@@ -57,7 +82,11 @@ createNpcs();
 initAudio();
 initHud();
 initWorld();
+<<<<<<< HEAD
 function initWorld() { WS.initWorldSim(); CM.initCommsSystem(); }
+=======
+function initWorld() { WS.initWorldSim(); CM.initComms(); }
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 S.running = true;
 
 // ── interlocks ───────────────────────────────────────────────────────
@@ -231,7 +260,11 @@ console.log('\n— nobody hunts a nobody —');
 // ── comms ────────────────────────────────────────────────────────────
 console.log('\n— the radio —');
 {
+<<<<<<< HEAD
   CM.initCommsSystem();
+=======
+  CM.initComms();
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('the log starts empty', CM.commsLog().length === 0);
 
   CM.transmit({ from: 'Test', faction: 'neutral', text: 'anyone on this band' });
@@ -383,7 +416,11 @@ console.log('\n— it all survives a save —');
   MG.setExperimental(true);
   S.tutorial = null;
   TU.startTutorial();
+<<<<<<< HEAD
   CM.initCommsSystem();
+=======
+  CM.initComms();
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   CM.transmit({ from: 'Archive', text: 'this should still be here' });
 
   const snap = save.snapshot();

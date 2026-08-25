@@ -37,10 +37,17 @@ const { S, recalcStats, cargoFree, cargoMass } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
+<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { COMMODITIES } = await imp('core/config.js');
 const CO = await imp('systems/trade/contracts.js');
 const EC = await imp('systems/trade/economy.js');
+=======
+const { initMarket } = await imp('systems/market.js');
+const { COMMODITIES } = await imp('core/config.js');
+const CO = await imp('systems/contracts.js');
+const EC = await imp('systems/economy.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene();
 recalcStats();
@@ -50,6 +57,7 @@ initMarket();
 CO.initContracts();
 
 /** A station whose board actually has a haul on it, and that haul. */
+<<<<<<< HEAD
 // A haul this character can actually take. Since v1.02.39 a board is tiered and most of it
 // is gated — taking the first haul on the first board found a Bonded job the test pilot
 // holds no certificate for, and every assertion downstream of that accept then failed for
@@ -57,6 +65,11 @@ CO.initContracts();
 function findHaul() {
   for (const st of S.world.stations) {
     const b = CO.boardFor(st).filter(x => x.type === 'haul' && !CO.acceptBlocker(x));
+=======
+function findHaul() {
+  for (const st of S.world.stations) {
+    const b = CO.boardFor(st).filter(x => x.type === 'haul');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     if (b.length) return { st, offer: b[0] };
   }
   return { st: null, offer: null };

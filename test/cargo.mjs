@@ -28,12 +28,21 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { spawnNpc } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initCombat, damageNpc } = await imp('systems/combat/combat.js');
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const H = await imp('systems/trade/holds.js');
 const D = await imp('systems/trade/deals.js');
 const { initMarket, bookFor } = await imp('systems/trade/market.js');
 const { scanReport } = await imp('systems/industry/scanner.js');
+=======
+const { initCombat, damageNpc } = await imp('systems/combat.js');
+const { initProjectiles } = await imp('systems/projectiles.js');
+const H = await imp('systems/holds.js');
+const D = await imp('systems/deals.js');
+const { initMarket, bookFor } = await imp('systems/market.js');
+const { scanReport } = await imp('systems/scanner.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { HOLD, COMMODITIES } = await imp('core/config.js');
 const { SCHEMA } = await imp('core/version.js');
 
@@ -218,7 +227,11 @@ console.log('\n— holds are deliberately not persisted —');
   // NPCs are not saved: serializeSim() persists *places* and respawns ships around them.
   // A hold rides on a ship, so it lives and dies with one. What survives a reload is what
   // the cargo did — the station stock a miner sold into, and the ledger record.
+<<<<<<< HEAD
   const snap = JSON.stringify(await imp('systems/platform/save.js').then(m => m.snapshot()));
+=======
+  const snap = JSON.stringify(await imp('systems/save.js').then(m => m.snapshot()));
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   ok('the save carries no NPC holds', !/"hold"/.test(snap));
   ok('the schema moved for the slice', SCHEMA >= 16);
 }

@@ -41,6 +41,12 @@
 #navmap-info b{color:var(--amber)}
 
 #ai-log{flex:1;overflow-y:auto;font-size:12px;line-height:1.6;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+<<<<<<< HEAD
+=======
+.ai-row{padding:7px 10px;border-radius:8px;max-width:92%}
+.ai-row.you{align-self:flex-end;background:rgba(8,45,88,.7);color:#cfe9ff}
+.ai-row.aria{align-self:flex-start;background:rgba(6,20,40,.8);border:1px solid rgba(50,130,220,.3);color:var(--ink-dim)}
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 #ai-status{font-size:10px;color:#7ea8c4;min-height:24px;line-height:1.4}
 #ai-inputrow{display:flex;gap:6px}
 #ai-input{flex:1;padding:10px 12px;background:rgba(4,16,30,.9);border:1px solid rgba(60,120,190,.45);
@@ -250,12 +256,15 @@
 .comms-who{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--edge-hot)}
 .comms-chan{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-dim);opacity:.7}
 .comms-text{color:#cfe6f6}
+<<<<<<< HEAD
 /* A line still arriving carries a caret. `::after` rather than a real node so the
    typewriter only ever writes `textContent` — one assignment, no child bookkeeping, and no
    way for an interrupted reveal to leave an orphan cursor behind in the log. */
 .typing::after{content:'▌';margin-left:1px;color:var(--edge-hot);
   animation:tw-caret .7s steps(1) infinite}
 @keyframes tw-caret{0%,49%{opacity:1}50%,100%{opacity:.15}}
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 #comms-replies{display:flex;flex-wrap:wrap;gap:5px;padding-top:6px;border-top:1px solid var(--edge)}
 #comms-replies.hidden{display:none}
 .comms-prompt{flex:1 0 100%;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--amber);margin-bottom:2px}
@@ -306,6 +315,7 @@
 .mind-mem{font-size:11px;line-height:1.5;color:var(--ink-dim);padding:5px 0;border-top:1px solid rgba(80,140,170,.16)}
 .mind-mem b{color:var(--amber);font-weight:normal}
 .comms-who{cursor:pointer;text-decoration:underline dotted rgba(120,190,220,.4);text-underline-offset:2px}
+<<<<<<< HEAD
 
 /* ── ARIA's advisory (v1.02.60) ──────────────────────────────────────
    A recommendation is an argument, so the panel is laid out like one: the claim, the case,
@@ -422,3 +432,5 @@
   color:var(--dim);text-align:center}
 .cframe-desc{margin-top:5px;font:9px/1.45 ui-monospace,monospace;color:var(--dim)}
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

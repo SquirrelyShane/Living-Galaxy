@@ -26,6 +26,7 @@ const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { createNpcs } = await imp('entities/npcs.js');
+<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const { LOCK, HOLD, DETECT } = await imp('core/config.js');
 const { lockRange } = await imp('entities/npcs.js');
@@ -41,6 +42,19 @@ const CMD = await imp('systems/company/command.js');
 const { fleetOrderReport, updateFleetOrders } = await imp('systems/company/orders.js');
 const { createCharacter } = await imp('systems/crew/character.js');
 const { channelLog } = await imp('systems/npc/comms.js').then(m => ({ channelLog: m.commsLog || m.channelLog || (() => []) }));
+=======
+const { initMarket } = await imp('systems/market.js');
+const { LOCK, HOLD, DETECT } = await imp('core/config.js');
+const { lockRange } = await imp('entities/npcs.js');
+const { detectionRange } = await imp('systems/detection.js');
+const { holdCap, holdMass, loadHold } = await imp('systems/holds.js');
+const FL = await imp('systems/fleet.js');
+const FW = await imp('systems/fleet-work.js');
+const CMD = await imp('systems/command.js');
+const { fleetOrderReport, updateFleetOrders } = await imp('systems/orders.js');
+const { createCharacter } = await imp('systems/character.js');
+const { channelLog } = await imp('systems/comms.js').then(m => ({ channelLog: m.commsLog || m.channelLog || (() => []) }));
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(21);
 createSystem(); createAsteroids(); createNpcs(); initMarket();
@@ -235,7 +249,11 @@ console.log('\n— being shot at is reported to the owner —');
 console.log('\n— the commands still dispatch —');
 {
   exec();
+<<<<<<< HEAD
   const { FLEET_ORDER_TYPES } = await imp('systems/company/orders.js');
+=======
+  const { FLEET_ORDER_TYPES } = await imp('systems/orders.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const need = new Set();
   for (const k of Object.keys(FLEET_ORDER_TYPES)) {
     for (const r of FLEET_ORDER_TYPES[k].requires || []) need.add(r);

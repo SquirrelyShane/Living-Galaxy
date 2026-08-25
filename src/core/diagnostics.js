@@ -131,7 +131,11 @@ export function diagnostics() {
 }
 
 export const isParked = where => parked.has(where);
+<<<<<<< HEAD
 const faultCount = () => log.length;
+=======
+export const faultCount = () => log.length;
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 /**
  * Render the in-memory fault log as plain text suitable for a bug report or a download.

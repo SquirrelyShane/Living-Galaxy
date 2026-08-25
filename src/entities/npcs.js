@@ -3,6 +3,7 @@
 
 import { scene } from '../world/scene.js';
 import { S } from '../core/state.js';
+<<<<<<< HEAD
 import { NPC_TYPES, NPC_RESPAWN_INTERVAL, AMBUSH, ENGAGE, POP, LOCK, ORBIT_SCALE, RENDER_RANGE } from '../core/config.js';
 import { rand, TAU } from '../core/utils.js';
 import { wrand, wnext, stream, hashString, makeRng } from '../core/rng.js';
@@ -27,6 +28,30 @@ import { addBeam, deliverToSite, captureNpc } from '../systems/platform/worldsim
 import { nearestAsteroid, mineAsteroid } from '../world/asteroids.js';
 import { SIM } from '../core/config.js';
 import { toast } from '../core/notify.js';
+=======
+import { NPC_TYPES, NPC_RESPAWN_INTERVAL, AMBUSH, ENGAGE, POP, LOCK, ORBIT_SCALE } from '../core/config.js';
+import { rand, TAU } from '../core/utils.js';
+import { wrand, wnext, stream } from '../core/rng.js';
+import { fire } from '../systems/projectiles.js';
+import { damageNpc } from '../systems/combat.js';
+import { rangeScale } from '../systems/damage.js';
+import { appraise, spendShot, support, bandScale, callForHelp } from '../systems/npc-tactics.js';
+import { dealsFor, settle } from '../systems/deals.js';
+import { loadHold, holdCap, holdMass, holdFree, unloadHold } from '../systems/holds.js';
+import { applyTrade, marketPrice } from '../systems/market.js';
+import { creditExtraction, extractionBerth } from '../systems/fleet.js';
+import { HOLD } from '../core/config.js';
+import { sfx } from '../systems/audio.js';
+import { track as trackInterp, untrack as untrackInterp } from '../world/interpolate.js';
+import { attachGlow } from '../world/lightrig.js';
+import { register as registerLod } from '../world/lod.js';
+import { playerSignature, ambushRange, detectionRange } from '../systems/detection.js';
+import { isHostileTo, blocOf } from '../systems/reputation.js';
+import { addBeam, deliverToSite, captureNpc } from '../systems/worldsim.js';
+import { nearestAsteroid, mineAsteroid } from '../world/asteroids.js';
+import { SIM } from '../core/config.js';
+import { toast } from '../ui/toast.js';
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 const _dir = new THREE.Vector3();
 const _tan = new THREE.Vector3();
@@ -62,17 +87,25 @@ export function createNpcs() {
 
 export function spawnNpc(key, n) {
   const t = NPC_TYPES[key];
+<<<<<<< HEAD
   // The name is drawn before the mesh because the mesh is chosen *from* it — which variant
   // this ship wears is part of its identity, not a separate roll.
   const name = `${t.name} ${String(n || Math.floor(rand(1, 99))).padStart(2, '0')}`;
   const g = buildMesh(key, t, name);
+=======
+  const g = buildMesh(key, t);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   const a = wrand(0, TAU);
   const r = wrand(t.spawn[0], t.spawn[1]);
   g.position.set(Math.cos(a) * r, wrand(-90, 90), Math.sin(a) * r);
   const ROLE = { merc: 'merc', miner: 'mine', hauler: 'haul', builderC: 'build', builderP: 'build', fort: 'fort' };
   g.userData = {
     kind: 'ship', type: key, role: ROLE[key] || 'combat', faction: t.faction,
+<<<<<<< HEAD
     name,
+=======
+    name: `${t.name} ${String(n || Math.floor(rand(1, 99))).padStart(2, '0')}`,
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     hp: t.hp, maxHp: t.hp, speed: t.speed, turn: t.turn, sensor: t.sensor, range: t.range,
     dmg: t.dmg, pspeed: t.pspeed, pcool: t.pcool, color: t.color, size: t.size,
     dtype: t.dtype || 'kinetic', armorProfile: t.armorProfile || 'shield',
@@ -118,11 +151,15 @@ export function spawnNpc(key, n) {
   // any moment most of them are a fraction of a pixel wide and were being drawn anyway.
   // The radius is the hull's own size scaled for the length of the cone, which is what
   // actually subtends the screen.
+<<<<<<< HEAD
   // Ships get a far longer acquisition range than stations: a hull is the thing you most
   // need to see coming, and unlike a station it is small enough that LOD culls it honestly
   // once it is genuinely distant. The cap is a backstop against a contact rendered from
   // across the system, not the primary cull.
   registerLod(g, t.size * 1.6, null, RENDER_RANGE.ship);
+=======
+  registerLod(g, t.size * 1.6, null);
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   // NPCs move every simulation step and are the most visible thing on screen that is not
   // the player, so they benefit most from being drawn between steps.
   trackInterp(g);
@@ -158,6 +195,7 @@ function ambushHold(n, u) {
 // the material first — sharing is the default here, not an assumption.
 const hullAssets = new Map();
 
+<<<<<<< HEAD
 /**
  * Which career class an NPC type flies, and how many silhouettes it may wear.
  *
@@ -222,6 +260,48 @@ function buildMesh(key, t, name) {
   // The engine glow is a registration, not a light. See `world/lightrig.js` — sixty-seven
   // hulls each carrying their own `PointLight` was the single largest cost in the frame.
   // A clone needs its own registration: the rig tracks objects, not geometries.
+=======
+function assetsFor(key, t) {
+  let a = hullAssets.get(key);
+  if (a) return a;
+  const sz = t.size;
+  const body = c => new THREE.MeshStandardMaterial({ color: c, metalness: 0.7, roughness: 0.3,
+    emissive: c, emissiveIntensity: 0.22 });
+  a = { parts: [] };
+
+  if (key === 'drone') {
+    a.parts.push({ geo: new THREE.OctahedronGeometry(sz * 0.6), mat: body(t.color) });
+    a.parts.push({ geo: new THREE.BoxGeometry(sz * 1.4, sz * 0.25, sz * 0.4),
+      mat: new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.7, roughness: 0.4 }) });
+  } else if (key === 'command') {
+    a.parts.push({ geo: new THREE.IcosahedronGeometry(sz * 0.7, 1), mat: body(t.color) });
+    a.parts.push({ geo: new THREE.TorusGeometry(sz * 1.1, 1.5, 8, 32),
+      mat: new THREE.MeshBasicMaterial({ color: 0xff66cc }), rotX: Math.PI / 2 });
+  } else {
+    // nose points +Z so Object3D.lookAt orients it correctly
+    a.parts.push({ geo: new THREE.ConeGeometry(sz * 0.55, sz * 1.6, 5), mat: body(t.color),
+      rotX: Math.PI / 2 });
+    if (key === 'patrol') {
+      a.parts.push({ geo: new THREE.BoxGeometry(sz * 1.8, sz * 0.16, sz * 0.5),
+        mat: new THREE.MeshStandardMaterial({ color: 0x223344, metalness: 0.8, roughness: 0.3 }),
+        z: -sz * 0.2 });
+    }
+  }
+  hullAssets.set(key, a);
+  return a;
+}
+
+function buildMesh(key, t) {
+  const g = new THREE.Group();
+  for (const p of assetsFor(key, t).parts) {
+    const m = new THREE.Mesh(p.geo, p.mat);
+    if (p.rotX) m.rotation.x = p.rotX;
+    if (p.z) m.position.z = p.z;
+    g.add(m);
+  }
+  // The engine glow is a registration, not a light. See `world/lightrig.js` — sixty-seven
+  // hulls each carrying their own `PointLight` was the single largest cost in the frame.
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   attachGlow(g, t.color, 0.5, 120);
   return g;
 }
@@ -802,6 +882,7 @@ function topUpPopulation() {
     }
   }
 }
+<<<<<<< HEAD
 
 // ── the two tiers ────────────────────────────────────────────────────
 //
@@ -906,3 +987,5 @@ export function registerNpcFactories() {
   registerFactory('npc-promote', spawnFromRecord);
   registerFactory('npc-demote', despawnToRecord);
 }
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44

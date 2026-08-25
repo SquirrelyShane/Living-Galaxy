@@ -24,11 +24,19 @@ const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
 const { initScene } = await imp('world/scene.js');
 const { createSystem } = await imp('world/system.js');
+<<<<<<< HEAD
 const { initMarket } = await imp('systems/trade/market.js');
 const M = await imp('data/command-menu.js');
 const C = await imp('systems/company/command.js');
 const { FLEET_ORDER_TYPES, fleetOrderReport, updateFleetOrders } = await imp('systems/company/orders.js');
 const { foundCompany, hasCompany } = await imp('systems/company/company.js');
+=======
+const { initMarket } = await imp('systems/market.js');
+const M = await imp('data/command-menu.js');
+const C = await imp('systems/command.js');
+const { FLEET_ORDER_TYPES, fleetOrderReport, updateFleetOrders } = await imp('systems/orders.js');
+const { foundCompany, hasCompany } = await imp('systems/company.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const KB = await imp('data/npc-kb/index.js');
 
 initScene();

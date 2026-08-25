@@ -12,6 +12,7 @@
 
 import { $, el } from '../core/utils.js';
 import { LINEAGES, LINEAGE_KEYS, CORPORATIONS, CAREERS, CAREER_KEYS,
+<<<<<<< HEAD
          SKILLS, SKILL_KEYS, corpsFor, agentFor,
          FRAMES, FRAME_KEYS, DEFAULT_FRAME } from '../data/origins.js';
 import { createCharacter } from '../systems/crew/character.js';
@@ -20,14 +21,27 @@ import { beginAgentChain } from '../systems/trade/missions.js';
 import { sfx } from '../systems/platform/audio.js';
 
 let draft = { name: '', frame: DEFAULT_FRAME, lineage: null, corp: null, career: null, company: '' };
+=======
+         SKILLS, SKILL_KEYS, corpsFor, agentFor } from '../data/origins.js';
+import { createCharacter } from '../systems/character.js';
+import { suggestName } from '../systems/company.js';
+import { beginAgentChain } from '../systems/missions.js';
+import { sfx } from '../systems/audio.js';
+
+let draft = { name: '', lineage: null, corp: null, career: null, company: '' };
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 let step = 0;
 let onDone = null;
 
 const STEPS = ['Lineage', 'Corporation', 'Career', 'Agent'];
 
 export function openCreation(defaultName, done) {
+<<<<<<< HEAD
   draft = { name: defaultName || '', frame: DEFAULT_FRAME,
             lineage: null, corp: null, career: null, company: '' };
+=======
+  draft = { name: defaultName || '', lineage: null, corp: null, career: null, company: '' };
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   step = 0;
   onDone = done;
   $('create-overlay').classList.remove('hidden');
@@ -101,6 +115,7 @@ function renderLineage(body) {
   nameWrap.appendChild(input);
   body.appendChild(nameWrap);
 
+<<<<<<< HEAD
   // ── frame ──
   //
   // On the first step, next to the callsign, because it belongs with "who are you" and not
@@ -124,6 +139,8 @@ function renderLineage(body) {
     `${F.desc} <span class="pip">${F.pronouns.subj}/${F.pronouns.obj}</span>`));
   body.appendChild(frameWrap);
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   for (const key of LINEAGE_KEYS) {
     const L = LINEAGES[key];
     card(body, {

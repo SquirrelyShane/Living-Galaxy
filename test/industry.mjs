@@ -19,16 +19,26 @@ const { SCHEMA } = await imp('core/version.js');
 const CAT = await imp('data/crafting/index.js');
 const PL = await imp('data/planetary/index.js');
 const { COMMAND_CENTRES, CENTRE_KEYS } = await imp('data/planetary/centres.js');
+<<<<<<< HEAD
 const { BRANCHES, BRANCH_KEYS, BRANCH_FOR_CAREER } = await imp('data/planetary/branches.js');
 const { PLANET_RESOURCES, worldsWith, isPlanetary } = await imp('data/planetary/resources.js');
 const { traits } = await imp('data/planetary/traits.js');
 const CR = await imp('systems/industry/crafting.js');
 const D2 = await imp('data/crew.js');
 const IN = await imp('systems/industry/planetary.js');
+=======
+const { BRANCHES, BRANCH_KEYS, BRANCH_FOR_CAREER } = await imp('data/planetary/branches/index.js');
+const { PLANET_RESOURCES, worldsWith, isPlanetary } = await imp('data/planetary/resources.js');
+const { traits } = await imp('data/planetary/traits.js');
+const CR = await imp('systems/crafting.js');
+const D2 = await imp('data/crew.js');
+const IN = await imp('systems/planetary.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const { initScene } = await imp('world/scene.js');
 const { createSystem, updateSystem } = await imp('world/system.js');
 const { createAsteroids } = await imp('world/asteroids.js');
 const { initPlayerFx } = await imp('entities/player.js');
+<<<<<<< HEAD
 const { initProjectiles } = await imp('systems/combat/projectiles.js');
 const { initCombat } = await imp('systems/combat/combat.js');
 const { initMining } = await imp('systems/industry/mining.js');
@@ -38,6 +48,17 @@ const { initContracts } = await imp('systems/trade/contracts.js');
 const { resetReputation } = await imp('systems/company/reputation.js');
 const { CAREER_KEYS } = await imp('data/origins.js');
 const save = await imp('systems/platform/save.js');
+=======
+const { initProjectiles } = await imp('systems/projectiles.js');
+const { initCombat } = await imp('systems/combat.js');
+const { initMining } = await imp('systems/mining.js');
+const { initWorldSim } = await imp('systems/worldsim.js');
+const { initMarket } = await imp('systems/market.js');
+const { initContracts } = await imp('systems/contracts.js');
+const { resetReputation } = await imp('systems/reputation.js');
+const { CAREER_KEYS } = await imp('data/origins.js');
+const save = await imp('systems/save.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
 initScene(); recalcStats(); seedWorld(1337); createSystem(); createAsteroids();
 initProjectiles(); initCombat(); initMining(); initPlayerFx();
@@ -542,9 +563,15 @@ ok('the schema is current', SCHEMA >= 16);
 // ── v1.00.30: standing orders ────────────────────────────────────────
 console.log('\n— standing orders —');
 {
+<<<<<<< HEAD
   const OR = await imp('systems/company/orders.js');
   const { ORDERS } = await imp('core/config.js');
   const C = await imp('systems/crew/crew.js');
+=======
+  const OR = await imp('systems/orders.js');
+  const { ORDERS } = await imp('core/config.js');
+  const C = await imp('systems/crew.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   ok('three kinds of order', OR.ORDER_KEYS.length === 3);
   ok('every order declares crew, hours, risk and supplies',
@@ -597,9 +624,15 @@ console.log('\n— standing orders —');
      CR.stockUnits() >= before || (S.crew || []).length < 4);
 }
 {
+<<<<<<< HEAD
   const OR = await imp('systems/company/orders.js');
   const { ORDERS } = await imp('core/config.js');
   const C = await imp('systems/crew/crew.js');
+=======
+  const OR = await imp('systems/orders.js');
+  const { ORDERS } = await imp('core/config.js');
+  const C = await imp('systems/crew.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 
   // A survey raises a world's assay permanently, which every extractor there is paid on.
   S.orders = []; S.assay = {};
@@ -623,9 +656,15 @@ console.log('\n— standing orders —');
   ok('a surveyed world is worth more to an extractor', OR.assayOf(world) > 0);
 }
 {
+<<<<<<< HEAD
   const OR = await imp('systems/company/orders.js');
   // A dispatched flag with no order behind it would strand a crewman forever.
   const C = await imp('systems/crew/crew.js');
+=======
+  const OR = await imp('systems/orders.js');
+  // A dispatched flag with no order behind it would strand a crewman forever.
+  const C = await imp('systems/crew.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
   S.crew = null; C.initCrew();
   S.crew[0].dispatched = true; S.crew[0].onDuty = false;
   OR.restoreOrders({ orders: [], assay: {} });

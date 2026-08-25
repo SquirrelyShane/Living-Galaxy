@@ -36,8 +36,13 @@ const imp = p => import(new URL('src/' + p, ROOT).href);
 
 const { S, recalcStats } = await imp('core/state.js');
 const { seedWorld } = await imp('core/rng.js');
+<<<<<<< HEAD
 const { createCharacter } = await imp('systems/crew/character.js');
 const D = await imp('systems/company/dossier.js');
+=======
+const { createCharacter } = await imp('systems/character.js');
+const D = await imp('systems/dossier.js');
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 const F = await imp('data/factions.js');
 const { SKILL_KEYS, LINEAGE_POWERS, CORP_POWERS, startingStanding } = await imp('data/origins.js');
 const { REP } = await imp('core/config.js');
@@ -379,6 +384,7 @@ console.log('\n— what the screen gets —');
      (D.restoreDossiers(null), Object.keys(D.dossiers()).length === 0));
 }
 
+<<<<<<< HEAD
 // ── 8. the door ──────────────────────────────────────────────────────
 //
 // v1.02.36 shipped every section above green and nothing in the game read a word of it.
@@ -453,5 +459,7 @@ console.log('\n— the screen, and the way in —');
      /tickDossier\(dt\)/.test(src('main.js')) && /initDossier\(\)/.test(src('main.js')));
 }
 
+=======
+>>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
