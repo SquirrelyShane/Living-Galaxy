@@ -45,21 +45,17 @@
     "test:camera": "node test/camera.mjs",
     "test:screens": "node test/screens.mjs",
     "test:reachability": "node test/reachability.mjs",
-<<<<<<< HEAD
     "test:worldgen": "node test/worldgen.mjs",
     "test:missions": "node test/missions.mjs",
     "test:grammar": "node test/grammar.mjs",
     "test:architecture": "node test/architecture.mjs",
     "test:shipforge": "node test/shipforge.mjs",
-=======
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
     "test:engine": "node src/npc-avatar/test/run.mjs",
     "test:soak": "node test/soak.mjs",
     "test:sim": "node test/run.mjs",
     "test:ui": "node test/ui.mjs",
     "test:static": "node test/static.mjs",
     "test:net": "node test/net.mjs",
-<<<<<<< HEAD
     "test:vault": "node test/vault.mjs",
     "test:galaxy-server": "node test/galaxy-server.mjs",
     "test:beacon": "node test/beacon.mjs",
@@ -69,10 +65,9 @@
     "serve": "python3 -m http.server 8080",
     "galaxy": "node server/main.js",
     "certs": "node tools/make-certs.mjs"
-=======
     "test:nav": "node test/warp-nav.mjs",
     "serve": "python3 -m http.server 8080",
     "relay": "python3 server.py"
->>>>>>> 1935cd184c7779d3b421a28a48b3b29b1c83bc44
+
   }
 }
