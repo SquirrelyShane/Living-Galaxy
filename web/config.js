@@ -14,5 +14,5 @@
 // Plain script on purpose (not a module): every page and index.html load it first,
 // and it must work from a CDN, a laptop, and file:// alike.
 window.GALAXY = {
-  host: ''            // '' = same origin · or e.g. 'api.living-galaxy.com'
+  host: 'api.living-galaxy.com'            // '' = same origin · or e.g. 'api.living-galaxy.com'
 };
