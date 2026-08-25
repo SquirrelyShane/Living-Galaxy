@@ -7,3 +7,4 @@ galaxy-data/
 living-galaxy.log
 living-galaxy.pid
 node_modules/
+.wrangler/

@@ -1,0 +1,20 @@
+# What the CDN should NOT serve. The deployed site is the playable game + the web
+# suite; everything else in the repo is source, tooling, or — worst case — the build
+# environment's own node_modules (workerd alone is 144 MiB, over the 25 MiB asset cap).
+node_modules/
+.git/
+.wrangler/
+galaxy-data/
+server/
+test/
+tools/
+Patch-Notes/
+living-galaxy.log
+living-galaxy.pid
+package.json
+package-lock.json
+wrangler.jsonc
+start.sh
+launch.cmd
+tunnel.cmd
+UPGRADING.md
