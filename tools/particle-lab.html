@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Living Galaxy — particle lab</title>
+<!--
+  The workflow half of v1.02.41.
+
+  Tuning a particle effect used to mean: edit a constant, reload the game, power up, fly to a
+  rock or find something to shoot, watch two seconds of it, and start again. Every knob cost a
+  minute and a flight, so in practice nobody turned any of them — which is exactly why the
+  three old systems still had their v0.2 numbers in them at v1.02.40.
+
+  This page loads the real `src/world/particles.js` — not a copy, not a mock — fires the real
+  presets on demand, and puts every constant behind a slider. What you see here is what the
+  game does, because it is the same module the game imports. The COPY button prints a config
+  block you paste straight into `src/core/config.js`.
+
+  Serve the repo root and open /tools/particle-lab.html — the module path is relative to it.
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<style>
+  :root{
+    --void:#04090c; --panel:rgba(10,22,28,.88); --edge:#2c5a6b; --edge-dim:#1d3d49;
+    --edge-hot:#37b9d4; --ink:#d8f0f8; --ink-dim:#7fa8b8; --ink-label:#5d8496;
+    --amber:#ffb43a; --good:#54e0a0; --hostile:#ff5a48; --r:5px;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--void);color:var(--ink);font-family:var(--mono);overflow:hidden}
+  #c{position:fixed;inset:0;display:block}
+
+  #panel{position:fixed;top:0;right:0;width:min(340px,92vw);height:100%;
+    background:var(--panel);border-left:1px solid var(--edge);backdrop-filter:blur(7px);
+    display:flex;flex-direction:column;z-index:5}
+  #panel.hidden{transform:translateX(100%)}
+  #ph{padding:10px 12px;border-bottom:1px solid var(--edge-dim);flex:0 0 auto}
+  #ph h1{font-size:13px;letter-spacing:1.7px;text-transform:uppercase;color:var(--amber);font-weight:400}
+  #ph p{font-size:9px;color:var(--ink-dim);line-height:1.6;margin-top:3px}
+  #pb{flex:1 1 auto;overflow-y:auto;padding:10px 12px}
+  .sec{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-label);
+    margin:12px 0 6px;border-bottom:1px solid var(--edge-dim);padding-bottom:3px}
+  .sec:first-child{margin-top:0}
+
+  .fire{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .fire button{padding:9px 4px;background:rgba(8,18,22,.9);border:1px solid var(--edge);
+    border-radius:var(--r);color:var(--ink);font-family:var(--mono);font-size:9.5px;
+    letter-spacing:1px;cursor:pointer}
+  .fire button:hover{border-color:var(--edge-hot);background:rgba(55,185,212,.18)}
+  .fire button.on{border-color:var(--amber);color:var(--amber)}
+
+  .knob{margin:7px 0}
+  .kl{display:flex;justify-content:space-between;font-size:9.5px;color:var(--ink-dim)}
+  .kv{color:var(--ink);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;height:22px;-webkit-appearance:none;background:transparent;margin-top:2px}
+  input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--edge-dim);border-radius:2px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;margin-top:-6.5px;
+    border-radius:50%;background:var(--edge-hot);border:2px solid var(--void)}
+  input[type=range]::-moz-range-track{height:3px;background:var(--edge-dim)}
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;border:2px solid var(--void);
+    border-radius:50%;background:var(--edge-hot)}
+
+  #stats{font-size:9.5px;line-height:1.8;color:var(--ink-dim)}
+  #stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+  #load{height:4px;background:rgba(96,150,168,.16);border-radius:2px;margin-top:5px;overflow:hidden}
+  #loadf{height:100%;background:var(--good);width:0%}
+  #loadf.hot{background:var(--hostile)}
+
+  .swatches{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+  .sw{display:flex;align-items:center;gap:4px;font-size:8.5px;color:var(--ink-dim);
+    border:1px solid var(--edge-dim);border-radius:9px;padding:2px 7px 2px 3px}
+  .sw i{width:9px;height:9px;border-radius:50%;display:block}
+
+  #acts{flex:0 0 auto;padding:9px 12px;border-top:1px solid var(--edge-dim);display:flex;gap:5px}
+  #acts button{flex:1 1 0;padding:10px 4px;background:rgba(8,18,22,.9);border:1px solid var(--edge);
+    border-radius:var(--r);color:var(--ink);font-family:var(--mono);font-size:9.5px;
+    letter-spacing:1.2px;cursor:pointer}
+  #acts button:hover{border-color:var(--edge-hot)}
+  #toggle{position:fixed;top:8px;right:8px;z-index:6;padding:8px 11px;background:var(--panel);
+    border:1px solid var(--edge);border-radius:var(--r);color:var(--ink);font-family:var(--mono);
+    font-size:10px;cursor:pointer}
+  #note{position:fixed;left:10px;bottom:10px;z-index:4;font-size:9.5px;color:var(--ink-dim);
+    line-height:1.7;max-width:min(420px,60vw)}
+  #note b{color:var(--amber)}
+  #err{position:fixed;inset:0;display:none;place-items:center;padding:30px;
+    background:var(--void);color:var(--hostile);font-size:12px;line-height:1.8;z-index:9}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<button id="toggle">☰</button>
+<div id="note">
+  <b>Particle lab.</b> Drag to orbit · scroll to zoom · click the scene to fire the selected
+  preset there. This runs the game's own <code>world/particles.js</code>, so the numbers you
+  settle on here are the numbers the game will use.
+</div>
+
+<div id="panel">
+  <div id="ph">
+    <h1>Particle Lab</h1>
+    <p>Every preset, every constant, no flight required.</p>
+  </div>
+  <div id="pb">
+    <div class="sec">Fire</div>
+    <div class="fire" id="fire"></div>
+
+    <div class="sec">Reserved palette</div>
+    <div class="swatches" id="swatches"></div>
+
+    <div class="sec">Budget</div>
+    <div class="knob"><div class="kl"><span>quality / effect scale</span><span class="kv" id="qv">1.00</span></div>
+      <input type="range" id="q" min="0" max="4" step="1" value="3"/></div>
+    <div id="stats"></div>
+    <div id="load"><div id="loadf"></div></div>
+
+    <div class="sec">Constants</div>
+    <div id="knobs"></div>
+  </div>
+  <div id="acts">
+    <button id="clear">CLEAR</button>
+    <button id="storm">STORM</button>
+    <button id="copy">COPY CONFIG</button>
+  </div>
+</div>
+
+<div id="err"></div>
+
+<script type="module">
+const err = m => {
+  const e = document.getElementById('err');
+  e.style.display = 'grid';
+  e.textContent = m;
+};
+
+// Two failure modes, and they need different messages. Getting this wrong once cost real
+// time: the page reported "serve the repo root" while actually serving fine, because the
+// import blew up on a missing global rather than a missing file, and the real cause — no
+// network for the three.js CDN — was three frames up the stack.
+if (typeof THREE === 'undefined') {
+  err('three.js did not load.\n\n' +
+      'This page pulls r134 from cdnjs, the same as index.html. If you are offline or the ' +
+      'CDN is blocked, drop three.min.js into vendor/ and point the script tag at it.\n\n' +
+      'The game modules import fine without it — tools/shader-check.html compiles the ' +
+      'particle GLSL with no three.js at all, if that is what you came to check.');
+  throw new Error('no three.js');
+}
+
+let P, CFG, Q;
+try {
+  P   = await import('../src/world/particles.js');
+  CFG = await import('../src/core/config.js');
+  Q   = await import('../src/systems/quality.js');
+} catch (e) {
+  err('Could not import the game modules.\n\n' + e.message +
+      '\n\nServe the repository root (python3 -m http.server 8080) and open ' +
+      'http://127.0.0.1:8080/tools/particle-lab.html — this page imports ../src/, ' +
+      'so opening the file directly will not work.');
+  throw e;
+}
+
+const PARTICLES = CFG.PARTICLES;
+
+// ── scene ────────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setClearColor(0x04090c, 1);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, 1, 0.5, 20000);
+
+// A reference body so scale and distance attenuation are judgeable. Without something of
+// known size in frame, "is this particle too big" has no answer.
+const rock = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(22, 1),
+  new THREE.MeshStandardMaterial({ color: 0x5a5148, roughness: 0.95, flatShading: true })
+);
+scene.add(rock);
+scene.add(new THREE.AmbientLight(0x334455, 1.1));
+const key = new THREE.PointLight(0xffffff, 1.5, 4000);
+key.position.set(180, 160, 120);
+scene.add(key);
+scene.add(new THREE.GridHelper(600, 12, 0x1d3d49, 0x122a33));
+
+P.initParticles(scene);
+
+// ── camera control ───────────────────────────────────────────────────
+let yaw = 0.7, pitch = 0.35, dist = 200;
+let dragging = false, lx = 0, ly = 0, moved = 0;
+const place = () => {
+  camera.position.set(
+    Math.cos(pitch) * Math.sin(yaw) * dist,
+    Math.sin(pitch) * dist,
+    Math.cos(pitch) * Math.cos(yaw) * dist
+  );
+  camera.lookAt(0, 0, 0);
+};
+canvas.addEventListener('pointerdown', e => { dragging = true; moved = 0; lx = e.clientX; ly = e.clientY; });
+addEventListener('pointerup', e => {
+  if (dragging && moved < 5) fireAt(e);
+  dragging = false;
+});
+addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - lx, dy = e.clientY - ly;
+  moved += Math.abs(dx) + Math.abs(dy);
+  lx = e.clientX; ly = e.clientY;
+  yaw -= dx * 0.006;
+  pitch = Math.max(-1.4, Math.min(1.4, pitch + dy * 0.006));
+});
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  dist = Math.max(50, Math.min(900, dist * (1 + Math.sign(e.deltaY) * 0.12)));
+}, { passive: false });
+
+const resize = () => {
+  const w = innerWidth, h = innerHeight;
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+};
+addEventListener('resize', resize);
+resize();
+
+// ── presets ──────────────────────────────────────────────────────────
+//
+// Each entry is exactly one call into the real module. Nothing is reimplemented here — if a
+// preset looks wrong in this window it is wrong in the game.
+const PRESETS = [
+  ['impact · kinetic', (p, d) => P.impact(p, d, 'kinetic', dmg())],
+  ['impact · thermal', (p, d) => P.impact(p, d, 'thermal', dmg())],
+  ['impact · EM',      (p, d) => P.impact(p, d, 'em', dmg())],
+  ['shield splash',    (p, d) => P.shieldSplash(p, d, dmg())],
+  ['debris · ore',     (p, d) => P.debris(p, d, 'ore', rich())],
+  ['debris · salvage', (p, d) => P.debris(p, d, 'salvage', rich())],
+  ['debris · data',    (p, d) => P.debris(p, d, 'data', rich())],
+  ['bloom',            p => P.bloom(p, 1)],
+  ['bloom · big',      p => P.bloom(p, 2.2)],
+  ['warp flash',       (p, d) => P.warpFlash(p, d, 1)],
+  ['plume · cold',     (p, d) => P.plume(p, d, 1, 0)],
+  ['plume · hot',      (p, d) => P.plume(p, d, 1, 1)]
+];
+let sel = 0;
+
+const fire = document.getElementById('fire');
+PRESETS.forEach(([name], i) => {
+  const b = document.createElement('button');
+  b.textContent = name;
+  b.className = i === 0 ? 'on' : '';
+  b.addEventListener('click', () => {
+    sel = i;
+    [...fire.children].forEach((c, j) => c.className = j === i ? 'on' : '');
+    burstAt({ x: 0, y: 0, z: 0 }, { x: 0, y: 1, z: 0 });
+  });
+  fire.appendChild(b);
+});
+
+const burstAt = (p, d) => PRESETS[sel][1](p, d);
+
+// Click-to-fire in world space: unproject the pointer onto the y=0 plane.
+const _ray = new THREE.Raycaster();
+const _plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const _hit = new THREE.Vector3();
+function fireAt(e) {
+  const nx = (e.clientX / innerWidth) * 2 - 1;
+  const ny = -(e.clientY / innerHeight) * 2 + 1;
+  _ray.setFromCamera({ x: nx, y: ny }, camera);
+  if (!_ray.ray.intersectPlane(_plane, _hit)) return;
+  const d = _hit.clone().normalize();
+  burstAt({ x: _hit.x, y: _hit.y, z: _hit.z }, { x: d.x, y: 0.4, z: d.z });
+}
+
+// ── knobs ────────────────────────────────────────────────────────────
+//
+// Bound directly to the live `PARTICLES` object, so a change takes effect on the next emit.
+// `damage` and `richness` are inputs to the presets rather than constants, and they are here
+// because "does a big hit read as bigger than a small one" is the claim being tuned.
+const EXTRA = { damage: 24, richness: 0.7 };
+const dmg = () => EXTRA.damage;
+const rich = () => EXTRA.richness;
+
+const KNOBS = [
+  ['damage', EXTRA, 1, 120, 1, 'hit size fed to impact presets'],
+  ['richness', EXTRA, 0, 1, 0.05, 'seam yield fed to debris'],
+  ['drag', PARTICLES, 0, 8, 0.1, 'velocity decay per second'],
+  ['impactMin', PARTICLES, 1, 20, 1],
+  ['impactMax', PARTICLES, 4, 80, 1],
+  ['impactPerDamage', PARTICLES, 0, 2, 0.05],
+  ['impactSpeed', PARTICLES, 5, 160, 1],
+  ['debrisMin', PARTICLES, 1, 12, 1],
+  ['debrisMax', PARTICLES, 2, 40, 1],
+  ['debrisSpeed', PARTICLES, 2, 90, 1],
+  ['bloomCount', PARTICLES, 4, 120, 1],
+  ['bloomSpeed', PARTICLES, 5, 160, 1],
+  ['plumeRate', PARTICLES, 1, 20, 1],
+  ['plumeSpeed', PARTICLES, 5, 120, 1],
+  ['warpCount', PARTICLES, 4, 120, 1],
+  ['warpSpeed', PARTICLES, 5, 200, 1]
+];
+
+const knobs = document.getElementById('knobs');
+for (const [key2, obj, min, max, step, hint] of KNOBS) {
+  const wrap = document.createElement('div');
+  wrap.className = 'knob';
+  wrap.innerHTML =
+    `<div class="kl"><span>${key2}${hint ? ` <i style="opacity:.6">${hint}</i>` : ''}</span>` +
+    `<span class="kv"></span></div>`;
+  const input = document.createElement('input');
+  input.type = 'range'; input.min = min; input.max = max; input.step = step;
+  input.value = obj[key2];
+  const out = wrap.querySelector('.kv');
+  out.textContent = obj[key2];
+  input.addEventListener('input', () => {
+    obj[key2] = parseFloat(input.value);
+    out.textContent = obj[key2];
+  });
+  wrap.appendChild(input);
+  knobs.appendChild(wrap);
+}
+
+// Quality, so the budget can be watched doing its job rather than trusted.
+const qEl = document.getElementById('q'), qv = document.getElementById('qv');
+qEl.addEventListener('input', () => {
+  Q.setAuto(false);
+  Q.setQualityLevel(parseInt(qEl.value, 10));
+  qv.textContent = Q.effectScale().toFixed(2) + ' · ' + Q.quality().name;
+});
+Q.setAuto(false);
+Q.setQualityLevel(3);
+qv.textContent = Q.effectScale().toFixed(2) + ' · ' + Q.quality().name;
+
+// The reserved palette, on screen, because "are these six actually distinguishable" is a
+// question best answered by looking at them next to each other.
+const sw = document.getElementById('swatches');
+for (const k of ['kinetic', 'thermal', 'em', 'ore', 'salvage', 'data']) {
+  const c = P.PALETTE[k];
+  const hex = '#' + [0, 1, 2].map(i => Math.round(c[i] * 255).toString(16).padStart(2, '0')).join('');
+  const el = document.createElement('span');
+  el.className = 'sw';
+  el.innerHTML = `<i style="background:${hex}"></i>${k}`;
+  sw.appendChild(el);
+}
+
+// ── actions ──────────────────────────────────────────────────────────
+document.getElementById('clear').addEventListener('click', () => P.resetParticles());
+
+// The load test. Ten simultaneous impacts is a busy fight, and this is where you find out
+// whether the budget holds and what it looks like when it starts refusing.
+let storm = 0;
+document.getElementById('storm').addEventListener('click', () => { storm = storm > 0 ? 0 : 6; });
+
+document.getElementById('copy').addEventListener('click', async () => {
+  const body = Object.keys(PARTICLES)
+    .map(k => `  ${k}: ${PARTICLES[k]},`).join('\n').replace(/,$/, '');
+  const text = `export const PARTICLES = {\n${body}\n};`;
+  try { await navigator.clipboard.writeText(text); } catch { /* fall through */ }
+  console.log(text);
+  const b = document.getElementById('copy');
+  b.textContent = 'COPIED ✓';
+  setTimeout(() => { b.textContent = 'COPY CONFIG'; }, 1400);
+});
+
+document.getElementById('toggle').addEventListener('click', () =>
+  document.getElementById('panel').classList.toggle('hidden'));
+
+// ── loop ─────────────────────────────────────────────────────────────
+const statsEl = document.getElementById('stats');
+const loadEl = document.getElementById('loadf');
+let last = performance.now(), acc = 0, frames = 0, fps = 0, stormT = 0;
+
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+
+  if (storm > 0) {
+    stormT -= dt;
+    if (stormT <= 0) {
+      stormT = 0.12;
+      for (let i = 0; i < storm; i++) {
+        const a = Math.random() * Math.PI * 2, r = 30 + Math.random() * 90;
+        const p = { x: Math.cos(a) * r, y: (Math.random() - 0.5) * 40, z: Math.sin(a) * r };
+        burstAt(p, { x: Math.cos(a), y: 0.3, z: Math.sin(a) });
+      }
+    }
+  }
+
+  rock.rotation.y += dt * 0.12;
+  P.updateParticles(dt);
+  place();
+  renderer.render(scene, camera);
+
+  frames++; acc += dt;
+  if (acc >= 0.4) {
+    fps = frames / acc; frames = 0; acc = 0;
+    const s = P.particleStats();
+    statsEl.innerHTML =
+      `live <b>${s.live}</b> / budget <b>${s.budget}</b> · cap ${s.capacity}<br>` +
+      `dropped <b>${s.dropped}</b> · <b>${fps.toFixed(0)}</b> fps · 1 draw call`;
+    const pct = Math.min(1, s.load) * 100;
+    loadEl.style.width = pct + '%';
+    loadEl.className = pct > 92 ? 'hot' : '';
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

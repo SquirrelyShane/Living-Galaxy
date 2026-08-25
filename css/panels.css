@@ -1,0 +1,259 @@
+/* Living Galaxy — contact tabs, fitting bay, crew quarters, nav-map tooling,
+   and the canopy effects layers. Loaded after hud.css, before overlays.css. */
+
+/* ── canopy effects ───────────────────────────────────────────────── */
+/* Radial streaks that bloom with speed. Pure CSS so it costs no GPU geometry. */
+#speed-streaks{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;
+  transition:opacity .25s linear;mix-blend-mode:screen;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 47%,
+      rgba(150,205,255,.00) 0deg,rgba(150,205,255,.00) 3.2deg,
+      rgba(150,205,255,.16) 3.6deg,rgba(150,205,255,.00) 4.2deg);
+  -webkit-mask-image:radial-gradient(ellipse 62% 58% at 50% 47%,transparent 34%,#000 92%);
+  mask-image:radial-gradient(ellipse 62% 58% at 50% 47%,transparent 34%,#000 92%)}
+
+/* Hull damage bleeds red into the corners. Driven from hud.js. */
+#damage-vignette{position:absolute;inset:0;z-index:7;pointer-events:none;opacity:0;
+  transition:opacity .5s ease;
+  background:radial-gradient(ellipse 78% 70% at 50% 50%,transparent 46%,rgba(150,18,10,.55) 100%)}
+#damage-vignette.critical{animation:dmgpulse 1.5s ease-in-out infinite}
+@keyframes dmgpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.55)}}
+
+/* Sensor sweep ring — fires while the dish is charging. */
+#scan-sweep{position:absolute;top:47%;left:50%;width:24px;height:24px;margin:-12px 0 0 -12px;
+  z-index:7;pointer-events:none;border:1px solid var(--good);border-radius:50%;opacity:0}
+#scan-sweep.active{animation:sweep 1.5s linear infinite}
+@keyframes sweep{
+  from{opacity:.85;transform:scale(1)}
+  to{opacity:0;transform:scale(16)}}
+
+#scan-bar{position:absolute;top:96px;left:50%;transform:translateX(-50%);z-index:25;
+  width:150px;height:3px;background:rgba(2,10,14,.9);border:1px solid var(--edge-dim);display:none}
+#scan-bar.show{display:block}
+#scan-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#1c6a52,var(--good));
+  box-shadow:0 0 8px var(--good)}
+
+/* Pitch readout replaces the old slider — it sits with the crosshair where the
+   eye already is, instead of pulling attention to the screen edge. */
+#pitch-readout{position:absolute;top:47%;left:calc(50% + 26px);transform:translateY(-50%);
+  z-index:8;pointer-events:none;display:flex;align-items:baseline;gap:4px;
+  font-size:12px;color:var(--edge-hot);font-variant-numeric:tabular-nums;
+  text-shadow:0 0 8px rgba(55,185,212,.65)}
+#pitch-readout #pitch-tick{font-size:8px;color:var(--amber);letter-spacing:1px;opacity:.85}
+#pitch-readout.steep #pitch-num{color:var(--amber)}
+
+/* Velocity vector — where the ship is actually going, not where it's pointing.
+   Reads instantly whether assist is holding you or newtonian drift is winning. */
+#velocity-marker{position:absolute;z-index:7;width:16px;height:16px;margin:-8px 0 0 -8px;
+  pointer-events:none;border:1px solid var(--good);border-radius:50%;opacity:.75}
+#velocity-marker::before,#velocity-marker::after{content:'';position:absolute;background:var(--good)}
+#velocity-marker::before{left:-6px;top:50%;width:5px;height:1px}
+#velocity-marker::after{right:-6px;top:50%;width:5px;height:1px}
+#velocity-marker.reverse{border-color:var(--hostile)}
+#velocity-marker.reverse::before,#velocity-marker.reverse::after{background:var(--hostile)}
+
+/* ── contacts, now bucketed ──────────────────────────────────────── */
+.panel h3 .count{color:var(--ink-dim);font-size:8px;letter-spacing:1px}
+#contact-tabs{display:flex;gap:2px;margin-bottom:4px}
+.ctab{flex:1;padding:4px 0;background:rgba(8,18,22,.8);border:1px solid var(--edge-dim);
+  color:var(--ink-dim);font-size:10px;font-family:inherit;cursor:pointer;line-height:1}
+.ctab.active{background:rgba(12,34,42,.95);border-color:var(--edge-hot);color:var(--edge-hot);
+  box-shadow:inset 0 -2px 0 var(--amber)}
+.ctab:active{background:var(--edge-hot);color:var(--void)}
+.near-item .tag{font-size:7px;color:var(--ink-dim);opacity:.7;letter-spacing:.5px}
+
+/* ── bottom dock: throttle full width, actions in one row ────────── */
+#bottom-dock{position:absolute;left:6px;right:6px;bottom:calc(6px + var(--safe-b));z-index:21;
+  display:flex;flex-direction:column;gap:5px}
+
+/* ── nav-map tooling ─────────────────────────────────────────────── */
+#navmap-tools{display:flex;gap:4px;flex-wrap:wrap}
+.chip{padding:5px 9px;background:rgba(8,18,22,.85);border:1px solid var(--edge-dim);
+  color:var(--ink-dim);font-size:9px;font-family:inherit;cursor:pointer;letter-spacing:1px;
+  text-transform:uppercase;
+  clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.chip.on{border-color:var(--edge-hot);color:var(--edge-hot);background:rgba(12,34,42,.95)}
+.chip:active{background:var(--edge-hot);color:var(--void)}
+#navmap-zoom-in,#navmap-zoom-out,#navmap-recenter{margin-left:auto;font-size:12px;padding:3px 10px}
+/* A row of chips outside the nav map: freight-board commodity picker, site send amounts.
+   Wraps rather than scrolls, because a horizontal scroller on a phone hides its own tail. */
+.chiprow{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 6px}
+
+
+#navmap-zoom-in,#navmap-recenter{margin-left:0}
+
+#navmap-scan{font-size:9px;color:var(--ink-dim);line-height:1.55;max-height:96px;overflow-y:auto;
+  border:1px solid var(--edge-dim);border-left:2px solid var(--good);padding:6px 8px;
+  background:rgba(6,16,20,.8)}
+#navmap-scan .sr{display:flex;justify-content:space-between;gap:10px}
+#navmap-scan .sr .k{color:var(--ink-dim)}
+#navmap-scan .sr .v{color:var(--ink);font-variant-numeric:tabular-nums}
+#navmap-scan .note{color:#7ea8c4;margin-top:4px}
+#navmap-scan .hdr{color:var(--good);letter-spacing:1.5px;text-transform:uppercase;
+  font-size:8px;margin-bottom:4px}
+
+#orbit-menu{position:absolute;left:12px;right:12px;bottom:calc(64px + var(--safe-b));z-index:75;
+  background:rgba(4,12,18,.97);border:1px solid var(--edge-hot);padding:8px;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.om-head{font-size:8px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;
+  margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--edge-dim)}
+#orbit-menu-list{display:flex;flex-direction:column;gap:4px}
+.om-item{display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:8px 10px;background:rgba(8,20,28,.9);border:1px solid var(--edge-dim);
+  color:var(--ink);font-family:inherit;font-size:11px;cursor:pointer;text-align:left;width:100%}
+.om-item .om-note{font-size:8px;color:var(--ink-dim)}
+.om-item .om-r{color:var(--amber);font-variant-numeric:tabular-nums;font-size:10px}
+.om-item:active{background:var(--edge-hot);color:var(--void)}
+
+/* ── fitting bay ─────────────────────────────────────────────────── */
+#fit-summary,#crew-summary{font-size:10px;color:var(--ink-dim);line-height:1.5;
+  border-left:2px solid var(--amber);padding:4px 8px;background:rgba(8,16,20,.7)}
+#fit-summary b,#crew-summary b{color:var(--amber)}
+#fit-tabs,#crew-tabs{display:flex;gap:5px}
+#fit-body,#crew-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:11px}
+
+.slot-group{margin-bottom:4px}
+.slot-group>.sg-head{font-size:8px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;
+  margin:4px 0 5px;padding-bottom:3px;border-bottom:1px solid var(--edge-dim)}
+.slot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;
+  background:rgba(8,16,20,.85);border:1px solid var(--edge-dim);border-left:2px solid var(--edge);
+  cursor:pointer;font-family:inherit;color:var(--ink);text-align:left;width:100%;
+  clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
+.slot.filled{border-left-color:var(--edge-hot)}
+.slot.weapon.filled{border-left-color:var(--hostile)}
+.slot.empty .s-name{color:var(--ink-dim);font-style:italic}
+.slot .s-idx{font-size:8px;color:var(--ink-dim);letter-spacing:1px}
+.slot .s-name{font-size:11px;color:var(--edge-hot);letter-spacing:.4px}
+.slot .s-meta{font-size:8px;color:var(--ink-dim);line-height:1.4}
+.slot:active{background:rgba(55,185,212,.18)}
+.slot.selected{border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber-dim)}
+
+.pickrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;
+  background:rgba(6,14,18,.8);border:1px solid var(--edge-dim);cursor:pointer;
+  font-family:inherit;color:var(--ink);text-align:left;width:100%}
+.pickrow.owned .p-name{color:var(--good)}
+.pickrow.locked{opacity:.5}
+.pickrow .p-name{font-size:11px;letter-spacing:.4px}
+.pickrow .p-meta{font-size:8px;color:var(--ink-dim);line-height:1.4}
+.pickrow .p-price{font-size:9px;color:var(--amber);white-space:nowrap}
+.pickrow:active{background:rgba(55,185,212,.2)}
+
+.statgrid{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:10px}
+.statgrid .k{color:var(--ink-dim)}
+.statgrid .v{color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.statgrid .delta-up{color:var(--good)} .statgrid .delta-dn{color:var(--hostile)}
+
+/* ── crew quarters ───────────────────────────────────────────────── */
+.crew-card{display:flex;flex-direction:column;gap:5px;padding:9px 10px;
+  background:rgba(8,16,20,.85);border:1px solid var(--edge-dim);border-left:2px solid var(--edge-hot)}
+.crew-card .cc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.crew-card .cc-name{font-size:11px;color:#fff;letter-spacing:.4px}
+.crew-card .cc-role{font-size:9px;color:var(--edge-hot)}
+.crew-card .cc-meta{font-size:8px;color:var(--ink-dim);line-height:1.45}
+.crew-card .cc-lvl{font-size:9px;color:var(--amber);font-variant-numeric:tabular-nums}
+.xp-track{height:4px;background:rgba(2,10,12,.9);border:1px solid var(--edge-dim);overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,#0a6a86,var(--edge-hot))}
+.morale-track{height:3px;background:rgba(2,10,12,.9);overflow:hidden}
+.morale-fill{height:100%;background:linear-gradient(90deg,#7a4a00,var(--amber))}
+.morale-fill.low{background:linear-gradient(90deg,#7a1508,var(--hostile))}
+.cc-actions{display:flex;gap:4px;flex-wrap:wrap}
+.cc-actions .tiny-btn{flex:0 0 auto;padding:5px 8px}
+.role-pick{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.role-pick button{padding:4px 7px;font-size:8px;background:rgba(8,20,28,.9);
+  border:1px solid var(--edge-dim);color:var(--ink-dim);font-family:inherit;cursor:pointer;
+  letter-spacing:.5px}
+.role-pick button.on{border-color:var(--edge-hot);color:var(--edge-hot)}
+.role-pick button:active{background:var(--edge-hot);color:var(--void)}
+
+.dept-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;
+  background:rgba(6,14,18,.8);border:1px solid var(--edge-dim);border-left:2px solid var(--amber)}
+.dept-row .d-name{font-size:10px;color:var(--ink)}
+.dept-row .d-meta{font-size:8px;color:var(--ink-dim)}
+.dept-row .d-val{font-size:10px;color:var(--good);font-variant-numeric:tabular-nums}
+
+@media (pointer:coarse){
+  .ctab{padding:6px 0;font-size:11px}
+  .chip{padding:7px 11px}
+  .slot,.pickrow{padding:11px 10px}
+  .om-item{padding:11px 10px}
+}
+@media (max-width:400px){
+  #pitch-readout{left:calc(50% + 22px);font-size:11px}
+}
+
+
+/* ── pilot tab ────────────────────────────────────────────────────── */
+.pilot-head{border:1px solid var(--edge-hot);background:rgba(8,22,30,.9);padding:9px 10px;margin-bottom:8px}
+.pilot-head .pn{font-size:13px;color:#fff;letter-spacing:1px}
+.pilot-head .pr{font-size:9px;color:var(--ink-dim);letter-spacing:.5px;margin-top:2px}
+.pilot-head .pts{color:var(--amber)}
+.pilot-job{border:1px solid var(--edge-dim);border-left:2px solid var(--amber);
+  background:rgba(6,16,22,.85);padding:8px 9px;margin-bottom:8px}
+.pilot-job .jh{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--amber)}
+.pilot-job .jt{font-size:11px;color:var(--ink);margin-top:3px}
+.pilot-job .jb{font-size:9px;line-height:1.55;color:var(--ink-dim);margin-top:4px}
+.sec-head{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--amber);
+  margin:10px 0 5px;padding-bottom:3px;border-bottom:1px solid var(--edge-dim)}
+.skill-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(30,60,80,.35)}
+.skill-row>div:first-child{flex:1;min-width:0}
+.skill-row .nm{font-size:10px;color:var(--ink)}
+.skill-row .rk{color:var(--edge-hot);font-variant-numeric:tabular-nums}
+.skill-row .aff{font-size:8px;color:var(--good)}
+.skill-row .meta{font-size:8px;color:var(--ink-dim);margin:1px 0 3px}
+.empty-note{font-size:9px;color:var(--ink-dim);line-height:1.6;padding:10px;
+  border:1px solid var(--edge-dim);border-left:2px solid var(--edge)}
+
+/* ── contract board ───────────────────────────────────────────────── */
+.urgent{color:var(--hostile)}
+.bar-fill.hullbar{background:linear-gradient(90deg,#7a2a1a,var(--hostile))}
+b.tight{color:var(--amber)}
+b.over{color:var(--hostile)}
+
+/* ── crew, v1.00.10 ───────────────────────────────────────────────── */
+.crew-card.off-watch{opacity:.62;border-left:2px solid var(--edge-dim)}
+.cc-role .cross{color:var(--amber)}
+.tiny-btn.on{border-color:var(--good);color:var(--good)}
+.dept-row.unmanned{opacity:.55}
+.dept-row.unmanned .d-val{color:var(--hostile)}
+.cc-flavour{font-size:8px;line-height:1.5;color:#6f93ad;font-style:italic;margin-top:3px}
+
+/* Creation: a text field on a screen where everything else is a card. `user-select:none` is
+   set globally on `*`, which on a phone stops you selecting inside your own input, and the
+   global `touch-action:none` stops the caret being placed by tap — both have to be undone
+   here or the field looks editable and is not. */
+.cfield{display:flex;flex-direction:column;gap:5px;margin:2px 0 10px}
+.cfield label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-dim)}
+.cfield input{padding:11px 12px;background:rgba(4,16,30,.9);border:1px solid var(--edge);
+  color:var(--ink);font-size:14px;font-family:inherit;letter-spacing:.4px;
+  user-select:text;-webkit-user-select:text;touch-action:auto}
+.cfield input:focus{outline:none;border-color:var(--edge-hot)}
+@media (pointer:coarse){ .cfield input{padding:13px 12px;font-size:16px} }
+
+/* ── nav map ──────────────────────────────────────────────────────────
+   Two panes rather than one long column. Everything used to stack — tools, canvas, info
+   line, sensor return, five action buttons — and on a phone the bottom of that column fell
+   off the screen with nothing to scroll: the action row was half cut and the sensor return
+   under it was unreachable. The chart keeps the map, its filters and the actions; the
+   reading matter moved to its own tab. */
+#navmap-tabs{display:flex;gap:3px;flex:0 0 auto}
+#navmap-tabs .tab{flex:1;position:relative}
+#navmap-tabs .dot{position:absolute;top:5px;right:7px;width:5px;height:5px;border-radius:50%;
+  background:var(--amber)}
+#navmap-tabs .dot.hidden{display:none}
+.nm-pane{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:8px}
+.nm-pane.hidden{display:none}
+#navmap-detail{overflow-y:auto;touch-action:pan-y}
+#navmap-stage{position:relative;flex:1 1 auto;min-height:0;display:flex}
+/* The key sits over the map instead of pushing it: on a 360 px screen a legend that takes
+   its own row costs more chart than it explains. */
+#navmap-legend{position:absolute;left:8px;top:8px;background:rgba(3,10,14,.93);
+  border:1px solid var(--edge);padding:8px 10px;font-size:9px;line-height:1.9;
+  letter-spacing:.4px;color:var(--ink-dim);max-width:62%;pointer-events:none}
+#navmap-legend.hidden{display:none}
+#navmap-legend .lg{display:flex;align-items:center;gap:7px;white-space:nowrap}
+#navmap-legend .sw{width:9px;height:9px;flex:0 0 9px;display:inline-block}
+#navmap-legend .sw.dot{border-radius:50%}
+#navmap-legend .sw.ring{background:none;border:1px solid currentColor;border-radius:50%}
+#navmap-legend .hd{color:var(--edge-hot);letter-spacing:1.6px;text-transform:uppercase;
+  margin-top:5px}
+#navmap-legend .hd:first-child{margin-top:0}

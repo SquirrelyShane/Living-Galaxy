@@ -1,0 +1,132 @@
+/* Living Galaxy — the dossier screen.
+
+   Ported from docs/dossier-prototype.html, which was designed against this palette in the
+   first place. Two rules carried over from the prototype and worth keeping:
+
+   - **Categorical colour identifies an organisation.** Every power's hue comes from
+     `src/data/factions.js`, so the screen and the data cannot disagree about what colour
+     Meridian is. Nothing else on the screen competes for those hues.
+   - **The standing scale is diverging, not sequential.** Zero sits on a centre line
+     because standing is signed and zero is a real state — nobody has an opinion yet —
+     rather than the bottom of a range. A sequential bar would render "unknown" and
+     "hated" as neighbours, which is the opposite of true. */
+
+#dossier-overlay{z-index:74}
+#dossier-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-right:2px}
+
+.dcard{background:var(--panel);border:1px solid var(--edge-dim);border-radius:var(--r);
+  padding:10px 11px;margin-bottom:9px;position:relative;overflow:hidden}
+.dcard::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;
+  background:var(--dacc,var(--edge-hot));opacity:.85}
+.dhd{font-size:9px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ink-label);
+  margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dhd b{color:var(--amber);letter-spacing:1.6px;flex:0 0 auto}
+
+/* ── identity ── */
+#dossier-name{font-size:18px;letter-spacing:1.3px;color:var(--ink);line-height:1.15}
+#dossier-role{font-size:10px;color:var(--ink-dim);margin-top:3px;line-height:1.5}
+#dossier-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.dtag{font-size:8.5px;letter-spacing:.9px;text-transform:uppercase;padding:3px 7px;
+  border-radius:9px;border:1px solid var(--edge);color:var(--ink-dim)}
+.dtag.hot{border-color:var(--amber);color:var(--amber)}
+.dtag.lo{border-color:var(--edge-dim);color:var(--ink-label)}
+
+/* ── proficiency ── */
+#dossier-radarwrap{display:flex;gap:11px;align-items:center}
+#dossier-radar{flex:0 0 132px;width:132px;height:132px}
+#dossier-skills{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:5px}
+.drow{display:flex;align-items:center;gap:6px;font-size:9.5px}
+.dsk{flex:0 0 58px;color:var(--ink-dim);text-transform:capitalize;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dtrack{flex:1 1 auto;height:5px;background:rgba(96,150,168,.14);border-radius:3px;overflow:hidden}
+.dfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--edge-hot),var(--good))}
+.dval{flex:0 0 30px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ── standing ── */
+.dbloc{font-size:8.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-dim);
+  margin:7px 0 4px;display:flex;align-items:center;gap:5px}
+.dbloc:first-child{margin-top:0}
+.ddot{width:7px;height:7px;border-radius:2px}
+.dpow{display:grid;grid-template-columns:72px 1fr 34px;gap:7px;align-items:center;
+  padding:4px 0;cursor:pointer;border-radius:var(--r)}
+.dpow:active{background:rgba(55,185,212,.14)}
+.dpn{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dptrack{position:relative;height:11px;background:rgba(96,150,168,.10);border-radius:2px}
+.dpzero{position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--edge)}
+.dpbar{position:absolute;top:2px;bottom:2px;border-radius:2px}
+.dpv{font-size:10px;text-align:right;font-variant-numeric:tabular-nums}
+.dpv.pos{color:var(--good)} .dpv.neg{color:var(--hostile)} .dpv.zero{color:var(--ink-dim)}
+
+/* ── the ladder ── */
+#dossier-ladder{display:flex;flex-direction:column}
+.drung{display:grid;grid-template-columns:24px 1fr;gap:9px;padding:6px 0;position:relative}
+.drung:not(:last-child)::after{content:'';position:absolute;left:11px;top:24px;bottom:-6px;
+  width:1px;background:var(--edge-dim)}
+.dnode{width:23px;height:23px;border-radius:50%;border:2px solid var(--edge);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
+  background:var(--void);color:var(--ink-dim);z-index:1}
+.drung.done .dnode{border-color:var(--good);color:var(--good);
+  box-shadow:0 0 8px rgba(84,224,160,.35)}
+.drung.here .dnode{border-color:var(--amber);background:var(--amber);color:#04090c;
+  box-shadow:0 0 12px rgba(255,180,58,.5)}
+.drt{font-size:12px;color:var(--ink);letter-spacing:.4px}
+.drung:not(.done):not(.here) .drt{color:var(--ink-dim)}
+.dgr{font-size:8.5px;color:var(--ink-label);margin-top:2px;line-height:1.5}
+.dneeds{margin-top:5px;display:flex;flex-direction:column;gap:4px}
+.dneed{display:grid;grid-template-columns:1fr 54px;gap:6px;align-items:center;font-size:9px}
+.dnl{color:var(--ink-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dnv{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.dnbar{grid-column:1 / -1;height:4px;background:rgba(96,150,168,.14);border-radius:2px;
+  overflow:hidden}
+.dnfill{height:100%;border-radius:2px;background:var(--amber)}
+.dnfill.met{background:var(--good)}
+#dossier-next{font-size:9px;color:#7ea8c4;line-height:1.6;margin-top:7px}
+
+/* ── the world ── */
+#dossier-wars{display:flex;flex-direction:column;gap:5px}
+.dwar{display:grid;grid-template-columns:1fr auto 1fr;gap:7px;align-items:center;
+  font-size:9.5px;padding:5px 7px;background:rgba(255,90,72,.07);
+  border:1px solid rgba(255,90,72,.20);border-radius:var(--r)}
+.dwl{text-align:right} .dwr{text-align:left}
+.dwm{font-size:8px;letter-spacing:1.1px;text-transform:uppercase;color:var(--hostile)}
+
+.dev{padding:6px 0;border-bottom:1px solid rgba(96,150,168,.12)}
+.dev:last-child{border-bottom:none}
+.devh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.devy{font-size:9px;color:var(--amber);font-variant-numeric:tabular-nums;flex:0 0 auto}
+.devt{font-size:11px;color:var(--ink);letter-spacing:.3px}
+.devb{font-size:9px;color:var(--ink-dim);line-height:1.6;margin-top:3px}
+.devp{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+.devp span{font-size:7.5px;letter-spacing:.7px;text-transform:uppercase;padding:2px 5px;
+  border-radius:7px;border:1px solid}
+.dnote{font-size:8.5px;color:#7ea8c4;line-height:1.6;margin-top:6px}
+
+/* ── one power's file ── */
+#power-sheet{position:absolute;inset:0;z-index:6;background:rgba(3,7,10,.94);
+  padding:14px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#power-sheet.hidden{display:none}
+#power-card{max-width:520px;margin:8px auto;background:var(--panel-2);
+  border:1px solid var(--edge);border-radius:var(--r);padding:13px}
+#power-name{font-size:16px;letter-spacing:1.1px}
+#power-meta{font-size:9px;color:var(--ink-dim);margin-top:3px;letter-spacing:1.1px;
+  text-transform:uppercase;line-height:1.5}
+#power-standing{font-size:10px;margin-top:8px;letter-spacing:.5px}
+#power-blurb{font-size:10.5px;color:var(--ink-dim);line-height:1.7;margin-top:9px}
+#power-doctrine{font-size:10px;color:var(--amber);font-style:italic;margin-top:9px;
+  padding-left:9px;border-left:2px solid var(--amber)}
+.drel{display:grid;grid-template-columns:74px 1fr 52px;gap:7px;align-items:center;
+  font-size:9px;padding:3px 0}
+.drl{text-align:right;font-size:8px;letter-spacing:.7px;text-transform:uppercase}
+#power-close{margin-top:12px;width:100%;padding:11px;background:rgba(8,18,22,.9);
+  border:1px solid var(--edge);border-radius:var(--r);color:var(--ink);
+  font-family:var(--mono);font-size:10px;letter-spacing:1.4px}
+
+@media (pointer:coarse){
+  .dpow{padding:7px 0}
+  .drung{padding:8px 0}
+}
+@media (max-height:620px){
+  #dossier-radar{flex:0 0 108px;width:108px;height:108px}
+  #dossier-name{font-size:16px}
+}

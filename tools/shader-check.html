@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Living Galaxy — shader check</title>
+<!--
+  GLSL is the one part of this project that `node test/all.mjs` structurally cannot check.
+
+  A typo in a shader does not throw, does not fail an assertion, and does not appear in a
+  headless run. It produces a black screen on somebody's device and a driver info log nobody
+  reads. Every other class of bug in this codebase has a suite; this one had nothing.
+
+  This page compiles the game's real shader source in a real WebGL context and prints what the
+  driver says. It imports `src/world/particle-shader.js`, which deliberately imports nothing —
+  so this runs without three.js, without a scene, and without booting the game.
+
+  Serve the repo root and open /tools/shader-check.html.
+-->
+<style>
+  :root{--void:#04090c;--ink:#d8f0f8;--dim:#7fa8b8;--good:#54e0a0;--bad:#ff5a48;--amber:#ffb43a;
+        --edge:#2c5a6b;--panel:rgba(10,22,28,.9)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--void);color:var(--ink);font:12px/1.7 ui-monospace,Menlo,Consolas,monospace;
+       padding:18px;max-width:900px;margin:0 auto}
+  h1{font-size:14px;letter-spacing:1.8px;text-transform:uppercase;color:var(--amber);font-weight:400}
+  p.lede{color:var(--dim);font-size:11px;margin:6px 0 16px}
+  .card{background:var(--panel);border:1px solid var(--edge);border-radius:5px;
+        padding:11px 13px;margin-bottom:9px}
+  .hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .name{letter-spacing:1.2px}
+  .verdict{font-size:11px;letter-spacing:1.4px}
+  .pass{color:var(--good)} .fail{color:var(--bad)}
+  pre{white-space:pre-wrap;color:var(--dim);font-size:10.5px;margin-top:7px;
+      border-left:2px solid var(--edge);padding-left:9px}
+  pre.err{color:var(--bad);border-left-color:var(--bad)}
+  #sum{font-size:13px;letter-spacing:1.4px;margin:14px 0 4px}
+  canvas{display:none}
+</style>
+</head>
+<body>
+<h1>Shader check</h1>
+<p class="lede">Compiles the game's real GLSL in a real WebGL context. Nothing is mocked — this
+is the source <code>world/particles.js</code> ships.</p>
+<canvas id="gl" width="4" height="4"></canvas>
+<div id="out"></div>
+<div id="sum"></div>
+
+<script type="module">
+const out = document.getElementById('out');
+const sum = document.getElementById('sum');
+const card = (name, ok, log, extra) => {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.innerHTML =
+    `<div class="hd"><span class="name">${name}</span>` +
+    `<span class="verdict ${ok ? 'pass' : 'fail'}">${ok ? 'COMPILED' : 'FAILED'}</span></div>` +
+    (log ? `<pre class="${ok ? '' : 'err'}">${log.replace(/[<>]/g, '')}</pre>` : '') +
+    (extra ? `<pre>${extra.replace(/[<>]/g, '')}</pre>` : '');
+  out.appendChild(d);
+  return ok;
+};
+
+const gl = document.getElementById('gl').getContext('webgl2') ||
+           document.getElementById('gl').getContext('webgl');
+if (!gl) {
+  card('WebGL context', false, 'No WebGL context available in this browser.');
+  sum.innerHTML = '<span class="fail">CANNOT RUN</span>';
+} else {
+  const S = await import('../src/world/particle-shader.js');
+
+  // three.js prepends its own uniforms and attributes to every ShaderMaterial. Compiling the
+  // raw source without them fails on `modelViewMatrix` and friends for reasons that have
+  // nothing to do with our code, so the prologue is reproduced here. Keep it in step with
+  // three.js's `ShaderChunk` defaults if the version ever moves.
+  const PROLOGUE_V = `
+    precision highp float;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    attribute vec3 position;
+    attribute vec3 color;
+  `;
+  const PROLOGUE_F = `precision highp float;`;
+
+  const compile = (type, src, label) => {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    const ok = gl.getShaderParameter(sh, gl.COMPILE_STATUS);
+    const log = (gl.getShaderInfoLog(sh) || '').trim();
+    card(label, ok, log || (ok ? 'No warnings.' : 'No info log — the driver said nothing.'));
+    return ok ? sh : null;
+  };
+
+  const v = compile(gl.VERTEX_SHADER, PROLOGUE_V + S.PARTICLE_VERT, 'vertex — particle');
+  const f = compile(gl.FRAGMENT_SHADER, PROLOGUE_F + S.PARTICLE_FRAG, 'fragment — particle');
+
+  let linked = false, attrs = '';
+  if (v && f) {
+    const prog = gl.createProgram();
+    gl.attachShader(prog, v); gl.attachShader(prog, f);
+    gl.linkProgram(prog);
+    linked = gl.getProgramParameter(prog, gl.LINK_STATUS);
+    if (linked) {
+      // The varying contract between the two stages, and the attributes the pool must supply.
+      // A shader that compiles but expects an attribute nothing binds draws nothing, silently,
+      // which is the same black screen by a different road.
+      const n = gl.getProgramParameter(prog, gl.ACTIVE_ATTRIBUTES);
+      const names = [];
+      for (let i = 0; i < n; i++) names.push(gl.getActiveAttrib(prog, i).name);
+      attrs = 'active attributes: ' + names.join(', ');
+      const want = ['position', 'color', 'aSize'];
+      const missing = want.filter(w => !names.includes(w));
+      card('link + attribute contract', missing.length === 0,
+           missing.length ? 'the pool binds these and the program does not use them: ' +
+                            missing.join(', ') : (gl.getProgramInfoLog(prog) || '').trim() || 'Clean.',
+           attrs);
+      linked = missing.length === 0;
+    } else {
+      card('link', false, (gl.getProgramInfoLog(prog) || '').trim() || 'Link failed, no log.');
+    }
+  }
+
+  const all = !!v && !!f && linked;
+  sum.innerHTML = all
+    ? '<span class="pass">ALL SHADERS OK</span>'
+    : '<span class="fail">SHADER PROBLEM — see above</span>';
+  // Machine-readable, so a headless run can assert on it.
+  window.__shaderCheck = { ok: all, renderer: gl.getParameter(gl.RENDERER) };
+  console.log('SHADER_CHECK ' + JSON.stringify(window.__shaderCheck));
+}
+</script>
+</body>
+</html>

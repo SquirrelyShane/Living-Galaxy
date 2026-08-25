@@ -1,0 +1,260 @@
+/* Living Galaxy — the executive command surface.
+
+   Two jobs, in this order:
+
+   1. Take the flight HUD off the screen. `body.command-surface` is the switch; the list
+      of things that constitute "the flight HUD" lives here rather than in JS, because it
+      is a presentation fact and because a list of element ids in a module goes stale the
+      first time somebody renames a panel.
+
+   2. Draw the deck. Mobile-first — one column, thumb-reachable action row at the bottom,
+      everything above it scrollable — with a pointer:coarse pass at the end that grows
+      the touch targets on a phone.
+
+   The deck is not an overlay. It is a base surface at z-index 40, below the overlay layer
+   (70) so Ops, the chart and Settings still open on top of it in the usual way. */
+
+/* ── 1. the flight HUD, absent ─────────────────────────────────────── */
+/* The canvas goes too. An executive never renders the world — main.js skips the frame
+   entirely — and a stale last-drawn frame sitting behind a translucent deck is worse
+   than nothing, because it looks like a scene that has frozen. */
+body.command-surface #game-canvas,
+body.command-surface #cockpit-frame,
+body.command-surface #speed-streaks,
+body.command-surface #engine-glow,
+body.command-surface #damage-vignette,
+body.command-surface #crosshair,
+body.command-surface #pitch-readout,
+body.command-surface #velocity-marker,
+body.command-surface #warp-overlay,
+body.command-surface #reticle,
+body.command-surface #scan-sweep,
+body.command-surface #scan-bar,
+body.command-surface #top-hud,
+body.command-surface #threat-alert,
+body.command-surface #claim-alert,
+body.command-surface #left-stack,
+body.command-surface #target-panel,
+body.command-surface #tool-column,
+body.command-surface #bottom-dock,
+body.command-surface #group-chip,
+body.command-surface #warp-core-visual,
+body.command-surface #warp-status-text,
+body.command-surface #dock-prompt,
+body.command-surface #station-return,
+body.command-surface #touch-hint{display:none !important}
+
+/* The fleet alert is the one flight-HUD element an executive still wants: a hull under
+   fire is company property being destroyed, and it is the single most urgent thing that
+   can happen to a founder who is not there. It moves to the top of the deck instead. */
+body.command-surface #fleet-alert{top:6px;left:50%;transform:translateX(-50%);z-index:60}
+
+/* ── 2. the deck ───────────────────────────────────────────────────── */
+#exec-deck{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;gap:8px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(8px + var(--safe-b)) 10px;
+  background:
+    radial-gradient(120% 80% at 50% 0%,rgba(26,58,72,.55),transparent 70%),
+    linear-gradient(180deg,#04090c 0%,#03070a 100%);
+  overflow:hidden}
+#exec-deck.hidden{display:none}
+
+#exec-head{flex:0 0 auto;border-bottom:1px solid var(--edge);padding-bottom:7px;position:relative}
+#exec-head::after{content:'';position:absolute;left:0;bottom:-1px;width:44px;height:2px;background:var(--amber)}
+#exec-co{font-size:15px;letter-spacing:1.6px;text-transform:uppercase;color:var(--amber)}
+#exec-sub{font-size:10px;color:var(--ink-dim);line-height:1.5;margin-top:2px}
+
+#exec-stats{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.exec-cell{background:var(--panel);border:1px solid var(--edge-dim);border-radius:var(--r);
+  padding:6px 7px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ec-k{font-size:8px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-label)}
+.ec-v{font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The nav key. Deliberately the largest single control on the screen: it is the way to
+   the only live picture this career has, and the brief asked for it to be one tap. */
+#exec-nav{flex:0 0 auto;display:flex;align-items:center;gap:10px;cursor:pointer;
+  padding:11px 12px;border:1px solid var(--edge-hot);border-radius:var(--r);
+  background:linear-gradient(90deg,rgba(55,185,212,.16),rgba(55,185,212,.04))}
+#exec-nav:active{background:linear-gradient(90deg,rgba(55,185,212,.28),rgba(55,185,212,.08))}
+.xn-ico{font-size:22px;color:var(--edge-hot);line-height:1}
+.xn-l{font-size:9px;color:var(--ink-dim);line-height:1.5}
+.xn-l b{font-size:12px;color:var(--ink);letter-spacing:1.4px}
+
+#exec-board{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--panel);border:1px solid var(--edge-dim);border-radius:var(--r);padding:7px 8px}
+.exec-head{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-label);
+  margin-bottom:5px}
+.exec-note{font-size:9px;color:var(--ink-dim);line-height:1.6;padding:3px 0}
+.exec-row{display:flex;align-items:baseline;gap:7px;padding:5px 0;
+  border-bottom:1px solid rgba(96,150,168,.12);font-size:10px}
+.exec-row:last-child{border-bottom:none}
+.exec-row.hot .er-n{color:var(--hostile)}
+.er-n{flex:0 0 auto;color:var(--ink);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.er-s{flex:1 1 auto;color:var(--ink-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.er-d{flex:0 0 auto;color:var(--amber-dim);font-variant-numeric:tabular-nums}
+
+/* The column count follows the button count and is restated at the end of this file, where
+   the boardroom section sets it to five for the ten buttons the deck now carries. */
+#exec-actions{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.exec-btn{padding:11px 2px;background:rgba(8,18,22,.85);border:1px solid var(--edge);
+  border-radius:var(--r);color:var(--ink);font-family:var(--mono);font-size:9px;
+  letter-spacing:1.2px}
+.exec-btn:active{background:rgba(55,185,212,.22);border-color:var(--edge-hot)}
+
+#exec-foot{flex:0 0 auto;font-size:8.5px;color:var(--ink-dim);letter-spacing:.4px;
+  text-align:center;line-height:1.4}
+
+/* ── 3. the telemetry pane ─────────────────────────────────────────── */
+#navmap-telemetry{gap:6px}
+#tel-head{flex:0 0 auto;font-size:10px;color:var(--ink-dim);line-height:1.5}
+#tel-head b{color:var(--amber)}
+.tel-sub{color:#7ea8c4;font-size:9px}
+#tel-groups{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tel-group{margin-bottom:8px}
+.tel-gh{display:flex;justify-content:space-between;align-items:center;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-label);
+  border-bottom:1px solid var(--edge-dim);padding-bottom:3px;margin-bottom:3px}
+.tel-c{color:var(--amber);font-variant-numeric:tabular-nums}
+.tel-empty{font-size:9px;color:var(--ink-dim);line-height:1.5;padding:3px 0}
+.tel-row{display:flex;align-items:baseline;gap:8px;padding:5px 2px;font-size:10px;
+  border-bottom:1px solid rgba(96,150,168,.10)}
+.tel-row:active{background:rgba(55,185,212,.16)}
+.tel-row .tr-n{flex:0 0 auto;max-width:42%;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tel-row .tr-l{flex:1 1 auto;color:var(--ink-dim);text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tel-row.hostile .tr-n{color:var(--hostile)}
+.tel-row.rock .tr-n{color:var(--amber-dim)}
+#tel-detail{flex:0 0 auto;max-height:38%;overflow-y:auto;font-size:9px;line-height:1.55;
+  color:var(--ink-dim);background:rgba(6,14,18,.9);border:1px solid var(--edge-dim);
+  border-radius:var(--r);padding:6px 7px}
+#tel-detail.hidden{display:none}
+#tel-detail .hdr{color:var(--good);letter-spacing:1.5px;text-transform:uppercase;
+  font-size:9px;margin-bottom:3px}
+#tel-detail .sr{display:flex;justify-content:space-between;gap:10px}
+#tel-detail .sr .k{color:var(--ink-dim)}
+#tel-detail .sr .v{color:var(--ink);font-variant-numeric:tabular-nums}
+#tel-detail .note{color:#7ea8c4;margin-top:4px}
+
+/* Opened from a surface with no flight HUD behind it, the chart is the whole screen
+   rather than a panel over a cockpit — so it gets the opaque background. */
+#navmap-overlay.detached{background:linear-gradient(180deg,#04090c 0%,#03070a 100%)}
+
+/* ── 4. touch ──────────────────────────────────────────────────────── */
+@media (pointer:coarse){
+  .exec-btn{padding:13px 2px;font-size:9.5px}
+  .tel-row{padding:8px 2px}
+  #exec-nav{padding:14px 12px}
+}
+
+/* Short screens: the fleet board is the thing that gives, not the controls. */
+@media (max-height:620px){
+  #exec-stats{grid-template-columns:repeat(3,1fr)}
+  .ec-v{font-size:11px}
+  #exec-nav{padding:8px 10px}
+  .xn-ico{font-size:18px}
+  #exec-foot{display:none}
+}
+
+/* ── 5. the boardroom (v1.02.40) ───────────────────────────────────── */
+/* Every desk in the system on one screen. Categorical colour identifies the power, the
+   same rule the dossier screen carries: the hue comes from `data/factions.js`, so a screen
+   and its data cannot disagree about what colour Meridian is. */
+#boardroom-overlay{z-index:74}
+#boardroom-head{flex:0 0 auto;font-size:10px;color:var(--ink-dim);line-height:1.6;
+  padding:2px 0 6px;border-bottom:1px solid var(--edge-dim)}
+#boardroom-head b{color:var(--amber)}
+#boardroom-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-right:2px}
+
+.br-head{font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-label);
+  margin:9px 0 5px}
+.br-none{font-size:9px;color:var(--ink-dim);padding:4px 0 8px;line-height:1.5}
+
+.br-desk{margin:11px 0 5px;padding-left:9px;border-left:3px solid var(--dacc,var(--edge-hot))}
+.bdn{font-size:13px;letter-spacing:1.1px}
+.bdm{font-size:8.5px;color:var(--ink-dim);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
+.bdd{font-size:9.5px;color:var(--amber);font-style:italic;margin-top:3px;line-height:1.5}
+
+.br-offer,.br-held{background:var(--panel);border:1px solid var(--edge-dim);
+  border-radius:var(--r);padding:8px 9px;margin-bottom:5px;position:relative}
+.br-offer.locked{opacity:.72;border-style:dashed}
+.bt{font-size:11px;color:var(--ink);line-height:1.35;padding-right:66px}
+.bm{font-size:9px;color:var(--ink-dim);margin-top:3px;line-height:1.5}
+.bg{font-size:9px;color:var(--good);margin-top:3px}
+.bl{font-size:9px;color:var(--hostile);margin-top:3px;line-height:1.5}
+.bp{position:absolute;top:8px;right:9px;font-size:11px;color:var(--amber);
+  font-variant-numeric:tabular-nums}
+.br-offer .buy-btn,.br-acts .buy-btn{margin-top:6px}
+.br-acts{display:flex;gap:5px}
+.br-acts .buy-btn{flex:1 1 0}
+
+/* One button per candidate hull, because which ship goes is the decision. */
+.br-pick{display:flex;flex-direction:column;gap:4px;margin-top:6px;
+  border-top:1px solid var(--edge-dim);padding-top:6px}
+.br-hull{padding:9px 8px;background:rgba(8,18,22,.9);border:1px solid var(--edge);
+  border-radius:var(--r);color:var(--ink);font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.9px;text-align:left}
+.br-hull:active{background:rgba(55,185,212,.22);border-color:var(--edge-hot)}
+
+/* Ten buttons since the boardroom landed. Ten across three columns leaves an orphan on the
+   last row exactly as nine across four did at .38, so the deck goes to five columns and two
+   even rows. The labels are all four to six characters, which is what makes five columns
+   legible on a phone where four would not have been. */
+#exec-actions{grid-template-columns:repeat(5,1fr)}
+
+/* ── 6. the galactic chart (v1.02.47) ──────────────────────────────── */
+/*
+   Full-screen: the canvas underneath is the shared renderer drawing the chart's own scene,
+   so nothing here draws — this is the furniture around it.
+
+   ...which is exactly what the overlay's own `background:#02050a` prevented, and why the
+   chart was a black rectangle from the day it shipped. The comment above was true about the
+   intent and false about the result: an opaque panel at z-index 76 sits *over* #game-canvas
+   at z-index 1, so the scene was rendered correctly, every frame, into a canvas nobody could
+   see. A rendering bug with no rendering in it.
+
+   Two lines fix it, and they have to be both. The overlay goes transparent so the canvas
+   shows through — and the canvas is lifted above the flight HUD for as long as the chart is
+   up, because a transparent overlay would otherwise reveal the cockpit panels, the throttle
+   and the contact list floating over the galaxy. 75 is deliberately just under the overlay:
+   the chart's own furniture is a child of it and therefore painted above regardless. */
+#galaxy-overlay{position:absolute;inset:0;z-index:76;display:flex;flex-direction:column;
+  background:transparent}
+#galaxy-overlay.hidden{display:none}
+body.galaxy-open #game-canvas{z-index:75}
+/* A vignette so the disc has an edge and the furniture has something to sit on, without
+   putting an opaque sheet back over the canvas. */
+body.galaxy-open #galaxy-overlay::before{content:'';position:absolute;inset:0;
+  pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse at 50% 45%,rgba(2,5,10,0) 45%,rgba(2,5,10,.78) 100%)}
+#galaxy-view{position:absolute;inset:0;z-index:0;touch-action:none}
+
+#galaxy-head{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));left:50%;
+  transform:translateX(-50%);z-index:2;font-size:10px;color:var(--ink-dim);
+  background:rgba(4,9,12,.82);border:1px solid var(--edge-dim);border-radius:16px;
+  padding:6px 14px;white-space:nowrap;letter-spacing:.6px}
+#galaxy-head b{color:var(--amber)}
+
+#galaxy-panel{position:absolute;left:10px;right:10px;bottom:calc(60px + var(--safe-b));z-index:2;
+  max-width:420px;margin:0 auto;background:rgba(6,12,18,.92);border:1px solid var(--edge);
+  border-radius:var(--r);padding:11px 13px;backdrop-filter:blur(6px)}
+.gx-empty{font-size:11px;color:var(--ink-dim);line-height:1.7;text-align:center}
+.gx-empty span{font-size:9px;opacity:.7}
+.gx-name{font-size:15px;letter-spacing:1.4px}
+.gx-sub{font-size:10px;color:var(--ink-dim);margin-top:2px}
+.gx-rows{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px}
+.gx-row{display:flex;justify-content:space-between;font-size:9.5px;color:var(--ink-dim);
+  border-bottom:1px solid rgba(96,150,168,.10);padding:3px 0}
+.gx-row b{color:var(--ink);font-variant-numeric:tabular-nums}
+.gx-row b.good{color:var(--good)} .gx-row b.bad{color:var(--hostile)}
+.gx-why{font-size:9.5px;color:var(--hostile);margin-top:7px;line-height:1.5}
+
+#galaxy-acts{position:absolute;left:10px;right:10px;bottom:calc(8px + var(--safe-b));z-index:3;
+  display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:5px;max-width:420px;margin:0 auto}
+#galaxy-acts .wide-btn{padding:12px 4px;font-size:10px;letter-spacing:1.3px}
+#galaxy-jump{background:rgba(55,185,212,.24);border-color:var(--edge-hot);color:var(--ink)}
+#galaxy-jump:disabled{opacity:.4;background:rgba(8,18,22,.9);border-color:var(--edge-dim)}
+
+/* Eleven deck buttons now. Still five columns; the last row simply runs one short, which is
+   an even grid with a gap rather than an orphan pushed onto a row of its own. */

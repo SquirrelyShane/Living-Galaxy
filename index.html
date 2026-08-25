@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#00060f"/>
+<title>Living Galaxy — Space RPG</title>
+<!-- An inline SVG favicon. The browser requests /favicon.ico on every load whether or not
+     a page asks it to, and without this the Python dev server answers 404 on each one —
+     harmless, but it is the first line of every console session and it makes a clean run
+     look like a broken one. Data URI so there is no extra file and no extra request. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050a0f'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%234fd6ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23ffb020'/%3E%3C/svg%3E"/>
+<link rel="stylesheet" href="css/base.css"/>
+<link rel="stylesheet" href="css/hud.css"/>
+<link rel="stylesheet" href="css/panels.css"/>
+<link rel="stylesheet" href="css/overlays.css"/>
+<!-- The executive command surface. Last, because it wins over the flight HUD by
+     hiding it — see body.command-surface. -->
+<link rel="stylesheet" href="css/exec.css"/>
+<link rel="stylesheet" href="css/dossier.css"/>
+<link rel="stylesheet" href="css/loading.css"/>
+<link rel="stylesheet" href="css/conn.css"/>
+</head>
+<body>
+
+<canvas id="game-canvas"></canvas>
+<div id="speed-streaks"></div>
+<div id="cockpit-frame"></div>
+<div id="engine-glow"></div>
+<div id="damage-vignette"></div>
+<div id="crosshair"></div>
+<div id="pitch-readout"><span id="pitch-num">0.0°</span><span id="pitch-tick">—</span></div>
+<div id="velocity-marker" class="hidden"></div>
+<div id="warp-overlay"></div>
+<div id="reticle" class="hidden"></div>
+<!-- Contact brackets. One canvas rather than forty positioned nodes, and pointer-transparent
+     so the canopy keeps the drag; see ui/markers.js for both decisions. -->
+<canvas id="contact-markers"></canvas>
+<div id="scan-sweep"></div>
+
+<!-- ── top ───────────────────────────────────────────── -->
+<div id="top-hud">
+  <div id="system-name">SOLARIS SYSTEM</div>
+  <div id="status-line">Navigation core online</div>
+  <div id="wallet"><span id="credits-val">0 cr</span><span class="sep">·</span><span id="cargo-val">0 / 0 kg</span></div>
+</div>
+<div id="threat-alert">⚠ HOSTILE CONTACTS</div>
+<div id="fleet-alert">⚠ FLEET UNDER FIRE</div>
+<div id="claim-alert">☠ PIRATE-CLAIMED SPACE</div>
+<div id="scan-bar"><div id="scan-bar-fill"></div></div>
+
+<!-- ── left column ───────────────────────────────────── -->
+<div id="left-stack">
+
+  <section class="panel" id="systems-panel">
+    <h3>Ship systems</h3>
+    <div class="bar-row"><span class="bar-label">Energy</span><div class="bar-track"><div class="bar-fill energy" id="energy-fill"></div></div><span class="bar-val" id="energy-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Shield</span><div class="bar-track"><div class="bar-fill shield" id="shield-fill"></div></div><span class="bar-val" id="shield-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Armor</span><div class="bar-track"><div class="bar-fill armor" id="armor-fill"></div></div><span class="bar-val" id="armor-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Hull</span><div class="bar-track"><div class="bar-fill hull" id="hull-fill"></div></div><span class="bar-val" id="hull-val">100</span></div>
+    <div class="bar-row"><span class="bar-label">Heat</span><div class="bar-track"><div class="bar-fill heat" id="heat-fill"></div></div><span class="bar-val" id="heat-val">0</span></div>
+    <div class="bar-row"><span class="bar-label">Warp</span><div class="bar-track"><div class="bar-fill warp" id="warp-fill"></div></div><span class="bar-val" id="warp-val">0</span></div>
+    <!-- Solar arrays. Hidden entirely on a hull with none fitted, because a bar that is
+         always at zero teaches a pilot to stop reading that row. Two decimal places: the
+         drive is locked for the whole width of this bar and the pilot is watching it. -->
+    <div class="bar-row hidden" id="array-row"><span class="bar-label">Arrays</span><div class="bar-track"><div class="bar-fill array" id="array-fill"></div></div><span class="bar-val wide" id="array-val">0.00%</span></div>
+    <!-- The readouts under the bars are five lines of text that are interesting once a
+         minute and in the way for the other fifty-nine seconds. Behind a chevron, closed by
+         default, remembered in settings. The bars stay: those are the ones you glance at. -->
+    <button id="systems-more" class="panel-more">Detail <span class="chev">▾</span></button>
+    <div id="systems-extra">
+      <div class="micro" id="hull-status">Hull integrity: nominal</div>
+      <div class="micro" id="mass-info">Mass 12.4 t · cargo 0 kg</div>
+      <div class="micro" id="expend-info">Draw 0 MW</div>
+      <div class="micro" id="ammo-info">Magazines —</div>
+      <div class="micro" id="crew-info">Crew 0 · payroll 0 cr</div>
+      <div class="micro hidden" id="farm-info">No farm</div>
+    </div>
+  </section>
+
+  <section class="panel collapsible" id="info-panel">
+    <h3 data-collapse="info-body">Flight data <span class="chev">▾</span></h3>
+    <div id="info-body">
+      <div class="row"><span>Heading</span><span class="val" id="heading-val">000°</span></div>
+      <div class="row"><span>Pitch</span><span class="val" id="pitch-info">0.0°</span></div>
+      <div class="row"><span>Speed</span><span class="val" id="spd-info">0 m/s</span></div>
+      <div class="row"><span>TWR</span><span class="val" id="twr-info">0.00</span></div>
+      <div class="row"><span>Accel</span><span class="val" id="accel-info">0.0 m/s²</span></div>
+      <div class="row"><span>Drift</span><span class="val" id="drift-info">0 m/s</span></div>
+      <div class="row"><span>Signature</span><span class="val" id="sig-info">nominal</span></div>
+      <div class="row"><span>From star</span><span class="val" id="alt-info">—</span></div>
+      <div class="row"><span>Hull</span><span class="val" id="ship-info">Military</span></div>
+    </div>
+  </section>
+
+  <section class="panel" id="nearest-panel">
+    <h3>Contacts <span class="count" id="contact-count">0</span></h3>
+    <div id="contact-tabs">
+      <button class="ctab active" data-cat="all" title="All">◈</button>
+      <button class="ctab" data-cat="ship" title="Ships">✦</button>
+      <button class="ctab" data-cat="station" title="Stations">▣</button>
+      <button class="ctab" data-cat="body" title="Celestial bodies">◐</button>
+      <button class="ctab" data-cat="belt" title="Asteroid belts">⛏</button>
+      <button class="ctab" data-cat="deep" title="Lagrange points">⊹</button>
+    </div>
+    <div id="nearest-list"><div class="near-item empty">Scanning…</div></div>
+  </section>
+
+</div>
+
+<!-- ── target readout ────────────────────────────────── -->
+<section class="panel hidden" id="target-panel">
+  <h3>Locked <button id="target-clear" class="mini-btn">✕</button></h3>
+  <div id="target-name">—</div>
+  <div class="bar-track slim"><div class="bar-fill hull" id="target-hp"></div></div>
+  <div class="row"><span id="target-kind">—</span><span class="val" id="target-dist">—</span></div>
+  <!-- WARP sits with the other two ways of getting there rather than on the flight bar,
+       because "approach, match or warp" is one decision and it was previously split across
+       two surfaces. The chevron moved out of the button flow into its own end cell so SCAN
+       is not competing with it for a row — see #target-actions in css/hud.css. -->
+  <div id="target-actions">
+    <button id="target-approach" class="tiny-btn">APPROACH</button>
+    <button id="target-match" class="tiny-btn">MATCH</button>
+    <button id="target-warp" class="tiny-btn">WARP</button>
+    <button id="target-scan" class="tiny-btn">SCAN</button>
+    <button id="target-probe" class="tiny-btn hidden">PROBE</button>
+    <button id="target-file" class="tiny-btn">FILE</button>
+    <button id="target-expand" class="mini-btn">▾</button>
+  </div>
+  <div id="target-detail" class="hidden"></div>
+</section>
+
+<!-- ── right tools ───────────────────────────────────── -->
+<div id="tool-column">
+  <button id="btn-assist" class="tool-btn on" title="Flight assist">FA</button>
+  <button id="btn-level" class="tool-btn" title="Level the nose">⌃</button>
+  <button id="btn-cycle" class="tool-btn" title="Cycle target">TGT</button>
+  <button id="btn-cam" class="tool-btn" title="Chase cam">CAM</button>
+  <button id="btn-audio" class="tool-btn on" title="Sound">♪</button>
+  <button id="btn-ops" class="tool-btn" title="Ops — orders, ledger, company">OPS</button>
+  <button id="btn-ledger" class="tool-btn" title="Finance &amp; trade">LDG</button>
+  <button id="btn-settings" class="tool-btn" title="Settings &amp; diagnostics">⚙</button>
+  <button id="btn-file" class="tool-btn" title="Dossier — standing, skills, career">FILE</button>
+  <button id="btn-chart" class="tool-btn" title="Galactic chart — jump between systems">MAP</button>
+  <button id="btn-aria" class="tool-btn" title="ARIA — ship AI">ARIA</button>
+  <button id="btn-comms" class="tool-btn" title="Comms log">☏<span id="comms-badge" class="hidden">0</span></button>
+  <button id="btn-save" class="tool-btn" title="Save">💾</button>
+</div>
+
+<!-- ── docking prompt ────────────────────────────────── -->
+<button id="dock-prompt" class="hidden">⚓ Dock — <span id="dock-target">—</span></button>
+<button id="station-return" class="hidden">⌂ Return to Station</button>
+
+<!-- ── bottom ────────────────────────────────────────── -->
+<div id="bottom-dock">
+  <div id="speed-panel">
+    <div id="speed-header"><span>THROTTLE</span><span><span id="speed-value">0%</span><span id="real-speed"> · 0 m/s</span></span></div>
+    <!-- The track is a relative control, not an absolute one: grabbing the thumb moves the
+         throttle by how far the thumb moves, and dragging away from the bar drops into a
+         fine gain. The steppers either side are the reason a 5% change no longer needs a
+         steady hand at all. See ui/controls.js. -->
+    <div id="speed-track-wrap">
+      <button id="thr-down" class="thr-step" aria-label="Throttle down">–</button>
+      <div id="speed-track">
+        <div id="speed-fill"></div>
+        <div id="speed-zero"></div>
+        <div id="speed-thumb"></div>
+      </div>
+      <button id="thr-up" class="thr-step" aria-label="Throttle up">+</button>
+    </div>
+    <div id="speed-presets">
+      <button class="preset-btn reverse" data-pct="-25">REV</button>
+      <button class="preset-btn" data-pct="0">0</button>
+      <button class="preset-btn" data-pct="10">10</button>
+      <button class="preset-btn" data-pct="25">25</button>
+      <button class="preset-btn" data-pct="50">50</button>
+      <button class="preset-btn" data-pct="100">MAX</button>
+    </div>
+    <div id="speed-fine" class="hidden">FINE</div>
+  </div>
+
+  <!-- ARIA's switch. Green on, red off, and it says what she is doing underneath —
+       a toggle with no readout is a toggle you have to guess about. See ui/hud.js. -->
+  <button id="ap-toggle" class="off"><span id="ap-led"></span><span id="ap-label">AP OFF</span></button>
+  <div id="ap-line" class="hidden">—</div>
+  <!-- What she is for, while she has the ship. Hidden unless the autopilot is on. -->
+  <button id="ap-doctrine" class="hidden">◈ Balanced</button>
+  <button id="group-chip" class="hidden">GRP <b>ALL</b></button>
+  <div id="action-grid">
+    <button id="btn-mine" class="act-btn">⛏<span>MINE</span></button>
+    <button id="btn-fire" class="act-btn fire">✦<span id="fire-label">FIRE</span></button>
+    <button id="warp-btn" class="act-btn">✧<span>WARP</span></button>
+    <button id="btn-nav" class="act-btn">🗺<span>NAV</span></button>
+    <button id="btn-fit" class="act-btn">⛭<span>FIT</span></button>
+    <button id="btn-crew" class="act-btn">☗<span>CREW</span></button>
+  </div>
+</div>
+
+<!-- ── the handoff ────────────────────────────────────────
+     What flipping AP ON looks like. Presentation only: the autopilot is
+     already flying by the time the first frame draws, and this whole
+     overlay can be removed without changing a single thing the ship
+     does. See ui/conn.js. -->
+<div id="conn-overlay" class="hidden">
+  <canvas id="conn-canvas"></canvas>
+  <div id="conn-callouts"></div>
+  <div id="conn-top">
+    <div id="conn-mark">ARIA<span id="conn-meta">Autopilot handoff</span></div>
+    <div id="conn-chip"><span id="conn-chip-dot"></span><span id="conn-chip-text">LATTICE SEED</span></div>
+  </div>
+  <div id="conn-deck">
+    <div id="conn-log"></div>
+    <div id="conn-systems"></div>
+    <div id="conn-meter">
+      <div id="conn-meter-head"><span>LATTICE BIND</span><span id="conn-meter-pct">0%</span></div>
+      <div id="conn-meter-track"><div id="conn-meter-fill"></div></div>
+    </div>
+  </div>
+  <div id="conn-voice">
+    <div id="conn-voice-main"></div>
+    <div id="conn-voice-sub"></div>
+  </div>
+</div>
+
+<div id="warp-core-visual"><div id="warp-core-fill"></div></div>
+<div id="warp-status-text">WARP CORE</div>
+<div id="ship-panel" class="hidden"></div>
+<div id="tut-card" class="hidden">
+  <div id="tut-track"><div id="tut-bar"></div></div>
+  <div id="tut-head"><span id="tut-step">Training 1/7</span>
+    <span><button id="tut-hide" class="mini-btn">–</button><button id="tut-skip" class="mini-btn">✕</button></span></div>
+  <div id="tut-title">—</div>
+  <div id="tut-body">—</div>
+  <div id="tut-hint" class="hidden">—</div>
+</div>
+
+<div id="tut-done" class="overlay hidden">
+  <div class="overlay-head"><span>Flight training</span></div>
+  <div id="tut-done-body"></div>
+  <div class="overlay-actions">
+    <button id="tut-continue" class="wide-btn">Carry on flying</button>
+    <button id="tut-newgame" class="wide-btn ghost">Start a new game</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="touch-hint">Drag to steer · throttle below · NAV for the system chart</div>
+
+<!-- ── the executive command deck ─────────────────────────
+     A whole surface rather than a panel. It is not part of the flight HUD, it does not
+     sit over the canopy, and while it is up the 3D scene is not drawn at all — see
+     ui/execdeck.js and the render gate in main.js. Hidden for every other career. -->
+<div id="exec-deck" class="hidden">
+  <div id="exec-head">
+    <div id="exec-co">—</div>
+    <div id="exec-sub">—</div>
+  </div>
+  <div id="exec-stats"></div>
+  <div id="exec-nav">
+    <span class="xn-ico">◎</span>
+    <span class="xn-l"><b>NAV &amp; TELEMETRY</b><br><span>Live chart of the system, the stations, and everything the array can resolve</span></span>
+  </div>
+  <div id="exec-board"></div>
+  <div id="exec-actions">
+    <button class="exec-btn" id="exec-chart">CHART</button>
+    <button class="exec-btn" id="exec-galaxy">GALAXY</button>
+    <button class="exec-btn" id="exec-board">BOARD</button>
+    <button class="exec-btn" id="exec-ops">OPS</button>
+    <button class="exec-btn" id="exec-staff">FLEET</button>
+    <button class="exec-btn" id="exec-ledger">LEDGER</button>
+    <button class="exec-btn" id="exec-dossier">FILE</button>
+    <button class="exec-btn" id="exec-comms">COMMS</button>
+    <button class="exec-btn" id="exec-aria">ARIA</button>
+    <button class="exec-btn" id="exec-settings">⚙</button>
+    <button class="exec-btn" id="exec-save">SAVE</button>
+  </div>
+  <div id="exec-foot">—</div>
+</div>
+
+<!-- ── overlays ──────────────────────────────────────── -->
+<div id="navmap-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>System chart</span><button class="mini-btn" id="navmap-close">✕</button></div>
+  <div id="navmap-tabs">
+    <button class="tab active" data-pane="chart">Chart</button>
+    <button class="tab" data-pane="telemetry">Telemetry</button>
+    <button class="tab" data-pane="detail">Detail<span id="navmap-dot" class="dot hidden"></span></button>
+  </div>
+
+  <div id="navmap-chart" class="nm-pane">
+    <div id="navmap-tools">
+      <button class="chip on" data-filter="planet">Bodies</button>
+      <button class="chip on" data-filter="station">Stations</button>
+      <button class="chip on" data-filter="belt">Belts</button>
+      <button class="chip on" data-filter="ship">Ships</button>
+      <button class="chip" id="navmap-legendbtn">Key</button>
+      <button class="chip" id="navmap-zoom-out">−</button>
+      <button class="chip" id="navmap-zoom-in">+</button>
+      <button class="chip" id="navmap-recenter">⌖</button>
+    </div>
+    <div id="navmap-stage">
+      <canvas id="navmap-canvas"></canvas>
+      <div id="navmap-legend" class="hidden"></div>
+    </div>
+  </div>
+
+  <div id="navmap-telemetry" class="nm-pane hidden">
+    <div id="tel-head">Live telemetry</div>
+    <div id="tel-groups"></div>
+    <div id="tel-detail" class="hidden"></div>
+  </div>
+
+  <div id="navmap-detail" class="nm-pane hidden">
+    <div id="navmap-info">Tap a body to select it. Drag to pan, pinch to zoom.</div>
+    <div id="navmap-scan" class="hidden"></div>
+  </div>
+
+  <div id="orbit-menu" class="hidden"><div class="om-head">Orbit band</div><div id="orbit-menu-list"></div></div>
+  <div class="overlay-actions">
+    <button id="navmap-course" class="wide-btn">Warp</button>
+    <button id="navmap-approach" class="wide-btn ghost">Approach</button>
+    <button id="navmap-scanbtn" class="wide-btn ghost">Scan</button>
+    <button id="navmap-orbit" class="wide-btn ghost">Orbit ▲</button>
+    <button id="navmap-target" class="wide-btn ghost">Lock</button>
+  </div>
+</div>
+
+<div id="galaxy-overlay" class="hidden">
+  <div id="galaxy-view"></div>
+  <div id="galaxy-head">—</div>
+  <div id="galaxy-panel"></div>
+  <div id="galaxy-acts">
+    <button id="galaxy-home" class="wide-btn ghost">CENTRE</button>
+    <button id="galaxy-jump" class="wide-btn">JUMP</button>
+    <button id="galaxy-close" class="wide-btn ghost">CLOSE</button>
+  </div>
+</div>
+
+<div id="boardroom-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Boardroom</span><button class="mini-btn" id="boardroom-close">✕</button></div>
+  <div id="boardroom-head">—</div>
+  <div id="boardroom-body"></div>
+</div>
+
+<div id="dossier-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Dossier</span><button class="mini-btn" id="dossier-close">✕</button></div>
+  <div id="dossier-body">
+
+    <div class="dcard">
+      <div class="dhd"><span>Identity</span><b id="dossier-rung">—</b></div>
+      <div id="dossier-name">—</div>
+      <div id="dossier-role">—</div>
+      <div id="dossier-tags"></div>
+    </div>
+
+    <div class="dcard" style="--dacc:var(--good)">
+      <div class="dhd"><span>Proficiency</span><b id="dossier-best">—</b></div>
+      <div id="dossier-radarwrap">
+        <svg id="dossier-radar" viewBox="0 0 160 160" aria-label="Skill profile"></svg>
+        <div id="dossier-skills"></div>
+      </div>
+    </div>
+
+    <div class="dcard" style="--dacc:var(--amber)">
+      <div class="dhd"><span>Standing</span><b id="dossier-standsum">—</b></div>
+      <div id="dossier-standing"></div>
+      <div class="dnote">Zero is a real state — nobody has an opinion yet. Everything away
+      from the centre line was earned. Tap an organisation for its file.</div>
+    </div>
+
+    <div class="dcard" style="--dacc:var(--edge-hot)">
+      <div class="dhd"><span>Career track</span><b id="dossier-track">—</b></div>
+      <div id="dossier-ladder"></div>
+      <div id="dossier-next">—</div>
+    </div>
+
+    <div class="dcard" style="--dacc:var(--hostile)">
+      <div class="dhd"><span>Open hostilities</span><b id="dossier-warcount">—</b></div>
+      <div id="dossier-wars"></div>
+      <div class="dnote">Derived from the timeline below, not declared beside it.</div>
+    </div>
+
+    <div class="dcard">
+      <div class="dhd"><span>History</span><b id="dossier-now">—</b></div>
+      <div id="dossier-history"></div>
+    </div>
+
+  </div>
+
+  <div id="power-sheet" class="hidden"><div id="power-card">
+    <div id="power-name">—</div>
+    <div id="power-meta">—</div>
+    <div id="power-standing">—</div>
+    <div id="power-blurb">—</div>
+    <div id="power-doctrine">—</div>
+    <div class="dhd" style="margin-top:13px"><span>Regards</span></div>
+    <div id="power-rels"></div>
+    <div class="dhd" style="margin-top:13px"><span>Involved in</span></div>
+    <div id="power-history"></div>
+    <button id="power-close">CLOSE</button>
+  </div></div>
+</div>
+
+<div id="fit-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Ship fit</span><button class="mini-btn" id="fit-close">✕</button></div>
+  <div id="fit-summary"></div>
+  <div id="fit-tabs">
+    <button class="tab active" data-fittab="slots">Hardpoints</button>
+    <button class="tab" data-fittab="mag">Magazine</button>
+    <button class="tab" data-fittab="locker">Locker</button>
+    <button class="tab" data-fittab="stats">Readout</button>
+  </div>
+  <div id="fit-body"></div>
+  <div class="overlay-actions"><button id="fit-done" class="wide-btn">Done</button></div>
+</div>
+
+<div id="crew-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Crew</span><button class="mini-btn" id="crew-close">✕</button></div>
+  <div id="crew-summary"></div>
+  <div id="crew-tabs">
+    <button class="tab active" data-crewtab="roster">Roster</button>
+    <button class="tab" data-crewtab="hire">Recruit</button>
+    <button class="tab" data-crewtab="depts">Departments</button>
+      <button class="tab" data-crewtab="watch">Watch log</button>
+      <button class="tab" data-crewtab="welfare">Welfare</button>
+  </div>
+  <div id="crew-body"></div>
+  <div class="overlay-actions"><button id="crew-done" class="wide-btn">Done</button></div>
+</div>
+
+<div id="dock-overlay" class="overlay hidden">
+  <div class="overlay-head"><span id="dock-name">Station</span><button class="mini-btn" id="dock-close">✕</button></div>
+  <div id="dock-tabs">
+    <button class="tab active" data-tab="trade">Trade</button>
+    <button class="tab" data-tab="service">Service</button>
+    <button class="tab" data-tab="refit">Refit</button>
+    <button class="tab" data-tab="hulls">Ships</button>
+    <button class="tab" data-tab="modules">Modules</button>
+    <button class="tab" data-tab="board">Board</button>
+    <button class="tab" data-tab="pilot">Pilot</button>
+    <button class="tab" data-tab="crew">Crew</button>
+    <button class="tab" data-tab="station">Station</button>
+  </div>
+  <div id="dock-body"></div>
+  <div class="overlay-actions"><button id="dock-undock" class="wide-btn">Undock</button></div>
+</div>
+
+<div id="hail-overlay" class="overlay hidden">
+  <div class="overlay-head"><span id="hail-name">Station</span><button class="mini-btn" id="hail-close">✕</button></div>
+  <div id="hail-text"></div>
+  <div class="overlay-actions">
+    <button id="hail-dock" class="wide-btn">Request docking clearance</button>
+    <button id="hail-break" class="wide-btn ghost">Break off</button>
+  </div>
+</div>
+
+<div id="aria-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>ARIA · ship AI</span><button class="mini-btn" id="aria-close">✕</button></div>
+  <div id="aria-status">Rule-based mode. Load the local model for freeform answers — it runs off the render thread, so the game won't stutter.</div>
+  <div id="aria-log"></div>
+  <div id="aria-input-row">
+    <input id="aria-input" maxlength="120" placeholder="Ask ARIA — hull, cargo, threats, where to sell…" autocomplete="off"/>
+    <button id="aria-send" class="mini-btn send">➤</button>
+  </div>
+  <div class="overlay-actions">
+    <button id="aria-load" class="wide-btn">Load local model (SmolLM2-360M)</button>
+  </div>
+</div>
+
+<!-- ── ARIA's advisory ────────────────────────────────────
+     She has concluded the ship is short of something and she is making the case for it,
+     with the readings that led her there. Opened by `systems/npc/advisor.js` through the
+     screens port — the simulation names the screen, ui/advisory.js is what that means. -->
+<div id="advisory-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>ARIA · recommendation</span><button class="mini-btn" id="advisory-close">✕</button></div>
+  <div id="advisory-title">—</div>
+  <div id="advisory-body"></div>
+  <div id="advisory-evidence"></div>
+  <div id="advisory-options"></div>
+  <div class="overlay-actions">
+    <button id="advisory-fit" class="wide-btn">Open the fitting bay</button>
+    <button id="advisory-dismiss" class="wide-btn">Not now</button>
+  </div>
+</div>
+
+<!-- ── the warp menu ──────────────────────────────────────
+     The warp button is a decision now, not a switch: how close to arrive, and
+     whether to talk to the thing first. See ui/warpmenu.js. -->
+<div id="warp-menu" class="sheet hidden">
+  <div class="sheet-card">
+    <div class="overlay-head"><span id="warp-menu-name">No target</span><button class="mini-btn" id="warp-menu-close">✕</button></div>
+    <div id="warp-menu-body"></div>
+  </div>
+</div>
+
+<!-- ── the channel ────────────────────────────────────────
+     Conversation, persuasion and a berth's clearance scan. See ui/contact.js. -->
+<div id="contact-overlay" class="overlay hidden">
+  <div class="overlay-head">
+    <span><b id="contact-name">Contact</b><span id="contact-sub" class="ct-sub"></span></span>
+    <button class="mini-btn" id="contact-close">✕</button>
+  </div>
+  <div id="contact-log"></div>
+  <div id="contact-acts"></div>
+</div>
+
+<!-- ── the doctrine sheet ─────────────────────────────────
+     What kind of living this ship makes while ARIA has it. See ui/doctrine.js. -->
+<div id="doctrine-sheet" class="sheet hidden">
+  <div class="sheet-card">
+    <div class="overlay-head"><span>ARIA · standing orders</span><button class="mini-btn" id="doctrine-close">✕</button></div>
+    <div id="doctrine-body"></div>
+  </div>
+</div>
+
+<div id="comms-overlay" class="overlay hidden">
+  <div class="overlay-head"><span>Comms log</span><button class="mini-btn" id="comms-close">✕</button></div>
+  <div id="comms-channels"></div>
+  <div id="comms-log"></div>
+  <div id="comms-replies" class="hidden"></div>
+</div>
+
+<div id="mind-overlay" class="overlay hidden">
+  <div class="overlay-head"><span id="mind-name">Mind</span><button class="mini-btn" id="mind-close">✕</button></div>
+  <div id="mind-body"></div>
+</div>
+
+<!-- ── character creation ────────────────────────────── -->
+<!-- ── settings & diagnostics ─────────────────────────── -->
+<!-- ── operations & ledger ────────────────────────────── -->
+<div id="ops-overlay" class="hidden">
+  <div id="ops-card">
+    <h2>OPERATIONS</h2>
+    <div id="ops-tabs"></div>
+    <div id="ops-body"></div>
+    <div class="overlay-actions"><button id="ops-close" class="wide-btn">Close</button></div>
+  </div>
+</div>
+
+<div id="settings-overlay" class="hidden">
+  <div id="settings-card">
+    <h2>SETTINGS</h2>
+    <div id="settings-tabs"></div>
+    <div id="settings-body"></div>
+    <div class="overlay-actions"><button id="settings-close" class="wide-btn">Close</button></div>
+  </div>
+</div>
+
+<div id="create-overlay" class="hidden">
+  <div id="create-card">
+    <h2>WHO ARE YOU</h2>
+    <div id="create-steps"></div>
+    <div id="create-body"></div>
+    <div id="create-nav">
+      <button id="create-back" class="ghost hidden">Back</button>
+      <button id="create-next">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── the loading screen ──────────────────────────────────────────
+     Sits over the menu, not instead of it: the menu cannot be honest about how many
+     systems are charted or which pilots are on file until the archive has been read, so
+     it stays behind this until it can. See ui/loading.js. -->
+<div id="load-overlay">
+  <div id="load-card">
+    <div id="load-title">LIVING GALAXY</div>
+    <canvas id="load-art"></canvas>
+    <div id="load-headline">Waking the navigation core</div>
+    <div id="load-sub">&nbsp;</div>
+    <div id="load-bar"><div id="load-bar-fill"></div></div>
+    <div id="load-meter"><span id="load-pct">0%</span><span id="load-durable"></span></div>
+    <div id="load-feed"></div>
+  </div>
+</div>
+
+<div id="boot-overlay">
+  <div id="boot-card">
+    <h1>LIVING GALAXY</h1>
+    <p>Pick a life, take a hull, find out what it costs.</p>
+
+    <!-- Scale. Two knobs because they cost different things: depth is boot time and disk,
+         density is what is in a system once you get there. -->
+    <div id="gen-panel">
+      <div class="gen-row"><span>Galaxy depth</span><span id="gen-depth-val">640 systems</span></div>
+      <input type="range" id="gen-depth" min="32" max="4096" step="32" value="640"/>
+      <div class="gen-row"><span>System density</span><span id="gen-density-val">1.4×</span></div>
+      <input type="range" id="gen-density" min="5" max="22" step="1" value="14"/>
+      <div id="gen-note">Depth is how many systems are charted before you fly. Density is how much is in each one.</div>
+      <button id="gen-apply" class="ghost hidden">Rebuild archive</button>
+      <div id="gen-archive"></div>
+    </div>
+
+    <!-- The roster. A pilot is a record now, not a property of the one save slot. -->
+    <div id="pilot-panel">
+      <div id="pilot-head">Pilots on file<button id="pilot-new" class="ghost">New pilot</button></div>
+      <div id="pilot-list"></div>
+    </div>
+
+    <input id="mp-name" maxlength="16" placeholder="Callsign (optional)" autocomplete="off"/>
+    <input id="mp-url" placeholder="Galaxy server — wss://galaxy.local:8765 (optional)" autocomplete="off"/>
+    <!-- A callsign with a passphrase is an account on the galaxy server: banked credits,
+         a remembered position, a resumable identity. Without one you still fly — you are
+         just a guest the galaxy forgets. Created on first use; the passphrase decides
+         everything after that. -->
+    <input id="mp-pass" type="password" maxlength="64" placeholder="Account passphrase (optional)" autocomplete="off"/>
+    <button id="boot-start">Power up</button>
+    <button id="boot-wipe" class="ghost">Wipe saved flight</button>
+    <!-- Deliberately empty. main.js fills this in from core/version.js the moment the
+         module graph loads. It used to carry a hardcoded "v1.01.70 · Consignment", which
+         nobody updated for ten slices — so every boot flashed a build string that was a
+         year of work out of date before the real one replaced it, and wiping a save made
+         that flash long enough to look like the game had reverted. A version in markup is
+         a version with no way to stay true; test/static.mjs now fails if one comes back. -->
+    <div id="boot-version"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

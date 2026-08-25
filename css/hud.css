@@ -1,0 +1,420 @@
+/* Living Galaxy — HUD layer */
+
+.panel{position:relative;background:var(--panel);border:1px solid var(--edge);
+  padding:9px 10px 8px;backdrop-filter:blur(6px);font-size:10px;z-index:20;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+/* top-left corner bracket accent on every panel */
+.panel::before{content:'';position:absolute;left:-1px;top:-1px;width:12px;height:12px;
+  border-left:2px solid var(--edge-hot);border-top:2px solid var(--edge-hot)}
+.panel h3{font-size:8px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;
+  margin-bottom:7px;padding-bottom:4px;position:relative;
+  border-bottom:1px solid var(--edge-dim);
+  display:flex;justify-content:space-between;align-items:center}
+.panel h3::after{content:'';position:absolute;left:0;bottom:-1px;width:24px;height:1px;background:var(--amber)}
+.panel .row{display:flex;justify-content:space-between;color:var(--ink-dim);line-height:1.55}
+.panel .val{color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.micro{margin-top:3px;font-size:9px;color:var(--ink-dim);font-variant-numeric:tabular-nums;letter-spacing:.3px}
+#expend-info.warning{color:var(--hostile)}
+/* Drift goes amber when the RCS has run out of authority to hold your nose and your
+   velocity together — you are flying sideways whether or not you meant to. */
+.panel .val.warn{color:var(--amber)}
+
+#top-hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:20;
+  display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;
+  text-shadow:0 0 8px rgba(0,140,255,.6);max-width:96vw}
+#system-name{font-size:11px;letter-spacing:5px;color:var(--edge-hot);font-weight:600;
+  text-shadow:0 0 10px rgba(55,185,212,.5)}
+#status-line{font-size:9px;color:var(--ink-dim);letter-spacing:1px;text-transform:uppercase;
+  max-width:92vw;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  padding:1px 10px;border-top:1px solid var(--edge-dim);border-bottom:1px solid var(--edge-dim)}
+#wallet{font-size:10px;color:var(--amber);font-variant-numeric:tabular-nums;letter-spacing:1px}
+#wallet .sep{opacity:.4;margin:0 6px}
+
+#threat-alert{position:absolute;top:58px;left:50%;transform:translateX(-50%);z-index:25;
+  font-size:10px;letter-spacing:2px;color:#fff;background:rgba(60,10,6,.85);
+  border:1px solid var(--hostile);padding:3px 12px;text-transform:uppercase;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+  opacity:0;pointer-events:none;box-shadow:0 0 14px rgba(255,60,40,.4)}
+#threat-alert.show{opacity:1;animation:blink .8s steps(2,end) infinite}
+#threat-alert.locked{background:rgba(90,8,4,.95);border-color:#ff4422;
+  box-shadow:0 0 18px rgba(255,40,20,.65);animation:blink .45s steps(2,end) infinite}
+/* A hull the player owns is being shot at somewhere they cannot see. Amber rather than
+   red, and a slower blink than the lock warning: this is somebody else's emergency and it
+   must not read as "you are about to die". Sits under the threat banner so both can show
+   at once — being locked on and losing a miner are not mutually exclusive. */
+#fleet-alert{position:absolute;top:58px;left:50%;transform:translateX(-50%);z-index:25;
+  font-size:10px;letter-spacing:2px;color:#0b0600;background:rgba(255,176,32,.9);
+  border:1px solid #ffc451;padding:3px 12px;text-transform:uppercase;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+  opacity:0;pointer-events:none;box-shadow:0 0 14px rgba(255,180,40,.45)}
+#fleet-alert.show{opacity:1;animation:blink 1.1s steps(2,end) infinite}
+/* Escalation: the hull is not merely taking fire, it is about to be lost. */
+#fleet-alert.critical{background:rgba(255,90,20,.95);border-color:#ff7a2a;color:#160500;
+  box-shadow:0 0 18px rgba(255,110,30,.7);animation:blink .5s steps(2,end) infinite}
+/* Both banners visible at once: push the fleet one clear of the threat one. */
+#threat-alert.show ~ #fleet-alert.show{top:78px}
+
+#claim-alert{position:absolute;top:98px;left:50%;transform:translateX(-50%);z-index:25;
+  font-size:10px;letter-spacing:2px;color:var(--gold);text-shadow:0 0 10px #a60;
+  opacity:0;pointer-events:none}
+#claim-alert.show{opacity:1;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* The stack is bounded by the viewport, not by hope. Before this it was an unbounded
+   column pinned at the top, so on a short phone screen the bottom panel simply ran off
+   under the throttle dock and its last rows were unreachable. Anchoring both edges lets
+   the contacts panel below take whatever is actually left. */
+#left-stack{position:absolute;left:8px;top:64px;z-index:20;width:154px;
+  bottom:calc(var(--dock-h) + var(--safe-b));
+  display:flex;flex-direction:column;gap:6px;
+  pointer-events:none}
+#left-stack>*{pointer-events:auto}
+
+.bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.bar-label{width:44px;color:var(--ink-dim);font-size:8px;letter-spacing:1px;text-transform:uppercase}
+.bar-track{flex:1;height:8px;background:rgba(2,10,12,.9);overflow:hidden;
+  border:1px solid var(--edge-dim);position:relative}
+/* segment ticks overlaid on every gauge */
+.bar-track::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 7px,rgba(4,7,9,.9) 7px,rgba(4,7,9,.9) 8px)}
+.bar-track.slim{height:5px;margin:3px 0}
+.bar-fill{height:100%;width:100%;transition:width .12s linear}
+.bar-fill.energy{background:linear-gradient(90deg,#0a6a86,var(--edge-hot))}
+.bar-fill.shield{background:linear-gradient(90deg,#1560a0,#4aa8ff)}
+.bar-fill.armor{background:linear-gradient(90deg,#7a4a00,var(--amber))}
+.bar-fill.hull{background:linear-gradient(90deg,#7a1508,var(--hostile))}
+.bar-fill.warp{background:linear-gradient(90deg,#5a2a8a,#c060ff);width:0}
+.bar-fill.heat{background:linear-gradient(90deg,#7a3a00,#ff8c2a);width:0}
+#ammo-info.dry{color:var(--hostile)}
+.bar-row.overheat .bar-fill.heat{background:linear-gradient(90deg,#a01500,#ff3a1a)}
+.bar-val{width:26px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;font-size:9px;letter-spacing:.5px}
+/* Two decimal places need room the integer readouts do not, and they need it without
+   pushing the track narrower — so the value gets the width and gives back the letter
+   spacing, which is what was buying the integers their legibility in the first place. */
+.bar-val.wide{width:42px;font-size:8.5px;letter-spacing:0}
+/* Amber while they are moving, gold once they are out and making power. The moving state
+   is the one that matters: it is the window where the ship is committed and cannot leave. */
+.bar-fill.array{background:linear-gradient(90deg,#7a5a10,#ffcc44);width:0}
+.bar-fill.array.moving{background:linear-gradient(90deg,#8a5a10,#ff9c2a);animation:arrayPulse 1.1s ease-in-out infinite}
+@keyframes arrayPulse{0%,100%{opacity:.72}50%{opacity:1}}
+
+/* The systems detail drawer. Its own control rather than the panel's h3, because the bars
+   above it must never be collapsible — those are the six numbers a pilot glances at, and a
+   panel header that hides them is one mis-tap away from flying blind. */
+.panel-more{width:100%;margin-top:5px;padding:3px 0;background:none;border:none;
+  border-top:1px solid rgba(40,100,180,.28);color:#6f9dbe;font-family:inherit;
+  font-size:8px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;text-align:left}
+.panel-more .chev{display:inline-block;transition:transform .2s;font-size:9px}
+.panel-more.open .chev{transform:rotate(180deg)}
+#systems-extra{display:none}
+#systems-extra.open{display:block}
+
+.collapsible h3{cursor:pointer}
+.collapsible .chev{transition:transform .2s}
+.collapsible.closed .chev{transform:rotate(-90deg)}
+.collapsible.closed>div{display:none}
+
+/* ── contacts list ────────────────────────────────────────────────
+   Three separate things conspired to cut the list short, and all three are fixed here.
+
+   1. The panel and the list each carried their own hard-coded max-height (172 / 106).
+      Two magic numbers that have to add up correctly across every screen size never
+      will: with the header and the tab strip taking their share, the list's own box
+      overflowed the panel's, and `overflow:hidden` on the panel chopped the bottom off
+      the scroll viewport. You could scroll, but the last row scrolled into a region
+      that had already been clipped away. The panel is a flex column now and the list
+      simply takes the space that is left, so there is nothing to keep in sync.
+
+   2. `min-height:0` is what actually lets it scroll. A flex child defaults to
+      `min-height:auto`, which refuses to shrink below its content — so the list would
+      grow the panel instead of scrolling inside it, and the growth got clipped.
+
+   3. `body` sets `touch-action:none` so drags fly the ship rather than panning the
+      page. That also killed touch scrolling on this list — on a phone it could not be
+      scrolled at all, which is the part that reads as "cut off". `pan-y` gives the
+      list back vertical scrolling without giving up the flight drag anywhere else.  */
+#nearest-panel{display:flex;flex-direction:column;min-height:0;flex:1 1 auto;
+  max-height:340px;overflow:hidden}
+#nearest-panel h3,#nearest-panel #contact-tabs{flex:0 0 auto}
+#nearest-list{flex:1 1 auto;min-height:44px;overflow-y:auto;pointer-events:auto;
+  touch-action:pan-y;                    /* re-enable touch scroll inside the list */
+  overscroll-behavior:contain;           /* don't hand the scroll up to the document */
+  -webkit-overflow-scrolling:touch;
+  /* the panel's clip-path bites the bottom-left corner — keep the last row out of it */
+  padding-bottom:8px;
+  scrollbar-width:thin;scrollbar-color:var(--edge) transparent}
+#nearest-list::-webkit-scrollbar{width:4px}
+#nearest-list::-webkit-scrollbar-track{background:transparent}
+#nearest-list::-webkit-scrollbar-thumb{background:var(--edge);border-radius:2px}
+#nearest-list::-webkit-scrollbar-thumb:active{background:var(--edge-hot)}
+.near-item{display:flex;justify-content:space-between;gap:6px;color:var(--ink-dim);padding:3px 4px;
+  cursor:pointer;font-size:9px;border-left:2px solid transparent;letter-spacing:.3px;
+  flex:0 0 auto}
+.near-item:active{background:rgba(55,185,212,.18)}
+.near-item:hover{border-left-color:var(--edge-dim)}
+.near-item.hostile{color:var(--hostile);border-left-color:var(--hostile)}
+.near-item.friendly{color:var(--good);border-left-color:var(--good)}
+.near-item.rock{color:var(--amber)}
+.near-item.locked{background:rgba(55,185,212,.22);color:var(--ink);border-left-color:var(--edge-hot)}
+.near-item.empty{opacity:.5;cursor:default}
+.near-item .dist{color:#7bf;font-variant-numeric:tabular-nums;flex:none}
+.near-item .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 166, not 150. Two columns of action buttons plus a chevron does not fit in 150 at a font
+   size anybody can read — APPROACH clipped to APPROA, which is the sort of thing that reads
+   as a broken build rather than as a tight layout. The panel is on the right edge with
+   nothing behind it, so the sixteen pixels cost nothing but canopy nobody was using. */
+#target-panel{position:absolute;top:64px;right:8px;width:166px;z-index:23}
+#target-name{color:#fff;font-size:11px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* A grid, not a wrapping flex row.
+   Flex-wrap put whichever button happened to be last on a row of its own at whatever width
+   was left, so adding WARP pushed SCAN onto a line it had to share with the chevron and
+   both ended up too narrow to read. Two equal columns with the chevron pinned to its own
+   fixed end cell means every button is the same size whatever is hidden, and adding a
+   seventh action later cannot re-flow the other six. */
+#target-actions{display:grid;grid-template-columns:1fr 1fr auto;gap:4px;margin-top:6px;
+  align-items:stretch}
+.tiny-btn{font-size:8px;letter-spacing:.4px;padding:6px 1px;white-space:nowrap;background:rgba(10,26,32,.9);
+  border:1px solid var(--edge);color:var(--edge-hot);cursor:pointer;font-family:inherit;
+  text-transform:uppercase;min-width:0;
+  clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
+.tiny-btn:active{background:var(--edge-hot);color:var(--void)}
+.tiny-btn.hidden{display:none}
+/* The chevron owns the third column across every row, so the pair beside it is always the
+   full width of two columns and never squeezed by it. */
+#target-expand{grid-column:3;grid-row:1 / -1;align-self:stretch;
+  padding:2px 6px;font-size:11px;transition:transform .2s;
+  background:rgba(10,26,32,.9);border:1px solid var(--edge);color:var(--edge-hot);
+  cursor:pointer;font-family:inherit}
+#target-expand:active{background:var(--edge-hot);color:var(--void)}
+#target-expand.open{transform:rotate(180deg)}
+/* WARP is the one that gets you there; the eye should find it without reading. */
+#target-warp{border-color:var(--edge-hot);color:#dff4ff;
+  background:linear-gradient(180deg,rgba(14,52,64,.95),rgba(10,26,32,.95))}
+#target-warp:disabled{border-color:var(--edge);color:#4e7591;background:rgba(10,26,32,.6)}
+#target-detail{margin-top:6px;padding-top:5px;border-top:1px solid rgba(40,100,180,.32);font-size:9px;
+  max-height:132px;overflow-y:auto}
+#target-detail .row{line-height:1.6}
+#target-detail .note{color:#7ea8c4;line-height:1.45;margin-top:3px}
+
+.mini-btn{background:none;border:none;color:var(--amber);font-size:11px;cursor:pointer;padding:0 2px}
+
+/* Bounded at both edges, exactly like #left-stack. This column was pinned at the top and
+   left to grow downward, so once it reached eleven buttons the last few — ARIA and comms
+   among them — ran underneath the throttle dock and were simply unreachable. Anchoring
+   the bottom to the dock reserve means the column can never extend past it; the media
+   queries below tighten the buttons on short screens so it rarely needs to scroll, and
+   overflow is the guarantee that nothing is ever hidden even when it does. */
+#tool-column{position:absolute;right:8px;top:212px;z-index:20;
+  bottom:calc(var(--dock-h) + var(--safe-b));
+  display:flex;flex-direction:column;gap:5px;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+#tool-column::-webkit-scrollbar{display:none}
+.tool-btn{width:34px;height:30px;flex:0 0 auto;background:var(--panel);border:1px solid var(--edge);
+  color:var(--ink-dim);font-size:11px;cursor:pointer;
+  /* Short words rather than glyphs on the buttons whose glyph nobody guesses. `title`
+     is a hover affordance and there is no hover on a phone, so ◈ for "Ops" was a button
+     that, in practice, did not exist. Tracking is tightened so a four-letter label still
+     fits the 30px width at the smallest breakpoint. */
+  letter-spacing:-.02em;white-space:nowrap;overflow:hidden;
+  clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.tool-btn.on{border-color:var(--edge-hot);color:var(--edge-hot);box-shadow:inset 0 0 8px rgba(55,185,212,.25)}
+.tool-btn:active{background:var(--edge-hot);color:var(--void)}
+
+#dock-prompt{position:absolute;bottom:calc(var(--dock-h) + 8px + var(--safe-b));left:50%;transform:translateX(-50%);z-index:24;
+  padding:8px 16px;border-radius:20px;background:rgba(4,30,20,.92);border:1px solid var(--good);
+  color:var(--good);font-size:12px;cursor:pointer;font-family:inherit;animation:blink 2.2s ease-in-out infinite}
+#station-return{position:absolute;bottom:calc(var(--dock-h) + 8px + var(--safe-b));left:50%;transform:translateX(-50%);z-index:24;
+  padding:8px 16px;border-radius:20px;background:rgba(20,30,50,.94);border:1px solid var(--edge);
+  color:#9cf;font-size:12px;cursor:pointer;font-family:inherit}
+
+#speed-panel{width:100%;background:var(--panel);border:1px solid var(--edge);
+  padding:5px 10px 6px;backdrop-filter:blur(6px);
+  clip-path:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
+#speed-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;
+  font-size:9px;color:#8bc8ff}
+#speed-value{font-size:12px;color:#fff;font-variant-numeric:tabular-nums}
+#real-speed{font-size:10px;color:#6cf;font-variant-numeric:tabular-nums}
+/* ── the throttle ────────────────────────────────────────────────────
+   Three changes, all of them about thumbs. The track is 22px instead of 13 so the bar is
+   a target rather than a hairline. It is flanked by steppers, which are the only control
+   here that can hit an exact value with no precision at all. And it carries a visible
+   thumb, because a relative drag needs somewhere to say "grab here" — an absolute slider
+   does not, which is why the old one had none and why every tap was a jump. */
+#speed-track-wrap{position:relative;height:22px;margin-bottom:5px;
+  display:flex;align-items:stretch;gap:5px}
+.thr-step{flex:0 0 34px;background:rgba(10,22,28,.9);border:1px solid var(--edge);
+  color:var(--edge-hot);font-family:inherit;font-size:15px;line-height:1;padding:0;
+  border-radius:4px;touch-action:none;cursor:pointer}
+.thr-step:active{background:var(--edge-hot);color:var(--void)}
+#speed-track{position:relative;flex:1 1 auto;background:rgba(0,22,45,.9);border-radius:7px;
+  border:1px solid rgba(45,110,190,.5);overflow:hidden;cursor:pointer;touch-action:none}
+#speed-fill{height:100%;width:0;background:linear-gradient(90deg,#0a5a4a,#1aa888,var(--edge-hot))}
+#speed-fill.reverse{background:linear-gradient(90deg,#7a1508,var(--hostile))}
+/* Where zero is. The track runs -25%..100%, so zero is a fifth of the way in and nowhere
+   near the left edge — without a mark, "off" is a position you have to remember. */
+#speed-zero{position:absolute;top:0;bottom:0;left:20%;width:1px;
+  background:rgba(160,200,240,.45);pointer-events:none}
+#speed-thumb{position:absolute;top:-2px;bottom:-2px;width:14px;margin-left:-7px;left:20%;
+  background:rgba(180,235,255,.92);border:1px solid rgba(10,30,45,.9);border-radius:4px;
+  box-shadow:0 0 6px rgba(90,220,255,.5);pointer-events:none}
+#speed-track.grabbed #speed-thumb{background:#fff;box-shadow:0 0 10px rgba(120,240,255,.85)}
+#speed-fine{position:absolute;right:0;top:-13px;font-size:8px;letter-spacing:.12em;
+  color:var(--edge-hot)}
+#speed-fine.hidden{display:none}
+#speed-presets{display:flex;gap:4px}
+.preset-btn{flex:1;font-size:9px;letter-spacing:.5px;padding:4px 0;background:rgba(10,22,28,.85);
+  border:1px solid var(--edge);color:var(--ink-dim);cursor:pointer;font-family:inherit}
+.preset-btn:active,.preset-btn.active{background:var(--edge-hot);color:var(--void);border-color:var(--edge-hot)}
+.preset-btn.reverse{background:rgba(40,10,6,.85);border-color:rgba(190,70,35,.5);color:#fca}
+.preset-btn.reverse.active{background:var(--hostile);color:#fff}
+
+/* Ownership on the contact list. A hull you are paying for should not read the same as
+   ambient traffic on the one screen you check before locking something. */
+.near-item .own{display:block;font:8px/1.3 ui-monospace,monospace;color:#6f9dbe;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.near-item.mine{border-left:2px solid rgba(120,255,170,.9);padding-left:4px}
+.near-item.mine .own{color:rgba(120,255,170,.9)}
+.near-item.pilot{border-left:2px solid rgba(180,150,255,.9);padding-left:4px}
+.near-item.pilot .own{color:rgba(180,150,255,.9)}
+
+/* ── ARIA's switch (v1.02.58) ─────────────────────────────────────────
+   Colour AND word, never colour alone: "green means on" is a thing a player has to be
+   told, and a switch whose only state is a hue is unreadable to about one man in twelve.
+   The lamp is the glance; the label is the answer. */
+#ap-toggle{position:absolute;top:-26px;left:0;display:flex;align-items:center;gap:6px;
+  padding:3px 10px 3px 8px;font-size:11px;letter-spacing:.08em;font-family:inherit;
+  background:rgba(10,18,26,.92);border:1px solid var(--edge-dim);border-radius:3px;
+  color:var(--dim);cursor:pointer;touch-action:manipulation}
+#ap-led{width:8px;height:8px;border-radius:50%;background:#7a2a22;
+  box-shadow:0 0 6px rgba(255,80,60,.5);flex:0 0 auto}
+#ap-toggle.off{border-color:rgba(190,70,50,.55);color:#e39a8a}
+#ap-toggle.on{border-color:#5ce08a;color:#bdf6d5;background:rgba(10,32,22,.94)}
+#ap-toggle.on #ap-led{background:#5ce08a;box-shadow:0 0 10px rgba(92,224,138,.95);
+  animation:ap-pulse 1.9s ease-in-out infinite}
+@keyframes ap-pulse{0%,100%{opacity:1}50%{opacity:.45}}
+/* What she is doing, under the switch. Only while she is flying — a status line for a
+   system that is off is a line that is always wrong. */
+#ap-line{position:absolute;top:-42px;left:0;right:0;font:8.5px/1.3 ui-monospace,monospace;
+  color:#7fd8a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  pointer-events:none;text-shadow:0 0 8px rgba(0,0,0,.9)}
+#ap-line.hidden{display:none}
+
+#action-grid{display:flex;gap:4px}
+/* The group chip only exists when a fit actually has two groups in it — a control that
+   changes a label and nothing else invites a tap and teaches nothing. */
+#group-chip{position:absolute;top:-26px;right:0;padding:3px 9px;font-size:11px;letter-spacing:.08em;
+  background:rgba(10,18,26,.9);border:1px solid var(--edge);color:var(--dim);border-radius:3px}
+#group-chip b{color:var(--edge-hot)}
+#group-chip.hidden{display:none}
+.grp-tag{display:inline-block;min-width:18px;text-align:center;padding:1px 5px;margin-left:6px;
+  border:1px solid var(--edge);border-radius:2px;font-size:10px;color:var(--edge-hot)}
+.mag-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mag-row.chambered{border-color:var(--edge-hot)}
+.act-btn{flex:1;min-width:0;height:42px;background:linear-gradient(160deg,rgba(14,30,38,.95),rgba(6,14,18,.95));
+  border:1px solid var(--edge);color:var(--edge-hot);font-size:15px;cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.act-btn span{font-size:7px;letter-spacing:.5px;margin-top:2px;opacity:.85}
+.act-btn:active,.act-btn.active{background:var(--edge-hot);color:var(--void)}
+.act-btn.fire{border-color:var(--hostile);color:var(--hostile)}
+.act-btn.fire:active,.act-btn.fire.active{background:var(--hostile);color:#fff}
+.act-btn.disabled{opacity:.35;pointer-events:none}
+#warp-btn.spooling{border-color:var(--edge-hot);color:var(--edge-hot);box-shadow:0 0 18px rgba(55,185,212,.5)}
+#warp-btn.warping{border-color:#f0f;color:#faf;background:radial-gradient(circle at 35% 25%,#40a,#206)}
+
+#ship-panel{position:absolute;bottom:calc(6px + var(--safe-b));left:6px;right:6px;z-index:20;
+  display:flex;gap:4px;padding:4px;background:rgba(0,8,20,.8);border-radius:9px;
+  border:1px solid rgba(45,110,190,.32);overflow-x:auto;touch-action:pan-x;scrollbar-width:none}
+#ship-panel::-webkit-scrollbar{display:none}
+.ship-btn{flex:1;min-width:62px;padding:5px 4px 4px;background:rgba(10,22,28,.9);
+  border:1px solid var(--edge);color:var(--ink-dim);font-size:8px;letter-spacing:.5px;cursor:pointer;
+  font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;
+  clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.ship-btn .icon{font-size:14px}
+.ship-btn.active{background:linear-gradient(160deg,#0a4480,#052850);color:#fff;box-shadow:0 0 10px rgba(0,160,255,.4)}
+.ship-btn.locked{opacity:.6}
+.ship-btn.locked .icon{filter:grayscale(1)}
+.ship-btn .price{font-size:7px;color:var(--gold);margin-top:1px}
+.ship-btn[data-class="military"].active{border-color:#f55}
+.ship-btn[data-class="industrial"].active{border-color:#fa0}
+.ship-btn[data-class="logistics"].active{border-color:#5f5}
+.ship-btn[data-class="economic"].active{border-color:#f5f}
+.ship-btn[data-class="civilian"].active{border-color:#8cf}
+
+@media (pointer:coarse){
+  .act-btn{height:46px}
+  .tool-btn{width:38px;height:32px}
+  .preset-btn{padding:7px 0}
+  .near-item{padding:4px 3px}
+}
+@media (max-width:400px){
+  #left-stack{width:132px}
+  #target-panel{width:150px}
+  .act-btn{font-size:13px}
+  .act-btn span{font-size:6px}
+}
+@media (max-height:700px){
+  #info-panel{display:none}
+  /* No max-height override needed any more — the flex column already gives the list
+     exactly what is left over. Overriding it here is what made a short screen show two
+     and a half contacts out of eleven. */
+  .act-btn{height:38px}
+}
+/* Very short screens: keep the list usable rather than letting it collapse to nothing. */
+@media (max-height:560px){
+  /* Superseded by the detail drawer: the lines are already closed by default, and a
+     rule that hid them outright meant a short screen could not open them at all. */
+  #systems-extra .micro{font-size:8px;line-height:1.35}
+  #nearest-list{min-height:36px}
+}
+
+
+/* ── short screens ───────────────────────────────────────────────────
+   A phone in portrait with browser chrome top and bottom leaves far less height than a
+   desktop window, and the tool column is the first thing to run out of room. Rather than
+   scroll it — which hides buttons behind a gesture nobody knows is available — tighten
+   the buttons and reclaim a little more from the dock, so all eleven still fit. */
+@media (max-height:860px){
+  :root{--dock-h:136px}
+  #tool-column{gap:4px}
+  .tool-btn{height:27px;font-size:10px}
+  .act-btn{height:38px}
+}
+@media (max-height:740px){
+  :root{--dock-h:128px}
+  #tool-column{gap:3px;top:196px}
+  .tool-btn{height:24px;width:32px;font-size:9px}
+  .act-btn{height:34px;font-size:13px}
+  #speed-track-wrap{height:19px;margin-bottom:4px}
+  .thr-step{flex-basis:30px;font-size:14px}
+}
+/* Landscape, or a phone with an unusually greedy browser chrome. Below this the column
+   scrolls rather than shrinking further — a 20px tap target is already the floor. */
+@media (max-height:640px){
+  :root{--dock-h:119px}
+  /* The status line is the first thing to go on a short screen: the switch itself still
+     says on or off, and that is the part you cannot do without. */
+  #ap-line{display:none}
+  #tool-column{gap:2px;top:176px}
+  .tool-btn{height:22px;width:30px;font-size:8px}
+  .act-btn{height:30px;font-size:12px}
+}
+
+/* Site operations — the panel that turns a planetary dashboard into something you run.
+   Indented and edged so an expanded site reads as belonging to the card above it rather
+   than as another card in the list. */
+.site-ops{margin:2px 0 10px 10px;padding:6px 8px;border-left:2px solid var(--edge)}
+.site-ops .ops-head{margin-top:8px;font-size:11px;letter-spacing:.09em;color:var(--dim)}
+.site-ops .trade-row{padding:4px 0}
+.ops-run.open{border-color:var(--edge-hot)}
+
+/* ── the doctrine chip (v1.02.62) ────────────────────────────────────
+   Sits under ARIA's switch and only exists while she has the ship. It is a readout first and
+   a control second: the thing it is telling you is what she is going to do next. */
+#ap-doctrine{position:absolute;top:-24px;left:0;right:0;padding:3px 6px;
+  font:8.5px/1.2 ui-monospace,monospace;letter-spacing:.7px;text-transform:uppercase;
+  background:rgba(6,18,24,.9);border:1px solid var(--edge);color:var(--hot);
+  text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ap-doctrine.hidden{display:none}
+

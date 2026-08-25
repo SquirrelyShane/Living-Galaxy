@@ -1,0 +1,161 @@
+/* Living Galaxy — the autopilot handoff overlay.
+   See src/ui/conn.js. Uses the cockpit's own tokens rather than a palette
+   of its own: --amber is a system ARIA has not taken, --good is one she
+   has, and the whole sequence therefore reads as part of this ship's
+   instruments instead of as a cutscene bolted onto them.
+
+   z-index 70: over the flight HUD (20–25) and the toast (60), under the
+   dock and galaxy surfaces (76+) and well under boot (90+). Flipping AP
+   while a panel is open should not put a schematic on top of it. */
+
+#conn-overlay{position:absolute;inset:0;z-index:70;pointer-events:none;
+  opacity:1;transition:opacity .3s ease}
+#conn-overlay.hidden{display:none}
+#conn-overlay.out{opacity:0}
+
+#conn-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* ── the cockpit steps back ──────────────────────────────────
+   The schematic's own readouts land exactly where the flight HUD keeps
+   its panels — the left stack, the tool column, the dock. Dimming them
+   with the canvas backdrop is not enough: text over a ghosted panel is
+   text over noise, and raising the backdrop until it is opaque hides
+   the canopy, which is the one thing this overlay promised not to do.
+
+   So the chrome is faded and the *world* is not. Three seconds without a
+   fuel gauge is survivable; three seconds without being able to see what
+   is shooting at you is not.
+
+   The alert banners are the exception and are lifted ABOVE the overlay
+   instead. If something starts shooting during the handoff, that is
+   precisely the moment the player needs to be told — and it is also the
+   moment `CONN.combatPace` has already made this whole sequence brief. */
+body.conn-open #top-hud,
+body.conn-open #left-stack,
+body.conn-open #tool-column,
+body.conn-open #bottom-dock,
+body.conn-open #target-panel,
+body.conn-open #dock-prompt,
+body.conn-open #touch-hint,
+body.conn-open #crosshair,
+body.conn-open #pitch-readout,
+body.conn-open #reticle,
+body.conn-open #contact-markers{opacity:.08;transition:opacity .3s ease;pointer-events:none}
+
+body.conn-open #threat-alert,
+body.conn-open #fleet-alert,
+body.conn-open #claim-alert,
+body.conn-open #toast{z-index:72}
+
+#conn-callouts{position:absolute;inset:0;pointer-events:none}
+.conn-callout{position:absolute;font:9px/1.2 var(--mono);letter-spacing:.11em;
+  white-space:nowrap;color:var(--amber);opacity:0;
+  transition:opacity .3s ease,color .4s ease;
+  text-shadow:0 0 6px #000,0 0 14px #000}
+.conn-callout.on{opacity:.95}
+.conn-callout.bound{color:#dffbec;opacity:1;
+  text-shadow:0 0 6px #000,0 0 15px rgba(84,224,160,.5)}
+
+/* ── title block ─────────────────────────────────────────── */
+
+#conn-top{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:14px;right:14px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+#conn-mark{font-size:17px;letter-spacing:.34em;color:var(--ink);line-height:1;
+  text-shadow:0 0 14px rgba(84,224,160,.35)}
+/* One line, always. It wraps to a lonely "8 SYSTEMS" on a phone otherwise,
+   and the drawing is the subject — the metadata is a caption. */
+#conn-meta{display:block;margin-top:7px;font-size:8.5px;letter-spacing:.16em;
+  color:var(--ink-dim);text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56vw}
+
+#conn-chip{display:flex;align-items:center;gap:7px;padding:6px 11px 6px 9px;
+  border:1px solid var(--amber-dim);background:rgba(7,17,26,.88);
+  font-size:9.5px;letter-spacing:.15em;color:var(--amber);white-space:nowrap;
+  transition:color .45s ease,border-color .45s ease}
+#conn-chip.bound{color:var(--good);border-color:rgba(84,224,160,.55)}
+#conn-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);
+  box-shadow:0 0 9px var(--amber);animation:conn-breathe 1.4s ease-in-out infinite;
+  transition:background .45s ease,box-shadow .45s ease}
+#conn-chip.bound #conn-chip-dot{background:var(--good);box-shadow:0 0 11px var(--good);
+  animation-duration:2.4s}
+@keyframes conn-breathe{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── readouts ────────────────────────────────────────────── */
+/* They recede when she finally speaks: the payoff line should be the
+   only thing competing for the eye at that moment, and receding beats
+   colliding. */
+
+#conn-deck{position:absolute;inset:0;pointer-events:none;transition:opacity .7s ease}
+#conn-deck.handoff{opacity:.16}
+
+#conn-log{position:absolute;left:14px;bottom:calc(46px + var(--safe-b));
+  width:min(330px,42vw);height:130px;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:1px;overflow:hidden;
+  font:9.5px/1.5 var(--mono);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 36%,#000);
+          mask-image:linear-gradient(180deg,transparent,#000 36%,#000)}
+.conn-line{display:grid;grid-template-columns:3.2em 1fr;gap:.7em;white-space:nowrap;
+  color:var(--ink-dim);opacity:0;transform:translateX(-6px);
+  animation:conn-line-in .28s ease forwards}
+@keyframes conn-line-in{to{opacity:1;transform:none}}
+.conn-line .t{color:var(--ink-label);font-variant-numeric:tabular-nums}
+.conn-line.pending .m{color:var(--amber)}
+.conn-line.bound .m{color:var(--good)}
+.conn-line.system .m{color:var(--ink)}
+
+#conn-systems{position:absolute;right:14px;bottom:calc(46px + var(--safe-b));
+  width:min(200px,30vw);padding:10px 11px 11px;
+  background:rgba(7,17,26,.86);border-left:1px solid rgba(47,106,146,.4)}
+.conn-col-title{font-size:9px;letter-spacing:.2em;color:var(--ink-dim);margin-bottom:9px}
+.conn-grp{margin-bottom:8px}
+.conn-grp:last-child{margin-bottom:0}
+.conn-grp-head{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:9px;letter-spacing:.1em;margin-bottom:3px}
+.conn-grp-name{color:var(--ink-dim)}
+.conn-grp-val{font-variant-numeric:tabular-nums;color:var(--amber);transition:color .4s ease}
+.conn-grp.done .conn-grp-name{color:var(--ink)}
+.conn-grp.done .conn-grp-val{color:var(--good)}
+.conn-grp-track{height:2px;background:rgba(27,58,82,.9);overflow:hidden}
+.conn-grp-fill{width:0;height:100%;background:var(--amber);box-shadow:0 0 6px var(--amber);
+  transition:background .4s ease,box-shadow .4s ease}
+.conn-grp.done .conn-grp-fill{background:var(--good);box-shadow:0 0 7px var(--good)}
+
+#conn-meter{position:absolute;left:14px;right:14px;bottom:calc(16px + var(--safe-b))}
+#conn-meter-head{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:9px;letter-spacing:.18em;color:var(--ink-dim);margin-bottom:5px}
+#conn-meter-pct{font-variant-numeric:tabular-nums;font-size:12px;color:var(--amber);
+  transition:color .4s ease}
+#conn-meter.bound #conn-meter-pct{color:var(--good)}
+#conn-meter-track{height:3px;background:rgba(27,58,82,.9);position:relative;overflow:hidden}
+#conn-meter-fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--amber);
+  box-shadow:0 0 9px var(--amber);transition:background .4s ease,box-shadow .4s ease}
+#conn-meter.bound #conn-meter-fill{background:var(--good);box-shadow:0 0 13px var(--good)}
+
+/* ── the payoff ──────────────────────────────────────────── */
+
+#conn-voice{position:absolute;left:50%;bottom:calc(66px + var(--safe-b));
+  transform:translateX(-50%) translateY(10px);width:min(680px,88vw);text-align:center;
+  opacity:0;transition:opacity .7s ease,transform .7s ease;pointer-events:none}
+#conn-voice.in{opacity:1;transform:translateX(-50%)}
+#conn-voice-main{font-size:clamp(15px,3.4vw,25px);letter-spacing:.08em;line-height:1.25;
+  color:#dffbec;text-shadow:0 0 16px rgba(84,224,160,.5),0 0 46px rgba(84,224,160,.18)}
+#conn-voice-sub{margin-top:8px;font-size:clamp(9px,1.7vw,12px);letter-spacing:.09em;
+  line-height:1.55;color:var(--ink)}
+
+/* ── phones ──────────────────────────────────────────────── */
+/* The column goes and the log takes the space under the drawing rather
+   than parking at the floor — a fixed-height log on a tall phone leaves
+   a dead third of the screen between the ship and the words. */
+
+@media (max-width:780px){
+  #conn-systems{display:none}
+  #conn-log{width:min(330px,88vw);top:47vh;bottom:auto;height:200px;
+    justify-content:flex-start;
+    -webkit-mask-image:none;mask-image:none}
+  #conn-voice{bottom:calc(64px + var(--safe-b))}
+}
+@media (max-height:640px){
+  #conn-log{top:50vh;height:140px}
+  #conn-voice{bottom:calc(56px + var(--safe-b))}
+  #conn-meta{display:none}
+}
