@@ -1,0 +1,268 @@
+/* LIVING GALAXY — the CONSOLE sheet (js/console/console.js).
+ *
+ * Loaded after glass.css. The shell: a full-height frosted sheet with the
+ * header live cells, the jump box, six tabs, a sub-tab chip strip, the body
+ * and a recents row. The section/row/button/slider vocabulary the panels
+ * build from (.term-sec .trow .tbtn .tgroup .tslider .tmodes …) lives in
+ * style.css untouched; only the shell and the search/recents rows are here.
+ * Portrait phone first: 44 px rows under a coarse pointer, tab strips scroll
+ * sideways, nothing wider than the screen. */
+
+.console {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: var(--pad-t) var(--pad-r) var(--pad-b) var(--pad-l);
+  background: rgba(2, 5, 9, 0.5);
+  pointer-events: auto;
+}
+.console.hidden { display: none; }
+
+.console .con-sheet.glass {
+  width: min(44rem, 100%);
+  height: 100%;
+  max-height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(10, 14, 20, 0.88) !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--glass-r);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.6);
+}
+html[data-orient="landscape"] .console .con-sheet.glass { width: min(52rem, 100%); }
+
+/* ---- header: title + live cells + HOLD/close. Narrow phones put the cells on their own line. ---- */
+.con-head {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--glass-line);
+}
+.con-id { flex: 1 1 auto; min-width: 0; }
+.con-id b { display: block; font-family: var(--font-display); font-size: 12px; letter-spacing: 0.18em; color: var(--glass-ink); }
+.con-id span { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--glass-ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.con-live { flex: 1 1 100%; order: 3; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-start; }
+.con-live span { display: flex; align-items: baseline; gap: 4px; padding: 2px 7px; border: 1px solid var(--glass-line); border-radius: 999px; background: rgba(255, 255, 255, 0.05); }
+.con-live i { font-style: normal; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--glass-ink2); }
+.con-live b { font-family: var(--font-mono); font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--glass-ink); }
+.con-act { flex: 0 0 auto; order: 2; margin-left: auto; display: flex; gap: 6px; }
+.con-act .btn { min-height: 38px; min-width: 38px; font-family: var(--font-mono); font-size: 11px; border-radius: 10px; }
+#con-hold.on { background: color-mix(in srgb, var(--glass-warm) 30%, transparent); border-color: var(--glass-warm); color: #fff; }
+@media (min-width: 560px) {
+  .con-live { flex: 1 1 auto; order: 2; justify-content: flex-end; }
+  .con-act { order: 3; margin-left: 0; }
+}
+
+/* ---- the jump box ---- */
+.con-search { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--glass-line); font-family: var(--font-display); }
+.cmd-glyph { color: var(--glass-accent); font-size: 14px; }
+.con-search input { flex: 1; min-width: 0; height: 32px; background: rgba(255, 255, 255, 0.06); border: 0; border-radius: 999px; padding: 0 12px; outline: none; color: var(--glass-ink); font: inherit; font-size: 13px; letter-spacing: 0.04em; }
+.con-search input::placeholder { color: var(--glass-ink2); }
+
+/* ---- hits: the search results, in place of the body ---- */
+.con-hits { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 0; }
+.con-hits[hidden] { display: none; }
+.cmd-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 14px; align-items: center; gap: 8px; width: calc(100% - 16px); margin: 0 8px 4px; padding: 9px 10px; border: 0; border-radius: 12px; background: rgba(255, 255, 255, 0.04); color: var(--glass-ink); text-align: left; font-family: var(--font-display); }
+.cmd-row:active { background: rgba(95, 211, 196, 0.12); }
+.cmd-row .cmd-label { font-size: 12.5px; letter-spacing: 0.03em; }
+.cmd-row.hot .cmd-label { color: var(--danger); }
+.cmd-sig { color: var(--glass-accent); font-size: 12px; text-align: center; opacity: 0.8; }
+.cmd-main { display: grid; gap: 1px; min-width: 0; }
+.cmd-hint { font-size: 9.5px; color: var(--glass-ink2); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmd-st { font-size: 9.5px; letter-spacing: 0.12em; color: var(--glass-ink2); text-transform: uppercase; white-space: nowrap; max-width: 34vw; overflow: hidden; text-overflow: ellipsis; }
+.cmd-row.set .cmd-st { color: var(--glass-accent); }
+.cmd-chev { color: var(--glass-ink2); text-align: right; }
+.cmd-empty { padding: 18px 12px; color: var(--glass-ink2); font-family: var(--font-display); font-size: 11px; letter-spacing: 0.08em; }
+
+/* ---- tabs: six of them, scrolling sideways on a phone ---- */
+.con-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--glass-line);
+}
+.con-tabs::-webkit-scrollbar { display: none; }
+.con-tabs[hidden] { display: none; }
+.con-tabs button {
+  flex: 1 0 auto;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  background: none;
+  color: var(--glass-ink2);
+  padding: 9px 12px;
+  border-radius: 10px 10px 0 0;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+.con-tabs button.on { color: var(--glass-accent); background: rgba(255, 255, 255, 0.07); border-color: var(--glass-line); }
+
+/* ---- sub-tabs: pill chips like the chatbox tabs ---- */
+/* WRAP, not scroll.
+ *
+ * This row scrolled sideways, which is fine on a desktop and close to useless
+ * on a phone: at 412px NAV's CONTACTS, CREW's BRIG and HOUSE and CORP's
+ * STANDING and GNN all sat past the right edge with nothing on screen to say
+ * they were there. HOUSE and GNN were not even partly visible. A pill row that
+ * looks complete and is not is a menu the pilot never finds.
+ *
+ * Wrapping costs one more line of chips on a narrow screen and nothing at all
+ * on a wide one, where they already fit. */
+.con-subtabs { flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; border-bottom: 1px solid var(--glass-line); }
+.con-subtabs[hidden] { display: none; }
+.con-sub { flex: 0 0 auto; padding: 6px 11px; border-radius: 999px; border: 1px solid transparent; background: none; color: var(--glass-ink2); font-family: var(--font-display); font-size: 11px; letter-spacing: 0.1em; white-space: nowrap; }
+.con-sub.on { color: var(--glass-ink); background: rgba(255, 255, 255, 0.09); border-color: var(--glass-line); }
+
+/* ---- body ---- */
+.con-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 10px; -webkit-overflow-scrolling: touch; min-width: 0; }
+.con-body[hidden] { display: none; }
+.con-body .term-sec { background: rgba(255, 255, 255, 0.03); border-color: var(--glass-line); border-radius: 12px; }
+.con-body .term-sec > h3 { background: rgba(255, 255, 255, 0.04); border-color: var(--glass-line); }
+.con-body .trow { border-color: rgba(255, 255, 255, 0.06); }
+.con-body .trow > .v { white-space: normal; overflow-wrap: anywhere; max-width: 60vw; }
+.con-body .trow > .v .v { white-space: nowrap; }
+.con-body .trow.focus, .con-body .tmode.focus { outline: 1px solid var(--glass-accent); outline-offset: -1px; }
+.con-body .tgroup { max-width: 62vw; }
+.con-body .tgroup .v { white-space: nowrap; }
+.con-body .tinput { max-width: 9rem; }
+.tcard { margin: 8px 10px; border: 1px solid var(--glass-line); border-radius: 12px; overflow: hidden; }
+.tcard .head { padding: 7px 10px; font-size: 12px; background: rgba(255, 255, 255, 0.04); display: grid; gap: 2px; }
+.tcard .head small { color: var(--glass-ink2); font-size: 10px; }
+.tcard .body { padding: 6px 10px; }
+.tcard.ask { border-color: var(--glass-warm); }
+.tcard.hidden { display: none; }
+.tchips { display: flex; gap: 4px; flex-wrap: wrap; padding: 6px 10px; }
+.tchip { border: 1px solid var(--glass-line); background: rgba(255, 255, 255, 0.04); color: var(--glass-ink2); border-radius: 999px; padding: 6px 11px; font-family: var(--font-mono); font-size: 11px; }
+.tchip.on { color: var(--glass-ink); border-color: var(--glass-accent); background: rgba(95, 211, 196, 0.12); }
+.con-body select.tinput { max-width: 10rem; }
+
+/* ---- recents ---- */
+.con-foot { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-top: 1px solid var(--glass-line); min-width: 0; }
+.con-foot[hidden] { display: none; }
+.cmd-footlab { font-family: var(--font-display); font-size: 8.5px; letter-spacing: 0.18em; color: var(--glass-ink2); flex: 0 0 auto; }
+.cmd-recents { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.cmd-recents::-webkit-scrollbar { display: none; }
+.cmd-chip { flex: 0 0 auto; border: 1px solid var(--glass-line); background: rgba(95, 211, 196, 0.06); color: var(--glass-ink); border-radius: 999px; padding: 6px 10px; font-family: var(--font-display); font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; }
+
+/* ---- phones: tap targets, no sideways page scroll ---- */
+@media (pointer: coarse) {
+  .con-body .trow { min-height: 44px; }
+  .con-body .tbtn { min-height: 40px; }
+  .con-body .tbtn.tiny { min-height: 36px; }
+  .con-tabs button, .con-sub { min-height: 40px; }
+  .cmd-row { padding: 11px 10px; min-height: 44px; }
+  .cmd-chip { min-height: 36px; }
+}
+@media (max-width: 420px) {
+  .console { padding: 0; }
+  .console .con-sheet.glass { border-radius: 0; border-left: 0 !important; border-right: 0 !important; }
+  .con-body .trow { grid-template-columns: minmax(0, 1fr) auto; }
+  .con-body .tgroup { max-width: 58vw; }
+  .con-body .tele-strip .spark svg { max-width: 100%; height: auto; }
+}
+@media (max-height: 460px) {
+  .con-tabs button { padding: 7px 10px; font-size: 10px; }
+  .con-body { padding: 8px; }
+}
+
+/* ---- shared with the CREW panel and the deck-plan dialogue (talkview.js) ---- */
+.tbtn.locked, button.locked { opacity: 0.4; border-style: dashed; color: var(--glass-ink2); cursor: default; }
+.tbtn.muted, button.muted { color: var(--glass-ink2); background: transparent; }
+.tbtn.accent { border-color: var(--glass-warm); color: var(--glass-warm); }
+.in-talk-host { padding: 10px; }
+.in-talk-host .in-talk-nm { color: var(--glass-accent); font-size: 13px; letter-spacing: 0.06em; }
+.in-talk-host .in-talk-sub { color: var(--glass-ink2); font-size: 10px; margin: 2px 0 8px; }
+.in-talk-host .in-talk-line { color: var(--glass-ink); margin-bottom: 8px; line-height: 1.45; font-size: 13px; }
+.in-talk-host .in-talk-beat { margin: 0 0 8px; }
+.in-talk-host .in-talk-beat-lbl,
+.in-talk-host .in-talk-beat-tag { font-size: 10px; color: var(--glass-ink2); letter-spacing: 0.04em; }
+.in-talk-host .in-talk-beat-track { height: 6px; margin: 4px 0 0; background: color-mix(in srgb, var(--glass-accent) 12%, transparent); border: 1px solid var(--glass-line); }
+.in-talk-host .in-talk-beat-fill { height: 100%; width: 0; background: var(--glass-accent); transition: width 0.35s linear; }
+.in-talk-host .in-talk-beat-fill.ok { background: #8dffb0; }
+.in-talk-host .in-talk-beat-fill.bad { background: #ff8c8c; }
+.in-talk-host .in-talk-opts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.in-talk-opts .tinput { flex: 1; min-width: 8rem; max-width: none; }
+.in-talk-host .in-talk-log { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--glass-line); color: var(--glass-ink2); font-size: 10.5px; line-height: 1.5; }
+@media (pointer: coarse) { .in-talk-host .in-talk-opts .tbtn, .in-talk-host .in-talk-opts .btn { min-height: 40px; } }
+/* a group dropped straight into a section (not in a row's value cell) spans it */
+.con-body .term-sec > .tgroup { max-width: none; justify-content: flex-start; padding: 8px 10px; }
+.con-body .term-sec > .tgroup > .tinput { flex: 1 1 12rem; max-width: none; }
+/* a small in-section label (WORK › MISSION uses it above chip rows) */
+.con-body .tlab { margin: 0; padding: 8px 10px 2px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--glass-ink2); }
+
+/* ---- CREW › GENOME and LOG (js/console/panels/crew-gene.js) --------------
+ * The decision record is the one place in the console where prose is the
+ * data. Reasoning chains read as a numbered list, the graph path as a
+ * hairline breadcrumb under it, and the effects as one dim line. Mobile
+ * first: everything wraps, nothing sets a min-width, long genome strings
+ * break rather than push the sheet sideways. */
+
+.tmono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--subtle);
+  padding: 8px 10px;
+  background: rgba(8, 12, 18, 0.5);
+  border: 1px solid #171b23;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+.tlogcard { border-left: 2px solid var(--cyan); }
+
+.twhy { padding: 6px 10px 8px; }
+
+.tlabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--subtle);
+  margin-bottom: 4px;
+}
+
+.treason {
+  margin: 0 0 6px;
+  padding-left: 1.15rem;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.treason li { padding: 1px 0; }
+.treason li::marker { color: var(--cyan); font-size: 9px; }
+
+.tpath {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--subtle);
+  overflow-wrap: anywhere;
+  opacity: 0.8;
+}
+
+.tfx {
+  padding: 6px 10px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--subtle);
+  border-top: 1px solid #171b23;
+  overflow-wrap: anywhere;
+}
+
+@media (pointer: coarse) {
+  .treason { font-size: 12.5px; }
+  .tfx { font-size: 11.5px; }
+  .tmono { font-size: 10.5px; }
+}

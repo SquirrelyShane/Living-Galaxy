@@ -1,0 +1,292 @@
+/* css/comms.css — LIVING GALAXY comms overlay (call panel, hail puck, open-channel ticker) */
+.cx {
+  --cx-bg: rgba(9, 12, 17, 0.90);
+  --cx-bg-solid: #0b0f15;
+  --cx-line: rgba(150, 170, 200, 0.16);
+  --cx-line-hot: rgba(190, 210, 240, 0.34);
+  --cx-txt: #dde5ef;
+  --cx-dim: #78848f;
+  --cx-copper: #c2854f;
+  --cx-cyan: #56a9d6;
+  --cx-ok: #5fd08a;
+  --cx-bad: #e0574f;
+  --cx-amber: #d9a441;
+
+  --cx-panel-bottom: 43vh;   /* sits above the OPS panel — tune per layout */
+  --cx-rail-right: 10px;
+  --cx-rail-top: 46vh;
+  --cx-r: 10px;
+
+  position: fixed; /* mounted on <body>: #hud is its own stacking context under the deck */
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-mono, ui-monospace, "Roboto Mono", "DejaVu Sans Mono", monospace);
+  color: var(--cx-txt);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  z-index: 7; /* over the dash, the terminal and the station deck: a call is a call */
+}
+.cx * { box-sizing: border-box; }
+.cx button { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; }
+.cx [hidden] { display: none !important; }
+
+/* ---------- hail puck ---------- */
+.cx-puck {
+  position: absolute;
+  right: var(--cx-rail-right);
+  top: var(--cx-rail-top);
+  width: 58px; height: 58px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--cx-bg);
+  border: 1px solid var(--cx-line);
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s, transform .12s;
+}
+.cx-puck:active { transform: scale(.94); }
+.cx-puck__glyph { width: 22px; height: 22px; display: block; }
+.cx-puck__glyph path, .cx-puck__glyph circle { stroke: var(--cx-txt); }
+.cx-puck__badge {
+  position: absolute; top: -3px; right: -3px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 8px; background: var(--cx-bad); color: #0b0f15;
+  font-size: 10px; font-weight: 700; display: grid; place-items: center;
+}
+/* pulse rings */
+.cx-puck__ring {
+  position: absolute; inset: -2px; border-radius: 50%;
+  border: 1px solid currentColor; opacity: 0;
+  /* 0.3.37 — decoration, and decoration must never eat a tap. These sit at
+   * opacity 0 unless a call is ringing, but an invisible element still takes
+   * pointer events, and `inset: -2px` puts them two pixels PROUD of the puck
+   * on every side. Anything underneath that rim was untappable by something
+   * nobody could even see. */
+  pointer-events: none;
+}
+.cx-puck[data-ring] { color: var(--cx-cyan); border-color: color-mix(in srgb, currentColor 50%, transparent); }
+.cx-puck[data-ring="out"] { color: var(--cx-amber); }
+.cx-puck[data-ring="hostile"] { color: var(--cx-bad); }
+.cx-puck[data-ring] .cx-puck__ring { animation: cx-ping 1.6s ease-out infinite; }
+.cx-puck[data-ring] .cx-puck__ring:nth-child(2) { animation-delay: .55s; }
+.cx-puck[data-ring] .cx-puck__glyph path,
+.cx-puck[data-ring] .cx-puck__glyph circle { stroke: currentColor; }
+.cx-puck[data-ring] { animation: cx-nudge 1.6s ease-in-out infinite; }
+.cx-puck[data-state="live"] { color: var(--cx-ok); border-color: color-mix(in srgb, var(--cx-ok) 45%, transparent); }
+.cx-puck[data-state="live"] .cx-puck__glyph path,
+.cx-puck[data-state="live"] .cx-puck__glyph circle { stroke: var(--cx-ok); }
+
+@keyframes cx-ping { 0% { transform: scale(1); opacity: .85; } 100% { transform: scale(1.85); opacity: 0; } }
+@keyframes cx-nudge { 0%,100% { transform: translateX(0); } 45% { transform: translateX(-2px); } 60% { transform: translateX(2px); } }
+
+/* ---------- accept / reject ---------- */
+.cx-answer {
+  position: absolute;
+  right: calc(var(--cx-rail-right) + 66px);
+  top: var(--cx-rail-top);
+  height: 58px;
+  display: flex; align-items: center; gap: 8px;
+  pointer-events: auto;
+}
+.cx-answer button {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--cx-bg); border: 1px solid var(--cx-line);
+  -webkit-tap-highlight-color: transparent;
+  animation: cx-slide .18s ease-out both;
+}
+.cx-answer button:active { transform: scale(.94); }
+.cx-answer .cx-yes { color: var(--cx-ok); border-color: color-mix(in srgb, var(--cx-ok) 55%, transparent); }
+.cx-answer .cx-no { color: var(--cx-bad); border-color: color-mix(in srgb, var(--cx-bad) 55%, transparent); animation-delay: .04s; }
+.cx-answer svg { width: 22px; height: 22px; stroke: currentColor; }
+@keyframes cx-slide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+
+/* ---------- call panel ---------- */
+.cx-panel {
+  position: absolute;
+  left: 8px; right: 8px;
+  bottom: var(--cx-panel-bottom);
+  background: var(--cx-bg);
+  backdrop-filter: blur(3px);
+  border: 1px solid var(--cx-line);
+  border-radius: var(--cx-r);
+  pointer-events: auto;
+  overflow: hidden;
+  animation: cx-rise .2s ease-out both;
+}
+@keyframes cx-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.cx-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cx-line);
+}
+.cx-head__who { flex: 1 1 auto; min-width: 6ch; font-size: 12px; color: var(--cx-txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-head__meta { flex: 0 1 auto; min-width: 0; font-size: 10px; color: var(--cx-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-head__sp { flex: 1; }
+.cx-head button {
+  min-width: 40px; height: 30px; padding: 0 9px;
+  border: 1px solid var(--cx-line); border-radius: 7px;
+  color: var(--cx-dim); font-size: 11px;
+}
+.cx-head .cx-end { color: var(--cx-bad); border-color: color-mix(in srgb, var(--cx-bad) 40%, transparent); }
+
+/* carrier waveform — the signature strip */
+.cx-wave { display: flex; align-items: center; gap: 2px; height: 14px; width: 62px; }
+.cx-wave i {
+  flex: 1; height: 100%; background: currentColor; opacity: .55;
+  transform: scaleY(.12); transform-origin: center;
+  transition: transform .09s linear;
+}
+.cx-wave[data-src="peer"] { color: var(--cx-cyan); }
+.cx-wave[data-src="self"] { color: var(--cx-copper); }
+.cx-wave[data-src="idle"] { color: var(--cx-dim); }
+
+.cx-log {
+  padding: 8px 10px;
+  max-height: 27vh; min-height: 66px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.cx-log::-webkit-scrollbar { display: none; }
+.cx-row { display: flex; gap: 7px; padding: 3px 0; line-height: 1.45; }
+.cx-row__tag { flex: 0 0 auto; font-size: 10px; padding-top: 2px; letter-spacing: .08em; }
+.cx-row__txt { flex: 1; word-break: break-word; }
+.cx-row[data-sp="peer"] .cx-row__tag { color: var(--cx-cyan); }
+.cx-row[data-sp="self"] .cx-row__tag { color: var(--cx-copper); }
+.cx-row[data-sp="self"] .cx-row__txt { color: #b9c4d0; }
+.cx-row[data-sp="sys"] { color: var(--cx-dim); font-size: 11px; }
+.cx-caret::after { content: "_"; animation: cx-blink 1s steps(1) infinite; }
+@keyframes cx-blink { 50% { opacity: 0; } }
+
+.cx-replies {
+  display: flex; gap: 6px;
+  padding: 8px;
+  border-top: 1px solid var(--cx-line);
+  overflow-x: auto; scrollbar-width: none;
+}
+.cx-replies::-webkit-scrollbar { display: none; }
+.cx-replies:empty { display: none; }
+.cx-chip {
+  flex: 0 0 auto;
+  min-height: 38px; padding: 8px 12px;
+  border: 1px solid var(--cx-line); border-radius: 8px;
+  background: rgba(255,255,255,.02);
+  color: var(--cx-txt); font-size: 11.5px;
+  -webkit-tap-highlight-color: transparent;
+}
+.cx-chip:active { background: rgba(255,255,255,.08); }
+.cx-chip[data-tone="firm"] { border-color: color-mix(in srgb, var(--cx-amber) 45%, transparent); color: var(--cx-amber); }
+.cx-chip[data-tone="hostile"] { border-color: color-mix(in srgb, var(--cx-bad) 45%, transparent); color: var(--cx-bad); }
+.cx-chip[data-tone="friendly"] { border-color: color-mix(in srgb, var(--cx-ok) 40%, transparent); color: var(--cx-ok); }
+.cx-chip[data-end] { color: var(--cx-dim); }
+
+/* collapsed ticker */
+.cx-panel[data-min] .cx-log { max-height: none; min-height: 0; padding: 6px 10px; }
+.cx-panel[data-min] .cx-row:not(:last-child) { display: none; }
+.cx-panel[data-min] .cx-replies { padding: 6px 8px; }
+.cx-panel[data-min] .cx-chip:nth-child(n+3) { display: none; }
+
+/* coarse pointers: bigger targets, roomier log */
+@media (pointer: coarse) {
+  .cx-puck { width: 64px; height: 64px; }
+  .cx-answer { right: calc(var(--cx-rail-right) + 72px); }
+  .cx-answer button { width: 58px; height: 58px; }
+  .cx-chip { min-height: 44px; }
+  .cx-head button { height: 34px; }
+}
+@media (max-height: 700px) { .cx { --cx-panel-bottom: 40vh; } .cx-log { max-height: 20vh; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cx *, .cx *::after { animation: none !important; transition: none !important; }
+  .cx-puck[data-ring] { border-color: currentColor; }
+}
+
+/* ---------- transmit row (live calls) ---------- */
+.cx-say {
+  display: flex; gap: 6px;
+  padding: 8px;
+  border-top: 1px solid var(--cx-line);
+}
+.cx-say input {
+  flex: 1; min-width: 0; min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--cx-line); border-radius: 8px;
+  background: rgba(255,255,255,.03); color: var(--cx-txt);
+  font: inherit; letter-spacing: inherit;
+}
+.cx-say input:focus { outline: none; border-color: var(--cx-line-hot); }
+.cx-say .cx-tx {
+  min-width: 52px; min-height: 38px; padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--cx-copper) 55%, transparent); border-radius: 8px;
+  color: var(--cx-copper); font-size: 11px;
+}
+.cx-say .cx-tx:active { background: rgba(255,255,255,.08); }
+
+/* ---------- open-channel ticker (NPC ↔ NPC, overheard) ---------- */
+.cx-chatter {
+  position: absolute;
+  display: flex; gap: 8px; align-items: baseline;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--cx-line); border-radius: 8px;
+  background: var(--cx-bg);
+  color: var(--cx-dim);
+  font-size: 11px; line-height: 1.35;
+  pointer-events: none;
+  animation: cx-rise .2s ease-out both;
+}
+.cx-chatter__tag { flex: 0 0 auto; color: var(--cx-cyan); letter-spacing: .1em; font-size: 10px; }
+.cx-chatter__txt { flex: 1; min-width: 0; color: var(--cx-txt); opacity: .85; }
+.cx-chatter[data-tone="hostile"] .cx-chatter__tag { color: var(--cx-bad); }
+
+/* ---------- placement in the LIVING GALAXY cockpit ---------- */
+/* Portrait: stick + RCS bottom-left, dash bottom-right. The panel rides on
+ * top of the dash; the puck hangs on the right rail under the status line. */
+html[data-orient="portrait"] .cx {
+  --cx-rail-right: var(--g-rail-right, var(--pad-r));
+  /* 0.3.31: the puck and the systems strip share the right edge in portrait,
+   * and this 150px stopped clearing the strip when it grew — the pulse ring sat
+   * on ASST and the puck's left edge on CUT, both untappable.
+   *
+   * hud.js measures the strip and publishes --g-rail-top, but only where the
+   * puck clears the dash card at it. On a short screen the dash rides up until
+   * it already overlaps the strip, and dropping the puck below the strip there
+   * only moves it onto the throttle — so the variable stays unset and this
+   * number is what applies. It is deliberately the ORIGINAL one: the short
+   * screen keeps exactly the layout it had rather than a worse one. */
+  --cx-rail-top: var(--g-rail-top, calc(var(--pad-t) + 150px));
+}
+html[data-orient="portrait"] .cx-panel {
+  left: var(--pad-l); right: var(--pad-r);
+  bottom: calc(var(--pad-b) + var(--dash-h) + 10px);
+}
+html[data-orient="portrait"] .cx-chatter {
+  /* under the route plot, above the tutorial card — nothing else lives here */
+  top: calc(var(--pad-t) + 13.6rem);
+  left: var(--pad-l);
+  right: calc(var(--pad-r) + 40px);
+  border-radius: 4px;
+}
+
+/* Landscape: stick and RCS bottom-left, dash bottom-right, notice card
+ * bottom-centre. The panel takes the gap between them. */
+html[data-orient="landscape"] .cx {
+  /* 0.3.37 — landscape takes the measured slot too. The systems strip is on
+   * the LEFT here while the puck is on the right, so "below the strip" means
+   * nothing and the old fixed 108px put it over the throttle's presets. */
+  --cx-rail-right: var(--g-rail-right, var(--pad-r));
+  --cx-rail-top: var(--g-rail-top, calc(var(--pad-t) + 108px));
+}
+html[data-orient="landscape"] .cx-panel {
+  left: calc(var(--pad-l) + var(--stick) + var(--rcs) + 22px);
+  right: calc(var(--pad-r) + var(--dash-w) + 10px);
+  bottom: var(--pad-b);
+}
+html[data-orient="landscape"] .cx-log { max-height: 22vh; }
+html[data-orient="landscape"] .cx-chatter {
+  top: calc(var(--pad-t) + 108px);
+  left: var(--pad-l);
+  max-width: 44%;
+}

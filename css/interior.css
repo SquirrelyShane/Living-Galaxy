@@ -1,0 +1,101 @@
+/* LIVING GALAXY experimental — the deck plan overlay. Blueprint ink, mounted on <body>. */
+
+.in-root {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid;
+  grid-template-columns: 1fr minmax(200px, 26vw);
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "head head" "canvas rail";
+  background:
+    radial-gradient(ellipse at 40% 45%, rgba(20, 60, 100, 0.55), rgba(4, 10, 18, 0.92) 70%),
+    rgba(4, 10, 18, 0.9);
+  color: #cfeeff;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+}
+.in-root.in { animation: in-materialize 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; pointer-events: auto; }
+.in-root.out { animation: in-dematerialize 0.6s ease-in forwards; }
+@keyframes in-materialize { from { opacity: 0.2; clip-path: inset(0 0 100% 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+@keyframes in-dematerialize { from { opacity: 1; clip-path: inset(0 0 0 0); } to { opacity: 0; clip-path: inset(100% 0 0 0); } }
+
+/* the scan line that sweeps the canopy while the hull dissolves */
+.in-sweep {
+  position: absolute; left: 0; right: 0; height: 3px; top: 0;
+  background: linear-gradient(90deg, transparent, #7ce7ff, transparent);
+  box-shadow: 0 0 18px 4px rgba(124, 231, 255, 0.35);
+  opacity: 0; pointer-events: none;
+}
+.in-root.in .in-sweep { animation: in-sweep 0.7s linear; }
+.in-root.out .in-sweep { animation: in-sweep-up 0.6s linear; }
+@keyframes in-sweep { from { top: 0; opacity: 1; } to { top: 100%; opacity: 0.2; } }
+@keyframes in-sweep-up { from { top: 100%; opacity: 1; } to { top: 0; opacity: 0; } }
+
+.in-head {
+  grid-area: head;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: max(8px, env(safe-area-inset-top)) 12px 6px;
+  border-bottom: 1px solid rgba(126, 200, 255, 0.25);
+  font-size: 11px; letter-spacing: 0.08em;
+}
+.in-head b { color: #7ce7ff; margin-right: 12px; }
+.in-head span { color: rgba(207, 238, 255, 0.7); }
+.in-canvas { grid-area: canvas; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+.in-rail {
+  grid-area: rail; overflow-y: auto;
+  border-left: 1px solid rgba(126, 200, 255, 0.25);
+  padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
+  font-size: 11px;
+}
+.in-rail h4 { margin: 8px 0 4px; font-size: 10px; letter-spacing: 0.14em; color: rgba(126, 200, 255, 0.7); font-weight: 600; }
+.in-row { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px dashed rgba(126, 200, 255, 0.12); }
+.in-row .k { color: rgba(207, 238, 255, 0.85); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.in-row .v { color: #7ce7ff; flex: none; }
+.in-row.good .v { color: #9fe8b0; }
+.in-row.hot .v, .in-row.hot .k { color: #ff8c8c; }
+.in-row.amber .v { color: #ffc857; }
+.in-row.syn .v { color: #c9a8ff; }
+.in-empty { color: rgba(207, 238, 255, 0.45); padding: 4px 0; }
+.in-hand {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%;
+  background: rgba(110, 180, 230, 0.05); border: 1px solid rgba(126, 200, 255, 0.25); color: inherit;
+  padding: 5px 7px; margin: 3px 0; text-align: left; font: inherit; cursor: pointer;
+}
+.in-hand .nm { color: #cfeeff; }
+.in-hand .st { color: rgba(207, 238, 255, 0.55); font-size: 10px; }
+.in-hand.sel { border-color: #7ce7ff; background: rgba(126, 231, 255, 0.12); }
+.in-hand.conn .nm { color: #fff2aa; }
+
+.in-talk {
+  position: absolute; left: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  max-width: min(520px, calc(74vw - 24px));
+  background: rgba(6, 16, 28, 0.94); border: 1px solid rgba(126, 200, 255, 0.45);
+  box-shadow: 0 0 24px rgba(20, 80, 120, 0.4);
+  padding: 10px 12px; font-size: 12px;
+}
+.in-talk-nm { color: #7ce7ff; font-size: 13px; letter-spacing: 0.06em; }
+.in-talk-sub { color: rgba(207, 238, 255, 0.6); font-size: 10px; margin: 2px 0 8px; }
+.in-talk-line { color: #e6f4ff; margin-bottom: 8px; line-height: 1.4; }
+.in-talk-beat { margin: 0 0 8px; }
+.in-talk-beat-lbl, .in-talk-beat-tag { font-size: 10px; letter-spacing: 0.04em; color: rgba(207, 238, 255, 0.55); }
+.in-talk-beat-tag { margin-top: 3px; }
+.in-talk-beat-track { height: 6px; margin: 4px 0 0; background: rgba(126, 200, 255, 0.12); border: 1px solid rgba(126, 200, 255, 0.25); }
+.in-talk-beat-fill { height: 100%; width: 0; background: #7ce7ff; transition: width 0.35s linear; }
+.in-talk-beat-fill.ok { background: #8dffb0; }
+.in-talk-beat-fill.bad { background: #ff8c8c; }
+.in-talk-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.in-talk-opts .btn.accent { border-color: #fff2aa; color: #fff2aa; }
+.in-talk-opts .btn.danger { border-color: #ff8c8c; color: #ff8c8c; }
+.in-talk-log { margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(126, 200, 255, 0.2); color: rgba(207, 238, 255, 0.6); font-size: 10px; }
+
+@media (orientation: portrait), (max-width: 640px) {
+  .in-root { grid-template-columns: 1fr; grid-template-rows: auto 1fr minmax(120px, 34vh); grid-template-areas: "head" "canvas" "rail"; }
+  .in-rail { border-left: 0; border-top: 1px solid rgba(126, 200, 255, 0.25); }
+  .in-talk { left: 8px; right: 8px; max-width: none; bottom: calc(34vh + 8px); }
+}
+@media (pointer: coarse) {
+  .in-hand { padding: 8px 9px; }
+  .in-talk-opts .btn { min-height: 34px; }
+}
+.in-talk-opts .btn.tiny { padding: 4px 9px; font-size: 11px; }

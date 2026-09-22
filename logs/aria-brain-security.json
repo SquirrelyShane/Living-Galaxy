@@ -1,0 +1,45 @@
+{
+  "sig": "0.3.37:0.72-1.45:1.7",
+  "career": "security",
+  "sky": "sol",
+  "runs": 6,
+  "moves": {
+    "board:security:rogues": {
+      "runs": 1,
+      "secs": 1200.033333332242,
+      "cr": -1236,
+      "fails": 1
+    },
+    "board:security:bounty": {
+      "runs": 1,
+      "secs": 629.4999999994275,
+      "cr": 1400,
+      "fails": 1
+    },
+    "board:security:patrol": {
+      "runs": 1,
+      "secs": 1200.000000003312,
+      "cr": 2600,
+      "fails": 1
+    },
+    "board:civic:relay": {
+      "runs": 1,
+      "secs": 495.0666666729703,
+      "cr": 1200,
+      "fails": 1
+    },
+    "sell": {
+      "runs": 1,
+      "secs": 153.16666666861693,
+      "cr": 21449,
+      "fails": 0
+    },
+    "board:energy:reactor": {
+      "runs": 1,
+      "secs": 464.6333333392495,
+      "cr": -9496,
+      "fails": 1
+    }
+  },
+  "saved": 5539
+}

@@ -1,0 +1,24 @@
+// Living Galaxy — Cloudflare Workers static-asset deployment.
+//
+// Committed so `npx wrangler deploy` (the Workers Builds deploy command) uses THIS
+// instead of inventing a config at build time — its guess uploads the entire repo
+// directory as assets, node_modules included, and dies on workerd's 144 MiB binary
+// (the per-asset limit is 25 MiB). What actually gets uploaded is this directory
+// minus everything listed in .assetsignore: the playable site, nothing else.
+//
+// Routing (`/` → portal, `/play` → game, `/forum`, `/admin`) comes from the
+// `_redirects` file, which Workers static assets honor the same way Pages does.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "living-galaxy",
+  "compatibility_date": "2026-08-20",
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": ".",
+    // "none", deliberately: with auto-trailing-slash, the `/play → /index.html`
+    // rewrite gets normalized BACK to `/` (index.html always does under auto), and `/`
+    // rewrites to the portal — so /play showed the portal and the game was unreachable.
+    // With none, every route in _redirects serves exactly the file it names.
+    "html_handling": "none"
+  }
+}

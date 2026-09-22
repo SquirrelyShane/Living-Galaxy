@@ -1,0 +1,39 @@
+{
+  "sig": "0.3.37:0.72-1.45:1.7",
+  "career": "commerce",
+  "sky": "sol",
+  "runs": 14,
+  "moves": {
+    "board:trade:resupply": {
+      "runs": 4,
+      "secs": 2124.3000000023085,
+      "cr": 22504,
+      "fails": 1
+    },
+    "board:trade:procure": {
+      "runs": 7,
+      "secs": 3459.8000000316297,
+      "cr": 76174,
+      "fails": 1
+    },
+    "board:trade:tender": {
+      "runs": 1,
+      "secs": 337.0666666709585,
+      "cr": -9497,
+      "fails": 1
+    },
+    "yard": {
+      "runs": 1,
+      "secs": 44.03333333389401,
+      "cr": -1220,
+      "fails": 0
+    },
+    "board:salvage:salvage": {
+      "runs": 1,
+      "secs": 304.26666667054087,
+      "cr": 1022,
+      "fails": 1
+    }
+  },
+  "saved": 7659
+}

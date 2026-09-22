@@ -1,0 +1,262 @@
+/* LIVING GALAXY — the Glass HUD (chosen from ui-demos/b-glass).
+ *
+ * Frosted cards over the canopy. Status pills top-left, gauges top-right,
+ * throttle + keys down the right edge, a dock of chips bottom-right, and the
+ * chatbox where the thumbstick was. Menus (CMD) slide in as a left drawer.
+ * Loaded after style.css; every rule is #hud-scoped so it wins over the old
+ * layout and its media queries without touching them. */
+
+:root {
+  --glass: rgba(255, 255, 255, 0.07);
+  --glass-line: rgba(255, 255, 255, 0.12);
+  --glass-ink: #f1f4f8;
+  --glass-ink2: #9aa6b6;
+  --glass-accent: #5fd3c4;
+  --glass-warm: #ffb457;
+  --glass-r: 16px;
+}
+  background: var(--glass) !important; border: 1px solid var(--glass-line) !important; backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35); border-radius: var(--glass-r);
+}
+
+/* ---- top-left: brand + instrument pills ---- */
+#hud .hud-top { top: var(--pad-t); left: var(--pad-l); right: auto; width: auto; flex-direction: column; align-items: flex-start; gap: 6px; }
+#hud .hud-brand { padding: 5px 12px; border-radius: 999px; display: flex; gap: 8px; align-items: baseline; }
+#hud .hud-brand strong { font-size: 12px; letter-spacing: 0.18em; }
+#hud .hud-brand span { font-size: 11px; color: var(--glass-ink2); }
+#hud .instruments { position: absolute; transform: none !important; top: calc(var(--pad-t) + 36px); left: var(--pad-l); right: auto; display: flex; flex-wrap: wrap; gap: 6px; max-width: 62vw; padding: 0; background: none !important; border: 0 !important; box-shadow: none; backdrop-filter: none; }
+#hud .inst { background: var(--glass); border: 1px solid var(--glass-line); border-radius: 999px; padding: 4px 10px; display: flex; gap: 5px; align-items: baseline; backdrop-filter: blur(12px); }
+#hud .inst i { font-size: 10px; color: var(--glass-ink2); }
+#hud .inst b { font-size: 13px; }
+#hud .inst u { font-size: 10px; color: var(--glass-ink2); text-decoration: none; }
+
+/* narrow phones: shorter pills so two rows of instruments still clear the status line */
+@media (max-width: 400px) {
+  #hud .instruments { gap: 4px; max-width: 60vw; }
+  #hud .inst { padding: 2px 8px; }
+  #hud .inst b { font-size: 12px; }
+  #hud .inst i, #hud .inst u { font-size: 9px; }
+  #hud .status { top: calc(var(--pad-t) + 104px) !important; }
+  #hud .lockbar { top: calc(var(--pad-t) + 130px) !important; }
+  #hud .alarms { top: calc(var(--pad-t) + 156px) !important; }
+}
+
+/* ---- top-right: gauges as a small bar card ---- */
+#hud .gauges { left: auto; right: var(--pad-r); top: var(--pad-t); width: 118px; flex-direction: column; gap: 5px; padding: 8px 10px; }
+#hud .gauge { display: grid; grid-template-columns: 36px 1fr; gap: 6px; align-items: center; }
+#hud .gauge em { display: flex; justify-content: space-between; font-style: normal; font-size: 10px; color: var(--glass-ink2); }
+#hud .gauge .bar { height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.12); }
+#hud .gauge .bar b { border-radius: 3px; }
+
+/* ---- systems strip: four switches under the gauges ---- */
+/* `pointer-events: auto` is not optional here, and it is the whole reason the
+ * DOCK and HAIL side keys were dead for so long. `.hud` is `pointer-events:
+ * none` (style.css) so the pilot can drag the sky through the gaps between
+ * readouts, and EVERY interactive child has to opt back in — .panel and .rcs
+ * do. This strip never did, so the four switches a pilot reaches for first —
+ * shields, engines, turrets, assist — painted their state, looked live, and
+ * passed every tap straight through to the canvas. Found by the hit-test in
+ * smoke-immersive; it is not visible in a screenshot. */
+#hud .sys-strip { position: absolute; right: var(--pad-r); top: calc(var(--pad-t) + 100px); width: 118px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; pointer-events: auto; }
+#hud .sys-strip .sw { display: flex; flex-direction: column; align-items: center; gap: 1px; min-height: 0; height: 30px; padding: 2px 0; border-radius: 8px; background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(12px); }
+#hud .sys-strip .sw .nm { font-size: 8px; letter-spacing: 0.06em; color: var(--glass-ink2); }
+#hud .sys-strip .sw .st { font-size: 8px; }
+#hud .sys-strip .sw .led { width: 14px; height: 3px; border-radius: 2px; }
+/* CUT spans both columns under the four switches: it is the one the pilot
+   reaches for most in a belt, and a fifth cell in a 2-wide grid would leave a
+   hole beside it. */
+#hud .sys-strip .sw.wide { grid-column: 1 / -1; }
+#hud .sys-strip #sw-cut.on { border-color: rgba(255, 180, 87, 0.7) !important; }
+#hud .sys-strip #sw-cut.on .st { color: var(--glass-warm); }
+#hud .sys-strip #sw-cut.on .led { background: var(--glass-warm); box-shadow: 0 0 6px var(--glass-warm); }
+
+/* ---- status + lock, under the pills ---- */
+#hud .status { top: calc(var(--pad-t) + 100px); left: var(--pad-l); right: auto; max-width: 62vw; padding: 4px 10px; border-radius: 999px; font-size: 11px; }
+#hud .lockbar { top: calc(var(--pad-t) + 128px); left: var(--pad-l); right: auto; width: min(62vw, 16rem); border-radius: 999px; }
+#hud .alarms { top: calc(var(--pad-t) + 156px); left: var(--pad-l); right: auto; }
+
+/* ---- notice + toast: one glass line each, never in the middle ---- */
+#hud .hud-notice { top: calc(var(--pad-t) + 182px); left: var(--pad-l); right: calc(var(--g-col) + var(--pad-r) + 8px); max-width: none; padding: 8px 12px; }
+#hud .hud-notice h2 { font-size: 12px; margin: 0 0 2px; }
+#hud .hud-notice p { font-size: 12px; margin: 0; max-height: 3.9em; overflow: hidden; }
+#hud .toast { top: calc(var(--pad-t) + 182px); left: var(--pad-l); right: calc(var(--g-col) + var(--pad-r) + 8px); transform: none; max-width: none; text-align: left; font-size: 12px; }
+
+/* ---- right column, stacked from the bottom up so nothing can overlap:
+ *      dock (tool chips) · RCS cluster · side keys · throttle card.
+ *      Every block is placed by its bottom edge; heights are fixed here, not
+ *      inherited, and shrink together on short screens. ---- */
+/* The right-hand column is a stack with a fixed budget, and `--g-dock` is the
+ * box reserved at the bottom for the tool chips. It used to be a hand-tuned
+ * number per breakpoint — 146px, which is exactly 5 x 26px + 4 x 4px — so the
+ * moment 0.3.06 added the fullscreen chip the stack grew 30px past its own box
+ * and covered the RCS pad's bottom row: AFT, DN and SCAN laid out correctly and
+ * were untappable, because #btn-aria was painted over them.
+ *
+ * It was derived from --g-tools, a hand-kept count. 0.3.29 added the HOLD chip
+ * without raising it and the same bug came straight back: AFT, DN and SCAN
+ * untappable again, ARIA painted over them again. A number someone has to
+ * remember to bump is not a derivation, it is the same bug with extra steps.
+ *
+ * 0.3.31: hud.js MEASURES the column and publishes --g-dock in pixels, on
+ * resize, on orientation change, and through a ResizeObserver so a chip that
+ * merely unhides (the mute chip) is caught too. There is no feedback loop —
+ * .hud-tools is bottom-anchored and sized by its content, and nothing that
+ * reads --g-dock can change its height.
+ *
+ * The --g-tools arithmetic below stays as the no-JS fallback, for the frames
+ * before hud.js runs and for a browser that has no ResizeObserver. Keep it
+ * honest; test/hudlayout.test.mjs fails if it drifts from the markup. */
+:root {
+  --g-col: 96px;
+  --g-tools: 7;                 /* fallback only — hud.js measures. Visible chips: ARIA, fullscreen, CON, FPV, HOLD, MAP, II */
+  --g-tool-h: 26px;
+  --g-tool-gap: 4px;
+  --g-dock: calc(var(--g-tools) * var(--g-tool-h) + (var(--g-tools) - 1) * var(--g-tool-gap));
+  --g-rcs: 96px;                /* 3 rows, on the row the dead DOCK/HAIL keys gave back */
+  --g-gap: 6px;
+}
+#hud .hud-tools { position: fixed; right: var(--pad-r); bottom: var(--pad-b); z-index: 6; flex-direction: column; gap: var(--g-tool-gap); width: var(--g-col); }
+#hud .hud-tools .btn { width: 100%; height: var(--g-tool-h) !important; min-height: 0 !important; padding: 0 !important; border-radius: 9px; font-size: 9px; letter-spacing: 0.08em; }
+#hud .hud-tools #btn-con { color: var(--glass-accent); border-color: rgba(95, 211, 196, 0.5) !important; }
+#hud .hud-tools #btn-con.on { background: rgba(95, 211, 196, 0.16); }
+/* ARIA: dim when you have the ship, lit while it has the conn */
+/* The fullscreen chip. Same family as ARIA/CON, dimmer until it is on, and
+   the glyph is large for its box so it reads as an icon at 26px. */
+#hud .hud-tools #btn-full { color: #8fa6bd; border-color: rgba(143, 166, 189, 0.32) !important; font-size: 12px; line-height: 1; }
+#hud .hud-tools #btn-full.on { color: #dff0ff; background: rgba(124, 231, 255, 0.24) !important; border-color: rgba(124, 231, 255, 0.75) !important; }
+#hud .hud-tools #btn-aria { color: #9fe3c4; border-color: rgba(127, 224, 180, 0.35) !important; }
+#hud .hud-tools #btn-aria.on { color: #d9ffec; background: rgba(127, 224, 180, 0.3) !important; border-color: #7fe0b4 !important; box-shadow: 0 0 10px rgba(127, 224, 180, 0.35); }
+#hud .rcs { left: auto; right: var(--pad-r); bottom: calc(var(--pad-b) + var(--g-dock) + var(--g-gap)); width: var(--g-col); height: var(--g-rcs); gap: 3px; }
+#hud .rcs-btn { font-size: 8px; border-radius: 8px; }
+#hud .rcs-btn.brake { color: var(--glass-warm); border-color: rgba(255, 180, 87, 0.5) !important; }
+#hud .dash { left: auto; right: var(--pad-r); top: auto; bottom: calc(var(--pad-b) + var(--g-dock) + var(--g-rcs) + var(--g-gap) * 2); transform: none; width: var(--g-col); height: 236px; grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; gap: 6px; padding: 6px; }
+/* 0.3.37 — `1fr` carries an implicit `min-height: auto`, so a grid row never
+ * shrinks below its content's minimum however small the card gets. At the
+ * 620px breakpoint the dash is 150px tall, the throttle's min-content is
+ * larger than the room left for it, and the row below — the WARP / APPR pair
+ * — was drawn straight over the throttle's MAX button. `minmax(0, 1fr)` is
+ * the row actually meant: take the space that is left, and no more. */
+#hud .dash-tabs, #hud .switches, #hud .dash-page-name { display: none !important; }
+/* the throttle: a slim momentary track with the held-thrust presets beside it */
+#hud .thr { grid-column: 1; grid-row: 1; min-height: 0; display: grid; grid-template-columns: 22px 1fr; grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 6px; }
+#hud .thr-head { grid-column: 1 / -1; }
+#hud .thr-foot { grid-column: 1 / -1; }
+#hud .thr-track { grid-column: 1; grid-row: 2; width: 22px; }
+#hud .thr-thumb { left: 2px; right: 2px; height: 6px; }
+#hud .thr-presets { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; justify-content: space-between; gap: 2px; }
+#hud .thr-presets button { flex: 1; min-height: 0; padding: 0; border: 1px solid var(--glass-line); border-radius: 6px; background: rgba(255, 255, 255, 0.04); color: var(--glass-ink2); font: 600 9px var(--font-mono); letter-spacing: 0.04em; }
+#hud .thr-presets button.on { color: var(--glass-accent); border-color: rgba(95, 211, 196, 0.6); background: rgba(95, 211, 196, 0.1); }
+#hud .thr-presets button:last-child { color: var(--glass-warm); }
+#hud .thr-head { justify-content: center; }
+#hud .thr-foot { font-size: 8px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* WARP keeps its height; APPR sits beside it and the two split the width */
+#hud .warp-row { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+#hud .warpbar { grid-column: auto; grid-row: auto; grid-template-columns: 1fr; text-align: center; min-height: 36px; min-width: 0; border-radius: 9px; padding: 3px 1px; }
+#hud .approachbar { background: var(--glass); border: 1px solid var(--glass-line); color: var(--glass-ink2); }
+#hud .approachbar.on { color: var(--glass-accent); border-color: rgba(95, 211, 196, 0.6); }
+#hud .approachbar .warp-lab { color: inherit; }
+#hud .warpbar .warp-lab, #hud .warpbar .warp-state { position: relative; display: block; width: 100%; }
+#hud .warpbar .warp-lab { font-size: 9px; letter-spacing: 0.04em; }
+#hud .warpbar .warp-state { font-size: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the route card and the tutorial stack above the chatbox, left of the column; the notice is
+ * capped so the three never meet */
+:root { --g-chat: 28vh; --g-route: 104px; }
+#hud .route { position: absolute; transform: none !important; box-sizing: border-box; left: var(--pad-l); right: calc(var(--g-col) + var(--pad-r) + 8px); top: auto; bottom: calc(var(--pad-b) + var(--g-chat) + 8px); width: auto; max-height: var(--g-route); overflow: hidden; margin: 0; font-size: 11px; z-index: 5; }
+#hud .route .route-head { display: flex; justify-content: space-between; gap: 8px; }
+#hud .route .route-body { max-height: 3.6em; overflow: hidden; }
+/* the old portrait rule also pins the card's bottom, which stretches it to its cap: top only, and it fits its text */
+#hud .hud-notice { bottom: auto !important; transform: none !important; min-height: 0 !important; height: auto !important; max-height: 92px; overflow: hidden; padding: 7px 12px 8px; }
+#hud .hud-notice.fading { transform: translateY(6px) !important; }
+#hud .hud-notice h2 { line-height: 1.2; }
+#hud .hud-notice p { line-height: 1.3; }
+
+/* ---- the chatbox, where the stick was. Folded to its input by default; the unread badge
+ *      blinks with the count for the open tab; tap it, the input or the toggle to open ---- */
+#hud.chat-folded { --g-chat: 46px; }
+#hud .chatbox.folded { height: 46px; }
+#hud .chatbox.folded .cb-top, #hud .chatbox.folded .cb-log { display: none; }
+.cb-unread { position: relative; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--glass-line); background: rgba(255, 255, 255, 0.06); color: var(--glass-ink2); flex: none; padding: 0; }
+.cb-unread::before { content: ""; position: absolute; left: 9px; top: 9px; width: 12px; height: 12px; border: 1.5px solid currentColor; border-radius: 4px 4px 4px 1px; }
+.cb-unread i { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--glass-warm); color: #1a1200; font: 700 10px/16px var(--font-body, sans-serif); font-style: normal; text-align: center; display: none; }
+.cb-unread.has { color: var(--glass-warm); border-color: rgba(255, 180, 87, 0.5); animation: cb-blink 1.6s ease-in-out infinite; }
+.cb-unread.has i { display: block; }
+@keyframes cb-blink { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 180, 87, 0); } 50% { box-shadow: 0 0 0 5px rgba(255, 180, 87, 0.28); } }
+@media (prefers-reduced-motion: reduce) { .cb-unread.has { animation: none; } }
+
+#hud .chatbox { position: absolute; left: var(--pad-l); bottom: var(--pad-b); width: calc(100vw - var(--g-col) - var(--pad-l) - var(--pad-r) - 8px); height: var(--g-chat); display: flex; flex-direction: column; overflow: hidden; pointer-events: auto; transition: height 0.25s; }
+#hud .chatbox.open { height: 62vh; }
+#hud .chatbox.pulse { animation: cb-pulse 1.1s ease-out; }
+@keyframes cb-pulse { 0% { box-shadow: 0 0 0 0 rgba(95, 211, 196, 0.55); } 100% { box-shadow: 0 0 0 14px rgba(95, 211, 196, 0); } }
+.cb-top { display: flex; align-items: center; padding: 6px 8px 0; }
+.cb-tabs { display: flex; gap: 2px; }
+.cb-tab { position: relative; padding: 4px 9px; border-radius: 8px; color: var(--glass-ink2); font-size: 12px; background: none; border: 0; }
+.cb-tab.on { color: var(--glass-ink); background: rgba(255, 255, 255, 0.09); }
+.cb-badge { position: absolute; top: -3px; right: -2px; min-width: 14px; height: 14px; padding: 0 4px; border-radius: 7px; background: var(--glass-warm); color: #1a1200; font: 600 10px/14px var(--font-body, sans-serif); font-style: normal; text-align: center; }
+.cb-toggle { margin-left: auto; width: 30px; height: 26px; border-radius: 8px; color: var(--glass-ink2); background: none; border: 0; }
+.chatbox.open .cb-toggle { transform: rotate(180deg); }
+.cb-log { flex: 1; overflow-y: auto; padding: 6px 10px 2px; overscroll-behavior: contain; scrollbar-width: thin; }
+.cb-empty { color: var(--glass-ink2); font-size: 12px; margin: 8px 0; }
+.cb-row { padding: 5px 0; border-top: 1px solid var(--glass-line); }
+.cb-row:first-child { border-top: 0; }
+.cb-head { display: flex; gap: 6px; align-items: baseline; font-size: 11px; color: var(--glass-ink2); }
+.cb-head b { color: var(--glass-ink); font-weight: 600; }
+.cb-head i { font-style: normal; }
+.cb-when { margin-left: auto; }
+.cb-row.gnn .cb-head b { color: var(--glass-warm); }
+.cb-row.drones .cb-head b { color: #a6e29a; }
+.cb-row.hostile .cb-head b, .cb-row.alert .cb-text { color: #ff8a7a; }
+.cb-row.you { text-align: right; }
+.cb-row.you .cb-head { justify-content: flex-end; }
+.cb-row.you .cb-text { display: inline-block; background: rgba(255, 255, 255, 0.09); padding: 3px 9px; border-radius: 10px; }
+.cb-text { margin: 2px 0 0; font-size: 13px; line-height: 1.3; color: var(--glass-ink); }
+.cb-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.cb-link { padding: 3px 10px; border: 1px solid var(--glass-accent); border-radius: 999px; color: var(--glass-accent); font-size: 11px; background: none; }
+.cb-link:active { background: var(--glass-accent); color: #03201c; }
+.cb-in { display: flex; gap: 6px; padding: 6px 8px; align-items: center; }
+.cb-fold { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--glass-line); background: rgba(255, 255, 255, 0.06); color: var(--glass-ink2); flex: none; padding: 0; font-weight: 700; }
+.cb-in input { flex: 1; min-width: 0; background: rgba(255, 255, 255, 0.08); border: 0; border-radius: 999px; padding: 7px 13px; font-size: 13px; color: var(--glass-ink); }
+.cb-in button { width: 36px; height: 32px; border-radius: 50%; background: var(--glass-accent); color: #03201c; font-weight: 700; border: 0; }
+
+/* ---- tutorial card: under the notice strip, off the chat ---- */
+.tutor { top: auto !important; bottom: calc(var(--pad-b) + var(--g-chat) + var(--g-route) + 16px) !important; width: auto !important; right: calc(var(--g-col) + var(--pad-r) + 8px) !important; box-sizing: border-box; }
+
+/* ---- short screens: the column shrinks before anything overlaps ---- */
+@media (max-height: 740px) {
+  :root { --g-tool-h: 22px; --g-rcs: 84px; --g-gap: 4px; }
+  #hud .hud-tools .btn { font-size: 8px; }
+  #hud .dash { height: 188px; }
+  :root { --g-chat: 26vh; }
+  #hud .gauges { padding: 5px 8px; gap: 3px; }
+  #hud .instruments { max-width: 58vw; }
+}
+@media (max-height: 620px) {
+  :root { --g-tool-h: 18px; --g-rcs: 0px; }
+  #hud .rcs { display: none; }          /* thrusters live on the keyboard and in CMD on a phone this short */
+  #hud .dash { height: 150px; }
+  #hud .hud-notice, #hud .toast, .tutor { display: none !important; }
+  #hud .route { bottom: auto; top: calc(var(--pad-t) + 150px); }
+}
+
+/* ---- landscape: chat takes 40 % of the width ---- */
+@media (orientation: landscape) {
+  /* two right-hand columns: the throttle card alone on the far right, the gauges and the
+   * dock / RCS stack in a second column beside it; chat takes 40 % of the width */
+  :root { --g-tool-h: 18px; --g-rcs: 78px; --g-gap: 4px; --g-col2: calc(var(--pad-r) + var(--g-col) + 6px); }
+  #hud .dash { top: var(--pad-t); bottom: var(--pad-b); height: auto; }
+  #hud .gauges { right: var(--g-col2); width: var(--g-col); padding: 5px 6px; gap: 3px; }
+  #hud .sys-strip { right: auto; left: var(--pad-l); width: 118px; top: calc(var(--pad-t) + 100px); grid-template-columns: repeat(4, 1fr); width: 220px; }
+  #hud .status { top: calc(var(--pad-t) + 136px); }
+  #hud .lockbar { top: calc(var(--pad-t) + 164px); }
+  #hud .route { bottom: auto; top: calc(var(--pad-t) + 192px); }
+  #hud .gauge { grid-template-columns: 30px 1fr; }
+  #hud .hud-tools { right: var(--g-col2); }
+  #hud .rcs { right: var(--g-col2); }
+  :root { --g-chat: 34vh; }
+  #hud .chatbox { width: min(40vw, 440px); }
+  #hud .chatbox.open { height: 80vh; }
+  #hud .instruments { max-width: 46vw; }
+  #hud .hud-notice, #hud .toast { right: auto; width: min(46vw, 24rem); }
+  #hud .route { right: auto; width: min(40vw, 440px); }
+  .tutor { left: calc(min(40vw, 440px) + var(--pad-l) + 8px) !important; right: calc(var(--g-col2) + var(--g-col) + 8px) !important; bottom: var(--pad-b) !important; width: auto !important; }
+}
+@media (prefers-reduced-motion: reduce) { #hud .chatbox { transition: none; } #hud .chatbox.pulse { animation: none; } }

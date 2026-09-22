@@ -1,0 +1,39 @@
+{
+  "sig": "0.3.27:0.72-1.45:1.7",
+  "career": "trading",
+  "sky": "sol",
+  "runs": 9,
+  "moves": {
+    "board:mining:vein": {
+      "runs": 1,
+      "secs": 798.8333333326068,
+      "cr": 11587,
+      "fails": 1
+    },
+    "yard": {
+      "runs": 1,
+      "secs": 145.16666666653464,
+      "cr": -2028,
+      "fails": 0
+    },
+    "mine": {
+      "runs": 5,
+      "secs": 940.2333333324782,
+      "cr": 13696,
+      "fails": 0
+    },
+    "sell": {
+      "runs": 1,
+      "secs": 61.266666666610945,
+      "cr": 3718,
+      "fails": 0
+    },
+    "board:mining:ice": {
+      "runs": 1,
+      "secs": 876.9666666658691,
+      "cr": -900,
+      "fails": 1
+    }
+  },
+  "saved": 3373
+}

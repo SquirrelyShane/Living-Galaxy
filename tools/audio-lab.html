@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LIVING GALAXY · audio lab</title>
+<style>
+  :root { --bg:#06080d; --card:#0b0f16; --line:#1b2530; --ink:#dfe6ef; --dim:#7b8798; --cy:#6fd6e8; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; padding:14px 12px 40px; }
+  h1 { font-size:15px; letter-spacing:.16em; margin:0 0 2px; font-weight:600; }
+  .sub { color:var(--dim); font-size:11px; margin:0 0 14px; }
+  h2 { font-size:10px; letter-spacing:.18em; color:var(--dim); margin:18px 0 7px; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr)); gap:6px; }
+  button { font:inherit; font-size:11px; color:var(--ink); background:var(--card);
+           border:1px solid var(--line); border-radius:7px; padding:11px 8px; min-height:44px;
+           text-align:left; letter-spacing:.04em; }
+  button:active { border-color:var(--cy); color:var(--cy); }
+  button.on { border-color:var(--cy); color:var(--cy); }
+  .row { display:flex; align-items:center; gap:9px; margin:5px 0; }
+  .row label { width:5.6rem; font-size:11px; color:var(--dim); letter-spacing:.1em; }
+  .row input[type=range] { flex:1; accent-color:var(--cy); height:26px; }
+  .row b { width:2.4rem; text-align:right; font-size:11px; color:var(--cy); font-weight:500; }
+  .bar { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .note { color:var(--dim); font-size:10.5px; margin:9px 0 0; line-height:1.5; }
+  #meter { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin:10px 0 0; }
+  #meter i { display:block; height:100%; width:0; background:var(--cy); transition:width .08s linear; }
+</style>
+</head>
+<body>
+<h1>LIVING GALAXY · AUDIO LAB</h1>
+<p class="sub">Every cue and every ambient bed, live. Nothing here is a file — it is all synthesised on the spot.</p>
+
+<div class="bar">
+  <button id="unlock">▶ START AUDIO</button>
+  <button id="bedstop">■ BED OFF</button>
+</div>
+<div id="meter"><i></i></div>
+
+<h2>MIX</h2>
+<div id="mix"></div>
+
+<h2>AMBIENT BED — where you are</h2>
+<div class="grid" id="places"></div>
+<p class="note">The bed never stops and never restarts; changing place crossfades held voices. Leave one running and fire cues over it — that is how they will actually be heard.</p>
+
+<h2>CUES</h2>
+<div id="cues"></div>
+
+<p class="note" id="stat"></p>
+
+<script type="importmap">
+{ "imports": { "three": "../vendor/three.module.min.js" } }
+</script>
+<script type="module">
+import { CUES, cue } from "../js/audio/cues.js";
+import { busLevels, setBusLevel, BUSES, audio, ensureAudio } from "../js/audio/graph.js";
+import { ambience, PLACE_IDS, startAmbience, stopAmbience } from "../js/audio/ambience.js";
+
+const $ = (id) => document.getElementById(id);
+
+/* ---- mix ---- */
+const mix = $("mix");
+const levels = busLevels();
+for (const name of ["master", ...BUSES]) {
+  const row = document.createElement("div");
+  row.className = "row";
+  const lab = document.createElement("label");
+  lab.textContent = name.toUpperCase();
+  const r = document.createElement("input");
+  r.type = "range"; r.min = "0"; r.max = "100"; r.value = String(Math.round((levels[name] ?? 0.6) * 100));
+  const b = document.createElement("b");
+  b.textContent = r.value;
+  r.addEventListener("input", () => { b.textContent = r.value; setBusLevel(name, r.value / 100); });
+  row.append(lab, r, b);
+  mix.append(row);
+}
+
+/* ---- places ---- */
+const places = $("places");
+for (const p of PLACE_IDS) {
+  const btn = document.createElement("button");
+  btn.textContent = p;
+  btn.addEventListener("click", () => {
+    ambience.set(p);
+    [...places.children].forEach((c) => c.classList.toggle("on", c === btn));
+  });
+  places.append(btn);
+}
+
+/* ---- cues, grouped by prefix ---- */
+const groups = {};
+for (const name of Object.keys(CUES)) {
+  const g = name.split(".")[0];
+  (groups[g] ??= []).push(name);
+}
+const cuesEl = $("cues");
+for (const [g, names] of Object.entries(groups)) {
+  const h = document.createElement("h2");
+  h.textContent = g.toUpperCase();
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  for (const n of names) {
+    const btn = document.createElement("button");
+    btn.textContent = n.split(".")[1];
+    btn.addEventListener("click", () => {
+      /* the two cues that take an argument get a middling one */
+      if (n === "ship.impact") cue(n, 0.7);
+      else if (n === "nav.spool") cue(n, 2.4);
+      else cue(n);
+    });
+    grid.append(btn);
+  }
+  cuesEl.append(h, grid);
+}
+
+/* ---- transport ---- */
+$("unlock").addEventListener("click", () => {
+  const k = ensureAudio();
+  if (k?.ctx.state === "suspended") k.ctx.resume();
+  startAmbience();
+  ambience.set("cockpit");
+  [...places.children].forEach((c) => c.classList.toggle("on", c.textContent === "cockpit"));
+});
+$("bedstop").addEventListener("click", () => {
+  stopAmbience(600);
+  [...places.children].forEach((c) => c.classList.remove("on"));
+});
+
+/* ---- a level meter, so you can see a cue that is too hot ---- */
+let analyser = null;
+const bar = document.querySelector("#meter i");
+setInterval(() => {
+  const k = ensureAudio();
+  if (!k) return;
+  if (!analyser) {
+    analyser = k.ctx.createAnalyser();
+    analyser.fftSize = 1024;
+    k.master.connect(analyser);
+  }
+  const buf = new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
+  let peak = 0;
+  for (const v of buf) peak = Math.max(peak, Math.abs(v));
+  bar.style.width = `${Math.min(100, peak * 140)}%`;
+  $("stat").textContent = `${Object.keys(CUES).length} cues · ${PLACE_IDS.length} beds · ${audio.voices} voices live · peak ${(peak).toFixed(3)} · bed: ${ambience.place || "off"}`;
+}, 110);
+
+/* ---- offline bake, for tools/audiobake.mjs ---- */
+window.__bakeCue = async (name, seconds = 4) => {
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const rate = 44100;
+  const off = new OAC(2, Math.ceil(rate * seconds), rate);
+  const graph = await import("../js/audio/graph.js");
+  const cues = await import("../js/audio/cues.js");
+  graph._teardown();
+  graph._installContext(off);
+  if (name.startsWith("bed.")) {
+    const amb = await import("../js/audio/ambience.js");
+    amb.disposeAmbience();
+    amb.startAmbience();
+    amb.ambience.set(name.slice(4));
+  } else if (name === "ship.impact") cues.cue(name, 0.7);
+  else if (name === "nav.spool") cues.cue(name, 2.4);
+  else cues.cue(name);
+  const buf = await off.startRendering();
+  graph._teardown();
+  const ch = [buf.getChannelData(0), buf.numberOfChannels > 1 ? buf.getChannelData(1) : buf.getChannelData(0)];
+  const n = buf.length;
+  const bytes = new DataView(new ArrayBuffer(44 + n * 4));
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) bytes.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, "RIFF"); bytes.setUint32(4, 36 + n * 4, true); str(8, "WAVEfmt ");
+  bytes.setUint32(16, 16, true); bytes.setUint16(20, 1, true); bytes.setUint16(22, 2, true);
+  bytes.setUint32(24, rate, true); bytes.setUint32(28, rate * 4, true);
+  bytes.setUint16(32, 4, true); bytes.setUint16(34, 16, true);
+  str(36, "data"); bytes.setUint32(40, n * 4, true);
+  let peak = 0, sum = 0;
+  for (let i = 0; i < n; i++) {
+    for (let c = 0; c < 2; c++) {
+      const v = Math.max(-1, Math.min(1, ch[c][i]));
+      peak = Math.max(peak, Math.abs(v));
+      sum += v * v;
+      bytes.setInt16(44 + (i * 2 + c) * 2, v < 0 ? v * 0x8000 : v * 0x7fff, true);
+    }
+  }
+  /* Two different questions. `length` is where the last audible sample is,
+   * which a long reverb tail inflates. `tailRms` is the energy in the final
+   * half second — that is what separates a cue that is decaying from one
+   * that never stopped, and the difference matters because a held voice
+   * nobody released is a leak that lasts the session. */
+  let last = 0;
+  for (let i = 0; i < n; i++) if (Math.abs(ch[0][i]) > 0.002) last = i;
+  const tail = last / rate;
+  const from = Math.max(0, n - Math.floor(rate * 0.5));
+  let tsum = 0;
+  for (let i = from; i < n; i++) tsum += ch[0][i] * ch[0][i];
+  const tailRms = Math.sqrt(tsum / Math.max(1, n - from));
+  let b = "";
+  const u8 = new Uint8Array(bytes.buffer);
+  for (let i = 0; i < u8.length; i += 8192) b += String.fromCharCode(...u8.subarray(i, i + 8192));
+  return { wav: btoa(b), peak, rms: Math.sqrt(sum / (n * 2)), length: tail, tailRms };
+};
+</script>
+</body>
+</html>

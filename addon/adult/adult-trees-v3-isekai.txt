@@ -1,0 +1,2262 @@
+# =============================================================================
+# ADULT / MATURE CONVERSATION TREES — V3 SPACE-ISEKAI EXPANSION
+# =============================================================================
+# Rebuilt from the original tree while preserving node IDs, destinations,
+# conditions and parser-facing flags.
+#
+# V2 WRITING GOALS
+# - conversation first; branch mechanics second
+# - less repetitive command/menu language
+# - more hesitation, humor, familiarity, tension and emotional reaction
+# - mature intimacy described non-graphically
+# - clearer mutual boundaries and check-ins
+# - distinct partner / stranger / pad / brig / xeno tones
+#
+# OPTIONAL FUTURE STATE FLAGS (not required by this file):
+# trust, affection, stress, tension, jealousy, relationshipStage,
+# privacy, mood, history.* and remembered conversation flags.
+# =============================================================================
+
+# =============================================================================
+# ADULT PACK — CONVERSATION TREES  (hand-edit this file)
+# =============================================================================
+#
+# HOW TO EDIT
+# -----------
+# 1. Find a node in [brackets]. That is one beat in the chat.
+# 2. Add or change "They:" lines. Those are possible replies at that beat.
+#    One is picked per visit. Order does not matter. Add as many as you want.
+# 3. Add or change "> Label => next.node" lines. Those are player choices.
+#    The label is the button. The id after => is where the chat goes.
+# 4. "You:" is the narration printed when THIS node opens (what you just did).
+# 5. "Scene:" is optional physical narration after the reply.
+# 6. Lines starting with # are comments. Blank lines are fine.
+#
+# SPECIAL TARGETS
+#   END              thread closes
+#   topics           back to topic list
+#
+# FLAGS on a node (optional, one per line):
+#   title:     shown in the atlas
+#   when:      human note (not parsed as logic)
+#   place:     cabin | corridor | pad | brig
+#   heat:      +1  or  +2
+#   act:       kiss | hands | oral | sex | tryChild
+#   pace:      hard | slow | flip
+#   cls:       accent | danger     (default style for arriving here)
+#   effect:    trust=+2 morale=+1 resistance=-1
+#              Applied when the node opens. Positive resistance means the NPC
+#              pushes back harder; negative resistance means reduced resistance.
+#
+# FLAGS on a choice:
+#   > Label => node.id
+#   > Label | accent => node.id
+#   > Label | danger => node.id
+#   > Label | when:partner => node.id
+#   > Label | when:family => node.id
+#   > Label | when:docked => node.id
+#   > Label | when:captive => node.id
+#   > Label | when:xeno => node.id
+#   > Label | when:heat>=2 => node.id
+#   > Label | when:heat<2 => node.id
+#   > Label | when:credits>=100 => node.id
+#   > Label | when:credits<100 => node.id
+#
+# A choice can also carry a You-line for the click itself:
+#   > Label => node.id :: You walk to the hatch.
+#
+# Do not reuse a node id. If you want a new branch, copy a block,
+# change the [id], point a choice at it.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# TOPIC LIST
+# -----------------------------------------------------------------------------
+
+[topics]
+title: Topic list
+They: I'm off the board. That can mean talk or it can mean you.
+They: You keep looking at the hatch like it is a question.
+They: Say the name of the thing or go stand a watch.
+> The cabin | accent | when:partner => cabin.partner
+> Ask them somewhere private | accent | when:notpartner => cabin.other
+> An hour on the pad | accent | when:docked => pad.open
+> Visit a prisoner in the brig | when:captive => brig.entry
+> Speak with an indebted servant | when:collared => collar.entry
+> The body they have | accent | when:xeno => xeno.ask
+
+
+# -----------------------------------------------------------------------------
+# CABIN — NOT PARTNER
+# -----------------------------------------------------------------------------
+
+[cabin.other]
+title: Cabin ask — not partner
+place: corridor
+when: not partner
+They: If that's a question, ask it with your mouth or don't.
+They: You keep looking at my mouth. Say the thing or walk.
+They: Private is a hatch, not a corridor performance.
+They: I don't do briefings against a bulkhead.
+They: If the mess sees this they will make it smaller than it is.
+> Ask them to the cabin | accent => cabin.other.ask :: You ask for the cabin, not the corridor.
+> Kiss them here => kiss.corridor :: You pin the question to the bulkhead.
+> Talk without touching => cabin.other.talk :: You let the moment become more intimate.
+> Cover it — ask about the watch => cabin.other.cover :: You make it sound like a roster problem.
+> Drop it => end.drop :: You let the moment pass.
+
+[cabin.other.ask]
+title: They said the cabin is yes
+They: Door. Now.
+They: Hatch. Before I remember a reason not to.
+They: Yes. Not here. In.
+They: If you follow me, you follow me all the way in.
+They: I will not stand in this corridor and negotiate the rest.
+> Go in | accent => cabin.in :: You follow. The hatch dogs.
+> After the watch instead => cabin.other.later :: You name a later hour so this does not have to be now.
+> Not tonight => end.out :: You don't follow.
+
+[cabin.other.later]
+They: Then say the hour like you will keep it.
+They: I can wait. I will not wait in a corridor.
+They: Fine. After. Don't make it a performance in the mess first.
+> Promise the hour | accent => end.promise :: You name the watch and mean it.
+> Change your mind — go in now => cabin.in :: You drop the delay and follow.
+> Walk away => end.out :: You take the delay as an exit.
+
+[cabin.other.talk]
+They: Words first. That is allowed. Hands later is not promised.
+They: If this is an apology, make it an apology. If it is a want, make it a want.
+They: I can hear you without being against a wall.
+> Say you want them | accent => cabin.other.want :: You say it without the hatch as cover.
+> Ask if they want you => cabin.other.askwant :: You put the question on them.
+> Leave it as talk => end.talkonly :: You take the words and do not push the door.
+
+[cabin.other.want]
+They: Then the cabin is the next sentence. Not the mess.
+They: I heard you. I did not hear a time.
+They: Want is cheap. A hatch is not.
+> Ask them to the cabin | accent => cabin.other.ask
+> Kiss them here => kiss.corridor
+> Stop there => end.talkonly
+
+[cabin.other.askwant]
+They: Sometimes. Not as a corridor trick.
+They: Yes. Not tonight-in-public yes. Cabin yes.
+They: I want the version of you that can shut a door.
+> Ask them to the cabin | accent => cabin.other.ask
+> Drop it => end.drop
+
+[cabin.other.cover]
+They: Cute. The watch is not what your mouth was doing.
+They: Fine. We can pretend this was roster. I will not pretend twice.
+They: If you need a cover, you are not ready for the cabin.
+> Drop the cover and ask => cabin.other.ask
+> Take the cover and leave => end.drop
+
+
+# -----------------------------------------------------------------------------
+# CABIN — PARTNER
+# -----------------------------------------------------------------------------
+
+[cabin.partner]
+title: Cabin — partner
+place: cabin
+when: partner
+They: Door's dogged if you want it to be.
+They: You know you don't have to hover by the hatch.
+They: I'm off the board. We can talk, sit here in silence, or forget the rest of the ship for a while.
+They: You came home like a person with a decision. Make it.
+They: I already took my boots off. That was not nothing.
+> Shut the hatch | accent => cabin.in :: You dog the hatch. The corridor stops existing.
+> Talk first => cabin.talk :: You let the moment become more intimate.
+> A minute together, before the watch | accent | when:heat<2 => during.hands :: You do not take the long road.
+> Stay with the moment | accent | when:heat>=2 => during.sex :: You skip the speech. They already voted.
+> I need to tell you something first => cabin.news :: You let the moment become more intimate.
+> Bad watch. I just need you here => cabin.softneed :: You come in wrecked and do not dress it as hunger.
+
+[cabin.in]
+title: Hatch shut
+place: cabin
+You: You make your intention clear without rushing the moment.
+They: Suit off.
+They: Hatch is shut. That was the hard part.
+They: Good. Now say how, or I will.
+They: If you freeze now I will dress you myself and send you back to the board.
+They: Come here. We can still talk. We can also not.
+> Act menu — say how | accent => menu.from_in
+> Terms first — quiet, marks, time => terms.open :: You let the moment become more intimate.
+> Just kiss them => during.kiss :: You let the moment become more intimate.
+> You froze. Sit instead => cabin.talk :: You sit. The suit stays on a minute longer.
+
+[cabin.talk]
+title: Talk first
+You: You sit on the bunk instead of reaching.
+They: Talk or sit. Both are fine.
+They: You can have words. You can have me. Where do you want to start?
+They: I'm listening. I'm also not dressed for a briefing.
+They: Stay with me. If anything changes, I'll tell you.
+They: I like this version of you. Don't rush it just because you can.
+> Tell them what you want | accent => talk.want.you
+> Ask what they want => talk.want.them
+> Talk about the last watch => talk.watch
+> Just stay close => talk.soft :: You stay dressed. You stay close.
+> I changed my mind. Hatch. | accent => cabin.in
+
+[cabin.news]
+You: You say there is a thing they should hear before anyone gets undressed.
+They: Then Go on. I can hold bad news and still want you after. Usually.
+They: If this is a leaving speech, do not start it with my belt.
+They: I'm here. Talk.
+> It can wait. I wanted you first. | accent => cabin.in
+> Soft night only => talk.soft
+> Back to the watch => end.watch :: You came to speak and the speaking used the hour.
+
+[cabin.softneed]
+You: You sit. You do not reach yet.
+They: Come here. You can have quiet. You can have a mouth. You don't have to pick this second.
+They: I can stand a wreck. I cannot stand you pretending you are fine and then shaking.
+They: Boots off. That's an order I am allowed.
+> Stay close only => talk.soft
+> Kiss them => during.kiss
+> Shut the hatch properly | accent => cabin.in
+
+
+# -----------------------------------------------------------------------------
+# TALK BRANCHES
+# -----------------------------------------------------------------------------
+
+[talk.want.you]
+title: You tell them
+You: You say the want without sanding it down.
+They: Go on.
+They: Don't pretty it up. I want the actual sentence.
+They: Tell me the thing you wouldn't say on the board.
+They: Good. Keep going. Vague is how people get hurt.
+> I want your mouth | accent => talk.you.mouth
+> I want you in the bunk | accent => talk.you.bed
+> I want your hands and nothing louder => talk.you.hands
+> I want it rough => talk.you.rough
+> I want you to take me => talk.you.take
+> I want quiet and close, not a scene => talk.soft
+
+[talk.you.mouth]
+They: Then ask with your knees or ask me to. I can do either.
+They: Mouth is a full answer. Don't tack a speech on it.
+They: Yes. I have wanted that since the last burn.
+> You go to them | accent => during.oral
+> Ask them to | accent => during.oral
+> Not only that — menu => menu.from_talk
+
+[talk.you.bed]
+They: Then stop talking like the bunk is theoretical.
+They: Stay with me. If anything changes, I'll tell you.
+They: Hatch is already shut. That was the permission.
+> Take this further | accent => during.sex
+> Terms first => terms.open
+> Kiss first => during.kiss
+
+[talk.you.hands]
+They: Hands I can do. I can also be greedy after. Say if greedy is allowed.
+They: Quiet. I heard you. Come here.
+They: Then we keep the suits half on and we keep the noise down.
+> Stay close | accent => during.hands
+> Allow greedy after => during.hands
+> Menu => menu.from_talk
+
+[talk.you.rough]
+They: Rough I can do. Mean I will not. Know the difference.
+They: Then say stop if you mean stop. I'd rather you tell me.
+They: Marks under a flight suit. That I understood.
+> Take this further | accent => during.sex.roughask
+> Terms first — marks, safe word, time => terms.open
+> Too far. Soft instead => talk.soft
+
+[talk.you.take]
+They: Then lie back and let me. I have been patient.
+They: I can take you. I will still look at your face.
+They: Yes. Don't start topping the request halfway through.
+> Let them | accent => during.sex
+> Kiss first => during.kiss
+> Menu => menu.from_talk
+
+[talk.want.them]
+title: They tell you
+You: You ask what they want and then you shut up.
+They: I want you to fuck me. That is not a metaphor.
+They: Stay with me. If anything changes, I'll tell you.
+They: I want your hands, then the rest, and I want you to look at me.
+They: I want to be kissed like the board can wait and then I want the bunk.
+They: Tonight I want slow. If you make it a drill I will stop you.
+> Follow their order | accent => during.kiss
+> Skip to what they named last | accent => during.sex
+> Ask them to be more specific => talk.them.more
+> Soft only tonight => talk.soft
+
+[talk.them.more]
+They: Mouth. Then bunk. If I shake, that is not a stop.
+They: Hands on my hips so I know you aren't going anywhere.
+They: Stay with me. If anything changes, I'll tell you.
+They: Look at me. That is the specific part.
+> Mouth first | accent => during.oral
+> Take this further | accent => during.sex
+> Stay close | accent => during.hands
+
+[talk.watch]
+You: You talk about the last watch instead of the bunk.
+They: I was there. I know. Come here anyway.
+They: We can unpack the burn after. Or we can not.
+They: If you need to talk it dead, talk it dead. I will not punish you for not being hard yet.
+> Let the watch go — hatch | accent => cabin.in
+> Stay on the watch, no touching => end.talkonly
+> Stay close while you talk => talk.soft
+
+[talk.soft]
+title: Stay close
+You: You stay dressed. You stay close.
+heat: +1
+They: Don't dress yet.
+They: Stay in the clothes. Stay close. That still counts.
+They: I can do quiet. I cannot do you leaving in the first minute.
+They: This is still the cabin. Don't make it smaller than a bunk.
+They: Hand on my neck is allowed. Anything else you ask first.
+> Kiss them anyway | accent => during.kiss
+> Ask for more now => menu.from_talk
+> Sleep like this => end.stay
+> Back to the watch => end.watch
+
+
+# -----------------------------------------------------------------------------
+# TERMS
+# -----------------------------------------------------------------------------
+
+[terms.open]
+title: Terms
+You: You make the rules before anyone gets sore by accident.
+They: Good. I like a person who can say the ugly words first.
+They: Let's be clear about boundaries first. I don't want either of us guessing.
+They: We can talk through it. I just need us to be clear with each other before anything changes.
+> Quiet. No marks. Watch in twenty. => terms.quiet :: You keep it small enough to hide.
+> Loud is fine. Marks under the suit. => terms.loud :: You give permission instead of hoping.
+> Finish in me. | accent | when:family => terms.in
+> Don't finish in me. => terms.out
+> Skip the list. I trust you. | accent => menu.from_in
+
+[terms.quiet]
+They: Quiet I can do. The next cabin isn't deaf.
+They: Then put a hand on my mouth when you have to.
+They: Twenty minutes is a tight orbit. Don't waste it talking.
+> Kiss | accent => during.kiss
+> Stay close => during.hands
+> Get closer => during.oral
+> Take this further => during.sex
+
+[terms.loud]
+They: Then don't look shocked when I am not polite.
+They: Marks I can hide. Don't put them where a collar camera cares.
+They: Good. I wanted to stop being careful.
+> Take this further | accent => during.sex.roughask
+> Get closer => during.oral
+> Menu => menu.from_in
+
+[terms.in]
+They: Then say it again when you are close. I want the last ten seconds.
+They: If it takes, it takes. That is a different node. This is just the finish.
+They: Yes.
+> Take this further | accent => during.sex
+> Say you want a child, not only a finish | when:family => child.ask
+
+[terms.out]
+They: Let's be clear about boundaries first. I don't want either of us guessing.
+They: Good. I can want you and still want a clean scan.
+They: Say close. I will hold you to it.
+> Take this further | accent => during.sex
+> Get closer => during.oral
+
+
+# -----------------------------------------------------------------------------
+# ACT MENU
+# -----------------------------------------------------------------------------
+
+[menu.from_in]
+title: Act menu — hatch just shut
+You: You have the room. They want a verb.
+They: If you're going to start something, say how.
+They: Kiss, hands, mouth, bunk. I can do all of them. I'd rather you tell me.
+They: Tell me what you're thinking. I hate a person who starts and then goes shy.
+They: You don't need a speech. Just tell me what feels right.
+> Kiss them => during.kiss
+> Stay close | accent => during.hands
+> Get closer | accent => during.oral
+> Take this further | accent => during.sex
+> Bed — and say you want a child | accent | when:family => child.ask
+> Terms first => terms.open
+> Stop here => end.stop
+
+[menu.from_talk]
+title: Act menu — after talk
+You: They wait for the shape, not another speech.
+They: You said it. So what happens now?
+They: Good. Don't leave it as a speech.
+They: I understand what you want. I'm asking what you want from me right now.
+They: I already answered. Your turn to move.
+> Kiss them => during.kiss
+> Stay close | accent => during.hands
+> Get closer | accent => during.oral
+> Take this further | accent => during.sex
+> Bed — and say you want a child | accent | when:family => child.ask
+> Stop here => end.stop
+
+[menu.again]
+title: Act menu — again
+You: They are still in the bunk. Neither of you seems ready to call the night finished.
+They: You can have again. Say how.
+They: I'm still here. That was not a closing argument.
+They: I'm still here. I got more patient, not less hungry.
+They: If you are asking permission, you already have it.
+> Kiss them => during.kiss
+> Stay close | accent => during.hands
+> Get closer | accent => during.oral
+> Take this further | accent => during.sex
+> Try for a child | accent | when:family => child.ask
+> Actually stay still => end.stay
+> Back to the watch => end.watch
+
+
+# -----------------------------------------------------------------------------
+# DURING — KISS
+# -----------------------------------------------------------------------------
+
+[during.kiss]
+title: During — kiss
+act: kiss
+heat: +1
+You: You kiss them and wait for the next sentence.
+They: That was the mouth. Do you want the rest?
+They: I'm not done being kissed. I'm also not only that.
+They: You can stop there. I will be annoyed and I will live.
+They: Bite if you mean it.
+They: Hand in my hair. That's the ask.
+They: Don't perform. Kiss.
+> Keep kissing | accent => finish.kiss
+> Bite => kiss.bite :: You bite. You mean it.
+> Stay close | accent => during.hands
+> Get closer | accent => during.oral
+> Take this further | accent => during.sex
+> Talk against their mouth => kiss.talk :: You speak into the kiss instead of leaving it.
+> Stop here => end.stop
+
+[kiss.corridor]
+title: Corridor kiss
+place: corridor
+act: kiss
+heat: +1
+You: You pin the question to the bulkhead.
+They: The hatch isn't dogged. I don't care.
+They: Someone will walk this passage. I still want this.
+They: That's not off-duty. That's mine.
+They: If this is a question, the answer is yes.
+> Keep kissing | accent => finish.kiss
+> Pull them to the cabin | accent => cabin.in :: You drag the kiss somewhere with a hatch.
+> Hands here => during.hands
+> Someone's coming — stop => end.caught :: You break it because the hull has ears.
+> Stop here => end.stop
+
+[kiss.bite]
+They: Yes. That. Don't you make it cute after.
+They: Again. Not the throat unless you know me.
+They: I will ruin your next briefing.
+> Keep kissing | accent => finish.kiss
+> Stay close => during.hands
+> Take this further => during.sex
+> Stop here => end.stop
+
+[kiss.talk]
+They: Then say it against my mouth. I can hear you.
+They: If the sentence is stop, I will stop. If it is more, move.
+They: Don't use talk to dodge the body.
+> Say you want more | accent => during.hands
+> Say you want the bunk => during.sex
+> Say that's enough => end.stop
+
+
+# -----------------------------------------------------------------------------
+# DURING — HANDS
+# -----------------------------------------------------------------------------
+
+[during.hands]
+title: During — hands
+act: hands
+heat: +1
+You: You get a hand where they asked.
+They: Don't you dare stop at a hand.
+They: Stay with me. If anything changes, I'll tell you.
+They: Quiet. The next cabin isn't deaf. Keep going or put me on the bunk.
+They: Look at me while you do that.
+They: Harder. I said harder.
+They: If you stop now I will end you professionally.
+> Stay with this | accent => finish.hands
+> Harder | accent => finish.hands.hard
+> Tease — don't finish yet => hands.tease :: You keep it just shy of done.
+> Get closer | accent => during.oral
+> Take this further | accent => during.sex
+> Their hand on you => hands.switch :: You let the moment become more intimate.
+> Stop here => end.stop
+
+[hands.tease]
+They: I will remember this. That is not a compliment yet.
+They: Cruel. Fine. I can be cruel back.
+They: Then the bunk is no longer optional.
+> Finish them | accent => finish.hands
+> Take this further | accent => during.sex
+> Get closer => during.oral
+
+[hands.switch]
+They: Good. I wanted a turn. Don't look surprised.
+They: I know how you go. I have been paying attention.
+They: Stay still. That's the whole instruction.
+> Let them take the lead | accent => finish.hands
+> Meet them halfway => finish.hands
+> Take this further => during.sex
+
+
+# -----------------------------------------------------------------------------
+# DURING — ORAL
+# -----------------------------------------------------------------------------
+
+[during.oral]
+title: During — mouth
+act: oral
+heat: +1
+You: Mouth. The next word is theirs.
+They: Stay down there or get up here. I will not invent the next beat.
+They: I'm close. That is information, not a request to flee.
+They: The bunk rail exists for a reason. Hold it or hold me.
+They: If I grab your hair that's not a complaint.
+They: Don't be precious about the taste.
+They: I will return the favour. After.
+> Don't stop | accent => finish.oral
+> Harder | accent => finish.oral.hard
+> Switch — they go down => oral.switch :: You pull them up and send them the other way.
+> Pull them up to the bunk | accent => during.sex
+> Talk them through it => oral.talk :: You keep your voice in it.
+> Stop here => end.stop
+
+[oral.switch]
+They: Fair. I said after. After is now.
+They: Stay where I can see you.
+They: I have wanted this in my mouth since you shut the hatch.
+> Don't stop | accent => finish.oral
+> Take this further => during.sex
+> Stop here => end.stop
+
+[oral.talk]
+They: Yes. Keep talking. I can come on a sentence.
+They: Don't narrate like a log. Say dirty or say my name.
+They: Quiet after that. I need the last ten seconds.
+> Don't stop | accent => finish.oral
+> Take this further => during.sex
+
+
+# -----------------------------------------------------------------------------
+# DURING — SEX
+# -----------------------------------------------------------------------------
+
+[during.sex]
+title: During — bed
+act: sex
+heat: +1
+You: You put them on the bunk. Nobody is briefing anybody.
+They: That's the angle. Don't get creative unless I ask.
+They: Hard, slow, or flip me. I can take a decision.
+They: Say when you're close. I want the last ten seconds.
+They: Hold my hip so I can't wriggle off.
+They: I will come first and I will still want you to keep going.
+They: If you go slow I will assume you are thinking. Don't think.
+> Harder | accent => finish.sex.hard
+> Slow => finish.sex.slow
+> Flip them | accent => finish.sex.flip
+> Don't talk. Finish. | accent => finish.sex
+> Check in — still good? => sex.check :: You ask with words, not just a look.
+> Talk them through it => sex.talk
+> Mouth instead => during.oral
+> Say you want a child | when:family => child.from_sex
+> Stop here => end.stop
+
+[during.sex.roughask]
+title: During — they agreed to rough
+act: sex
+heat: +1
+You: You put them on the bunk without being gentle about the putting.
+They: Yes. That. Don't you change it.
+They: I calibrated for this. Prove it.
+They: Marks under the suit. You have the list.
+They: If I say stop you stop. Until then, don't you dare go polite.
+> Harder | accent => finish.sex.hard
+> Flip them => finish.sex.flip
+> Check in => sex.check
+> Finish | accent => finish.sex
+> Stop here => end.stop
+
+[sex.check]
+They: Still good. Don't make checking in a way to leave.
+They: Yes. Harder now that you asked.
+They: Pause is allowed. Leaving mid-sentence is not what I wanted.
+> Keep going | accent => finish.sex
+> Soften => finish.sex.slow
+> Stop => end.stop
+
+[sex.talk]
+They: Then Go on. I can take filthy. I cannot take a briefing.
+They: Say my name when I go.
+They: Stay with me. If anything changes, I'll tell you.
+> Finish | accent => finish.sex
+> Harder => finish.sex.hard
+> Slow => finish.sex.slow
+
+[child.from_sex]
+You: You say it while you still have a body to say it with. A child. On this hull.
+They: Say it again: you want a child on this hull.
+They: If we're talking about a family, I want us to mean it—not make the decision in the heat of a moment.
+They: I heard you. I want to hear you twice.
+> No precautions. That's the point. | accent => finish.try
+> Not the child. Just finish the night. => finish.sex
+> Stop and talk => child.ask
+
+
+# -----------------------------------------------------------------------------
+# FINISH NODES (narration + aftercare fork)
+# -----------------------------------------------------------------------------
+
+[finish.kiss]
+title: Finish — kiss
+act: kiss
+heat: +1
+pace:
+Scene: The kiss lands and stays a kiss long enough to count. Hands find jacket, hair, the seam of a suit. Nobody calls it nothing.
+They: That was a start. Don't make it the whole night unless you're a coward.
+They: Come here. Don't turn this into something we have to pretend didn't matter.
+They: Kiss me once more or put your hands where they were going.
+They: I wanted that since the last watch.
+> Kiss them again and stay | accent => end.stay
+> More than a kiss | accent => menu.again
+> Hands now => during.hands
+> Back to the watch => end.watch
+
+[finish.hands]
+title: Finish — hands
+act: hands
+heat: +2
+Scene: The moment turns private and intimate, with both of them paying attention to each other's reactions.
+They: Come here. Don't turn this into something we have to pretend didn't matter.
+They: Don't wipe that on the log.
+They: You can stop. I would rather you didn't.
+They: Look at me. That was not theoretical.
+> Stay a while | accent => end.stay
+> Don't stop at a hand | accent => menu.again
+> Get closer => during.oral
+> Take this further => during.sex
+> Back to the watch => end.watch
+
+[finish.hands.hard]
+title: Finish — hands, harder
+act: hands
+pace: hard
+heat: +2
+Scene: Harder, as asked. They shake and bite a shoulder and still keep the noise in the cabin.
+They: That's it. Don't change anything.
+They: I said harder. I meant it.
+They: Quiet. Then again, if you have it.
+> Stay a while | accent => end.stay
+> Don't stop at a hand | accent => menu.again
+> Back to the watch => end.watch
+
+[finish.oral]
+title: Finish — mouth
+act: oral
+heat: +2
+Scene: They spill or shake on a tongue and have to hold the rail. Nobody treats the first one as an exit interview.
+They: I will return the favour. After. Or now.
+They: Don't look proud yet. I have more.
+They: Come here. I can still taste you and I am not done talking.
+They: Stay down there is also an answer.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Return it now | accent => during.oral
+> Take this further => during.sex
+> Back to the watch => end.watch
+
+[finish.oral.hard]
+title: Finish — mouth, harder
+act: oral
+pace: hard
+heat: +2
+Scene: Not gentle. Hair, hips, rail. They come like they meant the asking.
+They: That's good. That's criminal. Don't change it.
+They: I will return the favour. After.
+They: Water. Then I want the bunk or I want you again.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Take this further => during.sex
+> Back to the watch => end.watch
+
+[finish.sex]
+title: Finish — bed
+act: sex
+heat: +2
+Scene: The cabin hatch stays dogged. The bunk frame learns a rhythm. Afterwards nobody is late to a feeling.
+They: Stay. The board can wait.
+They: Don't dress yet.
+They: That was ours. Five more minutes is not a desertion.
+They: I liked who I was just then.
+They: If the mess asks, we were reviewing seals.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Water, then talk => after.talk
+> Ask to try for a child | when:family => child.ask
+> Back to the watch => end.watch
+
+[finish.sex.hard]
+title: Finish — bed, hard
+act: sex
+pace: hard
+heat: +2
+Scene: It is not gentle. The frame knocks the wall. They take it like they asked for it and then they go still.
+They: Yes. That. Don't you change it.
+They: I will be sore and I will not complain.
+They: Stay in.
+They: Marks under the suit. You kept the list.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Water, then talk => after.talk
+> Back to the watch => end.watch
+
+[finish.sex.slow]
+title: Finish — bed, slow
+act: sex
+pace: slow
+heat: +2
+Scene: They keep it slow on purpose. Thinking almost starts. Then it does not. The finish is quiet and complete.
+They: Slow, then. I will assume you are feeling it, not thinking.
+They: That's worse. That's better. Don't speed up to hide.
+They: Hold me there after.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Water, then talk => after.talk
+> Back to the watch => end.watch
+
+[finish.sex.flip]
+title: Finish — bed, flipped
+act: sex
+pace: flip
+heat: +2
+Scene: They change who is under who. The frame knocks the wall from a new angle. Someone laughs once and then there is no room for jokes.
+They: Turn. I want the other view and the other leverage.
+They: On my back. I want to see you forget the rank.
+They: Stay.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Back to the watch => end.watch
+
+[finish.try]
+title: Finish — trying for a child
+act: tryChild
+heat: +2
+Scene: The moment turns private and intimate, with both of them paying attention to each other's reactions.
+They: Then we did it on purpose.
+They: Hold me there after. Let it be true.
+They: If the scan comes back loud I will not pretend I didn't ask.
+They: Come here. Don't turn this into something we have to pretend didn't matter.
+> Stay a while | accent => end.stay
+> Again | accent => menu.again
+> Talk about if it takes => child.after
+> Back to the watch => end.watch
+
+
+# -----------------------------------------------------------------------------
+# AFTERCARE EXTRA
+# -----------------------------------------------------------------------------
+
+[after.talk]
+You: Water. Then you stay on the bunk and use words.
+They: That was ours.
+They: I can stand a watch. After five more minutes.
+They: Don't make it rare.
+They: If you need to say a tender thing, say it now while I cannot flee into rank.
+> Say the tender thing | accent => after.tender
+> Keep it practical => after.practical
+> Again => menu.again
+> Watch => end.watch
+
+[after.tender]
+They: I heard you. Don't take it back on the board.
+They: Come here. That sentence stays in this cabin.
+They: I liked who I was just then. I like who you were.
+> Stay | accent => end.stay
+> Watch => end.watch
+
+[after.practical]
+They: Seals. Right. Fine. Kiss me once more and then we can be professionals.
+They: Water, cloth, suit. I can do the list. Don't skip the kiss in the list.
+They: Next watch I will look at you like this never happened. That is a lie we both need.
+> Kiss once more | accent => end.stay
+> Watch => end.watch
+
+
+# -----------------------------------------------------------------------------
+# CHILD
+# -----------------------------------------------------------------------------
+
+[child.ask]
+title: Try for a child
+when: family on
+You: You say it before anyone undresses further. A child. On this hull.
+They: Say it again: you want a child on this hull.
+They: If we're talking about a family, I want us to mean it—not make the decision in the heat of a moment.
+They: I heard you. I want to hear you twice.
+They: This is not a drill. This is a decision.
+They: I want to be carrying your stubbornness and mine.
+> No precautions. That's the point. | accent => finish.try
+> Talk through the fear first => child.fear
+> Not the child. Just the night. => child.notyet
+> Not that conversation => menu.from_talk
+
+[child.fear]
+You: You say the hull is a stupid place to make a person, and you still want it.
+They: I know the hull is stupid. I still want it.
+They: If we do this, we do scans and we do not hide from the board.
+They: Fear is allowed. Backing out after I am already carrying is not what I want to hear next month.
+> Still yes | accent => finish.try
+> Not this cycle => child.notyet
+> Drop the subject => menu.from_talk
+
+[child.notyet]
+They: Not the child. Just the night. I can hold both thoughts.
+They: Then take me and leave the future on the board.
+They: Fine. Sex without a speech. I liked the speech anyway.
+They: Ask again when the run is quieter. I will remember you asked.
+> Take the night | accent => during.sex
+> Stay close only => talk.soft
+> Watch => end.watch
+
+[child.after]
+They: Then we wait on a scan like everyone else.
+They: If it didn't take, we can want it again. If it did, we built a problem I will love.
+They: Don't look at my belly like it owes you news tonight.
+> Stay | accent => end.stay
+> Again => menu.again
+> Watch => end.watch
+
+
+# -----------------------------------------------------------------------------
+# PAD
+# -----------------------------------------------------------------------------
+
+[pad.open]
+title: Pad — hour
+place: pad
+when: docked
+They: Hour's a hundred. Cabin is cleaner than your lock.
+They: Don't ask my real name. Ask what you want.
+They: Boots off. Money first. Rank doesn't impress me, and speeches aren't part of the hour.
+They: I have forty minutes before the next pad slot.
+They: Your rank does not get you a discount.
+> Pay 100 cr | accent | when:credits>=100 => pad.paid :: Credits move. The cabin light goes low.
+> Haggle => pad.hag :: You try the hall voice on a person who is not ore.
+> Ask what is on the menu => pad.menuask
+> Not that => end.padno
+> Broke | when:credits<100 => pad.broke
+
+[pad.broke]
+They: Pay first.
+They: I don't do courtesy hours.
+They: Come back with a chit. I will still be here. That is the job.
+> Back off => end.padno
+
+[pad.paid]
+They: Be specific about what kind of company you want. The boundaries stay clear.
+They: Clock's running. Mouth, bed, or hands. I do not do mystery.
+They: Credits cleared. Now be specific.
+They: I will fake a lot. I will not fake the yes at the start.
+> Get closer | accent => during.oral
+> Take this further | accent => during.sex
+> Keep it simple => during.hands
+> Ask for the girlfriend voice => pad.sweet :: You ask for the lie they already priced.
+> Extra hour — another hundred | when:credits>=100 => pad.extra
+> Done already => pad.out
+
+[pad.menuask]
+They: Mouth, bed, hands. Girlfriend voice if you need a lie. No overnight unless you pay the night. No name.
+They: I do not do kids, I do not do unconscious, I do not do that face you just made.
+They: If you want tender, say tender. I can do the work of tender.
+> Pay and pick | accent | when:credits>=100 => pad.paid
+> Walk => end.padno
+
+[pad.hag]
+They: Don't bargain like the hall. This isn't ore.
+They: The rate is the rate. I am not a crate of freeze.
+They: Haggle and I will remember you as work.
+> Pay the hundred | accent | when:credits>=100 => pad.paid
+> Walk => end.padno
+
+[pad.sweet]
+They: I can do the girlfriend voice. It is a voice.
+They: Sweet costs the same hour and I still won't love you.
+They: You can have the lie. You cannot have tomorrow morning.
+They: Come here, then. I can say your name like it matters.
+> Then the bed | accent => during.sex
+> Mouth with the lie => during.oral
+> That's the hour => pad.out
+
+[pad.extra]
+They: Another hundred, another hour. I will reset the room in between if you need the fiction of a start.
+They: Fine. I can be bought twice. That is the honest version.
+> Take this further | accent => during.sex
+> Get closer => during.oral
+> Done => pad.out
+
+[pad.out]
+They: Door's that way. I have to reset the room.
+They: Time. Wash is in the corner.
+They: You were easy. That's a compliment in this trade.
+They: Same pad next week if your hull lives.
+> Leave => END
+
+
+# -----------------------------------------------------------------------------
+# BRIG PRISONERS / COLLARED DEBT-SERVANTS
+# -----------------------------------------------------------------------------
+
+# These are deliberately separate systems:
+# - brig.*   = judicial, military, political or captured prisoners
+# - collar.* = adults serving a legally enforced personal/family debt
+# Adult romance may be discussed, but confinement, debt and obedience never
+# count as consent. Intimate routes require release from custody/service first.
+
+[brig.entry]
+title: Brig — prisoner visit
+place: brig
+when: prisoner
+They: The ward-light changes when the hatch opens. That is how I know it is you.
+They: Captain, jailer, hero from another world—pick the title that helps you sleep.
+They: If this is an interrogation, record it. If it is a conversation, sit down.
+They: Your stars are prettier through armored glass. That almost feels deliberate.
+They: I had a kingdom yesterday. Today I have a bunk and your attention.
+> Friendly — bring food and talk | accent => brig.friendly
+> Romantic — admit you came for them => brig.romantic.boundary
+> Mean — remind them where they are | danger => brig.mean
+> Funny — tease the dramatic prisoner => brig.funny
+> Sad — ask what they lost => brig.sad
+> Provoke — challenge their story | danger => brig.provoke
+> Inspire — give them a reason to endure | accent => brig.inspire
+> Recruit — offer a place on the crew => brig.recruit
+> Mind Break — begin psychological pressure | danger => brig.mindbreak
+> End the visit => END
+
+[brig.friendly]
+title: Brig — friendly
+You: You slide a warm ration through the pass-through and take the floor opposite the field.
+They: Real broth? Either you like me or the replicator finally developed a conscience.
+They: You remembered the spice. That is suspiciously human of you.
+They: In my world, captors did not sit on the floor. Then again, they did not own starships.
+They: Five minutes without questions? I had forgotten silence could be a gift.
+> Ask about their homeland => brig.friendly.home
+> Trade ship gossip => brig.friendly.gossip
+> Offer a book-slate => brig.friendly.book
+> Ask how the guards treat them => brig.welfare
+> Return to the hatch => brig.entry
+
+[brig.friendly.home]
+They: Home had two moons and one road out. I spent my life wanting the road. Idiot, wasn't I?
+They: The rain smelled like ironwood. Your hydroponics tries, but it has never met rain.
+They: We called the orbital ring the Crown of Heaven. Then your gate opened inside it.
+They: I can draw you the valley. I cannot promise it still exists.
+> Ask them to draw it => brig.memory.map
+> Tell them about Earth => brig.friendly.earth
+> Let the memory rest => brig.friendly
+
+[brig.friendly.earth]
+They: A world without mana, yet you split atoms and taught metal to think. Terrifying.
+They: Your Earth sounds impossible. I suppose mine does too, from your side of the gate.
+They: Eight billion people and you still left the sky looking for somewhere else. That feels familiar.
+> Compare old-world customs => brig.lore
+> Joke about vending machines => brig.funny.machine
+> Return to safer talk => brig.friendly
+
+[brig.friendly.gossip]
+They: Your engineer sings to the reactor. Badly. I assume this is a maintenance rite.
+They: The marines wager on whether I am royalty. Tell them the answer is expensive.
+They: Someone keeps stealing sweetener from the galley. It is not me. I steal salt.
+They: Your navigator and medic are either feuding or courting. Possibly both.
+> Share harmless gossip => brig.funny
+> Ask what they notice about the crew => brig.observe
+> Keep the crew out of it => brig.friendly
+
+[brig.friendly.book]
+They: A library containing ten thousand worlds, and you chose me a detective serial.
+They: If the hero is transported to another realm in chapter three, I am throwing this at the field.
+They: Leave it. If nothing else, I need to know why the butler has a plasma sword.
+> Promise the sequel => brig.trust
+> Ask what they used to read => brig.lore
+> Leave them to it => END
+
+[brig.welfare]
+title: Brig — welfare check
+They: The guards follow the rules. Some enjoy the rules more than others.
+They: I am fed, scanned and watched. Survival is not the same thing as living.
+They: The field hums at night. After six hours it feels like a thought I cannot finish.
+They: Ask me again when the security chief is not standing behind you.
+> Order a private medical review | accent => brig.welfare.medical
+> Promise better treatment => brig.promise
+> Say captivity is supposed to be unpleasant | danger => brig.mean.cold
+> Ask for names and details => brig.welfare.names
+
+[brig.welfare.medical]
+They: A doctor who reports to you is not independent, but it is better than nothing.
+They: Thank you. I dislike owing gratitude to the person with the door code.
+They: Have them check the suppressor burns. Your guards call them harmless.
+> Make the order official => brig.trust
+> Ask about the burns => brig.sad
+> End the visit => END
+
+[brig.welfare.names]
+They: I will give you names when you prove this is not bait.
+They: Guard Pell. Third watch. He cuts the heat and calls it discipline.
+They: Check the corridor logs before you ask me to trust your uniform.
+> Investigate it => brig.promise
+> Accuse them of manipulating you | danger => brig.provoke
+> Thank them for telling you => brig.trust
+
+[brig.romantic.boundary]
+title: Brig — romantic boundary
+You: You admit the visit was personal. You keep your hands away from the controls.
+They: Do not offer me affection with one hand on the lock.
+They: I wanted you before the cell. That does not make the cell disappear.
+They: There may be something between us. We do not get to test it while you own the door.
+They: If you mean it, bring me due process—not flowers.
+> Promise nothing until they are free => brig.romantic.honest
+> Ask whether they felt it before capture => brig.romantic.past
+> Offer release from custody | accent => brig.release.review
+> Push for an answer now | danger => brig.romantic.refuse
+> Apologize and step back => brig.apology
+
+[brig.romantic.honest]
+They: Good. Want can wait. Character is what you do while it waits.
+They: That may be the first romantic thing anyone has said to me in a prison.
+They: Come back when the door opens from my side. Then ask again.
+> Ask what freedom would look like => brig.release.future
+> Return to ordinary conversation => brig.friendly
+> Leave with the promise intact => END
+
+[brig.romantic.past]
+They: Before capture? Yes. You argued with a war golem while your sleeve was on fire.
+They: I noticed you at the gate feast. You looked bored by every noble in the room.
+They: I thought you were dangerous. I was right, just not in the interesting way.
+> Laugh and ask for the full story => brig.funny
+> Say you noticed them too => brig.romantic.honest
+> Use the admission against them | danger => brig.mean
+
+[brig.romantic.refuse]
+They: No. Not while refusal costs me comfort, hearings or sunlight.
+They: That was your answer. You wanted the cell to make it easier.
+They: Leave before I mistake your loneliness for cruelty.
+> Apologize without excuses => brig.apology
+> Threaten consequences | danger => brig.mean.threat
+> Leave => END
+
+[brig.mean]
+title: Brig — mean
+They: There it is—the voice you use when you need the uniform to win the argument.
+They: I know where I am. Do you?
+They: A locked door makes you louder, not more convincing.
+They: You crossed dimensions and still brought petty tyranny with you. Impressive.
+> Mock their fallen status => brig.mean.status
+> Threaten isolation => brig.mean.threat
+> Demand military information => brig.interrogate
+> Call it off => brig.apology
+
+[brig.mean.status]
+They: Titles vanish quickly. Habits survive. You still wait for me to bow.
+They: I lost a throne. You found a cell and mistook it for one.
+They: If humiliation is all you wanted, you could have stayed in your old world and opened social media.
+> Provoke them into boasting => brig.provoke
+> Admit that was beneath you => brig.apology
+> Double down => brig.mean.threat
+
+[brig.mean.threat]
+They: Then record the threat. I want your crew to hear what their captain becomes behind a sealed hatch.
+They: Isolation will hurt. It will not make your version true.
+They: You can punish my body. You cannot order belief.
+> Carry out nonviolent isolation => brig.mindbreak.isolation
+> Switch to formal questioning => brig.interrogate
+> Back down => brig.apology
+
+[brig.mean.cold]
+They: Then stop calling this justice. Justice has standards; discomfort is just appetite in a uniform.
+They: At least cruelty honestly named gives me something solid to hate.
+> Reconsider the conditions => brig.promise
+> End the conversation => END
+
+[brig.funny]
+title: Brig — funny
+They: Careful. If the guards hear me laugh, they will add it to the contraband list.
+They: A captain, a prisoner and a summoned hero walk into a starship. The reactor leaves first.
+They: You have the comic timing of an airlock alarm. Against reason, it works.
+They: Keep going. I have not heard a joke that was not about my execution in weeks.
+> Tell an awful Earth joke => brig.funny.earth
+> Ask for an isekai joke => brig.funny.isekai
+> Tease them about ship technology => brig.funny.machine
+> Let the laughter fade => brig.friendly
+
+[brig.funny.earth]
+They: That joke survived across dimensions? Your civilization deserved the gate collapse.
+They: I understood every word and regret the translation implant.
+They: Tell it to the lich admiral. He cannot execute what is already dead.
+> Try another => brig.funny
+> Admit defeat => brig.trust
+
+[brig.funny.isekai]
+They: In tavern stories the summoned hero gets a sacred sword. You got a maintenance tablet.
+They: The oracle promised a champion from beyond the veil. Nobody mentioned you would arrive in underwear.
+They: You call this an isekai. We call it Tuesday near an unstable gate.
+> Defend your heroic entrance => brig.provoke.light
+> Laugh with them => brig.trust
+
+[brig.funny.machine]
+They: I bowed to the drink dispenser for three days. Nobody corrected me.
+They: Your automatic doors are smug. They know I cannot open the important ones.
+They: The sanitation unit challenged me to verify I was sentient. We are no longer speaking.
+> Offer to introduce them properly => brig.friendly
+> Say the machine has good instincts => brig.provoke.light
+
+[brig.sad]
+title: Brig — sad
+They: I keep remembering the last ordinary morning. I did not know I should have treasured it.
+They: My sister thinks I died at the gate. Some nights I wish she were right; grief has an ending.
+They: I can name every person who followed my order. I cannot tell you which ones lived.
+They: I miss sunlight that did not come through a radiation filter.
+> Ask about their family => brig.sad.family
+> Sit quietly with them => brig.sad.silence
+> Offer to send a message => brig.sad.message
+> Tell them loss makes people weak | danger => brig.mean
+
+[brig.sad.family]
+They: My brother wore the debt-collar for our mother. I joined the rebellion to buy his name back.
+They: My daughter would be old enough to hate me now. That would still mean she lived.
+They: Family is the first kingdom and the last hostage.
+> Promise to search the gate records => brig.promise
+> Share a loss of your own => brig.sad.shared
+> Ask whether family would ransom them => brig.interrogate
+
+[brig.sad.silence]
+They: You are the first person aboard who did not rush to fill the quiet.
+They: Stay another minute. Do not make it mean anything.
+They: Thank you. I still dislike you. Grief is untidy that way.
+> Stay => brig.trust
+> Leave gently => END
+
+[brig.sad.message]
+They: No promises. Tell me what the channel can actually reach.
+They: One line: I lived. Do not add hope you cannot deliver.
+They: If they answer, read it to me exactly. Even the cruel parts.
+> Authorize the message | accent => brig.promise
+> Say security will not allow it => brig.sad
+> Demand intelligence in exchange | danger => brig.recruit.bargain
+
+[brig.sad.shared]
+They: I am sorry. I did not think your world had left anything inside you that could bruise.
+They: Then you know why easy comfort sounds like an insult.
+They: Sit. For once neither of us has to win.
+> Sit with them => brig.trust
+> Change the subject => brig.friendly
+
+[brig.provoke]
+title: Brig — provoke
+They: You want anger because anger is easier to catalogue than grief.
+They: Open the field and I will show you how much of my reputation was exaggerated.
+They: Call me coward again. The cameras deserve a better angle.
+They: You think I betrayed the citadel. I think I stopped a massacre. We can both bring maps.
+> Challenge them to prove their claim => brig.provoke.proof
+> Insult their honor => brig.provoke.honor
+> Let them vent => brig.provoke.vent
+> De-escalate => brig.apology
+
+[brig.provoke.light]
+They: Oh, now I have your attention. Should I insult the uniform or your haircut next?
+They: That little flare of pride is almost charming.
+> Trade another jab => brig.funny
+> Ask the serious question underneath => brig.provoke.proof
+> Call it even => brig.trust
+
+[brig.provoke.proof]
+They: Pull navigation record Kestrel-Nine. Compare my route to the civilian convoy.
+They: My proof is in your own sensor archive, which is why nobody has shown it to the tribunal.
+They: Give me a slate and ten minutes. I will mark every ship my so-called treason saved.
+> Review the evidence | accent => brig.release.review
+> Say records can be forged => brig.interrogate
+> Offer a bargain for cooperation => brig.recruit.bargain
+
+[brig.provoke.honor]
+They: Honor is what commanders call obedience after the bodies are cold.
+They: Mine survived the battle. Can yours survive this room?
+They: If you need me ashamed, you will be waiting longer than your species lives.
+> Demand an apology => brig.mean
+> Ask what honor means to them => brig.lore
+> Respect the answer => brig.trust
+
+[brig.provoke.vent]
+They: You opened the gate over our capital and called the invasion an accident!
+They: Your crew gets medals. Mine gets translated into casualty statistics.
+They: I am angry because anger is the only thing in this cell that belongs entirely to me.
+> Accept their anger => brig.trust
+> Correct their version of events => brig.interrogate
+> Walk away => END
+
+[brig.inspire]
+title: Brig — inspire
+They: Hope from a jailer is a strange currency.
+They: You speak as if tomorrow has already agreed to happen.
+They: I used to give speeches like that. Mine had banners and worse acoustics.
+They: Do not tell me to be strong. Tell me what strength can change.
+> Promise a fair hearing => brig.release.review
+> Ask them to help prevent another war => brig.inspire.purpose
+> Remind them who still needs them => brig.inspire.family
+> Admit you only have hope => brig.inspire.honest
+
+[brig.inspire.purpose]
+They: A bridge between worlds built by two people who tried to kill each other. Very heroic.
+They: If my knowledge prevents one city from becoming glass, I will talk.
+They: Give me charts, not slogans. Purpose needs work to hold onto.
+> Begin a supervised strategy session => brig.recruit.specialist
+> Ask for their conditions => brig.recruit.terms
+> Thank them and leave => END
+
+[brig.inspire.family]
+They: Do not use my family as a lever.
+They: They need me alive, perhaps. They also need me to remain someone worth finding.
+They: Fine. I will survive tonight. Tomorrow must negotiate separately.
+> Promise to search for them => brig.promise
+> Sit through tonight's watch => brig.sad.silence
+
+[brig.inspire.honest]
+They: Honesty is thinner than hope, but it bears more weight.
+They: Then lend me yours until mine grows back.
+They: No grand prophecy? Good. I have been betrayed by three of those.
+> Offer practical help => brig.welfare
+> Share a small future plan => brig.release.future
+
+[brig.recruit]
+title: Brig — recruit
+They: A uniform instead of a cell is still a uniform you control.
+They: You want my gatecraft, not me. Begin with that honesty.
+They: Crew? Your security chief would sleep in the corridor with a rifle.
+They: I might work beside you. I will not work beneath a threat.
+> Offer full crew status after review => brig.recruit.terms
+> Offer temporary specialist status => brig.recruit.specialist
+> Bargain freedom for service => brig.recruit.bargain
+> Withdraw the offer => brig.entry
+
+[brig.recruit.terms]
+They: Pay, quarters, movement, legal status and the right to leave at port. Put all of it in writing.
+They: No explosive implant. No obedience geas. No collar dressed up as a badge.
+They: I report to the captain on gate matters. I do not become the crew's pet enemy.
+> Accept the terms in principle | accent => brig.release.review
+> Negotiate limited access => brig.recruit.specialist
+> Refuse the right to leave | danger => brig.recruit.bargain
+
+[brig.recruit.specialist]
+They: Supervised access to charts. No weapons. A fair beginning, if not a free one.
+They: I can tune the aether lens. Your physicist keeps treating mana like radiation.
+They: Give me one shift. If the drive does not sing cleaner, put me back in the cell.
+> Approve a trial shift | accent => brig.trust
+> Demand loyalty first => brig.interrogate
+> Ask what resources they need => brig.lore
+
+[brig.recruit.bargain]
+They: That is conscription with polished language.
+They: Say it plainly: work for you or remain in the cage.
+They: I may accept because survival is not pride. Do not call the answer willing.
+> Make the coercive bargain | danger => brig.recruit.coerced
+> Replace it with a fair offer => brig.recruit.terms
+> End negotiations => END
+
+[brig.recruit.coerced]
+They: I will work. Record that I objected, so history cannot pretend this was loyalty.
+They: You have my labor, Captain. Trust costs more.
+They: Point me at the gate engine. Keep your celebration private.
+> Assign supervised duty => END
+> Reconsider and offer terms => brig.recruit.terms
+
+[brig.interrogate]
+title: Brig — interrogation
+They: State the charge, the question and what happens if I refuse.
+They: I know twelve gate routes. Nine lead somewhere survivable. Which answer are you buying?
+They: Your truth field reads stress, not lies. I am stressed because I am in a cell.
+They: Ask about the fleet. Leave my family out of your strategy.
+> Ask about enemy positions => brig.interrogate.fleet
+> Ask about the gate network => brig.interrogate.gates
+> Offer immunity for testimony => brig.release.review
+> Threaten them => brig.mean.threat
+
+[brig.interrogate.fleet]
+They: Three dreadnoughts at the violet moon, unless the Regent finally learned caution.
+They: The black pennants are decoys. Watch the hospital ships; they carry spell artillery.
+They: I will mark the formation. Civilians are not part of our bargain.
+> Record the intelligence => brig.trust
+> Accuse them of lying => brig.provoke
+
+[brig.interrogate.gates]
+They: Gates remember destinations like scars. Force one and it may open onto the original wound.
+They: Your coordinates are correct. Your assumption that space is the only distance is not.
+They: The seventh sigil is not a number. It is an invitation.
+> Ask them to teach the system => brig.recruit.specialist
+> Demand the coordinates only => brig.mean
+> Thank them for the warning => brig.trust
+
+[brig.mindbreak]
+title: Brig — mind break
+place: brig
+They: So that is the game. Not truth—erosion.
+They: You want me uncertain enough to borrow your version of myself.
+They: Isolation, contradiction, kindness, threat. I studied empires too.
+They: Break obedience into me if you can. It will never become loyalty.
+> Isolate them from time cues | danger => brig.mindbreak.isolation
+> Feed conflicting reports | danger => brig.mindbreak.doubt
+> Alternate comfort and coldness | danger => brig.mindbreak.condition
+> Target their identity and title | danger => brig.mindbreak.identity
+> Stop before crossing the line => brig.apology
+
+[brig.mindbreak.isolation]
+They: No clock, no window, no footsteps. You are trying to make your visits become the calendar.
+They: I counted breaths until I lost the number. That is what you wanted, yes?
+They: The silence is doing your work. You still chose to give it the order.
+> Restore normal conditions => brig.mindbreak.stop
+> Continue the pressure | danger => brig.mindbreak.fracture
+> Offer conversation as a reward | danger => brig.mindbreak.condition
+
+[brig.mindbreak.doubt]
+They: Yesterday you said the capital fell. Today you say it never existed. Choose a lie.
+They: Memory does not become false because your screen says so.
+They: If my people betrayed me, show me the raw transmission.
+> Produce verifiable evidence => brig.provoke.proof
+> Continue contradicting them | danger => brig.mindbreak.fracture
+> Admit the manipulation => brig.mindbreak.stop
+
+[brig.mindbreak.condition]
+They: Warm food after a threat. A blanket after isolation. You want gratitude tied to fear.
+They: Kindness used as a weapon still cuts the person holding it.
+They: I feel relief when you enter. I hate you for teaching my body that lesson.
+> Exploit their dependence | danger => brig.mindbreak.fracture
+> End the conditioning => brig.mindbreak.stop
+> Offer unconditional care instead => brig.welfare
+
+[brig.mindbreak.identity]
+They: You can confiscate the crest. You cannot make me forget why people followed it.
+They: Say my name. Prisoner is a status, not a species.
+They: If I abandon myself to survive you, what exactly have you recruited?
+> Demand they renounce their title | danger => brig.mindbreak.fracture
+> Ask who they are without it => brig.lore
+> Stop the attack => brig.mindbreak.stop
+
+[brig.mindbreak.fracture]
+title: Brig — psychological damage
+effect: trust=-8 morale=-8 resistance=-5
+They: Tell me which answer makes the lights stop changing.
+They: I know what you want. I no longer know whether I knew it before you asked.
+They: Yes, Captain. No, Captain. Whichever keeps the hatch quiet.
+They: You won compliance. There is nobody here who trusts the victory.
+> Continue as handler | danger => END
+> Call medical support and stop => brig.mindbreak.stop
+> Offer freedom now => brig.release.review
+
+[brig.mindbreak.stop]
+They: Stopping does not erase it. It does tell me you found a boundary somewhere.
+They: Restore the clock. Restore the books. Then leave me alone.
+They: If you want forgiveness, start with records nobody can edit.
+> Restore humane conditions => brig.promise
+> Apologize => brig.apology
+> Leave => END
+
+[brig.apology]
+They: An apology in a locked room is a beginning, not absolution.
+They: Say what you did, not what you intended.
+They: I heard you. I do not know what I will do with it yet.
+> Name the harm honestly => brig.trust
+> Make excuses => brig.provoke
+> Leave them space => END
+
+[brig.promise]
+They: Put it in the ship log. Promises survive better when other people can read them.
+They: I will remember the promise. More importantly, I will remember whether you keep it.
+They: Good. Give me an action, a name and a time.
+> Record the order publicly => brig.trust
+> Ask them to trust your word => brig.provoke.light
+
+[brig.trust]
+title: Brig — trust gained
+effect: trust=+3 morale=+2 resistance=+1
+They: I still want the door open. I also believe you may open it one day.
+They: Do not look so pleased. One decent choice is not redemption.
+They: Come back tomorrow. Bring the terrible detective story.
+They: For the record, I chose to tell you that.
+> Continue talking => brig.friendly
+> Discuss release => brig.release.review
+> End on a better note => END
+
+[brig.release.review]
+title: Brig — review custody
+They: A review with counsel, evidence and a date. Not freedom as a favor.
+They: If the charges stand, say so. If they do not, open the door.
+They: I will cooperate with a real hearing. I will not audition for mercy.
+> Schedule a formal hearing | accent => brig.release.future
+> Offer immediate conditional release => brig.recruit.terms
+> Retract the offer => brig.mean
+
+[brig.release.future]
+They: Freedom first. After that, perhaps the crew. Perhaps a road home. Perhaps you.
+They: I want one sunrise, one unlocked room and a meal nobody slides through a slot.
+They: Ask me what I want after I am allowed to say no and walk away.
+> Promise to ask then => end.promise
+> Discuss life beyond the ship => brig.friendly.home
+> End the visit => END
+
+[brig.memory.map]
+They: Here—the ironwood valley, the old gate tower, my mother's house beyond the river.
+They: Your slate makes the lines too perfect. Home was never this orderly.
+They: Keep a copy. If I do not return, somebody should know it was real.
+> Promise to preserve it => brig.trust
+> Ask about the gate tower => brig.lore
+
+[brig.observe]
+They: Your crew follows you because you listen in public and decide in private.
+They: The security chief expects betrayal. The engineer expects miracles. Both will be disappointed.
+They: Half this ship thinks I am a monster. The other half is waiting for me to become useful.
+> Ask how they see you => brig.provoke.proof
+> Ask who might accept them => brig.recruit
+
+[brig.lore]
+They: Magic is what your scientists call physics before the equations forgive it.
+They: Nobility was never blood alone. It was contracts with things living under the moons.
+They: The old gates were grown, not built. Your machines wake them by shouting.
+> Ask for a lesson => brig.recruit.specialist
+> Compare it with human science => brig.friendly.earth
+> Return to the visit => brig.entry
+
+# Compatibility redirects for older callers.
+[collar.door]
+title: Collar — debt service
+place: quarters
+They: If you came to discuss the debt, discuss it. Do not confuse my collar with a cell door.
+> Continue => collar.entry
+
+[collar.entry]
+title: Collar — indebted servant
+place: quarters
+when: collared adult
+They: The collar records service hours, location and outstanding debt. It does not record dignity.
+They: Mine was my father's debt. The law calls that inheritance. I call it a sentence with paperwork.
+They: I signed for medicine. I did not sign away the right to dislike you.
+They: Orders, conversation, or another speech about how fortunate I am?
+They: I serve the contract. Whether I respect the person holding it remains negotiable.
+> Friendly — treat them as a person | accent => collar.friendly
+> Romantic — acknowledge the power imbalance => collar.romantic.boundary
+> Mean — enforce the contract harshly | danger => collar.mean
+> Funny — make light of ship life => collar.funny
+> Sad — ask about the debt => collar.sad
+> Provoke — challenge their resentment | danger => collar.provoke
+> Inspire — help them imagine life after debt | accent => collar.inspire
+> Recruit — offer paid crew status => collar.recruit
+> Mind Break — condition obedience | danger => collar.mindbreak
+> Discuss work assignment => collar.work
+> Leave => END
+
+[collar.friendly]
+title: Collar — friendly
+They: You used my name instead of 'servant.' A low bar, yet here we are.
+They: Sit if you mean to talk. Standing over me makes every sentence sound like an order.
+They: I finished the shift. The next ten minutes are mine unless the contract has learned hunger.
+They: Kindness does not cancel the debt, but it makes the hours feel less stolen.
+> Ask about their day => collar.friendly.day
+> Share a meal => collar.friendly.meal
+> Ask what would improve their conditions => collar.conditions
+> Ask about their skills => collar.work.skills
+> Return to choices => collar.entry
+
+[collar.friendly.day]
+They: I repaired two drones, translated one rune array and stopped your cook from poisoning an elf.
+They: The quartermaster praised me, then added the time to 'training debt.' We should discuss that.
+They: Ordinary. Which is a beautiful word when nobody owns your evening.
+> Audit the added debt => collar.audit
+> Ask about the elf => collar.funny
+> Let them rest => collar.trust
+
+[collar.friendly.meal]
+They: Servants eat after officers where I come from. Your table confuses the collar more than I expected.
+They: Is that curry? I crossed a dimensional gate and somehow found my grandmother's kitchen.
+They: If anyone asks, this was a tactical discussion involving dumplings.
+> Ask about their family recipes => collar.sad.family
+> Trade jokes over dinner => collar.funny
+> Discuss the contract calmly => collar.audit
+
+[collar.conditions]
+They: A door I can lock from inside. Time off that cannot be recalled. A statement showing the real balance.
+They: Stop letting officers borrow me as if I were equipment.
+They: Remove the pain function. Location tracking is already enough humiliation.
+They: Let me choose which work uses my body and which does not.
+> Grant reasonable changes | accent => collar.trust
+> Review the collar's functions => collar.audit
+> Say the contract allows worse | danger => collar.mean
+
+[collar.romantic.boundary]
+title: Collar — romantic boundary
+You: You name the attraction without turning it into an order.
+They: I may want you. The collar makes it impossible to prove the answer is free.
+They: Do you want me, or do you want obedience wearing a pretty expression?
+They: Buy out the contract, transfer it to neutral custody, then ask me on equal ground.
+They: Flirting is easy. Saying no to the person who owns my debt is not.
+> Promise to wait until the debt is resolved => collar.romantic.wait
+> Offer neutral transfer | accent => collar.release.transfer
+> Ask whether the feeling began before service => collar.romantic.past
+> Demand affection as service | danger => collar.romantic.refuse
+> Apologize => collar.apology
+
+[collar.romantic.wait]
+They: Waiting is the first thing you have offered that costs you instead of me.
+They: When this comes off, ask again. I might surprise both of us.
+They: Until then, let me keep one feeling the contract cannot invoice.
+> Discuss paying down the debt => collar.audit
+> Return to friendly conversation => collar.friendly
+> Leave => END
+
+[collar.romantic.past]
+They: Before the collar? Yes. You bought noodles from my stall three nights in a row and never noticed me noticing.
+They: I liked you when you were only the strange hero with a broken translation charm.
+They: The feeling is real. The situation is also real. One does not erase the other.
+> Say you remember them => collar.romantic.wait
+> Offer neutral transfer => collar.release.transfer
+> Exploit the admission | danger => collar.romantic.refuse
+
+[collar.romantic.refuse]
+They: No. Service is labor, not access to my affection or body.
+They: The contract cannot make that request clean.
+They: If refusal changes my food, hours or balance, it was never a choice.
+> Accept the refusal => collar.apology
+> Retaliate through the contract | danger => collar.mean.retaliate
+> Leave => END
+
+[collar.mean]
+title: Collar — mean
+They: The contract has penalties. You do not need to sound pleased about them.
+They: There is the master voice. I wondered when you would stop pretending.
+They: You can add hours. You cannot make them honorable.
+They: My family already sold tomorrow. Do not expect gratitude because you purchased today.
+> Assign an exhausting shift => collar.mean.shift
+> Threaten a debt penalty => collar.mean.penalty
+> Humiliate them in front of crew => collar.mean.public
+> Stop and reconsider => collar.apology
+
+[collar.mean.shift]
+They: Eighteen hours is legal only because lawmakers never worked one.
+They: I will finish the shift. The mistakes after hour twelve belong to you.
+They: Add the order to the log. I want the accident report to know your name.
+> Record the order anyway | danger => END
+> Reduce the shift => collar.apology
+> Ask for a safer schedule => collar.work
+
+[collar.mean.penalty]
+They: Interest on disobedience. A perfect machine for turning years into generations.
+They: Add it. My grandchildren can curse your grandchildren.
+They: The number was never meant to reach zero, was it?
+> Admit the system is designed to trap them => collar.sad
+> Enforce the penalty | danger => collar.mean.retaliate
+> Freeze interest pending review => collar.audit
+
+[collar.mean.public]
+They: Do you feel taller now that the crew watched me kneel?
+They: They looked away from me. More importantly, they looked differently at you.
+They: Public obedience buys private hatred at an excellent rate.
+> Order another display | danger => collar.mean.retaliate
+> Apologize publicly => collar.apology
+> Tell them humiliation builds discipline => collar.provoke
+
+[collar.mean.retaliate]
+effect: trust=-5 morale=-3 resistance=+4
+They: There. Refusal had a price. Thank you for proving my caution correct.
+They: I will obey the written terms. You have ended everything beyond them.
+They: You wanted warmth on command and purchased silence instead.
+> Return to formal work only => collar.work
+> Attempt an apology => collar.apology
+> Leave => END
+
+[collar.funny]
+title: Collar — funny
+They: The collar translated your joke as a workplace hazard.
+They: I serve a legendary gatewalker who cannot operate the laundry drone.
+They: In prophecy you were taller. Also, the prophecy omitted your snoring.
+They: If laughter counts as morale labor, I am billing the debt ledger.
+> Joke about being summoned wrong => collar.funny.summon
+> Tease them about ship customs => collar.funny.ship
+> Ask for their best joke => collar.funny.theirs
+> Let the mood soften => collar.friendly
+
+[collar.funny.summon]
+They: The ritual demanded a chosen warrior. It received you holding a convenience-store sandwich.
+They: You defeated the demon knight with a fire extinguisher. Historians will never recover.
+They: Your sacred artifact was a phone at twelve percent charge.
+> Claim it was strategic => collar.provoke.light
+> Laugh and concede => collar.trust
+
+[collar.funny.ship]
+They: Your ship has artificial gravity but the shower still changes temperature when someone flushes.
+They: I asked the computer for spirits. It opened the engine diagnostic.
+They: The cleaning bot has declared me nobility. At last, proper recognition.
+> Promote the cleaning bot => collar.funny
+> Ask about old-world magic => collar.lore
+
+[collar.lore]
+title: Collar — old-world lore
+They: Mana follows intention until machinery gives it a better argument.
+They: The gate empires mapped twelve worlds and understood perhaps two of them.
+They: Your science asks what a thing does. Our magic asks what it believes it is.
+They: I restored relics before the debt. I would like to be that person again.
+> Ask for a proper lesson => collar.inspire.training
+> Compare magic with ship systems => collar.work.engineering
+> Return to lighter talk => collar.funny
+
+[collar.funny.theirs]
+They: A mage, an engineer and a priest enter a gate. The gate locks behind the engineer because it respects competence.
+They: What do nobles call inherited debt? Tradition.
+They: I know a rude joke about paladins, but your content filters may excommunicate me.
+> Ask for the rude version => collar.funny
+> Admit the debt joke hurt => collar.sad
+
+[collar.sad]
+title: Collar — sad
+They: The original debt was smaller than this month's interest.
+They: My mother needed a regeneration chamber. I signed before the doctor finished explaining.
+They: My brother died owing the Guild. The collar came to me at the funeral.
+They: Every payment proves I served. None proves I am closer to freedom.
+> Ask whose debt it was => collar.sad.family
+> Review the numbers together => collar.audit
+> Offer to forgive part of it => collar.release.partial
+> Say they chose the contract | danger => collar.provoke
+
+[collar.sad.family]
+They: Father borrowed passage off a dying moon. I was six. Apparently rescue accrues interest.
+They: My sister is free because I took her share. Do not tell her what it costs.
+They: It was my debt. One desperate signature, perfectly legal and completely impossible.
+They: The law treats blood as a cosigner. Convenient for everyone except families.
+> Offer to contact their family => collar.sad.message
+> Ask if they regret it => collar.sad.regret
+> Promise an independent audit => collar.audit
+
+[collar.sad.message]
+They: Tell them I am alive and working aboard a starship. Leave out the collar if you can do that without lying.
+They: My sister sends credits every month. The Guild applies them to 'administration.'
+They: I want to hear their voices. I am afraid they will hear mine and know.
+> Arrange a private call | accent => collar.trust
+> Use the call as leverage | danger => collar.mindbreak
+> Respect their hesitation => collar.sad
+
+[collar.sad.regret]
+They: I regret the system, not the person I saved.
+They: Ask me on a cruel day and I will say yes. Ask me beside their bed and I will sign again.
+They: Regret is a luxury for choices that had alternatives.
+> Sit with the answer => collar.trust
+> Question the contract's legality => collar.audit
+
+[collar.provoke]
+title: Collar — provoke
+They: You want me grateful because another holder might be worse.
+They: Say 'choice' again. Perhaps the collar will believe you.
+They: Challenge me when refusal cannot add a year to my balance.
+They: I do resent you. I resent that you can afford to be kind.
+> Accuse them of hiding behind the debt => collar.provoke.pride
+> Say service gave them opportunity => collar.provoke.gratitude
+> Ask what they truly think of you => collar.provoke.truth
+> De-escalate => collar.apology
+
+[collar.provoke.light]
+They: Strategic? You screamed in three languages and threw a sandwich.
+They: Heroic pride is adorable when it is losing.
+> Trade another jab => collar.funny
+> Admit they won => collar.trust
+
+[collar.provoke.pride]
+They: The debt is not a shield. It is the blade at my back.
+They: My pride is why I am still a person instead of a function on your roster.
+They: Remove the collar and challenge me again. I promise a memorable answer.
+> Respect their defiance => collar.trust
+> Punish the tone | danger => collar.mean
+
+[collar.provoke.gratitude]
+They: Opportunity paid at zero wages is exploitation with excellent branding.
+They: I learned starship systems because I am talented, not because bondage inspired me.
+They: If you opened the door during a fire, would you invoice me for the smoke?
+> Admit the point => collar.apology
+> Argue the legal terms => collar.audit
+> Demand thanks => collar.mean
+
+[collar.provoke.truth]
+They: I think you want to be good without surrendering anything that makes goodness difficult.
+They: Some days I like you. Some days that feels like betrayal of myself.
+They: I think you are kinder than the system and too comfortable benefiting from it.
+> Ask how to change that => collar.conditions
+> Get defensive => collar.provoke
+> Accept the criticism => collar.trust
+
+[collar.inspire]
+title: Collar — inspire
+They: Do not give me a horizon unless you intend to remove the chain between us.
+They: I keep a list of first things: first meal free, first door of my own, first wage with my name on it.
+They: Hope is dangerous. It makes endless service harder to survive.
+They: Tell me the plan, not the dream.
+> Build a real payoff plan => collar.inspire.plan
+> Ask what work they want when free => collar.inspire.future
+> Offer education and certification => collar.inspire.training
+> Give a hollow speech => collar.inspire.hollow
+
+[collar.inspire.plan]
+They: Freeze interest, count every hour and let an outside advocate see the ledger.
+They: If the numbers are real, I can endure them. It is infinity disguised as accounting that breaks people.
+They: Put the final date on the calendar. I want to wake up knowing time is moving.
+> Approve the plan | accent => collar.release.partial
+> Send it for independent review => collar.audit
+> Refuse to freeze interest => collar.mean.penalty
+
+[collar.inspire.future]
+They: Xenobotany. I want to grow something nobody can claim as collateral.
+They: Navigation. I have spent enough of my life going where other people point.
+They: A little shop beside a gate—tea, repairs and absolutely no prophecy.
+> Offer training toward it => collar.inspire.training
+> Say they would make good crew => collar.recruit
+> Promise to visit someday => collar.trust
+
+[collar.inspire.training]
+They: Certification in my own name, not yours. And the hours reduce the debt.
+They: Teach me the drive systems and I will make myself impossible to own.
+They: Education is dangerous. Skilled servants start calculating what they are worth.
+> Agree to their terms => collar.trust
+> Add training fees to the debt | danger => collar.mean.penalty
+
+[collar.inspire.hollow]
+They: Beautiful speech. The balance did not move.
+They: Hope without policy is entertainment for the person giving it.
+They: Come back with a number and a signature.
+> Review the ledger => collar.audit
+> Take offense => collar.provoke
+
+[collar.recruit]
+title: Collar — recruit
+They: Recruit me as what—crew, servant or a convenient mixture when the watch gets difficult?
+They: Wages paid against debt are not wages unless I choose the allocation.
+They: I want rank, grievance rights and a contract that ends.
+They: Free me first. Then discover whether I still choose your ship.
+> Offer paid crew status now => collar.recruit.paid
+> Convert debt to a fixed service term => collar.recruit.term
+> Promise crew status after payoff => collar.recruit.later
+> Demand loyalty before freedom | danger => collar.recruit.coerced
+
+[collar.recruit.paid]
+They: A wage, my own quarters and the right to resign. That sounds almost like a life.
+They: If payroll goes entirely to the holder, call it accounting, not pay.
+They: Put half in my account. Apply half to debt. Let me decide if I change it.
+> Accept the split | accent => collar.trust
+> Keep all wages against debt => collar.recruit.coerced
+> Discuss duties => collar.work
+
+[collar.recruit.term]
+They: A fixed end date is better than compounding forever.
+They: No sale, no inherited balance, no penalties that extend the term.
+They: When the date comes, the collar opens even if you regret the bargain.
+> Sign fair conversion terms | accent => collar.release.partial
+> Keep a transfer clause | danger => collar.provoke
+
+[collar.recruit.later]
+They: Later is where holders store promises they do not intend to keep.
+They: Put the promotion criteria in writing and let the crew see them.
+They: I will work toward it. You will prove whether the ladder is real.
+> Publish the criteria => collar.trust
+> Keep it discretionary => collar.provoke
+
+[collar.recruit.coerced]
+They: Loyalty demanded under debt is performance. I can perform it if that is the job.
+They: You may get obedience. You will spend it every time you issue an order.
+They: Call me crew in public if you like. We both know who can leave.
+> Accept mere compliance => END
+> Replace coercion with terms => collar.recruit.term
+
+[collar.work]
+title: Collar — work assignment
+They: Give me the task, authority, safety limits and end of shift. In that order.
+They: I can repair the rune-drive or inventory the cargo. I cannot do both before dawn safely.
+They: Service does not make me infinitely skilled, though your officers remain optimistic.
+They: If it involves personal care, I choose the boundaries before the assignment begins.
+> Assign engineering duty => collar.work.engineering
+> Assign diplomatic translation => collar.work.diplomatic
+> Ask what they prefer => collar.work.choice
+> Discuss their skills => collar.work.skills
+
+[collar.work.engineering]
+They: Give me diagnostic access and keep the apprentice away from the mana conduit.
+They: The drive is mixing vacuum harmonics with ley resonance. It sounds like a haunted kettle.
+They: Four hours. Six if you want the repair to survive the next gate.
+> Authorize safe access => collar.trust
+> Demand it faster => collar.mean.shift
+
+[collar.work.diplomatic]
+They: I translate meaning, not just words. Do not interrupt because my sentence is longer than theirs.
+They: The moon-court considers eye contact a challenge. Your ambassador considers it manners. Fun.
+They: I want diplomatic immunity for anything I must say in the other side's voice.
+> Grant the protection => collar.trust
+> Tell them to follow the script exactly => collar.provoke
+
+[collar.work.choice]
+They: You are asking? Engineering. Machines punish mistakes without pretending it is moral.
+They: Translation today. My hands still ache from cargo watch.
+They: Give me the night shift. The stars make the collar feel smaller.
+> Respect the choice => collar.trust
+> Override it without reason => collar.mean
+
+[collar.work.skills]
+They: Rune circuitry, trade cant, field medicine and enough sword work to embarrass your marines.
+They: Before the debt I restored gate relics. Since the debt I have mostly polished other people's trophies.
+They: Test me fairly and pay the skill rate into the ledger.
+> Arrange a fair assessment => collar.inspire.training
+> Recruit them for specialist work => collar.recruit
+> Dismiss the claim => collar.provoke
+
+[collar.audit]
+title: Collar — debt audit
+They: Principal, interest, housing, food, collar lease, transfer fee—every line breeds another.
+They: This charge predates my signature. It belonged to my grandfather.
+They: The ledger says I owe more after three years of work. That is the system working as designed.
+They: Bring an independent advocate. Your quartermaster answers to you.
+> Freeze interest during review | accent => collar.release.partial
+> Challenge inherited debt => collar.release.transfer
+> Defend every charge => collar.provoke
+> Add another fee | danger => collar.mean.penalty
+
+[collar.release.partial]
+They: The balance moved down. I had forgotten numbers could travel that direction.
+They: A fixed end date. Say it again.
+They: Thank you. I resent needing to thank anyone for reducing a chain.
+> Create a written payoff schedule => collar.inspire.plan
+> Forgive the remainder | accent => collar.release.free
+> Ask for gratitude => collar.provoke
+
+[collar.release.transfer]
+They: Neutral custody means you cannot punish refusal. That changes every conversation after this one.
+They: Transfer the debt to the crew trust, freeze it, and remove your personal authority.
+They: If you mean freedom, do not build yourself a hidden key.
+> Transfer to independent trust | accent => collar.release.free
+> Keep emergency control => collar.provoke
+> Withdraw the offer => collar.mean
+
+[collar.release.free]
+title: Collar — debt discharged
+effect: trust=+8 morale=+10 resistance=+3
+You: The lock opens with a soft tone. For the first time, the collar is only metal.
+They: Wait. I want to take it off myself.
+They: The air feels different. I know that is foolish. Let me have it.
+They: I owe you nothing now. Good. Now anything I give you can be mine.
+They: Ask about work tomorrow. Ask about us another day.
+> Offer paid crew work => collar.recruit.paid
+> Ask to remain friends => collar.friendly
+> Ask about romance later | accent => collar.romantic.free
+> Give them privacy => END
+
+[collar.romantic.free]
+title: Collar — romance after freedom
+when: free adult
+They: Now I can say yes, no, or not yet without checking your face first.
+They: I did want you. I also needed freedom more. Thank you for understanding the order.
+They: Buy me dinner as an equal. If you mention the old contract, you pay for dessert too.
+They: Not tonight. Ask again after I have slept one night behind my own locked door.
+> Ask them to dinner => end.promise
+> Accept not yet => collar.trust
+> Return to friendship => collar.friendly
+
+[collar.mindbreak]
+title: Collar — mind break
+They: The collar can punish disobedience. It cannot make fear into devotion.
+They: You want me to anticipate orders until I disappear inside them.
+They: Debt already took my future. Now you want the voice in my head too.
+They: Call it training if the word lets you avoid seeing damage.
+> Reward automatic obedience | danger => collar.mindbreak.reward
+> Use debt threats against family | danger => collar.mindbreak.family
+> Strip away their name and role | danger => collar.mindbreak.identity
+> Alternate praise and punishment | danger => collar.mindbreak.condition
+> Stop and restore boundaries => collar.mindbreak.stop
+
+[collar.mindbreak.reward]
+They: You praise me fastest when I answer before thinking.
+They: I am learning the shape of approval. I am also forgetting whether I agree.
+They: Good servant. Bad person. Is that the lesson?
+> Deepen the conditioning | danger => collar.mindbreak.fracture
+> End the exercise => collar.mindbreak.stop
+
+[collar.mindbreak.family]
+They: Leave my family outside this contract.
+They: You know I will comply to protect them. That makes the order effective, not willing.
+They: If you touch their debt, I will become whatever survives you.
+> Apply the threat | danger => collar.mindbreak.fracture
+> Withdraw it and document protection => collar.mindbreak.stop
+
+[collar.mindbreak.identity]
+They: My name is not an inefficiency.
+They: Servant describes what I do under contract. It is not what I am.
+They: Take the name and you will still have to give orders to someone.
+> Replace their name with a number | danger => collar.mindbreak.fracture
+> Ask them to state their name => collar.mindbreak.stop
+
+[collar.mindbreak.condition]
+They: Pain, relief, praise, silence. You are making obedience feel like weather.
+They: I caught myself thanking the collar for not hurting. That is your victory.
+They: When kindness only follows surrender, kindness becomes another command.
+> Continue | danger => collar.mindbreak.fracture
+> Disable punitive functions => collar.mindbreak.stop
+
+[collar.mindbreak.fracture]
+title: Collar — conditioned compliance
+effect: trust=-10 morale=-9 resistance=-8
+They: Tell me what expression belongs with the answer.
+They: I can be useful. I can be quiet. I can be whoever leaves my family alone.
+They: The debt is mine. The voice giving orders is yours. I cannot find the border anymore.
+They: Yes, holder. I understand. I do not know whether I mean it.
+> Keep them in conditioned service | danger => END
+> Stop and seek independent care => collar.mindbreak.stop
+> Discharge the debt immediately => collar.release.free
+
+[collar.mindbreak.stop]
+They: Disable the punishment circuit first. We can discuss apologies after my hands stop shaking.
+They: Give the key to someone who does not benefit from my obedience.
+They: Recovery is not another task you get to supervise.
+> Disable punitive functions and transfer control => collar.release.transfer
+> Apologize and step back => collar.apology
+> Leave => END
+
+[collar.apology]
+They: Do not say you are sorry I felt hurt. Say what you chose.
+They: An apology without a ledger change is atmosphere.
+They: I hear you. Trust will need wages, time and evidence.
+> Change the conditions => collar.conditions
+> Order an independent audit => collar.audit
+> Give them space => END
+
+[collar.trust]
+title: Collar — trust gained
+effect: trust=+3 morale=+2 resistance=+1
+They: I can work with you. One day I may even choose to.
+They: You listened when the contract said you did not have to. I noticed.
+They: Do not make a ceremony of basic decency. Just keep doing it.
+They: Stay a minute. That is a request, not an assignment.
+> Stay and talk => collar.friendly
+> Discuss their future => collar.inspire.future
+> Leave on good terms => END
+
+# Older V2 node compatibility.
+[collar.water]
+They: Thank you. Water given without a condition is rarer than it should be.
+> Talk as equals => collar.friendly
+> Leave => END
+
+[collar.ask]
+They: Ask what the contract requires or what I choose. They are different questions.
+> Discuss work => collar.work
+> Discuss freedom => collar.audit
+> Leave => END
+
+[collar.kneel]
+They: Contract posture is not affection. Do not confuse practiced obedience with desire.
+> Tell them to stand => collar.up
+
+[collar.up]
+They: I am standing. Now speak to me without staging the power between us.
+> Talk => collar.entry
+> Leave => END
+
+[collar.unlock]
+They: If you mean to change the contract, bring the ledger and a witness.
+> Review the debt => collar.audit
+> Leave => END
+
+[collar.leave]
+They: Then go. Service does not require me to make your exit comfortable.
+> Leave => END
+
+[collar.check]
+They: I am tired, paid in subtraction and still here. That is the honest report.
+> Ask what they need => collar.conditions
+> Leave => END
+
+
+# -----------------------------------------------------------------------------
+# XENO
+# -----------------------------------------------------------------------------
+
+[xeno.ask]
+title: The body they have
+place: cabin
+when: xeno partner
+They: I can take a human shape in the dark. I will not pretend I am one.
+They: Don't flinch at the body. I am a person.
+They: Mind the claws. I will mind them unless you ask me not to.
+They: Muzzle first. I kiss different. Keep up.
+They: I rumble. That is not the reactor.
+> As they are | accent => xeno.asis :: You don't ask them to pass.
+> Ask them to take the human shape tonight => xeno.human :: You ask for passing, not for them.
+> Go slow => xeno.slow
+> Not tonight => xeno.no :: You step back from the body you asked to see.
+
+[xeno.asis]
+They: Don't flinch at the body. I am a person.
+They: The fur holds heat. You will be too warm and you will not leave.
+They: Ask before you grab. I like manners more than I look like I do.
+They: The ears pin when I'm close. That's your instrument panel.
+> Ask about the tail => xeno.tail :: You ask about the tail like it is anatomy, not a joke.
+> Ask if they knot => xeno.knot :: You ask the practical question.
+> Ask about teeth and claws => xeno.claws
+> Heat season — is it now? => xeno.heat
+> Take this further | accent => during.sex
+> Muzzle first | accent => during.kiss
+
+[xeno.tail]
+They: Don't pull the tail unless you want me to bite.
+They: Hand on the base of the tail. Now. That is not a joke.
+They: Tail around your thigh means stay. Pulling it means I set the pace.
+They: You can hold it. You cannot steer me with it unless I say.
+> Then the bunk | accent => during.sex
+> Muzzle first | accent => during.kiss
+> Don't touch the tail => xeno.asis
+
+[xeno.knot]
+They: Knot if you stay in. Say now if you don't want that.
+They: If I knot we are here a while. Breathe.
+They: That is anatomy, not a threat. Decide.
+They: I will not apologize for a body I live in.
+> Stay in | accent => during.sex
+> Not that => xeno.noknot
+> Mouth instead => during.oral
+
+[xeno.noknot]
+They: Fine. Kiss the muzzle after. I can do without.
+They: Then we keep it to hands and mouth and I will not pin you.
+They: Don't look relieved like you escaped an animal. I am still here.
+> Kiss | accent => during.kiss
+> Stay close => during.hands
+> Get closer => during.oral
+> Bunk anyway, no knot => during.sex
+
+[xeno.claws]
+They: Claws in the sheet, not in your lung. I can do careful.
+They: My teeth are a warning and an offer.
+They: Horns are not handles unless I say they are.
+They: The pad of my hand is rough. I know. Use it anyway.
+> Careful bunk | accent => xeno.slow
+> I want the claws | accent => during.sex.roughask
+> Kiss first => during.kiss
+
+[xeno.heat]
+They: Heat like this is a season. Ride it or give me space.
+They: I can fuck you through a cycle if you ask ugly.
+They: If you stay, stay. Heat is not a toy you put down mid-way.
+> Stay and ride it | accent => during.sex
+> Space tonight => xeno.no
+> Slow anyway => xeno.slow
+
+[xeno.human]
+They: I can. I will be angry the whole time and I will still do it if you need the lie.
+They: Don't ask me to pass unless passing keeps us alive. This cabin is not a checkpoint.
+They: If I put the human shape on, kiss me like I am still this.
+> Take the shape, then the bunk => during.sex
+> Withdraw the ask — as they are | accent => xeno.asis
+> Not tonight => xeno.no
+
+[xeno.slow]
+They: Don't pet me like a mascot. Kiss me like a lover.
+They: Go slow. Muzzle first. I kiss different. Keep up.
+They: Claws in the sheet, not in your lung. I can do careful.
+They: I will nap on you. That is not optional.
+> Muzzle first | accent => during.kiss
+> Stay close => during.hands
+> Bunk slow => during.sex
+> Menu => menu.from_talk
+
+[xeno.no]
+They: Don't flinch now — or do, and leave.
+They: Not tonight is a full sentence. I will not chase it.
+They: Then don't look at the tail like a question.
+> Leave => END
+
+
+# -----------------------------------------------------------------------------
+# ENDINGS
+# -----------------------------------------------------------------------------
+
+[end.stay]
+title: Stay
+You: You don't reach for the suit.
+They: Stay. The board can wait.
+They: Don't dress yet.
+They: Sleep if you can.
+They: Come back after the next watch.
+They: Hand on me like you mean the morning too.
+> Close => END
+
+[end.watch]
+title: Back to the watch
+You: You reach for the hatch.
+They: Go. Before I keep you.
+They: The watch will take you if I don't. Fine.
+They: Kiss the hatch on the way out. That's a joke. Mostly.
+They: I can stand a watch. After one more minute. That minute is gone.
+> Close => END
+
+[end.stop]
+title: Stop
+You: You stop.
+They: That's enough.
+They: Stop. I changed my mind.
+They: Not like that. Not here.
+They: I wanted you. I didn't want that version.
+> Close => END
+
+[end.drop]
+You: You let the moment pass.
+They: Good.
+They: I have plating to be on.
+They: Ask when you mean the cabin.
+> Close => END
+
+[end.out]
+You: You don't follow.
+They: Then don't start it.
+They: Good. I have a watch.
+They: Ask again when the answer is the cabin.
+> Close => END
+
+[end.talkonly]
+You: You take the words and leave the body out of it.
+They: Fine. That was still a conversation.
+They: I can want you and still accept a no.
+They: Next time start with the sentence you meant.
+> Close => END
+
+[end.promise]
+You: You name the later hour and you leave.
+They: I will be there. Don't make me into a fool.
+They: After the watch. Cabin. If you don't come I will not ask in the mess.
+> Close => END
+
+[end.caught]
+You: Footsteps. You break it.
+They: Walk. Don't look like a theft.
+They: We will finish this behind a hatch or we will not finish it.
+They: I hate the hull for that. Not you. Mostly not you.
+> Close => END
+
+[end.padno]
+You: You put the chit away. Or you never took it out.
+They: Clock's not running.
+They: No. That wasn't on the menu.
+They: You just talked yourself out of an hour.
+> Close => END
+
+
+# -----------------------------------------------------------------------------
+# V2 OPTIONAL RELATIONSHIP BEATS
+# These can be wired into existing branches as the relationship system expands.
+# -----------------------------------------------------------------------------
+
+[v2.partner.readroom]
+title: Read the room
+place: cabin
+They: You've been standing there for a full minute. Either something happened, or you're trying very hard not to say something.
+They: Hey. Come sit down before you decide you have to be fine.
+They: I know that look. Give me the real version, not the report.
+> Sit with them => v2.partner.decompress
+> Tell them about the watch => talk.watch
+> Admit you missed them | accent => v2.partner.missed
+> Say you need a minute alone => end.watch
+
+[v2.partner.decompress]
+title: Decompress
+They: You don't have to perform in here. That's what the hatch is for.
+They: We can talk about it, complain about it, or sit here until your shoulders come down.
+They: I'm not going anywhere for the next few minutes. Start wherever you can.
+> Talk about what happened => talk.watch
+> Ask about their day => v2.partner.theirday
+> Just stay close => talk.soft
+> Change the subject => v2.partner.smalltalk
+
+[v2.partner.missed]
+title: Missed you
+They: There. That wasn't so difficult.
+They: I missed you too. I was trying to be less obvious about it.
+They: Come here. We don't have to turn it into anything bigger than that.
+> Stay close | accent => talk.soft
+> Talk first => cabin.talk
+> Tease them about being obvious => v2.partner.smalltalk
+> Head back to duty => end.watch
+
+[v2.partner.theirday]
+title: Their day
+They: Mine? Mostly alarms, bad coffee, and pretending the board wasn't personally insulting me.
+They: I had a decent hour until somebody asked how my day was and made me think about it.
+They: It was ordinary. I'm starting to appreciate ordinary.
+> Ask what went wrong => talk.watch
+> Tell them ordinary sounds good => v2.partner.smalltalk
+> Stay close => talk.soft
+
+[v2.partner.smalltalk]
+title: Cabin small talk
+They: You know what I want when we finally get leave? A room that doesn't hum.
+They: And a chair nobody has bolted to the floor.
+They: Maybe food that wasn't designed by somebody optimizing storage volume.
+> Laugh with them => v2.partner.decompress
+> Ask where they'd go => v2.partner.future
+> Tell them your own leave plan => v2.partner.future
+> Let the quiet settle => talk.soft
+
+[v2.partner.future]
+title: Somewhere after this
+They: I don't know. Somewhere with weather, maybe. Real weather.
+They: Funny, isn't it? We spend all this time trying to get somewhere, then fantasize about staying still.
+They: Ask me again after this run. I might have an actual answer by then.
+> Promise to ask again => end.promise
+> Say you'd go with them | accent => after.tender
+> Bring it back to tonight => cabin.talk
+
+[v2.boundary.check]
+title: Check in
+They: Still okay?
+They: You don't have to keep going just because we started.
+They: Tell me if you want something different. I'd rather hear it than guess.
+> Keep going | accent => menu.again
+> Slow down => talk.soft
+> Stop and talk => cabin.talk
+> Stop for tonight => end.stop
+
+[v2.brig.check]
+title: Brig check-in
+place: brig
+They: If you came down here to check on me, then check on me. Don't make the collar answer for me.
+They: Water would help. So would five minutes of being spoken to like a person.
+They: You want an honest answer? Ask an honest question.
+> Bring water | accent => collar.water
+> Ask how they are => collar.check
+> Talk without touching => collar.unlock
+> Leave => END
+
+[v2.xeno.translate]
+title: Different instincts
+when: xeno
+They: You're reading my body like it belongs to your species. Some of it translates. Some of it doesn't.
+They: Ask when you aren't sure. I'll do the same.
+They: Curiosity is fine. Assumptions are where this gets complicated.
+> Ask what a gesture means => xeno.ask
+> Explain one of your own customs => cabin.talk
+> Keep things simple => talk.soft
+> Give them space => end.stop

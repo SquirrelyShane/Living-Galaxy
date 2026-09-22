@@ -1,0 +1,39 @@
+{
+  "sig": "0.3.37:0.72-1.45:1.7",
+  "career": "mining",
+  "sky": "sol",
+  "runs": 13,
+  "moves": {
+    "board:industry:parts": {
+      "runs": 1,
+      "secs": 290.4333333335129,
+      "cr": 6477,
+      "fails": 0
+    },
+    "board:mining:vein": {
+      "runs": 8,
+      "secs": 3160.566666668724,
+      "cr": 111582,
+      "fails": 1
+    },
+    "board:mining:mine": {
+      "runs": 2,
+      "secs": 2400.0000000197724,
+      "cr": 14305,
+      "fails": 2
+    },
+    "supply": {
+      "runs": 1,
+      "secs": 386.30000000491873,
+      "cr": 3102,
+      "fails": 0
+    },
+    "board:salvage:salvage": {
+      "runs": 1,
+      "secs": 284.1333333369512,
+      "cr": 1301,
+      "fails": 1
+    }
+  },
+  "saved": 6747
+}

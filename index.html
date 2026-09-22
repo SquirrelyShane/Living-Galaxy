@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The ship generator (js/shipgen/) imports bare "three"; map it onto the
+         vendored build so it shares one three.js instance with the engine. -->
+    <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js", "three/addons/postprocessing/Pass.js": "./js/asteroidgen/addons/Pass.js" } }</script>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="theme-color" content="#05060a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Living Galaxy — Ad Astrum</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='%237ce7ff' stroke-width='1.5'/%3E%3Ccircle cx='8' cy='8' r='2' fill='%237ce7ff'/%3E%3C/svg%3E" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/glass.css" />
+    <link rel="stylesheet" href="./css/console.css" />
+    <link rel="stylesheet" href="./css/comms.css" />
+    <link rel="stylesheet" href="./css/interior.css" />
+  </head>
+  <body>
+    <h1 class="sr-only">Living Galaxy — Ad Astrum: a first-person solar system</h1>
+    <canvas id="view" aria-label="Cockpit view"></canvas>
+    <!-- Core flash: the field going up and the field collapsing. Sits over the
+         view and under the canopy, because it is something happening outside
+         the glass rather than something the ship is telling you. -->
+    <div id="warp-flash" class="warp-flash" aria-hidden="true"></div>
+
+    <!-- Canopy: the frame you are looking through. -->
+    <div id="canopy" class="canopy hidden" aria-hidden="true">
+      <div class="canopy-glass"></div>
+      <svg class="canopy-frame" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="strut" d="M0 0 L100 0 L100 3.2 L0 3.2 Z" />
+        <path class="strut" d="M0 100 L100 100 L100 96 L0 96 Z" />
+        <path class="strut-l" d="M0 0 L3.4 6 L3.4 94 L0 100 Z" />
+        <path class="strut-l" d="M100 0 L96.6 6 L96.6 94 L100 100 Z" />
+      </svg>
+      <div class="reticle">
+        <span class="ret-ring"></span>
+        <span class="ret-dot"></span>
+        <span class="ret-tick t-l"></span>
+        <span class="ret-tick t-r"></span>
+        <span class="ret-tick t-u"></span>
+        <span class="ret-tick t-d"></span>
+      </div>
+      <div id="markers" class="markers"></div>
+      <div id="heat-wash" class="heat-wash"></div>
+    </div>
+
+    <div id="start" class="start">
+      <section class="start-card panel">
+        <p class="kicker">First-person solar system</p>
+        <h1>LIVING GALAXY</h1>
+        <p class="subtitle">Ad Astrum</p>
+        <p class="lede">
+          Fly it from the seat. The nose goes where you look, momentum is yours to
+          cancel, and the worlds are hundreds of times longer than your hull.
+        </p>
+        <label>
+          Callsign
+          <input id="callsign" maxlength="18" autocomplete="off" />
+        </label>
+        <button type="button" id="btn-create" class="btn btn-accent">Create pilot</button>
+        <p id="sys-line" class="sys-line"></p>
+        <div class="stats">
+          <div>Survey log <strong id="stat-survey">0/11 worlds</strong></div>
+          <div>Probes <strong id="stat-probes">0/6</strong></div>
+        </div>
+        <p class="hint">
+          Left thumb points the nose. Right-hand dash carries throttle and the switchboard.
+          Centre pad is your RCS cluster and the brake. Rotate for the wide deck.
+        </p>
+        <p class="build" id="build-line"></p>
+      </section>
+    </div>
+
+    <!-- Pilot creation. Surfaces stream in behind this. -->
+    <div id="create" class="create hidden">
+      <div class="panel create-card">
+        <header class="create-head">
+          <div>
+            <p class="kicker">Pilot record</p>
+            <h2 id="create-title">New pilot</h2>
+          </div>
+          <div class="create-load">
+            <span id="load-text">surfaces</span>
+            <span class="load-bar"><b id="load-fill"></b></span>
+          </div>
+        </header>
+
+        <nav class="create-steps" id="create-steps">
+          <button type="button" data-step="race" class="on">1 · Race</button>
+          <button type="button" data-step="career">2 · Career</button>
+          <button type="button" data-step="corp">3 · Corporation</button>
+          <button type="button" data-step="sky">4 · Sky</button>
+        </nav>
+
+        <div class="create-body" id="create-body"></div>
+
+        <footer class="create-foot">
+          <div class="create-sum" id="create-sum">—</div>
+          <div class="create-nav">
+            <button type="button" class="btn" id="create-back">Back</button>
+            <button type="button" class="btn btn-accent" id="create-next">Next</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <div id="hud" class="hud hidden">
+      <div id="labels" class="labels"></div>
+
+      <header class="hud-top">
+        <div class="hud-brand panel">
+          <strong>LIVING GALAXY<em>Ad Astrum</em></strong>
+          <span id="hud-sky"></span>
+        </div>
+        <div class="hud-tools">
+          <button type="button" class="btn icon-btn" id="btn-aria" aria-label="ARIA takes the conn">ARIA</button>
+          <button type="button" class="btn icon-btn" id="btn-full" aria-label="Fullscreen">⛶</button>
+          <button type="button" class="btn icon-btn" id="btn-con" aria-label="Console">CON</button>
+          <button type="button" class="btn icon-btn hidden" id="btn-mute" aria-label="Mute">M</button>
+          <button type="button" class="btn icon-btn" id="btn-cam" aria-label="Camera">FPV</button>
+          <button type="button" class="btn icon-btn" id="btn-hold" aria-label="Open the hold">HOLD</button>
+          <button type="button" class="btn icon-btn" id="btn-map" aria-label="System map">Map</button>
+          <button type="button" class="btn icon-btn" id="btn-pause" aria-label="Pause">II</button>
+        </div>
+      </header>
+
+      <!-- Instrument strip -->
+      <div class="instruments panel" id="instruments">
+        <div class="inst"><i>VEL</i><b id="i-vel">0</b><u>u/s</u></div>
+        <div class="inst"><i>CLS</i><b id="i-cls">0</b><u>u/s</u></div>
+        <div class="inst"><i>ALT</i><b id="i-alt">—</b><u></u></div>
+        <div class="inst"><i>G</i><b id="i-g">0.00</b><u></u></div>
+      </div>
+
+      <!-- Gauges -->
+      <div class="gauges panel" id="gauges">
+        <div class="gauge" data-k="pwr"><em><i>PWR</i><u id="g-pwr-n">100%</u></em><span class="bar"><b id="g-pwr"></b></span></div>
+        <div class="gauge" data-k="hull"><em><i>HULL</i><u id="g-hull-n">100</u></em><span class="bar"><b id="g-hull"></b></span></div>
+        <div class="gauge" data-k="shld"><em><i>SHLD</i><u id="g-shld-n">100</u></em><span class="bar"><b id="g-shld"></b></span></div>
+        <div class="gauge" data-k="o2"><em><i>O2</i><u id="g-o2-n">100</u></em><span class="bar"><b id="g-o2"></b></span></div>
+        <button type="button" class="gauge gauge-btn" data-k="cgo" id="g-cgo-btn" aria-label="Open the hold"><em><i>CGO</i><u id="g-cgo-n">0</u></em><span class="bar"><b id="g-cgo"></b></span></button>
+      </div>
+
+      <!-- Always-on one-liner: where you are, what is out there -->
+      <div class="status" id="status"></div>
+      <div class="lockbar" id="lockbar"><span id="lock-text">NO LOCK</span><i id="lock-fill"></i></div>
+      <div class="hazline hidden" id="hazline"><span id="haz-text"></span></div>
+      <div class="hazline respline hidden" id="respline"><span id="resp-text"></span></div>
+
+      <div id="alarms" class="alarms"></div>
+
+      <button type="button" class="hud-notice panel" id="notice-card" aria-label="Dismiss message">
+        <h2 id="lock-name">—</h2>
+        <p id="notice"></p>
+      </button>
+
+      <div id="toast" class="toast panel hidden"></div>
+
+      <!-- Flight controls -->
+      <div class="touch">
+        <!-- the stick is retired: drag the sky to point the nose. It stays in the DOM, hidden, so
+             the pad binding and the tutorial's references keep working. -->
+        <div class="stick hidden" id="stick" aria-label="Pan. Points the nose of the ship." aria-hidden="true">
+          <div class="stick-knob" id="stick-knob"></div>
+          <span class="stick-label">Point</span>
+        </div>
+
+        <!-- the band, where the stick was -->
+        <section class="chatbox glass" id="chatbox" aria-label="Chat">
+          <div class="cb-top"><div class="cb-tabs" id="cb-tabs"></div><button type="button" class="cb-toggle" id="cb-toggle" aria-label="Expand chat">⌃</button></div>
+          <div class="cb-log" id="cb-log"></div>
+          <div class="cb-in">
+            <button type="button" class="cb-unread" id="cb-unread" aria-label="Unread messages — open the band"><i id="cb-unread-n">0</i></button>
+            <input id="cb-in" placeholder="Say something on the band" autocomplete="off" spellcheck="false" />
+            <button type="button" id="cb-send" aria-label="Send">↑</button>
+            <button type="button" id="cb-fold" class="cb-fold" aria-label="Fold the band">↓</button>
+          </div>
+        </section>
+
+        <!-- the route card lives beside the dash, not inside it (the dash is a glass card:
+             backdrop-filter makes it the containing block for anything fixed inside) -->
+        <div class="route hidden" id="route-card">
+          <div class="route-head"><b id="route-target">—</b><span id="route-eta">—</span></div>
+          <div class="route-body" id="route-hazards"></div>
+        </div>
+
+        <!-- systems strip: the four switches you touch in flight, on the same data-sys contract as
+             the switchboard pages (hud.js wires every .sw[data-sys]) -->
+        <div class="sys-strip" id="sys-strip">
+          <button type="button" class="sw" data-sys="shields"><span class="led"></span><span class="nm">SHLD</span><span class="st">UP</span></button>
+          <button type="button" class="sw" data-sys="engines"><span class="led"></span><span class="nm">ENG</span><span class="st">ON</span></button>
+          <button type="button" class="sw" data-sys="turretsArmed"><span class="led"></span><span class="nm">TURR</span><span class="st">ARMED</span></button>
+          <button type="button" class="sw" data-sys="assist"><span class="led"></span><span class="nm">ASST</span><span class="st">ON</span></button>
+          <!-- the cutter is a MODE (off/closest/overdrive), not a boolean, so it
+               is not on the data-sys contract: hud.js wires it by hand -->
+          <button type="button" class="sw wide" id="sw-cut"><span class="led"></span><span class="nm">CUT</span><span class="st">OFF</span></button>
+        </div>
+        <div class="rcs" id="rcs">
+          <button type="button" class="rcs-btn" data-rcs="fwd" aria-label="Forward thruster">FWD</button>
+          <button type="button" class="rcs-btn" data-rcs="up" aria-label="Up thruster">UP</button>
+          <button type="button" class="rcs-btn act" id="btn-plock" aria-label="Pointer lock">P-LOCK</button>
+          <button type="button" class="rcs-btn" data-rcs="left" aria-label="Port thruster">◀</button>
+          <button type="button" class="rcs-btn brake" id="btn-brake" aria-label="Retrograde brake">BRAKE</button>
+          <button type="button" class="rcs-btn" data-rcs="right" aria-label="Starboard thruster">▶</button>
+          <button type="button" class="rcs-btn" data-rcs="aft" aria-label="Aft thruster">AFT</button>
+          <button type="button" class="rcs-btn" data-rcs="down" aria-label="Down thruster">DN</button>
+          <button type="button" class="rcs-btn act" id="btn-survey" aria-label="Survey">SCAN</button>
+        </div>
+
+        <!-- Cockpit dashboard -->
+        <div class="dash" id="dash">
+          <nav class="dash-tabs" id="dash-tabs">
+            <button type="button" data-page="1" class="on">1</button>
+            <button type="button" data-page="2">2</button>
+            <button type="button" data-page="3">3</button>
+            <span class="dash-page-name" id="dash-page-name">FLIGHT</span>
+          </nav>
+
+          <div class="thr">
+            <div class="thr-head"><i>THRUST</i><b id="thr-num">0</b></div>
+            <div class="thr-track" id="thr-track">
+              <div class="thr-od"></div>
+              <div class="thr-zero"></div>
+              <div class="thr-fill" id="thr-fill"></div>
+              <div class="thr-thumb" id="thr-thumb"></div>
+            </div>
+            <!-- held thrust: the slider is momentary (springs back to zero), these hold a setting -->
+            <div class="thr-presets" id="thr-presets">
+              <button type="button" data-thr="0">0%</button>
+              <button type="button" data-thr="0.1">10%</button>
+              <button type="button" data-thr="0.2">20%</button>
+              <button type="button" data-thr="0.5">50%</button>
+              <button type="button" data-thr="0.75">75%</button>
+              <button type="button" data-thr="1">MAX</button>
+            </div>
+            <div class="thr-foot" id="thr-draw">0 kW</div>
+          </div>
+
+          <!-- page 1: flight systems -->
+          <div class="switches page" id="dash-page-1">
+            <button type="button" class="sw" data-sys="shields">
+              <span class="led"></span><span class="nm">SHLD</span><span class="st">UP</span>
+            </button>
+            <button type="button" class="sw" data-sys="turretsArmed">
+              <span class="led"></span><span class="nm">TURR</span><span class="st">ON</span>
+            </button>
+            <button type="button" class="sw" data-sys="engines">
+              <span class="led"></span><span class="nm">ENG</span><span class="st">ON</span>
+            </button>
+            <button type="button" class="sw" data-sys="pressurized">
+              <span class="led"></span><span class="nm">CABIN</span><span class="st">PRESS</span>
+            </button>
+            <button type="button" class="sw" data-sys="localGravity">
+              <span class="led"></span><span class="nm">GRAV</span><span class="st">ON</span>
+            </button>
+            <button type="button" class="sw" data-sys="assist">
+              <span class="led"></span><span class="nm">ASST</span><span class="st">ON</span>
+            </button>
+            <button type="button" class="sw mode" id="mode-turret">
+              <span class="nm">TURRETS</span><span class="st" id="mode-turret-st">CASTLE</span>
+            </button>
+            <button type="button" class="sw mode" id="mode-mining">
+              <span class="nm">MINER</span><span class="st" id="mode-mining-st">OFF</span>
+            </button>
+          </div>
+
+          <!-- page 2: ops board -->
+          <div class="switches page hidden" id="dash-page-2">
+            <button type="button" class="sw" data-sys="lights">
+              <span class="led"></span><span class="nm">FLOOD</span><span class="st">OFF</span>
+            </button>
+            <button type="button" class="sw" data-sys="sentry">
+              <span class="led"></span><span class="nm">SENTRY</span><span class="st">ON</span>
+            </button>
+            <button type="button" class="sw" data-sys="salvage">
+              <span class="led"></span><span class="nm">SALVG</span><span class="st">OFF</span>
+            </button>
+            <button type="button" class="sw" data-sys="matchLock">
+              <span class="led"></span><span class="nm">MATCH</span><span class="st">OFF</span>
+            </button>
+            <button type="button" class="sw act" id="op-pulse">
+              <span class="nm">PULSE</span><span class="st" id="op-pulse-st">READY</span>
+            </button>
+            <button type="button" class="sw act" id="op-level">
+              <span class="nm">LEVEL</span><span class="st">TRIM</span>
+            </button>
+            <button type="button" class="sw act" id="op-dock">
+              <span class="nm">DOCK</span><span class="st" id="op-dock-st">—</span>
+            </button>
+            <button type="button" class="sw act" id="op-claim">
+              <span class="nm">CLAIM</span><span class="st" id="op-claim-st">—</span>
+            </button>
+            <button type="button" class="sw mode" id="op-time">
+              <span class="nm">TIME</span><span class="st" id="op-time-st">1×</span>
+            </button>
+            <button type="button" class="sw mode" id="op-threat">
+              <span class="nm">THREAT</span><span class="st" id="op-threat-st">CLEAR</span>
+            </button>
+          </div>
+
+          <!-- page 3: comms + aux -->
+          <div class="switches page hidden" id="dash-page-3">
+            <button type="button" class="sw act" id="aux-hail" aria-label="Hail">
+              <span class="nm">HAIL</span><span class="st" id="aux-hail-st">—</span>
+            </button>
+            <button type="button" class="sw" id="aux-listen" aria-label="Listen to open channels">
+              <span class="led"></span><span class="nm">LISTEN</span><span class="st" id="aux-listen-st">ON</span>
+            </button>
+            <button type="button" class="sw act" id="aux-deck" aria-label="Deck plan"><span class="nm">DECK</span><span class="st" id="aux-deck-st">READY</span></button>
+            <button type="button" class="sw" id="aux-ice" aria-label="Ice works"><span class="led"></span><span class="nm">ICE</span><span class="st" id="aux-ice-st">—</span></button>
+            <button type="button" class="sw" id="aux-atmo" aria-label="Atmo works"><span class="led"></span><span class="nm">ATMO</span><span class="st" id="aux-atmo-st">—</span></button>
+            <button type="button" class="sw" id="aux-auto" aria-label="Approach autopilot"><span class="led"></span><span class="nm">AUTO</span><span class="st" id="aux-auto-st">—</span></button>
+            <button type="button" class="sw mode" id="aux-comms"><span class="nm">COMMS</span><span class="st" id="aux-comms-st">LOCAL</span></button>
+            <button type="button" class="sw mode aux"><span class="nm">AUX BUS B</span><span class="st">UNASSIGNED</span></button>
+          </div>
+
+          <div class="warp-row">
+            <button type="button" class="warpbar" id="btn-warp" aria-label="Warp core">
+              <span class="warp-fill" id="warp-fill"></span>
+              <span class="warp-lab">WARP</span>
+              <span class="warp-state" id="warp-state">READY</span>
+            </button>
+            <!-- the approach autopilot, beside the core (proxies the AUX page's AUTO switch) -->
+            <button type="button" class="warpbar approachbar" id="btn-approach" data-proxy="aux-auto" data-proxy-st="aux-auto-st" aria-label="Approach autopilot">
+              <span class="warp-lab">APPR</span>
+              <span class="warp-state" id="approach-state">—</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The console: everything the dash has no room for. -->
+    <div id="console" class="console hidden">
+      <div class="con-sheet glass">
+        <header class="con-head">
+          <div class="con-id"><b id="con-title">CONSOLE</b><span id="con-sub">—</span></div>
+          <div class="con-live"><span><i>VEL</i><b id="t-vel">0</b></span><span><i>ALT</i><b id="t-alt">—</b></span><span><i>PWR</i><b id="t-pwr">100%</b></span><span><i>HULL</i><b id="t-hull">100</b></span></div>
+          <div class="con-act"><button type="button" class="btn" id="con-hold">HOLD</button><button type="button" class="btn icon-btn" id="con-close" aria-label="Close console">X</button></div>
+        </header>
+        <div class="con-search"><span class="cmd-glyph">⌕</span><input id="con-q" placeholder="jump to…" autocomplete="off" spellcheck="false" /></div>
+        <div class="con-hits" id="con-hits" hidden></div>
+        <nav class="con-tabs" id="con-tabs">
+          <button type="button" data-panel="ship" class="on">SHIP</button><button type="button" data-panel="nav">NAV</button>
+          <button type="button" data-panel="crew">CREW</button><button type="button" data-panel="work">WORK</button>
+          <button type="button" data-panel="market">MARKET</button><button type="button" data-panel="corp">CORP</button>
+        </nav>
+        <nav class="con-subtabs" id="con-subtabs"></nav>
+        <div class="con-body" id="con-body"></div>
+        <footer class="con-foot" id="con-foot" hidden><span class="cmd-footlab">RECENT</span><div class="cmd-recents" id="con-recents"></div></footer>
+      </div>
+    </div>
+
+    <div id="pause" class="overlay hidden">
+      <div class="panel">
+        <h2>Paused</h2>
+        <p class="lede">The sky keeps turning. Your vector holds — nothing out there slows you down.</p>
+        <div class="stack">
+          <button type="button" class="btn btn-accent" id="btn-resume">Resume</button>
+          <button type="button" class="btn hidden" id="btn-watch">Conn watch ×40</button>
+          <button type="button" class="btn" id="btn-tutor">Run tutorial</button>
+          <button type="button" class="btn" id="btn-menu">Leave sky</button>
+        </div>
+        <div class="mixer" id="mixer">
+          <h3>Audio</h3>
+          <div class="mix-rows" id="mix-rows"></div>
+          <button type="button" class="btn tiny" id="btn-mix-reset">Reset levels</button>
+        </div>
+        <div class="keymap">
+          <div><b>Left stick / drag · W A S D</b><span>Point the nose (camera up / left / down / right)</span></div>
+          <div><b>Throttle slider · ↑ ↓</b><span>Main engine, 1% steps · X to zero</span></div>
+          <div><b>Shift · Shift+Ctrl</b><span>Boost while held · set cruise (any thruster drops it)</span></div>
+          <div><b>Q E · R F</b><span>Lateral / vertical RCS</span></div>
+          <div><b>EXT camera: drag · wheel/pinch · 2 fingers</b><span>Orbit · zoom · pan (double-tap resets)</span></div>
+          <div><b>Chart: tap anywhere</b><span>Warp · approach · probe · scan · save</span></div>
+          <div><b>Space</b><span>Retrograde brake</span></div>
+          <div><b>1 2 3 4 5 6</b><span>Shield · turret · engine · cabin · grav · assist</span></div>
+          <div><b>T / Y</b><span>Turret mode / mining mode</span></div>
+          <div><b>V · G</b><span>Survey · spool the warp core</span></div>
+          <div><b>M · C</b><span>System chart · camera</span></div>
+          <div><b>B / Tab</b><span>Console</span></div>
+          <div><b>H</b><span>Hail · answer a call</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 0.3.29 — the hold, as a bag. The CGO gauge opens it. -->
+    <div id="hold" class="overlay hidden">
+      <div class="panel holdbag">
+        <header class="hv-top">
+          <h2>HOLD</h2>
+          <button type="button" class="btn icon-btn" id="hold-close" aria-label="Close the hold">X</button>
+        </header>
+        <div id="hold-body"></div>
+      </div>
+    </div>
+
+    <div id="map" class="overlay hidden">
+      <div class="panel chart">
+        <header class="chart-head">
+          <div>
+            <h2 id="map-title">System chart</h2>
+            <span id="map-scale">—</span>
+          </div>
+          <div class="chart-tools">
+            <button type="button" class="btn icon-btn" id="map-out" aria-label="Zoom out">−</button>
+            <button type="button" class="btn icon-btn" id="map-in" aria-label="Zoom in">+</button>
+            <button type="button" class="btn icon-btn" id="map-fit" aria-label="Fit system">◎</button>
+            <button type="button" class="btn icon-btn" id="map-list" aria-label="Directory">≡</button>
+            <button type="button" class="btn icon-btn" id="btn-map-close" aria-label="Close chart">X</button>
+          </div>
+        </header>
+
+        <div class="chart-plot">
+          <svg id="map-svg" class="map-svg" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="chart-hint" id="map-hint">Drag to pan · pinch to zoom · tap a body</div>
+          <!-- the directory: everything in the sky, filtered, nearest first -->
+          <div class="chart-dir hidden" id="map-dir">
+            <div class="dir-chips" id="dir-chips"></div>
+            <div class="dir-rows" id="dir-rows"></div>
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <span><i class="lg-body"></i>world</span>
+          <span><i class="lg-probe"></i>probe</span>
+          <span><i class="lg-port"></i>port</span>
+          <span><i class="lg-pirate"></i>free port</span>
+          <span><i class="lg-mark"></i>waypoint</span>
+          <span><i class="lg-ship"></i>you</span>
+          <span><i class="lg-vec"></i>velocity</span>
+        </div>
+
+        <div class="chart-sheet" id="map-sheet">
+          <div class="sheet-empty" id="sheet-empty">Tap a world for its readout and options.</div>
+          <div class="sheet-body hidden" id="sheet-body">
+            <div class="sheet-top">
+              <div>
+                <h3 id="sheet-name">—</h3>
+                <span id="sheet-sub">—</span>
+              </div>
+              <span class="sheet-tier" id="sheet-tier">—</span>
+            </div>
+            <div class="sheet-stats" id="sheet-stats"></div>
+            <div class="sheet-lane" id="sheet-lane">—</div>
+            <div class="sheet-acts">
+              <button type="button" class="tbtn" id="sheet-lock">LOCK</button>
+              <button type="button" class="tbtn" id="sheet-warp">WARP</button>
+              <button type="button" class="tbtn" id="sheet-mark">MARK</button>
+              <button type="button" class="tbtn" id="sheet-centre">CENTRE</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="station-deck" class="sdeck hidden">
+      <header class="sd-head">
+        <div>
+          <h2 id="sd-title">PORT</h2>
+          <div id="sd-sub" class="sd-subtl">deck · clamps engaged</div>
+        </div>
+        <div class="sd-headr">
+          <span id="sd-credits" class="sd-chip">0 CR</span>
+          <button type="button" id="sd-repair" class="sd-btn sd-repair hidden">REPAIR</button>
+          <button type="button" id="sd-stow" class="sd-btn">STOW</button>
+          <button type="button" id="sd-undock" class="sd-btn sd-danger">UNDOCK</button>
+        </div>
+      </header>
+      <div class="sd-grid">
+        <aside class="sd-wall">
+          <div class="sd-crt"><span class="sd-crtlab">TRAFFIC/0</span><canvas id="sd-rain1"></canvas></div>
+          <div class="sd-crt">
+            <span class="sd-crtlab">CREW VITALS · <b id="sd-bpm">-- BPM</b></span>
+            <span class="sd-heart">♥</span>
+            <canvas id="sd-vitals"></canvas>
+          </div>
+          <div class="sd-crt sd-crtbars"><span class="sd-crtlab">STATION PROC</span>
+            <div id="sd-procs">
+              <div class="sd-proc"><span>SMELT QUEUE</span><i class="sd-bar"><b></b></i></div>
+              <div class="sd-proc"><span>FUEL CRACK</span><i class="sd-bar"><b></b></i></div>
+              <div class="sd-proc"><span>AIR SCRUB</span><i class="sd-bar"><b></b></i></div>
+              <div class="sd-proc"><span>FAB LINE</span><i class="sd-bar"><b></b></i></div>
+            </div>
+          </div>
+          <div class="sd-crt"><span class="sd-crtlab">DOCKNET/1</span><canvas id="sd-rain2"></canvas></div>
+        </aside>
+        <section class="sd-main">
+          <nav class="sd-tabs" id="sd-tabs">
+            <button type="button" data-sd="market" class="on">Market</button>
+            <button type="button" data-sd="shipyard">Shipyard</button>
+            <button type="button" data-sd="board">Board</button>
+            <button type="button" data-sd="crew">Crew</button>
+            <button type="button" data-sd="works">Works</button>
+            <button type="button" data-sd="drones">Drones</button>
+            <button type="button" data-sd="robots">Robots</button>
+            <button type="button" data-sd="refit">Refit</button>
+            <button type="button" data-sd="gnn" hidden>GNN</button>
+            <button type="button" data-sd="blueprint">Blueprint</button>
+            <button type="button" data-sd="log">Log</button>
+          </nav>
+          <div class="sd-body" id="sd-body"></div>
+        </section>
+      </div>
+    </div>
+    <button type="button" id="sd-reopen" class="sd-reopen hidden">STATION DECK</button>
+
+    <div id="sky-glare" aria-hidden="true"></div>
+    <div id="impact-flash" aria-hidden="true"></div>
+
+    <!-- 0.3.27 — the boot watchdog. A module graph that fails to LINK never runs
+         its entry module, so nothing inside js/ can report it: the page keeps the
+         shell above, paints a black canvas, and says nothing. This classic script
+         runs before the module, catches whatever the link threw, and hands it to
+         js/boot.js to put on the screen in words. It only speaks if something
+         actually threw, so a slow device is never accused of being broken. -->
+    <script>
+      (function () {
+        var seen = null;
+        function grab(e) { if (!seen && e) seen = e.error || e.reason || e.message || e; }
+        addEventListener("error", grab, true);
+        addEventListener("unhandledrejection", grab);
+        setTimeout(function () {
+          if (window.__lgBooted || !seen || document.getElementById("boot-fail")) return;
+          import("./js/boot.js").then(function (m) { m.showFailure(seen); }).catch(function () {
+            var t = String((seen && seen.message) || seen || "").replace(/[&<>]/g, "");
+            document.body.insertAdjacentHTML("beforeend",
+              '<div id="boot-fail"><div class="bf-card"><div class="bf-tag">LIVING GALAXY — AD ASTRUM</div>' +
+              '<h1>Living Galaxy could not start</h1><p>Some files in this folder are a version behind the rest — re-apply the patches in order.</p>' +
+              '<pre>' + t + '</pre></div></div>');
+            document.documentElement.classList.add("boot-failed");
+          });
+        }, 8000);
+      })();
+    </script>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
