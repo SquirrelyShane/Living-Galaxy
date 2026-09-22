@@ -3,3 +3,6 @@ package.json
 package-lock.json
 wrangler.jsonc
 *.zip
+tools
+test
+docs
