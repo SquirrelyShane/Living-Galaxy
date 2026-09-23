@@ -82,7 +82,11 @@
 /* ---------- accept / reject ---------- */
 .cx-answer {
   position: absolute;
-  right: calc(var(--cx-rail-right) + 66px);
+  /* js/hud.js places the puck AND this row together and publishes where this
+   * one goes — it may sit to the left of the puck (the usual place) or flipped
+   * to its right when the puck is near the left edge. The calc() is the no-JS
+   * fallback. 0.3.37 placed only the puck and pushed these off screen. */
+  right: var(--g-answer-right, calc(var(--cx-rail-right) + 66px));
   top: var(--cx-rail-top);
   height: 58px;
   display: flex; align-items: center; gap: 8px;
@@ -191,7 +195,7 @@
 /* coarse pointers: bigger targets, roomier log */
 @media (pointer: coarse) {
   .cx-puck { width: 64px; height: 64px; }
-  .cx-answer { right: calc(var(--cx-rail-right) + 72px); }
+  .cx-answer { right: var(--g-answer-right, calc(var(--cx-rail-right) + 72px)); }
   .cx-answer button { width: 58px; height: 58px; }
   .cx-chip { min-height: 44px; }
   .cx-head button { height: 34px; }

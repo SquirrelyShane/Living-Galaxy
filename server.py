@@ -1450,7 +1450,10 @@ def main():
     global LAN_IPS
     os.chdir(ROOT)
     LAN_IPS = _lan_ips()
-    httpd = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
+    # LG_HOST=127.0.0.1 keeps a relay behind a tunnel or proxy off the LAN
+    # entirely (the site's deploy/lg-relay.service sets it); the default stays
+    # open so a phone on Wi-Fi can be joined from the next device over.
+    httpd = ThreadingHTTPServer((os.environ.get("LG_HOST", "0.0.0.0"), PORT), Handler)
     LOG.begin(f"SERVER START v{VERSION} run={LOG.run_id} port={PORT} pid={os.getpid()} root={ROOT}")
 
     console = Console.wanted()

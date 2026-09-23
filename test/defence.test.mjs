@@ -28,6 +28,7 @@ import {
 import { SHIP_DB, shipById, DEFAULT_SHIP_ID } from "../js/shipdb.js";
 import { makeShip, applyDamage } from "../js/ship.js";
 import { UPGRADES } from "../js/upgrades.js";
+import { readFileSync } from "node:fs";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -191,7 +192,54 @@ const byTier = (t) => SHIP_DB.filter((d) => d.tier === t);
   ok(ttk(trainer, 1) === Infinity, "one drone alone can never finish a hull — the screen outruns it");
 }
 
-/* ---- 7. the report a pilot reads ----------------------------------------- */
+/* ---- 7. NPC hulls are measured the same way ------------------------------ */
+{
+  /* 0.3.39. `hullPerf` scaled toughness by `clamp(massT / 60, 0.6, 2.4)` —
+   * linear and clamped, against a registry whose mass runs 9 t to 7,500 t.
+   * It SATURATED AT 144 t, so a 260 t barge, a 700 t, a 2,200 t and a 7,500 t
+   * all came out at exactly 624 hp and 139 shield: four tiers with no
+   * difference between them. The bottom was truncated too.
+   *
+   * It uses the same power curve as the player's pools now, so both sides of
+   * a fight are measured the same way — which is the point of checking it
+   * here, in the suite that owns that curve. */
+  const { hullPerf } = await import("../js/npc/flight.js");
+  const perf = (t) => hullPerf({ role: "hauler", ship: byTier(t)[0].id });
+
+  const tiers = [...("ABCDEFG")].map((t) => perf(t).hp);
+  for (let i = 1; i < tiers.length; i++) {
+    ok(tiers[i] > tiers[i - 1], `an NPC ${("ABCDEFG")[i]} frame outlasts a ${("ABCDEFG")[i - 1]} (${tiers[i - 1]} → ${tiers[i]} hp)`);
+  }
+  ok(new Set(tiers).size === tiers.length, `every tier is distinct (${tiers.join(", ")}) — four of them used to be identical`);
+
+  const all = SHIP_DB.map((d) => hullPerf({ role: "hauler", ship: d.id }).hp);
+  const spread = Math.max(...all) / Math.min(...all);
+  ok(spread > 6, `NPC toughness spans the registry (x${spread.toFixed(1)}; the clamp held it to x4.0)`);
+  const pool = SHIP_DB.map(hullPoolFor);
+  const playerSpread = Math.max(...pool) / Math.min(...pool);
+  ok(Math.abs(spread - playerSpread) < 3, `…on roughly the player's own curve (NPC x${spread.toFixed(1)} vs player x${playerSpread.toFixed(1)})`);
+
+  /* screens come off the plant on both sides */
+  const small = hullPerf({ role: "hauler", ship: byTier("A")[0].id });
+  const big = hullPerf({ role: "hauler", ship: byTier("G")[0].id });
+  ok(big.shield > small.shield, `a bigger plant holds a bigger screen (${small.shield} → ${big.shield})`);
+
+  /* and no role falls through to a default nobody tuned */
+  const src = readFileSync(new URL("../js/npc/flight.js", import.meta.url).pathname, "utf8");
+  const tough = src.match(/const TOUGH = \{([\s\S]*?)\n\};/)?.[1] ?? "";
+  const accel = src.match(/const ACCEL = \{([^}]*)\}/)?.[1] ?? "";
+  const roles = [...accel.matchAll(/(\w+):/g)].map((m) => m[1]);
+  const missing = roles.filter((r) => !new RegExp(`\\b${r}:`).test(tough));
+  ok(missing.length === 0,
+    `every role with a flight profile has a toughness profile — missing: ${missing.join(", ") || "none"}. ` +
+    "supply and rogue were in ACCEL and TURN but not TOUGH, so both silently took DEFAULT_TOUGH.");
+  ok(/rogue:/.test(tough), "a nest drone has numbers of its own rather than a generic hull's");
+  const rogue = hullPerf({ role: "rogue", ship: "salvage_a" });
+  const trader = hullPerf({ role: "trader", ship: "salvage_a" });
+  ok(rogue.hp < trader.hp, `and it is the more fragile of the two (${rogue.hp} vs ${trader.hp} hp) — the wave is the threat, not the unit`);
+}
+
+/* ---- 8. the report a pilot reads ----------------------------------------- */
 {
   const d = byTier("E")[0];
   const r = defenceReport(d, null);

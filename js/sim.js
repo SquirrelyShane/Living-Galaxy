@@ -9,7 +9,7 @@ import { BEACONS, BODIES, applySystem, beaconPosition, bodyById, bodyPosition, b
 import { generateSystem, rngFromSeed, spawnBodyId } from "./generate.js";
 import { consumeLook, justPressed, sampleInput, setInjectedKeys, setInjectedPan, touch } from "./input.js";
 import { NAV, SHIP, UI, WARN, setEngineLevel } from "./audio.js";
-import { skyProgress, useGameStore } from "./store.js";
+import { loadSave, skyProgress, useGameStore } from "./store.js";
 import {
   batteryCap,
   MINING_MODES,
@@ -74,12 +74,12 @@ import {
 import { ORES, baseValue, good, goodName, priceAt, rollOre } from "./materials.js";
 import { stepEconomy, stockMult, lotMult, askPrice, econReport, wantsOf } from "./economy.js";
 import { bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, stepDockwork } from "./dockwork.js";
-import { buildCorps, corpOfStation, corpOfVessel, blameKill, adjustStanding, standingMargin } from "./corps.js";
-import { applyRaceToShip, applyRaceTune, pilot, rankStatus, serveTime, syncMods, takePayout, title, work } from "./pilot.js";
+import { buildCorps, corpOfStation, corpOfVessel, blameKill, adjustStanding, standingMargin, corps } from "./corps.js";
+import { applyRaceToShip, applyRaceTune, loadPilot, pilot, rankStatus, savePilot, serveTime, syncMods, takePayout, title, work } from "./pilot.js";
 import { DEFAULT_SHIP_ID, hullTuneFor, issuedShips, shipById } from "./shipdb.js";
 import { yardQuote } from "./shipcost.js";
 import { hullPoolFor, shieldPoolFor, resistsFor } from "./defence.js";
-import { claim as insuranceClaim, playerKey, policyFor, resetInsurance } from "./insurance.js";
+import { claim as insuranceClaim, insure, playerKey, policies, policyFor, resetInsurance } from "./insurance.js";
 import { crew, resetCrew, tickCrew } from "./crew.js";
 import { loadRobots, tickRobots } from "./crew/robots.js";
 import { fx as upgradeFx, loadUpgrades, upgradeResists, resistKey } from "./upgrades.js";
@@ -122,6 +122,7 @@ import {
   syncContacts,
   turretAim, miningHooks } from "./turrets.js";
 
+const WALLET_EVERY = 30;   // seconds between wallet writes while credits move (0.3.41)
 const LOOK_GAIN = 1;
 
 /** Softens the centre of the stick without giving up the full rate at the rim. */
@@ -939,6 +940,15 @@ export function loadSky(seed) {
   buildStations(sys, rngFromSeed(`${seed}:ports`), String(seed));
   stepStations(sim.time);
   buildCorps(rngFromSeed(`${seed}:corps`));
+  /* 0.3.42 — standing is the pilot's, per sky: the corps are regrown from the
+   * seed on every load, and until now that put every one of them back to the
+   * tier default — a season of favours gone on reload. The record carries a
+   * table per sky; a returning pilot gets theirs back here, before anything
+   * reads it. */
+  if (pilot.restored) {
+    const table = pilot.record?.standing?.[String(seed)];
+    if (table) for (const c of corps) if (Number.isFinite(table[c.id])) c.standing = Math.max(-100, Math.min(100, table[c.id]));
+  }
   for (const st of stations) st.guards0 = st.guards ?? 0;
   sim.skySeed = seed;
   /* Before anything is POPULATED, not after. How many hulls and how many
@@ -1121,10 +1131,20 @@ export function launchSim(callsign, seed) {
   sim.hold.has = false;
   sim.terminalOpen = false;
   sim.termHold = false;
-  if (pilot.corpId) adjustStanding(pilot.corpId, 25, "signed on");
+  /* signing on is a fresh pilot's event — a returning one (0.3.42) signed on
+   * the day they were made, and does not collect the standing again each launch */
+  if (pilot.corpId && !pilot.restored) adjustStanding(pilot.corpId, 25, "signed on");
   sim.activeHullId = null;
   sim.ownedHulls = [];
   resetInsurance();      // policies are written against hulls, and these are new hulls
+  if (pilot.restored) {
+    /* the hulls the pilot bought, and the cover written on them, come back
+     * with the pilot — they were swept with everything else until 0.3.42 */
+    const rec = pilot.record ?? null;
+    sim.ownedHulls = (rec?.hulls ?? []).filter((id) => shipById(id));
+    sim.activeHullId = sim.ownedHulls.includes(rec?.activeHull) ? rec.activeHull : null;
+    for (const p of rec?.cover ?? []) if (p?.key?.startsWith("player:") && sim.ownedHulls.includes(p.key.slice(7))) insure(p.key, p.tier, p.value, p.at ?? 0);
+  }
   /* set the pools before anything can read them: syncHullTune refreshes these
    * every tick, but a launch must not leave `resists` null for a frame */
   syncHullDefence(ship, currentShipId());
@@ -1193,6 +1213,17 @@ export function launchSim(callsign, seed) {
   sim.selected = home;
   applyRaceToShip(ship);
   applyCareerDefaults(ship);
+  /* 0.3.41 — the wallet comes back. Until now `ship.credits` was whatever
+   * makeShip() and the race bonus issued, every launch: a session's earnings
+   * were gone on reload while the corp treasury beside them survived, and
+   * the account page (0.3.40) made that visible. A saved purse replaces the
+   * starting one — after the race bonus, which is a fresh pilot's and must
+   * not be paid again each morning. */
+  const purse = loadSave().credits;
+  if (Number.isFinite(purse) && purse !== null) ship.credits = purse;
+  sim.walletSaved = Math.round(ship.credits);
+  sim.walletAt = sim.wall;
+  savePilotRecord();
   /* the sky keeps what the atmo works earned */
   applyTerraformSnapshot(sim.pendingTerraform?.snap, sim.pendingTerraform?.bonds);
   sim.pendingTerraform = null;
@@ -1214,6 +1245,12 @@ export function launchSim(callsign, seed) {
     systemName: sys.name,
     scanned: [...sim.scanned],
     beaconsGot: [...sim.beaconsGot],
+    /* 0.3.40: the launch persist below used to write `terraform: {}` for this
+     * sky (the store had none yet) and the atmo works' progress was gone until
+     * the next scan or beacon wrote it back — two reloads in a row lost it. */
+    terraform: terraformSnapshot(),
+    terraBonds: [...(sim.terraBonds ?? [])],
+    credits: Math.round(ship.credits),
     surveyComplete: sim.scanned.size >= surveyIds().length && sim.beaconsGot.size >= BEACONS.length,
   });
   useGameStore.getState().persist();
@@ -1446,15 +1483,37 @@ function collectBeacon(id, local) {
   persistProgress();
 }
 
+/** The pilot record with what the sim owns: hulls bought, the active one, the cover on them. */
+function savePilotRecord() {
+  if (!pilot.character) return false;
+  const cover = [...policies.values()].filter((p) => p.key.startsWith("player:")).map((p) => ({ key: p.key, tier: p.tier, value: p.value, at: p.at }));
+  /* standing per sky: this sky's table over whatever other skies the record already holds */
+  const standing = { ...(loadPilot()?.standing ?? {}) };
+  if (sim.skySeed != null && corps.length) standing[String(sim.skySeed)] = Object.fromEntries(corps.map((c) => [c.id, Math.round(c.standing * 10) / 10]));
+  return savePilot({ hulls: [...(sim.ownedHulls ?? [])], activeHull: sim.activeHullId ?? null, cover, standing });
+}
+
+/** Write progress and the wallet now — the tab is going away (main.js wires it). */
+export function persistNow() {
+  if (sim.phase !== "play" || !sim.ship) return false;
+  persistProgress();
+  return true;
+}
+
 function persistProgress() {
   useGameStore.getState().patchHud({
     scanned: [...sim.scanned],
     beaconsGot: [...sim.beaconsGot],
     terraform: terraformSnapshot(),
     terraBonds: [...(sim.terraBonds ?? [])],
+    credits: Math.round(sim.ship?.credits ?? useGameStore.getState().credits),
     surveyComplete: sim.scanned.size >= surveyIds().length && sim.beaconsGot.size >= BEACONS.length,
   });
   useGameStore.getState().persist();
+  savePilotRecord();
+  sim.walletSaved = Math.round(sim.ship?.credits ?? 0);
+  sim.walletAt = sim.wall;
+  pilot.dirty = false;
 }
 
 /** The scanner reads what the nose is on: debris and belt rocks up close, worlds beyond. */
@@ -2930,6 +2989,7 @@ export function loseHull(ship, cause = "hull loss") {
   /* struck off the books, and fall back to whatever is left */
   sim.ownedHulls = (sim.ownedHulls ?? []).filter((h) => h !== id);
   sim.activeHullId = sim.ownedHulls.length ? sim.ownedHulls[sim.ownedHulls.length - 1] : null;
+  sim.requestPersist = true;   // the loss is on the record before the next frame can be closed on
 
   const lostCargo = Math.round(cargoTotal(ship));
   if (paid > 0) ship.credits += paid;
@@ -3938,6 +3998,9 @@ function stepCareer(d) {
   stepContract();
   stepIcework(d);
   stepAtmoWorks(d);
+  /* the wallet: a credit moved and half a minute passed since the last write —
+   * scans and beacons write at once, this is for the trade that never scans */
+  if ((Math.abs(Math.round(sim.ship.credits) - (sim.walletSaved ?? 0)) >= 1 || pilot.dirty) && sim.wall - (sim.walletAt ?? 0) >= WALLET_EVERY) sim.requestPersist = true;
   if (sim.requestPersist) { sim.requestPersist = false; persistProgress(); }
   stepMarket(d);
   coolBodies(d);

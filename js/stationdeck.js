@@ -219,6 +219,7 @@ const PANELS = {
         sim.ownedHulls = sim.ownedHulls ?? [];
         sim.ownedHulls.push(d.id);
         sim.activeHullId = d.id;
+        sim.requestPersist = true;   // a hull is worth a write now, not in thirty seconds (0.3.42)
         sim.notice = `${d.name} laid down, assembled, and signed over. She answers to your key now.`;
         paintPanel();
       }, afford && yardish ? "sd-accent" : "");
@@ -238,7 +239,7 @@ const PANELS = {
           ui: { el, row, btn },
           onBuy: (tierId) => {
             const got = buyCoverage(sim.ship, flownId, tierId, yardQuote(flown, buyer).total);
-            if (got) sim.notice = `${got.tier.toUpperCase()} cover written on ${flown.name} — ${got.payout.toLocaleString()} cr if she is lost.`;
+            if (got) { sim.notice = `${got.tier.toUpperCase()} cover written on ${flown.name} — ${got.payout.toLocaleString()} cr if she is lost.`; sim.requestPersist = true; }
             paintPanel();
           },
         });
@@ -250,7 +251,7 @@ const PANELS = {
           const od = shipById(id);
           const v = row(own, od.name, od.role);
           const active = sim.activeHullId === id;
-          v.append(btn(active ? "FLYING" : "FLY", () => { sim.activeHullId = id; paintPanel(); }, active ? "sd-accent" : ""));
+          v.append(btn(active ? "FLYING" : "FLY", () => { sim.activeHullId = id; sim.requestPersist = true; paintPanel(); }, active ? "sd-accent" : ""));
         }
         detail.append(own);
       }

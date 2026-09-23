@@ -281,6 +281,8 @@ function save() {
   saveTimer.unref?.(); // node: do not hold the process open for a save
 }
 export const saveCompany = save;
+/** Write a pending debounced save now (the account sync snapshots storage and must not read a 1.5 s-old book). */
+export function flushCompany() { if (saveTimer) { clearTimeout(saveTimer); flushSave(); } }
 if (globalThis.window?.addEventListener) window.addEventListener("pagehide", () => { if (saveTimer) { clearTimeout(saveTimer); flushSave(); } });
 export function loadCompany() {
   if (loaded) return;

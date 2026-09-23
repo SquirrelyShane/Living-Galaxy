@@ -8,6 +8,8 @@
 
 import { button, el, group, note, row, section, setBar } from "../kit.js";
 import { mountMarshal } from "./corp-marshal.js";
+import { mountAccount } from "./corp-account.js";
+import { account, accountLine } from "../../account.js";
 import { ticketsHeld } from "../../npc/bounty.js";
 import { certSheet, corp, pilot, rankStatus, skillSheet, specEffectLines, specOptions, standingSheet, title, transferOptions, tryPromote, trySpecialize, tryTransfer } from "../../pilot.js";
 import { MOD_LABELS } from "../../careers/effects.js";
@@ -368,13 +370,14 @@ function mountTown(root) {
 const SUBS = {
   company: mountCompany, town: mountTown, board: mountBoard, pilot: mountPilot, standing: mountStanding, gnn: mountGnn,
   marshal: (root, push, ctx) => mountMarshal(root, ctx ?? { push }),
+  account: (root, push, ctx) => mountAccount(root, ctx ?? { push }),
 };
 
 export default {
   id: "corp",
   title: "CORP",
   order: 60,
-  subtabs: [{ id: "company", label: "COMPANY" }, { id: "town", label: "TOWN" }, { id: "board", label: "BOARD" }, { id: "marshal", label: "MARSHAL" }, { id: "pilot", label: "PILOT" }, { id: "standing", label: "STANDING" }, { id: "gnn", label: "GNN" }],
+  subtabs: [{ id: "company", label: "COMPANY" }, { id: "town", label: "TOWN" }, { id: "board", label: "BOARD" }, { id: "marshal", label: "MARSHAL" }, { id: "pilot", label: "PILOT" }, { id: "standing", label: "STANDING" }, { id: "gnn", label: "GNN" }, { id: "account", label: "ACCOUNT" }],
   mount(root, ctx) { (SUBS[ctx.sub] ?? mountCompany)(root, ctx.push, ctx); },
   paint() {},
   unmount() {},
@@ -386,6 +389,7 @@ export default {
       { label: "Contracts", hint: `${contracts.active.length} in hand`, sub: "board", keywords: "board desk jobs offers" },
       { label: "GNN desk", hint: `${gnn.posts.length} bulletins`, sub: "gnn", keywords: "news bulletins" },
       { label: "Marshal's board", hint: `${ticketsHeld().length} ticket${ticketsHeld().length === 1 ? "" : "s"} signed`, sub: "marshal", keywords: "bounty marks wanted capture brig marshal" },
+      { label: "Account", hint: accountLine(), sub: "account", keywords: "account sign in login sync save cloud site password", status: () => (account.user ? `● ${account.user.username}` : account.site ? "SIGNED OUT" : "OFFLINE") },
     ];
     for (const c of standingSheet()) out.push({ label: c.name, hint: `${c.tier} · ${c.sector} · ${standingLabel(c.standing)}`, sub: "standing", focus: `corp-${c.id}`, keywords: "corporation standing" });
     for (const a of contracts.active) out.push({ label: a.title, hint: `${a.corpName} · in hand`, sub: "board", focus: `contract-${a.id}`, keywords: "contract" });

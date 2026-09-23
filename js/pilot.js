@@ -22,7 +22,7 @@ import {
   transferEligibility,
 } from "./careers/index.js";
 import { SPEC_EFFECTS, composeMods, effectLines } from "./careers/effects.js";
-import { raceById, traitsOf } from "./races.js";
+import { RACES, raceById, traitsOf } from "./races.js";
 import { corpById, corps, setStandingMods } from "./corps.js";
 
 export const pilot = {
@@ -43,6 +43,11 @@ export const pilot = {
   payout: 0,
   /* probationary: enrolled under the rank A bar; cleared on first promotion */
   probation: false,
+  /* true when this pilot came back from the record rather than the creation screen */
+  restored: false,
+  record: null,
+  /* something worth writing changed (skill, rank, cert, hull) — the sim's 30 s writer reads it */
+  dirty: false,
 };
 
 let crewBag = null;
@@ -109,8 +114,76 @@ export function makePilot(name, raceId, complexId, corpId) {
   pilot.lastPromotion = null;
   pilot.busy = false;
   pilot.payout = 0;
+  pilot.restored = false;
+  pilot.record = null;
+  pilot.dirty = true;
   refreshMods();
   return pilot;
+}
+
+/* ---- the pilot record: what "fly on as the same pilot" needs ---------------
+ *
+ * 0.3.42. Until now nothing here was written anywhere: race, career, rank,
+ * skills, certs, the specialisation — every launch was makePilot() from the
+ * creation screen, which is a NEW run (js/profile.js sweeps the old one). So
+ * a returning player was a new character in a new corp with the starting
+ * purse, whatever the save beside it said. The record below is a RUN key: it
+ * goes with the pilot, travels with the account, and is swept by a new one.
+ * The hulls the pilot bought and the cover written on them ride in it too —
+ * they were reset at launch with everything else. */
+export const PILOT_KEY = "lgaa.pilot.v1";
+export const PILOT_RECORD_VERSION = 1;
+
+const store = () => { try { return globalThis.localStorage ?? null; } catch { return null; } };
+
+/** The record, as JSON-safe data. `extra` is what the sim owns (hulls, cover). */
+export function serializePilot(extra = {}) {
+  return {
+    v: PILOT_RECORD_VERSION,
+    name: pilot.name,
+    raceId: pilot.raceId,
+    complexId: pilot.complexId,
+    corpId: pilot.corpId ?? null,
+    character: pilot.character,
+    probation: Boolean(pilot.probation),
+    lastPromotion: pilot.lastPromotion ?? null,
+    payout: Number(pilot.payout) || 0,
+    cyclePool: Number(pilot.cyclePool) || 0,
+    ...extra,
+  };
+}
+
+/** Put a record back on `pilot`. Returns false (and touches nothing) for a bad one. */
+export function restorePilot(rec) {
+  if (!rec || rec.v !== PILOT_RECORD_VERSION || !rec.character?.careers || !rec.complexId || !RACES.some((r) => r.id === rec.raceId)) return false;
+  pilot.name = String(rec.name || "Pilot");
+  pilot.raceId = rec.raceId;
+  pilot.complexId = rec.complexId;
+  pilot.corpId = rec.corpId ?? null;
+  pilot.character = rec.character;
+  pilot.probation = Boolean(rec.probation);
+  pilot.lastPromotion = rec.lastPromotion ?? null;
+  pilot.payout = Number(rec.payout) || 0;
+  pilot.cyclePool = Number(rec.cyclePool) || 0;
+  pilot.drip = {};
+  pilot.busy = false;
+  pilot.restored = true;
+  pilot.record = rec;      // the sim reads hulls and cover off it at launch
+  pilot.dirty = false;
+  refreshMods();
+  return true;
+}
+
+export function savePilot(extra = {}) {
+  try { store()?.setItem(PILOT_KEY, JSON.stringify(serializePilot(extra))); return true; } catch { return false; }
+}
+
+/** The record on this device, or null. Does not touch `pilot`. */
+export function loadPilot() {
+  try {
+    const rec = JSON.parse(store()?.getItem(PILOT_KEY) ?? "null");
+    return rec && rec.v === PILOT_RECORD_VERSION && rec.character?.careers ? rec : null;
+  } catch { return null; }
 }
 
 /** Applies race traits to a fresh ship. Called once, at launch. */
@@ -160,6 +233,7 @@ export function work(skillId, amount) {
   if (whole > 0) {
     const r = trainSkill(pilot.character, skillId, whole);
     if (r.character) pilot.character = r.character;
+    pilot.dirty = true;
   }
 }
 
@@ -181,6 +255,7 @@ export function serveTime(seconds, { docked = false } = {}) {
   pilot.cyclePool += seconds;
   while (pilot.cyclePool >= 90) {
     pilot.cyclePool -= 90;
+    pilot.dirty = true;          // a cycle ticked: scrip, maybe a skill — worth writing; the seconds between are not
     const before = pilot.character.scrip ?? 0;
     const train = pilot.busy ? 0.35 : docked ? 0.18 : 0;
     const r = tickCycle(pilot.character, { train: train > 0, trainChance: train, trainAmount: 1 });
@@ -194,6 +269,7 @@ export function serveTime(seconds, { docked = false } = {}) {
 /** Drains earned scrip; the sim credits it to the ship. */
 export function takePayout() {
   const p = Math.round(pilot.payout);
+  if (p) pilot.dirty = true;   // paid something: the record moved (and so did the wallet)
   pilot.payout -= p;
   return p;
 }
@@ -223,6 +299,7 @@ export function rankStatus() {
 }
 
 export function tryPromote() {
+  pilot.dirty = true;
   if (!pilot.character) return { ok: false, reason: "no pilot" };
   const r = promote(pilot.character, pilot.complexId);
   if (r.ok) {
@@ -246,6 +323,7 @@ export function transferOptions() {
 }
 
 export function tryTransfer(toId) {
+  pilot.dirty = true;
   if (!pilot.character) return { ok: false, error: "no pilot" };
   if (!getComplex(toId) || toId === pilot.complexId) return { ok: false, error: "Already in that complex" };
   let e = { ok: true, recommendedStart: pilot.character.careers?.[toId]?.rank, related: true };
@@ -275,6 +353,7 @@ export function specOptions() {
 }
 
 export function trySpecialize(specId) {
+  pilot.dirty = true;
   const r = specialize(pilot.character, pilot.complexId, specId);
   if (r.ok) {
     pilot.character = r.character;

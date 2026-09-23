@@ -36,6 +36,10 @@
  *
  * This module is a LEAF. It touches storage and nothing else, so it can be
  * imported from anywhere without dragging the sim in behind it.
+ *
+ * 0.3.40: the same three lists say what an ACCOUNT carries. js/account.js
+ * syncs RUN_KEYS + RUN_PREFIXES + LEARNED_KEYS + the profile record to the
+ * website and leaves DEVICE_KEYS and the cradle where they are.
  */
 
 export const DEVICE_KEYS = [
@@ -47,6 +51,8 @@ export const DEVICE_KEYS = [
   "lgaa.attract",         // js/engine.js — attract loop seen
   "lgaa-adult-pack",      // addon/adult/ — the opt-in gate for the mature pack
   "lgaa.npcchat.v1",      // js/npc/chat.js — the rating the NPC band is allowed to speak at
+  "lgaa.account.v1",      // js/account.js — which account version THIS DEVICE last synced to
+  "lgaa.news.seen.v1",    // js/account.js — site bulletins already put on the GNN desk here
 ];
 
 export const LEARNED_KEYS = [
@@ -64,6 +70,7 @@ export const RUN_KEYS = [
   "lgaa.con.recents.v1",  // js/console/console.js — command history
   "lgaa.tutorial.v1",     // js/tutorial.js — which lessons are done
   "lgaa.tutorial.core.v1", // js/tutorial.js — the MISSION CORE walkthrough, shown once
+  "lgaa.pilot.v1",        // js/pilot.js — the pilot record: race, career, rank, skills, hulls, cover (0.3.42)
 ];
 
 /* The other half, and the half that made this bug so hard to see.
@@ -93,7 +100,7 @@ export const RUN_PREFIXES = [
   "lgaa.fab.v1:",         // js/fabricate.js — jobs on the ports' fabrication lines
 ];
 
-const PROFILE_KEY = "lgaa.profile.v1";
+export const PROFILE_KEY = "lgaa.profile.v1";
 
 const store = () => {
   try { return globalThis.localStorage ?? null; } catch { return null; }

@@ -114,6 +114,24 @@ const style = read("css/style.css");
     "a free slot may not be on the right rail, so the column is published too");
   ok(/removeProperty\("--g-rail-top"\)/.test(hud), "…and a screen where nothing fits keeps the CSS fallback");
 
+  /* THE ANSWER BUTTONS MOVE WITH IT.
+   * 0.3.37 placed the puck alone and forgot .cx-answer hangs off it at a
+   * LARGER offset from the right edge — so a left-edge slot pushed the
+   * accept/reject pair off screen and a ringing call could not be answered
+   * without going fullscreen. Reported, and the reason for 0.3.38. */
+  ok(/ANSWER_W/.test(hud) && /ANSWER_GAP/.test(hud), "the search knows the answer row's size, not just the puck's");
+  ok(/--g-answer-right/.test(hud) && /--g-answer-right/.test(comms), "…and publishes where that row goes");
+  ok(/c\.answer\.left < 0 \|\| c\.answer\.right > vw/.test(hud),
+    "a slot that would put the answer buttons off screen is rejected outright — they must be tappable");
+  const ansRules = [...comms.matchAll(/\.cx-answer \{[^}]*\}/g)].map((m) => m[0]);
+  ok(ansRules.length >= 1, "the answer row is positioned in css");
+  ok(ansRules.every((r) => !/right:\s*calc\(var\(--cx-rail-right\)/.test(r) || /var\(--g-answer-right/.test(r)),
+    "every .cx-answer rule takes the measured offset, including the coarse-pointer one — that is the phone");
+
+  /* and in portrait it stays where the pilot expects it */
+  ok(/vw > vh/.test(hud), "the far side is a landscape-only option: in portrait the puck stays on its own rail");
+  ok(/overlapArea/.test(hud), "candidates are scored by how much they cover, not just accepted or rejected");
+
   /* an invisible decoration must never take a tap */
   const ring = comms.match(/\.cx-puck__ring\s*\{([^}]*)\}/);
   ok(!!ring, ".cx-puck__ring is styled");

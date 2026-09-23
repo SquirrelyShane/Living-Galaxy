@@ -1397,6 +1397,17 @@ html[data-orient="landscape"] .instruments {
   min-height: 42px;
 }
 
+/* 0.3.42 — FLY AS <callsign> takes the accent; New pilot steps back to a ghost */
+.start-card .btn-ghost { background: transparent; border: 1px solid var(--border, rgba(255,255,255,0.18)); color: var(--muted, #aab); }
+.start-card #btn-continue + #btn-create { margin-top: 8px; }
+
+/* 0.3.40 — the account line under the callsign on the start card: who is
+ * signed in at living-galaxy.com, or the one link to get there. Hidden on a
+ * device that has no site behind it (server.py on a phone, a static host). */
+.account-line { margin-top: 2px; }
+.account-line a { color: var(--accent, #ffd166); text-decoration: underline; text-underline-offset: 2px; }
+.account-line.on { color: var(--ok, #8ee6a5); }
+
 .sys-line {
   margin-top: 10px;
   font-size: 12px;

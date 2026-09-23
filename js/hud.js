@@ -18,7 +18,8 @@ import { mountMap } from "./map.js";
 import { mountCreation } from "./creation.js";
 import { MINING_MODES, THROTTLE_MAX, THROTTLE_MIN, TURRET_MODES, cargoTotal } from "./ship.js";
 import { setAudioMuted, unlockAudio, UI, busLevels, setBusLevel, resetMix, BUSES } from "./audio.js";
-import { randomCallsign, skyProgress, useGameStore } from "./store.js";
+import { loadSave, randomCallsign, skyProgress, useGameStore } from "./store.js";
+import { loadPilot, restorePilot } from "./pilot.js";
 import { mountComms, wireCommsTest } from "./comms/comms.js";
 import { connectNet, disconnectNet } from "./net.js";
 import { mountInterior } from "./interior/interior.js";
@@ -88,8 +89,13 @@ function measureDock() {
  * of the canopy and there is nothing to clear.
  */
 const RAIL_GAP = 8;
-const PUCK_H = 58;              // .cx-puck in css/comms.css
-const PUCK_W = 58;
+/* .cx-puck and .cx-answer in css/comms.css. A coarse pointer gets the bigger
+ * set, and since that is the phone this game is played on, the bigger set is
+ * what the slot search reserves — a slot that only fits the desktop sizes is
+ * not a slot. */
+const PUCK_H = 64, PUCK_W = 64;
+const ANSWER_GAP = 72;          // .cx-answer offset from the rail
+const ANSWER_W = 2 * 58 + 8;    // two round buttons and the gap between them
 
 /* What the comms puck has to stay off: CONTROLS, not cards.
  *
@@ -116,6 +122,17 @@ function boxesToAvoid(doc) {
 
 const hits = (a, boxes, pad = 4) => boxes.some((b) =>
   a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad);
+
+/** How much of `a` lands on top of controls, in square pixels. */
+function overlapArea(a, boxes, pad = 4) {
+  let total = 0;
+  for (const b of boxes) {
+    const w = Math.min(a.right, b.right + pad) - Math.max(a.left, b.left - pad);
+    const h = Math.min(a.bottom, b.bottom + pad) - Math.max(a.top, b.top - pad);
+    if (w > 0 && h > 0) total += w * h;
+  }
+  return total;
+}
 
 /* Only where there is somewhere to put it. On a short screen the dash card
  * rides up until it already overlaps the strip — 360x640 has the dash at y=172
@@ -159,30 +176,128 @@ function measureRail() {
   const sr = strip ? strip.getBoundingClientRect() : null;
   const boxes = boxesToAvoid(doc);
 
-  const slot = (right, top) => ({
-    left: vw - right - PUCK_W, right: vw - right, top, bottom: top + PUCK_H, right_: right,
-  });
+  /* A CANDIDATE IS THE WHOLE COMMS CLUSTER, NOT JUST THE PUCK.
+   *
+   * 0.3.37 placed the puck and forgot that the ANSWER buttons hang off it —
+   * `.cx-answer` sits at `--cx-rail-right + 72px`, i.e. further from the right
+   * edge than the puck. So when the search moved the puck to the left edge,
+   * it pushed the accept/reject pair clean off the side of the screen and a
+   * ringing call could not be answered at all without going fullscreen.
+   * Reported, and entirely my doing.
+   *
+   * The cluster is placed as one thing now, and the answer row takes whichever
+   * side of the puck has room: its usual place to the left, or flipped to the
+   * right when the puck is near the left edge. Both rects are collision-tested
+   * and both must be on screen, so there is no arrangement where the puck is
+   * reachable and the buttons are not. */
+  const slot = (right, top) => {
+    const px0 = vw - right - PUCK_W, px1 = vw - right;
+    const puck = { left: px0, right: px1, top, bottom: top + PUCK_H };
+    /* preferred: the answer row to the LEFT of the puck */
+    let aRight = right + ANSWER_GAP;
+    let a0 = vw - aRight - ANSWER_W, a1 = vw - aRight;
+    if (a0 < 4) {
+      /* no room that side — flip it to the right of the puck */
+      aRight = right - ANSWER_GAP - ANSWER_W;
+      a0 = vw - aRight - ANSWER_W; a1 = vw - aRight;
+      if (a1 > vw - 4) return null;
+    }
+    const answer = { left: a0, right: a1, top, bottom: top + PUCK_H };
+    return { puck, answer, top, bottom: top + PUCK_H, right_: right, answerRight: aRight };
+  };
+  /* THE PUCK STAYS ON THE RIGHT RAIL.
+   *
+   * 0.3.37 let the search move it to the left edge when the right was busy,
+   * which was over-engineering: a pilot learns where the comms button is, and
+   * a button that teleports across the canopy is worse than one that sits
+   * slightly close to a switch. Reported as the icon "getting pushed to the
+   * left side" — and on a phone that is not fullscreen, where the viewport is
+   * short enough to crowd the right rail, that is exactly what it did.
+   *
+   * So the search now only chooses HOW FAR DOWN the right rail it sits. Under
+   * the systems strip first, then a ladder of positions down the rail. If
+   * every one of them is occupied the CSS fallback applies, which is where it
+   * has always been. */
   const cands = [];
   if (sr && sr.height > 0) {
     cands.push(slot(padR, Math.round(sr.bottom) + RAIL_GAP));          // under the strip
     cands.push(slot(padR, Math.round(sr.top) - PUCK_H - RAIL_GAP));    // above it
   }
-  cands.push(slot(padR, Math.round(vh * 0.30)));                       // right rail, upper third
-  cands.push(slot(vw - padL - PUCK_W, Math.round(vh * 0.32)));         // left edge, clear of the status strips
-  cands.push(slot(vw - padL - PUCK_W, Math.round(vh * 0.46)));         // left edge, lower
-  cands.push(slot(padR, Math.round(vh * 0.62)));                       // right rail, lower
+  /* CANDIDATES FROM THE ACTUAL GAPS, not from fractions of the screen.
+   *
+   * A ladder at fixed fractions lands wherever it lands — at 360x740 the
+   * nearest rung sat eight pixels into the dash, so the scorer picked a
+   * different slot that clipped the CGO gauge button instead. Neither was
+   * necessary: there was a clear 64px band between the systems strip and the
+   * top of the dash, and nothing was looking for it.
+   *
+   * So: take everything already on this column, sort it, and offer the puck
+   * each gap between one obstacle and the next. A gap that is big enough gets
+   * the puck centred in it, which is both the tidiest place and the one least
+   * likely to clip either neighbour when a font loads late. */
+  const colLeft = vw - padR - PUCK_W - 8;
+  const column = boxes.filter((b) => b.right > colLeft).sort((a, b) => a.top - b.top);
+  let edge = 4;
+  for (const b of column) {
+    const gap = b.top - edge;
+    if (gap >= PUCK_H + 4) cands.push(slot(padR, Math.round(edge + (gap - PUCK_H) / 2)));
+    edge = Math.max(edge, b.bottom);
+  }
+  if (vh - edge >= PUCK_H + 4) cands.push(slot(padR, Math.round(edge + (vh - edge - PUCK_H) / 2)));
+  /* and a fallback ladder, for a column with nothing on it to measure against */
+  for (const f of [0.30, 0.38, 0.46, 0.22, 0.54, 0.62, 0.14]) {
+    cands.push(slot(padR, Math.round(vh * f)));
+  }
+  /* LANDSCAPE ONLY: the far side is allowed.
+   *
+   * In portrait the right rail is the puck's home and it stays there — moving
+   * it is what the "pushed to the left side" report was about. In landscape
+   * the right rail is the throttle card top to bottom, so there is genuinely
+   * nowhere on it that is not a control, and the opposite edge is open. The
+   * layouts are different enough that the pilot is not being asked to unlearn
+   * anything: the whole HUD is somewhere else in landscape already. */
+  if (vw > vh) {
+    for (const f of [0.34, 0.46, 0.22, 0.58]) {
+      cands.push(slot(vw - padL - PUCK_W, Math.round(vh * f)));
+    }
+  }
 
+  /* SCORE, DO NOT JUST TAKE THE FIRST CLEAR ONE.
+   *
+   * Keeping the puck on the right rail means that on a short screen there may
+   * be no completely clear slot at all. "First clear one, else give up" then
+   * falls back to the CSS position, which is the very place that was sitting
+   * on the CUT switch. So every candidate is scored by how much of it lands on
+   * controls, and the least-bad wins — zero where a clear slot exists, and the
+   * smallest possible nuisance where none does. The puck is only on screen
+   * during a call, so a few square pixels over a readout for the length of a
+   * hail is a far better trade than moving it somewhere the pilot will not
+   * look for it. */
+  let best = null;
   for (const c of cands) {
+    if (!c) continue;
     if (c.top < 4 || c.bottom > vh - 4) continue;
-    if (hits(c, boxes)) continue;
-    root.style.setProperty("--g-rail-top", `${c.top}px`);
-    root.style.setProperty("--g-rail-right", `${c.right_}px`);
+    if (c.puck.left < 4 || c.puck.right > vw - 4) continue;
+    if (c.answer.left < 0 || c.answer.right > vw) continue;   // never off screen: it must be tappable
+    /* Overlap dominates; distance from home breaks the ties. Without the
+     * tiebreak the first clear gap wins, which on a tall screen is the strip
+     * of sky above the gauges — technically free, and a strange place to look
+     * for the comms button. Home is just under the systems strip, where it
+     * has always been. */
+    const home = sr && sr.height > 0 ? sr.bottom + RAIL_GAP : vh * 0.3;
+    const score = (overlapArea(c.puck, boxes) + overlapArea(c.answer, boxes)) * 1000 + Math.abs(c.top - home);
+    if (!best || score < best.score) best = { c, score };
+  }
+  if (best) {
+    root.style.setProperty("--g-rail-top", `${best.c.top}px`);
+    root.style.setProperty("--g-rail-right", `${best.c.right_}px`);
+    root.style.setProperty("--g-answer-right", `${best.c.answerRight}px`);
     return sr ? sr.height : 0;
   }
-  /* nothing fits: leave comms.css its own fixed number rather than inventing
-   * a worse position than the one it shipped with */
+  /* not one candidate even fit on screen: leave comms.css its own number */
   root.style.removeProperty("--g-rail-top");
   root.style.removeProperty("--g-rail-right");
+  root.style.removeProperty("--g-answer-right");
   return sr ? sr.height : 0;
 }
 
@@ -204,6 +319,13 @@ export function bindOrient() {
   }
   /* web fonts land after first paint and change both boxes under us */
   document.fonts?.ready?.then(measure).catch(() => {});
+  /* And the HUD is not laid out on the first call at all — it is `hidden`
+   * until a sky is launched, so anything measured before that reads zero and
+   * a slot gets chosen against a screen that is not there yet. Measured at
+   * 360x740 this put the puck over the CGO gauge button, because the gauges
+   * had not been painted when the search ran. A few re-measures cover the
+   * gap without needing to know when the HUD appears. */
+  for (const ms of [250, 1000, 2500, 6000]) setTimeout(measure, ms);
   return go;
 }
 
@@ -587,10 +709,45 @@ export function mountHud() {
     normalizeSeed: (seed) => (seed === "sol" ? PUBLIC_ROOM : sanitizeRoom(seed)),
     onLaunch: (seed) => go(seed === "sol" ? PUBLIC_ROOM : sanitizeRoom(seed)),
   });
-  $("btn-create").addEventListener("click", () => {
+  /* 0.3.42 — FLY AS <callsign>. A device with a pilot record and a save flies
+   * on as that pilot: race, rank, skills, hulls, cover, purse, corp, fleet,
+   * into the sky they were last in. "New pilot" is the creation screen as
+   * before, which is a NEW RUN and sweeps all of that — so it asks first. */
+  const contBtn = $("btn-continue");
+  const createBtn = $("btn-create");
+  const paintStart = () => {
+    const rec = loadPilot();
+    const sv = loadSave();
+    const can = Boolean(rec && sv.callsign);
+    if (contBtn) {
+      contBtn.hidden = !can;
+      if (can) contBtn.textContent = `Fly as ${sv.callsign}`;
+    }
+    createBtn.textContent = can ? "New pilot" : "Create pilot";
+    createBtn.classList.toggle("btn-accent", !can);
+    createBtn.classList.toggle("btn-ghost", can);
+  };
+  paintStart();
+  contBtn?.addEventListener("click", () => {
+    const rec = loadPilot();
+    const sv = loadSave();
+    if (!rec || !sv.callsign || !restorePilot(rec)) { paintStart(); return; }
+    $("callsign").value = sv.callsign;
+    store.getState().setCallsign(sv.callsign);
+    const sky = sv.lastSky || PUBLIC_ROOM;
+    if (sky !== seedKey) { seedKey = sky; refreshPreview(); }
+    go(sky);
+  });
+  createBtn.addEventListener("click", () => {
+    if (loadPilot() && loadSave().callsign) {
+      const name = loadSave().callsign;
+      const sure = globalThis.confirm ? confirm(`Start a NEW pilot?\n\n${name}'s rank, hulls, corp, fleet, refits and purse on this device are cleared. If ${name} is synced to an account, the next sync replaces the account copy too.\n\nFly as ${name} instead to keep them.`) : true;
+      if (!sure) return;
+    }
     unlockAudio();
     creation.show();
   });
+  if (globalThis.window?.__lg) window.__lg.start = { paintStart, continueRun: () => contBtn?.click() };
 
   /* --- pan stick: this is the nose --- */
   bindPad(

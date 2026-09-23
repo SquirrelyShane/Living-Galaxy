@@ -14,6 +14,10 @@ export function loadSave() {
           callsign: parsed.callsign,
           muted: parsed.muted,
           skies: parsed.skies ?? {},
+          /* 0.3.41: the wallet. Absent on a save from before — the launch
+           * then issues the career's starting purse as it always did. */
+          credits: Number.isFinite(parsed.credits) ? parsed.credits : null,
+          lastSky: typeof parsed.lastSky === "string" ? parsed.lastSky : null,   // 0.3.42: where FLY AS goes
         };
       }
     }
@@ -26,12 +30,14 @@ export function loadSave() {
         skies: {
           [PUBLIC_ROOM]: { scanned: v1.scanned ?? [], beacons: v1.beacons ?? [] },
         },
+        credits: null,
+        lastSky: null,
       };
     }
   } catch {
     /* ignore */
   }
-  return { skies: {} };
+  return { skies: {}, credits: null, lastSky: null };
 }
 
 export function skyProgress(seed) {
@@ -189,6 +195,8 @@ const state = {
       version: 2,
       callsign: state.callsign,
       muted: state.muted,
+      credits: Number.isFinite(state.credits) ? Math.round(state.credits) : prev.credits ?? null,
+      lastSky: state.phase === "play" ? state.room : prev.lastSky ?? null,
       skies: {
         ...prev.skies,
         [state.room]: { scanned: state.scanned, beacons: state.beaconsGot, terraform: state.terraform ?? {}, terraBonds: state.terraBonds ?? [] },

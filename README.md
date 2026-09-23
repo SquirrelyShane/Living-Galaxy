@@ -51,9 +51,25 @@ On another device on the same Wi-Fi, use your phone's IP instead of `127.0.0.1`
 (`ifconfig` / `ip addr`). Desktop: `python3 server.py`, same URL.
 
 `server.py` takes a port as its first argument (`python server.py 8124`) or from
-`$PORT`; **8080** is the default. The browser smokes expect **8124**, which is
+`$PORT`; **8080** is the default. `LG_HOST=127.0.0.1` binds loopback only, for
+a relay behind a tunnel or proxy; the default is every interface so the phone
+can be joined over Wi-Fi. The browser smokes expect **8124**, which is
 only a convention so a test run does not collide with the port you are playing
 on.
+
+### From the website
+
+The other way to play is `https://living-galaxy.com/play/`, where the site
+(a separate product line, `LivingGalaxy-Site`) serves this same folder
+read-only and adds what a file server cannot: an **account**. Sign in at
+CON › CORP › ACCOUNT (or on the site first — a signed-in browser that opens
+`/play/` with nothing on the device loads your pilot before the start card
+comes up) and everything `js/profile.js` files as the pilot's — callsign, corp,
+fleet, refits, robots, missions, drones, ARIA's flying — syncs as one
+versioned blob. Two devices that both changed get asked which copy wins;
+nothing is ever overwritten silently. The site's news posts land on the GNN
+desk. On a plain `server.py` none of this exists and the game says so in one
+line; nothing else changes.
 
 ### What server.py is, besides a file server
 
@@ -229,6 +245,7 @@ refresh the browser — there is no build step.
 | `js/npc/speech.js`, `js/speech/` | The open channel |
 | `js/upgrades.js`, `js/refityard.js` | Refits and where they are fitted |
 | `js/profile.js` | The run profile: what belongs to a pilot and what outlives them |
+| `js/account.js`, `js/console/panels/corp-account.js` | The account: the pilot's storage namespace synced to living-galaxy.com, and the CON › CORP › ACCOUNT card |
 
 ### Experimental
 
@@ -261,6 +278,14 @@ asteroid generator's lens imports (`three/addons/postprocessing/Pass.js`) with
 ---
 
 ## Flying it
+
+### Flying on as the same pilot
+
+From 0.3.42 the start card offers **Fly as <callsign>** whenever a pilot
+record (`lgaa.pilot.v1`) and a save are on the device: race, rank, skills,
+hulls, cover, purse, corp, fleet, refits and standing all come back, into the
+sky you were last in, with no creation screen. **New pilot** is the creation
+screen as before — a new run, which sweeps all of that — and asks first.
 
 ### Making a pilot
 

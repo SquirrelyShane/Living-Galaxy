@@ -55,6 +55,7 @@
  */
 
 import { shipById } from "../shipdb.js";
+import { POOL } from "../defence.js";
 
 /* Sublight crossing-time band, seconds. */
 export const CROSS_MIN = 42;
@@ -79,13 +80,23 @@ const TURN = { trader: 0.55, hauler: 0.40, miner: 0.50, patrol: 1.05, security: 
 
 /* Combat weight. Everything used to be hp 120 / shield 40 regardless of what
  * it was; a picket and a laden ore barge are not the same problem. */
+/* Toughness per role, at the REFERENCE frame — `hullPerf` scales these by the
+ * hull actually being flown. Every role that exists has an entry: `supply`
+ * and `rogue` were in ACCEL and TURN above but not here, so both fell through
+ * to DEFAULT_TOUGH and a nest drone was quietly as tough as a generic hull.
+ * That is the same shape as the gun bug fixed in 0.3.35 — a default catching
+ * things nobody remembered to list. */
 const TOUGH = {
   trader:   { hp: 150, shield: 60,  radius: 7,  gun: { dmg: 5,  rate: 1.6, range: 780,  speed: 560 } },
   hauler:   { hp: 260, shield: 90,  radius: 10, gun: { dmg: 4,  rate: 2.2, range: 700,  speed: 540 } },
+  supply:   { hp: 210, shield: 75,  radius: 9,  gun: { dmg: 4,  rate: 2.0, range: 720,  speed: 540 } },
   miner:    { hp: 190, shield: 50,  radius: 8,  gun: { dmg: 3,  rate: 2.4, range: 620,  speed: 520 } },
   patrol:   { hp: 220, shield: 130, radius: 6,  gun: { dmg: 10, rate: 0.9, range: 1250, speed: 820 } },
   security: { hp: 280, shield: 170, radius: 7,  gun: { dmg: 12, rate: 0.8, range: 1400, speed: 880 } },
   pirate:   { hp: 170, shield: 70,  radius: 6,  gun: { dmg: 8,  rate: 1.1, range: 1000, speed: 620 } },
+  /* A nest drone is scrap welded round a gun: it dies easily and carries no
+   * screen worth the name. The wave is the threat, not the unit. */
+  rogue:    { hp: 90,  shield: 20,  radius: 5,  gun: { dmg: 3,  rate: 2.2, range: 1100, speed: 520 } },
 };
 const DEFAULT_TOUGH = { hp: 160, shield: 60, radius: 6, gun: { dmg: 6, rate: 1.4, range: 900, speed: 600 } };
 
@@ -94,6 +105,10 @@ const DEFAULT_TOUGH = { hp: 160, shield: 60, radius: 6, gun: { dmg: 6, rate: 1.4
  * entry. Mass moves thrust and toughness in opposite directions, which is the
  * whole reason a hauler is worth escorting and a picket is worth avoiding.
  */
+/* The reference frame the TOUGH table is written against: a 60 t hull with a
+ * 230 kW plant, which is the middle of the registry. */
+const REF_MASS = 60, REF_KW = 230;
+
 export function hullPerf(n) {
   const role = n.role ?? "trader";
   const stats = shipById(n.ship)?.stats ?? null;
@@ -102,12 +117,28 @@ export function hullPerf(n) {
   const massK = Math.max(0.45, Math.min(1.6, 60 / Math.max(12, massT)));
   const base = ACCEL[role] ?? 60;
   const t = TOUGH[role] ?? DEFAULT_TOUGH;
-  const bulk = Math.max(0.6, Math.min(2.4, massT / 60));
+
+  /* HOW MUCH HULL THE FRAME IS WORTH.
+   *
+   * This was `clamp(massT / 60, 0.6, 2.4)` — linear, and clamped. Mass runs
+   * from 9 t to 7,500 t across the registry, and that curve SATURATES AT
+   * 144 t: a D-tier barge at 260 t, an E at 700, an F at 2,200 and a G at
+   * 7,500 all came out at exactly 624 hp and 139 shield. Four tiers,
+   * indistinguishable. The bottom was truncated too — a 12 t skiff and a 34 t
+   * courier were both 156.
+   *
+   * It is the same power curve the player's pools use now (POOL.hullPow in
+   * js/defence.js), off the same exponent, so both sides of a fight are
+   * measured the same way. Spread across the registry: 4.0x before, and about
+   * 8x after, against the player's 9.2x. */
+  const bulk = (Math.max(4, massT) / REF_MASS) ** POOL.hullPow;
+  /* and the screen comes off the plant, as the player's does */
+  const plant = (Math.max(30, stats?.reactor ?? REF_KW) / REF_KW) ** POOL.shieldPow;
   return {
     accel: base * massK * (stats?.thrust ?? 1),
     turn: (TURN[role] ?? 0.6) * (stats?.turn ?? 1) * Math.max(0.5, massK),
     hp: Math.round(t.hp * bulk),
-    shield: Math.round(t.shield * Math.sqrt(bulk)),
+    shield: Math.round(t.shield * plant),
     radius: Math.max(4, Math.round(t.radius * Math.cbrt(bulk))),
     gun: { ...t.gun, mounts: stats?.turrets ?? (role === "security" || role === "patrol" || role === "pirate" ? 2 : 1) },
   };

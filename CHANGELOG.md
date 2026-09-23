@@ -10,6 +10,312 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.43 — 2026-09-23
+
+Site bulletins link back; the pilots board in the ACCOUNT card.
+
+Goes with `LivingGalaxy-Site-0.1.1`, where every published news item owns
+a discussion thread in Announcements and `/api/news` carries `url`,
+`discuss` and `replies`, and `/pilots` + `/api/leaderboard` rank synced
+pilots by purse.
+
+- A bulletin from the site carries **READ** (its page) and **DISCUSS (n)**
+  (its thread, with the reply count). Both repeat — a link is not a thing
+  you do once — and both open in a new tab on the site's own origin. Only a
+  same-origin path becomes a button: a scheme or a `//host` in the feed is
+  ignored. A 0.1.0 site's feed has neither and gets no buttons.
+- CON › CORP › ACCOUNT has a **TOP PILOTS** card: the top ten by purse,
+  callsigns only, with a link to the full board. Fetched when the card
+  builds, at most once a minute; a site without the board shows "not up
+  yet"; a plain `server.py` shows nothing new.
+
+Files: `js/account.js`, `js/console/panels/corp-account.js`,
+`js/version.js`, `test/account.test.mjs` (120), `test/smoke-account.mjs`
+(28: DISCUSS opens the real thread in a new tab; the board lists the synced
+pilot).
+
+---
+
+## 0.3.42 — 2026-09-23
+
+FLY AS <callsign>. The pilot comes back.
+
+Found while testing 0.3.41, and the bug behind "saves by account" all along.
+
+**What was happening.** Nothing about the pilot was ever written anywhere.
+Race, career, rank, skills, certs, specialisation, the hulls bought at the
+yard, the cover on them, corp standing — all of it lived in memory and was
+rebuilt from scratch by `makePilot()` on the creation screen, which every
+launch went through, and which is a NEW RUN: `js/profile.js` sweeps the corp,
+the fleet, the save, the refits and the missions behind it. Measured in a
+browser before building this: purse 99,999 on disk, 3,100 after "Create
+pilot" with the same callsign; corps regrown from the seed put every standing
+back to the tier default. A returning player was a new character in the
+trainer with the starting purse, and the account (0.3.40) faithfully synced
+that.
+
+**The record.** `lgaa.pilot.v1` — a RUN key, so it travels with the account
+and a new pilot sweeps it — carries who the pilot is (`serializePilot()`:
+race, career, the whole character, probation, payout) and what the sim owns
+for them (hulls, the active hull, the player's policies, a standing table per
+sky). `restorePilot()` refuses a bad one — wrong version, no character, a race
+that does not exist — and touches nothing when it does.
+
+**The start card** shows **Fly as <callsign>** when a record and a save are on
+the device, with "New pilot" stepped back to a ghost. FLY AS restores the
+record, sets the callsign, and launches into the sky the pilot was last in
+(`lastSky` in the save) — no creation screen. A restored pilot does not
+collect the sign-on standing again; standing per sky is applied after the
+corps are regrown, before anything reads it. **New pilot asks first**,
+naming what it sweeps and that the account copy follows on the next sync.
+
+**When it writes.** At launch; with the wallet's 30 s writer whenever the
+record is dirty (a skill point landed, a cycle ticked, a promotion, a
+transfer, a specialisation, a payout — the seconds between are not dirty);
+at once on a hull bought, switched, insured or lost; on the tab hiding.
+
+**Verified.** 37 headless checks (`test/continue.test.mjs`; seven reverted
+behaviours each fail it), a browser smoke of the real card
+(`test/smoke-continue.mjs`: rank, skill, hull, purse and sky kept across a
+reload, the dialog dismissed leaves the record alone), and the account smoke
+now flies device B on as device A's restored pilot.
+
+Files: `js/pilot.js`, `js/sim.js`, `js/store.js`, `js/hud.js`,
+`js/profile.js`, `js/stationdeck.js`, `index.html`, `css/style.css`,
+`js/version.js`, `test/continue.test.mjs` (new), `test/smoke-continue.mjs`
+(new), `test/smoke-account.mjs`.
+
+---
+
+## 0.3.41 — 2026-09-23
+
+The wallet is part of the save.
+
+Requested: wallet credits persist.
+
+`ship.credits` was whatever `makeShip()` and the race bonus issued, every
+launch — 2,500 plus the race's head start — and a session's trade was gone on
+reload while the corp treasury beside it survived. The account page (0.3.40)
+put the number on a table and made it obvious.
+
+- `lgaa-save-v1` carries `credits`. `persist()` writes it from the store,
+  which `publishHud` keeps current every frame; a NaN never overwrites a good
+  purse; a save from before this patch reads as **null**, not zero, so an old
+  save launches with the starting purse rather than broke.
+- The launch restores it AFTER `applyRaceToShip` — the race bonus is a new
+  pilot's and is not paid again every morning.
+- While credits move the sim writes the save every 30 s (`WALLET_EVERY`);
+  scans, beacons and atmo works write at once as before; nothing is
+  stringified when nothing changed.
+- `persistNow()` (exported from `sim.js`) writes on `visibilitychange` →
+  hidden and on `pagehide`, on every host — the phone switching apps is the
+  common case, and the 0.3.40 account flush only ran with a site behind the
+  origin. It refuses outside play.
+- The ACCOUNT conflict card shows **Purse** beside Treasury.
+
+**Honest note.** On its own this is invisible in play: `Create pilot` starts a
+new run and sweeps the save (that is what `js/profile.js` is for), so a
+restored purse only shows up once there is a way to fly on as the SAME pilot.
+That is 0.3.42, found while testing this one.
+
+Files: `js/store.js`, `js/sim.js`, `js/main.js`, `js/account.js`,
+`js/console/panels/corp-account.js`, `js/version.js`, `test/wallet.test.mjs`
+(18; five reverted behaviours each fail it), `test/account.test.mjs`.
+
+---
+
+## 0.3.40 — 2026-09-23
+
+The pilot follows you: accounts, cloud saves and site news, from inside the
+game. This is the game's half of the website (`LivingGalaxy-Site-0.1.0`, its
+own zip and runbook); the site's half is the account, the forum, the news
+desk and the save store.
+
+Requested: a website suite for account creation and email registration so
+character saves are by account; news and updates that show in the game.
+
+**What syncs.** `js/profile.js` already said what belongs to a pilot —
+`RUN_KEYS`, the callsign-suffixed families, `LEARNED_KEYS`, the profile record
+— and `js/account.js` syncs exactly that as one blob. Device settings (mixer,
+rock quality, fullscreen, the attract flag) and the CRADLE (the sky's people,
+which the relay already shares) stay on the device, and a blob from the
+server can never write outside that scope whatever it contains.
+
+**Where it works.** Only when the game is served by the site at
+`living-galaxy.com/play/` — same origin, so the site's own cookie and CSRF
+model (HttpOnly session, `X-Requested-With` as the proof) is reused with no
+CORS and no token anywhere in a URL. The module probes `/api/me` once at boot;
+a phone's `server.py` or a static host answers 404 and every account feature
+becomes one line — *"Play from living-galaxy.com to carry this pilot across
+devices"* — and nothing else changes. Verified on both.
+
+**Versions, and the only question it ever asks.** Every upload carries the
+server version this device last synced to. A second device writing in
+between makes the next upload a **409**, and the CON › CORP › ACCOUNT card
+puts both copies side by side — callsign, corp, treasury, when — with KEEP
+THIS DEVICE and USE THE ACCOUNT COPY. The same card appears on first sign-in
+when both the device and the account already hold a pilot. Taking the account
+copy rewrites storage and reloads: two dozen modules read their keys at
+launch, and swapping a pilot under a running sim is how saves get eaten. A
+signed-in device that has NOT changed since its last sync takes a newer
+account copy automatically at the menu (the phone-then-desk case) and only
+offers it while flying.
+
+**When.** A hash of the snapshot gates every upload: every two minutes while
+playing, when the tab hides (after every module's own hidden-flush, hence the
+`setTimeout`), on `pagehide` with `keepalive`, and on SYNC NOW. Never two
+uploads within 15 s; the site allows 60 per ten minutes.
+
+**News.** `/api/news` is read once a launch and each unseen item lands on the
+GNN news desk, oldest first, tagged by kind (`PATCH NOTES ·`, `UPDATE ·`,
+`EVENT ·`), site markup stripped, at most five a boot. The seen-set is a
+DEVICE key: a new pilot does not re-read the patch notes.
+
+**The start card** carries one line under the callsign when a site is
+behind the origin: who is signed in, or the single link to sign in, or
+"loading your pilot from the account…".
+
+**Also in this patch — a save bug found on the way.** The launch persist
+wrote `terraform: {}` for the sky (the store had no terraform state yet) and
+the atmo works' progress was gone from the save until the next scan or
+beacon wrote it back — two reloads in a row without scanning lost it.
+`launchSim` now carries the applied snapshot into the store before that
+persist. `company.js` exports `flushCompany()` so a snapshot never reads a
+1.5-second-old book.
+
+**Site-side changes made for this (in `LivingGalaxy-Site-0.1.0`):** the game
+page under `/play/` gets its own CSP with the response nonce stamped onto
+every `<script>` (the site's page CSP had blocked the importmap and the boot
+watchdog — the first cut booted to a black canvas); `js/data/` and
+`js/shipgen/data/` are served (the first cut refused every `/data/` path —
+same black canvas); `/net/*` and `/cradle/*` pass through to the game's own
+`server.py` so the shared sky is online from `/play/` on the same origin,
+with the tunnel routing those paths straight to :8080 in production.
+
+**`server.py` takes `LG_HOST`.** Default unchanged (`0.0.0.0`, so a phone
+on Wi-Fi is still joinable from the next device); `LG_HOST=127.0.0.1` keeps a
+relay that sits behind the tunnel off the LAN entirely, which is how the
+site's `deploy/lg-relay.service` runs it.
+
+Files: `js/account.js` (new), `js/console/panels/corp-account.js` (new),
+`js/console/panels/corp.js`, `js/profile.js`, `js/company.js`, `js/main.js`,
+`js/sim.js`, `index.html`, `css/style.css`, `js/version.js`, `server.py`,
+`test/account.test.mjs` (101, both against a stand-in API and the real
+`lgsite.py` when `../site` is present), `test/smoke-account.mjs` (19: the
+game served by the site, signed in from the console, the pilot carried to a
+second browser, the relay online through the pass-through).
+
+---
+
+## 0.3.39 — 2026-09-22
+
+NPC and drone hulls are measured the way the player's are.
+
+Requested: do the NPC and drone hull toughness numbers.
+
+**A correction first.** I had described these as flat per-role numbers that
+ignored the frame. That was wrong — `hullPerf` has always scaled them by mass.
+The fault was narrower and stranger: the scale was
+`clamp(massT / 60, 0.6, 2.4)`, linear and **clamped**, against a registry
+whose mass runs from 9 t to 7,500 t. It saturates at 144 t.
+
+| tier | mass | hp before | hp after |
+|---|---|---|---|
+| A | 12 t | 156 | 153 |
+| B | 34 t | **156** | 216 |
+| C | 90 t | 390 | 297 |
+| D | 260 t | 624 | 422 |
+| E | 700 t | **624** | 585 |
+| F | 2,200 t | **624** | 853 |
+| G | 7,500 t | **624** | 1,279 |
+
+Four tiers with no difference between them at the top, two at the bottom. A
+7,500-tonne capital hull was exactly as hard to kill as a 144-tonne one, and
+the player's own pools — rebuilt in 0.3.34 — had quietly overtaken them: a G
+frame gave the player 920 hull against an NPC's 624 in the same ship.
+
+It is the **same power curve the player uses** now, off the same exponent in
+`js/defence.js`, so both sides of a fight are measured one way. Spread across
+the registry: **x4.0 → x9.2**, against the player's x9.2. Screens come off the
+reactor rather than the mass, as the player's do.
+
+**And two roles had no entry at all.** `supply` and `rogue` were in `ACCEL`
+and `TURN` but never in `TOUGH`, so both fell through to `DEFAULT_TOUGH` — a
+generic 160/60 nobody had tuned for them. That is the same shape as the gun
+bug in 0.3.35: a default quietly catching whatever nobody remembered to list,
+and the reason the new test walks the role list rather than checking names.
+
+A nest drone now has numbers of its own: **90 hp and 20 shield** at the
+reference frame, against a trader's 150/60. Scrap welded round a gun, dying
+easily — the wave is the threat, not the unit. With 0.3.35's damage cut that
+makes a belt fight shorter in both directions: about 2.5 s of turret fire per
+drone against the 8 s it used to take.
+
+`test/defence.test.mjs` goes to 59 assertions. Reverting the curve fails ten
+of them and prints the old numbers back: `156, 156, 390, 624, 624, 624, 624`.
+
+Changed: `js/npc/flight.js`, `test/defence.test.mjs`.
+
+---
+
+## 0.3.38 — 2026-09-22
+
+The comms icon comes home, and a call can be answered again.
+
+Reported: the incoming-comms icon gets pushed to the left side when not in
+fullscreen, forcing a trip to fullscreen to answer. **This was 0.3.37's doing,
+and it was worse than it looked.**
+
+0.3.37 taught the comms puck to find a free slot by measurement, and among the
+candidates were the left edge of the canopy. Two faults followed.
+
+**The answer buttons did not go with it.** `.cx-answer` — accept and reject —
+is positioned at `--cx-rail-right + 72px`, which is to say FURTHER from the
+right edge than the puck. Move the puck to the left edge and that arithmetic
+puts the buttons off the side of the screen entirely. The puck was reachable
+and the call was not answerable, which is exactly what was reported. Going
+fullscreen changed the viewport enough to pick a different slot, which is why
+that worked around it.
+
+**And moving it at all was the wrong idea in portrait.** A pilot learns where
+the comms button is. A button that crosses the canopy because the screen got
+shorter is worse than one sitting slightly close to a switch.
+
+So:
+
+- **The cluster is placed as one thing.** Puck and answer row are both
+  collision-tested and both must be on screen; a slot that would strand the
+  buttons is rejected outright. The row takes its usual place to the puck's
+  left, or **flips to its right** when the puck is near an edge, and js/hud.js
+  publishes `--g-answer-right` so the CSS follows — including the
+  `pointer: coarse` rule, which is the one that applies on a phone.
+- **In portrait the puck stays on the right rail.** Only the height is chosen.
+  The far side is a landscape-only option, where the right rail is the
+  throttle card from top to bottom and there is genuinely nothing else.
+- **Candidates come from the real gaps**, not from fractions of the screen.
+  Everything already on that column is sorted and the puck is offered each gap
+  between one obstacle and the next, centred. A fixed ladder had been landing
+  eight pixels inside the dash at 360x740 while a clear 64px band sat unused.
+- **Candidates are scored, not just accepted or rejected.** Least overlap
+  wins, with distance from home breaking ties — so where nothing is free the
+  puck takes the smallest nuisance rather than falling back to a fixed
+  position that sat on the CUT switch, and where several are free it takes the
+  one under the systems strip rather than the first clear patch of sky.
+- **Re-measured after the HUD exists.** The first search runs while `#hud` is
+  still `hidden`, measuring a screen that is not there. A few late passes fix
+  the slot once there is something to measure.
+
+Hit-tested with a call ringing across twelve viewports: **zero covered
+controls, and the answer buttons on screen and tappable in every one.**
+
+`test/hudlayout.test.mjs` goes to 44 assertions, including that every
+`.cx-answer` rule takes the measured offset — the coarse-pointer one had its
+own hard-coded copy, and that is the rule a phone uses.
+
+Changed: `js/hud.js`, `css/comms.css`, `test/hudlayout.test.mjs`.
+
+---
+
 ## 0.3.37 — 2026-09-21
 
 Bugs.

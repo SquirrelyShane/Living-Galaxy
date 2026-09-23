@@ -10,6 +10,10 @@ import { mountGame } from "./engine.js";
 import "./crew/deckmind.js";
 import "./addon-loader.js";
 import { guard } from "./boot.js";
+import { mountAccount } from "./account.js";
+import { flushCompany } from "./company.js";
+import { sim, persistNow } from "./sim.js";
+import { pilot, title } from "./pilot.js";
 
 /* 0.3.27 — everything after the imports runs inside the guard, so a failure
  * while mounting is reported in the page rather than into a console nobody on
@@ -30,6 +34,18 @@ const canvas = document.getElementById("view");
 mountGame(canvas);
 mountHud();
 canvas.focus();
+/* 0.3.40 — the account: probes for living-galaxy.com behind this origin and,
+ * when it is there, keeps the pilot's storage namespace synced to it. Wired
+ * last so its hidden-tab flush runs after every module's own. */
+mountAccount({
+  meta: () => { const s = useGameStore.getState(); return { callsign: s.callsign, career: pilot.character ? title() : pilot.complexId, sky: s.room, credits: (sim.ship?.credits ?? 0) }; },
+  flushers: [flushCompany, persistNow],
+});
+/* 0.3.41 — the wallet and the survey log are written when the tab goes to
+ * the background, on every host: the account flush above only runs with a
+ * site behind the origin, and a phone switching apps is the common case. */
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") persistNow(); });
+window.addEventListener("pagehide", () => persistNow());
 /* the watchdog stands down once the game is actually up */
 globalThis.__lgBooted = true;
 });
