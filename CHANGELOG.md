@@ -10,6 +10,40 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.44 — 2026-09-24
+
+The shared sky survives the relay restarting underneath it.
+
+Now that the relay sits behind living-galaxy.com, it gets restarted: a
+cloudflared bounce, `install.sh --update` restarting `lg-relay`, a reboot.
+Two things did not survive that, measured in two real browsers through the
+site's pass-through (`test/smoke-relay-restart.mjs`):
+
+**The room is reborn and nobody says so.** A relay restart starts the ring
+and its cursor over at zero, and `born` moves. A client still holding its
+old, larger cursor asked for "everything after 9" of a ring that had seen
+two messages — and got nothing, for every hail, scan and beacon, until the
+new ring outgrew the old number. A pilot who stayed connected through a
+restart never heard another word (smoke: `heard [1]` before the fix,
+`[1,2]` after). `js/net.js` now treats a moved `born` as a fresh join:
+adopt the new cursor, do not replay the ring, resync the clock.
+
+**The ledger gave up.** `js/npc/cradle.js` pulled the server's records once,
+at connect, and switched pushes off for the session after four failures. A
+relay down for the five seconds of a launch — or the site answering 503 —
+meant that session never saw the sky's people and never shared its own. The
+pull now backs off and comes back (5 s, 15 s, 45 s, then every two
+minutes); the push gate reopens for one try a minute after it shut; any
+success resets the count. A static host (404/405/501) is still written off
+exactly once. `test/relayretry.test.mjs` (16, fake fetch and timers).
+
+Files: `js/net.js`, `js/npc/cradle.js`, `js/version.js`,
+`test/relayretry.test.mjs` (new), `test/smoke-relay-restart.mjs` (new, 15:
+kill and restart the relay under two pilots through lgsite; fails 3 checks
+with the `born` fix reverted).
+
+---
+
 ## 0.3.43 — 2026-09-23
 
 Site bulletins link back; the pilots board in the ACCOUNT card.

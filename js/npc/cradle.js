@@ -484,23 +484,60 @@ function relayGone(status, path) {
   console.warn(`[cradle] ${path} answered ${status} — this server has no ledger (static host). The CRADLE stays local; run \`python server.py\` for a shared sky.`);
 }
 
-export function connectCradle(room) {
-  remote = { enabled: true, room: String(room || "sol").slice(0, 32), failed: 0, dead: false };
-  if (typeof fetch !== "function") { remote.enabled = false; return; }
-  /* pull what the server holds for this sky; local records stay authoritative on conflict */
-  fetch(`/cradle/all?room=${encodeURIComponent(remote.room)}`, { cache: "no-store" })
+/* 0.3.44 — the pull is retried, and a run of failed pushes is not forever.
+ * The pull happened exactly once, at connect: a relay that was down for the
+ * five seconds of a launch (a cloudflared restart, `--update` bouncing
+ * lg-relay, a 503 from the site's pass-through) meant this session never
+ * saw the shared ledger at all. And `failed > 3` switched pushes off for the
+ * rest of the session, so the same outage silently stopped the sky's
+ * people being shared until a reload. Now: the pull backs off and tries
+ * again (5 s, 15 s, 45 s, then every two minutes); the push gate reopens
+ * after PUSH_RETRY_MS; a success resets the count. */
+export const PULL_RETRY_MS = [5000, 15000, 45000];
+export const PULL_RETRY_STEADY_MS = 120000;
+export const PUSH_RETRY_MS = 60000;
+let pullTimer = 0;
+let pullTries = 0;
+
+function schedulePull() {
+  if (pullTimer || !remote.enabled || remote.dead) return;
+  const wait = pullTries < PULL_RETRY_MS.length ? PULL_RETRY_MS[pullTries] : PULL_RETRY_STEADY_MS;
+  pullTimer = setTimeout(() => { pullTimer = 0; pullRemote(); }, wait);
+  pullTimer.unref?.();
+  pullTries++;
+  remote.nextPullMs = wait;
+}
+
+/** Pull what the server holds for this sky; local records stay authoritative on conflict. */
+export function pullRemote() {
+  if (!remote.enabled || remote.dead || typeof fetch !== "function") return Promise.resolve(false);
+  return fetch(`/cradle/all?room=${encodeURIComponent(remote.room)}`, { cache: "no-store" })
     .then((r) => {
       if (r.status === 404 || r.status === 405 || r.status === 501) { relayGone(r.status, "/cradle/all"); return null; }
-      return r.ok ? r.json() : null;
+      if (!r.ok) throw new Error(`cradle ${r.status}`);
+      return r.json();
     })
-    .then((j) => { if (j?.records) importLedger(j); })
-    .catch(() => { remote.failed++; });
+    .then((j) => {
+      noteOk(); remote.pulled = true; pullTries = 0;   // before the import: its records go out through an open gate
+      if (j?.records) importLedger(j);
+      return true;
+    })
+    .catch(() => { noteFail(); schedulePull(); return false; });
+}
+
+export function connectCradle(room) {
+  remote = { enabled: true, room: String(room || "sol").slice(0, 32), failed: 0, dead: false, pulled: false, retryAt: 0 };
+  if (pullTimer) { clearTimeout(pullTimer); pullTimer = 0; }
+  pullTries = 0;
+  if (typeof fetch !== "function") { remote.enabled = false; return; }
+  pullRemote();
 }
 
 export function disconnectCradle() {
   remote.enabled = false;
   pending.clear();
   if (flushTimer) { clearTimeout(flushTimer); flushTimer = 0; }
+  if (pullTimer) { clearTimeout(pullTimer); pullTimer = 0; }
 }
 
 /** For the console and the tests: what the ledger's server side is doing. */
@@ -508,8 +545,20 @@ export function cradleRemote() {
   return { ...remote, queued: pending.size };
 }
 
+/** A push or pull failed: count it, and after a run of them shut the push gate for PUSH_RETRY_MS. */
+function noteFail() {
+  remote.failed++;
+  if (remote.failed > 3 && !remote.retryAt) remote.retryAt = Date.now() + PUSH_RETRY_MS;
+}
+function noteOk() { remote.failed = 0; remote.retryAt = 0; }
+
 function pushRemote(rec) {
-  if (!remote.enabled || remote.dead || remote.failed > 3 || typeof fetch !== "function") return;
+  if (!remote.enabled || remote.dead || typeof fetch !== "function") return;
+  if (remote.failed > 3) {
+    /* the gate: shut by noteFail() after a run of failures, open for ONE more try once PUSH_RETRY_MS has passed */
+    if (Date.now() < remote.retryAt) return;
+    remote.retryAt = 0; remote.failed = 3;   // that try: a success resets everything, a failure shuts the gate again
+  }
   pending.set(rec.id, rec);
   if (pending.size >= FLUSH_MAX) { flushRemote(); return; }
   if (!flushTimer) flushTimer = setTimeout(flushRemote, FLUSH_MS);
@@ -533,9 +582,10 @@ export function flushRemote() {
   const first = batch.shift();
   put(first).then((r) => {
     if (r.status === 404 || r.status === 405 || r.status === 501) { relayGone(r.status, "/cradle/put"); return; }
-    if (!r.ok) { remote.failed++; return; }
-    for (const rec of batch) put(rec).then((x) => { if (!x.ok) remote.failed++; }).catch(() => { remote.failed++; });
-  }).catch(() => { remote.failed++; });
+    if (!r.ok) { noteFail(); return; }
+    noteOk();
+    for (const rec of batch) put(rec).then((x) => { if (!x.ok) noteFail(); }).catch(() => { noteFail(); });
+  }).catch(() => { noteFail(); });
 }
 
 /* ---- personality in words ----------------------------------------------- */

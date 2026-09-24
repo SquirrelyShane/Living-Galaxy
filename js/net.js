@@ -152,8 +152,25 @@ async function poll() {
     noRelayMisses = 0;
     net.online = true;
     net.lastError = "";
-    const fresh = net.seq < 0;
-    net.seq = Math.max(net.seq, j.seq ?? 0);
+    let fresh = net.seq < 0;
+    /* 0.3.44 — THE ROOM WAS REBORN. A relay restart (a reboot, `--update`
+     * restarting lg-relay, the room swept after standing empty) starts the
+     * ring and its cursor over at zero, and `born` moves. A client still
+     * holding its old, larger cursor then asks for "everything after 4,812"
+     * of a ring that has seen three messages — and receives nothing, for
+     * every hail and beacon, until the new ring outgrows the old number.
+     * Measured: a pilot who stayed connected through a relay restart never
+     * got another message. So a moved `born` is a fresh join: take the new
+     * cursor, do not replay the ring, resync the clock from scratch. */
+    if (typeof j.born === "number" && net.worldBorn && j.born !== net.worldBorn) {
+      console.info(`[net] the relay restarted (room reborn) — rejoining at cursor ${j.seq ?? 0}`);
+      net.seq = j.seq ?? 0;
+      net.rebirths = (net.rebirths ?? 0) + 1;
+      sim.clockSynced = false;
+      fresh = true;
+    } else {
+      net.seq = Math.max(net.seq, j.seq ?? 0);
+    }
     /* shared world clock: the room was born when the first pilot joined it.
      * every client chases that clock so the same slot fires the same event. */
     if (typeof j.born === "number" && typeof j.now === "number") {
