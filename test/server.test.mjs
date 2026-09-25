@@ -121,6 +121,23 @@ try {
     ok(all.json.records.some((r) => r.id === "srvtest1"), "…and it contains what was just written");
   }
 
+  /* ---- 4b. the Galactic Database (0.3.54) -------------------------------- */
+  {
+    const id = `srvgdb${Date.now()}`;
+    const put = await post("/gdb/put", { room: "t", entries: [{ id, name: "First Name", raceId: "terran", kind: "hall", sky: "t", at: 1000, seen: 1000, status: "alive" }] });
+    ok(put.json?.ok === true && put.json.n === 1, "a catalogue entry is accepted");
+    await post("/gdb/put", { room: "t", entries: [{ id, name: "Second Name", raceId: "terran", kind: "hall", sky: "t", at: 2000, seen: 3000, status: "dead" }] });
+    const all = await get("/gdb/all?room=t");
+    const e = all.json?.entries?.find((x) => x.id === id);
+    ok(all.json?.gdb === 1 && e, "the catalogue reads back for one sky");
+    ok(e?.name === "First Name", `the first filing keeps the name (${e?.name})`);
+    ok(e?.status === "dead" && e?.seen === 3000, "and the latest word — death, last seen — lands on it");
+    const other = await get("/gdb/all?room=zz-none");
+    ok(!other.json?.entries?.some((x) => x.id === id), "another sky does not get it");
+    const bad = await post("/gdb/put", { room: "t", entries: "nope" });
+    ok(bad.status === 400, "a malformed put is refused");
+  }
+
   /* ---- 5. the chat book ------------------------------------------------- */
   {
     /* what js/chat.js actually sends: the text is under one of several keys,

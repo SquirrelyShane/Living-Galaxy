@@ -4,3 +4,7 @@ lgalaxy.txt*
 id_ed25519*
 id_rsa*
 *.pem
+
+# 0.3.54: the relay's Galactic Database catalogue — the galaxy's, not the repo's
+gdb.json
+gdb.json.*

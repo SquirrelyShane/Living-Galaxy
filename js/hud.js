@@ -27,6 +27,7 @@ import { connectNet, disconnectNet } from "./net.js";
 import { mountInterior } from "./interior/interior.js";
 import { captain, wireCaptainTest } from "./npc/captain.js";
 import { connectCradle, disconnectCradle } from "./npc/cradle.js";
+import { connectGdb, disconnectGdb } from "./gdb.js";
 import { wireIcework } from "./icework.js";
 import { wireAtmoWorks } from "./atmoworks.js";
 import { wireAutopilot, nearestSeam, busOverload, autopilot as ap } from "./autopilot.js";
@@ -756,6 +757,7 @@ export function mountHud() {
     mountWorldSync();
     connectNet(seed);
     connectCradle(seed);
+    connectGdb(seed);
   };
 
   queueSky();
@@ -944,6 +946,7 @@ export function mountHud() {
   $("btn-menu").addEventListener("click", () => {
     disconnectNet();
     disconnectCradle();
+    disconnectGdb();
     returnToMenu();
     queueSky();
   });

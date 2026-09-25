@@ -26,6 +26,7 @@ import { traffic, trafficDown, markVesselDown } from "./traffic.js";
 import { engagementOf } from "./battles.js";
 import { flow } from "./flow.js";
 import { cradle, generateNPC } from "./cradle.js";
+import { catalogue, file as gdbFile } from "../gdb.js";
 import { shipById } from "../shipdb.js";
 import { sim, logEvent } from "../sim.js";
 import { crew, crewHooks, CYCLE_SECONDS } from "../crew.js";
@@ -119,6 +120,9 @@ export function crewOf(v) {
       /* the vessel's trade decides the post, not a deck plan it does not have */
       duty: null,
     });
+    /* 0.3.54: into the GDB — one name to one person in the whole galaxy, and
+     * not one that looks like a shipmate's. The captain is in the room too. */
+    catalogue(list[i], { kind: "crew", place: v.id, sky: sim.skySeed ?? null, group: [{ id: v.recId, name: v.captain }, ...list.slice(0, i)] });
     /* keep the unfiled record's own trade sensible for the run it is on */
     const want = trades[i % trades.length];
     if (want && !String(list[i].complexId ?? "").includes(want)) list[i].duty = null;
@@ -154,7 +158,7 @@ export function promote(m, note) {
   rec.traits = m.traits;
   rec.skills = m.skills;
   rec.cyclesServed = m.cyclesAboard ?? 0;
-  cradle.put(rec);
+  gdbFile(rec, { kind: "crew" });    // the catalogued name stands; now a full record
   if (note) cradle.note(rec.id, note);
   /* the cached body was keyed on the same id, and is still the same body */
   return rec;

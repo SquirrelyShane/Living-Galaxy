@@ -83,6 +83,7 @@ in-memory:
 | `GET /net/ping` | liveness |
 | `GET`/`POST` `/net/world` | the host's sky snapshot — craters, lost ports, what the rocks did |
 | `GET /cradle/all`, `POST /cradle/put` | the shared CRADLE ledger of people |
+| `GET /gdb/all`, `POST /gdb/put` | the Galactic Database catalogue (0.3.54) — one light entry per person; the first filing wins the name; `gdb.json` |
 | `POST /llm/proxy` | loopback pass-through to a llama.cpp on the same machine |
 
 Every client runs sim time as `now - born`, so the ports, the traffic and the
@@ -190,6 +191,7 @@ refresh the browser — there is no build step.
 | `js/stationclock.js` | Port standard time (0.3.52): hours, days, weeks, shifts, day parts — the one clock everything asks |
 | `js/stafflife.js` | A settled hand's working day (0.3.52): job, shift, hours, housing, needs, hour-by-hour plan, pay by hours worked, labour on the port's lines, the day log |
 | `js/staffcare.js` | A settled hand's menu (0.3.53): WORK (job, shift, hours), HOME (housing), CARE (day off, a meal, a night out, a course) — drawn by the HALL and CORP › TOWN |
+| `js/gdb.js` | The Galactic Database (0.3.54): every person the galaxy produces, catalogued once — unique names, look-alike checks per room, stable GDB numbers, census, search, the chronicle; relay-synced via `/gdb` |
 | `js/staffline.js` | The company line: call a settled hand from anywhere, their calls and asks, regard, passage between ports |
 | `js/economy.js` | Production lines, stock, the price curve |
 | `js/blueprint.js` | Deterministic station deck plans, drawn blueprint-style |
@@ -1798,6 +1800,23 @@ world, moon, rock and beacon name — checked per **word**, because a fragment
 that exists only because two names sit next to each other ("Sera Petrosyan") is
 not something anybody sees. `test/names.test.mjs` scans half a million names for
 it on every run.
+
+**One name, one person — the Galactic Database** (`js/gdb.js`, 0.3.54). The
+forge makes names; the GDB decides which ones a person may have. Everybody the
+galaxy produces is filed there — hiring halls, traffic captains, NPC hull
+crews, flow-boat pilots, boarders, bounty marks, children born aboard and
+ashore — and filing is where the checks live: a full name already on file is
+never issued again (the given name is re-forged from the person's own seed, so
+every device gets the same answer), and a given name that shares its first or
+last three letters with somebody already in the ROOM (the hall plus your crew,
+a hull's crew plus its captain, siblings and parents) is re-forged too. Once
+filed, a person keeps their name, whatever the forge would say today. Each has
+a stable GDB-XXXXXX number, first-filed and last-seen, and a status that death
+sets for good. Hiring halls bring back only their own port's people (and
+anyone you paid off there, first). The forge itself allows one doubled vowel
+and one apostrophe per given name, ten letters at most, and re-rolls a family
+name that echoes the given name's opening. CON › CREW › GDB is the census,
+the search and the chronicle; the relay keeps the catalogue in `gdb.json`.
 
 ### Who is who: sex, gender, and printing it
 

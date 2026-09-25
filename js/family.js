@@ -26,6 +26,7 @@
 
 import { crew, crewHooks, rapportBetween } from "./crew.js";
 import { cradle, drawnTo, generateNPC, genomeOf, looksLine, GENDERS, PRONOUNS, TRAIT_AXES } from "./npc/cradle.js";
+import { file as gdbFile } from "./gdb.js";
 import { childFamily, nameRng } from "./names.js";
 import { breed, packGenome, fingerprint, genomeTraits, genomeIdentity, genomePulse, genomeTells, skillAptitude, SPACER, kinship } from "./genome/spacer.js";
 import { heritageFor, applyHeritage, heritageLine, startingLetter } from "./crew/heritage.js";
@@ -210,7 +211,8 @@ export function conceive(carrier, sire) {
    * has nothing to hand down at all. childFamily knows the difference. */
   const surname = childFamily(sire, carrier, child.gender, child.raceId ?? raceId, nameRng(`name:${seed}`));
   child.name = surname ? `${child.name.split(" ")[0]} ${surname}` : child.name.split(" ")[0];
-  cradle.put(child);
+  /* 0.3.54: into the GDB — not a sibling's name, not a parent's, not a shipmate's */
+  gdbFile(child, { kind: "born", group: [carrier, sire, ...crew.aboard, ...household.children] });
   cradle.note(child.id, `Born aboard ${crew.employer ?? "a ship"} to ${carrier.name} and ${sire.name}`);
   const look = looksLine(child);
   if (look) cradle.note(child.id, `On the record at birth: ${look}`);

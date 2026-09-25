@@ -38,6 +38,7 @@
 
 import { corpById } from "../corps.js";
 import { generateNPC, cradle } from "./cradle.js";
+import { file as gdbFile } from "../gdb.js";
 import { rngFromSeed } from "../generate.js";
 import { currentSystem, hashHue } from "../bodies.js";
 import { stations as liveStations } from "../stations.js";
@@ -160,13 +161,19 @@ export function buildRoster(seed, stationList, system, count) {
     const role = plan[i];
     const spec = ROLES[role];
     const rec = generateNPC(`${seed}:cap:${role}:${i}`, { sky: seed, complexId: spec.complex, letter: spec.letter });
-    rec.status = "captain";
-    rec.employer = rec.name;
     const prior = cradle.get(rec.id);
     if (prior) {
+      /* 0.3.54: the same captain is the same person — the name on file stands,
+       * even when the forge would say something else today */
+      rec.name = prior.name;
+      rec.gdb = prior.gdb ?? null;
       rec.history = prior.history;
       rec.brain = prior.brain ?? rec.brain;
+    } else {
+      gdbFile(rec, { kind: "captain", group: roster.map((v) => ({ id: v.recId, name: v.captain })), put: false });
     }
+    rec.status = "captain";
+    rec.employer = rec.name;
     cradle.put(rec);
     if (!prior) cradle.note(rec.id, `Holds the ${role} run in ${seed}`);
 

@@ -38,6 +38,7 @@ import { baseValue } from "../materials.js";
 import { BODIES } from "../bodies.js";
 import { RACES } from "../races.js";
 import { personName } from "../names.js";
+import { catalogue } from "../gdb.js";
 import { PRONOUNS } from "./cradle.js";
 import { mulberry } from "../ui/glyphs.js";
 import { reports, answerFor } from "./reports.js";
@@ -151,7 +152,9 @@ function flowPilot(b) {
   const race = RACES[Math.floor(rnd() * RACES.length)] ?? { id: "terran" };
   const g = rnd();
   const gender = g < 0.55 ? "woman" : g < 0.95 ? "man" : "nonbinary";
-  p = { name: personName(race.id, gender, rnd).full, gender, pronouns: PRONOUNS[gender] };
+  /* 0.3.54: a pilot is a person, and the GDB has them — one name, theirs alone */
+  const person = catalogue({ id: `pilot:${b.id}`, seed: `pilot:${b.id}`, name: personName(race.id, gender, rnd).full, raceId: race.id, gender }, { kind: "pilot", place: b.from ?? null });
+  p = { name: person.name, gender, pronouns: PRONOUNS[gender] };
   flowPilots.set(b.id, p);
   if (flowPilots.size > 400) flowPilots.delete(flowPilots.keys().next().value);
   return p;

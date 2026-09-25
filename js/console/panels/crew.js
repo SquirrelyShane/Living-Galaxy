@@ -25,6 +25,7 @@ import { tierOf, TIER_NAMES } from "../../crew/talk.js";
 import { mountGenome, mountLog } from "./crew-gene.js";
 import { mountSky } from "./crew-sky.js";
 import { mountBrig } from "./crew-brig.js";
+import { mountGdb } from "./crew-gdb.js";
 import { runHooks } from "../../crew/hooks.js";
 import { stopAllBeats } from "../../crew/beats.js";
 
@@ -326,7 +327,7 @@ export default {
   id: "crew",
   title: "CREW",
   order: 30,
-  subtabs: [{ id: "roster", label: "ROSTER" }, { id: "talk", label: "TALK" }, { id: "bonds", label: "BONDS" }, { id: "genome", label: "GENOME" }, { id: "log", label: "LOG" }, { id: "sky", label: "SKY" }, { id: "brig", label: "BRIG" }, { id: "house", label: "HOUSE" }],
+  subtabs: [{ id: "roster", label: "ROSTER" }, { id: "talk", label: "TALK" }, { id: "bonds", label: "BONDS" }, { id: "genome", label: "GENOME" }, { id: "log", label: "LOG" }, { id: "sky", label: "SKY" }, { id: "brig", label: "BRIG" }, { id: "house", label: "HOUSE" }, { id: "gdb", label: "GDB" }],
   mount(root, ctx) {
     view.ctx = ctx;
     const sub = ctx.sub ?? "roster";
@@ -336,6 +337,7 @@ export default {
     else if (sub === "log") mountLog(root, ctx);
     else if (sub === "sky") mountSky(root, ctx);
     else if (sub === "brig") mountBrig(root, ctx);
+    else if (sub === "gdb") mountGdb(root, ctx);
     else if (sub === "house") mountHouse(root, ctx);
     else mountRoster(root, ctx);
     if (ctx.focus && sub === "roster") root.querySelector(`[data-id="${ctx.focus}"]`)?.scrollIntoView?.({ block: "center" });

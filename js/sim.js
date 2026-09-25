@@ -82,7 +82,7 @@ import { DEFAULT_SHIP_ID, hullTuneFor, issuedShips, shipById } from "./shipdb.js
 import { yardQuote } from "./shipcost.js";
 import { hullPoolFor, shieldPoolFor, resistsFor } from "./defence.js";
 import { claim as insuranceClaim, insure, playerKey, policies, policyFor, resetInsurance } from "./insurance.js";
-import { crew, resetCrew, tickCrew } from "./crew.js";
+import { crew, crewHooks, resetCrew, tickCrew } from "./crew.js";
 import { loadRobots, tickRobots } from "./crew/robots.js";
 import { fx as upgradeFx, loadUpgrades, upgradeResists, resistKey } from "./upgrades.js";
 import { tickPatchDrone, hullMaxOf } from "./repair.js";
@@ -1042,6 +1042,7 @@ function wireReactiveSky() {
 
   /* 0.3.52: company hands on shift make their port's lines run faster */
   econHooks.labour = labourAt;
+  crewHooks.port = () => sim.ship?.dockedAt ?? null;   // 0.3.54: where a paid-off hand now lives
 
   /* 0.3.48: the security ◆ — the player's own SOS, and what a fight costs you */
   securityHooks.selfVictim = selfVictim;

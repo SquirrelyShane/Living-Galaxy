@@ -30,8 +30,12 @@ Experimental: it also keeps the shared CRADLE ledger (js/npc/cradle.js):
     POST /llm/proxy  {..llama body, "_port":8081, "_path":"/completion"}
                                        -> llama.cpp's JSON (loopback pass-through)
 
-That is the one thing written to disk — `cradle.json` beside this file.
-Delete it to forget everyone.
+    GET  /gdb/all?room=<sky>           -> {"gdb":1,"entries":[…]}    (0.3.54, the Galactic Database)
+    POST /gdb/put {"room","entries"}   -> {"ok":true,"n":<accepted>}
+
+Those are the things written to disk — `cradle.json` (full records) and
+`gdb.json` (the catalogue: one light entry per person the galaxy has produced)
+beside this file. Delete them to forget everyone.
 
 THE CONSOLE (0.3.36)
 --------------------
@@ -77,6 +81,10 @@ try:
     CRADLE_MAX = int(os.environ.get("CRADLE_MAX", "20000"))   # records kept; 0 = no cap
 except ValueError:
     CRADLE_MAX = 20000
+try:
+    GDB_MAX = int(os.environ.get("GDB_MAX", "80000"))         # 0.3.54: catalogue entries kept; 0 = no cap
+except ValueError:
+    GDB_MAX = 80000
 MSG_KEEP = 400           # ring buffer per room
 MAX_BODY = 64 * 1024
 VERSION = "0.1"                                  # keep in step with js/version.js
@@ -773,6 +781,8 @@ class Console:
         rows.append(f"  {C.bold}{C.accent}LEDGER{C.reset}")
         rows.append(kv("records", f"{cr['records']:,}  {C.dim}cap {cr['cap'] or '∞'}{C.reset}", C.white))
         rows.append(kv("writes", f"{s['cradle_puts']:,} accepted   {C.dim}· {cr['flushes']} flushes to disk{C.reset}", C.white))
+        g = GDB.describe()
+        rows.append(kv("gdb", f"{g['entries']:,} catalogued  {C.dim}cap {g['cap'] or '∞'} · {g['flushes']} flushes{C.reset}", C.white))
         if s["llm_calls"]:
             rows.append(kv("llm proxy", f"{s['llm_calls']:,} calls   "
                                         f"{(C.red if s['llm_fails'] else C.dim)}{s['llm_fails']} failed{C.reset}", C.white))
@@ -1233,6 +1243,137 @@ class Cradle:
 
 CRADLE = Cradle()
 
+
+class Gdb:
+    """The Galactic Database (0.3.54): one light entry per person the galaxy
+    has produced — {id, no, name, raceId, gender, complexId, letter, title,
+    kind, place, sky, at, seen, status, full} — so every device agrees on who
+    somebody is. The FIRST filing of a person wins their name: that is how two
+    devices that forged the same seed converge on one identity. Death sticks.
+    `gdb.json` beside this file; flushed on the cradle's schedule."""
+
+    PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gdb.json")
+    FIELDS = ("id", "no", "name", "raceId", "gender", "complexId", "letter", "title",
+              "kind", "place", "sky", "at", "seen", "status", "full", "died", "how")
+    TRANSIENT = ("pilot", "boarder", "crew")
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.entries = {}
+        self.dirty = False
+        self.readonly = False
+        self.flushes = 0
+        try:
+            with open(self.PATH, "r", encoding="utf-8") as f:
+                for e in json.load(f).get("entries", []):
+                    if isinstance(e, dict) and isinstance(e.get("id"), str) and e.get("name"):
+                        self.entries[e["id"]] = e
+        except FileNotFoundError:
+            pass
+        except (OSError, ValueError) as e:
+            keep = f"{self.PATH}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}"
+            try:
+                os.replace(self.PATH, keep)
+                print(f"GDB: {os.path.basename(self.PATH)} would not parse ({e}); kept as {os.path.basename(keep)}.")
+            except OSError:
+                self.readonly = True
+                print("GDB: gdb.json is unreadable and cannot be moved aside — the catalogue is read-only this run.")
+            self.entries.clear()
+        threading.Thread(target=self._flusher, name="gdb-flush", daemon=True).start()
+        atexit.register(self.flush)
+
+    def _clean(self, e):
+        if not isinstance(e, dict) or not isinstance(e.get("id"), str) or not e["id"] or not isinstance(e.get("name"), str):
+            return None
+        out = {k: e[k] for k in self.FIELDS if k in e}
+        out["id"] = out["id"][:96]
+        out["name"] = out["name"][:80]
+        return out
+
+    def put(self, items):
+        n = 0
+        with self.lock:
+            for raw in items or []:
+                e = self._clean(raw)
+                if not e:
+                    continue
+                have = self.entries.get(e["id"])
+                if have:
+                    # first filing keeps the name; the rest is the latest word
+                    if (have.get("at") or 0) <= (e.get("at") or float("inf")):
+                        e["name"] = have["name"]
+                        e["at"] = have.get("at")
+                    if have.get("status") == "dead":
+                        e["status"] = "dead"
+                    if (have.get("seen") or 0) > (e.get("seen") or 0):
+                        e["seen"] = have.get("seen")
+                        e["place"] = have.get("place")
+                    e["full"] = bool(have.get("full") or e.get("full"))
+                self.entries[e["id"]] = e
+                n += 1
+            if n:
+                self.dirty = True
+        return n
+
+    def all(self, room=""):
+        with self.lock:
+            if not room:
+                return list(self.entries.values())
+            return [e for e in self.entries.values() if not e.get("sky") or e.get("sky") == room]
+
+    def describe(self) -> dict:
+        with self.lock:
+            return {"entries": len(self.entries), "cap": GDB_MAX, "flushes": self.flushes}
+
+    def prune(self):
+        """Transient people nobody saw again go first; the dead and the fully
+        recorded are the last thing a catalogue gives up."""
+        with self.lock:
+            if GDB_MAX <= 0 or len(self.entries) <= GDB_MAX:
+                return 0
+            def weight(e):
+                return (
+                    1 if e.get("full") else 0,
+                    1 if e.get("status") == "dead" else 0,
+                    0 if e.get("kind") in self.TRANSIENT else 1,
+                    e.get("seen") or e.get("at") or 0,
+                )
+            ordered = sorted(self.entries.values(), key=weight)
+            drop = len(self.entries) - GDB_MAX
+            for e in ordered[:drop]:
+                self.entries.pop(e["id"], None)
+            self.dirty = True
+            return drop
+
+    def _flusher(self):
+        while True:
+            time.sleep(CRADLE_FLUSH)
+            n = self.prune()
+            if n:
+                LOG.line(f"GDB pruned {n} entr(ies) — catalogue capped at {GDB_MAX}")
+            self.flush()
+
+    def flush(self):
+        if self.readonly:
+            return
+        with self.lock:
+            if not self.dirty:
+                return
+            self.dirty = False
+            entries = list(self.entries.values())
+        tmp = self.PATH + ".tmp"
+        try:
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump({"gdb": 1, "entries": entries}, f)
+            os.replace(tmp, self.PATH)
+            self.flushes += 1
+        except (OSError, ValueError):
+            with self.lock:
+                self.dirty = True
+
+
+GDB = Gdb()
+
 class Handler(SimpleHTTPRequestHandler):
     extensions_map = {
         **SimpleHTTPRequestHandler.extensions_map,
@@ -1280,7 +1421,7 @@ class Handler(SimpleHTTPRequestHandler):
         if u.path in ("/net/poll", "/net/ping") and not LOG.log_polls:
             return LOG.quiet_hit(u.path, client)
         ref = _referer_path(self.headers.get("Referer"))
-        chatty = u.path.startswith("/net/") or u.path.startswith("/cradle/")
+        chatty = u.path.startswith("/net/") or u.path.startswith("/cradle/") or u.path.startswith("/gdb/")
         level = "error" if isinstance(status, int) and status >= 400 else ("net" if chatty else "info")
         LOG.line(
             f"{client}  {method} {status}  {size}B  {ms:.1f}ms  target={u.path}  from={ref}",
@@ -1330,6 +1471,10 @@ class Handler(SimpleHTTPRequestHandler):
             # whole join stall. A record's `born` is its sky; records without
             # one predate the field and belong to everybody.
             return self._json(200, {"cradle": 1, "records": CRADLE.all(room)})
+        if u.path == "/gdb/all":
+            q = parse_qs(u.query)
+            room = (q.get("room") or [""])[0][:32]
+            return self._json(200, {"gdb": 1, "entries": GDB.all(room)})
         return super().do_GET()
 
     def do_POST(self):
@@ -1379,6 +1524,19 @@ class Handler(SimpleHTTPRequestHandler):
                 if ok:
                     STATS.note("cradle_puts")
                 return self._json(200 if ok else 400, {"ok": ok})
+            except (ValueError, UnicodeDecodeError) as e:
+                return self._json(400, {"error": str(e)})
+        if u.path == "/gdb/put":
+            try:
+                n = int(self.headers.get("Content-Length", "0"))
+                if n <= 0 or n > MAX_BODY * 4:
+                    return self._json(413, {"error": "body size"})
+                body = json.loads(self.rfile.read(n).decode("utf-8"))
+                if not isinstance(body, dict) or not isinstance(body.get("entries"), list):
+                    return self._json(400, {"error": "entries list required"})
+                got = GDB.put(body["entries"][:500])
+                STATS.note("gdb_puts")
+                return self._json(200, {"ok": True, "n": got})
             except (ValueError, UnicodeDecodeError) as e:
                 return self._json(400, {"error": str(e)})
         if u.path == "/net/world":

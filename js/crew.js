@@ -15,6 +15,7 @@ import { COMPLEXES, RANK_LETTERS } from "./careers/complexes.js";
  * upgrades.js writes its own fx() into shipFx when it loads. */
 import { shipFx } from "./ship.js";
 import { cradle, drawnTo, ensureIdentity, generateNPC, genomeOf } from "./npc/cradle.js";
+import { file as gdbFile } from "./gdb.js";
 import { genomeCompat, kinship, KIN_BLOCK, kinLabel } from "./genome/spacer.js";
 
 export const CYCLE_SECONDS = 90;
@@ -47,12 +48,25 @@ export function stationRoster(station, restock = 0, sky = "sol") {
   const rnd = mulberry(`${station.id}:${sky}:roster:${restock}`);
   const n = 4 + Math.floor(rnd() * 4);
   const out = [];
-  const pool = cradle.pool().sort((a, b) => (a.seed < b.seed ? -1 : 1));
+  /* 0.3.54: the people who come back to a hall are the people who LIVE at
+   * this port — offered here before, or paid off here. It used to be the whole
+   * sky's pool, and every candidate any hall had ever shown went into it, so
+   * the first port's people turned up at every port after it. A drifter from
+   * elsewhere still walks in now and then (the hand you dismissed at Foundry
+   * Hold, turning up at Kessler Reach), one a hall at most. */
+  const locals = cradle.pool((r) => r.station === station.id).sort((a, b) => (a.seed < b.seed ? -1 : 1));
+  /* somebody you paid off HERE is looking for a berth, not just living here: they come back to the hall first */
+  const pool = [...locals, ...locals.filter((r) => r.status === "dismissed").flatMap((r) => [r, r, r, r, r, r])];
+  const drifters = cradle.pool((r) => r.status === "dismissed" && r.station && r.station !== station.id);
   const returning = Math.min(pool.length, Math.floor(n / 2));
   for (let i = 0; i < returning; i++) {
     const rec = pool[Math.floor(rnd() * pool.length)];
     if (out.some((x) => x.id === rec.id)) continue;
     out.push(candidateFrom(rec));
+  }
+  if (drifters.length && rnd() < 0.25) {
+    const rec = drifters[Math.floor(rnd() * drifters.length)];
+    if (!out.some((x) => x.id === rec.id)) out.push(candidateFrom(rec));
   }
   for (let i = 0; out.length < n && i < n * 3; i++) {
     /* stations mostly offer the working ranks */
@@ -67,8 +81,10 @@ export function stationRoster(station, restock = 0, sky = "sol") {
      * about hands who are actually on this ship. */
     if (have && (have.status === "aboard" || have.status === "captain") && crew.aboard.some((m) => m.id === have.id)) continue;
     if (out.some((x) => x.id === rec.id)) continue;
-    if (!have) cradle.put(rec);
-    out.push(candidateFrom(have ?? rec));
+    /* 0.3.54: into the GDB — a name nobody else has, and not one that looks
+     * like anybody already on this list or aboard your ship */
+    const filed = have ?? gdbFile(rec, { kind: "hall", place: station.id, group: [...crew.aboard, ...out] });
+    out.push(candidateFrom(filed));
   }
   return out;
 }
@@ -110,7 +126,7 @@ function candidateFrom(rec) {
  * `always` runs on every sim tick whether or not the player has anybody
  * aboard — the rest of the sky has crews too (npc/npccrew.js), and they do
  * not stop existing because your berths are empty. */
-export const crewHooks = { onCycle: null, cycle: [], reset: [], always: [] };
+export const crewHooks = { onCycle: null, cycle: [], reset: [], always: [], port: null };
 
 export const crew = {
   employer: null,   // the pilot's callsign, for the ledger
@@ -200,6 +216,9 @@ function fileDeparture(m, status, text) {
   if (!rec) return;
   rec.status = status;
   rec.employer = null;
+  /* 0.3.54: they live where you left them — that port's hall is where they come back */
+  const port = crewHooks.port?.() ?? null;
+  if (port) rec.station = port;
   rec.cyclesServed = (rec.cyclesServed ?? 0) + (m.cyclesAboard ?? 0);
   cradle.note(rec.id, text);
 }

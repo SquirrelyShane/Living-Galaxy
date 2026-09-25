@@ -24,6 +24,7 @@ import { sim, logEvent } from "../sim.js";
 import { applyDamage } from "../ship.js";
 import { crew } from "../crew.js";
 import { cradle, generateNPC } from "../npc/cradle.js";
+import { catalogue } from "../gdb.js";
 
 export const boarding = {
   pods: [],        // inbound: { eta, n, from }
@@ -62,6 +63,7 @@ export function launchPod(st, n = 0) {
 export function startBoarding(n, from = "a breach pod") {
   for (let i = 0; i < n; i++) {
     const rec = generateNPC(`boarder:${sim.skySeed}:${sim.time.toFixed(0)}:${i}`, { complexId: "security", sky: sim.skySeed });
+    catalogue(rec, { kind: "boarder", sky: sim.skySeed ?? null, group: [...crew.aboard, ...boarding.intruders.map((x) => x.rec ?? x)] });   // 0.3.54
     boarding.intruders.push({ id: rec.id, name: rec.name, hp: 100, skill: 20 + Math.floor(Math.random() * 30), rec });
   }
   syncSensors();

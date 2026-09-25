@@ -42,6 +42,14 @@
  * website and leaves DEVICE_KEYS and the cradle where they are.
  */
 
+/* 0.3.54: the galaxy's population — the CRADLE's full records and the Galactic
+ * Database's catalogue. Not the pilot's (no account sync, no clearing on a new
+ * run) and not the device's settings: they are who lives in the sky. */
+export const SKY_KEYS = [
+  "lgaa.cradle.v1",       // js/npc/cradle.js — full records of people
+  "lgaa.gdb.v1",          // js/gdb.js — the catalogue of everyone, one name to one person
+];
+
 export const DEVICE_KEYS = [
   "lgaa.audio.mix",       // js/audio/graph.js — the mixer
   "lgaa.rocks",           // js/engine.js — asteroid quality tier

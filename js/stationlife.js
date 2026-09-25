@@ -23,6 +23,7 @@
 
 import { company, staffAt } from "./company.js";
 import { cradle, generateNPC, drawnTo, ensureIdentity, genomeOf, PRONOUNS } from "./npc/cradle.js";
+import { file as gdbFile, markDead } from "./gdb.js";
 import { breed, packGenome, fingerprint, genomeTraits, genomeIdentity, skillAptitude, SPACER, kinship } from "./genome/spacer.js";
 import { childFamily, nameRng } from "./names.js";
 import { stationById } from "./stations.js";
@@ -265,7 +266,7 @@ function removeStaff(s, why) {
 function kill(s, st, how) {
   removeStaff(s, how);
   const rec = cradle.get(s.id);
-  if (rec) { rec.status = "dead"; rec.diedAt = sim.time; cradle.note(rec.id, `Died at ${st?.name ?? "a port"} — ${how}`); }
+  if (rec) { rec.status = "dead"; rec.diedAt = sim.time; cradle.note(rec.id, `Died at ${st?.name ?? "a port"} — ${how}`); markDead(rec.id, `at ${st?.name ?? "a port"} — ${how}`); }
   company.confidence = Math.max(0, (company.confidence ?? 0.5) - 0.06);
   for (const o of staffAt(s.stationId)) o.mood = (o.mood ?? 70) - 10;
   const h = household(s);
@@ -315,7 +316,8 @@ export function bearChild(s, st, sireOverride = null) {
   }
   const surname = childFamily(b ?? a, a, child.gender, child.raceId ?? raceId, nameRng(`sname:${seed}`));
   child.name = surname ? `${child.name.split(" ")[0]} ${surname}` : child.name.split(" ")[0];
-  cradle.put(child);
+  /* 0.3.54: into the GDB — not a sibling's name, not a parent's */
+  gdbFile(child, { kind: "born", place: s.stationId, group: [a, b, ...h.children.map((id) => cradle.get(id))].filter(Boolean) });
   const kid = { id: child.id, name: child.name, parents: child.parents, stationId: s.stationId, age: 0, gender: child.gender, pronouns: child.pronouns };
   stationLife.kids.push(kid);
   h.children.push(child.id);

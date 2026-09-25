@@ -191,7 +191,7 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
     ["lg-rockbody", "js/bodygen/body.js — a three.js shader program cache key"],
     ["lgaa-net-id", "js/net.js — sessionStorage, one tab, dies with the tab"],
   ]);
-  const known = new Set([...P.RUN_KEYS, ...P.DEVICE_KEYS, ...P.LEARNED_KEYS, "lgaa.cradle.v1", "lgaa.profile.v1"]);
+  const known = new Set([...P.RUN_KEYS, ...P.DEVICE_KEYS, ...P.LEARNED_KEYS, ...P.SKY_KEYS, "lgaa.profile.v1"]);
   const found = new Map();                // key (or prefix stem) → the file that owns it
   const stems = P.RUN_PREFIXES.map((p) => p.slice(0, -1));
   for (const f of files) {

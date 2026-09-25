@@ -20,6 +20,7 @@
 import { sim, logEvent } from "../sim.js";
 import { stations, stationById } from "../stations.js";
 import { cradle, generateNPC, ensureIdentity } from "./cradle.js";
+import { catalogue } from "../gdb.js";
 import { corps, corpById, corpOfStation, corpRelation, adjustStanding } from "../corps.js";
 import { crew, crewHooks } from "../crew.js";
 import { boarding } from "../interior/boarding.js";
@@ -114,7 +115,7 @@ export function boardAt(st) {
     if (!rec) {
       rec = generateNPC(`${sim.skySeed || "sol"}:mark:${st.id}:${restock}:${i}`, { sky: sim.skySeed });
       const held = cradle.get(rec.id);
-      rec = held ?? rec;
+      rec = held ?? catalogue(rec, { kind: "mark", place: st.id, sky: sim.skySeed ?? null, group: marks });   // 0.3.54: a wanted name is still one person's
     }
     if (marks.some((m) => m.id === rec.id)) continue;
     ensureIdentity(rec);

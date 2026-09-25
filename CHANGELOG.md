@@ -10,6 +10,73 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.54 — 2026-09-25
+
+One name, one person: the Galactic Database.
+
+Reported: everybody has similar names, or the same names. Measured on 0.3.53,
+the forge was not running out — 1,950 distinct given names in 2,000 draws per
+people — it was three other things:
+
+| | 0.3.53 | 0.3.54 |
+| --- | --- | --- |
+| hall candidates also offered at another port | **65 of 174 (37%)** | 0 |
+| hiring halls with two look-alike given names | 9% | 0% |
+| NPC hull crews with two look-alike given names | — | 0% (103 crews) |
+| people in a sky with no catalogue entry | NPC crews, flow pilots, boarders, marks | none |
+| two people on file sharing a full name | possible | never (census: 0) |
+
+1. **Hiring halls shared one pool.** Half of every hall came from the whole
+   sky's pool, and every candidate any hall had shown went into it — so the
+   first port's people were offered again at every port after it. A hall now
+   brings back only the people who live at THAT port (offered there before,
+   or paid off there — a hand you pay off lives where you left them and comes
+   back to that hall first). One drifter from elsewhere, now and then.
+2. **Nothing checked the room.** A people's names are meant to sound alike;
+   eight of them on one list shared a first or last three letters more often
+   than not. Filing into a group — a hall (with your own crew counted), a
+   hull's crew (with its captain), siblings and parents — re-forges a given
+   name that looks like a roommate's.
+3. **Most people were never filed.** NPC hull crews, flow-boat pilots,
+   boarders and bounty marks were forged on the spot and forgotten.
+
+**The GDB** (`js/gdb.js`, new) catalogues everyone the galaxy produces:
+halls, captains, hull crews, pilots, boarders, marks, children born aboard
+and ashore. A full name is never issued twice — a clash is re-forged from the
+person's own seed (only the given name; the family is theirs), so every
+device gets the same answer. Somebody already on file keeps their name when
+regenerated: a captain is the same person next session. Each person has a
+stable number (GDB-XXXXXX), a first-filed and last-seen record, and a status;
+deaths are filed and stick. The relay keeps the catalogue too (`/gdb/all`,
+`/gdb/put`, `gdb.json` beside server.py, first filing wins the name), local
+first like CRADLE.
+
+**CON › CREW › GDB** — the census (catalogued, living, deceased, peoples, and
+"names shared", which should read 0), search by name / number / people /
+trade / title, filters (this sky, galaxy, captains, crews, halls, born,
+dead), a FILE card per person, and **the chronicle**: every line the ledger's
+histories hold, newest first.
+
+**The forge, tidied** (`js/names.js`): one doubled vowel and one apostrophe
+per given name at most ("Z'hesskiisaa" was three flourishes), never the same
+letter three times running, ten letters at most (was twelve), a family name
+that echoes the given name's opening is re-rolled ("Thregruka Thregargh"),
+and the Haask and Veyd — five endings a gender — got more.
+
+Files: `js/gdb.js` (new), `js/console/panels/crew-gdb.js` (new),
+`js/console/panels/crew.js`, `js/names.js`, `js/data/lexicons.js`,
+`js/crew.js`, `js/sim.js`, `js/hud.js`, `js/family.js`, `js/stationlife.js`,
+`js/npc/traffic.js`, `js/npc/npccrew.js`, `js/npc/bounty.js`,
+`js/npc/speech.js`, `js/interior/boarding.js`, `js/profile.js`, `server.py`, `.gitignore`,
+`js/version.js`, `README.md`; tests `test/gdb.test.mjs` (new, 30),
+`test/smoke-gdb.mjs` (new, 10), `test/server.test.mjs` (+6), `test/profile.test.mjs`.
+
+**Server:** the relay needs a restart to pick up the `/gdb` endpoints. Until
+it has them, the game keeps the catalogue on the device and says so once in
+the browser console.
+
+---
+
 ## 0.3.53 — 2026-09-25
 
 Doing something about it: a menu for settled hands, and buttons on the genome.

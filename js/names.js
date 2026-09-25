@@ -203,6 +203,22 @@ function affix(stem, end) {
   return (stem + end).replace(/[aeiouy]{3,}/gi, (m) => m.slice(0, 2));
 }
 
+/* 0.3.54 — a given name gets ONE flourish. The tongues that double their
+ * vowels or break a word with an apostrophe were doing it two and three times
+ * in a name ("Z'hesskiisaa"), and a crew list of those reads as one name
+ * printed five times. The first doubled vowel and the first mark stay; the
+ * rest are sung short. */
+function oneFlourish(name) {
+  let seen = false;
+  let out = name.replace(/([aeiouy])\1/gi, (m) => { if (seen) return m[0]; seen = true; return m; });
+  let marks = 0;
+  out = out.replace(/'/g, () => (marks++ ? "" : "'"));
+  return out.replace(/([a-z])\1\1+/gi, "$1$1");   // "Hsazhas" + "ssa" is not "sss"
+}
+
+/* Past this a given name is a mouthful on a crew list (0.3.54: 12 → 10). */
+const GIVEN_MAX = 10;
+
 export function givenName(lex, gender, rnd) {
   /* Curated names stay in the mix for the tongues that have them — a sky
    * with no familiar names in it reads as costume rather than place.
@@ -223,15 +239,15 @@ export function givenName(lex, gender, rnd) {
     if (pool?.length) return pick(rnd, pool);
   }
   let stem = forgeWord(lex, rnd, weighted(rnd, lex.givenSyl ?? { 2: 7, 1: 2, 3: 2 }));
-  let name = affix(stem, endingFor(lex, gender, rnd));
-  /* A given name is something somebody shouts across a deck. Eleven letters
+  let name = oneFlourish(affix(stem, endingFor(lex, gender, rnd)));
+  /* A given name is something somebody shouts across a deck. Ten letters
    * is already generous; past that, take the short form of the tongue. */
   /* The join can make one the syllables never held: "Cli" + "tor". */
-  for (let i = 0; i < 6 && (name.length > 12 || offensive(name)); i++) {
-    stem = forgeWord(lex, rnd, 2);
-    name = affix(stem, endingFor(lex, gender, rnd));
+  for (let i = 0; i < 6 && (name.replace(/'/g, "").length > GIVEN_MAX || offensive(name)); i++) {
+    stem = forgeWord(lex, rnd, i < 3 ? 2 : 1);
+    name = oneFlourish(affix(stem, endingFor(lex, gender, rnd)));
   }
-  return offensive(name) ? cap(stem) : name;
+  return offensive(name) ? oneFlourish(cap(stem)) : name;
 }
 
 /**
@@ -320,9 +336,14 @@ export function childFamily(sire, carrier, gender, raceId, rnd = Math.random) {
 export function personName(race, gender, rnd = Math.random) {
   const lex = LEXICONS[race] ?? DEFAULT_LEX;
   const first = givenName(lex, gender, rnd);
-  const last = familyName(lex, rnd, gender);
+  let last = familyName(lex, rnd, gender);
+  /* 0.3.54: "Thregruka Thregargh-Vrakourk" — a family name that opens on the
+   * same sound as the given name reads as a stammer. Three more tries. */
+  for (let i = 0; i < 3 && last && echoes(first, last); i++) last = familyName(lex, rnd, gender);
   return { first, last, full: last ? `${first} ${last}` : first };
 }
+const bare = (w) => String(w ?? "").toLowerCase().replace(/^(of the |of )/, "").replace(/[^a-z]/g, "");
+function echoes(first, last) { const a = bare(first), b = bare(last); return a.length >= 3 && b.length >= 3 && a.slice(0, 3) === b.slice(0, 3); }
 
 /* ---- worlds -------------------------------------------------------------
  * Every system picks one tongue and names its worlds from it, so a sky
