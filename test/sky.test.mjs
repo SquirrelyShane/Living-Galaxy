@@ -17,6 +17,7 @@ import { flow, populateFlow, stepFlow, flowPose, portPulse } from "../js/npc/flo
 import { subLaneFor, subLaneOffset, SUBLANES, SUBLANE_GAP, ZONE_HALF_W, laneFlow } from "../js/npc/lanes.js";
 import { insideBay } from "../js/npc/bay.js";
 import { templateFor, warm, instanceOf, releaseInstance, poolStats, drainPool } from "../js/hullpool.js";
+import { bulkOf, holdForCargoRating } from "../js/materials.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -29,7 +30,8 @@ ok(rookie.stats.turrets === 0 && rookie.grammar.weapons === "none", "trainer is 
 ok(rookie.dims[0] < shipById("general_b").dims[0], "trainer is smaller than the Wren");
 for (const d of SHIP_DB) {
   const t = hullTuneFor(d);
-  ok(t.thrust > 0.2 && t.turn > 0.15 && t.reactor >= 0.85 && t.cargo >= 0.5 && t.cargo <= 4, `${d.id}: sane hull tune`);
+  /* 0.3.52: the hold has no ceiling — it follows the cargo rating on a steady curve */
+  ok(t.thrust > 0.2 && t.turn > 0.15 && t.reactor >= 0.85 && t.cargo > 0 && Math.abs(t.cargo * 400 - holdForCargoRating(d.stats.cargo)) < 1, `${d.id}: sane hull tune`);
 }
 ok(hullTuneFor(rookie).turn > hullTuneFor(shipById("mining_g")).turn * 3, "a skiff turns far faster than a colossus");
 ok(hullTuneFor(shipById("mining_g")).reactor > hullTuneFor(rookie).reactor, "a colossus has the bigger reactor");

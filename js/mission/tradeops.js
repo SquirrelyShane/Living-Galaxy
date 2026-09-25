@@ -13,7 +13,7 @@
  */
 
 import { sim, sellAllOre, tradeBuy, tradeSell, logEvent } from "../sim.js";
-import { holdRoom } from "../ship.js";
+import { holdRoom, roomFor } from "../ship.js";
 import { stationById } from "../stations.js";
 import { bestRoute, sellable, routeLine } from "../traderoutes.js";
 
@@ -88,7 +88,7 @@ export function makeTradeOps({ mission, note, ap }) {
         if (!t) return "fail:no route on the books";
         if (t.fromId !== st.id) return `fail:the route buys at ${t.from}, not ${st.name}`;
         good = t.good;
-        qty = Math.min(t.qty, holdRoom(ship));
+        qty = Math.min(t.qty, Math.floor(roomFor(ship, good)));
       } else if (!good) {
         /* best margin FROM HERE: the best route whose source is this port (0.3.19 — it used to ask one
          * "best buyer" port chosen for the hold as it was before buying, which was nearly always this one) */
@@ -97,6 +97,7 @@ export function makeTradeOps({ mission, note, ap }) {
         good = r.good;
         qty = Math.min(qty, r.qty);
       }
+      if (good && good !== "route") qty = Math.min(qty, Math.floor(roomFor(ship, good)));   // 0.3.52: what fits of this good
       if (qty <= 0) return "fail:hold full";
       const c0 = ship.credits, h0 = ship.hold[good] ?? 0;
       const e = tradeBuy(good, qty);

@@ -30,6 +30,7 @@ import { settleFamily, trustOf } from "./family.js";
 import { mountTalk } from "./crew/talkview.js";
 import { TOPICS, callTopic, lineLog, openAsk, regardOf, cutOf, topicById } from "./staffline.js";
 import { incomeOf, roleAt } from "./stationlife.js";
+import { lifeLine, needsLine, dayLogOf } from "./stafflife.js";
 
 const DOC = globalThis.document ?? null;
 const el = (tag, cls, text) => { const e = DOC.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -125,6 +126,10 @@ function hallSection(st, repaint) {
 function lineCard(p, repaint) {
   const box = el("div", "sd-talk sd-line");
   box.append(el("p", "sd-note", `${roleAt(p.role).label} · ${p.cycles ?? 0} cycles · mood ${Math.round(p.mood ?? 74)} · regard ${Math.round(regardOf(p))} · ${Math.round(incomeOf(p) * cutOf(p))} cr/cycle`));
+  /* 0.3.52: where they are in their day, and how it has gone */
+  box.append(el("p", "sd-note sd-now", `NOW — ${lifeLine(p)} · ${needsLine(p)}`));
+  const day = dayLogOf(p, 4);
+  if (day.length) box.append(el("p", "sd-note sd-day", day.map((e) => `${e.hhmm} ${e.text}`).join(" · ")));
   for (const e of lineLog(p, 5).slice().reverse()) box.append(el("p", `sd-note ${e.who === "you" ? "sd-you" : "sd-them"}`, `${e.who === "you" ? "You" : p.name.split(" ")[0]}: ${e.text}`));
   if (hallView.said?.id === p.id && hallView.said.why) box.append(el("p", "sd-note sd-warn", hallView.said.why));
   const ask = openAsk(p);
@@ -162,7 +167,7 @@ function floorSection(st, repaint) {
   sec.append(el("h4", null, `${company.name.toUpperCase()} — ON THIS FLOOR · ${here.length}`));
   if (!here.length) sec.append(el("p", "sd-empty", "Nobody of yours lives here. Settle a hand at this port and they earn the company a share every cycle."));
   for (const p of here) {
-    const v = row(sec, `${sigil(p.id)} ${p.name}`, `${p.title}${p.pronouns ? ` · ${p.pronouns.subj}/${p.pronouns.obj}` : ""} · ${Math.round(incomeOf(p) * cutOf(p))} cr/cycle to the company${p.family?.length ? ` · household of ${p.family.length + 1}` : ""}`);
+    const v = row(sec, `${sigil(p.id)} ${p.name}`, `${lifeLine(p)} · ${p.title}${p.pronouns ? ` · ${p.pronouns.subj}/${p.pronouns.obj}` : ""} · ${Math.round(incomeOf(p) * cutOf(p))} cr/cycle to the company${p.family?.length ? ` · household of ${p.family.length + 1}` : ""}`);
     v.parentElement.dataset.staff = p.id;
     const open = hallView.line === p.id;
     v.append(btn(open ? "CLOSE" : "LINE", () => { hallView.line = open ? null : p.id; repaint(); }, open || (openAsk(p) && !openAsk(p).lapsed) ? "sd-accent" : ""));

@@ -28,6 +28,7 @@
  */
 
 import { sim, logEvent, addWaypointAt, waypointPosition } from "../sim.js";
+import { cargoTotal } from "../ship.js";
 import { stations, stationById } from "../stations.js";
 import { nearbyRocks, wearRock, depleted, CELL } from "../field.js";
 import { BODIES, bodyPosition, currentSystem } from "../bodies.js";
@@ -60,7 +61,7 @@ export const droneOps = { units: [], queue: [], seq: 1, sky: null, lastT: null, 
 function holdFrac() {
   const ship = sim.ship;
   const cap = Math.max(1, ship?.cargoCap ?? 1);
-  return Object.values(ship?.hold ?? {}).reduce((a, q) => a + q, 0) / cap;
+  return ship ? cargoTotal(ship) / cap : 0;   // 0.3.52: by bulk, like the hold
 }
 
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);

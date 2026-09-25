@@ -35,10 +35,15 @@ export const FLEET = {
   max: 6,
 };
 
-/** A company hull's real hold: the same tune the pilot's own hull gets (baseCargo 400 × hull scale). */
+/** What a company hull brings home a run. 0.3.52 made the PILOT's hold a
+ * volume with no ceiling (a D-frame now holds ~22,000 hu); a company hull's
+ * earnings are balanced on its run timetable, not its bay, so it keeps the
+ * old curve — 400 × sqrt(rating / 30), clamped 0.5–4 — or one D-frame on the
+ * books would out-earn a career. */
 export function fleetHold(shipId) {
-  const def = shipById(shipId);
-  return Math.round(400 * (hullTuneFor(def)?.cargo ?? 1));
+  const c = shipById(shipId)?.stats?.cargo;
+  if (!c) return 400;
+  return Math.round(400 * Math.max(0.5, Math.min(4, Math.sqrt(c / 30))));
 }
 
 export const fleet = { hulls: [], payPool: 0, seq: 1 };
@@ -145,7 +150,9 @@ trafficHooks.onCargo = (n, st, what, id, q) => {
   /* the timetable's cargo number is a token; the hull brings a real hold home */
   const units = Math.max(q, fleetHold(h.shipId));
   const value = h.order === "haul" ? units * bidPrice(st, id) * FLEET.haulRate : units * bidPrice(st, id) * (1 - FLEET.crewShare);
-  const got = Math.round(value);
+  /* 0.3.52: a port pays a company hull out of its own treasury, as it pays you */
+  const got = Math.max(0, Math.min(Math.round(value), Math.round(st.credits ?? Infinity)));
+  if (Number.isFinite(st.credits)) st.credits -= got;
   company.treasury += got;
   h.earned += got;
   h.runs++;

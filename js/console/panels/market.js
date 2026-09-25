@@ -307,7 +307,7 @@ function mountHold(root, push) {
     modeBtn.disabled = !fit.ok && icework.mode === "off";
     runRow.value.textContent = icework.ran > 0 ? `${Math.round(icework.ran)} units · ${icework.product || "—"}` : icework.mode === "off" ? "—" : icework.product || "—";
     const t = cargoTotal(ship);
-    total.value.textContent = `${Math.round(t)} / ${ship.cargoCap}`;
+    total.value.textContent = `${Math.round(t).toLocaleString()} / ${ship.cargoCap.toLocaleString()} hu`;
     setBar(total.bar, t / ship.cargoCap, t / ship.cargoCap > 0.9 ? "warn" : null);
     creditRow.value.textContent = `${Math.round(ship.credits).toLocaleString()} cr`;
     drawManifest();

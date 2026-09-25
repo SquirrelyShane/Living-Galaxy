@@ -153,7 +153,7 @@ refresh the browser — there is no build step.
 | `js/bodies.js` | Handmade Sol catalog, scaling and sphere-of-influence pass |
 | `js/generate.js` | How private systems are grown |
 | `js/archetypes.js` | The body database — palettes, surfaces, temperatures, ores |
-| `js/materials.js` | Ores, minerals, tier-0 components, sector price tables |
+| `js/materials.js` | Ores, minerals, tier-0 components, sector price tables; bulk per good and the hold curve (0.3.52) |
 | `js/field.js` | Asteroid field density, rock size distribution, band names, taxonomic class per rock |
 | `js/aria-pilot.js` | ARIA at the conn: plans your jobs (repair, sell, mine, survey, and — 0.3.06 — refit and build) off your own habits and hands them to the mission runner |
 | `js/fabricate.js` | The fabrication solver and job queue: resolves a part down the whole recipe tree to raw ore, runs it on sim time at a port, delivers to the locker (leaf — no game imports) |
@@ -187,6 +187,8 @@ refresh the browser — there is no build step.
 | `js/stationdeck.js` | The docked deck — only what a port has: market, shipyard, desk, hall, works, drone and robot yards, refit, GNN, blueprint (the company books, fleet and logs are the console's, 0.3.45) |
 | `js/deckhall.js` | The deck's HALL (0.3.49): your crew with TALK/SETTLE/PAY OFF inline, the hiring hall, the company's people on this floor with the LINE inline, and the registrar with a typed name — all in station style, never the console |
 | `js/stationlife.js` | Settled staff: work, roles, life events, station births |
+| `js/stationclock.js` | Port standard time (0.3.52): hours, days, weeks, shifts, day parts — the one clock everything asks |
+| `js/stafflife.js` | A settled hand's working day (0.3.52): job, shift, hours, housing, needs, hour-by-hour plan, pay by hours worked, labour on the port's lines, the day log |
 | `js/staffline.js` | The company line: call a settled hand from anywhere, their calls and asks, regard, passage between ports |
 | `js/economy.js` | Production lines, stock, the price curve |
 | `js/blueprint.js` | Deterministic station deck plans, drawn blueprint-style |
@@ -858,6 +860,16 @@ was made of. **One mineral list** — the asteroid generator's own catalogue of
 41 species was thrown away rather than carried alongside this one, because a
 rock that assays "chalcopyrite" and then puts "copper ore" in the hold is two
 games.
+
+**The hold is a volume** (0.3.52). A hold is measured in **hold units (hu)**
+and every good takes up room by its mass (`bulkOf`): hydrogen and helium-3
+0.4 hu a unit, ices about 0.5, iron ore 0.93, platinum ore 1.73, uraninite
+1.99 — ore never more than 2, finished goods up to 3.5. A hull's hold grows with
+its cargo rating and has no ceiling (`holdForCargoRating`): the Fledgling about
+1,200 hu (~670 platinum ore), the median hull ~21,700, the biggest ~461,000
+(~266,000 platinum, ~495,000 iron). Cargo never changes how a hull flies.
+`roomFor(ship, id)` is how many of one good still fit, and the desk sizes work
+in units of the good it wants.
 
 ### Rocks that mean something
 
@@ -2786,6 +2798,24 @@ member under mood 48 asks for something — a bonus, a raise, a move — with th
 answers on the row. Three cycles unanswered costs 5 mood and 6 regard. The
 towns (households, children, the town log) and the inbox ride in the
 `lgaa-company` save — before 0.3.46 a reload lost every marriage and child.
+
+**Port standard time and a working day** (`js/stationclock.js`,
+`js/stafflife.js`, 0.3.52). Every port keeps the same clock: an hour is 30 s of
+sky time, a day 24 hours (12 minutes at ×1), a pay cycle three hours, a week
+seven days, day 1 opening at 06:00. It is on the title bar and in the station
+deck's header. Each settled hand has a **job** at their port (by sector — the
+smelter line, the cross-dock, the clinic, the grow ring), a **shift** (day
+06–14, swing 14–22, night 22–06), **hours** (standard 8, overtime 10, part 5)
+and **housing** (bunk free, cabin 12 cr/cycle, family quarters 30). Their day:
+the shift, a meal, their own time (at home with a partner and children if they
+have them), supper, eight hours asleep. **Needs** — tiredness, hunger, company
+— move with what they are doing and lean on mood every hour. **Pay** is a 30%
+retainer each cycle plus the rest for the hours worked, at a productivity read
+off mood and tiredness; a standard day averages the old share. Each hand on
+shift adds 3% to their port's production lines (max 30%). The rolls' events
+lean on the hour — accidents at work, births at home — and a strike puts a
+shift on the picket line. HALL › ON THIS FLOOR and CORP › TOWN show what each
+person is doing now and their day log; calling someone at 02:00 wakes them.
 
 ### Robot crew and refits
 

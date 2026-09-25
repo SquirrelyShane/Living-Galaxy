@@ -1,4 +1,5 @@
 import { defaultMods } from "./careers/effects.js";
+import { bulkOf } from "./materials.js";
 
 /* LIVING GALAXY — ship state, Newtonian flight model, and the power economy.
  *
@@ -756,19 +757,33 @@ export function applyDamage(ship, amount, from, time, kind = "kinetic") {
   return left;
 }
 
+/** Hold units in use (0.3.52: each good by its bulk — materials.js bulkOf). */
 export function cargoTotal(ship) {
+  let n = 0;
+  for (const k in ship.hold) n += ship.hold[k] * bulkOf(k);
+  return n;
+}
+
+/** How many ITEMS are aboard, whatever they take up. */
+export function cargoCount(ship) {
   let n = 0;
   for (const k in ship.hold) n += ship.hold[k];
   return n;
 }
 
+/** Hold units still free. */
 export function holdRoom(ship) {
   return Math.max(0, ship.cargoCap - cargoTotal(ship));
 }
 
+/** How many units of `id` still fit. Use this, not holdRoom, to size a buy or a job. */
+export function roomFor(ship, id) {
+  return Math.max(0, holdRoom(ship) / bulkOf(id));
+}
+
 /** Adds what will fit and returns how much actually went in. */
 export function addCargo(ship, id, qty) {
-  const take = Math.min(qty, holdRoom(ship));
+  const take = Math.min(qty, roomFor(ship, id));
   if (take <= 0) return 0;
   ship.hold[id] = (ship.hold[id] ?? 0) + take;
   return take;

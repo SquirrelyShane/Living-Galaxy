@@ -1,4 +1,5 @@
 import { PUBLIC_ROOM, bodyById } from "./bodies.js";
+import { clockAt } from "./stationclock.js";
 import { BUILD_LINE } from "./version.js";
 import { describeSystem, generateSystem } from "./generate.js";
 import { touch } from "./input.js";
@@ -1093,6 +1094,23 @@ export function mountHud() {
   const paintConsole = mountConsole();
   const paintDeck = mountStationDeck();
   const paintSec = mountSecBadge();
+  /* 0.3.52 — port standard time on the title bar: the day, the hour, and a
+   * glyph for the part of it. The whole HUD carries the part as data-part so
+   * the night can dim it. Repaints only when the minute turns. */
+  let clockKey = "";
+  const paintClock = () => {
+    const c = clockAt(sim.time);
+    const k = `${c.day}|${c.hhmm}`;
+    if (k === clockKey) return;
+    clockKey = k;
+    const el = $("hud-clock");
+    const glyph = c.part === "night" ? "☾" : c.part === "day" ? "☀" : "◐";
+    el.textContent = `${glyph} D${c.day} ${c.hhmm}`;
+    el.title = `Port standard time · ${c.weekday}, day ${c.day} (week ${c.week}) · ${c.hhmm} · ${c.part} · ${c.shift} shift on the docks`;
+    el.dataset.part = c.part;
+    const hud = document.getElementById("hud");
+    if (hud && hud.dataset.part !== c.part) hud.dataset.part = c.part;
+  };
   const paintDockBoot = mountDockBoot();
   const paintChat = mountChatbox() ?? (() => {});
 
@@ -1135,6 +1153,7 @@ export function mountHud() {
     const sel = s.selected ? bodyById(s.selected) : undefined;
     const near = bodyById(s.nearest);
     $("hud-sky").textContent = s.isPublic ? s.systemName : `${s.systemName} · ${s.room}`;
+    paintClock();
 
     /* instruments */
     $("i-vel").textContent = fmtNum(s.speed, s.speed < 100 ? 1 : 0);

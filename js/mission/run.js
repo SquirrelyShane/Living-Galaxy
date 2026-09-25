@@ -12,7 +12,7 @@
  * paused, so a reload never flies by itself.
  */
 
-import { sim, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim.js";
+import { sim, losBlocker, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim.js";
 import * as shipMod from "../ship.js";
 import { holdRoom, BATTERY } from "../ship.js";
 import { BODIES, bodyPosition, dist3 } from "../bodies.js";
@@ -361,6 +361,13 @@ export const EXEC = {
       if (dist <= Math.max(node.arriveR, 2000) && sim.warp.state === "idle") { apHold(); mission.run.why = `already at ${node.name} — you have the stick`; return "done"; }
       return legTo(s, node, { farLeg: node.arriveR * 1.5, graze: "go" });
     }
+    /* 0.3.52: a dogleg round a world is done the moment the next corridor is
+     * clear (or you are within a well's width of the mark). It used to have to
+     * be parked on exactly, and a mark hung off Jupiter's shoulder is a place
+     * the well will not let a hull hold still — ARIA sat 17 km short of one,
+     * braking, for ten minutes. */
+    const via = s.args?.via;
+    if (via && sim.warp.state !== "run" && (dist < 40000 || !losBlocker(sim.ship.pos, via, null))) { mission.run.why = `clear of the corridor at ${node.name}`; return "done"; }
     const r = legTo(s, node);
     if (r !== "near") return r;
     if (apPark(node) !== "parked") return "flying";

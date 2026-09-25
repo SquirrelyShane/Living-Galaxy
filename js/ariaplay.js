@@ -24,7 +24,7 @@
 
 import { sim, sellPriceAt, setTurretMode } from "./sim.js";
 import { stations, stationById } from "./stations.js";
-import { holdRoom, batteryCap } from "./ship.js";
+import { holdRoom, batteryCap, roomFor, cargoTotal } from "./ship.js";
 import { pilot } from "./pilot.js";
 import { goodName } from "./materials.js";
 import { boardFor, acceptContract, acceptBlocker, abandonContract, deliverContracts, deliverableAt, contracts, CATEGORIES, CATEGORY_ORDER, categoryOf, hullFit, jobStatus, targetPos, timeLeft, BOARD } from "./contracts.js";
@@ -95,7 +95,7 @@ export const netWorth = () => Math.round((sim.ship.credits ?? 0) + (hasCompany()
 /** How much of the hold is spoken for, 0…1. */
 export const holdUsed = () => {
   const cap = Math.max(1, sim.ship.cargoCap ?? 1);
-  return Object.values(sim.ship.hold ?? {}).reduce((a, q) => a + q, 0) / cap;
+  return cargoTotal(sim.ship) / cap;   // 0.3.52: by bulk
 };
 const note = (text) => { play.log.push({ t: Math.round(now()), text }); if (play.log.length > 400) play.log.shift(); };
 
@@ -214,7 +214,7 @@ export function canFly(o) {
     if (!o.markId && !(o.nestId && nests.some((n) => n.id === o.nestId))) return false;   // nothing to fly to
   }
   if (o.mech === "haul" && sim.ship.dockedAt !== o.stationId) return false;
-  if ((o.mech === "deliver" || o.mech === "haul") && o.qty > holdRoom(sim.ship) + (sim.ship.hold[o.good] ?? 0)) return false;
+  if ((o.mech === "deliver" || o.mech === "haul") && o.qty > roomFor(sim.ship, o.good) + (sim.ship.hold[o.good] ?? 0)) return false;
   /* a buy-and-bring job needs somewhere to buy it, and the purse to do it */
   if (o.mech === "deliver" && !o.spot && !o.salvage && o.good) {
     const src = o.sourceId && stockOf(stationById(o.sourceId), o.good) >= o.qty ? stationById(o.sourceId) : sourceFor(o.good, o.qty, o.stationId);
@@ -323,7 +323,12 @@ function legsTo(target, from, label = null) {
     const L = r.legs[i];
     const last = i === r.legs.length - 1;
     if (last && L.kind === "station") out.push(makeStep("DOCK", { kind: "station", id: L.id, name: L.name }));
-    else out.push(makeStep("GOTO", { kind: "point", x: L.x, y: L.y, z: L.z, name: L.name ?? label ?? "the mark" }));
+    else {
+      /* 0.3.52: a dogleg is a way round, not a place — it carries the next
+       * leg's end so the executor can call it done once that corridor is clear */
+      const nx = !last ? r.legs[i + 1] : null;
+      out.push(makeStep("GOTO", { kind: "point", x: L.x, y: L.y, z: L.z, name: L.name ?? label ?? "the mark" }, nx ? { args: { via: { x: nx.x, y: nx.y, z: nx.z } } } : {}));
+    }
   }
   return { steps: out, end: r.legs[r.legs.length - 1], why: r.why };
 }

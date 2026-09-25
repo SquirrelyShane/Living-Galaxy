@@ -18,7 +18,7 @@
 import { sim, sellPriceAt, buyPriceAt, losBlocker } from "./sim.js";
 import { stations } from "./stations.js";
 import { holdRoom } from "./ship.js";
-import { goodName } from "./materials.js";
+import { goodName, bulkOf } from "./materials.js";
 import { contracts } from "./contracts.js";
 
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -67,7 +67,7 @@ export function tradeRoutes({ pos = sim.ship?.pos, room = holdRoom(sim.ship), cr
        * price first, then re-price that size, then trim it to what the buyer
        * can actually pay for at the price that size costs. */
       const unit = buyPriceAt(A, line);
-      const can = Math.min(Math.floor(line.qty), Math.floor(room), Math.floor(credits / Math.max(1, unit)));
+      const can = Math.min(Math.floor(line.qty), Math.floor(room / bulkOf(line.id)), Math.floor(credits / Math.max(1, unit)));   // room is hold units (0.3.52)
       if (can < ROUTE.minUnits) continue;
       const afford = Math.min(can, Math.floor(credits / Math.max(1, buyPriceAt(A, line, can))));
       if (afford < ROUTE.minUnits) continue;

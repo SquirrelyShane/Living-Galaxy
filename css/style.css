@@ -2384,6 +2384,9 @@ html[data-orient="landscape"] .chart-sheet { overflow: auto; }
   color: #9dffb0;
   text-shadow: 0 0 14px rgba(120, 255, 160, 0.35);
 }
+/* 0.3.52 — the port keeps its own hours: the deck dims a little on the night shift */
+.sdeck[data-part="night"] .sd-head { filter: brightness(0.82) saturate(0.85); }
+.sdeck[data-part="dawn"] .sd-head, .sdeck[data-part="dusk"] .sd-head { filter: sepia(0.12); }
 .sd-subtl { font-family: var(--font-mono); font-size: 9px; color: #4d7a5c; letter-spacing: 0.14em; text-transform: uppercase; }
 .sd-headr { display: flex; align-items: center; gap: 6px; }
 .sd-chip {
@@ -3214,5 +3217,8 @@ html.boot-failed body > *:not(#boot-fail) { display: none !important; }
 .sd-talk .in-talk-opts { display: flex; flex-wrap: wrap; gap: 6px; }
 .sd-note.sd-you { color: #7da88c; }
 .sd-note.sd-them { color: #d9ffe6; }
+/* 0.3.52 — a settled hand's day */
+.sd-note.sd-now { color: #d9ffe6; border-left: 2px solid #5fe39a; padding-left: 8px; }
+.sd-note.sd-day { font-size: 11px; color: #5f8a6e; }
 .sd-val { flex-wrap: wrap; }
 @media (pointer: coarse) { .sd-btn { min-height: 36px; } .sd-input { min-height: 40px; font-size: 16px; } }

@@ -13,6 +13,8 @@ import { sim } from "../../sim.js";
 import { company, hasCompany } from "../../company.js";
 import { townReport, townLog, townLine, roleAt } from "../../stationlife.js";
 import { cradle, traitLine } from "../../npc/cradle.js";
+import { lifeLine, needsLine, dayLogOf } from "../../stafflife.js";
+import { clockLine } from "../../stationclock.js";
 import { sigil } from "../../ui/glyphs.js";
 import {
   TOPICS, callTopic, cutOf, lineLog, lineState, lineSummary, markRead, openAsk,
@@ -49,6 +51,16 @@ function lineCard(s, render) {
   c.append(head);
   const body = el("div", "body");
   c.append(body);
+
+  /* 0.3.52: their day — what they are doing now, how they are holding up, and the log */
+  body.append(el("p", "warm", `Now: ${lifeLine(s)}`));
+  body.append(el("small", null, `${needsLine(s)} · ${s.job ?? "—"} · ${s.shift ?? "day"} shift · ${s.hours ?? "standard"} hours · ${s.housing ?? "bunk"}`));
+  const day = dayLogOf(s, 5);
+  if (day.length) {
+    const dl = el("div", "in-talk-log day-log");
+    for (const e of day) dl.append(el("p", null, `D${e.day} ${e.hhmm} — ${e.text}`));
+    body.append(dl);
+  }
 
   /* the transcript, oldest at the top so it reads like a call */
   const log = lineLog(s, 6).slice().reverse();
@@ -112,7 +124,7 @@ export function mountTown(root, ctx = {}) {
 
     const head = section("COMPANY TOWNS");
     if (!hasCompany()) { note(head, "Register a charter and settle a hand at a port — that is how a company gets a town."); host.append(head); return; }
-    note(head, townLine());
+    note(head, `${clockLine(sim.time ?? 0)} — ${townLine()}`);
     const sum = lineSummary();
     if (sum) note(head, `The line: ${sum}. Tap LINE on anybody to call them — from anywhere in this sky.`);
     host.append(head);
@@ -161,7 +173,7 @@ export function mountTown(root, ctx = {}) {
     for (const [port, list] of byPort) {
       const s = section(`${port.toUpperCase()} — ${list.length} on the rolls · ${list.reduce((a, r) => a + (r.s.transit ? 0 : Math.round(r.income * cutOf(r.s))), 0)} cr/cycle`);
       for (const r of list) {
-        const bits = [r.role.label, `${r.cycles} cycles served`];
+        const bits = [r.s.transit ? null : lifeLine(r.s), r.role.label, `${r.cycles} cycles served`].filter(Boolean);
         if (r.s.transit) bits.push(whereOf(r.s).text);
         if (r.partner) bits.push(`with ${r.partner}`);
         if (r.children.length) bits.push(`${r.children.length} child${r.children.length === 1 ? "" : "ren"}: ${r.children.join(", ")}`);

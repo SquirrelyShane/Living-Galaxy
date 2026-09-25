@@ -314,6 +314,13 @@
 #hud .hud-top .hud-brand > span { font-size: 10px; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 #hud .hud-top .sec-badge { margin-left: auto; flex: none; min-height: 0; padding: 2px 8px 2px 6px; }
 @media (max-width: 380px) { #hud .hud-top .hud-brand strong em { display: none; } }
+/* 0.3.52 — port standard time rides the title bar; the sky name gives way first */
+#hud .hud-top .hud-brand > .hud-clock { flex: none; overflow: visible; font-size: 10px; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; color: var(--glass-ink2); }
+#hud .hud-top .hud-brand > .hud-clock[data-part="day"] { color: #ffd98a; }
+#hud .hud-top .hud-brand > .hud-clock[data-part="dawn"], #hud .hud-top .hud-brand > .hud-clock[data-part="dusk"] { color: var(--glass-warm); }
+#hud .hud-top .hud-brand > .hud-clock[data-part="night"] { color: #9fb4ff; }
+#hud[data-part="night"] .hud-top { background: linear-gradient(180deg, rgba(2, 4, 12, 0.94), rgba(2, 4, 12, 0.7)); }
+@media (max-width: 380px) { #hud .hud-top .hud-brand > .hud-clock { letter-spacing: 0; } }
 #hud .instruments { top: var(--pad-t); }
 /* the message card and the toast stop short of the systems strip, which is wider than the dash column */
 html[data-orient="portrait"] #hud .hud-notice, html[data-orient="portrait"] #hud .toast { right: calc(max(var(--g-col), 118px) + var(--pad-r) + 8px); }

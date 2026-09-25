@@ -14,7 +14,7 @@ import { stations } from "../js/stations.js";
 import { corps } from "../js/corps.js";
 import { contracts, resetContracts } from "../js/contracts.js";
 import { deliver } from "../js/economy.js";
-import { good } from "../js/materials.js";
+import { good, bulkOf } from "../js/materials.js";
 import { clearDockwork } from "../js/dockwork.js";
 import { HOLD, holdSlots, holdLine, consignedNow, dropFromHold, sellFromHold, renderHold } from "../js/holdview.js";
 
@@ -53,7 +53,9 @@ const clear = () => { for (const k of Object.keys(ship.hold)) delete ship.hold[k
   ok(Math.abs(iron.mass - 184 * (good("iron_ore")?.mass ?? 1)) < 0.5, `tonnage is quantity × mass, not quantity (${iron.mass} t for 184)`);
   ok(h.slots.every((s, i) => i === 0 || s.worth <= h.slots[i - 1].worth), "the most valuable slot is first — the thing you would sell");
   ok(h.slots.every((s) => s.ore === true), "all four read as ore, so the bag can colour them as rock");
-  ok(Math.round(h.used) === 572 || Math.abs(h.used - 572.4) < 1, `the total matches the gauge (${h.used})`);
+  /* 0.3.52: the gauge is hold units — each good at its bulk */
+  const hu = h.slots.reduce((a, s) => a + s.qty * bulkOf(s.id), 0);
+  ok(Math.abs(h.used - hu) < 1, `the total matches the gauge (${h.used} hu)`);
   ok(/4 kinds/.test(holdLine(h)) && /t/.test(holdLine(h)), `and it says itself in one line: ${holdLine(h)}`);
 }
 

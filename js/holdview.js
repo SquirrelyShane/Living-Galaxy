@@ -20,7 +20,7 @@
 
 import { sim, sellPriceAt, jettison, tradeSell, logEvent } from "./sim.js";
 import { stationById } from "./stations.js";
-import { good, goodName, baseValue } from "./materials.js";
+import { good, goodName, baseValue, bulkOf } from "./materials.js";
 import { holdRoom, cargoTotal } from "./ship.js";
 import { contracts } from "./contracts.js";
 import { classForOre } from "./sites.js";
@@ -61,6 +61,7 @@ export function holdSlots(ship = sim.ship) {
     worth += unit * (qty - cons);
     slots.push({
       id, name: goodName(id), qty, mass: Math.round(m * 10) / 10,
+      bulk: bulkOf(id), hu: Math.round(qty * bulkOf(id) * 10) / 10,   // 0.3.52: what it takes up
       unit: Math.round(unit), worth: Math.round(unit * qty),
       consigned: Math.round(cons * 100) / 100, mine: Math.round((qty - cons) * 100) / 100,
       cls: g?.tier === "ore" ? classForOre(id) : null,
@@ -83,7 +84,7 @@ export function holdSlots(ship = sim.ship) {
 /** "84 of 420 · 6 kinds · 1,240 t · 38,900 cr" */
 export function holdLine(h = holdSlots()) {
   const kinds = h.slots.length;
-  return `${h.used.toLocaleString("en-US")} of ${h.cap.toLocaleString("en-US")} · ${kinds} kind${kinds === 1 ? "" : "s"} · ${h.mass.toLocaleString("en-US")} t${h.worth ? ` · ${h.worth.toLocaleString("en-US")} cr` : ""}`;
+  return `${Math.round(h.used).toLocaleString("en-US")} of ${h.cap.toLocaleString("en-US")} hu · ${kinds} kind${kinds === 1 ? "" : "s"} · ${h.mass.toLocaleString("en-US")} t${h.worth ? ` · ${h.worth.toLocaleString("en-US")} cr` : ""}`;
 }
 
 /* ---- what you can do to it from the seat --------------------------------------- */

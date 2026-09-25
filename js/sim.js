@@ -33,6 +33,7 @@ import {
   stepAttitude,
   stepPower,
   stepTranslation,
+  roomFor,
 } from "./ship.js";
 import { record as tapeRecord } from "./recorder.js";
 import { wireFab, stepFab, loadFab, resetFab } from "./fabricate.js";
@@ -72,7 +73,8 @@ import {
   stepStations,
 } from "./stations.js";
 import { ORES, baseValue, good, goodName, priceAt, rollOre } from "./materials.js";
-import { stepEconomy, stockMult, lotMult, askPrice, econReport, wantsOf } from "./economy.js";
+import { stepEconomy, stockMult, lotMult, askPrice, econReport, wantsOf, econHooks } from "./economy.js";
+import { labourAt } from "./stafflife.js";
 import { bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, stepDockwork } from "./dockwork.js";
 import { buildCorps, corpOfStation, corpOfVessel, blameKill, adjustStanding, standingMargin, corps } from "./corps.js";
 import { applyRaceToShip, applyRaceTune, loadPilot, pilot, rankStatus, savePilot, serveTime, syncMods, takePayout, title, work } from "./pilot.js";
@@ -719,10 +721,10 @@ export function tradeBuy(id, qty) {
   if (!st) return "Not docked";
   const line = st.stock.find((x) => x.id === id);
   if (!line) return "Not stocked";
-  const want = Math.min(qty, line.qty, holdRoom(ship));
+  const want = Math.min(qty, line.qty, Math.floor(roomFor(ship, id)));   // 0.3.52: what fits of THIS good
   const price = buyPriceAt(st, line, want);
   const take = Math.min(want, Math.floor(ship.credits / price));
-  if (take <= 0) return holdRoom(ship) <= 0 ? "Hold full" : "Cannot afford";
+  if (take <= 0) return roomFor(ship, id) < 1 ? "Hold full" : "Cannot afford";
   ship.credits -= take * price;
   line.qty -= take;
   st.credits += take * price;
@@ -1037,6 +1039,9 @@ function wireReactiveSky() {
     }
     sim.send({ t: "vdown", id: n.id, until: trafficDown[n.id] });
   };
+
+  /* 0.3.52: company hands on shift make their port's lines run faster */
+  econHooks.labour = labourAt;
 
   /* 0.3.48: the security ◆ — the player's own SOS, and what a fight costs you */
   securityHooks.selfVictim = selfVictim;

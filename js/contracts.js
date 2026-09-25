@@ -39,12 +39,12 @@ import { stations, stationById } from "./stations.js";
 import { corpOfStation, corpRelation, corps, adjustStanding, standingLabel } from "./corps.js";
 import { POWERS } from "./data/factions.js";
 import { shortagesOf, wantsOf, bidPrice, askPrice, stockOf, deliver, lift } from "./economy.js";
-import { goodName, baseValue, good, ORES, SECTORS } from "./materials.js";
+import { goodName, baseValue, good, bulkOf, ORES, SECTORS } from "./materials.js";
 import { traffic, HOSTILE_ROLES } from "./npc/traffic.js";
 import { flow } from "./npc/flow.js";
 import { nests } from "./npc/rogues.js";
 import { rngFromSeed } from "./generate.js";
-import { takeCargo } from "./ship.js";
+import { takeCargo, addCargo, roomFor } from "./ship.js";
 import { shipById } from "./shipdb.js";
 import { bookRevenue } from "./company.js";
 import { work, pilot } from "./pilot.js";
@@ -154,15 +154,17 @@ export function hullFit() {
   const def = shipById(currentShipId?.() ?? null);
   const turrets = def?.stats?.turrets ?? 0;
   const armed = turrets > 0 && def?.grammar?.weapons !== "none";
-  return { cap: Math.max(1, Math.round(sim.ship?.cargoCap ?? 60)), armed, turrets, hull: def?.name ?? "your hull" };
+  const cap = Math.max(1, Math.round(sim.ship?.cargoCap ?? 60));
+  /* 0.3.52: `cap` is hold units; how many of a GIVEN good fit is capFor(id) */
+  return { cap, capFor: (id) => (id ? Math.max(1, Math.floor(cap / bulkOf(id))) : cap), armed, turrets, hull: def?.name ?? "your hull" };
 }
 /* cargo work sized to the hold: `frac` of it, at least `lo` units */
-const sized = (fit, frac, lo = 4) => Math.max(lo, Math.round(fit.cap * frac));
+const sized = (fit, frac, lo = 4, id = null) => Math.max(lo, Math.round((fit.capFor ? fit.capFor(id) : fit.cap) * frac));
 /* …and to a purse: nobody posts a job that means buying two hundred thousand
  * credits of armour plate first. The budget grows with the tier and (gently)
  * with the hold, so a big hull sees bigger jobs without a skiff seeing none. */
 function qtyFor(fit, frac, lo, id, t) {
-  const hold = sized(fit, frac, lo);
+  const hold = sized(fit, frac, lo, id);
   const unit = Math.max(1, baseValue(id));
   const budget = (2500 + 4000 * (t?.pay ?? 1)) * Math.sqrt(Math.max(0.25, fit.cap / 400));
   return Math.max(Math.min(lo, hold), Math.min(hold, Math.floor(budget / unit)));
@@ -395,13 +397,13 @@ const KINDS = {
   },
   /* SALVAGE */
   salvage(st, rnd, t, fit) {
-    const qty = sized(fit, 0.08 + rnd() * 0.12 * t.pay, 6);
+    const qty = sized(fit, 0.08 + rnd() * 0.12 * t.pay, 6, "iron_ore");
     return { mech: "deliver", good: "iron_ore", qty, salvage: true, pay: Math.round(qty * 18 * t.pay + 300 * t.pay), title: `Salvage ${qty} plate`, text: `The yard buys wreck plate: ${qty} units of debris iron, tractored off whatever died out there.` };
   },
   wreck(st, rnd, t, fit) {
     const spot = jobSpot(st, rnd, { spread: 1.5, r: 1200 });
     if (!spot) return null;
-    const qty = sized(fit, 0.05 + rnd() * 0.08, 4);
+    const qty = sized(fit, 0.05 + rnd() * 0.08, 4, "iron_ore");
     return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the wreck in ${spot.name}`, dwell: 20 }], good: "iron_ore", qty, salvage: true, pay: Math.round((600 + qty * 20) * t.pay), title: `Recover a wreck in ${spot.name}`, text: `A hull went down in ${spotLine(spot, st)}. Fly the site, hold twenty seconds for the insurers' scan, and bring back ${qty} plate.` };
   },
   pod(st, rnd, t, fit) {
@@ -506,7 +508,7 @@ function chainOffer(st, rnd, now, fit, spec) {
   /* tonnage first: the pay follows it — and never more than the hold can take,
    * or the stage is a job you can accept and can never finish */
   if (stage.qtyK && job.qty) {
-    const ceiling = job.mech === "deliver" || job.mech === "haul" ? Math.max(4, Math.floor(fit.cap * 0.92)) : Infinity;
+    const ceiling = job.mech === "deliver" || job.mech === "haul" ? Math.max(4, Math.floor(fit.capFor(stage.good ?? job.good) * 0.92)) : Infinity;
     const q = Math.max(1, Math.min(ceiling, Math.round(job.qty * stage.qtyK)));
     job.pay = Math.round(job.pay * (q / job.qty));
     job.qty = q;
@@ -637,8 +639,8 @@ export function acceptBlocker(c) {
     const st = stationById(c.stationId);
     if (sim.ship.dockedAt !== c.stationId) return `Load at ${c.stationName}`;
     if (!c.chainStock && stockOf(st, c.good) < c.qty) return `${c.stationName} no longer holds ${c.qty} ${goodName(c.good)}`;
-    const room = sim.ship.cargoCap - Object.values(sim.ship.hold).reduce((a, q) => a + q, 0);
-    if (room < c.qty) return `Hold needs ${c.qty} free`;
+    const room = roomFor(sim.ship, c.good);
+    if (room < c.qty) return `Hold needs room for ${c.qty} ${goodName(c.good)} (${Math.floor(room)} fit)`;
   }
   if (c.mech === "survey" && sim.scanned?.has?.(c.bodyId)) return `${c.bodyName} is already on the register`;
   return null;
@@ -820,7 +822,7 @@ export function tickContracts(dt) {
         a.dwell = (a.dwell ?? 0) + dt;
         if (a.dwell >= (T.dwell ?? 10)) {
           /* a recovered pod comes aboard at the site (what the hold has room for) */
-          if (a.grant && !a.granted) { const room = Math.max(0, sim.ship.cargoCap - Object.values(sim.ship.hold).reduce((x, q) => x + q, 0)); const got = Math.min(room, a.grant.qty); sim.ship.hold[a.grant.good] = (sim.ship.hold[a.grant.good] ?? 0) + got; a.granted = got; }
+          if (a.grant && !a.granted) { const got = addCargo(sim.ship, a.grant.good, a.grant.qty); a.granted = got; }
           a.leg = (a.leg ?? 0) + 1;
           a.dwell = 0;
           a.progress = a.leg / a.targets.length;

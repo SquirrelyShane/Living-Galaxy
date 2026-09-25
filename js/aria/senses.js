@@ -38,7 +38,7 @@ import { corps, corpOfStation, standingLabel } from "../corps.js";
 import { holdRoom, batteryCap } from "../ship.js";
 import { hullMaxOf, repairsAt, pricePerPoint } from "../repair.js";
 import { shipById } from "../shipdb.js";
-import { goodName } from "../materials.js";
+import { goodName, bulkOf } from "../materials.js";
 import { sites, sitesNear } from "../sites.js";
 import { boardByCategory } from "../contracts.js";
 import { tradeRoutes } from "../traderoutes.js";
@@ -254,7 +254,7 @@ export function unpostedWork(s = null, room = holdRoom(sim.ship), purse = sim.sh
         const line = S.stock.find((l) => l.id === want.id && l.qty >= 5);
         if (!line) continue;
         const src = stationById(S.id);
-        const qty = Math.max(1, Math.min(Math.floor(room), Math.floor(line.qty), Math.floor(purse / Math.max(1, line.ask))));
+        const qty = Math.max(1, Math.min(Math.floor(room / bulkOf(line.id ?? want.id)), Math.floor(line.qty), Math.floor(purse / Math.max(1, line.ask))));
         const ask = buyPriceAt(src, { id: want.id }, qty);
         if (ask >= bid) continue;
         const profit = (bid - ask) * qty;

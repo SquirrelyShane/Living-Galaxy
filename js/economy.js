@@ -220,9 +220,13 @@ export function ledgerOf(st) {
 }
 
 /** One production pass for a port. */
+/* 0.3.52: other systems may lean on a port's line rate — the company's hands on
+ * shift there (js/stafflife.js labourAt). A hook, so this module stays a leaf. */
+export const econHooks = { labour: null };
+
 export function runLines(st) {
   const e = ledgerOf(st);
-  const k = tierOf(st);
+  const k = tierOf(st) * (econHooks.labour?.(st.id) ?? 1);
   const before = {};
   for (const l of st.stock ?? []) before[l.id] = l.qty;
   const lines = LINES[st.sector] ?? [];

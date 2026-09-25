@@ -9,6 +9,7 @@
  */
 
 import { sim, launchSim } from "../js/sim.js";
+import { bulkOf } from "../js/materials.js";
 import { makePilot } from "../js/pilot.js";
 import { stations } from "../js/stations.js";
 import { corps, corpOfStation } from "../js/corps.js";
@@ -77,7 +78,8 @@ const honest = stations.filter((s) => !(s.hostile && !s.claimed) && s.sector !==
   ship.cargoCap = 2000;
   const big = boardFor(st, sim.time + BOARD.refresh * 3).filter((o) => o.mech === "deliver" || o.mech === "haul");
   const avg = (l) => l.reduce((a, o) => a + o.qty, 0) / Math.max(1, l.length);
-  ok(small.every((o) => o.qty <= 60) && avg(big) > avg(small) * 3, `cargo work is sized to the hold (avg ${avg(small).toFixed(0)} at 60, ${avg(big).toFixed(0)} at 2000)`);
+  /* 0.3.52: cap is hold units, and a light good packs more units into them */
+  ok(small.every((o) => o.qty <= Math.ceil(60 / bulkOf(o.good))) && avg(big) > avg(small) * 3, `cargo work is sized to the hold (avg ${avg(small).toFixed(0)} at 60, ${avg(big).toFixed(0)} at 2000)`);
   ship.cargoCap = 400;
   const fit0 = hullFit();
   ok(!fit0.armed, `the trainer is unarmed (${fit0.hull})`);

@@ -189,6 +189,34 @@ export function goodMass(id) {
   return BY_ID.get(id)?.mass ?? 1;
 }
 
+/* ---- the hold is a VOLUME (0.3.52) ----------------------------------------
+ *
+ * The hold used to count items: a unit of hydrogen and a unit of platinum ore
+ * took the same one slot, and a hull's hold was 400 × a factor clamped at 4,
+ * so the biggest ship in the registry carried 1,600 of anything and a
+ * Fledgling ~305. Reported: "capped at like 250 platinum ore".
+ *
+ * Now a hold has a capacity in HOLD UNITS (hu) and every good takes up its
+ * BULK in them, from its mass per unit — denser ore, fewer units in the same
+ * hold. Deliberately not the raw mass: hydrogen to uraninite is 82× by mass,
+ * which is right for a scale and silly for a cargo bay, so bulk runs from 0.4
+ * (the gases, a unit of ice) to 2 (the heavy metal ores), and a made thing up
+ * to 3.5. Cargo still has no effect on flight; a port still only buys what its
+ * treasury can pay for, which is what keeps a hold of 200,000 honest. */
+export const BULK = { base: 0.35, perT: 0.2, min: 0.4, oreMax: 2, max: 3.5 };
+export function bulkOf(id) {
+  const g = BY_ID.get(id);
+  const m = g?.mass ?? 1;
+  const b = BULK.base + m * BULK.perT;
+  return Math.max(BULK.min, Math.min(g?.tier === "ore" ? BULK.oreMax : BULK.max, Math.round(b * 100) / 100));
+}
+
+/** A hull's hold in hu from its registry cargo rating — no ceiling, a steady curve. */
+export const HOLD = { k: 110, exp: 0.95, base: 400 };
+export function holdForCargoRating(c) {
+  return Math.round(HOLD.k * Math.pow(Math.max(1, c), HOLD.exp));
+}
+
 /** Everything a given body kind can yield, weighted by abundance. */
 export function oresFor(kind) {
   return ORES.filter((o) => o.found.includes(kind));

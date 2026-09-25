@@ -111,7 +111,8 @@ const fresh = () => { resetCompany(); resetCrew(); resetBusiness(); ship.dockedA
 {
   const need = workingCapital();
   ok(need >= RUN.float && need <= RUN.float * 6, `working capital is ${need.toLocaleString("en-US")} cr — bounded, and not the half-million an infinite purse would justify`);
-  ok(need >= holdRoom(ship) * 80, "and it is sized off the hold she has to fill");
+  /* 0.3.52: holds are volumes now and run to thousands of hu, so the float's own ceiling binds first */
+  ok(need >= Math.min(holdRoom(ship) * 80, RUN.float * 6), "and it is sized off the hold she has to fill (up to its ceiling)");
   ship.credits = need * 4;
   const moved = considerTreasury();
   ok(moved > 0 && company.treasury === moved, `banked ${moved.toLocaleString("en-US")} cr`);

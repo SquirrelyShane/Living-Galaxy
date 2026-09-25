@@ -22,6 +22,8 @@ import { wageFor, CYCLE_SECONDS } from "./crew.js";
 import { cradle } from "./npc/cradle.js";
 import { tickStationLife, incomeOf, resetStationLife, stationLife } from "./stationlife.js";
 import { tickLine, cutOf } from "./staffline.js";
+import { tickStaffHour, takeWorked, cyclePay, housingCost } from "./stafflife.js";
+import { CLOCK } from "./stationclock.js";
 
 export const CHARTERS = {
   military:     { name: "Security Charter",     desc: "Escort, denial and ordnance. Paid by whoever is frightened.",              revenue: ["bounty", "escort"] },
@@ -242,19 +244,30 @@ export function boardBrief() {
 /** Every cycle: staff earn, dependants draw, the board re-reads the record. */
 export function tickCompany(seconds) {
   if (!company.founded) return;
+  /* 0.3.52: the hours first — people go to work, eat and sleep on port time
+   * (js/stafflife.js) — then the cycle pays for what they did in them */
+  company.hourPool = (company.hourPool ?? 0) + seconds;
   company.payPool += seconds;
-  while (company.payPool >= CYCLE_SECONDS) {
+  while (company.hourPool >= CLOCK.hourS || company.payPool >= CYCLE_SECONDS) {
+    if (company.hourPool >= CLOCK.hourS && (company.hourPool - CLOCK.hourS) >= (company.payPool - CYCLE_SECONDS)) {
+      company.hourPool -= CLOCK.hourS;
+      tickStaffHour((sim.time ?? 0) - company.hourPool);
+      continue;
+    }
     company.payPool -= CYCLE_SECONDS;
     let earned = 0;
     for (const s of company.staff) {
       if (!inThisSky(s)) continue; // their port is in a sky that is not loaded; the books catch up when it is
       if (s.transit) continue;     // 0.3.46: nobody earns on a liner
-      /* 0.3.46: a raise on the company line is their share, out of ours */
-      earned += Math.round(incomeOf(s) * cutOf(s));
+      /* 0.3.46: a raise on the company line is their share, out of ours.
+       * 0.3.52: a retainer, and the rest for the hours they actually worked */
+      earned += Math.round(cyclePay(incomeOf(s) * cutOf(s), takeWorked(s)));
       /* the port pays a stipend for every child on the books — a company town in miniature */
       earned += Math.round((s.family?.length ?? 0) * s.income * COMPANY.dependantShare);
     }
     if (earned > 0) { company.treasury += earned; book(`Staff wages booked (${company.staff.length} on the rolls)`, earned, "wages"); }
+    const rent = housingCost();
+    if (rent > 0) { company.treasury -= rent; book(`Housing for the staff`, -rent, "housing"); }
     /* and then they get on with their lives — and pick up the phone */
     tickStationLife();
     tickLine();
@@ -306,7 +319,7 @@ export function resetCompany() {
   try { localStorage.removeItem(SAVE_KEY); } catch { /* ignore */ }
   company.founded = false; company.name = ""; company.hq = null; company.hqSky = null; company.treasury = 0;
   company.book.length = 0; company.staff.length = 0; company.alumni.length = 0;
-  company.revenue = 0; company.spend = 0; company.inCharter = 0; company.outCharter = 0; company.confidence = 0.5; company.payPool = 0;
+  company.revenue = 0; company.spend = 0; company.inCharter = 0; company.outCharter = 0; company.confidence = 0.5; company.payPool = 0; company.hourPool = 0;
   company.line = { inbox: [], seq: 1 };
   company.shareV = COMPANY.staffShare;
   resetStationLife();

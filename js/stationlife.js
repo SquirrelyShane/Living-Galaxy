@@ -31,6 +31,8 @@ import { logEvent, sim } from "./sim.js";
 import { COMPLEXES } from "./careers/complexes.js";
 import { post } from "./chat.js";
 import { hearFrom, moodLift } from "./staffline.js";
+import { planAt } from "./stafflife.js";
+import { hoursAt } from "./stationclock.js";
 
 /* Cycles a station child takes to come of age and go on the rolls. Longer than
  * the shipboard one: a childhood on a station is not a cruise. */
@@ -174,6 +176,7 @@ const EVENTS = [
     run(s, st) {
       const lost = Math.round(s.income * 3);
       company.treasury = Math.max(0, company.treasury - lost);
+      s.onStrikeUntil = hoursAt(sim.time) + 24;   // 0.3.52: a day on the picket line, not at the line
       company.confidence = Math.max(0, (company.confidence ?? 0.5) - 0.05);
       return note("strike", s, `${s.name} has stopped work at ${st?.name ?? "the port"} over the rate. Three cycles of their share gone.`, st?.id, -lost);
     },
@@ -226,6 +229,17 @@ const EVENTS = [
     },
   },
 ];
+
+/* 0.3.52: what someone is doing when their cycle's roll comes up leans on what can happen */
+export const ACTIVITY_K = {
+  accident: { work: 2.2, sleep: 0.1, family: 0.4, own: 0.5, meal: 0.3, supper: 0.3 },
+  incident: { own: 1.6, work: 0.6, sleep: 0.3, family: 0.5 },
+  marriage: { family: 1.2, own: 1.5, work: 0.4, sleep: 0.3 },
+  birth: { family: 1.6, work: 0.5 },
+  commendation: { work: 1.8, sleep: 0.4 },
+  windfall: { work: 1.4, own: 1.2 },
+  feud: { work: 1.3, own: 1.2, sleep: 0.2 },
+};
 
 /* a CRADLE record carries its genome PACKED; kinship wants the array */
 function kinOK(a, b) {
@@ -385,8 +399,10 @@ export function tickStationLife() {
 
     const r = roll(`${s.id}:life:${cycle}`);
     if (r > EVENT_CHANCE) continue;
-    /* which event: weighted draw off who they are and where they are */
-    const weights = EVENTS.map((e) => Math.max(0, e.weight(s, st)));
+    /* which event: weighted draw off who they are, where they are — and, 0.3.52,
+     * what they are doing: the press line lets go on the people working it */
+    const act = planAt(s, hoursAt(sim.time)).id;
+    const weights = EVENTS.map((e) => Math.max(0, e.weight(s, st)) * (ACTIVITY_K[e.id]?.[act] ?? 1));
     const total = weights.reduce((a, b) => a + b, 0);
     if (total <= 0) continue;
     let pick = roll(`${s.id}:pick:${cycle}`) * total;

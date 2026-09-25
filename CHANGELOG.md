@@ -10,6 +10,78 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.52 — 2026-09-25
+
+Mine a lot more; a port clock; settled hands with a working day.
+
+**The hold is a volume, and it has no ceiling.** Reported: capped at about 250
+platinum ore. The hold was a count of units with a curve that topped out at
+four times a skiff's. Now it is **hold units (hu)**: every good takes up room by
+its mass (`bulkOf` in `js/materials.js` — hydrogen 0.4 hu a unit, iron ore 0.93,
+platinum ore 1.73, uraninite 1.99; ore caps at 2), and a hull's hold grows with
+its cargo rating with no top (`holdForCargoRating`):
+
+| Hull | Hold | Iron ore | Platinum ore |
+| --- | --- | --- | --- |
+| Fledgling (starter) | ~1,200 hu | ~1,250 | ~670 (was ~250) |
+| median hull (cargo 260) | ~21,700 hu | ~23,000 | ~12,500 |
+| Slipway (cargo 2,000) | ~150,000 hu | ~160,000 | ~87,000 |
+| the biggest (cargo 6,500) | ~461,000 hu | ~495,000 | ~266,000 |
+
+Cargo still has no effect on flight. The desk sizes jobs in units of *that*
+good (`hullFit().capFor(id)`), buying and hauling check room for that good
+(`roomFor`), and the market/hold screens read hu. Company hulls keep their old
+hold curve and a port only buys what its treasury can pay for, so the fleet's
+books don't jump twentyfold.
+
+**Port standard time** (`js/stationclock.js`, new). An hour is 30 s of sky
+time, a day 24 hours (12 minutes at ×1), a pay cycle three hours, a week seven
+days; day 1 opens at 06:00. Shifts: day 06–14, swing 14–22, night 22–06. The
+title bar shows it (☀/◐/☾, day and time; tap-hold for the weekday and shift),
+the HUD darkens a touch at night, and the station deck's header reads the
+port's hour and which shift is on the docks.
+
+**A working life ashore** (`js/stafflife.js`, new). Every settled hand now has
+a **job** at their port (smelter line, cross-dock, clinic, grow ring … by
+sector), a **shift**, **hours** (standard 8, overtime 10, part-time 5) and
+**housing** (bunk, cabin, family quarters). Hour by hour they work, eat, have
+their own time — at home with their partner and kids if they have them,
+somewhere that suits them if not — eat again and sleep eight hours. Night
+shift sleeps through the afternoon.
+
+- **Needs** — tiredness, hunger, company — rise and fall with what they are
+  doing and lean on their mood every hour. Better housing sleeps better.
+- **Pay follows the work**: a 30% retainer every cycle, the rest for hours
+  actually worked at a productivity read off mood and tiredness. A standard day
+  averages out at the old share.
+- **The port gets busier**: each hand on shift adds 3% to their port's
+  production lines (capped at 30%).
+- **The rolls lean on the hour**: accidents happen at work, not in bed; births
+  at home; commendations on the floor. A strike puts the shift on the picket
+  line for a day.
+- **A day log** per person. HALL › ON THIS FLOOR and CON › CORP › TOWN show
+  what each hand is doing right now and for how long, how they are holding up,
+  and their day so far. Ring someone at 02:00 on the company line and you wake
+  them (it costs a little mood).
+
+**ARIA doglegs.** A leg round a planet used to end at a fixed point off its
+shoulder that she had to park on exactly; off Jupiter the well would not let
+her hold still and she sat 17 km short, braking, for ten minutes. A dogleg now
+ends as soon as the next corridor is clear.
+
+Files: `js/materials.js`, `js/ship.js`, `js/shipdb.js`, `js/sim.js`,
+`js/contracts.js`, `js/fleet.js`, `js/economy.js`, `js/company.js`,
+`js/stationlife.js`, `js/staffline.js`, `js/stationclock.js` (new),
+`js/stafflife.js` (new), `js/hud.js`, `js/stationdeck.js`, `js/deckhall.js`,
+`js/console/panels/corp-town.js`, `js/console/panels/market.js`,
+`js/holdview.js`, `js/traderoutes.js`, `js/ariaplay.js`, `js/aria/senses.js`,
+`js/mission/run.js`, `js/mission/tradeops.js`, `js/drones/ops.js`,
+`index.html`, `css/glass.css`, `css/style.css`, `css/console.css`,
+`js/version.js`, `README.md`; tests `test/stafflife.test.mjs` (new, 46),
+`hold`, `sky`, `desk`, `ariabiz`, `aria-repair` updated for hold units.
+
+---
+
 ## 0.3.51 — 2026-09-25
 
 The nose goes where the ship goes.

@@ -20,6 +20,8 @@
  *   turrets   fitted mounts               crew    berths
  */
 
+import { holdForCargoRating, HOLD } from "./materials.js";
+
 export const SIZE_BANDS = [
   { id: "skiff",    label: "Skiff",     max: 2.0 },
   { id: "boat",     label: "Boat",      max: 4.0 },
@@ -566,6 +568,9 @@ export function hullTuneFor(def) {
      * default loadout (shields, turrets, gravity, sentry, cutter) at 101 of 110 kW
      * and every regen tick put the bus over — "overloaded everywhere" from launch */
     reactor: clamp((s.reactor / 130) ** 0.35, 1, 2.2),
-    cargo: clamp((s.cargo / 30) ** 0.5, 0.5, 4),
+    /* 0.3.52: the hold is a volume and has no ceiling — a Fledgling (rating 12)
+     * carries ~1,170 hu, a G-frame ark ~468,000. Was sqrt(rating/30) clamped
+     * to 0.5–4: every hull between 1,600 and nothing. */
+    cargo: holdForCargoRating(s.cargo) / HOLD.base,
   };
 }

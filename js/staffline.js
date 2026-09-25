@@ -36,6 +36,8 @@ import { cradle, PRONOUNS } from "./npc/cradle.js";
 import { logEvent, sim } from "./sim.js";
 import { ROLES, roleAt, roleIndex, incomeOf, stationLife } from "./stationlife.js";
 import { CYCLE_SECONDS } from "./crew.js";
+import { nowOf } from "./stafflife.js";
+import { clockAt } from "./stationclock.js";
 
 export const LINE = {
   bonusCycles: 3,        // a bonus is this many cycles of what they bring in
@@ -153,7 +155,18 @@ function checkIn(s) {
   const role = roleAt(s.role).label.toLowerCase();
   const bits = [];
   if (w.moving) bits.push(pick(s, "ci-move", [`Still on the liner. ${w.left}s out from ${w.to?.name ?? "the port"}.`, `Somewhere between ports — ${w.left}s to go. The food is worse than you'd think.`]));
-  else bits.push(pick(s, "ci-open", [
+  else {
+    /* 0.3.52: they are somewhere, doing something, at an hour of their day */
+    const now = nowOf(s, sim.time ?? 0);
+    const hh = clockAt(sim.time ?? 0).hhmm;
+    if (now.id === "sleep") bits.push(pick(s, "ci-sleep", [`Mm — it's ${hh} here. I was asleep.`, `${hh}. You know what time it is down here? …Go on.`, `I'm up, I'm up. It's ${hh}.`]));
+    else if (now.id === "work") bits.push(pick(s, "ci-work", [`On shift — ${s.job}. I've got a minute.`, `Can't talk long, I'm on the ${s.job}.`, `${hh}, middle of my shift on the ${s.job}.`]));
+    else if (now.id === "strike") bits.push("I'm on the picket line. You know why.");
+    else if (now.id === "meal" || now.id === "supper") bits.push(pick(s, "ci-eat", ["Eating. Talk with my mouth full, you don't mind.", "In the mess. It's not bad today.", "Caught me at the table."]));
+    else if (now.id === "family") bits.push(pick(s, "ci-home", ["I'm home. It's loud.", "At home — good timing, actually.", "Home. Hang on, let me step out."]));
+    else bits.push(pick(s, "ci-own", [`Off shift — ${now.label}.`, `My own time. I'm ${now.label}.`]));
+  }
+  if (!w.moving) bits.push(pick(s, "ci-open", [
     `${w.text}'s holding. ${s.cycles ?? 0} cycles on the rolls now, ${role}.`,
     `It's ${w.text}, it's a job. ${role[0].toUpperCase()}${role.slice(1)}, ${s.cycles ?? 0} cycles in.`,
     `Floor's busy at ${w.text}. I'm ${role} — ${s.cycles ?? 0} cycles since you set me down.`,
@@ -215,7 +228,11 @@ export const TOPICS = [
     ok: () => null,
     run(s) {
       const c = cycleNow();
-      if (s.lastCheckIn !== c) { bumpRegard(s, 2); s.mood = Math.min(100, (s.mood ?? 74) + 1.5); s.lastCheckIn = c; }
+      if (s.lastCheckIn !== c) {
+        /* waking someone to ask how they are is still asking, but it costs a little */
+        const asleep = !s.transit && nowOf(s, sim.time ?? 0).id === "sleep";
+        bumpRegard(s, asleep ? 0.5 : 2); s.mood = Math.min(100, (s.mood ?? 74) + (asleep ? -1 : 1.5)); s.lastCheckIn = c;
+      }
       return checkIn(s);
     },
   },

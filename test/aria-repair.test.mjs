@@ -14,6 +14,7 @@ const { currentSystem } = await import("../js/bodies.js");
 const { upgrades, fx } = await import("../js/upgrades.js");
 const { repairsAt, pricePerPoint, repairQuote, yardRepair, tickPatchDrone, patchDrone, REPAIR } = await import("../js/repair.js");
 const { aria, ariaTakeConn, ariaRelease, ariaHasConn, wireAria } = await import("../js/aria.js");
+const { bulkOf } = await import("../js/materials.js");
 const { ariaPilot, planJob, notePlayerJob, jobHabits } = await import("../js/aria-pilot.js");
 const { mission } = await import("../js/mission/run.js");
 const { validate, makeMission, makeStep } = await import("../js/mission/script.js");
@@ -99,7 +100,7 @@ tickSim(1 / 60);
   ok(jobHabits().share.survey > 0.8, "your flying is tallied by job");
   p = planJob();
   ok(p.job === "survey" && /survey 9\\d%/.test(p.why) === false && /you survey/.test(p.why), `a surveyor's ARIA surveys (${p.why})`);
-  ship.hold = { iron_ore: ship.cargoCap * 0.9 };
+  ship.hold = { iron_ore: (ship.cargoCap * 0.9) / bulkOf("iron_ore") };   // 0.3.52: 90% of the hold's volume
   p = planJob();
   ok(p.job === "sell" && p.mission.steps[0].op === "DOCK", `a full hold goes to the desk first (${p.why})`);
   ship.hull = 30;

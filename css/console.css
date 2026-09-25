@@ -270,6 +270,7 @@ html[data-orient="landscape"] .console .con-sheet.glass { width: min(52rem, 100%
 /* 0.3.46 — the company line (CORP › TOWN) */
 .tcard .in-talk-log { max-height: 180px; overflow-y: auto; margin: 4px 0 8px; font-size: 12px; }
 .tcard .in-talk-log p { margin: 3px 0; color: var(--glass-ink2); }
+.tcard .day-log { max-height: 110px; font-size: 11px; border-left: 2px solid var(--glass-line); padding-left: 8px; }
 .tcard .in-talk-log p.them { color: var(--glass-ink); }
 .tcard p.warm { color: var(--glass-warm); font-size: 12px; margin: 4px 0; }
 .tcard p.hot { color: #ff8a8a; font-size: 12px; margin: 4px 0; }

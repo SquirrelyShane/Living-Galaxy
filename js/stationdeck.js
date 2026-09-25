@@ -22,6 +22,7 @@ import { renderCoverage, buyCoverage } from "./ui/coverage.js";
 import { corpOfStation, standingLabel } from "./corps.js";
 import { stationPlan, tickPlan, drawPlan, occupancy, roomAt } from "./blueprint.js";
 import { stationById } from "./stations.js";
+import { clockAt } from "./stationclock.js";
 import { worksPanel } from "./deckworks.js";
 import { DRONE_ROLES } from "./drones/roles.js";
 import { droneOps, buildOptions, orderBuild, queueAt, unitsHomedAt, statusLine, pendingAsks, beginWork } from "./drones/ops.js";
@@ -435,6 +436,9 @@ export function mountStationDeck() {
     rain1(dt); rain2(dt);
     const bpm = vitals(dt) ?? 60;
     $("sd-bpm").textContent = `${Math.round(bpm)} BPM · ${crew.aboard.length} SOULS`;
+    /* 0.3.52: the port's own clock in the header — which shift is on the docks */
+    { const c = clockAt(sim.time); const line = `${stationById(dockedAt)?.sector ?? ""} deck · ${c.weekday} ${c.hhmm} · ${c.shift} shift`;
+      const sub = $("sd-sub"); if (sub.textContent !== line) sub.textContent = line; if (root.dataset.part !== c.part) root.dataset.part = c.part; }
     $("sd-credits").textContent = `${Math.round(sim.ship.credits).toLocaleString()} CR`;
     paintDeckRepair($("sd-repair"), stationById(dockedAt));
 
