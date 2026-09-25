@@ -1,0 +1,6 @@
+
+# never commit key material
+lgalaxy.txt*
+id_ed25519*
+id_rsa*
+*.pem
