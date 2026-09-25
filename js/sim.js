@@ -2058,6 +2058,10 @@ function warpDropout(h, u) {
   work("navigation", 2); // surviving one teaches you something
 }
 
+/* fractions of a warp run: onto the lane by the first, off it from the second (0.3.51) */
+const WARP_TURN_IN = 0.1;
+const WARP_TURN_OUT = 0.9;
+
 function engageWarp() {
   const w = sim.warp;
   const ship = sim.ship;
@@ -2084,6 +2088,13 @@ function engageWarp() {
   w.fromPitch = ship.pitch;
   w.toYaw = Math.atan2(-dx / horiz, -dz / horiz);
   w.toPitch = clamp(Math.atan2(dy, horiz), -0.4, 0.4);
+  /* the lane itself: where the hull is actually going for the whole run */
+  {
+    const lx = to.x - ship.pos.x, ly = to.y - ship.pos.y, lz = to.z - ship.pos.z;
+    const lh = Math.hypot(lx, lz) || 1;
+    w.laneYaw = Math.atan2(-lx / lh, -lz / lh);
+    w.lanePitch = clamp(Math.atan2(ly, lh), -1.2, 1.2);
+  }
   NAV.spool(spoolTime());
   sim.trauma = Math.min(1, sim.trauma + 0.4);
   sim.notice = `Warp to ${body.name}.`;
@@ -2156,8 +2167,26 @@ export function stepWarp(dt) {
     ship.pos.x = lerp(w.from.x, w.to.x, u);
     ship.pos.y = lerp(w.from.y, w.to.y, u);
     ship.pos.z = lerp(w.from.z, w.to.z, u);
-    ship.yaw = w.fromYaw + wrapPi(w.toYaw - w.fromYaw) * u;
-    ship.pitch = lerp(w.fromPitch, w.toPitch, u);
+    /* 0.3.51: the nose follows the lane. It used to turn from wherever it
+     * started to "facing the target on arrival" across the whole jump, while
+     * the hull moved in a straight line — so any drop point off to one side of
+     * the target (every station lane, every stand-off) flew the jump crabbed,
+     * measured 24° by the end. Now: come onto the lane in the first tenth, fly
+     * it nose-first, and turn to face the target only as the core lets go. */
+    const f = clamp(w.t / w.dur, 0, 1);
+    const laneYaw = w.laneYaw ?? w.toYaw, lanePitch = w.lanePitch ?? w.toPitch;
+    if (f < WARP_TURN_IN) {
+      const k = easeInOut(f / WARP_TURN_IN);
+      ship.yaw = w.fromYaw + wrapPi(laneYaw - w.fromYaw) * k;
+      ship.pitch = lerp(w.fromPitch, lanePitch, k);
+    } else if (f < WARP_TURN_OUT) {
+      ship.yaw = laneYaw;
+      ship.pitch = lanePitch;
+    } else {
+      const k = easeInOut((f - WARP_TURN_OUT) / (1 - WARP_TURN_OUT));
+      ship.yaw = laneYaw + wrapPi(w.toYaw - laneYaw) * k;
+      ship.pitch = lerp(lanePitch, w.toPitch, k);
+    }
     ship.aimYaw = ship.yaw;
     ship.aimPitch = ship.pitch;
     /* every hazard the plot accepted gets its roll as the lane crosses it */

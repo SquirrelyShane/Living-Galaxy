@@ -534,6 +534,48 @@ export function apSteer(tx, ty, tz, want, opts = false) {
 
 const _avoid = { x: 0, y: 0, z: 0 };
 
+/* FLY THE LANE — how a pilot lines up for a jump (0.3.51).
+ *
+ * The ship should be MOVING where it points. Coming out of a climb it is
+ * doing hundreds of u/s in some other direction, and the lane is somewhere
+ * else. Swinging the nose onto the lane first and braking after is what flew
+ * the hull sideways — for the whole brake. So, like a pilot:
+ *
+ *   1. carrying real drift off the lane: nose ALONG the motion and brake —
+ *      the canopy shows you slowing down, not sliding past
+ *   2. slow enough: pivot onto the lane (a turn at a walk is quick)
+ *   3. on the lane: mains, and the core
+ *
+ * Relative to the well you are in, because that is what the canopy shows
+ * sliding past. Returns the off-lane speed still being carried. */
+const LANE_DRIFT = 40;         // u/s of off-lane motion that reads as flying sideways
+const PIVOT_SPEED = 80;        // u/s under which the nose may come about onto the lane
+export function flyTheLane(node, want = 0) {
+  const ship = sim.ship;
+  const dest = warpDestination(node);
+  const dx = dest.x - ship.pos.x, dy = dest.y - ship.pos.y, dz = dest.z - ship.pos.z;
+  const d = Math.hypot(dx, dy, dz) || 1;
+  const fv = sim.frameVel ?? { x: 0, y: 0, z: 0 };
+  const vx = ship.vel.x - fv.x, vy = ship.vel.y - fv.y, vz = ship.vel.z - fv.z;
+  const sp = Math.hypot(vx, vy, vz);
+  const along = (vx * dx + vy * dy + vz * dz) / d;
+  const lat = Math.hypot(vx - (along * dx) / d, vy - (along * dy) / d, vz - (along * dz) / d);
+  const drifting = lat > LANE_DRIFT || along < -LANE_DRIFT;
+  if (drifting && sp > PIVOT_SPEED) {
+    /* 1: nose on the flight path, shed it */
+    apSteer(ship.pos.x + (vx / sp) * 1e6, ship.pos.y + (vy / sp) * 1e6, ship.pos.z + (vz / sp) * 1e6, 0, { jumpAhead: true, avoid: "soft" });
+    setThrottle(0);
+    touch.brake = true;
+    autopilot.lining = "shed";
+    return lat;
+  }
+  /* 2 and 3: onto the lane; a little drift left at a walk is braked out as it turns */
+  apSteer(dest.x, dest.y, dest.z, drifting ? 0 : want, { jumpAhead: true, avoid: "soft" });
+  if (drifting) { setThrottle(0); touch.brake = true; }
+  autopilot.lining = drifting ? "pivot" : "lane";
+  return lat;
+}
+
 export function apHold() {
   setInjectedPan({ x: 0, y: 0 });
   setThrottle(0);
@@ -631,6 +673,12 @@ export function apLeg(node, { cap = 1, warp = "auto", farLeg = null, graze = "ho
   node.pos(_p);
   const dist = dist3(_p, ship.pos);
   const far = farLeg ?? Math.max(90000, node.arriveR * 2);
+  /* 0.3.51: a spool is flown, not held. apHold() let whatever velocity the
+   * climb had built carry on while the nose sat on the lane, so for the whole
+   * spool the hull slid backwards and sideways at ~600 u/s — measured 125–138°
+   * between the nose and the flight path. Keep the nose on the lane and trim
+   * off anything that is not along it, so the ship is moving where it points. */
+  if (sim.warp.state === "spool") { autopilot.phase = "warp"; autopilot.task = `spool · ${node.name}`; flyTheLane(node, 0); return "flying"; }
   if (sim.warp.state !== "idle") { autopilot.phase = "warp"; autopilot.task = `warp · ${node.name}`; apHold(); return "flying"; }
 
   /* A break-out burn owns the ship until it is done. */
@@ -671,7 +719,23 @@ export function apLeg(node, { cap = 1, warp = "auto", farLeg = null, graze = "ho
       if (dom) bodyPosition(dom.id, sim.time, _w); else { _w.x = 0; _w.y = 0; _w.z = 0; }
       const dx = ship.pos.x - _w.x, dy = ship.pos.y - _w.y, dz = ship.pos.z - _w.z;
       const d = Math.hypot(dx, dy, dz) || 1;
-      apSteer(ship.pos.x + (dx / d) * 1e6, ship.pos.y + (dy / d) * 1e6, ship.pos.z + (dz / d) * 1e6, 0.8, { jumpAhead: true, avoid: "soft" });
+      /* 0.3.51: climb out TOWARD the lane, not straight up. Straight up left
+       * the hull doing 800 u/s at right angles to where it was going, so it
+       * came about and slid sideways for the length of the brake. Tilted, the
+       * climb still gains height on every tick (the radial part is never less
+       * than half) and most of its speed is already along the lane. */
+      const rx = dx / d, ry = dy / d, rz = dz / d;
+      const dest = warpDestination(node);
+      let lx = dest.x - ship.pos.x, ly = dest.y - ship.pos.y, lz = dest.z - ship.pos.z;
+      const ll = Math.hypot(lx, ly, lz) || 1; lx /= ll; ly /= ll; lz /= ll;
+      const lr = lx * rx + ly * ry + lz * rz;
+      let px = lx - lr * rx, py = ly - lr * ry, pz = lz - lr * rz;           // the lane, across the well
+      const pl = Math.hypot(px, py, pz);
+      if (pl > 0.05) { px /= pl; py /= pl; pz /= pl; } else { px = py = pz = 0; }
+      const tilt = lr > 0 ? 1.6 : 1.0;                                       // target outward: lean further in
+      const cx = rx + px * tilt, cy = ry + py * tilt, cz = rz + pz * tilt;
+      const cl = Math.hypot(cx, cy, cz) || 1;
+      apSteer(ship.pos.x + (cx / cl) * 1e6, ship.pos.y + (cy / cl) * 1e6, ship.pos.z + (cz / cl) * 1e6, 0.8, { jumpAhead: true, avoid: "soft" });
       return "flying";
     }
     if (/CHARGE/.test(blk) || ship.charge < warpReserve()) {
@@ -698,10 +762,14 @@ export function apLeg(node, { cap = 1, warp = "auto", farLeg = null, graze = "ho
     const sp = Math.hypot(ship.vel.x, ship.vel.y, ship.vel.z);
     const fast = sp > ALIGN_CEILING;
     /* soft: hold the lane unless something is genuinely about to be hit. A
-     * full dodge here fights the alignment gate and neither ever wins. */
-    apSteer(dest.x, dest.y, dest.z, fast ? 0 : 0.3, { jumpAhead: true, avoid: "soft" });
+     * full dodge here fights the alignment gate and neither ever wins.
+     * 0.3.51: and coming about sheds the drift the climb left, rather than
+     * carrying it sideways into the spool. */
+    const drift = flyTheLane(node, fast ? 0 : 0.3);
     if (fast && sp > DEAD_SLOW * 3) { setThrottle(0); touch.brake = true; }
     const route = plotRoute(node.id);
+    /* and the core is not lit until the hull is moving where it points */
+    if (drift > LANE_DRIFT * 2) { autopilot.task = `align · ${node.name} · trimming ${Math.round(drift)} u/s of drift`; return "flying"; }
     if (route?.aligned && !route.impact && sim.warp.cool <= 0) {
       const risky = graze === "hold" && route.hazards.some((h) => h.kind === "graze");
       if (risky) { autopilot.why = "well graze in the lane — holding for a cleaner plot"; return "flying"; }

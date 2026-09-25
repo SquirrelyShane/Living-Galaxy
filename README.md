@@ -1449,6 +1449,15 @@ and burn) — visual only, the rogue is already gone from the sim.
 
 ## Nav, avoidance and the autopilot
 
+### Flying like a pilot (0.3.51)
+
+The ship moves where it points. Out of a well the autopilot climbs tilted
+toward the lane; lining up for a jump (`flyTheLane`) it sheds any drift with the
+nose ALONG the motion, pivots onto the lane under 80 u/s, and only then lights
+the core; the jump itself flies the lane nose-first and turns to face the
+target only in its last tenth. Before, the spool slid backwards at 600 u/s with
+the nose 125–138° off the flight path, and every jump crabbed up to 24°.
+
 ### The contact register
 
 `js/contacts.js` exists because `map.js` used to say so in its own comment:
@@ -3522,6 +3531,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
 | `seclevel` | 0.3.48: GREEN with SOS open, a real wing flown to the player and a call that is not closed as "victim gone"; one call at a time; YELLOW from a hit or a round fired, clearing after 20 s; pirates add no heat, honest hulls and pilots do; RED closes SOS, drops Directorate standing, marks the hull an outlaw and turns patrol contacts hostile; heat rides the pilot record, cools, and is paid off at an honest port only |
 | `line` | 0.3.46: regard from trust aboard and its lift on mood; every line topic moves the number it names (bonus, cut, promotion, family, passage, release) with its cooldown and limits; nobody earns in transit and the books count raises; the rolls' events reach the inbox; an ask is answered or lapses and costs; towns, children and the inbox survive a save; a port in another sky cannot be called |
+| `nose` | 0.3.51: an autopilot jump out of a well — the ship moves where it points above 150 u/s, the drift is shed nose-first before the core is lit, the jump flies the lane at 0° and still arrives; a manual jump flies the lane nose-first |
 | `chartquiet` | 0.3.50: nothing beyond the dish or under drive is on the chart, a hull leaves it the moment its drive lights, the register holds only what is near, your own fleet stays visible anywhere |
 | `balance` | 0.3.47: every mineral and part equals `VALUE_RULE`; the multiple over raw ore climbs with depth, nothing under 1.3× or over 3.6×; the curve still falls past twice target and lands on the floor; `BOARD.pay` is 1; a mining job pays 1.05–1.8× the bid, buying for the desk under 1.7× book, freight under 35% of cargo value; a flying job under 30% of a starter hull; the chain bonus is `CHAIN.bonusK` of authored; staff share ≤ 35% |
 | `deck` | 0.3.45/0.3.49: every deck tab in index.html has a panel and every panel a tab; the treasury, fleet and flight log are not on the deck; the HALL never opens the console — crew TALK/SETTLE/PAY OFF inline, the company line inline, a registrar that takes a typed name |

@@ -10,6 +10,48 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.51 — 2026-09-25
+
+The nose goes where the ship goes.
+
+Reported: warping or approaching, the ship flew sideways — not like a pilot
+flying it. Measured on an autopilot jump out of Earth's well, the angle between
+the nose and the flight path (relative to the well the canopy shows):
+
+| Phase | 0.3.50 | 0.3.51 |
+| --- | --- | --- |
+| climb out of the well | 2–13° | 1–9° |
+| align + spool | **125–138°** (sliding backwards at 600 u/s) | 0–3°, a brief pivot at walking pace |
+| the jump itself | 0° → **24°** crabbed by the end | **0°** until the core lets go |
+
+Three causes, three fixes:
+
+- **The spool was held, not flown.** The autopilot swung the nose onto the
+  lane and then did nothing while the climb's 800 u/s carried on in another
+  direction. Lining up for a jump is now what a pilot does
+  (`flyTheLane` in `js/autopilot.js`): carrying real drift off the lane, the
+  nose goes ALONG the motion and brakes; under 80 u/s it pivots onto the lane;
+  on the lane, mains and the core. The core is not lit while more than 80 u/s
+  of drift is still being carried.
+- **The climb went straight up.** Out of a well it now climbs tilted toward
+  the lane (never less than half radial, so it still gains height every tick),
+  so most of its speed is already going the right way.
+- **The jump turned the whole way.** The run interpolated the nose from where
+  it started to "facing the target on arrival" while the hull moved in a
+  straight line — every stand-off drop point off to one side of its target
+  crabbed the jump. Now it comes onto the lane in the first tenth, flies it
+  nose-first, and turns to face the target in the last tenth as the core lets
+  go. Manual jumps get this too.
+
+Cost: shedding the drift before spooling adds about 12 s to a jump out of a
+well (Earth → Mars autopilot: 55 s end to end). Approaches were already
+tracking the nose within 1–9° relative to the port being flown to.
+
+Files: `js/autopilot.js`, `js/sim.js`, `js/version.js`, `README.md`,
+`test/nose.test.mjs` (new, 7).
+
+---
+
 ## 0.3.50 — 2026-09-25
 
 The nav map stops tracking the whole sky.
