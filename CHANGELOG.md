@@ -10,6 +10,37 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.55 — 2026-09-25
+
+You spawn where you spawn.
+
+Reported from the live site: the game drops you into an asteroid field, then
+after a while throws you back to the normal spawn.
+
+A launch seats the hull beside the home world at sky time 0. Joining a shared
+sky then jumps the clock by the room's whole age — on day 41 that is 28,890 s
+in one step — and `shiftClock` carried the hull along the world's velocity in
+a **straight line** for all of it. Earth's orbit curves; the line does not.
+Measured on 0.3.54:
+
+| Clock jump | Hull from Earth after it, 0.3.54 | 0.3.55 |
+| --- | --- | --- |
+| join a day-41 room, Earth already found | 951,810 u — **in the main belt** | 8,055 u |
+| join before the first tick found Earth | 978,201 u — empty space | 8,055 u |
+| relay restart, room clock moves back | 963,960 u | 8,055 u |
+| the clock chase's ¼ s nudge | unchanged | unchanged |
+
+Now the hull is carried by where its world actually IS at the new time, and
+its velocity turns with the world's, so any jump — forward on joining,
+backward when the relay restarts and the room is reborn — leaves you exactly
+where you were relative to the world you were beside. A hull near the star,
+or out in the belt, is not moved: the star does not move.
+
+Files: `js/sim.js`, `js/version.js`, `README.md`; `test/spawn.test.mjs` (new, 20 —
+fails on 0.3.54).
+
+---
+
 ## 0.3.54 — 2026-09-25
 
 One name, one person: the Galactic Database.

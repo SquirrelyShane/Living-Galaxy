@@ -3768,14 +3768,36 @@ export function shiftClock(dt) {
   const ship = sim.ship;
   if (!ship || sim.phase === "menu") { sim.time += dt; return; }
   const port = ship.dockedAt ? null : dockPortFor(ship);
-  let fx = 0, fy = 0, fz = 0;
-  if (port) { fx = port.vx ?? 0; fy = port.vy ?? 0; fz = port.vz ?? 0; }
-  else if (sim.dominant) { bodyVelocity(sim.dominant.id, sim.time, _clockV); fx = _clockV.x; fy = _clockV.y; fz = _clockV.z; }
+  const t0 = sim.time;
   sim.time += dt;
   if (ship.dockedAt || tractor.active) return;   // clampDocked and the tractor re-seat the hull off the new clock
-  ship.pos.x += fx * dt; ship.pos.y += fy * dt; ship.pos.z += fz * dt;
+  if (port) {
+    /* a berth request is a short-range frame and its corrections are small */
+    ship.pos.x += (port.vx ?? 0) * dt; ship.pos.y += (port.vy ?? 0) * dt; ship.pos.z += (port.vz ?? 0) * dt;
+    return;
+  }
+  /* 0.3.55 — carry the hull with the world it is near, by where that world IS
+   * at the new time. This used to be `velocity × dt`: a straight line along
+   * the world's orbit. Fine for the quarter-second nudges of the clock chase;
+   * not for JOINING a shared sky, where the clock jumps by the room's whole
+   * age at once. Reported: you spawn into an asteroid field, then get thrown
+   * back to the normal spawn. Measured: launch at sky time 0 beside Earth, the
+   * relay says the room is on day 41 (a 28,890 s jump), and the straight line
+   * put the hull 950,000 u off Earth, in the main belt — or, when the first
+   * poll landed before the first tick had found Earth at all, left it behind
+   * in empty space. When a relay restart moved the room's clock back, the
+   * same thing ran the other way. Now the hull keeps its place and its motion
+   * relative to its world for any jump, forward or back. */
+  const dom = sim.dominant ?? gravityAt(ship.pos, t0, bodyPosition, _clockG).body;
+  if (!dom || dom.kind === "star") return;   // the star does not move
+  if (!bodyPosition(dom.id, t0, _clockA) || !bodyPosition(dom.id, sim.time, _clockB)) return;
+  ship.pos.x += _clockB.x - _clockA.x; ship.pos.y += _clockB.y - _clockA.y; ship.pos.z += _clockB.z - _clockA.z;
+  bodyVelocity(dom.id, t0, _clockA); bodyVelocity(dom.id, sim.time, _clockB);
+  ship.vel.x += _clockB.x - _clockA.x; ship.vel.y += _clockB.y - _clockA.y; ship.vel.z += _clockB.z - _clockA.z;
 }
-const _clockV = { x: 0, y: 0, z: 0 };
+const _clockA = { x: 0, y: 0, z: 0 };
+const _clockB = { x: 0, y: 0, z: 0 };
+const _clockG = { x: 0, y: 0, z: 0 };
 
 /** The port whose frame the hull flies in: a live berth request (yours or the autopilot's) inside 30 km. */
 const DOCK_FRAME_R = 30000;

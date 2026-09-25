@@ -94,6 +94,12 @@ line-uppable that way, so the longest-present live pilot in a room is its
 and `/net/world` is the snapshot a late joiner inherits so they arrive into the
 same scarred system.
 
+Joining jumps your clock by the room's whole age in one step (and a relay
+restart can move it back). `shiftClock` carries the hull by where the world
+it is beside actually is at the new time, velocity included (0.3.55) — a
+straight line along the world's velocity, for a jump of hours, used to drop a
+fresh spawn in the asteroid belt.
+
 `cradle.json` beside `server.py` is the one thing written to disk. Delete it to
 forget everyone — or leave it: it is capped (`CRADLE_MAX`, default 20,000) and
 pruned on the flush thread, and what goes first is what is cheapest to lose. A
