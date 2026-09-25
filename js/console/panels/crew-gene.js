@@ -23,8 +23,10 @@ import { journal, exportJournals, habitsOf } from "../../crew/journal.js";
 import { habitsLearned, learnedLine, confidenceOf, trainingCorpus, DECK_KINDS } from "../../crew/learn.js";
 import { heritageLine, learningBonus, houseSkills } from "../../crew/heritage.js";
 import { SKILLS } from "../../careers/skills.js";
+import { orderFor, giveOrder, setTraining, coachHabit, ceilingOf, TRAIT_MEANS } from "../../crew/orders.js";
+import { deckmind } from "../../crew/deckmind.js";
 
-const view = { geneId: null, logId: null, logOpen: null, logAll: false };
+const view = { geneId: null, logId: null, logOpen: null, logAll: false, said: null };
 
 const TRAIT_LABEL = { grit: "Grit", caution: "Caution", greed: "Greed", loyalty: "Loyalty", curiosity: "Curiosity" };
 const NEED_LABEL = {
@@ -47,7 +49,14 @@ const memberOf = (id) => crew.aboard.find((m) => m.id === id) ?? null;
  * hand is actually in. Cheap enough to build on a repaint; guarded because a
  * member who has just left the deck has no context to build. */
 function ctxOf(m) {
-  try { return buildContext(m); } catch { return null; }
+  /* 0.3.53: a PEEK — reading a hand must not live a watch for them */
+  try { return buildContext(m, { peek: true }); } catch { return null; }
+}
+
+/* what the last thing you did on the sheet came to, for this hand */
+function said(m, r) {
+  view.said = { id: m.id, line: r.ok ? r.line : null, why: r.ok ? null : r.why };
+  sim.notice = r.ok ? r.line : r.why;
 }
 
 /* ---- GENOME -------------------------------------------------------------- */
@@ -67,7 +76,7 @@ export function mountGenome(root, ctx) {
     if (!m) { body.innerHTML = ""; return; }
     const b = bodyOf(m);
     const rec = cradle.get(m.id);
-    const k = `${m.id}:${Math.round(m.morale ?? m.condition ?? 0)}:${Math.round((needsOf(m).fatigue ?? 0) * 20)}`;
+    const k = `${m.id}:${Math.round(m.morale ?? m.condition ?? 0)}:${NEED_KEYS.map((n) => Math.round((needsOf(m)[n] ?? 0) * 20)).join("")}:${m.orderCycle}:${deckmind.cycle}:${m.trainFocus}:${m.heardAt}:${JSON.stringify(m.coached ?? {})}:${view.said?.id === m.id ? view.said.line ?? view.said.why : ""}:${Math.round(m.trust ?? 0)}`;
     if (k === key) return;
     key = k;
     body.innerHTML = "";
@@ -89,33 +98,48 @@ export function mountGenome(root, ctx) {
 
     /* — temperament — */
     const tr = section("TEMPERAMENT");
-    note(tr, "Grown from the genes, not rolled. A child inherits these because they inherit what makes them.");
+    note(tr, "Grown from the genes, not rolled — nothing to press here. A child inherits these because they inherit what makes them. What each one does aboard:");
     for (const [axis, label] of Object.entries(TRAIT_LABEL)) {
       const v = b.traits[axis] ?? 0.5;
-      const r = row(tr, label, { value: v.toFixed(2), bar: true });
+      const r = row(tr, label, { value: v.toFixed(2), bar: true, hint: `${v >= 0.6 ? "high — " : v <= 0.4 ? "low — the opposite of: " : ""}${TRAIT_MEANS[axis] ?? ""}` });
       setBar(r.bar, v, "ok");
     }
     body.append(tr);
 
     /* — what they were built for — */
     const ap = section("APTITUDE");
-    note(ap, "The ceiling the body sets. What they have actually learned is the paler number.");
+    note(ap, "The ceiling the body sets, and what they have actually learned. TRAIN sets what they study toward — GIVE A GOAL below, or their own study — up to that ceiling and no further.");
     const top = Object.entries(b.apt).sort((a, x) => x[1] - a[1]).slice(0, 8);
+    if (m.trainFocus && !top.some(([k]) => k === m.trainFocus)) top.push([m.trainFocus, b.apt[m.trainFocus] ?? 0]);
     for (const [skill, v] of top) {
       const have = (m.skills?.[skill] ?? 0) / 100;
-      const r = row(ap, SKILLS[skill]?.name ?? skill, { value: `${pct(v)} · learned ${pct(have)}`, bar: true });
+      const on = m.trainFocus === skill;
+      const r = row(ap, SKILLS[skill]?.name ?? skill, { value: "", bar: true, hint: `ceiling ${pct(v)} · learned ${pct(have)}${have >= v - 0.005 ? " · at the ceiling" : ""}` });
       setBar(r.bar, v, v > 0.7 ? "ok" : v > 0.45 ? "warn" : "hot");
+      const tb = button(on ? "TRAINING" : "TRAIN", () => { setTraining(m, skill); said(m, { ok: true, line: m.trainFocus ? `${firstName(m)} will study ${SKILLS[skill]?.name ?? skill} (to ${ceilingOf(m, skill)}).` : `${firstName(m)} studies what they like again.` }); key = ""; paint(); }, `tiny${on ? " accent" : ""}`);
+      tb.dataset.train = skill;
+      if (m.robot) { tb.disabled = true; tb.classList.add("locked"); }
+      r.value.replaceChildren(tb);
     }
     body.append(ap);
 
     /* — what they need — */
     const nd = section("CARRYING");
-    note(nd, "Nine needs. They rise on their own and only come down when something is done about them.");
+    note(nd, "Nine needs. They rise on their own and only come down when something is done about them — by them, or by you: one order a watch, and it is a real watch, filed in their LOG.");
+    if (view.said?.id === m.id) nd.append(el("p", view.said.why ? "hot" : "warm", view.said.line ?? view.said.why));
+    if (m.orderCycle === deckmind.cycle) note(nd, "Ordered this watch — the next one is theirs.");
     const needs = needsOf(m);
     for (const n of NEED_KEYS) {
       const v = needs[n] ?? 0;
-      const r = row(nd, NEED_LABEL[n] ?? n, { value: v.toFixed(2), bar: true });
+      const o = orderFor(m, n);
+      const r = row(nd, NEED_LABEL[n] ?? n, { value: "", bar: true, hint: `${v.toFixed(2)}${o?.hint ? ` · ${o.hint}` : ""}` });
       setBar(r.bar, v, NEED_TONE(v));
+      if (!o) continue;
+      const ob = button(o.label, () => { said(m, giveOrder(m, n)); key = ""; paint(); }, `tiny${v > 0.55 && !o.why ? " accent" : ""}`);
+      ob.dataset.order = n;
+      ob.title = o.why ?? o.hint ?? "";
+      if (o.why) { ob.disabled = true; ob.classList.add("locked"); }
+      r.value.replaceChildren(ob);
     }
     body.append(nd);
 
@@ -142,11 +166,20 @@ export function mountGenome(root, ctx) {
     row(lr, "Settled", { value: pct(conf), hint: conf < 0.1 ? "too new to have learned anything yet" : "how much of a life there is behind this" });
     if (conf >= 0.1) {
       note(lr, learnedLine(m));
-      const learned = habitsLearned(m, ctxOf(m)).slice(0, 5);
-      for (const h of learned) {
-        const r = row(lr, h.kind, { value: h.p.toFixed(3), bar: true });
-        setBar(r.bar, Math.min(1, h.p * DECK_KINDS.length / 2), h.p * DECK_KINDS.length > 1.15 ? "ok" : h.p * DECK_KINDS.length < 0.85 ? "hot" : "warn");
-      }
+    }
+    /* 0.3.53: a word from the captain is one step of the same learning */
+    note(lr, "ENCOURAGE or CURB a habit: a word from you, learned the way their own watches are — once a habit a watch.");
+    const learned = habitsLearned(m, ctxOf(m)).slice(0, conf >= 0.1 ? 5 : 9);
+    for (const h of learned) {
+      const r = row(lr, h.kind, { value: "", bar: true, hint: h.p.toFixed(3) });
+      setBar(r.bar, Math.min(1, h.p * DECK_KINDS.length / 2), h.p * DECK_KINDS.length > 1.15 ? "ok" : h.p * DECK_KINDS.length < 0.85 ? "hot" : "warn");
+      const done = m.coached?.[h.kind] === deckmind.cycle;
+      const up = button("+", () => { said(m, coachHabit(m, h.kind, +1)); key = ""; paint(); }, "tiny");
+      const dn = button("−", () => { said(m, coachHabit(m, h.kind, -1)); key = ""; paint(); }, "tiny");
+      up.title = `encourage ${h.kind}`; dn.title = `curb ${h.kind}`;
+      up.dataset.coach = `${h.kind}:+`; dn.dataset.coach = `${h.kind}:-`;
+      for (const x of [up, dn]) if (done || m.robot) { x.disabled = true; x.classList.add("locked"); }
+      r.value.replaceChildren(up, dn);
     }
     body.append(lr);
 

@@ -77,6 +77,9 @@ function book(text, delta, kind = "note") {
   save();
 }
 
+/** 0.3.53: a line of spending from the care menu (js/staffcare.js). */
+export function bookSpend(text, amount, kind = "care") { book(text, -Math.abs(amount), kind); }
+
 export function suggestName() {
   const heads = ["Farside", "Longreach", "Cinder", "Meridian", "Halyard", "Quill", "Ninefold", "Bright Arc", "Tallgrass", "Ferrous"];
   const tails = { military: "Security", industrial: "Extraction", logistic: "Freight", civilian: "Trading", agricultural: "Provisions" };

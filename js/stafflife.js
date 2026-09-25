@@ -40,6 +40,8 @@ export const HOUSING = {
   cabin: { id: "cabin", label: "Private cabin", cost: 12, sleep: 1.2, mood: 1 },
   quarters: { id: "quarters", label: "Family quarters", cost: 30, sleep: 1.35, mood: 3 },
 };
+/* 0.3.53: the shift differential — nights pay more for the same hour */
+export const SHIFT_PAY = { day: 1, swing: 1.05, night: 1.15 };
 export const LIFE = {
   retainer: 0.3,          // of the share, booked every cycle whatever they are doing
   perHour: 0.7,           // …and this much of it per hour worked (a cycle is 3 hours; they work 1 in 3)
@@ -110,8 +112,10 @@ export function planAt(s, H) {
   if (s.transit) return { id: "transit", label: "on a liner between ports", left: 0 };
   const W = HOURS[s.hours]?.h ?? 8;
   const into = hoursIntoShift(SHIFTS[s.shift]?.start ?? 6, H);
+  /* 0.3.53: a shift can be given back — a day off, or a training course */
+  const off = s.offShift && H >= s.offShift.from && H < s.offShift.to ? s.offShift : null;
   const blocks = [
-    [W, s.onStrikeUntil && s.onStrikeUntil > H ? "strike" : "work"],
+    [W, s.onStrikeUntil && s.onStrikeUntil > H ? "strike" : off ? (off.kind === "course" ? "course" : "off") : "work"],
     [W + 1, "meal"],
     [15, "own"],
     [16, "supper"],
@@ -123,6 +127,8 @@ export function planAt(s, H) {
       let label;
       if (id === "work") label = `on the ${s.job} · ${SHIFTS[s.shift].label}`;
       else if (id === "strike") label = "on the picket line";
+      else if (id === "off") label = "a day off";
+      else if (id === "course") label = `on a training course · ${SHIFTS[s.shift].label} given back`;
       else if (id === "meal") label = "in the mess";
       else if (id === "supper") label = "at supper";
       else if (id === "sleep") label = "asleep";
@@ -147,14 +153,16 @@ export function nowOf(s, t) {
   return { ...p, leftS: Math.round(p.left * CLOCK.hourS) };
 }
 
-/** How much an hour of their work is worth, 0.3–1.1. */
+/** How much an hour of their work is worth, 0.3–1.1 (to 1.28 with courses). */
 export function productivity(s) {
   const mood = s.mood ?? 74;
   const tired = s.needs?.tired ?? 0.3;
-  return Math.max(0.3, Math.min(1.1, (0.45 + (mood / 100) * 0.55) * (tired > 0.75 ? 0.7 : 1)));
+  const trained = Math.min(3, s.trained ?? 0) * 0.06;
+  return Math.max(0.3, Math.min(1.1 + trained, (0.45 + (mood / 100) * 0.55 + trained) * (tired > 0.75 ? 0.7 : 1)));
 }
 
-function log(s, c, text) {
+export function log(s, c, text) {
+  ensureLife(s);
   s.dayLog.unshift({ day: c.day, hhmm: c.hhmm, text });
   if (s.dayLog.length > LIFE.logMax) s.dayLog.length = LIFE.logMax;
 }
@@ -163,6 +171,8 @@ const NEEDS = {
   //          tired   hungry  lonely  mood/h
   work:     [0.055,  0.05,   0.015,  0],
   strike:   [0.03,   0.05,   -0.02,  -0.3],
+  off:      [-0.02,  0.03,   -0.1,   0.6],
+  course:   [0.03,   0.05,   -0.04,  0.2],
   meal:     [0.0,    -0.45,  -0.05,  0.2],
   supper:   [0.0,    -0.45,  -0.06,  0.2],
   own:      [0.01,   0.03,   -0.07,  0.3],
@@ -182,6 +192,7 @@ export function tickStaffHour(t) {
   for (const s of company.staff) {
     if (s.sky != null && s.sky !== sim.skySeed) continue;   // another sky: its port is not running
     ensureLife(s);
+    if (s.offShift && H >= s.offShift.to) s.offShift = null;
     const p = planAt(s, H);
     const d = NEEDS[p.id] ?? NEEDS.own;
     const house = HOUSING[s.housing] ?? HOUSING.bunk;
@@ -193,12 +204,13 @@ export function tickStaffHour(t) {
     const lean = (0.45 - n.tired) * 0.5 + (0.45 - n.hungry) * 0.35 + (0.45 - n.lonely) * 0.35 + d[3] + house.mood * 0.05;
     s.mood = Math.max(0, Math.min(100, (s.mood ?? 74) + lean));
     if (p.id === "work") {
-      const w = productivity(s);
+      const w = productivity(s) * (SHIFT_PAY[s.shift] ?? 1);
       s.worked += w;
       s.workedToday += 1;
       onShift.set(s.stationId, (onShift.get(s.stationId) ?? 0) + 1);
     }
     if (p.id !== s.lastAct) {
+      if (p.id === "course" && s.lastAct !== "course") s.trained = Math.min(3, (s.trained ?? 0) + 1);
       if (p.id === "work") log(s, c, `clocked on — ${s.job}`);
       else if (s.lastAct === "work") log(s, c, `off shift after ${s.workedToday} h${p.id === "meal" ? ", to the mess" : ""}`);
       else log(s, c, p.label);

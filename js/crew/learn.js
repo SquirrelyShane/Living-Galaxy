@@ -176,14 +176,33 @@ export function learnFromRecord(ctx, rec) {
   return reward;
 }
 
+/**
+ * 0.3.53 — a word from the captain about one kind of thing (js/crew/orders.js):
+ * one step of the same learning, in the situation they are in now, and the
+ * brain written back to the ledger straight away.
+ */
+export const COACH_STEPS = 4;
+export function coach(m, ctx, kind, reward) {
+  const net = brainOf(m);
+  if (!net || !DECK_KINDS.includes(kind)) return false;
+  /* a word from the captain lands harder than one watch's outcome — four
+   * steps of it — but counts as one thing lived through, not four */
+  const x = ctx?._deckX ?? deckFeatures(ctx);
+  const at = net.outcomes ?? 0;
+  for (let i = 0; i < COACH_STEPS; i++) learnOutcome(net, x, kind, reward);
+  net.outcomes = at + 1;
+  mirror(m, net, true);
+  return true;
+}
+
 /* Weights ride in the CRADLE record of whoever they belong to, the same way
  * the conn core does — but only for people who are actually on the ledger. A
  * provisional NPC hand's brain lives and dies with the run, which is the
  * right trade: it costs nothing and nobody will ever ask about it. */
-function mirror(m, net) {
+function mirror(m, net, force = false) {
   const rec = cradle.get(m.id);
   if (!rec) { m.deckBrain = net; return; }
-  if ((net.outcomes ?? 0) % 8) return;             /* not every step — this serialises */
+  if (!force && (net.outcomes ?? 0) % 8) return;   /* not every step — this serialises */
   rec.deckBrain = {
     ...net,
     W1: net.W1.map(r4), b1: net.b1.map(r4),

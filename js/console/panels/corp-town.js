@@ -15,6 +15,7 @@ import { townReport, townLog, townLine, roleAt } from "../../stationlife.js";
 import { cradle, traitLine } from "../../npc/cradle.js";
 import { lifeLine, needsLine, dayLogOf } from "../../stafflife.js";
 import { clockLine } from "../../stationclock.js";
+import { CARE, careAct, setHousing, setHours, setJob, setShift, termsLine, workOptions } from "../../staffcare.js";
 import { sigil } from "../../ui/glyphs.js";
 import {
   TOPICS, callTopic, cutOf, lineLog, lineState, lineSummary, markRead, openAsk,
@@ -32,6 +33,36 @@ function act(staffId, topicId, arg, render) {
   view.arm = null; view.move = null;
   if (!staffById(staffId)) view.open = null;
   render();
+}
+
+/* 0.3.53 — WORK · HOME · CARE (js/staffcare.js): the settled hand's menu */
+function careBlock(s, render) {
+  const box = el("div", "tcare");
+  box.append(el("small", null, `WORK · HOME — ${termsLine(s)}`));
+  const o = workOptions(s);
+  const pick = (list, cur, fn, aria) => {
+    const sel = el("select", "tinput");
+    for (const x of list) { const id = x.id ?? x; const op = el("option", null, x.label ?? x); op.value = id; if (id === cur) op.selected = true; sel.append(op); }
+    sel.setAttribute("aria-label", aria);
+    sel.dataset.care = aria.toLowerCase();
+    sel.addEventListener("change", () => { const why = fn(s, sel.value); view.said = { id: s.id, care: true, why, line: why ? null : `${aria}: ${sel.options[sel.selectedIndex].textContent}` }; if (why) sim.notice = why; render(); });
+    return sel;
+  };
+  const g1 = el("div", "tgroup");
+  g1.append(pick(o.jobs, s.job, setJob, "Job"), pick(o.shifts, s.shift, setShift, "Shift"), pick(o.hours, s.hours, setHours, "Hours"), pick(o.housing, s.housing, setHousing, "Housing"));
+  box.append(g1);
+  const g2 = el("div", "tgroup");
+  for (const c of CARE) {
+    const why = c.ok(s);
+    const b = button(c.label.toUpperCase(), () => { const r = careAct(s, c.id); view.said = { id: s.id, care: true, why: r.ok ? null : r.why, line: r.ok ? r.line : null }; if (!r.ok) sim.notice = r.why; render(); }, "tiny");
+    b.dataset.care = c.id;
+    b.title = why ?? c.hint(s);
+    if (why) { b.disabled = true; b.classList.add("locked"); }
+    g2.append(b);
+  }
+  box.append(g2);
+  if (view.said?.id === s.id && view.said.care && view.said.line) box.append(el("p", "warm", view.said.line));
+  return box;
 }
 
 /** The open line to one person: who they are now, the transcript, what you can do. */
@@ -61,6 +92,7 @@ function lineCard(s, render) {
     for (const e of day) dl.append(el("p", null, `D${e.day} ${e.hhmm} — ${e.text}`));
     body.append(dl);
   }
+  if (!s.transit) body.append(careBlock(s, render));
 
   /* the transcript, oldest at the top so it reads like a call */
   const log = lineLog(s, 6).slice().reverse();
@@ -114,7 +146,7 @@ export function mountTown(root, ctx = {}) {
   };
   const signature = () => {
     const L = hasCompany() ? lineState() : { inbox: [] };
-    return `${hasCompany()}:${company.staff.length}:${company.staff.map((s) => `${s.id}${Math.round(s.mood ?? 0)}${s.transit ? "t" : ""}${s.role}`).join(",")}:${L.inbox.length}:${unread()}:${view.open}:${view.arm}:${view.move}:${Math.floor((sim.time ?? 0) / 10)}`;
+    return `${hasCompany()}:${company.staff.length}:${company.staff.map((s) => `${s.id}${Math.round(s.mood ?? 0)}${s.transit ? "t" : ""}${s.role}${s.job}${s.shift}${s.hours}${s.housing}${s.trained ?? 0}${s.offShift ? "o" : ""}`).join(",")}:${L.inbox.length}:${unread()}:${view.open}:${view.arm}:${view.move}:${Math.floor((sim.time ?? 0) / 10)}`;
   };
   const paint = () => {
     const k = signature();

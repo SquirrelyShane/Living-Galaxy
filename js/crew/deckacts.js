@@ -252,10 +252,14 @@ export function applyAction(ctx, id, spec, efficacy, rng, cycle = 0) {
     const apt = Object.entries(ctx.body.apt)
       .map(([k, v]) => [k, v * (house.has(k) ? 1.5 : 1)])
       .sort((a, b) => b[1] - a[1]);
-    const pick = apt[Math.floor(rng() * Math.min(4, apt.length))]?.[0];
+    /* 0.3.53: a hand the captain set to TRAIN studies that — and only as far
+     * as their body lets them (js/crew/orders.js) */
+    const focus = m.trainFocus && ctx.body.apt[m.trainFocus] != null ? m.trainFocus : null;
+    const pick = focus ?? apt[Math.floor(rng() * Math.min(4, apt.length))]?.[0];
     if (pick) {
       const gain = (1 + efficacy * 2) * learningBonus(m, pick);
-      m.skills[pick] = Math.min(100, (m.skills[pick] ?? 0) + Math.round(gain));
+      const cap = focus ? Math.max(m.skills[pick] ?? 0, Math.round(ctx.body.apt[pick] * 100)) : 100;
+      m.skills[pick] = Math.min(cap, (m.skills[pick] ?? 0) + Math.round(gain));
     }
   }
   if (!spec.romance && EVERYDAY_MOMENT[id] && focus?.m && !focus.m.robot && !ctx.m.robot) {

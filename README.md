@@ -189,6 +189,7 @@ refresh the browser — there is no build step.
 | `js/stationlife.js` | Settled staff: work, roles, life events, station births |
 | `js/stationclock.js` | Port standard time (0.3.52): hours, days, weeks, shifts, day parts — the one clock everything asks |
 | `js/stafflife.js` | A settled hand's working day (0.3.52): job, shift, hours, housing, needs, hour-by-hour plan, pay by hours worked, labour on the port's lines, the day log |
+| `js/staffcare.js` | A settled hand's menu (0.3.53): WORK (job, shift, hours), HOME (housing), CARE (day off, a meal, a night out, a course) — drawn by the HALL and CORP › TOWN |
 | `js/staffline.js` | The company line: call a settled hand from anywhere, their calls and asks, regard, passage between ports |
 | `js/economy.js` | Production lines, stock, the price curve |
 | `js/blueprint.js` | Deterministic station deck plans, drawn blueprint-style |
@@ -2440,7 +2441,15 @@ against what they are for, walks a decision graph, and lives with the result.
   person's genes and saturating rather than pinning, so a need that nothing is
   being done about can still lose an argument. A need nobody can meet is not
   free: somebody with no one to be close to, or nothing worth doing, comes off
-  the watch a little worse each cycle.
+  the watch a little worse each cycle. `buildContext(m, { peek: true })` reads
+  a hand without living a watch for them (0.3.53 — the GENOME sheet used to
+  drift every need on each repaint).
+- **`js/crew/orders.js`** (0.3.53) — the captain's side: an order per need,
+  run through `stepHand` with `{ order }` so it is a real watch (effect table,
+  efficacy, journal record, learning) with the graph not consulted; HEAR THEM
+  OUT on a grievance (`HEARD`: 0.35 less for five watches); TRAIN
+  (`m.trainFocus`, study capped at the aptitude ceiling); ENCOURAGE / CURB on a
+  learned habit (`learn.js` `coach`).
 - **`js/crew/hull.js`** — the seam. A **hull** is whatever a watch is stood on,
   so the graph, the effect table and the journal go through it rather than
   reaching into `sim.ship` directly. That is what let the rest of the sky have
@@ -2816,6 +2825,23 @@ shift adds 3% to their port's production lines (max 30%). The rolls' events
 lean on the hour — accidents at work, births at home — and a strike puts a
 shift on the picket line. HALL › ON THIS FLOOR and CORP › TOWN show what each
 person is doing now and their day log; calling someone at 02:00 wakes them.
+
+**What you can do about it** (0.3.53). A settled hand's card — HALL › LINE on
+the deck, or CORP › TOWN › LINE from anywhere — carries WORK · HOME · CARE
+(`js/staffcare.js`): change their job, shift (nights +15% an hour, swing +5%)
+or hours; move them out of the bunk room (cabin 12 cr/cycle, family quarters
+30); give them a DAY OFF (their next shift, unpaid, once a day), STAND THEM A
+MEAL (8 cr), A NIGHT OUT (30 cr), or SEND THEM ON A COURSE (4 cycles of their
+income; their next shift is a training day and each course makes an hour of
+their work worth 6% more, three at most).
+
+Aboard, CON › CREW › GENOME has an **order** for every need
+(`js/crew/orders.js`) — STAND DOWN, MESS CALL, SHARE A MEAL, EASE OFF / SHORE
+LEAVE, TIME WITH / WRITE HOME, REC TIME, HEAR THEM OUT, GIVE A GOAL, CLEAR THE
+BACKLOG. An order is a real watch through `deckmind.stepHand` — the effect
+table, efficacy from their genes and how tired they are, a LOG record, a step
+of learning — one a watch. TRAIN points their study at a skill, capped at the
+body's aptitude ceiling; + / − on a LEARNED habit coaches it.
 
 ### Robot crew and refits
 

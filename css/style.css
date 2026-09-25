@@ -3220,5 +3220,8 @@ html.boot-failed body > *:not(#boot-fail) { display: none !important; }
 /* 0.3.52 — a settled hand's day */
 .sd-note.sd-now { color: #d9ffe6; border-left: 2px solid #5fe39a; padding-left: 8px; }
 .sd-note.sd-day { font-size: 11px; color: #5f8a6e; }
+/* 0.3.53 — a settled hand's WORK · HOME · CARE */
+.sd-care { margin-top: 6px; padding-top: 4px; border-top: 1px dashed rgba(109, 255, 176, 0.18); }
+.sd-care .sd-btnrow .sd-select { flex: 1 1 44%; min-width: 0; }
 .sd-val { flex-wrap: wrap; }
 @media (pointer: coarse) { .sd-btn { min-height: 36px; } .sd-input { min-height: 40px; font-size: 16px; } }

@@ -31,6 +31,7 @@ import { mountTalk } from "./crew/talkview.js";
 import { TOPICS, callTopic, lineLog, openAsk, regardOf, cutOf, topicById } from "./staffline.js";
 import { incomeOf, roleAt } from "./stationlife.js";
 import { lifeLine, needsLine, dayLogOf } from "./stafflife.js";
+import { CARE, careAct, setHousing, setHours, setJob, setShift, termsLine, workOptions } from "./staffcare.js";
 
 const DOC = globalThis.document ?? null;
 const el = (tag, cls, text) => { const e = DOC.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -122,6 +123,35 @@ function hallSection(st, repaint) {
   return hall;
 }
 
+/* 0.3.53 — WORK · HOME · CARE for one settled hand (js/staffcare.js), in the deck's style */
+function careBlock(p, repaint) {
+  const wrap = el("div", "sd-care");
+  wrap.append(el("p", "sd-note", `WORK · HOME — ${termsLine(p)}`));
+  const o = workOptions(p);
+  const pick = (list, cur, fn, aria) => {
+    const sel = el("select", "sd-select");
+    for (const x of list) { const id = x.id ?? x; const op = el("option", null, x.label ?? x); op.value = id; if (id === cur) op.selected = true; sel.append(op); }
+    sel.setAttribute("aria-label", aria);
+    sel.dataset.care = aria.toLowerCase();
+    sel.addEventListener("change", () => { const why = fn(p, sel.value); hallView.said = { id: p.id, why, line: why ? null : `${aria}: ${sel.options[sel.selectedIndex].textContent}` }; repaint(); });
+    return sel;
+  };
+  const r1 = el("div", "sd-btnrow");
+  r1.append(pick(o.jobs, p.job, setJob, "Job"), pick(o.shifts, p.shift, setShift, "Shift"), pick(o.hours, p.hours, setHours, "Hours"), pick(o.housing, p.housing, setHousing, "Housing"));
+  wrap.append(r1);
+  const r2 = el("div", "sd-btnrow");
+  for (const c of CARE) {
+    const why = c.ok(p);
+    const b = btn(c.label.toUpperCase(), () => { const r = careAct(p, c.id); hallView.said = { id: p.id, why: r.ok ? null : r.why, line: r.ok ? r.line : null }; repaint(); });
+    b.dataset.care = c.id;
+    b.title = why ?? c.hint(p);
+    if (why) b.disabled = true;
+    r2.append(b);
+  }
+  wrap.append(r2);
+  return wrap;
+}
+
 /* the company line, drawn in the deck's style */
 function lineCard(p, repaint) {
   const box = el("div", "sd-talk sd-line");
@@ -132,6 +162,8 @@ function lineCard(p, repaint) {
   if (day.length) box.append(el("p", "sd-note sd-day", day.map((e) => `${e.hhmm} ${e.text}`).join(" · ")));
   for (const e of lineLog(p, 5).slice().reverse()) box.append(el("p", `sd-note ${e.who === "you" ? "sd-you" : "sd-them"}`, `${e.who === "you" ? "You" : p.name.split(" ")[0]}: ${e.text}`));
   if (hallView.said?.id === p.id && hallView.said.why) box.append(el("p", "sd-note sd-warn", hallView.said.why));
+  else if (hallView.said?.id === p.id && hallView.said.line) box.append(el("p", "sd-note sd-them", hallView.said.line));
+  box.append(careBlock(p, repaint));
   const ask = openAsk(p);
   if (ask && !ask.lapsed) box.append(el("p", "sd-note sd-warn", `Asking: ${ask.asks.map((a) => topicById(a)?.label.toLowerCase()).join(", or ")}.`));
   const btns = el("div", "sd-btnrow");

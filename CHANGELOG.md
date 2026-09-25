@@ -10,6 +10,64 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.53 — 2026-09-25
+
+Doing something about it: a menu for settled hands, and buttons on the genome.
+
+**Settled hands: WORK · HOME · CARE** (`js/staffcare.js`, new). On a settled
+hand's card — the port's HALL › LINE in station style, or CON › CORP › TOWN ›
+LINE from anywhere in the sky:
+
+| | What | What it does |
+| --- | --- | --- |
+| WORK | job | any job their port has (by sector); a curious hand likes a change, most do not |
+| | shift | day / swing / night — nights pay **+15%** an hour, swing +5%; most people dislike nights |
+| | hours | standard 8, overtime 10, part-time 5 — a greedy hand likes overtime |
+| HOME | housing | bunk (free), private cabin (12 cr/cycle), family quarters (30) — better sleep, better mood |
+| CARE | DAY OFF | their next shift given back, unpaid, once a day; mood +4 |
+| | STAND THEM A MEAL | 8 cr — fed, a little less alone |
+| | A NIGHT OUT | 30 cr — company, and a late one |
+| | SEND ON A COURSE | 4 cycles of their income — their next shift is a training day; each course makes an hour of their work worth 6% more (three at most) |
+
+Money comes from the treasury, or your pocket when it is dry, and all of it
+lands in their day log.
+
+**GENOME: every stat you can act on has a button** (`js/crew/orders.js`, new).
+CON › CREW › GENOME:
+
+- **CARRYING** — each of the nine needs has an **order**: Tiredness → STAND
+  DOWN, Hunger → MESS CALL, Company → SHARE A MEAL (with whoever they get on
+  with best), Strain → EASE OFF (docked: SHORE LEAVE, 60 cr), Closeness → TIME
+  WITH their partner (or WRITE HOME), Something to do → REC TIME, Grievance →
+  HEAR THEM OUT, Purpose → GIVE A GOAL, Work outstanding → CLEAR THE BACKLOG.
+  An order is a **real watch**: the same effect table and efficacy as their
+  own choice, filed in their LOG with "the captain's orders" as the reason,
+  and learned from. One a watch. Hearing a grievance does not remove its cause
+  — wages, a rival, a neglected hull — but for five watches it weighs 0.35
+  less, and the row tells you what the cause is.
+- **APTITUDE** — TRAIN a skill and they study toward it, up to the ceiling
+  their body sets and no further; having a goal slows how fast purpose runs out.
+- **LEARNED** — + / − (ENCOURAGE / CURB) on a habit is a word from you: four
+  steps of the same learning their watches do, in the situation they are in,
+  counted as one thing lived through. Once a habit a watch.
+- **TEMPERAMENT** is genes — nothing to press — so each trait now says what it
+  does aboard.
+
+**Fixed: the GENOME sheet was tiring people out.** Building a hand's decision
+context drifted every need a step, and the sheet built one on every repaint —
+keyed on tiredness, so an open sheet on a seasoned hand ran their needs to the
+ceiling in a handful of frames (and charged morale for it). Reading a hand is
+now a peek (`buildContext(m, { peek: true })`).
+
+Files: `js/staffcare.js` (new), `js/crew/orders.js` (new), `js/stafflife.js`,
+`js/company.js`, `js/deckhall.js`, `js/console/panels/corp-town.js`,
+`js/console/panels/crew-gene.js`, `js/crew/deckmind.js`, `js/crew/deckacts.js`,
+`js/crew/learn.js`, `css/style.css`, `css/console.css`, `js/version.js`,
+`README.md`; tests `test/orders.test.mjs` (new, 44), `test/smoke-orders.mjs`
+(new, 21).
+
+---
+
 ## 0.3.52 — 2026-09-25
 
 Mine a lot more; a port clock; settled hands with a working day.

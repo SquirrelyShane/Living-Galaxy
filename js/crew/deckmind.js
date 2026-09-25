@@ -103,6 +103,23 @@ export function needsOf(m) {
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
+/* 0.3.53: a captain who sat down and HEARD a grievance buys this many watches
+ * of it counting for less — the cause is still there, and it comes back. */
+export const HEARD = { cycles: 5, relief: 0.35 };
+
+/** The two needs that are read off the world, not drifted: grievance and upkeep. */
+export function computedNeeds(m, st) {
+  /* a grievance is not a mood — it is owed wages, a rival on the same watch,
+   * or a hull nobody is maintaining. It is computed, not drifted. */
+  let grief = 0;
+  if (st?.shortfall) grief += 0.6;   /* unpaid wages are a grievance on their own */
+  if ((m.morale ?? 70) < 35) grief += 0.2;
+  if ((st?.wear ?? 0) > 0.6) grief += 0.15;
+  if ((m.ties ?? []).some((t) => t.kind === "rival")) grief += 0.2;
+  if (m.heardAt != null && deckmind.cycle - m.heardAt < HEARD.cycles) grief = Math.max(0, grief - HEARD.relief);
+  return { grievance: clamp01(grief), upkeep: clamp01(st?.wear ?? 0) };
+}
+
 /** Needs drift up before the decision; genes set how fast for each person. */
 function driftNeeds(m, body, st) {
   const n = needsOf(m);
@@ -114,7 +131,7 @@ function driftNeeds(m, body, st) {
     stress: RISE.stress * (0.6 + (g[66] ?? 0.5) * 0.9),            // CORTISOL
     intimacy: RISE.intimacy * (0.4 + (g[70] ?? 0.5) * 1.2),        // OXYTOCIN
     play: RISE.play * (0.5 + (g[174] ?? 0.5) * 1.1),               // PLAY_DRIVE
-    purpose: RISE.purpose * (0.5 + (g[19] ?? 0.5) * 1.1),          // CURIOSITY
+    purpose: RISE.purpose * (0.5 + (g[19] ?? 0.5) * 1.1) * (m.trainFocus ? 0.7 : 1),   // CURIOSITY; a goal slows it (0.3.53)
   };
   /* Saturating rise. A need that nothing is being done about climbs toward 1
    * and never quite reaches it, which keeps a gradient for the graph to weigh
@@ -123,15 +140,7 @@ function driftNeeds(m, body, st) {
     const r = rate[k] ?? 0;
     if (r) n[k] = clamp01((n[k] ?? 0.25) + r * (1 - (n[k] ?? 0.25)));
   }
-  /* a grievance is not a mood — it is owed wages, a rival on the same watch,
-   * or a hull nobody is maintaining. It is computed, not drifted. */
-  let grief = 0;
-  if (st?.shortfall) grief += 0.6;   /* unpaid wages are a grievance on their own */
-  if ((m.morale ?? 70) < 35) grief += 0.2;
-  if ((st?.wear ?? 0) > 0.6) grief += 0.15;
-  if ((m.ties ?? []).some((t) => t.kind === "rival")) grief += 0.2;
-  n.grievance = clamp01(grief);
-  n.upkeep = clamp01(st?.wear ?? 0);
+  Object.assign(n, computedNeeds(m, st));
   if (m.robot) { n.hunger = 0; n.intimacy = 0; n.fatigue = clamp01(1 - (m.condition ?? 100) / 100); }
   /* A need nobody can meet is not free. Someone with no one to be close to,
    * or nothing worth doing, comes off the watch a little worse each cycle —
@@ -156,7 +165,11 @@ export function buildContext(m, opts = {}) {
   const time = opts.time ?? sim.time ?? 0;
   const ship = opts.ship ?? hull.state();
   const body = bodyOf(m);
-  const needs = driftNeeds(m, body, ship);
+  /* 0.3.53: `peek` reads a hand without living a watch. Building a context
+   * used to drift every need a step, and the GENOME sheet built one on every
+   * repaint — keyed on tiredness, so an open sheet tired a seasoned hand out
+   * in a handful of frames. A peek only refreshes the two computed needs. */
+  const needs = opts.peek ? Object.assign(needsOf(m), m.robot ? {} : computedNeeds(m, ship)) : driftNeeds(m, body, ship);
   const phase = hull.phaseOf(m, time);
   const post = hull.postOf(m);
   const kind = post?.kind ?? null;
@@ -315,7 +328,11 @@ export function stepHand(m, opts = {}) {
   /* ── decide ── */
   let out;
   try {
-    out = decide(deckGraph, ctx, { rng });
+    /* 0.3.53: an order from the captain (js/crew/orders.js) is the decision —
+     * the graph is not asked, but everything after this is the same watch */
+    out = opts.order
+      ? { action: opts.order.action, node: "order", trace: [{ node: "root", reason: opts.order.why ?? "the captain's orders" }], path: ["root", "order"], depth: 1 }
+      : decide(deckGraph, ctx, { rng });
   } catch (e) {
     out = { action: "STAND_WATCH", node: "act.standWatch", trace: [{ node: "root", reason: `the decision could not be completed (${e.code ?? "error"}), so I fell back to my post` }], path: ["root", "act.standWatch"], depth: 1 };
   }
