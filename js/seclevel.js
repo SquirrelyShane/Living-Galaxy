@@ -116,13 +116,13 @@ export function secLevel(ship, t) {
   else if (!law) why = "nobody polices this sky";
   else if (ship?.dockedAt) why = "docked — the port's own guns are your cover";
   else if (!secState.authority) why = "shared sky — the host's desk runs the Directorate; call from their side";
-  else if (open && open.state !== "closed") why = "a wing is already on its way";
+  else if (open && open.state !== "closed" && open.state !== "unanswered") why = "a wing is already on its way";
   else if (t - secState.sosAt < SEC.sosCooldown) why = `the desk will take another call in ${Math.ceil(SEC.sosCooldown - (t - secState.sosAt))} s`;
   return {
     ...lv, heat: h, corp: law?.name ?? null, canSOS: !why, why,
     fine: h > 0 ? Math.max(SEC.fineFloor, Math.round(h * SEC.finePerHeat)) : 0,
     cools: h > 0 ? Math.round(h * SEC.cool) : 0,
-    sos: open && open.state !== "closed" ? { state: open.state, eta: etaOf(open, t), wing: open.wing.length } : null,
+    sos: open && open.state !== "closed" && open.state !== "unanswered" ? { state: open.state, eta: etaOf(open, t), wing: open.wing.length } : null,
   };
 }
 
@@ -142,6 +142,10 @@ function nearestHostile(pos) {
 export function callSOS(ship, t) {
   const lv = secLevel(ship, t);
   if (!lv.canSOS) return { ok: false, why: lv.why };
+  /* a call nobody could answer is closed before a new one goes out — the bus
+   * refreshes an open call rather than re-dispatching it */
+  const prev = secState.sosId ? callById(secState.sosId) : null;
+  if (prev && prev.state === "unanswered") { prev.state = "closed"; prev.closedAt = t; prev.outcome = "unanswered"; }
   const foe = nearestHostile(ship.pos);
   const me = { id: "self", name: ship.name ?? pilot.name ?? "your hull", role: "player", x: ship.pos.x, y: ship.pos.y, z: ship.pos.z };
   const call = callForHelp(me, foe ? { id: foe.id, name: foe.name } : null, t, "sos", { coverage: 1 });

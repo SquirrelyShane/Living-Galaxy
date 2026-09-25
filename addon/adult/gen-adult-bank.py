@@ -109,7 +109,32 @@ TRY = bag_expand([
     "Hold me there after. Let it be true.",
     "If the scan comes back loud I will not pretend I didn't ask.",
     "Fuck me like we're making a person.",
-], ["Don't flinch now.", "I meant the word child.", "Stay."])
+    "Leave it in me. That's the ask, not a metaphor.",
+    "I want a name on the next roster that wasn't there last cycle.",
+    "If we do this, we do it knowing the medbay will have opinions.",
+    "Come inside and stay there until it stops being a maybe.",
+    "I am not asking for a rumor. I am asking for a child.",
+    "Take the implant out of the conversation. I want the risk.",
+    "If I get sick in the mornings I will still want you at the hatch.",
+    "Put a future on this hull that isn't just cargo and burns.",
+    "I want your kid arguing with both of us in ten years.",
+    "Don't pull out. Don't look away. Don't make this half a sentence.",
+    "If it takes, we keep the watch and we keep the baby.",
+    "Say child like it is a person, not a trophy.",
+    "I want the mess to have to make a smaller chair.",
+    "Breeding is a crude word. Making a crewmember is the accurate one.",
+    "Hold my hips and mean the finish.",
+    "If you are scared, good. Stay scared and stay in me.",
+    "I already picked a middle name I will not tell you yet.",
+    "The ship can handle one more heartbeat. Prove it.",
+    "I want to be swollen on a long burn and still take your hand.",
+    "No timer. No pull. No 'we'll talk later.' Now.",
+    "If the test sings, we tell the board together.",
+    "Fill me like the next generation is a mission, not an accident.",
+    "I want inheritance that isn't stock and a surname.",
+    "Kiss me after you come and don't pretend it was only sex.",
+    "A crib locks down same as a crate. We can do this.",
+], ["Don't flinch now.", "I meant the word child.", "Stay.", "Say yes out loud.", "The scan can wait until morning."])
 
 AFTER = bag_expand([
     "Stay. The board can wait.",
@@ -416,7 +441,7 @@ def main():
         lines_out.append("  ],")
     lines_out.append("};")
     lines_out.append(f"export const ADULT_BANK_SIZE = {total};")
-    dest = Path("/tmp/living-galaxy/Living Galaxy/addon/adult/voice-bank.js")
+    dest = Path(__file__).resolve().parent / "voice-bank.js"
     dest.write_text("\n".join(lines_out) + "\n")
     print(f"wrote {dest} bags={len(bags)} lines={total}")
 

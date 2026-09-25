@@ -25,8 +25,15 @@ for (const kept of ["market", "shipyard", "board", "hall", "works", "drones", "r
 
 const src = readFileSync(new URL("../js/stationdeck.js", import.meta.url), "utf8");
 ok(!/foundCompany|commissionHull|transfer\(|fleetReport/.test(src), "no register, treasury or fleet on the deck");
-ok(/openConsole\("crew", "roster"\)/.test(src), "the hall jumps to CON › CREW");
-ok(/openConsole\("corp", "company"\)/.test(src), "the registrar is a jump to CON › CORP");
+ok(/hallPanel/.test(src), "the hall is drawn by js/deckhall.js");
+ok(!/openConsole\("corp", "company"\)/.test(src), "the registrar is on the deck, not a jump to CON");
+
+/* 0.3.49: the hall keeps you on the deck */
+const hall = readFileSync(new URL("../js/deckhall.js", import.meta.url), "utf8");
+ok(!/openConsole/.test(hall), "nothing in the hall throws you into the console");
+ok(/mountTalk\(/.test(hall) && /settleFamily\(m\.id, "staff"\)/.test(hall) && /settleFamily\(m\.id, "payoff"\)/.test(hall), "your crew: TALK, SETTLE and PAY OFF inline");
+ok(/el\("input", "sd-input"\)/.test(hall) && /foundCompany\(name\.value/.test(hall), "the registrar takes a typed name");
+ok(/callTopic\(p\.id/.test(hall), "the company line runs inline for staff on this floor");
 
 console.log(`deck: ${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

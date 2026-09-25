@@ -10,6 +10,96 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.50 — 2026-09-25
+
+The nav map stops tracking the whole sky.
+
+Every NPC with its lane drive lit, anywhere inside 1.4 million u, was a blob on
+the chart — the 0.2.x "long-range band" in `js/contacts.js` — so the map showed
+traffic streaking across the system, and the register created and updated a
+record for every hull in the sky at 5 Hz to draw it (68 hulls in the test sky,
+32 under drive at any moment).
+
+- The band is gone. A contact is what the dish sees: inside scan range, and not
+  under drive. A hull that lights its drive leaves the chart at once instead of
+  sliding off as a blob; one out of range is never allocated a record. Measured:
+  **7 register records for 68 hulls** instead of one per hull.
+- Your own fleet is unchanged — yours to see anywhere, even under drive.
+- The canopy's labels read the same register, so they follow the same rule.
+- Other pilots were never on the nav map; they are drawn only in the 3D view,
+  and only where the relay puts them.
+
+Files: `js/contacts.js`, `js/version.js`, `README.md`, `test/nav.test.mjs`
+(the band's test is now its absence), `test/chartquiet.test.mjs` (new, 8),
+`test/smoke-chart.mjs` (comment).
+
+---
+
+## 0.3.49 — 2026-09-25
+
+Bug hunt on 0.3.48: the HUD's top edge, the deck HALL, the registrar, and
+what the SOS was doing wrong.
+
+**Reported, fixed**
+
+- **The title bar rests across the very top.** It was a pill card top-left;
+  0.3.48's security ◆ made it wide and tall enough to run under the gauges
+  card and push "AD ASTRUM" onto the instrument pills. It is a thin
+  full-width strip now — mark, series, sky, and the ◆ pinned to its right end
+  — and everything else hangs from under it (`--pad-t` inside `#hud`).
+- **Top-right panels overlapping.** The systems strip sat at a fixed +100 under
+  a gauges card 112 px tall, so SHLD/ENG covered the card's CGO row (on 0.3.44
+  too). The right column stacks itself now: the strip hangs from the card's
+  real bottom, and the throttle card gives up height rather than being drawn
+  under it (`stackRightColumn` in `js/hud.js`).
+- **The call icon in the top right.** The comms puck's slot search scored
+  "above the systems strip" as free because the gauges card is a readout, so
+  every call parked the puck over PWR/HULL/SHLD — on 0.3.44 as well, at every
+  portrait size tested. In portrait it is never above the strip now.
+- **The message card covering the response panel.** The hazard line and the
+  response clock were given the same `top`, and the message card sat 12 px
+  below it, so "◈ RESPONSE 12s · <hull>" was under the card exactly when a
+  fight was on. The left column stacks itself too — only what is showing, in
+  order — and the card, toast and hazard lines stop short of the strip.
+- **"EARTH" over "Turrets armed".** A message took its title from the lock,
+  the reticle or the nearest world whether or not it was about it. A name the
+  text does not mention is not what it is about: those messages are **SHIP**.
+- **The HALL keeps you in the station.** Your crew are on the deck now in its
+  own style — TALK opens the conversation inline (the same talk view the
+  interior deck uses), SETTLE and PAY OFF ask twice — and the company's people
+  on this floor get the company LINE inline. Nothing in the HALL opens the
+  console (`js/deckhall.js`, split out of `stationdeck.js` for the 600-line gate).
+- **A typed company name.** The registrar is back on the deck (HALL, when you
+  have no company) with a name field, a charter and REGISTER. CON › CORP ›
+  COMPANY has the field too — and its rebuild key held the live purse, so
+  any credit moving while you typed rebuilt the card and wiped the field.
+
+**Found in the hunt, fixed**
+
+- An SOS made before the shooting started was "quiet" and closed after 70 s —
+  before a wing from across the ring could arrive. It holds until the wing is
+  due.
+- An SOS nobody could answer stayed open for its full five minutes and blocked
+  the next call ("a wing is already on its way"). It no longer blocks, and a
+  new call closes the dead one first.
+- 0.3.47 cut the staff share 45% → 32% only for hands settled after it; the
+  rolls you already had kept booking 45% forever. They are re-rated once on
+  load, off their list wage (station-born family keep their own number).
+- A crew member settled or paid off from inside TALK left the hall showing
+  them; it redraws.
+
+Files: `js/hud.js`, `js/deckhall.js` (new), `js/stationdeck.js`,
+`js/console/panels/corp.js`, `js/company.js`, `js/seclevel.js`,
+`js/npc/security.js`, `css/glass.css`, `css/style.css`, `js/version.js`,
+`README.md`, `test/deck.test.mjs` (39), `test/seclevel.test.mjs` (+4),
+`test/line.test.mjs` (+2), `test/smoke-ui.mjs` and `test/smoke-line.mjs`
+(the HALL's crew and LINE are on the deck now — smoke-line's old check was
+passing on a stale console card), `test/smoke-hall.mjs` (new, 25: both portrait
+sizes; the bar, the right rail, SHIP, the response clock, the puck, HALL ›
+TALK inline, a typed registration).
+
+---
+
 ## 0.3.48 — 2026-09-25
 
 The security ◆. One diamond that says where you stand with the law.

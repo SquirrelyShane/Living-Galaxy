@@ -19,7 +19,7 @@ import { standingLabel, corpOfStation } from "../../corps.js";
 import { sigil } from "../../ui/glyphs.js";
 import { sim } from "../../sim.js";
 import { stationById } from "../../stations.js";
-import { CHARTERS, CHARTER_KEYS, COMPANY, boardBrief, company, contacts, foundCompany, hasCompany, staffAt, transfer } from "../../company.js";
+import { CHARTERS, CHARTER_KEYS, COMPANY, boardBrief, company, contacts, foundCompany, hasCompany, staffAt, suggestName, transfer } from "../../company.js";
 import { boardFor, contracts, timeLeft, BOARD } from "../../contracts.js";
 import { renderDesk, renderHeld } from "../../boardview.js";
 import { DESKS, gnn, gnnStation, runAction } from "../../gnn.js";
@@ -43,7 +43,7 @@ function mountCompany(root, push, ctx = null) {
     const b = hasCompany() ? boardBrief() : null;
     const k = hasCompany()
       ? `co:${company.name}:${Math.round(company.treasury)}:${company.staff.length}:${company.book.length}:${st?.id ?? ""}:${b.seats.map((x) => x.verdict).join("")}`
-      : `none:${st?.id ?? ""}:${Math.round(sim.ship.credits)}`;
+      : `none:${st?.id ?? ""}:${sim.ship.credits >= COMPANY.registration}`;   // 0.3.49: not the live purse — a rebuild mid-typing wiped the name field
     if (k === key) return;
     key = k;
     host.innerHTML = "";
@@ -54,7 +54,10 @@ function mountCompany(root, push, ctx = null) {
         const v = row(sec, "Register a company", { hint: `${COMPANY.registration} cr at ${st.name}` });
         const sel = el("select", "tinput");
         for (const c of CHARTER_KEYS) { const o = el("option", null, CHARTERS[c].name); o.value = c; if (c === (st.sector === "pirate" ? "civilian" : st.sector) || (c === "industrial" && !CHARTERS[st.sector])) o.selected = true; sel.append(o); }
-        v.value.replaceChildren(group(sel, button("REGISTER", () => { const e = foundCompany("", sel.value); if (e) sim.notice = e; rebuild(); }, "on")));
+        /* 0.3.49: a name you type — it was always the suggested one */
+        const nm = el("input", "tinput");
+        nm.type = "text"; nm.maxLength = 28; nm.placeholder = suggestName(); nm.autocomplete = "off"; nm.setAttribute("aria-label", "Company name");
+        v.value.replaceChildren(group(nm, sel, button("REGISTER", () => { const e = foundCompany(nm.value.trim(), sel.value); if (e) sim.notice = e; rebuild(); }, "on")));
       } else sec.append(el("div", "tempty", "Dock to register."));
       host.append(sec);
       return;

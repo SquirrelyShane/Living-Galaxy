@@ -1,6 +1,12 @@
 /* 18+ scene text. Not imported by core. */
 import { adultLine, flavorBags } from "./voice.js";
 
+function hashSimple(s) {
+  let h = 0;
+  const str = String(s ?? "");
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
 function first(p) {
   return String(p?.name ?? "they").split(" ")[0];
 }
@@ -46,7 +52,14 @@ export function scene(a, b, actId = "sex") {
   else if (ba.cock && bb.cock) pent = `${A} oils up and fucks ${B}'s ass while ${B} strokes ${him(b)}self off on the same sheet.`;
   else if (ba.cunt && bb.cunt) pent = `They grind until both of them shake, strap and hands, no one keeping score.`;
   else pent = `${A} takes ${B} against the locker until neither of them can stand a watch.`;
-  const trying = actId === "tryChild" ? ` They say it: they want a child on this hull.` : "";
+  const tryingLines = [
+    ` They say it: they want a child on this hull.`,
+    ` They keep still after the finish, no precautions, and neither of them pretends it is only sex.`,
+    ` When they finish they stay locked, talking about a name that is not on the roster yet.`,
+    ` They decide out loud: if this cycle takes, they will tell the board together.`,
+    ` Hands on hips, no pull-away — the kind of finish that is a vote.`,
+  ];
+  const trying = actId === "tryChild" ? tryingLines[hashSimple(`${a?.id}:${b?.id}`) % tryingLines.length] : "";
   const bag = actId === "kiss" ? "kiss" : actId === "hands" ? "hands" : actId === "oral" ? "oral" : actId === "tryChild" ? "tryChild" : "sex";
   const quoted = adultLine(flavorBags(b, bag), `${a?.id}:${b?.id}:${actId}`, "");
   const narr = adultLine("narr", `${a?.id}:${b?.id}:n`, "");

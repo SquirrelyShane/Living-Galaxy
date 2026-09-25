@@ -97,6 +97,7 @@ export function foundCompany(name, charter = "industrial") {
   company.foundedAt = sim.time;
   company.hq = st.id;
   company.hqSky = sim.skySeed ?? null;
+  company.shareV = COMPANY.staffShare;
   company.treasury = 0;
   company.book.length = 0;
   company.staff.length = 0;
@@ -307,6 +308,7 @@ export function resetCompany() {
   company.book.length = 0; company.staff.length = 0; company.alumni.length = 0;
   company.revenue = 0; company.spend = 0; company.inCharter = 0; company.outCharter = 0; company.confidence = 0.5; company.payPool = 0;
   company.line = { inbox: [], seq: 1 };
+  company.shareV = COMPANY.staffShare;
   resetStationLife();
 }
 
@@ -323,6 +325,20 @@ export function restoreCompany(data) {
   if (!data || !data.founded) return;
   const { life, ...rest } = data;
   Object.assign(company, rest);
+  company.shareV = rest.shareV ?? null;   // a save from before the stamp has none
+  /* 0.3.49: 0.3.47 cut the staff share 45% → 32%, but only for hands settled
+   * after it; everyone already on the rolls kept booking 45% forever. Re-rate
+   * them once, off their list wage. Station-born family keep their own number. */
+  if (company.shareV !== COMPANY.staffShare) {
+    for (const s of company.staff) {
+      if (s.born) continue;
+      const list = s.listWage ?? wageFor(s.complexId, s.letter);
+      if (!(list > 0)) continue;
+      s.baseIncome = Math.round(list * COMPANY.staffShare);
+      s.income = incomeOf(s);
+    }
+    company.shareV = COMPANY.staffShare;
+  }
   if (life) {
     stationLife.households = life.households ?? {};
     stationLife.kids.splice(0, stationLife.kids.length, ...(life.kids ?? []));

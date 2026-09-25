@@ -117,6 +117,27 @@ ok(!ship.outlaw && SEC.secLevel(ship, t0() + 999).id === "green", "and the diamo
 const free = stations.find((s) => s.sector === "pirate" || (s.hostile && !s.claimed));
 if (free) { pilot.secHeat = 1; ship.dockedAt = free.id; ok(/free port/.test(SEC.payFine(ship) ?? ""), "a free port keeps no Directorate counter"); ship.dockedAt = null; pilot.secHeat = 0; }
 
+/* ---- 0.3.49: a call before the shooting holds until the wing is due; an unanswered one can be re-made ---- */
+{
+  const { dispatch } = await import("../js/npc/security.js");
+  SEC.resetSecLevel();
+  ship.dockedAt = null; ship.lastHitBy = null; ship.lastFireAt = -1e9; pilot.secHeat = 0;
+  const t = t0() + 10000;
+  const far = SEC.callSOS(ship, t);
+  ok(far.ok, "a quiet SOS goes out");
+  if (far.call) {
+    far.call.eta = t + 200; far.call.state = "dispatched"; far.call.lastHitAt = t;
+    stepSecurity(t + 100, 0.05);
+    ok(far.call.state !== "closed", "a pre-emptive call is not closed at 70 s while the wing is still 100 s out");
+    far.call.state = "unanswered"; far.call.eta = null;
+    const lv = SEC.secLevel(ship, t + SEC.SEC.sosCooldown + 1);
+    ok(lv.canSOS && !lv.sos, `an unanswered call does not block the next one (${lv.why ?? "open"})`);
+    const again2 = SEC.callSOS(ship, t + SEC.SEC.sosCooldown + 1);
+    ok(again2.ok && again2.call !== far.call && far.call.state === "closed", "and the dead call is closed before a new one goes out");
+    void dispatch;
+  }
+}
+
 /* ---- the SOS is honest about a false alarm ------------------------------------- */
 ok(SEC.SEC.falseAlarm < 0, "a wing that finds nothing costs a little standing");
 ok(distress.some((c) => c.victimId === "self"), "the player's call is on the same bus as everyone's");

@@ -42,6 +42,10 @@ function aftercareChoices(m) {
       say: () => actMenu(m, "You can have again. Say how.") },
     { id: "child", label: "Ask to try for a child", whenOk: () => social.family && together(m),
       say: () => tryChildNode(m) },
+    { id: "planTalk", label: "Talk about a family, not just tonight", whenOk: () => social.family && together(m),
+      say: () => familyPlanNode(m) },
+    { id: "ifTakes", label: "If this cycle takes…", whenOk: () => social.family && together(m) && heatOf(m) >= 2,
+      say: () => ifTakesNode(m) },
     { id: "deck", label: "Back to the watch",
       say: () => ({ text: Q(m, say(m, "after", "deck", "Go. Before I keep you.")), choices: [] }) },
   ].filter((ch) => !ch.whenOk || ch.whenOk());
@@ -78,15 +82,13 @@ function tryChildNode(m) {
   loadSocial();
   const choices = [
     { id: "yes", label: "No precautions. That's the point.", cls: "accent", fx: { trust: 4 },
-      say: () => {
-        const held = social.contraception;
-        social.contraception = false;
-        const hit = tryConceive(m, playerAsPerson());
-        social.contraception = held;
-        heat(m, 2);
-        const extra = hit.conceived ? ` ${firstName(hit.carrier)} may be carrying.` : " Not this cycle.";
-        return finishAct(m, "tryChild", extra);
-      } },
+      say: () => conceiveFinish(m) },
+    { id: "stayIn", label: "Stay in after. Mean it.", cls: "accent", fx: { trust: 3, morale: 2 },
+      say: () => conceiveFinish(m, " They stay joined until the shaking stops.") },
+    { id: "nameFirst", label: "Pick a name first, then try",
+      say: () => nameThenTryNode(m) },
+    { id: "timing", label: "Ask about timing and medbay",
+      say: () => timingNode(m) },
     { id: "notYet", label: "Not the child. Just the night.",
       say: () => finishAct(m, "sex") },
     { id: "back", label: "Not that conversation",
@@ -97,6 +99,94 @@ function tryChildNode(m) {
   return {
     text: Q(m, say(m, "tryChild", "ask", "Say it again: you want a child on this hull.")) + (chance ? ` (odds ~${chance}%)` : " (families are off in HOUSE)"),
     choices,
+  };
+}
+
+function conceiveFinish(m, extraNarr = "") {
+  const held = social.contraception;
+  social.contraception = false;
+  const hit = tryConceive(m, playerAsPerson());
+  social.contraception = held;
+  heat(m, 2);
+  const extra = extraNarr + (hit.conceived ? ` ${firstName(hit.carrier)} may be carrying.` : " Not this cycle.");
+  return finishAct(m, "tryChild", extra);
+}
+
+function nameThenTryNode(m) {
+  return {
+    text: Q(m, say(m, "tryChild", "name", "A name is not a guarantee. It is still a promise.")),
+    choices: [
+      { id: "founder", label: "Use a founder name", cls: "accent", fx: { trust: 2 },
+        say: () => conceiveFinish(m, " They pick a founder name and then stop being careful.") },
+      { id: "new", label: "Something the hull has never heard", cls: "accent",
+        say: () => conceiveFinish(m, " They invent a name that isn't in the archive.") },
+      { id: "later", label: "Name after the scan",
+        say: () => conceiveFinish(m, " They leave the name blank on purpose.") },
+      { id: "back", label: "Back", say: () => tryChildNode(m) },
+    ],
+  };
+}
+
+function timingNode(m) {
+  const odds = conceptionOdds(m, playerAsPerson());
+  const chance = social.family ? Math.round((odds.chance || 0.2) * 100) : 0;
+  return {
+    text: Q(m, say(m, "tryChild", "time", "Medbay will have a window. I would rather use this one.")) + (chance ? ` (~${chance}% this cycle)` : ""),
+    choices: [
+      { id: "now", label: "This cycle. Tonight.", cls: "accent", fx: { trust: 3 },
+        say: () => conceiveFinish(m) },
+      { id: "afterBurn", label: "After the next burn",
+        say: () => ({
+          text: Q(m, say(m, "after", "wait", "Then we wait. I will not punish you for timing.")),
+          choices: aftercareChoices(m),
+        }) },
+      { id: "scanFirst", label: "Get a fertility scan first", fx: { trust: 1 },
+        say: () => ({
+          text: Q(m, say(m, "tryChild", "scan", "Fine. Scan first. Then you come back and say the word again.")),
+          choices: aftercareChoices(m),
+        }) },
+      { id: "back", label: "Back", say: () => tryChildNode(m) },
+    ],
+  };
+}
+
+function familyPlanNode(m) {
+  loadSocial();
+  return {
+    text: Q(m, say(m, "tryChild", "plan", "A child is watches and sick nights, not just a finish. Ask the real question.")),
+    choices: [
+      { id: "ready", label: "I am ready to raise one on this ship", cls: "accent", fx: { trust: 4, morale: 2 },
+        say: () => tryChildNode(m) },
+      { id: "adopt", label: "Adoption or guardianship, not a pregnancy", fx: { trust: 3 },
+        say: () => ({
+          text: Q(m, say(m, "after", "adopt", "Then we file it like adults. The bunk can wait for celebration.")),
+          choices: aftercareChoices(m),
+        }) },
+      { id: "duties", label: "Talk watches, school, and who holds the baby",
+        say: () => ({
+          text: Q(m, say(m, "after", "duty", "I will take midwatch if you take mornings. That is the romance.")),
+          choices: [
+            { id: "try", label: "Then try tonight", cls: "accent", say: () => tryChildNode(m) },
+            { id: "hold", label: "Hold the plan", say: () => ({ text: Q(m, say(m, "after", "hold", "Held. I am still here.")), choices: [] }) },
+          ],
+        }) },
+      { id: "wait", label: "Not ready. Keep the night.",
+        say: () => finishAct(m, "sex") },
+    ],
+  };
+}
+
+function ifTakesNode(m) {
+  return {
+    text: Q(m, say(m, "tryChild", "if", "If the scan is loud, we do not hide it in a locker.")),
+    choices: [
+      { id: "tell", label: "We tell the board together", cls: "accent", fx: { trust: 3 },
+        say: () => conceiveFinish(m, " They agree the board hears it from both of them.") },
+      { id: "keep", label: "Keep it ours until the second month",
+        say: () => conceiveFinish(m, " They keep the secret small and the hatch dogged.") },
+      { id: "justTalk", label: "Just talk. No trying yet.",
+        say: () => ({ text: Q(m, say(m, "after", "just", "Talk is allowed. I like you better when you plan.")), choices: aftercareChoices(m) }) },
+    ],
   };
 }
 
@@ -144,7 +234,9 @@ function cabinOpen(m, c) {
           ],
         }) },
       { id: "quick", label: "Quick, before the watch", cls: "accent", say: () => finishAct(m, heatOf(m) >= 2 ? "sex" : "hands") },
-    ],
+      { id: "family", label: "Talk family", whenOk: () => social.family && together(m),
+        say: () => familyPlanNode(m) },
+    ].filter((ch) => !ch.whenOk || ch.whenOk()),
   };
 }
 
@@ -289,6 +381,16 @@ export function adultTopics(m) {
       tier: 0,
       cooldown: 1,
       say: xenoOpen,
+    });
+  }
+  if (together(m) && social.family) {
+    topics.push({
+      id: "adultFamily",
+      label: "A child on this hull",
+      cls: "accent",
+      tier: 0,
+      cooldown: 1,
+      say: familyPlanNode,
     });
   }
   return topics;

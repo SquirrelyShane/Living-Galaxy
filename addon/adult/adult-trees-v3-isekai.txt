@@ -2260,3 +2260,108 @@ They: Curiosity is fine. Assumptions are where this gets complicated.
 > Explain one of your own customs => cabin.talk
 > Keep things simple => talk.soft
 > Give them space => end.stop
+
+# -----------------------------------------------------------------------------
+# FAMILY / REPRODUCTION BRANCHES (additive)
+# -----------------------------------------------------------------------------
+
+[family.topic]
+title: A child on this hull
+when: partner, family
+They: A child is watches and sick nights, not just a finish. Ask the real question.
+They: If we do this, we do it knowing the medbay will have opinions.
+They: I want a name on the next roster that wasn't there last cycle.
+They: Say child like it is a person, not a trophy.
+> I am ready to raise one on this ship | accent | when:family => family.try
+> Adoption or guardianship, not a pregnancy | when:family => family.adopt
+> Talk watches, school, and who holds the baby => family.duties
+> Ask about timing and medbay => family.timing
+> Pick a name first => family.name
+> If this cycle takes… | when:heat>=2 => family.ifTakes
+> Not ready. Keep the night. => cabin.bed
+> Drop it => END
+
+[family.try]
+title: Try
+act: tryChild
+heat: +2
+place: cabin
+when: partner, family
+They: Say it again: you want a child on this hull.
+They: No precautions. I heard you. I want it too.
+They: Leave it in me. That's the ask, not a metaphor.
+They: Don't pull out. Don't look away. Don't make this half a sentence.
+They: If you are scared, good. Stay scared and stay in me.
+> No precautions. That's the point. | accent | when:family => family.finish
+> Stay in after. Mean it. | accent => family.finish
+> Name first => family.name
+> Timing first => family.timing
+> Not the child. Just the night. => cabin.bed
+> Back => family.topic
+
+[family.finish]
+title: Trying
+act: tryChild
+heat: +2
+place: cabin
+They: Hold me there after. Let it be true.
+They: If the scan comes back loud I will not pretend I didn't ask.
+They: Kiss me after you come and don't pretend it was only sex.
+They: If it takes, we keep the watch and we keep the baby.
+Scene: They stay joined. No precautions. The hatch stays dogged.
+> Stay a while | accent => after.stay
+> Again => cabin.again
+> Back to the watch => END
+
+[family.name]
+title: Name first
+when: family
+They: A name is not a guarantee. It is still a promise.
+They: I already picked a middle name I will not tell you yet.
+They: Founder names carry weight. New names carry less luggage.
+> Use a founder name | accent => family.finish
+> Something the hull has never heard | accent => family.finish
+> Name after the scan => family.finish
+> Back => family.topic
+
+[family.timing]
+title: Timing
+when: family
+They: Medbay will have a window. I would rather use this one.
+They: After the next burn we will both still be tired. That is not a reason to wait forever.
+They: Scan first if you need numbers. Then say the word again.
+> This cycle. Tonight. | accent => family.finish
+> After the next burn => after.stay
+> Get a fertility scan first => after.stay
+> Back => family.topic
+
+[family.duties]
+title: Duties
+when: family
+They: I will take midwatch if you take mornings. That is the romance.
+They: School on a hull is a corner of the mess and a locked crate of books.
+They: If we cannot name who holds the baby during a red alert, we are not ready.
+> Then try tonight | accent => family.try
+> Hold the plan => after.stay
+> Back => family.topic
+
+[family.adopt]
+title: Adoption
+when: family
+They: Then we file it like adults. The bunk can wait for celebration.
+They: A child who already exists does not need us to perform a conception scene.
+They: Guardianship is still a family. Do not let anyone tell you otherwise.
+> Start the filing | accent => after.stay
+> Talk more => family.duties
+> Back => family.topic
+
+[family.ifTakes]
+title: If it takes
+when: family
+They: If the scan is loud, we do not hide it in a locker.
+They: The board hears it from both of us or they hear a rumor. I prefer the first.
+They: Keep it ours until the second month if you need air. Then we tell them.
+> We tell the board together | accent => family.finish
+> Keep it ours until the second month => family.finish
+> Just talk. No trying yet. => after.stay
+> Back => family.topic

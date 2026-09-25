@@ -64,17 +64,12 @@ export const SCAN = {
   decay: 0.055,          // resolution lost per second when nothing is looking
   pulseBonus: 2.6,       // an active pulse resolves this much faster
   probeWatch: 9000,      // u — a landed probe keeps this much of the sky under watch
-  /* The long-range track. Beyond `range` the dish cannot identify anything,
-   * but a hull under drive is a bright, moving, unmistakable thing and the
-   * array sees it coming a long way off — it just cannot tell you whose it
-   * is. This band gives the chart a coarse return: a bearing, a rough
-   * position and a big error circle, which is exactly enough to plot an
-   * interception against and not enough to know what you are intercepting.
-   * Without it a supply run crossing the system is invisible until it is
-   * already on top of a port, and there is nothing to plan against. */
-  track_r: 1.4e6,        // u — how far a coarse return reaches
-  trackCap: 0.40,        // and the resolution ceiling out there: never better than a blob
-  trackGain: 0.22,       // how fast a coarse return builds
+  /* 0.3.50 — the long-range track is gone. From 0.2.x a hull under drive
+   * anywhere inside 1.4 million u put a blob on the chart, so the nav map
+   * showed every NPC warping across the system, and the register kept a live
+   * record for every hull in the sky at 5 Hz to do it. A contact is now what
+   * the dish can actually see (`range`), and a hull with its drive lit is not
+   * a contact at all until it drops out: a warp is a streak, not a track. */
   keep: 240,             // seconds a stale record is remembered before it is dropped
   /* level thresholds */
   seen: 0.14,
@@ -146,41 +141,31 @@ export function tickContacts(dt) {
 
   const touch = (id, v, kind) => {
     let rec = register.get(id);
+    /* Free knowledge first: your own hulls and a probe's footprint never need
+     * the dish (and your own fleet stays on the chart even under drive). */
+    if (v.company === true || probeCovers(v.x, v.y ?? 0, v.z)) {
+      if (!rec) { rec = { id, res: 0, x: v.x, y: v.y ?? 0, z: v.z, at: sim.time, kind, ref: v }; register.set(id, rec); }
+      rec.ref = v; rec.kind = kind;
+      rec.res = 1;
+      rec.x = v.x; rec.y = v.y ?? 0; rec.z = v.z; rec.at = sim.time;
+      rec.free = true;
+      return;
+    }
+    /* 0.3.50: out of the dish's range, or under drive — not a contact. An
+     * existing record just decays (below); nothing new is allocated, so a busy
+     * sky costs the register only what is actually near you. */
+    const dist = d3(ship.pos, v);
+    if (dist > range || v.drive) {
+      if (rec) { rec.free = false; rec.ref = v; if (v.drive) rec.res = 0; }   // lit its drive: off the chart now, not a fading blob
+      return;
+    }
     if (!rec) {
       rec = { id, res: 0, x: v.x, y: v.y ?? 0, z: v.z, at: sim.time, kind, ref: v };
       register.set(id, rec);
     }
     rec.ref = v;
     rec.kind = kind;
-
-    /* Free knowledge first: these never decay and never need the dish. */
-    if (v.company === true || probeCovers(v.x, v.y ?? 0, v.z)) {
-      rec.res = 1;
-      rec.x = v.x; rec.y = v.y ?? 0; rec.z = v.z; rec.at = sim.time;
-      rec.free = true;
-      return;
-    }
     rec.free = false;
-
-    const dist = d3(ship.pos, v);
-    if (dist > range) {
-      /* Out of identification range but inside the long-range band: a coarse
-       * return that builds slowly and is capped well below `track`, so it
-       * shows on the chart as an uncertain blob and never as a name. A hull
-       * with its drive lit is much easier to see than one coasting. */
-      const far = SCAN.track_r * (ship.mods?.scan ?? 1);
-      if (dist <= far) {
-        const lit = v.drive ? 1.8 : v.speed > 900 ? 1.25 : 1;
-        const fade = 1 - dist / far;
-        const cap = SCAN.trackCap * Math.min(1, lit * (0.35 + fade));
-        const rate = SCAN.trackGain * lit * (0.3 + fade) * (pulsing ? SCAN.pulseBonus : 1);
-        rec.res = Math.min(cap, rec.res + rate * step);
-        if (rec.res > 0) { rec.x = v.x; rec.y = v.y ?? 0; rec.z = v.z; rec.at = sim.time; }
-        return;
-      }
-      rec.res = Math.max(0, rec.res - SCAN.decay * step);
-      return;
-    }
 
     /* ---- the broad sweep ----
      * Everything in range, every pass, up to `broadCap`. On the nose fills

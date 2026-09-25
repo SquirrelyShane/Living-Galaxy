@@ -151,6 +151,22 @@ ok(SL.stationLife.log.length === Math.min(30, lg), "the town log comes back");
 ok(LN.lineState().inbox.length === Math.min(30, inbox), "the inbox comes back");
 ok(CO.company.staff.every((x) => x.regard != null), "regard is on the record");
 
+/* ---- 7b. 0.3.49: hands settled before the 0.3.47 share cut are re-rated once ---- */
+{
+  const x = CO.company.staff.find((q) => !q.born && q.listWage > 0);
+  if (x) {
+    const snap2 = JSON.parse(JSON.stringify(CO.serializeCompany()));
+    const sx = snap2.staff.find((q) => q.id === x.id);
+    sx.baseIncome = Math.round(sx.listWage * 0.45);
+    delete snap2.shareV;
+    CO.restoreCompany(snap2);
+    const y = CO.company.staff.find((q) => q.id === x.id);
+    ok(y.baseIncome === Math.round(y.listWage * CO.COMPANY.staffShare) && CO.company.shareV === CO.COMPANY.staffShare, `an old 45% hand books ${Math.round(CO.COMPANY.staffShare * 100)}% now (${Math.round(y.listWage * 0.45)} → ${y.baseIncome})`);
+    CO.restoreCompany(JSON.parse(JSON.stringify(CO.serializeCompany())));
+    ok(CO.company.staff.find((q) => q.id === x.id).baseIncome === y.baseIncome, "and only once");
+  }
+}
+
 /* ---- 8. a sibling in another sky is not reachable ---------------------------- */
 const far = CO.company.staff[0];
 const sky = far.sky;

@@ -10,15 +10,12 @@
  * to fly the berth with the HUD.
  */
 
-import { currentShipId, issuedHullId, sim, toggleDock, crewCapacity } from "./sim.js";
+import { currentShipId, issuedHullId, sim, toggleDock } from "./sim.js";
 import { SHIP_DB, shipById, sizeBand } from "./shipdb.js";
 import { componentBill, stockLines, yardQuote } from "./shipcost.js";
 import { pilot, rankStatus } from "./pilot.js";
-import { radar, traitAxes } from "./ui/charts.js";
-import { glyphBar, sigil } from "./ui/glyphs.js";
-import { crew, crewWageTotal, hireCrew, hireTerms, stationRoster, wageFor } from "./crew.js";
-import { cradle } from "./npc/cradle.js";
-import { company, hasCompany, recallStaff, staffAt } from "./company.js";
+import { crew } from "./crew.js";
+import { company, hasCompany } from "./company.js";
 import { contracts, BOARD } from "./contracts.js";
 import { renderDesk, renderHeld } from "./boardview.js";
 import { renderCoverage, buyCoverage } from "./ui/coverage.js";
@@ -33,6 +30,7 @@ import { openConsole } from "./console/console.js";
 import { marketBlock } from "./console/panels/market.js";
 import { robotsPanel } from "./crew/robotyard.js";
 import { refitPanel, wireDeckRepair, paintDeckRepair } from "./refityard.js";
+import { hallPanel, resetHall } from "./deckhall.js";
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -100,7 +98,6 @@ function mountVitals(canvas) {
 let tab = "market";
 let tabs = null;
 let view = { zoom: 1, panX: 0, panY: 0, selected: null };
-let rosterCache = null;
 let paintPanel = () => {};
 
 function row(parent, label, hint) {
@@ -110,11 +107,6 @@ function row(parent, label, hint) {
   r.append(l, v);
   parent.append(r);
   return v;
-}
-
-/** A settled hand back as a hall candidate, at list wage, no bonus. */
-function candidateFor(sRec) {
-  return { id: sRec.id, name: sRec.name, complexId: sRec.complexId, letter: sRec.letter, title: sRec.title, wage: wageFor(sRec.complexId, sRec.letter), complexName: sRec.complexName ?? "", traits: sRec.traits, pronouns: sRec.pronouns, gender: sRec.gender, attractedTo: sRec.attractedTo };
 }
 
 function btn(text, fn, cls = "") { const b = el("button", `sd-btn ${cls}`, text); b.addEventListener("click", fn); return b; }
@@ -281,68 +273,10 @@ const PANELS = {
     body.append(head, held, offers);
   },
 
-  /* 0.3.45 — the HALL. This tab was CREW and carried half the console with it:
-   * the roster line, the company register, the treasury, the fleet and the
-   * crew log, every one of them also a CON panel. The deck keeps what only a
-   * port has — the people on this floor you can sign, and the company's own
-   * people who live here. Everything else is one jump away in the console. */
-  hall(body, st) {
-    const cap = crewCapacity();
-    const aboard = el("div", "sd-sec");
-    aboard.append(el("h4", null, `BERTHS ${crew.aboard.length}/${cap} · payroll ${crewWageTotal()} cr/cycle`));
-    const v = row(aboard, "Your crew", crew.aboard.length ? `${crew.aboard.length} aboard — roster, talk and duties in the console` : "No crew signed. The ship runs quiet.");
-    v.append(btn("CON › CREW", () => openConsole("crew", "roster"), "sd-accent"));
-    const hall = el("div", "sd-sec");
-    hall.append(el("h4", null, `HIRING HALL — ${st.name}`));
-    rosterCache = rosterCache?.st === st.id ? rosterCache : { st: st.id, list: stationRoster(st, 0, sim.skySeed) };
-    let reveal = 0;
-    for (const c of rosterCache.list) {
-      if (crew.aboard.some((m) => m.id === c.id)) continue;
-      const rs = cradle.get(c.id)?.status;
-      if (rs === "staff" || rs === "captain" || rs === "dependant" || rs === "child") continue; // on somebody's books, or too young
-      const v = row(hall, `${sigil(c.id)} ${c.name} · ${c.letter}`, `${c.title} — ${c.complexName}${c.pronouns ? ` · ${c.pronouns.subj}/${c.pronouns.obj}` : ""}`);
-      const terms = hireTerms(c);
-      /* the record compiles as the hall reveals it: temperament radar + the
-       * two axes a captain hires on, written in glyphs and filling in turn */
-      const card = el("div", "sd-person");
-      const rd = radar(el("div"), traitAxes(c).map((a) => ({ ...a, value: 0.04 })), { size: 64 });
-      const g1 = el("div"), g2 = el("div");
-      const b1 = glyphBar(g1, { label: "GRIT", value: 0, seed: `${c.id}:grit`, cells: 10, tone: "cyan", animate: false });
-      const b2 = glyphBar(g2, { label: "LOYALTY", value: 0, seed: `${c.id}:loyalty`, cells: 10, tone: "amber", animate: false });
-      card.append(rd.el, g1, g2);
-      const delay = 120 * reveal++;
-      setTimeout(() => { rd.update(traitAxes(c)); b1.set(c.traits?.grit ?? 0.5); b2.set(c.traits?.loyalty ?? 0.5); }, delay);
-      v.parentElement.classList.add("sd-row-tight");
-      v.append(el("span", "sd-cr", terms.firstHand ? `${terms.wage} cr/cyc · first hand` : `${c.wage} cr/cyc · ${terms.bonus} cr bonus`), btn("SIGN", () => {
-        const why = hireCrew(c, sim.ship, cap);
-        if (why) sim.notice = why;
-        paintPanel();
-      }, "sd-accent"));
-      v.parentElement.after(card);
-    }
-    /* the company's people who live on THIS floor — the one company list that is the port's */
-    const people = el("div", "sd-sec");
-    const here = staffAt(st.id).filter((p) => !p.transit);
-    people.append(el("h4", null, hasCompany() ? `${company.name.toUpperCase()} — ON THIS FLOOR · ${here.length}` : "COMPANY"));
-    for (const p of here) {
-      const v = row(people, `${sigil(p.id)} ${p.name}`, `${p.title}${p.pronouns ? ` · ${p.pronouns.subj}/${p.pronouns.obj}` : ""} · ${p.income} cr/cycle to the company${p.family?.length ? ` · household of ${p.family.length + 1}` : ""}`);
-      /* 0.3.46: the company line — talk to them without taking them back aboard */
-      v.append(btn("LINE", () => openConsole("corp", "town", { focus: p.id })));
-      v.append(btn("RECALL", () => {
-        const sRec = recallStaff(p.id);
-        if (!sRec) return;
-        const cand = candidateFor(sRec);
-        const why = hireCrew(cand, sim.ship, cap);
-        if (why) sim.notice = why;
-        paintPanel();
-      }));
-    }
-    if (!hasCompany()) {
-      const v = row(people, "No company registered", "the registrar, the treasury and the fleet are in the console");
-      v.append(btn("CON › CORP", () => openConsole("corp", "company"), "sd-accent"));
-    } else if (!here.length) people.append(el("p", "sd-empty", "Nobody of yours lives here. Settle a hand at this port and they earn the company a share every cycle."));
-    body.append(aboard, hall, people);
-  },
+  /* 0.3.49 — the HALL lives in js/deckhall.js: your crew (TALK, SETTLE, PAY
+   * OFF) in the deck's own style, the hiring hall, the company's people on
+   * this floor with the LINE inline, and the registrar with a name field. */
+  hall(body, st) { hallPanel(body, st, () => paintPanel()); },
 
   blueprint(body, st) {
     const wrapEl = el("div", "sd-bp");
@@ -391,7 +325,7 @@ PANELS.drones = (body, st) => {
   const opts = buildOptions(st);
   const sec = el("div", "sd-sec");
   sec.append(el("h4", null, "DRONE LINES"));
-  if (opts.length && !hasCompany()) { const v = row(sec, "Drones are company property", "Register a company at CON › CORP while you are docked; the yard bills the treasury and your drones earn into it."); v.append(btn("REGISTRAR", () => openConsole("corp", "company"), "sd-accent")); }
+  if (opts.length && !hasCompany()) { const v = row(sec, "Drones are company property", "Register one at the registrar on the HALL tab; the yard bills the treasury and your drones earn into it."); v.append(btn("REGISTRAR", () => { tab = "hall"; tabs.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x.getAttribute("data-sd") === "hall")); paintPanel(); }, "sd-accent")); }
   else if (opts.length) row(sec, `${company.name} treasury`, "the yard bills the treasury; drone earnings land there").append(el("span", "sd-note", `${Math.round(company.treasury).toLocaleString()} cr`));
   if (!opts.length) sec.append(el("p", "sd-empty", "This port builds no drones. Industrial ports build miners, salvagers and harvesters; logistics ports haulers and couriers; military ports combat frames."));
   for (const o of opts) {
@@ -474,7 +408,7 @@ export function mountStationDeck() {
 
   return function paintDeck(state) {
     const dockedAt = state.dockedAt;
-    if (dockedAt && dockedAt !== lastDock) { stowed = false; tab = "market"; view = { zoom: 1, panX: 0, panY: 0, selected: null }; rosterCache = null; }
+    if (dockedAt && dockedAt !== lastDock) { stowed = false; tab = "market"; view = { zoom: 1, panX: 0, panY: 0, selected: null }; resetHall(); }
     lastDock = dockedAt;
     const want = Boolean(dockedAt) && state.phase === "play" && !stowed;
     if (want !== open) {

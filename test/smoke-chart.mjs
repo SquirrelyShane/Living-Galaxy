@@ -116,9 +116,8 @@ const cold = await page.evaluate(async () => {
 });
 const drawn = cold.chevrons + cold.blobs;
 console.log("chart before scanning:", JSON.stringify(cold));
-/* Not zero — the scanner runs while you fly, and the long-range track band
- * (SCAN.track_r) hands anything under drive a coarse blob on purpose, so a
- * fair fraction of the sky shows as uncertain returns early. The 10% floor
+/* The scanner runs while you fly, so a few close returns can show early
+ * (0.3.50 removed the long-range band that blobbed every hull under drive). The 10% floor
  * here dated from before two things: the coarse band, and 0.2.02 halving the
  * flow (the denominator). */
 ok(drawn < cold.inSky * 0.35, `the chart shows ${drawn} of ${cold.inSky} hulls, not all of them`);

@@ -222,7 +222,10 @@ function measureRail() {
   const cands = [];
   if (sr && sr.height > 0) {
     cands.push(slot(padR, Math.round(sr.bottom) + RAIL_GAP));          // under the strip
-    cands.push(slot(padR, Math.round(sr.top) - PUCK_H - RAIL_GAP));    // above it
+    /* 0.3.49: never above it. "Above the strip" is the gauges card — a
+     * readout, so it scored as free, and the puck spent every call parked on
+     * top of PWR/HULL/SHLD in the top-right corner. Reported as the call icon
+     * having "moved to the top right". Under the strip or further down. */
   }
   /* CANDIDATES FROM THE ACTUAL GAPS, not from fractions of the screen.
    *
@@ -275,9 +278,10 @@ function measureRail() {
    * hail is a far better trade than moving it somewhere the pilot will not
    * look for it. */
   let best = null;
+  const floor = vw <= vh && sr && sr.height > 0 ? Math.round(sr.bottom) : 4;   // portrait: nothing above the strip
   for (const c of cands) {
     if (!c) continue;
-    if (c.top < 4 || c.bottom > vh - 4) continue;
+    if (c.top < Math.max(4, floor) || c.bottom > vh - 4) continue;
     if (c.puck.left < 4 || c.puck.right > vw - 4) continue;
     if (c.answer.left < 0 || c.answer.right > vw) continue;   // never off screen: it must be tappable
     /* Overlap dominates; distance from home breaks the ties. Without the
@@ -300,6 +304,72 @@ function measureRail() {
   root.style.removeProperty("--g-rail-right");
   root.style.removeProperty("--g-answer-right");
   return sr ? sr.height : 0;
+}
+
+/* THE LEFT COLUMN STACKS ITSELF (0.3.49).
+ *
+ * Instruments, status, lock, alarms, the hazard line, the response clock, the
+ * message card and the toast all hang down the left edge, and every one of
+ * them had a fixed `top` in CSS. The hazard line and the response clock were
+ * given the SAME top (+170), and the message card sat at +182 — so the card
+ * covered "◈ RESPONSE 12s · <hull>" every time there was a message, which is
+ * exactly when a fight is on. A fixed number cannot know which of these are
+ * showing, so they are laid out in order, only the visible ones, each under
+ * the last. Measured at most five times a second; reading layout every frame
+ * after the paint has just written text would force a reflow per frame. */
+const LEFT_STACK = ["instruments", "status", "lockbar", "alarms", "hazline", "respline", "notice-card", "toast"];
+const STACK_GAP = 6;
+let stackAt = 0;
+function stackLeftColumn(force = false) {
+  const doc = globalThis.document;
+  if (!doc) return;
+  const now = globalThis.performance?.now?.() ?? Date.now();
+  if (!force && now - stackAt < 200) return;
+  stackAt = now;
+  let y = null;
+  for (const id of LEFT_STACK) {
+    const el = doc.getElementById(id);
+    if (!el) continue;
+    if (y == null) { y = el.getBoundingClientRect().top; }   // the first one stays where CSS put it
+    else el.style.setProperty("top", `${Math.round(y)}px`, "important");
+    const shown = !el.classList.contains("hidden") && el.offsetParent !== null && getComputedStyle(el).display !== "none";
+    const h = shown ? el.getBoundingClientRect().height : 0;
+    if (h > 1) y += h + STACK_GAP;
+  }
+  stackRightColumn(doc);
+}
+
+/* …and so does the right one, in portrait. The systems strip sat at a fixed
+ * +100 under a gauges card 112 px tall, so SHLD/ENG covered the card's CGO row
+ * — "top right panels overlapping". The strip now hangs from the card's real
+ * bottom, and if that pushes it into the throttle card, the throttle card
+ * gives up the difference (its slider row is the flexible one) rather than the
+ * two being drawn on top of each other. The comms puck is re-placed whenever
+ * the column moves, since it is measured against the strip. */
+let rightSig = "";
+function stackRightColumn(doc) {
+  const g = doc.getElementById("gauges"), strip = doc.getElementById("sys-strip"), dash = doc.getElementById("dash");
+  if (!g || !strip) return;
+  const portrait = (globalThis.innerHeight || 0) >= (globalThis.innerWidth || 0);
+  if (!portrait) {
+    if (rightSig !== "land") { strip.style.removeProperty("top"); dash?.style.removeProperty("height"); rightSig = "land"; measureRail(); }
+    return;
+  }
+  const gr = g.getBoundingClientRect();
+  if (gr.height < 2) return;
+  const top = Math.round(gr.bottom + STACK_GAP);
+  strip.style.setProperty("top", `${top}px`, "important");
+  let dashH = "";
+  if (dash) {
+    dash.style.removeProperty("height");
+    const dr = dash.getBoundingClientRect(), sb = top + strip.getBoundingClientRect().height + STACK_GAP;
+    if (dr.height > 2 && dr.top < sb) {
+      dashH = `${Math.max(150, Math.round(dr.bottom - sb))}px`;
+      dash.style.setProperty("height", dashH, "important");
+    }
+  }
+  const sig = `${top}|${dashH}|${globalThis.innerWidth}x${globalThis.innerHeight}`;
+  if (sig !== rightSig) { rightSig = sig; measureRail(); }
 }
 
 export function bindOrient() {
@@ -1130,11 +1200,19 @@ export function mountHud() {
       $("alarms").innerHTML = ah;
     }
 
+    /* 0.3.49: the left column stacks itself (see stackLeftColumn) */
+    stackLeftColumn();
+
     /* transient message card */
     /* the card is titled by what the message is ABOUT when it says so — "Undocked." reads as the port */
     const about = s.noticeAbout && s.noticeAbout.text === s.notice ? s.noticeAbout.name : null;
-    /* … else by the lock, else by what the reticle is on, else by the nearest world */
-    $("lock-name").textContent = about ?? sel?.name ?? s.reticleName ?? near?.name ?? "—";
+    /* … else by the lock, else by what the reticle is on, else by the nearest
+     * world — but only when the message is about it. 0.3.49: tapping TURR or
+     * ENG printed "EARTH" over "Turrets armed", because a message about the
+     * ship took its title from whatever planet was closest. A name the text
+     * does not mention is not what it is about: those are the ship's. */
+    const named = [sel?.name, s.reticleName, near?.name].find((n) => n && s.notice?.includes(n));
+    $("lock-name").textContent = about ?? named ?? (s.noticeTag || "SHIP");
     $("notice").textContent = s.notice;
     const stale = s.noticeAge > NOTICE_LIFE;
     noticeCard.classList.toggle("fading", stale);

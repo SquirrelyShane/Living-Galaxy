@@ -227,10 +227,11 @@ t("resolving takes real time, and letting go loses it", () => {
  * level, and the label loop culls on the sensor radius. Both have been got
  * wrong before: a "track" tier once put hull names on the canopy from
  * fourteen thousand kilometres out. */
-t("the long-range band can never resolve far enough to name anything", () => {
-  assert.ok(SCAN.trackCap < SCAN.track, `a coarse return caps at ${SCAN.trackCap}, which must stay under the track threshold ${SCAN.track}`);
-  assert.equal(levelOf(SCAN.trackCap), 1, "so the best it can ever be is a seen-but-unidentified blob");
-  assert.ok(SCAN.track_r > SCAN.range, "and it reaches further than the identification dish, or it would be pointless");
+t("0.3.50: no long-range band — nothing beyond the dish, nothing under drive", () => {
+  assert.equal(SCAN.track_r, undefined, "the 1.4 million u coarse-return band is gone");
+  const src = readFileSync("js/contacts.js", "utf8");
+  assert.ok(/if \(dist > range \|\| v\.drive\)/.test(src), "a hull out of range or with its drive lit is not touched");
+  assert.ok(/if \(v\.drive\) rec\.res = 0/.test(src), "and one that lights its drive leaves the chart at once");
 });
 
 t("a level-1 return is unnamed, a level-2 return is a class, only level 3 is a name", () => {

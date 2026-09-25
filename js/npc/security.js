@@ -412,7 +412,10 @@ export function stepSecurity(t, dt, stationList = liveStations) {
 
     const victim = victimOf(c.victimId);
     const victimGone = !victim || victim.job === "down";
-    const quiet = t - (c.lastHitAt ?? c.at) > HOLD_AFTER_S;
+    /* 0.3.49: a player's SOS made before the shooting starts is quiet by
+     * definition, and was closed 70 s after the call — before a wing from the
+     * far side of the ring could arrive. It holds until the wing is due. */
+    const quiet = t - Math.max(c.lastHitAt ?? c.at, c.sos && c.eta != null && !c.arrivedAt ? c.eta : -Infinity) > HOLD_AFTER_S;
 
     if (t > c.expires || victimGone || quiet) {
       c.state = "closed";

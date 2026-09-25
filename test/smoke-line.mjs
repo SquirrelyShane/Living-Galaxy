@@ -119,11 +119,12 @@ const deck = await page.evaluate(async () => {
   btns[0]?.click();
   await new Promise((r) => setTimeout(r, 700));
   const C = await import("/js/console/console.js");
-  return { docked: sim.ship.dockedAt === st.id, lineBtns: btns.length, panel: C.console.panel, sub: C.console.sub.corp, card: Boolean(document.querySelector("#con-body .tcard")) };
+  return { docked: sim.ship.dockedAt === st.id, lineBtns: btns.length, open: C.console.open || sim.terminalOpen, inline: Boolean(document.querySelector("#sd-body .sd-line")), topics: document.querySelectorAll("#sd-body .sd-line .sd-btn").length };
 });
 ok(deck.docked, "docked at the company's port");
 ok(deck.lineBtns >= 1, `the HALL lists the company's people here with LINE (${deck.lineBtns})`);
-ok(deck.panel === "corp" && deck.sub === "town" && deck.card, "LINE on the deck lands on that person's card in CORP › TOWN");
+/* 0.3.49: the deck keeps you in the station — the line opens inline, the console stays shut */
+ok(deck.inline && deck.topics >= 5 && !deck.open, `LINE on the deck opens the line inline, in station style (${deck.topics} topics, console ${deck.open ? "OPEN" : "closed"})`);
 await page.screenshot({ path: "/tmp/line-deck.png" });
 
 ok(!errors.length, `no page errors (${errors.length})`);
