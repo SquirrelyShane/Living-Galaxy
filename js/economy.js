@@ -41,10 +41,16 @@ export const ECON_TICK = 20;          // sim seconds between production passes
  * Contracts are unaffected: a delivery pays `max(bid, book)` plus a premium,
  * so the floor under contract work is the book price and narrowing the band
  * moves route profit down without moving job pay with it. */
-export const PRICE_FLOOR = 0.72;      // glut: what a port pays / charges at the bottom of the curve, × book
-export const PRICE_CEIL = 1.45;       // shortage: the top of the curve
+/* 0.3.47 — narrowed again, 0.72…1.45 → 0.8…1.3 (a 1.63× swing). The trade
+ * bench still found a motor bought at an industrial yard for 579 and sold at a
+ * garrison for 996 — 1.7× in five minutes, 2,800 cr/min, with nothing made
+ * and nothing mined. A shortage is still worth flying to; a round trip is a
+ * living, not a fortune. */
+export const PRICE_FLOOR = 0.8;       // glut: what a port pays / charges at the bottom of the curve, × book
+export const PRICE_CEIL = 1.3;        // shortage: the top of the curve
 export const SHORT_FRAC = 0.25;       // stock under this fraction of target is a shortage
 export const GLUT_FRAC = 2.2;         // stock over this multiple of target is a glut
+const CURVE_K = Math.log(1 / PRICE_FLOOR) / Math.log(GLUT_FRAC + 0.18);
 
 /* Production lines by sector: what a pass eats and makes (units per tick at tier I; tier scales it).
  * Inputs are the sector's buys, outputs its sells — the trade map already told us who needs what. */
@@ -108,7 +114,12 @@ export function stockOf(st, id) {
 /** The curve itself, at an arbitrary quantity — the thing a lot is integrated over. */
 export function stockMultAt(st, id, q) {
   const target = Math.max(1, targetFor(st, id));
-  const m = Math.pow(target / (Math.max(0, q) + 0.18 * target), 0.45);
+  /* 0.3.47: the exponent was 0.45, which hit the 0.72 floor at 2× target —
+   * a glut past that point moved nothing, and a port sitting on four times
+   * what it wanted priced it the same as one on twice. The exponent is now
+   * whatever lands the curve on the floor where GLUT_FRAC says a glut starts,
+   * so the band and the curve cannot disagree again. */
+  const m = Math.pow(target / (Math.max(0, q) + 0.18 * target), CURVE_K);
   return Math.max(PRICE_FLOOR, Math.min(PRICE_CEIL, m));
 }
 

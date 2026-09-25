@@ -39,7 +39,7 @@ import { stations, stationById } from "./stations.js";
 import { corpOfStation, corpRelation, corps, adjustStanding, standingLabel } from "./corps.js";
 import { POWERS } from "./data/factions.js";
 import { shortagesOf, wantsOf, bidPrice, askPrice, stockOf, deliver, lift } from "./economy.js";
-import { goodName, baseValue, ORES, SECTORS } from "./materials.js";
+import { goodName, baseValue, good, ORES, SECTORS } from "./materials.js";
 import { traffic, HOSTILE_ROLES } from "./npc/traffic.js";
 import { flow } from "./npc/flow.js";
 import { nests } from "./npc/rogues.js";
@@ -50,13 +50,14 @@ import { bookRevenue } from "./company.js";
 import { work, pilot } from "./pilot.js";
 import { BODIES, BEACONS, bodyPosition, beaconPosition, currentSystem, scanRadius } from "./bodies.js";
 import { pickSpot, spotLine, openSite, closeSite, siteById } from "./sites.js";
-import { chainOffersAt, chainVersion, noteChainAccept, noteChainDone, noteChainFail, resetChains, chainReport, wireChains, CHAIN } from "./chains.js";
+import { chainOffersAt, chainVersion, noteChainAccept, noteChainDone, noteChainFail, resetChains, chainReport, wireChains, CHAIN, chainBonus } from "./chains.js";
 import { bookHandling } from "./dockwork.js";
 
 export const TIERS = [
+  /* 0.3.47: 1.55/2.4 → 1.35/1.8. A sealed job is worth having, not a jackpot */
   { key: "low",  name: "Standard", weight: 58, pay: 1.0,  standing: -10 },
-  { key: "mid",  name: "Bonded",   weight: 30, pay: 1.55, standing: 15 },
-  { key: "high", name: "Sealed",   weight: 12, pay: 2.4,  standing: 35 },
+  { key: "mid",  name: "Bonded",   weight: 30, pay: 1.35, standing: 15 },
+  { key: "high", name: "Sealed",   weight: 12, pay: 1.8,  standing: 35 },
 ];
 
 /* The departments, and the careers each one pays: every complex in
@@ -116,8 +117,16 @@ export const BOARD = {
    * so contract work is worth doing on its own rather than being the thing you
    * do between trade runs. It is the number to reach for when a career feels
    * thin — it moves every department at once, which is what you want for
-   * parity and not what you want for flavour. */
-  pay: 1.7,
+   * parity and not what you want for flavour.
+   *
+   * 0.3.47 — 1.7 → 1.0. A "cut 305 iron ore" job at 1.7 paid about 2.3× what
+   * the same ore fetched at the counter, a five-stage chain opened at 4,000 cr
+   * for a pilot whose whole hull was worth 6,500, and a start purse became a
+   * fleet in an evening. The desk now pays what its own text says — the goods
+   * at the bid plus a premium, or a flat fee for flying somewhere — and it is
+   * the price of the part, not the multiplier, that makes deep work worth it
+   * (materials.js VALUE_RULE). */
+  pay: 1.0,
 };
 
 export const contracts = { boards: new Map(), active: [], done: 0, failed: 0, seq: 1 };
@@ -231,7 +240,28 @@ function withSpot(job, st, rnd, opts = {}) {
  * by tier) and a fee — the desk has to beat the market floor, or you would
  * just sell the cargo there. (The 0.3.17 desk paid 0.55–0.7 of the bid and
  * called it "over the bid".) */
-const deliverJob = (st, id, qty, prem, fee, t, title, text) => ({ mech: "deliver", good: id, qty, pay: Math.round(qty * Math.max(bidPrice(st, id), baseValue(id)) * (1 + prem * (0.7 + 0.3 * t.pay)) + fee * t.pay), title, text });
+/* 0.3.47: a job that pays for goods pays the goods at the bid and a premium
+ * on top; the tier scales the PREMIUM and the fee, never the goods. Before, a
+ * Sealed procurement multiplied the whole cost of the cargo by the tier and
+ * then by BOARD.pay, and paid 3.7× what the goods were worth. Freight (a
+ * consignment the port loads for you) is a commission on its value, 10–12%,
+ * not 60%. */
+/* …and a delivery of something you can BUY is priced off what it costs to
+ * buy. Ore and ice you cut yourself are paid over the bid (the premium is your
+ * time on the cutter); a part or a refined good that some port sells for 0.7
+ * of book was paying bid × 1.54 on a Sealed desk, which is money for a trip to
+ * the shop. For those the basis is the cheapest ask in the sky (+8% for the
+ * trip), and the premium is lighter. */
+function unitBasis(st, id) {
+  const top = Math.max(bidPrice(st, id), baseValue(id));
+  if (good(id)?.tier === "ore") return { unit: top, k: (t) => 0.7 + 0.3 * t.pay };   // the 0.3.18 shape: the tier leans on it gently
+  const src = cheapestSource(id, st.id);
+  return { unit: src ? Math.min(top, src.p * 1.08) : top, k: (t) => 0.6 * t.pay };
+}
+const deliverJob = (st, id, qty, prem, fee, t, title, text) => {
+  const { unit, k } = unitBasis(st, id);
+  return { mech: "deliver", good: id, qty, pay: Math.round(qty * unit * (1 + prem * k(t)) + fee * t.pay), title, text };
+};
 
 function cheapestSource(id, except) {
   let best = null;
@@ -278,7 +308,7 @@ const KINDS = {
     const line = pickOf(rnd, lines);
     if (!dest || !line) return null;
     const qty = Math.round(Math.min(line.qty, qtyFor(fit, 0.25 + rnd() * 0.35 * t.pay, 8, line.id, t)));
-    return { mech: "haul", good: line.id, qty, destId: dest.id, destName: dest.name, pay: Math.round(qty * baseValue(line.id) * 0.6 * t.pay + 350 * t.pay), title: `Haul ${qty} ${goodName(line.id)} to ${dest.name}`, text: `Consignment: ${qty} ${goodName(line.id)} loaded here, delivered to ${dest.name}. Load on accept.` };
+    return { mech: "haul", good: line.id, qty, destId: dest.id, destName: dest.name, pay: Math.round(qty * baseValue(line.id) * 0.2 * t.pay + 450 * t.pay), title: `Haul ${qty} ${goodName(line.id)} to ${dest.name}`, text: `Consignment: ${qty} ${goodName(line.id)} loaded here, delivered to ${dest.name}. Load on accept.` };
   },
   supply(st, rnd, t, fit) {
     const short = shortagesOf(st);
@@ -292,7 +322,7 @@ const KINDS = {
     const id = pickOf(rnd, ["chip", "sensor", "medkit", "controller", "optic"]);
     if (!dest || stockOf(st, id) < 2) return null;
     const qty = Math.min(Math.round(stockOf(st, id)), 2 + Math.floor(rnd() * 5));
-    return { mech: "haul", good: id, qty, destId: dest.id, destName: dest.name, deadline: 0.6, pay: Math.round(qty * baseValue(id) * 0.25 * t.pay + 500 * t.pay), title: `Courier: ${qty} ${goodName(id)} to ${dest.name}`, text: `Bonded parcel — ${qty} ${goodName(id)} for ${dest.name}, on a short clock. Small, light, and worth more than the hull if it goes missing.` };
+    return { mech: "haul", good: id, qty, destId: dest.id, destName: dest.name, deadline: 0.6, pay: Math.round(qty * baseValue(id) * 0.15 * t.pay + 450 * t.pay), title: `Courier: ${qty} ${goodName(id)} to ${dest.name}`, text: `Bonded parcel — ${qty} ${goodName(id)} for ${dest.name}, on a short clock. Small, light, and worth more than the hull if it goes missing.` };
   },
   /* TRADE */
   procure(st, rnd, t, fit) {
@@ -302,7 +332,7 @@ const KINDS = {
     const src = cheapestSource(id, st.id);
     if (!src) return null;
     const qty = qtyFor(fit, 0.2 + rnd() * 0.3, 5, id, t);
-    const pay = Math.round(qty * Math.max(bidPrice(st, id), src.p) * 1.2 * t.pay + 300 * t.pay);
+    const pay = Math.round(qty * Math.max(bidPrice(st, id), src.p) * (1 + 0.18 * t.pay) + 300 * t.pay);
     return { mech: "deliver", good: id, qty, sourceId: src.st.id, sourceName: src.st.name, pay, title: `Procure ${qty} ${goodName(id)}`, text: `Buy ${qty} ${goodName(id)} wherever you can — ${src.st.name} asks ${Math.round(src.p)} cr a unit — and deliver here. The desk pays ${Math.round(pay / qty)} a unit.` };
   },
   consign(st, rnd, t, fit) {
@@ -313,7 +343,7 @@ const KINDS = {
     for (const l of lines) { const b = bestBuyer(l.id, st.id); if (b && (!best || b.p / Math.max(1, askPrice(st, l.id)) > best.gain)) best = { l, b, gain: b.p / Math.max(1, askPrice(st, l.id)) }; }
     if (!best || best.gain < 1.02) return null;
     const qty = Math.round(Math.min(best.l.qty, qtyFor(fit, 0.3 + rnd() * 0.3, 8, best.l.id, t)));
-    return { mech: "haul", good: best.l.id, qty, destId: best.b.st.id, destName: best.b.st.name, pay: Math.round(qty * best.b.p * 0.3 * t.pay + 250 * t.pay), title: `Consignment sale: ${goodName(best.l.id)} to ${best.b.st.name}`, text: `Take ${qty} ${goodName(best.l.id)} on consignment to ${best.b.st.name}, where it fetches ${Math.round(best.b.p)} a unit. Your commission is a cut of the sale.` };
+    return { mech: "haul", good: best.l.id, qty, destId: best.b.st.id, destName: best.b.st.name, pay: Math.round(qty * best.b.p * 0.12 * t.pay + 300 * t.pay), title: `Consignment sale: ${goodName(best.l.id)} to ${best.b.st.name}`, text: `Take ${qty} ${goodName(best.l.id)} on consignment to ${best.b.st.name}, where it fetches ${Math.round(best.b.p)} a unit. Your commission is a cut of the sale.` };
   },
   resupply(st, rnd, t, fit) {
     /* a tenant's own shop runs low: bring back a mixed good from the sector's sell list elsewhere */
@@ -323,7 +353,7 @@ const KINDS = {
     const id = pickOf(rnd, sells);
     if (!id) return null;
     const qty = qtyFor(fit, 0.25 + rnd() * 0.3, 6, id, t);
-    return { mech: "deliver", good: id, qty, sourceId: dest.id, sourceName: dest.name, pay: Math.round(qty * askPrice(dest, id) * 1.15 * t.pay + 250 * t.pay), title: `Restock ${qty} ${goodName(id)}`, text: `${dest.name} makes ${goodName(id)} cheap. Buy ${qty} there and bring them here — the shop pays over the ask.` };
+    return { mech: "deliver", good: id, qty, sourceId: dest.id, sourceName: dest.name, pay: Math.round(qty * askPrice(dest, id) * (1 + 0.14 * t.pay) + 250 * t.pay), title: `Restock ${qty} ${goodName(id)}`, text: `${dest.name} makes ${goodName(id)} cheap. Buy ${qty} there and bring them here — the shop pays over the ask.` };
   },
   tender(st, rnd, t, fit) {
     /* the port's buyers put out a tender for something it wants at a fixed price over its bid */
@@ -380,7 +410,7 @@ const KINDS = {
     if (!spot) return null;
     const id = pickOf(rnd, ["steel_plate", "wiring", "motor", "ration", "medkit", "battery", "polymer", "glass"]);
     const qty = Math.max(2, qtyFor(fit, 0.04 + rnd() * 0.08, 2, id, t));
-    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the pod in ${spot.name}`, dwell: 12 }], grant: { good: id, qty }, good: id, qty, pay: Math.round((500 + qty * baseValue(id) * 0.4) * t.pay), title: `Recover a cargo pod — ${goodName(id)} in ${spot.name}`, text: `A hauler lost a pod of ${qty} ${goodName(id)} in ${spotLine(spot, st)}. Fly to it, hold twelve seconds for the tractor, and bring it here. The owner pays the finder.` };
+    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the pod in ${spot.name}`, dwell: 12 }], grant: { good: id, qty }, good: id, qty, pay: Math.round((400 + qty * baseValue(id) * 0.15) * t.pay), title: `Recover a cargo pod — ${goodName(id)} in ${spot.name}`, text: `A hauler lost a pod of ${qty} ${goodName(id)} in ${spotLine(spot, st)}. Fly to it, hold twelve seconds for the tractor, and bring it here. The owner pays the finder.` };
   },
   /* INDUSTRY */
   materials(st, rnd, t, fit) {
@@ -396,7 +426,7 @@ const KINDS = {
     if (!dest) return null;
     const have = stockOf(st, id);
     const qty = Math.round(Math.max(3, Math.min(have > 3 ? have : 99, sized(fit, 0.1 + rnd() * 0.15, 3) / 6)));
-    if (have >= qty) return { mech: "haul", good: id, qty, destId: dest.id, destName: dest.name, pay: Math.round(qty * baseValue(id) * 0.35 * t.pay + 500 * t.pay), title: `Construction lift: ${qty} ${goodName(id)} to ${dest.name}`, text: `${dest.name} is building out a ring. Lift ${qty} ${goodName(id)} from here to the site crews.` };
+    if (have >= qty) return { mech: "haul", good: id, qty, destId: dest.id, destName: dest.name, pay: Math.round(qty * baseValue(id) * 0.15 * t.pay + 450 * t.pay), title: `Construction lift: ${qty} ${goodName(id)} to ${dest.name}`, text: `${dest.name} is building out a ring. Lift ${qty} ${goodName(id)} from here to the site crews.` };
     return deliverJob(st, id, qty, 0.25, 450, t, `Construction: ${qty} ${goodName(id)}`, `A ring extension on ${st.name} is waiting on ${qty} ${goodName(id)}.`);
   },
   parts(st, rnd, t, fit) {
@@ -493,7 +523,7 @@ function chainOffer(st, rnd, now, fit, spec) {
     if (job.mech === "haul") job.chainStock = true;
   }
   if (stage.payK) job.pay = Math.round(job.pay * stage.payK);
-  job.pay = Math.max(450, Math.round(job.pay * BOARD.pay));
+  job.pay = Math.max(300, Math.round(job.pay * BOARD.pay));
   job.title = stage.title;
   job.text = `${stage.text}${job.spot ? ` Survey puts it in ${spotLine(job.spot, st)}.` : ""}`;
   if (job.targets?.length === 1 && job.spot) job.targets[0].name = job.spot.name;
@@ -506,7 +536,7 @@ function chainOffer(st, rnd, now, fit, spec) {
     corpId: issuer?.id ?? null, corpName: issuer?.name ?? "the port", tenant: false,
     posted: now, expires: now + BOARD.expires * 2, standing: -10,
     chain: chain.id, chainIdx: idx, chainName: chain.name, chainBlurb: chain.blurb,
-    chainOf: of, chainLast: last, chainBonus: chain.bonus ?? 0,
+    chainOf: of, chainLast: last, chainBonus: chainBonus(chain),
     ...job,
     deadline: (job.deadline ?? 1) + CHAIN.carry / BOARD.deadline,
   };
@@ -648,6 +678,12 @@ function settle(a, ok, why) {
   contracts.active.splice(contracts.active.indexOf(a), 1);
   if (a.spot) closeSite(a.id);
   if (sim.autoPlan.seamOre === a.good && !contracts.active.some((x) => x.spot && x.good === a.good)) sim.autoPlan.seamOre = null;
+  /* 0.3.47: …and the site stops being "the seam". A closed job's spot stayed in
+   * autoPlan.seam, so the next free MINE flew back to wherever that job had
+   * been — found when a dropped vein strike sent ARIA 800,000 u across the
+   * system to a site that no longer had anything to do with anything. */
+  const sp = a.spot, sm = sim.autoPlan.seam;
+  if (sp && sm && sm.x === sp.x && sm.y === sp.y && sm.z === sp.z && !contracts.active.some((x) => x.spot && x.spot.x === sp.x && x.spot.z === sp.z)) sim.autoPlan.seam = null;
   const co = a.corpId ? corps.find((x) => x.id === a.corpId) : null;
   if (ok) {
     sim.ship.credits += a.pay;

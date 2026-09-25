@@ -50,7 +50,13 @@ export const QRF_PER_PORT = 2;        // quick-reaction hulls a port keeps ringe
 export const QRF_RING = 2600;         // and the radius they ring it at
 
 export const distress = [];           // live calls, oldest first
-export const securityHooks = { onCall: null, onDispatch: null, onArrive: null, onClosed: null };
+export const securityHooks = { onCall: null, onDispatch: null, onArrive: null, onClosed: null, selfVictim: null };
+
+/* 0.3.48: a call can come from the player (js/seclevel.js SOS). "self" is not
+ * in the traffic list, so the scene is read through a hook the sim installs. */
+function victimOf(id) {
+  return id === "self" ? securityHooks.selfVictim?.() ?? null : vesselById(id);
+}
 
 let seq = 1;
 let lawCorpId = null;
@@ -106,7 +112,7 @@ function d3(a, b) { return Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z); }
  * already has open. `attacker` may be a contact, a hull, or the player
  * (pass `{ id: "self", name, player: true }`).
  */
-export function callForHelp(victim, attacker, t, kind = "unknown") {
+export function callForHelp(victim, attacker, t, kind = "unknown", opts = {}) {
   if (!victim) return null;
   const open = distress.find((c) => c.victimId === victim.id && c.state !== "closed");
   if (open) {
@@ -119,7 +125,7 @@ export function callForHelp(victim, attacker, t, kind = "unknown") {
   if (t - since < CALL_COOLDOWN) return null;
   lastCall.set(victim.id, t);
 
-  const cover = coverageFor(victim);
+  const cover = opts.coverage ?? coverageFor(victim);
   const call = {
     id: `sos${seq++}`,
     at: t,
@@ -127,10 +133,11 @@ export function callForHelp(victim, attacker, t, kind = "unknown") {
     expires: t + CALL_TTL,
     victimId: victim.id,
     victimName: victim.name ?? "an unnamed hull",
-    victimCorp: corpOfVessel(victim)?.id ?? null,
+    victimCorp: victim.id === "self" ? null : corpOfVessel(victim)?.id ?? null,
     attackerId: attacker?.id ?? null,
     attackerName: attacker?.name ?? "an unknown hull",
     byPlayer: Boolean(attacker?.player || attacker?.id === "self"),
+    sos: victim.id === "self",
     kind,
     x: victim.x, y: victim.y, z: victim.z,
     coverage: cover,
@@ -193,7 +200,7 @@ export function dispatch(call, t, stationList = liveStations) {
   if (call.state === "closed") return call;
   if (call.coverage <= 0.05) { call.state = "unanswered"; call.eta = null; return call; }
 
-  const want = waveCap(call.kind === "rogue" ? 4 : call.byPlayer ? 3 : 2);
+  const want = waveCap(call.kind === "rogue" ? 4 : call.byPlayer || call.sos ? 3 : 2);
   const near = freeResponders(call, stationList);
   const port = coveringPort(call, stationList);
 
@@ -272,7 +279,7 @@ export function flyResponse(n, t, dt) {
   }
   armFlight(n);
   /* the scene follows the victim while the victim is still flying */
-  const v = vesselById(call.victimId);
+  const v = victimOf(call.victimId);
   const tx = v && v.job !== "down" ? v.x : call.x;
   const ty = v && v.job !== "down" ? v.y : call.y;
   const tz = v && v.job !== "down" ? v.z : call.z;
@@ -403,7 +410,7 @@ export function stepSecurity(t, dt, stationList = liveStations) {
       }
     }
 
-    const victim = vesselById(c.victimId);
+    const victim = victimOf(c.victimId);
     const victimGone = !victim || victim.job === "down";
     const quiet = t - (c.lastHitAt ?? c.at) > HOLD_AFTER_S;
 

@@ -184,14 +184,16 @@ refresh the browser — there is no build step.
 | `js/stations.js` | Port placement, mounts, docking, stock |
 | `js/stationyard.js` | The glue to STATIONGEN: config, scale, port frame, doors, weapon mounts, works |
 | `js/stationworks.js` | A port's fabrication lines |
-| `js/stationdeck.js` | The docked deck: market, hall, works, robots, fleet rows |
+| `js/stationdeck.js` | The docked deck — only what a port has: market, shipyard, desk, hiring hall, works, drone and robot yards, refit, GNN, blueprint (the roster, company, fleet and logs are the console's, 0.3.45) |
 | `js/stationlife.js` | Settled staff: work, roles, life events, station births |
+| `js/staffline.js` | The company line: call a settled hand from anywhere, their calls and asks, regard, passage between ports |
 | `js/economy.js` | Production lines, stock, the price curve |
 | `js/blueprint.js` | Deterministic station deck plans, drawn blueprint-style |
 | `js/npc/traffic.js` | The captains: roles, timetable, jobs, flags — and the flown state machine |
 | `js/npc/flight.js` | How a hull actually flies: thrust, arrival braking, the lane drive, hull characteristics |
 | `js/npc/combat.js` | NPC-vs-NPC combat: acquisition, hunts, gunnery, and the out-of-sight resolution |
 | `js/npc/security.js` | The distress bus, the Security Directorate, and the response clock |
+| `js/seclevel.js`, `js/secbadge.js` | The security ◆: green/yellow/red, heat, the player's SOS, the fine — and the diamond on the HUD and the deck |
 | `js/npc/rogues.js` | Drone nests and the waves they send at ports, traffic and each other |
 | `js/npc/flow.js` | Flow boats — the heartbeat |
 | `js/npc/lanes.js` | Traffic corridors and lane-ways |
@@ -565,7 +567,7 @@ you are at.
 | **CREW** | ROSTER · TALK · BONDS · HOUSE · GENOME · LOG · SKY · BRIG | Who is aboard with all three relationship tracks, the conversations and staged acts, the ties between them and the children, the house rules, the body on file, the decision record, the crewed hulls out there, and the cell |
 | **WORK** | MISSION · DRONES · FLEET | The mission editor and presets, your drones as cards with their orders, the company fleet |
 | **MARKET** | PORT · HOLD · REFIT | Nearest port with DOCK / CLAIM and what it is short of; docked, the same PORT LEDGER / THEY SELL / THEY BUY / LOCKER & WORKS block the station deck shows; the hold with jettison and the ice bench; the refit rack at a yard |
-| **CORP** | COMPANY · BOARD · PILOT · STANDING · GNN · MARSHAL · TOWN | Company treasury and book, contracts in hand and the port's offers, your record (rank, promotion, specialisations, transfer, skills, live modifiers), standing with every corporation, the GNN desks, the bounty board, and your settled staff ashore |
+| **CORP** | COMPANY · BOARD · PILOT · STANDING · GNN · MARSHAL · TOWN | Company treasury and book, contracts in hand and the port's offers, your record (rank, promotion, specialisations, transfer, skills, live modifiers), standing with every corporation, the GNN desks, the bounty board, and your settled staff ashore on the company line |
 
 The **jump box** at the top searches all of it at once — every panel's rows
 plus the leaves that never belonged to one (map, directory filters, deck plan,
@@ -836,6 +838,18 @@ wiring, capacitor, computer chip, sensor, flight controller, battery, fuel
 cell, reactor rod, thruster bell, gyroscope, air scrubber, hydroponic rack,
 ration pack, armour plate, shield coil.
 
+**What a thing is worth is its inputs and the work** (0.3.47, `VALUE_RULE` in
+`js/materials.js`). A refined mineral is its ore ÷ the refine yield × 1.3; a
+made thing is the sum of its inputs × 1.18 — each stage of work adds the same
+18%, so a part is worth more over its rock the deeper it sits, and a new
+recipe prices itself. Ores are the unit and are not touched. Before, the table
+was authored by hand and the graph showed it: a heat exchanger sold for 6.49×
+the ore it ate and a battery for 5×, while a gyroscope — six stages deep, a
+flight controller in it — sold for 1.25×. Now: shallow parts 1.5–1.7× (ration,
+chip, battery, heat exchanger), the deepest 2.3–2.5× (gyroscope, actuator,
+hydroponic rack, air scrubber). `test/balance.test.mjs` fails if a number in the table
+drifts from the rule.
+
 Every rock in the belt has a fixed composition set by its own hash, so a rock
 is always the same rock. Mining pays out what is actually in it, surveys pay a
 core sample of the world's archetype ores, and salvage pays whatever the wreck
@@ -971,7 +985,7 @@ its copper, an outbound plate boat that leaves takes its plate), the traffic
 captains carrying real cargo between real ports (a trader loads whatever the
 far end eats that is deepest on this floor; a miner brings home what it cut),
 and you. Prices ride the stock against the port's target: bare shelves pay
-and charge up to 1.7× book, a glut 0.6×, so selling a hold of ore into a
+and charge up to 1.3× book, a glut 0.8× (0.3.47), so selling a hold of ore into a
 foundry drops the price behind you. Anything a port did not make and holds
 far over target is re-exported a little each pass. The market tab opens with
 the PORT LEDGER — lines running or stalled and on what, treasury, throughput,
@@ -1092,6 +1106,26 @@ be gone before it lands, or do not start. Your standing with the directorate
 decides whether the cavalry comes for *you*, and a call from the belt fringe
 with every picket committed goes unanswered — which is what makes the patrolled
 lanes worth something.
+
+**The security ◆** (`js/seclevel.js`, `js/secbadge.js`, 0.3.48). A small
+diamond in the HUD's brand pill — and in the station deck's header, because
+docked the deck covers the HUD — says where you stand with the Directorate:
+
+| ◆ | Means | SOS |
+| --- | --- | --- |
+| **GREEN · SAFE** | nothing against you; the Directorate covers you | open — a quick-reaction wing flies to *you* on the same honest clock the NPCs get (coverage 1, a wave of up to three, 150 s between calls; a wing that arrives to find nothing costs 1 standing) |
+| **YELLOW · IN COMBAT** | hit by a contact, or your turrets fired, in the last 20 s | closed until it has been quiet 20 s — call early |
+| **RED · WANTED** | heat ≥ 3 | never; the Directorate posts you (−15 standing) and its patrols read you as hostile and open fire |
+
+**Heat** is what you have done: +1 an honest hull destroyed, +2 a Directorate
+hull, +2 another pilot, +0.2 an honest hull you opened fire on that then called
+for help. Pirates and rogue drones add nothing — they are the job. One point
+cools every six minutes of sky time; it rides the pilot record
+(`pilot.secHeat`), so a reload is not an amnesty; **PAY FINE** at any honest
+port (1,200 cr a point, 800 minimum) clears it and buys back 8 standing. Tap
+the diamond for the card: who polices the sky, why you are the colour you are,
+SOS with its reason when closed, and the response clock once you have called.
+In a shared sky only the host runs the Directorate, so a mirror's SOS says so.
 
 **Fights are decided by the rounds.** Near you they are real ordnance that can
 miss; out of sensor range the same fight resolves on the same numbers, so a
@@ -2156,6 +2190,31 @@ eighteen minutes of sky: the best route went from **7.74× the median career to
 and eight of nine careers now earn most from their own department's board
 instead of from trade runs.
 
+**0.3.47 — work for your credits.** That parity was bought by paying
+everything more, and it showed in play: a Fledgling's first chain stage paid
+4,192 cr against a 6,563 cr hull, a "cut 305 iron ore" job paid about 2.3× what
+the ore fetched at the counter, a Sealed procurement 3.7× what its cargo was
+worth, and a start purse was a fleet in an evening. So, all at once:
+
+| Lever | Was | Now |
+| --- | --- | --- |
+| `BOARD.pay` | 1.7 | **1.0** — the desk pays what its text says |
+| Bonded / Sealed tier | 1.55 / 2.4 | **1.35 / 1.8** |
+| Goods jobs | tier × the whole cargo | the goods at the bid (ore/ice) or the **cheapest ask in the sky + 8%** (anything you can buy), and the tier scales only the premium and the fee |
+| Freight (haul, courier, lift, consignment) | 25–60% of cargo value | **12–20%** + a fee |
+| Chain closing bonus | as authored, 5,500–9,500 | **× 0.5** (`CHAIN.bonusK`) |
+| Stock band | 0.72 … 1.45 | **0.8 … 1.3**, the curve's exponent solved so it lands on the floor where `GLUT_FRAC` says a glut starts (it had gone flat at 2× target — `economy.test` had been failing on it) |
+| Finished-work bonus | ×1.12 / ×1.22 | **×1.08 / ×1.12** |
+| Pirate bounty | 420 + 6/t + 600 rescue | **240 + 4/t + 350** |
+| Your drone's bounty | 300 | **180** |
+| Settled staff share | 45% of list wage | **32%** |
+
+Bench, one seed each at 20 min and a 20,000 cr purse, before → after (the
+bench counts purse + treasury, not cargo, so single runs swing): commerce
+1,844 → 139–334 cr/min, manufacturing 1,304 → roughly break-even to 541,
+energy 1,570 → 775–977, healthcare 811 → 158–255; the mean top-20 route spread
+1.70× → 1.43×. A typical flying job now pays under a third of a starter hull.
+
 ### Who says what
 
 **NPC chat is a seam, not a file** (0.3.23, `js/npc/chat.js`). The speech engine
@@ -2654,7 +2713,7 @@ their children go together:
 
 | | What happens |
 | --- | --- |
-| **SETTLE** (needs a company) | They go on the company's books at that port. Every cycle the company earns 45% of their list wage plus a stipend per child. RECALL at that port brings the hand back aboard. |
+| **SETTLE** (needs a company) | They go on the company's books at that port. Every cycle the company earns 32% of their list wage (45% before 0.3.47) plus a stipend per child. RECALL at that port brings the hand back aboard. |
 | **PAY OFF** | Three cycles of wage as severance. They are released and *recorded*: the company's contacts list keeps their name and the port they were last seen at, the CRADLE keeps `lastContact`, and the port's hiring hall will show them again. |
 
 **Berths** come from one place: `crewCapacity()` in `sim.js`, which is the hull
@@ -2690,6 +2749,32 @@ Read at CONSOLE › CORP › **TOWN**: everyone by port with their role, househo
 mood and whether they are about to walk, and the town log. Measured, 6 hands
 settled at an industrial port over 200 cycles: marriages, births, seven children
 come of age onto the rolls, promotions, feuds — **6 on the rolls → 14**.
+
+**The company line** (`js/staffline.js`, 0.3.46). Settling somebody is not the
+last time you speak to them. Every member of staff in this sky is on the line
+from anywhere — CORP › TOWN, LINE on their row (or LINE beside them in a port's
+HALL). A call reads their actual life back to you — role, cycles, mood,
+partner, children, a baby due — and every topic moves the number it names:
+
+| Topic | Does |
+| --- | --- |
+| HOW ARE THINGS? | the report; +2 regard once a cycle |
+| SEND A BONUS | 3 cycles of their income from the treasury (pocket if it is dry); mood +12, regard +5; 3-cycle cooldown |
+| RAISE THEIR CUT | they keep 10% more of the share (max three); mood +6, and +4 to the mood their port pulls them toward, for good |
+| PUSH FOR PROMOTION | 5 cycles of income; wants 8 cycles served a rung (the rolls want 14) and mood 55+ |
+| HOW'S THE FAMILY? | partner, children by age, the one on the way |
+| MOVE THEM / COME OUT TO THE SHIP | passage (180 cr + 40/Mm, 45 s + 30 s/Mm) to a company port or to where you are docked; no income on the liner; they call when they land and the HALL has them for RECALL |
+| LET THEM GO | severance (3 cycles of list wage), address kept — two taps |
+
+**Regard** is the new number: seeded from their trust aboard when they settled,
+it adds `(regard − 50) × 0.22` to the mood their port drifts them toward, so a
+hand who trusted you settles happier and one who did not needs looking after.
+**They call you**, too: the rolls' events (promotion, wedding, birth, a feud, a
+strike, an accident) land in THE LINE as a message from the person, and a
+member under mood 48 asks for something — a bonus, a raise, a move — with those
+answers on the row. Three cycles unanswered costs 5 mood and 6 regard. The
+towns (households, children, the town log) and the inbox ride in the
+`lgaa-company` save — before 0.3.46 a reload lost every marriage and child.
 
 ### Robot crew and refits
 
@@ -3433,6 +3518,10 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
 | `ground` | 0.3.16: speech units carry real hull, place and grade; maydays only from hulls really under fire (never a raider), naming real attackers, integrity and place; port reports only from hulls at that port with its real census; claim reports name the ores in reach, amounts, value and the raiders/drones on the belt; a finished claim hauls the ore it said pays; the engine's claim topics never fire untrue over a long band |
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
+| `seclevel` | 0.3.48: GREEN with SOS open, a real wing flown to the player and a call that is not closed as "victim gone"; one call at a time; YELLOW from a hit or a round fired, clearing after 20 s; pirates add no heat, honest hulls and pilots do; RED closes SOS, drops Directorate standing, marks the hull an outlaw and turns patrol contacts hostile; heat rides the pilot record, cools, and is paid off at an honest port only |
+| `line` | 0.3.46: regard from trust aboard and its lift on mood; every line topic moves the number it names (bonus, cut, promotion, family, passage, release) with its cooldown and limits; nobody earns in transit and the books count raises; the rolls' events reach the inbox; an ask is answered or lapses and costs; towns, children and the inbox survive a save; a port in another sky cannot be called |
+| `balance` | 0.3.47: every mineral and part equals `VALUE_RULE`; the multiple over raw ore climbs with depth, nothing under 1.3× or over 3.6×; the curve still falls past twice target and lands on the floor; `BOARD.pay` is 1; a mining job pays 1.05–1.8× the bid, buying for the desk under 1.7× book, freight under 35% of cargo value; a flying job under 30% of a starter hull; the chain bonus is `CHAIN.bonusK` of authored; staff share ≤ 35% |
+| `deck` | 0.3.45: every deck tab in index.html has a panel and every panel a tab; the roster, register, treasury, fleet and flight log are not on the deck; the hall jumps to CON › CREW and the registrar to CON › CORP |
 | `robots`, `drones`, `droneops`, `speech`, `comms`, `careers`, `experimental` | the rest |
 
 The generators carry their own harnesses:

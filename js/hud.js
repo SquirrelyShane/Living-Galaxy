@@ -5,6 +5,7 @@ import { touch } from "./input.js";
 import { autoLevel, cycleMiningMode, cycleTimeScale, cycleTurretMode, launchSim, loadSky, requestJump, requestScan, resumePlay, claimPort, sensorPulse, toggleDock, togglePointerLock, returnToMenu, dismissNotice, setThrottle, setMiningMode, sim, toggleSystem } from "./sim.js";
 import { mountConsole, toggleConsole } from "./console/console.js";
 import { mountStationDeck } from "./stationdeck.js";
+import { mountSecBadge } from "./secbadge.js";
 import { mountDockBoot } from "./ui/dockboot.js";
 import { mountFullscreen } from "./ui/fullscreen.js";
 import { wireRecorder, settle as settleTape, record as tapeRecord, recorder } from "./recorder.js";
@@ -1021,6 +1022,7 @@ export function mountHud() {
   const warpState = $("warp-state");
   const paintConsole = mountConsole();
   const paintDeck = mountStationDeck();
+  const paintSec = mountSecBadge();
   const paintDockBoot = mountDockBoot();
   const paintChat = mountChatbox() ?? (() => {});
 
@@ -1056,6 +1058,7 @@ export function mountHud() {
     paintDockBoot();
     if (!playing) return;
     paintChat();
+    paintSec();
     $("btn-cam").textContent = sim.cameraMode === 0 ? "FPV" : "EXT";
     { const b = $("btn-aria"); const on = ariaHasConn(); b.classList.toggle("on", on); b.title = on ? `ARIA · ${ariaPilot.job ?? "planning"} — tap or touch the stick to take it back` : "Hand ARIA the conn"; }
 

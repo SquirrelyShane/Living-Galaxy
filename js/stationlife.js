@@ -30,6 +30,7 @@ import { adjustStanding, corpOfStation } from "./corps.js";
 import { logEvent, sim } from "./sim.js";
 import { COMPLEXES } from "./careers/complexes.js";
 import { post } from "./chat.js";
+import { hearFrom, moodLift } from "./staffline.js";
 
 /* Cycles a station child takes to come of age and go on the rolls. Longer than
  * the shipboard one: a childhood on a station is not a cruise. */
@@ -55,6 +56,8 @@ function note(kind, who, text, stId, delta = 0) {
   stationLife.log.unshift({ at: sim.time, stationId: stId, kind, who: who?.name ?? who ?? "", text, delta });
   if (stationLife.log.length > MAX_LOG) stationLife.log.length = MAX_LOG;
   logEvent(text, "company");
+  /* 0.3.46: it happened to a person, and they call the company about it */
+  try { hearFrom(kind, who, text); } catch { /* the line is never why the rolls stop */ }
   return text;
 }
 
@@ -365,8 +368,12 @@ export function tickStationLife() {
     s.cycles = (s.cycles ?? 0) + 1;
     s.mood ??= 74;
     /* mood drifts toward what the port and the company are like to work for */
-    const target = 55 + (company.confidence ?? 0.5) * 40 + (st?.hostile ? -20 : 0);
+    /* 0.3.46: …and toward what they think of you — regard and raises from the company line */
+    const target = 55 + (company.confidence ?? 0.5) * 40 + (st?.hostile ? -20 : 0) + moodLift(s);
     s.mood += (target - s.mood) * 0.12;
+
+    /* between ports on company passage: nothing happens to you on a liner */
+    if (s.transit) continue;
 
     /* a pregnancy carried ashore comes due */
     const h = household(s);

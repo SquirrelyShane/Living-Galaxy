@@ -48,6 +48,9 @@ export const pilot = {
   record: null,
   /* something worth writing changed (skill, rank, cert, hull) — the sim's 30 s writer reads it */
   dirty: false,
+  /* 0.3.48: what the Directorate holds against you (js/seclevel.js). Rides the
+   * pilot record, so a reload is not an amnesty */
+  secHeat: 0,
 };
 
 let crewBag = null;
@@ -105,6 +108,7 @@ export function makePilot(name, raceId, complexId, corpId) {
   if (!res.ok) res = enroll(ch, complexId, { force: true }); // taken on as a probationary aide
   ch = res.character;
   pilot.name = name || "Pilot";
+  pilot.secHeat = 0;
   pilot.raceId = raceId;
   pilot.complexId = complexId;
   pilot.corpId = corpId ?? null;
@@ -149,6 +153,7 @@ export function serializePilot(extra = {}) {
     lastPromotion: pilot.lastPromotion ?? null,
     payout: Number(pilot.payout) || 0,
     cyclePool: Number(pilot.cyclePool) || 0,
+    secHeat: Math.round((Number(pilot.secHeat) || 0) * 100) / 100,
     ...extra,
   };
 }
@@ -165,6 +170,7 @@ export function restorePilot(rec) {
   pilot.lastPromotion = rec.lastPromotion ?? null;
   pilot.payout = Number(rec.payout) || 0;
   pilot.cyclePool = Number(rec.cyclePool) || 0;
+  pilot.secHeat = Math.max(0, Number(rec.secHeat) || 0);
   pilot.drip = {};
   pilot.busy = false;
   pilot.restored = true;

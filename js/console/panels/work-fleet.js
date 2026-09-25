@@ -2,8 +2,8 @@
  *
  * `fleetReport()` rows with SELL BACK, and the yard's offer (commission an
  * extract or haul hull with a member of staff in the chair) when docked at an
- * industrial or military yard — the same calls the port deck made. Read-only
- * elsewhere: the deck keeps only a jump here.
+ * industrial or military yard — the same calls the port deck used to make. The
+ * deck no longer carries a fleet at all (0.3.45).
  */
 
 import { el, section, note, row, button } from "../kit.js";
@@ -19,7 +19,7 @@ const tell = (msg) => { if (msg) { sim.notice = msg; sim.noticeAt = sim.wall; } 
 
 function fleetSection(render) {
   const s = section(`FLEET — ${fleet.hulls.length} hull${fleet.hulls.length === 1 ? "" : "s"}`);
-  if (!hasCompany()) { note(s, "Company hulls need a company — register one on a port deck's Crew tab."); return s; }
+  if (!hasCompany()) { note(s, "Company hulls need a company — register one at CON › CORP › COMPANY while docked."); return s; }
   row(s, `${company.name} treasury`, { value: `${Math.round(company.treasury).toLocaleString()} cr`, hint: "hulls are bought from here; their deliveries land here" });
   if (!fleet.hulls.length) note(s, "No hulls on the board yet.");
   for (const h of fleetReport()) {

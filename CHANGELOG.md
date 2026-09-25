@@ -10,6 +10,197 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.48 — 2026-09-25
+
+The security ◆. One diamond that says where you stand with the law.
+
+A small diamond sits in the HUD's brand pill, top left — and in the station
+deck's header, because docked the deck covers the HUD and that is where the
+fine gets paid.
+
+- **GREEN · SAFE** — nothing against you; the sky's policing corporation (the
+  Directorate, `npc/security.js`) covers you. **SOS · CALL QRF** puts *your*
+  call on the same distress bus the NPCs use: coverage 1, up to three hulls,
+  the same honest response clock on the HUD. One call at a time, 150 s between
+  calls; a wing that arrives to find nothing costs 1 standing.
+- **YELLOW · IN COMBAT** — a contact hit you, or your turrets fired, in the
+  last 20 s. SOS is closed until it has been quiet: call early.
+- **RED · WANTED** — heat 3 or more. No SOS; the Directorate posts you (−15
+  standing) and its patrols go hostile on your board and open fire.
+
+**Heat**: +1 an honest hull destroyed, +2 a Directorate hull, +2 another
+pilot, +0.2 an honest hull you fired on that called for help. Pirates and rogue
+drones add nothing. A point cools every 6 minutes; it rides the pilot record
+(`pilot.secHeat`), so a reload is not an amnesty. **PAY FINE** at any honest
+port (1,200 cr a point, 800 minimum) clears it and buys back 8 standing — not
+at a free port.
+
+Tap the diamond for the card: who polices the sky, why you are the colour you
+are, SOS (with its reason when closed), the live response clock once you have
+called, the fine when you carry heat and are docked. In a shared sky only the
+host runs the Directorate, so a mirror's SOS says so rather than pretending.
+
+Under the hood: `callForHelp` takes a coverage override and a call from
+`"self"` resolves its scene through `securityHooks.selfVictim` — before, a call
+whose victim was not in the traffic list closed itself on the first tick as
+"victim gone". `turrets.js` marks `ship.lastFireAt`, flips patrol contacts to
+hostile for an outlaw, and lets them shoot.
+
+Files: `js/seclevel.js` (new), `js/secbadge.js` (new), `js/npc/security.js`,
+`js/sim.js` (wiring, kills, the step), `js/turrets.js`, `js/pilot.js`
+(`secHeat` on the record), `js/hud.js`, `css/glass.css`, `js/version.js`,
+`README.md`, `test/seclevel.test.mjs` (new, 29), `test/smoke-seclevel.mjs`
+(new, 15: green → card → SOS dispatched → yellow → red on the deck → fine).
+
+---
+
+## 0.3.47 — 2026-09-25
+
+Work for your credits. Prices follow the recipe; the desk pays what it says.
+
+Reported from play: missions pay too much, prices are not balanced, and the
+higher-tier items do not match what goes into them. All three were true, and
+the third was the root of more than it looked.
+
+**Every value is its inputs.** The mineral and component values were authored
+one at a time. Run through the graph they were upside down: a heat exchanger
+sold for **6.49×** the ore it ate, a battery 5×, ammunition 4.9× — and a
+gyroscope, six stages deep with a flight controller in it, **1.25×**. The
+cheap shallow parts were the money; the deep ones were not worth building.
+`VALUE_RULE` in `js/materials.js` now prices everything: refined mineral =
+ore ÷ yield × 1.3, anything made = Σ inputs × 1.18. Each stage adds the same
+18%, so the multiple over raw ore climbs with depth (1.5× shallow → 2.5×
+deepest), and a new recipe prices itself. The table is still written out for
+reading; a test fails if it drifts. Ores are untouched — they are the unit.
+Some examples, old → new: heat exchanger 610 → 155, battery 690 → 215, chip
+900 → 360, armour plate 1,250 → 590, gyroscope 2,157 → 3,950, actuator 491 →
+905, air scrubber 520 → 1,140.
+
+**The desk pays what its text says.**
+- `BOARD.pay` 1.7 → **1.0**. A "cut 305 iron ore" job paid about 2.3× the
+  counter; a Fledgling's first chain stage paid 4,192 cr against a 6,563 cr hull.
+- Tiers: Bonded 1.55 → **1.35**, Sealed 2.4 → **1.8**.
+- A job that pays for goods pays the goods and a premium, and the tier scales
+  **only the premium and the fee** — a Sealed procurement multiplied the whole
+  cargo by the tier and then by `BOARD.pay` and paid 3.7× what it was worth.
+  Anything you can buy is priced off the **cheapest ask in the sky + 8%**, not
+  the book; ore and ice you cut are still paid over the bid.
+- Freight is a commission: haul 60% → 20% of cargo value, courier 25% → 15%,
+  consignment 30% → 12%, construction lift 35% → 15%, pod finder 40% → 15%.
+- Chain closing bonuses × **0.5** (`CHAIN.bonusK`; authored 5,500–9,500).
+- Chain stage floor 450 → 300 cr.
+
+**Less money for nothing.** Pirate bounty 420 + 6/t + 600 for a rescue →
+240 + 4/t + 350; your drone's bounty 300 → 180; a settled hand books 32% of a
+list wage to the company, not 45%.
+
+**The market.** The stock band 0.72…1.45 → **0.8…1.3**, and the finished-work
+bonus 1.12/1.22 → 1.08/1.12. The curve's exponent is now solved from the band
+so it lands on the floor where `GLUT_FRAC` says a glut starts — at 0.45 it went
+flat at 2× target, which is why `economy.test` had been failing on 0.3.44.
+`trade.test`'s other failure on 0.3.44 was a stale equality from before lot
+pricing (a route is quoted for a lot, so its average buy sits at or above the
+first unit's price); it asserts that now.
+
+**Found on the way:** a closed or abandoned job's mining site stayed in
+`sim.autoPlan.seam`, so the next free MINE flew back to it — ARIA dropped a vein
+strike and then crawled 800,000 u across the system to the same empty site for
+twenty minutes. Settling a job now clears the seam it set.
+
+**Measured** (`tools/aria-bench.mjs`, one seed, 20 min, 20,000 cr purse —
+single runs swing, the bench counts purse and treasury but not cargo):
+commerce 1,844 → 139–334 cr/min, manufacturing 1,304 → roughly break-even
+to 541, energy 1,570 → 775–977, healthcare 811 → 158–255; mean top-20 route
+spread 1.70× → 1.43×. What is still rich: a well-capitalised trade run (best
+~1,900 cr/min on a 20k purse) — see "next" in the report.
+
+Files: `js/materials.js` (VALUE_RULE, `derivedValue`, the table, finished
+bonus), `js/contracts.js`, `js/chains.js`, `js/economy.js`, `js/company.js`,
+`js/staffline.js` (severance off the new share), `js/drones/ops.js`,
+`js/sim.js` (pirate bounty), `js/version.js`, `README.md`,
+`test/balance.test.mjs` (new, 19), `test/economy.test.mjs` (the ceiling, not
+1.4), `test/trade.test.mjs` (lot-aware route check), `test/chains.test.mjs`
+(the scaled bonus), `test/fabricate.test.mjs` (the best part is 2–3.6×, not a
+6.5× faucet), `test/ariaplay.test.mjs` (the charter she registers is capital:
+one procurement no longer pays for the registrar with change).
+
+---
+
+## 0.3.46 — 2026-09-25
+
+The company line. A settled hand is still somebody you can reach.
+
+Settling a member was the last conversation you had with them. They became
+a row in CORP › TOWN and a number every cycle; the only thing left to do was
+fly back to their port and RECALL them from the hall. What happened to them
+after that — promoted, married, a child, a strike — was a log line.
+
+**Call them.** CORP › TOWN, **LINE** on anybody's row (or **LINE** beside
+them in a port's HALL) opens their card: where they are, role, cycles, mood,
+regard, the last six things either of you said, and what you can do about it
+from anywhere in this sky — HOW ARE THINGS?, SEND A BONUS, RAISE THEIR CUT,
+PUSH FOR PROMOTION, HOW'S THE FAMILY?, MOVE THEM (to a company port), COME
+OUT TO THE SHIP (passage to where you are docked, then RECALL in the HALL),
+LET THEM GO (two taps, severance, address kept). What they say is read off
+their real life, not a bank: the port, the rung, the partner, the children by
+age, the baby due. Every button says what it costs and why it is greyed.
+
+**They call you.** Every event the rolls file about a person lands in **THE
+LINE** as a message from them, with a HUD toast for the big ones. A member
+sliding under mood 48 **asks** — a bonus, a raise, a move — and the answers
+are buttons on that row. Leave it three cycles and it costs mood and regard.
+
+**Regard** is what they think of you as an employer: their trust aboard,
+carried ashore at settle, and it lifts or sinks the mood their port pulls them
+to. Raises lift it for good. Nobody earns on a liner; the books count raises.
+
+**Found on the way:** households, station children and the town log were never
+saved — a reload quietly un-married everybody and the kids were gone. They
+ride in the company's own save now (same `lgaa-company` key, no new storage).
+`staffAt()` no longer counts someone who is between ports.
+
+Files: `js/staffline.js` (new), `js/console/panels/corp-town.js` (new — TOWN
+moved out of `corp.js`, which is on the 600-line gate), `js/console/panels/corp.js`
+(TOWN import, LINE on COMPANY › PEOPLE, search entries for the line and every
+member), `js/company.js` (regard/list wage at settle, cut and transit in the
+books, `tickLine`, the towns in the save), `js/stationlife.js` (events call
+`hearFrom`, regard in the mood target, nothing happens in transit),
+`js/stationdeck.js` (LINE in the HALL), `css/console.css`, `js/version.js`,
+`README.md`, `test/line.test.mjs` (new, 39), `test/smoke-line.mjs` (new, 15:
+a real call, a bonus, the inbox answer, the deck jump).
+
+---
+
+## 0.3.45 — 2026-09-25
+
+The station deck is the station's. Only port panels on it.
+
+Docked, the deck and CON showed the same things twice. The deck's **CREW**
+tab carried the roster line, the company registrar, the treasury with
+DRAW/FUND, the whole fleet with SELL BACK and the yard's commission list, and
+the crew log — every one of those is also a console page (CON › CREW,
+CON › CORP › COMPANY, CON › WORK › FLEET). The deck's **LOG** was `sim.log`,
+the flight log that CON › SHIP › STATUS already prints.
+
+- **LOG** is gone from the deck.
+- **CREW** is now **HALL**: berths and payroll on one line with a
+  **CON › CREW** jump, the port's hiring hall, and the company's people who
+  live on *this* floor (RECALL). No registrar, treasury or fleet — without a
+  company the section is one **CON › CORP** jump.
+- DRONES' "Register a company" jump goes to CON › CORP › COMPANY instead of
+  the old deck tab; two console notes that still sent you to "the port
+  deck's Crew tab" say where the registrar is now.
+
+Left on the deck, all of it port-only: MARKET, SHIPYARD, BOARD, HALL, WORKS,
+DRONES, ROBOTS, REFIT, GNN (at a GNN relay), BLUEPRINT.
+
+Files: `index.html`, `js/stationdeck.js`, `js/console/panels/work-fleet.js`,
+`js/console/panels/work-drones.js`, `js/version.js`, `README.md`,
+`test/deck.test.mjs` (new, 35), `test/smoke-ui.mjs` (clicks HALL, looks for
+the CON › CREW jump).
+
+---
+
 ## 0.3.44 — 2026-09-24
 
 The shared sky survives the relay restarting underneath it.

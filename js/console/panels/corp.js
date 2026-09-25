@@ -24,7 +24,8 @@ import { boardFor, contracts, timeLeft, BOARD } from "../../contracts.js";
 import { renderDesk, renderHeld } from "../../boardview.js";
 import { DESKS, gnn, gnnStation, runAction } from "../../gnn.js";
 import { addWaypointAt } from "../../sim.js";
-import { townReport, townLog, townLine } from "../../stationlife.js";
+import { mountTown } from "./corp-town.js";
+import { lineSummary, unread } from "../../staffline.js";
 
 const DOC = globalThis.document ?? null;
 const docked = () => (sim.ship?.dockedAt ? stationById(sim.ship.dockedAt) : null);
@@ -32,7 +33,7 @@ const fmtAgo = (at) => { const s = Math.max(0, Math.round(sim.time - at)); retur
 
 /* ---- COMPANY --------------------------------------------------------------- */
 
-function mountCompany(root, push) {
+function mountCompany(root, push, ctx = null) {
   const host = el("div");
   root.append(host);
   let key = "";
@@ -71,11 +72,18 @@ function mountCompany(root, push) {
     host.append(book);
     const people = section("People");
     const here = st ? staffAt(st.id) : [];
-    for (const p of here) row(people, `${sigil(p.id)} ${p.name}`, { hint: `${p.title} · staff here · ${p.income} cr/cycle to the company${p.family?.length ? ` · household of ${p.family.length + 1}` : ""}`, value: "HERE" }).value.className = "v good";
+    const toLine = (id) => ctx?.openConsole?.("corp", "town", { focus: id });
+    for (const p of here) {
+      const r = row(people, `${sigil(p.id)} ${p.name}`, { hint: `${p.title} · staff here · ${p.income} cr/cycle to the company${p.family?.length ? ` · household of ${p.family.length + 1}` : ""}`, value: "" });
+      r.value.replaceChildren(el("span", "v good", "HERE"), button("LINE", () => toLine(p.id), "tiny"));
+    }
     const others = contacts().filter((c) => !here.some((h) => h.id === c.id));
     if (!here.length && !others.length) people.append(el("div", "tempty", "Nobody on the books yet. Settle a hand at a port and they earn the company a wage share every cycle."));
-    for (const c of others.slice(0, 10)) row(people, c.name, { hint: `${c.kind === "staff" ? "staff" : c.why ?? "paid off"} · ${c.where}${c.kind === "alumni" ? " · in the hall there" : ""}` });
-    if (here.length) note(people, "Recall staff from the port deck's hiring hall.");
+    for (const c of others.slice(0, 10)) {
+      const r = row(people, c.name, { hint: `${c.kind === "staff" ? "staff" : c.why ?? "paid off"} · ${c.where}${c.kind === "alumni" ? " · in the hall there" : ""}` });
+      if (c.kind === "staff") r.value.replaceChildren(button("LINE", () => toLine(c.id), "tiny"));
+    }
+    note(people, here.length ? "Recall staff from this port's HALL on the deck. Everyone else is on the company line — CORP › TOWN." : "Your staff are on the company line — CORP › TOWN, from anywhere in this sky.");
     host.append(people);
   });
 }
@@ -332,43 +340,8 @@ function mountGnn(root, push) {
  * the treasury, the standing or the board. The point of the desk is that you
  * can see the ones who are about to leave before they do.
  */
-function mountTown(root) {
-  const rows = townReport();
-  const head = section("COMPANY TOWNS");
-  if (!hasCompany()) { note(head, "Register a charter and settle a hand at a port — that is how a company gets a town."); root.append(head); return; }
-  note(head, townLine());
-  root.append(head);
-
-  if (!rows.length) {
-    const e = section("ON THE ROLLS");
-    note(e, "Nobody settled yet. CONSOLE › CREW, or a port deck, to settle a hand and whoever is theirs.");
-    root.append(e);
-  }
-  const byPort = new Map();
-  for (const r of rows) { if (!byPort.has(r.station)) byPort.set(r.station, []); byPort.get(r.station).push(r); }
-  for (const [port, list] of byPort) {
-    const s = section(`${port.toUpperCase()} — ${list.length} on the rolls · ${list.reduce((a, r) => a + r.income, 0)} cr/cycle`);
-    for (const r of list) {
-      const bits = [r.role.label, `${r.cycles} cycles served`];
-      if (r.partner) bits.push(`with ${r.partner}`);
-      if (r.children.length) bits.push(`${r.children.length} child${r.children.length === 1 ? "" : "ren"}: ${r.children.join(", ")}`);
-      if (r.expecting != null) bits.push(`expecting in ${r.expecting}`);
-      if (r.risk) bits.push(r.risk);
-      const row2 = row(s, `${r.s.name}${r.s.born ? " ·" : ""}`, { value: `${r.income} cr`, bar: true, hint: bits.join(" · ") });
-      setBar?.(row2, r.mood / 100);
-    }
-    root.append(s);
-  }
-
-  const lg = section("THE TOWN LOG");
-  const log = townLog(null, 16);
-  if (!log.length) note(lg, "Quiet so far.");
-  for (const e of log) row(lg, e.kind.replace(/-/g, " "), { hint: e.text, value: e.delta ? `${e.delta > 0 ? "+" : ""}${Math.round(e.delta)} cr` : "" });
-  root.append(lg);
-}
-
 const SUBS = {
-  company: mountCompany, town: mountTown, board: mountBoard, pilot: mountPilot, standing: mountStanding, gnn: mountGnn,
+  company: (root, push, ctx) => mountCompany(root, push, ctx), town: (root, push, ctx) => mountTown(root, ctx ?? { push }), board: mountBoard, pilot: mountPilot, standing: mountStanding, gnn: mountGnn,
   marshal: (root, push, ctx) => mountMarshal(root, ctx ?? { push }),
   account: (root, push, ctx) => mountAccount(root, ctx ?? { push }),
 };
@@ -391,6 +364,10 @@ export default {
       { label: "Marshal's board", hint: `${ticketsHeld().length} ticket${ticketsHeld().length === 1 ? "" : "s"} signed`, sub: "marshal", keywords: "bounty marks wanted capture brig marshal" },
       { label: "Account", hint: accountLine(), sub: "account", keywords: "account sign in login sync save cloud site password", status: () => (account.user ? `● ${account.user.username}` : account.site ? "SIGNED OUT" : "OFFLINE") },
     ];
+    if (hasCompany()) {
+      out.push({ label: "Company line", hint: lineSummary() || "nobody settled yet", sub: "town", keywords: "staff call phone inbox town settled people line", status: () => (unread() ? `● ${unread()} UNREAD` : "") });
+      for (const s of company.staff) out.push({ label: s.name, hint: `company line · ${s.title ?? "staff"}`, sub: "town", focus: s.id, keywords: "staff line call town settled" });
+    }
     for (const c of standingSheet()) out.push({ label: c.name, hint: `${c.tier} · ${c.sector} · ${standingLabel(c.standing)}`, sub: "standing", focus: `corp-${c.id}`, keywords: "corporation standing" });
     for (const a of contracts.active) out.push({ label: a.title, hint: `${a.corpName} · in hand`, sub: "board", focus: `contract-${a.id}`, keywords: "contract" });
     for (const b of gnn.posts.slice(-20)) out.push({ label: b.title || DESKS[b.desk]?.tag || "bulletin", hint: fmtAgo(b.at), sub: "gnn", focus: b.id, keywords: "gnn news" });

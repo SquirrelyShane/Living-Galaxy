@@ -98,7 +98,7 @@ function buildSection(render) {
     else note(s, hasCompany() ? "Dock at a port with a drone line — industrial ports build miners, logistics haulers, military combat frames." : "Register a company at a port first; drones are company property.");
     return s;
   }
-  if (!hasCompany()) note(s, "Drones are company property — register a company on the port deck's Crew tab first.");
+  if (!hasCompany()) note(s, "Drones are company property — register a company at CON › CORP › COMPANY while docked.");
   else row(s, `${company.name} treasury`, { value: `${Math.round(company.treasury).toLocaleString()} cr`, hint: "drones are bought and paid from here; their earnings land here" });
   const opts = buildOptions(st);
   if (!opts.length) note(s, "No drone lines here — industrial ports build miners, logistics haulers, military combat frames.");

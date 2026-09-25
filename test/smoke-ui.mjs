@@ -112,9 +112,9 @@ const hall = await page.evaluate(async () => {
   /* the tractor pull runs ~38 sim-s under swiftshader; 30 s of polling expired before the clamps did */
   for (let i = 0; i < 150 && sim.ship.dockedAt !== st.id; i++) await new Promise((r) => setTimeout(r, 500));
   await new Promise((r) => setTimeout(r, 900));
-  document.querySelector('#sd-tabs button[data-sd="crew"]')?.click();
+  document.querySelector('#sd-tabs button[data-sd="hall"]')?.click();
   await new Promise((r) => setTimeout(r, 1200));
-  const out = { docked: sim.ship.dockedAt === st.id, port: st.name, sector: st.sector, cards: document.querySelectorAll("#sd-body .sd-person").length, radars: document.querySelectorAll("#sd-body .radar").length, lit: document.querySelectorAll("#sd-body .gcell.lit").length, crewJump: Boolean([...document.querySelectorAll("#sd-body .sd-btn")].find((b) => /CONSOLE/.test(b.textContent))) };
+  const out = { docked: sim.ship.dockedAt === st.id, port: st.name, sector: st.sector, cards: document.querySelectorAll("#sd-body .sd-person").length, radars: document.querySelectorAll("#sd-body .radar").length, lit: document.querySelectorAll("#sd-body .gcell.lit").length, crewJump: Boolean([...document.querySelectorAll("#sd-body .sd-btn")].find((b) => /^CON › CREW$/.test(b.textContent))) };
   document.querySelector('#sd-tabs button[data-sd="market"]')?.click();
   await new Promise((r) => setTimeout(r, 300));
   out.marketSecs = [...document.querySelectorAll("#sd-body .sd-sec h4")].map((h) => h.textContent);
@@ -138,7 +138,7 @@ if (!closed.hidden || closed.flag) fails.push("close did not clear terminalOpen"
 if (tele.rings < 4 || tele.sparks < 4 || tele.points < 2) fails.push("telemetry charts");
 if (tele.overflow || tele.sheetOverflow) fails.push("horizontal overflow at 412 px");
 if (!hall.docked || hall.cards < 1 || hall.radars < 1) fails.push("hiring hall cards");
-if (!hall.crewJump) fails.push("deck crew tab has no CONSOLE › CREW jump");
+if (!hall.crewJump) fails.push("deck hall has no CON › CREW jump");
 if (!hall.marketSecs.some((h) => /THEY SELL/.test(h))) fails.push("deck market block");
 /* the robots tab is package D's fragment; until it lands the tab is simply empty */
 if (hall.sector === "industrial" && hall.robotCards < 3) console.warn("note: robots tab has fewer than 3 cards at an industrial port (package D pending?)");

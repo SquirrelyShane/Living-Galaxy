@@ -198,7 +198,8 @@ export function syncContacts(ship, remotes, relationOf, time, dt) {
     c.pitch = n.pitch;
     /* relationOf() was called twice per hull per tick to answer one question */
     const rel = relationOf(n.id);
-    c.relation = rel === "neutral" ? (LAW_ROLES.has(n.role) ? "ally" : HOSTILE_ROLES.has(n.role) ? "hostile" : "neutral") : rel;
+    /* 0.3.48: a wanted pilot (security ◆ RED) is the Directorate's quarry */
+    c.relation = rel === "neutral" ? (LAW_ROLES.has(n.role) ? (ship.outlaw ? "hostile" : "ally") : HOSTILE_ROLES.has(n.role) ? "hostile" : "neutral") : rel;
     c.cooldown = c.cooldown ?? Math.random() * PIRATE_RATE;
   }
   for (let i = contacts.length - 1; i >= 0; i--) {
@@ -263,7 +264,7 @@ function stepPirates(ship, time, dt) {
   const e = engagementAt(time);
   const joined = Boolean(e?.joined && time < e.end);
   for (const c of contacts) {
-    if (c.kind !== "npc" || !HOSTILE_ROLES.has(c.role) || c.hp <= 0) continue;
+    if (c.kind !== "npc" || !(HOSTILE_ROLES.has(c.role) || (ship.outlaw && LAW_ROLES.has(c.role))) || c.hp <= 0) continue;
     c.cooldown -= dt;
     const d = d3(c, ship.pos);
     const inWing = joined && e.wing.includes(c.id);
@@ -530,6 +531,7 @@ export function stepTurrets(ship, dt, time) {
     const rate = (ship.powered.gravity ? 0.42 : 0.52) / ((ship.tune?.turretRate ?? 1) * (ship.mods?.turret ?? 1));
     turretAim.cooldown = rate;
     turretAim.firing = true;
+    ship.lastFireAt = time;   // 0.3.48: shooting is being in a fight (js/seclevel.js)
     const lead = 0.35;
     fire(
       ship.pos,

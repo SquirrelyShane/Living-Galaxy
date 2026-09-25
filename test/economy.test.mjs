@@ -62,7 +62,7 @@ sim.phase = "play";
   const sm = e.lines.find((l) => l.id === "smelter");
   ok(!sm.running && sm.stalledOn === "iron_ore", `no ore: the smelter stalls on ${sm.stalledOn}`);
   const sh = shortagesOf(st);
-  ok(sh.some((x) => x.id === "iron_ore" && x.mult > 1.4), `iron ore is a shortage the port pays over the odds for (×${sh.find((x) => x.id === "iron_ore")?.mult.toFixed(2)})`);
+  ok(sh.some((x) => x.id === "iron_ore" && x.mult >= PRICE_CEIL - 1e-9), `iron ore is a shortage the port pays the ceiling for (×${sh.find((x) => x.id === "iron_ore")?.mult.toFixed(2)})`);
   const w = wantsOf(st);
   ok(w.length === 3 && w[0].over >= w[1].over, `wants are ranked by premium (${w.map((x) => `${x.name} ×${x.over.toFixed(2)}`).join(", ")})`);
   deliver(st, "iron_ore", 500);

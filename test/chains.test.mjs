@@ -12,7 +12,7 @@ import { sim, launchSim } from "../js/sim.js";
 import { makePilot } from "../js/pilot.js";
 import { stations, stationById } from "../js/stations.js";
 import { corps } from "../js/corps.js";
-import { CHAINS, CHAIN_BY_ID, chains, chainOffersAt, chainReport, homePortOf, nextPortFrom, resetChains } from "../js/chains.js";
+import { CHAINS, CHAIN_BY_ID, chains, chainOffersAt, chainReport, homePortOf, nextPortFrom, resetChains, chainBonus } from "../js/chains.js";
 import { boardFor, acceptContract, abandonContract, deliverContracts, contracts, resetContracts, CATEGORIES, CATEGORY_ORDER, BOARD, acceptBlocker } from "../js/contracts.js";
 import { stockOf } from "../js/economy.js";
 
@@ -67,7 +67,7 @@ for (const c of corps) c.standing = 100;
   const ch = CHAIN_BY_ID[o.chain];
   ok(o.chainIdx === 0 && o.tierName === `Stage 1 of ${ch.stages.length}` && o.chainOf === ch.stages.length, `the posting says which stage it is: "${o.title} · ${o.tierName}"`);
   ok(o.text.startsWith(ch.stages[0].text.slice(0, 40)) && o.cat === ch.cat && o.type === ch.stages[0].kind, "with the story's own words and the stage's own kind");
-  ok(o.pay > 0 && Number.isFinite(o.pay) && o.chainBonus === ch.bonus, `priced from the live sky: ${o.pay.toLocaleString("en-US")} cr, ${o.chainBonus.toLocaleString("en-US")} cr on the end`);
+  ok(o.pay > 0 && Number.isFinite(o.pay) && o.chainBonus === chainBonus(ch), `priced from the live sky: ${o.pay.toLocaleString("en-US")} cr, ${o.chainBonus.toLocaleString("en-US")} cr on the end`);
   ok(boardFor(home, 0).filter((x) => x.chain === o.chain).length === 1, "and it is posted once, not once per outfit");
   /* rock stages still get a place to go */
   const rock = boardFor(home, 0).find((x) => x.chain && ["mine", "ice", "vein", "assay"].includes(x.type));
@@ -116,7 +116,7 @@ for (const c of corps) c.standing = 100;
     }
   }
   ok(!chains.live.has(runnable.id) && chains.done.has(runnable.id), "the chain closes out");
-  ok(paid >= runnable.bonus, `paid ${paid.toLocaleString("en-US")} cr all told — the ${runnable.bonus.toLocaleString("en-US")} cr bonus is in it`);
+  ok(paid >= chainBonus(runnable), `paid ${paid.toLocaleString("en-US")} cr all told — the ${chainBonus(runnable).toLocaleString("en-US")} cr bonus is in it`);
   if (co) ok(co.standing >= st0 + runnable.standing, `and ${co.name} thinks better of you for it: ${Math.round(st0)} → ${Math.round(co.standing)} (chain pays ${runnable.standing})`);
   else ok(true, "no charter holder at that port");
   ok(new Set(seen).size === seen.length && seen.length === runnable.stages.length, `${seen.length} different jobs, in order`);

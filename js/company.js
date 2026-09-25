@@ -20,7 +20,8 @@ import { stationById } from "./stations.js";
 import { corpOfStation, adjustStanding } from "./corps.js";
 import { wageFor, CYCLE_SECONDS } from "./crew.js";
 import { cradle } from "./npc/cradle.js";
-import { tickStationLife, incomeOf, resetStationLife } from "./stationlife.js";
+import { tickStationLife, incomeOf, resetStationLife, stationLife } from "./stationlife.js";
+import { tickLine, cutOf } from "./staffline.js";
 
 export const CHARTERS = {
   military:     { name: "Security Charter",     desc: "Escort, denial and ordnance. Paid by whoever is frightened.",              revenue: ["bounty", "escort"] },
@@ -39,7 +40,7 @@ export const BOARD = [
 
 export const COMPANY = {
   registration: 2500,     // credits the registrar wants
-  staffShare: 0.45,       // of a settled hand's list wage the company books every cycle
+  staffShare: 0.32,       // of a settled hand's list wage the company books every cycle (0.3.47: was 0.45 — money for nothing, forever)
   dependantShare: 0.08,   // a child's stipend claimed from the port, per cycle
   severance: 3,           // cycles of wage a pay-off costs
   settleFee: 400,         // what a port charges to file a family
@@ -168,7 +169,10 @@ export function settleAsStaff(m, family = [], st = stationById(sim.ship.dockedAt
   if (sim.ship.credits < COMPANY.settleFee) return `The port wants ${COMPANY.settleFee} cr to file a household`;
   sim.ship.credits -= COMPANY.settleFee;
   const income = staffIncome(m);
-  company.staff.push({ id: m.id, name: m.name, title: m.title, complexId: m.complexId, complexName: m.complexName, letter: m.letter, traits: m.traits, gender: m.gender, pronouns: m.pronouns, attractedTo: m.attractedTo, raceId: m.raceId, stationId: st.id, sky: sim.skySeed ?? null, income, baseIncome: income, since: sim.time, family: family.map((f) => f.id), role: "staff", mood: 78, cycles: 0 });
+  /* 0.3.46: what they thought of you aboard comes ashore with them — the
+   * company line (js/staffline.js) reads it as their regard for the firm */
+  const listWage = m.listWage ?? m.wage ?? wageFor(m.complexId, m.letter);
+  company.staff.push({ id: m.id, name: m.name, title: m.title, complexId: m.complexId, complexName: m.complexName, letter: m.letter, traits: m.traits, gender: m.gender, pronouns: m.pronouns, attractedTo: m.attractedTo, raceId: m.raceId, stationId: st.id, sky: sim.skySeed ?? null, income, baseIncome: income, listWage, trustAboard: m.trust ?? 50, since: sim.time, family: family.map((f) => f.id), role: "staff", mood: 78, cycles: 0 });
   book(`${m.name} settled at ${st.name} as staff${family.length ? ` with ${family.length} of theirs` : ""}`, -COMPANY.settleFee, "staff");
   const rec = cradle.get(m.id);
   if (rec) { rec.status = "staff"; rec.employer = company.name; rec.station = st.id; cradle.note(rec.id, `Settled at ${st.name} on ${company.name}'s books`); }
@@ -204,7 +208,7 @@ export function contacts() {
 
 /** Staff at this port who could be re-signed (walk into the hall and they come back aboard). */
 export function staffAt(stId) {
-  return company.staff.filter((s) => s.stationId === stId && inThisSky(s));
+  return company.staff.filter((s) => s.stationId === stId && inThisSky(s) && !s.transit); // 0.3.46: not while on a liner
 }
 
 /** Take a settled hand back aboard. */
@@ -231,7 +235,7 @@ export function boardBrief() {
     { ...BOARD[1], mood: solvency, verdict: solvency > 0.7 ? "content" : solvency > 0.4 ? "watchful" : "alarmed" },
     { ...BOARD[2], mood: focus, verdict: focus > 0.7 ? "content" : focus > 0.4 ? "pointed" : "hostile" },
   ];
-  return { seats, confidence: c.confidence, staffIncome: c.staff.reduce((a, s) => a + s.income, 0) };
+  return { seats, confidence: c.confidence, staffIncome: c.staff.reduce((a, s) => a + (s.transit ? 0 : Math.round(incomeOf(s) * cutOf(s))), 0) };
 }
 
 /** Every cycle: staff earn, dependants draw, the board re-reads the record. */
@@ -243,13 +247,16 @@ export function tickCompany(seconds) {
     let earned = 0;
     for (const s of company.staff) {
       if (!inThisSky(s)) continue; // their port is in a sky that is not loaded; the books catch up when it is
-      earned += incomeOf(s);
+      if (s.transit) continue;     // 0.3.46: nobody earns on a liner
+      /* 0.3.46: a raise on the company line is their share, out of ours */
+      earned += Math.round(incomeOf(s) * cutOf(s));
       /* the port pays a stipend for every child on the books — a company town in miniature */
       earned += Math.round((s.family?.length ?? 0) * s.income * COMPANY.dependantShare);
     }
     if (earned > 0) { company.treasury += earned; book(`Staff wages booked (${company.staff.length} on the rolls)`, earned, "wages"); }
-    /* and then they get on with their lives */
+    /* and then they get on with their lives — and pick up the phone */
     tickStationLife();
+    tickLine();
     const b = boardBrief();
     const target = b.seats.reduce((a, s) => a + s.mood, 0) / 3;
     company.confidence += (target - company.confidence) * 0.25;
@@ -299,15 +306,29 @@ export function resetCompany() {
   company.founded = false; company.name = ""; company.hq = null; company.hqSky = null; company.treasury = 0;
   company.book.length = 0; company.staff.length = 0; company.alumni.length = 0;
   company.revenue = 0; company.spend = 0; company.inCharter = 0; company.outCharter = 0; company.confidence = 0.5; company.payPool = 0;
+  company.line = { inbox: [], seq: 1 };
   resetStationLife();
 }
 
+/* 0.3.46: the towns ride in the company's save. Households, the children
+ * growing up on the stations and the town log were never written anywhere, so
+ * a reload quietly un-married everybody and the kids were gone. Same key, no
+ * new storage: they are the company's people. */
 export function serializeCompany() {
-  return company.founded ? { ...company, book: company.book.slice(0, 30) } : null;
+  if (!company.founded) return null;
+  const life = { households: stationLife.households, kids: stationLife.kids, standing: stationLife.standing, log: stationLife.log.slice(0, 30) };
+  return { ...company, book: company.book.slice(0, 30), line: company.line ? { ...company.line, inbox: company.line.inbox.slice(0, 30) } : undefined, life };
 }
 export function restoreCompany(data) {
   if (!data || !data.founded) return;
-  Object.assign(company, data);
+  const { life, ...rest } = data;
+  Object.assign(company, rest);
+  if (life) {
+    stationLife.households = life.households ?? {};
+    stationLife.kids.splice(0, stationLife.kids.length, ...(life.kids ?? []));
+    stationLife.standing = life.standing ?? {};
+    stationLife.log.splice(0, stationLife.log.length, ...(life.log ?? []));
+  }
 }
 
 /** Console access. */

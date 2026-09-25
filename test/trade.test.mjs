@@ -43,7 +43,10 @@ tickSim(1 / 60);
 {
   const rs = tradeRoutes({ n: 0 });
   ok(rs.length > 0, `there is money in moving goods in this sky (${rs.length} profitable routes)`);
-  ok(rs.every((r) => r.from !== r.to && r.margin > 0 && r.sell === sellPriceAt(r.to, r.good) && r.buy === buyPriceAt(r.from, r.from.stock.find((l) => l.id === r.good))), "every route buys at one port's price and sells at another's for more");
+  /* 0.3.47: a route is quoted for a LOT (0.3.24), so its average buy is at or
+   * above the first unit's price and its average sell at or below — the
+   * shelf moves against you as you work it. The old equality predates lots. */
+  ok(rs.every((r) => r.from !== r.to && r.margin > 0 && r.sell <= sellPriceAt(r.to, r.good) + 0.5 && r.buy >= buyPriceAt(r.from, r.from.stock.find((l) => l.id === r.good)) - 0.5), "every route buys at one port's price and sells at another's for more — the lot moving the price against you");
   ok(rs.every((r) => r.qty <= holdRoom(ship) && r.qty * r.buy <= ship.credits && r.qty <= r.from.stock.find((l) => l.id === r.good).qty), "sized to the hold, the purse and the shelf");
   ok(rs.every((r, i) => i === 0 || r.perMin <= rs[i - 1].perMin), "ranked by credits per minute");
   console.log(`  best: ${routeLine(rs[0])}`);

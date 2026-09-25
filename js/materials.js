@@ -48,41 +48,41 @@ export const ORES = [
 /* ---- refined minerals --------------------------------------------------- */
 
 export const MINERALS = [
-  { id: "iron",         name: "Iron",             mass: 2.6, value: 11 },
-  { id: "nickel",       name: "Nickel",           mass: 2.8, value: 19 },
-  { id: "silicon",      name: "Silicon",          mass: 1.9, value: 14 },
-  { id: "aluminium",    name: "Aluminium",        mass: 1.5, value: 21 },
-  { id: "copper",       name: "Copper",           mass: 3.1, value: 26 },
-  { id: "tin",          name: "Tin",              mass: 3.4, value: 34 },
-  { id: "chromium",     name: "Chromium",         mass: 3.5, value: 41 },
-  { id: "titanium",     name: "Titanium",         mass: 2.2, value: 62 },
-  { id: "cobalt",       name: "Cobalt",           mass: 3.6, value: 74 },
-  { id: "zinc",         name: "Zinc",             mass: 3.2, value: 29 },
-  { id: "lead",         name: "Lead",             mass: 6.6, value: 24 },
-  { id: "rare_earths",  name: "Rare earths",      mass: 3.0, value: 239 },
-  { id: "platinum",     name: "Platinum",         mass: 6.4, value: 650 },
-  { id: "iridium",      name: "Iridium",          mass: 7.1, value: 1000 },
-  { id: "uranium",      name: "Uranium",          mass: 7.6, value: 786 },
-  { id: "water",        name: "Water",            mass: 1.0, value: 6 },
-  { id: "methane",      name: "Methane",          mass: 0.6, value: 13 },
-  { id: "ammonia",      name: "Ammonia",          mass: 0.7, value: 15 },
+  { id: "iron",         name: "Iron",             mass: 2.6, value: 8 },
+  { id: "nickel",       name: "Nickel",           mass: 2.8, value: 17 },
+  { id: "silicon",      name: "Silicon",          mass: 1.9, value: 10 },
+  { id: "aluminium",    name: "Aluminium",        mass: 1.5, value: 16 },
+  { id: "copper",       name: "Copper",           mass: 3.1, value: 23 },
+  { id: "tin",          name: "Tin",              mass: 3.4, value: 35 },
+  { id: "chromium",     name: "Chromium",         mass: 3.5, value: 43 },
+  { id: "titanium",     name: "Titanium",         mass: 2.2, value: 67 },
+  { id: "cobalt",       name: "Cobalt",           mass: 3.6, value: 87 },
+  { id: "zinc",         name: "Zinc",             mass: 3.2, value: 31 },
+  { id: "lead",         name: "Lead",             mass: 6.6, value: 30 },
+  { id: "rare_earths",  name: "Rare earths",      mass: 3.0, value: 250 },
+  { id: "platinum",     name: "Platinum",         mass: 6.4, value: 675 },
+  { id: "iridium",      name: "Iridium",          mass: 7.1, value: 1040 },
+  { id: "uranium",      name: "Uranium",          mass: 7.6, value: 815 },
+  { id: "water",        name: "Water",            mass: 1.0, value: 4 },
+  { id: "methane",      name: "Methane",          mass: 0.6, value: 14 },
+  { id: "ammonia",      name: "Ammonia",          mass: 0.7, value: 16 },
   { id: "nitrogen",     name: "Nitrogen",         mass: 0.8, value: 11 },
-  { id: "sulfur_r",     name: "Refined sulfur",   mass: 1.9, value: 9 },
-  { id: "phosphorus",   name: "Phosphorus",       mass: 1.8, value: 24 },
-  { id: "carbon",       name: "Carbon",           mass: 1.4, value: 12 },
-  { id: "organics",     name: "Organics",         mass: 1.1, value: 38 },
-  { id: "helium3_r",    name: "Helium-3, refined", mass: 0.2, value: 260 },
-  { id: "hydrogen_r",   name: "Hydrogen, refined", mass: 0.1, value: 5 },
-  { id: "metallic_h_r", name: "Metallic hydrogen", mass: 1.1, value: 470 },
-  { id: "deuterium_r",  name: "Deuterium",        mass: 0.2, value: 150 },
-  { id: "polymer",      name: "Polymer stock",    mass: 1.0, value: 33, from: { carbon: 2, hydrogen_r: 1 } },
-  { id: "glass",        name: "Glass",            mass: 1.8, value: 18, from: { silicon: 2 } },
-  { id: "ceramic",      name: "Ceramic",          mass: 2.0, value: 30, from: { silicon: 1, aluminium: 1 } },
-  { id: "steel",        name: "Steel",            mass: 2.7, value: 40, from: { iron: 3, carbon: 1 } },
-  { id: "stainless",    name: "Stainless",        mass: 2.8, value: 127, from: { steel: 2, chromium: 1, nickel: 1 } },
-  { id: "superalloy",   name: "Superalloy",       mass: 2.9, value: 190, from: { nickel: 2, cobalt: 1, titanium: 1 } },
-  { id: "bronze",       name: "Bronze",           mass: 3.2, value: 102, from: { copper: 3, tin: 1 } },
-  { id: "fertiliser",   name: "Fertiliser",       mass: 1.3, value: 47, from: { nitrogen: 2, phosphorus: 1 } },
+  { id: "sulfur_r",     name: "Refined sulfur",   mass: 1.9, value: 8 },
+  { id: "phosphorus",   name: "Phosphorus",       mass: 1.8, value: 26 },
+  { id: "carbon",       name: "Carbon",           mass: 1.4, value: 11 },
+  { id: "organics",     name: "Organics",         mass: 1.1, value: 35 },
+  { id: "helium3_r",    name: "Helium-3, refined", mass: 0.2, value: 165 },
+  { id: "hydrogen_r",   name: "Hydrogen, refined", mass: 0.1, value: 3 },
+  { id: "metallic_h_r", name: "Metallic hydrogen", mass: 1.1, value: 455 },
+  { id: "deuterium_r",  name: "Deuterium",        mass: 0.2, value: 92 },
+  { id: "polymer",      name: "Polymer stock",    mass: 1.0, value: 30,    from: { carbon: 2, hydrogen_r: 1 } },
+  { id: "glass",        name: "Glass",            mass: 1.8, value: 24,    from: { silicon: 2 } },
+  { id: "ceramic",      name: "Ceramic",          mass: 2.0, value: 31,    from: { silicon: 1, aluminium: 1 } },
+  { id: "steel",        name: "Steel",            mass: 2.7, value: 41,    from: { iron: 3, carbon: 1 } },
+  { id: "stainless",    name: "Stainless",        mass: 2.8, value: 170,   from: { steel: 2, chromium: 1, nickel: 1 } },
+  { id: "superalloy",   name: "Superalloy",       mass: 2.9, value: 220,   from: { nickel: 2, cobalt: 1, titanium: 1 } },
+  { id: "bronze",       name: "Bronze",           mass: 3.2, value: 125,   from: { copper: 3, tin: 1 } },
+  { id: "fertiliser",   name: "Fertiliser",       mass: 1.3, value: 57,    from: { nitrogen: 2, phosphorus: 1 } },
 ];
 
 /* ---- tier-0 components -------------------------------------------------- */
@@ -90,37 +90,60 @@ export const MINERALS = [
  * minerals above and nothing else.                                           */
 
 export const COMPONENTS = [
-  { id: "steel_plate",  name: "Steel plate",       mass: 6.0,  value: 130,  from: { steel: 3 } },
-  { id: "girder",       name: "Girder",            mass: 9.0,  value: 175,  from: { steel: 4 } },
-  { id: "hull_panel",   name: "Hull panel",        mass: 7.5,  value: 290,  from: { stainless: 2, ceramic: 1 } },
-  { id: "pressure_hull",name: "Pressure section",  mass: 14.0, value: 560,  from: { stainless: 3, steel_plate: 2 } },
-  { id: "girder_truss", name: "Truss assembly",    mass: 22.0, value: 640,  from: { girder: 3, steel_plate: 1 } },
-  { id: "bearing",      name: "Bearing set",       mass: 1.2,  value: 228,  from: { stainless: 1, bronze: 1 } },
-  { id: "motor",        name: "Electric motor",    mass: 4.0,  value: 420,  from: { copper: 4, steel: 2, bearing: 1 } },
-  { id: "actuator",     name: "Linear actuator",   mass: 3.2,  value: 491,  from: { motor: 1, steel_plate: 1 } },
-  { id: "pump",         name: "Fluid pump",        mass: 3.8,  value: 489,  from: { motor: 1, bronze: 1 } },
-  { id: "turbine",      name: "Turbine wheel",     mass: 8.5,  value: 980,  from: { superalloy: 2, bearing: 2 } },
-  { id: "heat_ex",      name: "Heat exchanger",    mass: 6.2,  value: 610,  from: { copper: 3, ceramic: 2 } },
-  { id: "radiator",     name: "Radiator panel",    mass: 5.0,  value: 330,  from: { aluminium: 4, steel_plate: 1 } },
-  { id: "wiring",       name: "Wiring loom",       mass: 1.0,  value: 150,  from: { copper: 3, polymer: 1 } },
-  { id: "capacitor",    name: "Capacitor bank",    mass: 2.4,  value: 480,  from: { aluminium: 2, ceramic: 2, wiring: 1 } },
-  { id: "chip",         name: "Computer chip",     mass: 0.15, value: 900,  from: { silicon: 3, rare_earths: 1, glass: 1 } },
-  { id: "sensor",       name: "Sensor cluster",    mass: 0.8,  value: 760,  from: { chip: 1, glass: 2, wiring: 1 } },
-  { id: "controller",   name: "Flight controller", mass: 1.1,  value: 1450, from: { chip: 2, wiring: 2, capacitor: 1 } },
-  { id: "battery",      name: "Battery block",     mass: 9.0,  value: 690,  from: { lead: 3, zinc: 2, polymer: 1 } },
-  { id: "fuel_cell",    name: "Fuel cell",         mass: 4.5,  value: 880,  from: { platinum: 1, polymer: 2, wiring: 1 } },
-  { id: "reactor_rod",  name: "Reactor rod",       mass: 12.0, value: 2600, from: { uranium: 2, superalloy: 1, ceramic: 2 } },
-  { id: "thruster_bell",name: "Thruster bell",     mass: 11.0, value: 1350, from: { superalloy: 2, heat_ex: 1 } },
-  { id: "gyro",         name: "Gyroscope",         mass: 5.5,  value: 2157, from: { motor: 2, bearing: 2, controller: 1 } },
-  { id: "optic",        name: "Optical assembly",  mass: 2.0,  value: 640,  from: { glass: 3, aluminium: 1, sensor: 1 } },
-  { id: "life_scrub",   name: "Air scrubber",      mass: 4.2,  value: 520,  from: { ceramic: 2, pump: 1, carbon: 2 } },
-  { id: "hydroponic",   name: "Hydroponic rack",   mass: 6.8,  value: 687,  from: { steel_plate: 1, pump: 1, fertiliser: 2 } },
-  { id: "ration",       name: "Ration pack",       mass: 0.6,  value: 34,   from: { organics: 1, water: 1 } },
-  { id: "medkit",       name: "Medical kit",       mass: 0.5,  value: 210,  from: { organics: 2, polymer: 1 } },
-  { id: "ammo_case",    name: "Ammunition case",   mass: 8.0,  value: 540,  from: { steel: 2, lead: 2, carbon: 1 } },
-  { id: "armour_plate", name: "Armour plate",      mass: 16.0, value: 1250, from: { stainless: 2, ceramic: 3, titanium: 1 } },
-  { id: "shield_coil",  name: "Shield coil",       mass: 7.0,  value: 2100, from: { superalloy: 1, capacitor: 2, rare_earths: 2 } },
+  { id: "steel_plate",  name: "Steel plate",       mass: 6.0,  value: 145,   from: { steel: 3 } },
+  { id: "girder",       name: "Girder",            mass: 9.0,  value: 195,   from: { steel: 4 } },
+  { id: "hull_panel",   name: "Hull panel",        mass: 7.5,  value: 440,   from: { stainless: 2, ceramic: 1 } },
+  { id: "pressure_hull",name: "Pressure section",  mass: 14.0, value: 945,   from: { stainless: 3, steel_plate: 2 } },
+  { id: "girder_truss", name: "Truss assembly",    mass: 22.0, value: 860,   from: { girder: 3, steel_plate: 1 } },
+  { id: "bearing",      name: "Bearing set",       mass: 1.2,  value: 350,   from: { stainless: 1, bronze: 1 } },
+  { id: "motor",        name: "Electric motor",    mass: 4.0,  value: 620,   from: { copper: 4, steel: 2, bearing: 1 } },
+  { id: "actuator",     name: "Linear actuator",   mass: 3.2,  value: 905,   from: { motor: 1, steel_plate: 1 } },
+  { id: "pump",         name: "Fluid pump",        mass: 3.8,  value: 880,   from: { motor: 1, bronze: 1 } },
+  { id: "turbine",      name: "Turbine wheel",     mass: 8.5,  value: 1350,  from: { superalloy: 2, bearing: 2 } },
+  { id: "heat_ex",      name: "Heat exchanger",    mass: 6.2,  value: 155,   from: { copper: 3, ceramic: 2 } },
+  { id: "radiator",     name: "Radiator panel",    mass: 5.0,  value: 245,   from: { aluminium: 4, steel_plate: 1 } },
+  { id: "wiring",       name: "Wiring loom",       mass: 1.0,  value: 115,   from: { copper: 3, polymer: 1 } },
+  { id: "capacitor",    name: "Capacitor bank",    mass: 2.4,  value: 245,   from: { aluminium: 2, ceramic: 2, wiring: 1 } },
+  { id: "chip",         name: "Computer chip",     mass: 0.15, value: 360,   from: { silicon: 3, rare_earths: 1, glass: 1 } },
+  { id: "sensor",       name: "Sensor cluster",    mass: 0.8,  value: 615,   from: { chip: 1, glass: 2, wiring: 1 } },
+  { id: "controller",   name: "Flight controller", mass: 1.1,  value: 1410,  from: { chip: 2, wiring: 2, capacitor: 1 } },
+  { id: "battery",      name: "Battery block",     mass: 9.0,  value: 215,   from: { lead: 3, zinc: 2, polymer: 1 } },
+  { id: "fuel_cell",    name: "Fuel cell",         mass: 4.5,  value: 1000,  from: { platinum: 1, polymer: 2, wiring: 1 } },
+  { id: "reactor_rod",  name: "Reactor rod",       mass: 12.0, value: 2260,  from: { uranium: 2, superalloy: 1, ceramic: 2 } },
+  { id: "thruster_bell",name: "Thruster bell",     mass: 11.0, value: 700,   from: { superalloy: 2, heat_ex: 1 } },
+  { id: "gyro",         name: "Gyroscope",         mass: 5.5,  value: 3950,  from: { motor: 2, bearing: 2, controller: 1 } },
+  { id: "optic",        name: "Optical assembly",  mass: 2.0,  value: 830,   from: { glass: 3, aluminium: 1, sensor: 1 } },
+  { id: "life_scrub",   name: "Air scrubber",      mass: 4.2,  value: 1140,  from: { ceramic: 2, pump: 1, carbon: 2 } },
+  { id: "hydroponic",   name: "Hydroponic rack",   mass: 6.8,  value: 1340,  from: { steel_plate: 1, pump: 1, fertiliser: 2 } },
+  { id: "ration",       name: "Ration pack",       mass: 0.6,  value: 46,    from: { organics: 1, water: 1 } },
+  { id: "medkit",       name: "Medical kit",       mass: 0.5,  value: 120,   from: { organics: 2, polymer: 1 } },
+  { id: "ammo_case",    name: "Ammunition case",   mass: 8.0,  value: 180,   from: { steel: 2, lead: 2, carbon: 1 } },
+  { id: "armour_plate", name: "Armour plate",      mass: 16.0, value: 590,   from: { stainless: 2, ceramic: 3, titanium: 1 } },
+  { id: "shield_coil",  name: "Shield coil",       mass: 7.0,  value: 1430,  from: { superalloy: 1, capacitor: 2, rare_earths: 2 } },
 ];
+
+/* ---- what a thing is worth: its inputs, and the work ---------------------
+ *
+ * 0.3.47. The values above used to be authored one by one, and running the
+ * whole graph showed what that had done: a heat exchanger sold for 6.5× the
+ * ore it ate and a battery for 5×, while a gyroscope — six stages deep, forty-
+ * odd units of rock and a flight controller in it — sold for 1.25×. The cheap,
+ * shallow parts were the money and the deep ones were not worth building,
+ * which is backwards for anything called a tier.
+ *
+ * Every value in MINERALS and COMPONENTS is now the rule, not a guess:
+ *
+ *   refined mineral   its ore's value ÷ the refine yield, × VALUE_RULE.refine
+ *   anything made     Σ inputs' values × VALUE_RULE.stage
+ *
+ * So each stage of work adds the same 18% on what went into it, a part is
+ * worth more the deeper it sits, and a new recipe prices itself. The table is
+ * still written out by hand so it can be read; test/balance.test.mjs fails if
+ * a number drifts from the rule. Ores are the unit everything else is priced
+ * in and are not touched. */
+export const VALUE_RULE = { refine: 1.3, stage: 1.18 };
+
+const niceValue = (v) => (v < 100 ? Math.max(1, Math.round(v)) : v < 1000 ? Math.round(v / 5) * 5 : Math.round(v / 10) * 10);
 
 /* ---- indexes ------------------------------------------------------------ */
 
@@ -142,6 +165,24 @@ export function goodName(id) {
 
 export function baseValue(id) {
   return BY_ID.get(id)?.value ?? 1;
+}
+
+/** What the rule says `id` is worth (see VALUE_RULE) — the test holds the table to it. */
+export function derivedValue(id, memo = new Map()) {
+  if (memo.has(id)) return memo.get(id);
+  const g = BY_ID.get(id);
+  let v = g?.value ?? 1;
+  if (g?.from) {
+    let c = 0;
+    for (const [k, q] of Object.entries(g.from)) c += derivedValue(k, memo) * q;
+    v = niceValue(c * VALUE_RULE.stage);
+  } else if (g && g.tier === "mineral") {
+    let best = null;
+    for (const o of ORES) if (o.refine?.mineral === id && (!best || o.value / o.refine.per < best.value / best.refine.per)) best = o;
+    if (best) v = niceValue((best.value / best.refine.per) * VALUE_RULE.refine);
+  }
+  memo.set(id, v);
+  return v;
 }
 
 export function goodMass(id) {
@@ -242,7 +283,7 @@ export const SECTOR_IDS = ["logistic", "military", "industrial", "civilian", "ag
  *
  * Only tiers you actually BUILD get this. Ore is dug, not made, so hauling rock
  * around is unchanged. */
-export const FINISHED_BONUS = { mineral: 1.12, component: 1.22 };
+export const FINISHED_BONUS = { mineral: 1.08, component: 1.12 };   // 0.3.47: was 1.12 / 1.22
 
 function finishedBonus(s, id) {
   const g = BY_ID.get(id);

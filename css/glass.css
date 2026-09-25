@@ -260,3 +260,31 @@
   .tutor { left: calc(min(40vw, 440px) + var(--pad-l) + 8px) !important; right: calc(var(--g-col2) + var(--g-col) + 8px) !important; bottom: var(--pad-b) !important; width: auto !important; }
 }
 @media (prefers-reduced-motion: reduce) { #hud .chatbox { transition: none; } #hud .chatbox.pulse { animation: none; } }
+
+/* 0.3.48 — the security ◆ */
+.sec-badge { display: inline-flex; vertical-align: middle; align-items: center; gap: 6px; margin-left: 4px; padding: 3px 8px 3px 6px; border-radius: 999px; border: 1px solid var(--glass-line, rgba(255,255,255,.14)); background: rgba(0,0,0,.25); color: var(--glass-ink2, #9fb3c8); font: 600 10px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .12em; cursor: pointer; pointer-events: auto; }
+.sec-badge .sec-lab { font-weight: 600; }
+.sec-gem { display: inline-block; width: 9px; height: 9px; transform: rotate(45deg); border-radius: 1px; background: #5fe39a; box-shadow: 0 0 6px #5fe39a; flex: none; }
+.sec-gem.yellow { background: #ffd166; box-shadow: 0 0 7px #ffd166; animation: sec-pulse 0.9s ease-in-out infinite; }
+.sec-gem.red { background: #ff5d6c; box-shadow: 0 0 8px #ff5d6c; animation: sec-pulse 1.6s ease-in-out infinite; }
+.sec-badge[data-level="yellow"] { color: #ffd166; border-color: rgba(255,209,102,.5); }
+.sec-badge[data-level="red"] { color: #ff5d6c; border-color: rgba(255,93,108,.55); }
+@keyframes sec-pulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .sec-gem.yellow, .sec-gem.red { animation: none; } }
+.sec-card { position: fixed; top: 56px; left: 10px; z-index: 1000; background: rgba(6, 14, 22, 0.94); color: var(--glass-ink, #e6f1ff); border: 1px solid var(--glass-line, rgba(255,255,255,.14)); width: min(340px, calc(100vw - 20px)); padding: 10px 12px; border-radius: 14px; pointer-events: auto; font-size: 12px; line-height: 1.45; }
+.sec-card.hidden { display: none; }
+.sec-card .sec-head { display: flex; align-items: center; gap: 8px; font: 600 11px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .12em; margin-bottom: 6px; }
+.sec-card .sec-x { margin-left: auto; background: none; border: 0; color: inherit; font-size: 18px; min-width: 36px; min-height: 36px; cursor: pointer; }
+.sec-card p { margin: 5px 0; }
+.sec-card .sec-dim { color: var(--glass-ink2, #9fb3c8); font-size: 11px; }
+.sec-card .sec-live { color: #ffd166; }
+.sec-card .sec-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 4px; }
+.sec-card .sec-sos, .sec-card .sec-fine { min-height: 40px; padding: 0 14px; font: 600 11px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .1em; }
+.sec-card .sec-sos.on { border-color: #5fe39a; color: #5fe39a; }
+.sec-card .sec-sos:disabled { opacity: .45; }
+.sec-card .sec-fine { border-color: #ff5d6c; color: #ff5d6c; }
+.sec-card .sec-legend { display: flex; gap: 12px; color: var(--glass-ink2, #9fb3c8); font: 10px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; margin-top: 8px; }
+.sec-card .sec-legend span { display: inline-flex; align-items: center; gap: 5px; }
+@media (pointer: coarse) { .sec-badge { min-height: 28px; padding: 4px 10px 4px 8px; } }
+
+#station-deck .sec-badge { margin: 6px 0 0; }

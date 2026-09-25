@@ -166,7 +166,10 @@ await t("no recipe destroys value, and the margin is reported on every one", () 
   /* the spread is still a spread: fabricating should be a choice, not a faucet */
   const ratios = COMPONENTS.map((c) => fabMargin(c.id).ratio).sort((a, b) => a - b);
   assert.ok(ratios[0] >= 1, `the worst component clears its ore (${ratios[0].toFixed(2)}×)`);
-  assert.ok(ratios.at(-1) > 3, `and the best is still well worth the trip (${ratios.at(-1).toFixed(2)}×)`);
+  /* 0.3.47: the best was a 6.49× heat exchanger — a faucet. Every value now
+   * follows VALUE_RULE (materials.js), so the best is the DEEPEST part, and
+   * still clearly worth the trip. test/balance.test.mjs holds the shape. */
+  assert.ok(ratios.at(-1) > 2 && ratios.at(-1) < 3.6, `and the best is still well worth the trip, not a faucet (${ratios.at(-1).toFixed(2)}×)`);
 });
 
 /* ---- who will build what ------------------------------------------------------ */

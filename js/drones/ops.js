@@ -49,7 +49,7 @@ import { openFreight, claim, touch, release, releaseAll, freightKey, FREIGHT_RAT
 import { claim as settleClaim, insure, droneKey, premiumFor, TIER_BY_ID, release as dropPolicy } from "../insurance.js";
 
 export const FREIGHT_RATE = BOARD_RATE; // of the buyer's bid, per unit hauled, paid to the company (board.js)
-export const BOUNTY_DRONE = 300;      // what the charters pay when your drone downs a pirate out of your sight
+export const BOUNTY_DRONE = 180;      // what the charters pay when your drone downs a pirate out of your sight
 export const THREAT_R = 1400;         // inside this a raider is shooting at a drone
 const STEP = 0.5;                     // sim-seconds per substep
 const SAVE_EVERY = 20;

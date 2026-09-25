@@ -93,6 +93,7 @@ import { crewEffects, updateCrewMods } from "./npc/crewfx.js";
 import { eventAt, eventLine, markVesselDown, populateTraffic, resetTraffic, stepTraffic, traffic, trafficCensus, trafficDown, trafficHooks, vesselById, HOSTILE_ROLES, LAW_ROLES, SLOT_S } from "./npc/traffic.js";
 import { battleHooks, fightCentre, pirateKilled, resetBattles, stepBattles } from "./npc/battles.js";
 import { resetSecurity, stepSecurity, mountSecurity, assignGuards, securityHooks, securityCorp, securityReport, callForHelp, distress, nearestCall, etaOf } from "./npc/security.js";
+import { stepSecLevel, resetSecLevel, secHooks, selfVictim, noteKillBySelf, noteHonestHit } from "./seclevel.js";
 import { resetNpcCombat, stepNpcCombat, mountNpcCombat, combatHooksOut, combatReport, combatLog, damageHull } from "./npc/combat.js";
 import { populateNests, stepRogues, mountRogues, rogueHooks, rogueReport, nests, waves } from "./npc/rogues.js";
 import { resetPerf, notePerf, perf, perfReport } from "./perf.js";
@@ -972,6 +973,7 @@ export function loadSky(seed) {
    * call), then combat (anything with a fight on flies the fight), then the
    * rogues (a drone with nothing in front of it presses on to its objective). */
   resetSecurity();
+  resetSecLevel();
   resetNpcCombat();
   mountSecurity();
   mountNpcCombat();
@@ -1036,9 +1038,15 @@ function wireReactiveSky() {
     sim.send({ t: "vdown", id: n.id, until: trafficDown[n.id] });
   };
 
+  /* 0.3.48: the security ◆ — the player's own SOS, and what a fight costs you */
+  securityHooks.selfVictim = selfVictim;
+  secHooks.log = logEvent;
+  secHooks.toast = (m) => { sim.toast = m; sim.lastToastAt = sim.time; };
+
   /* the clock the player is deciding against */
   securityHooks.onCall = (call) => {
     if (!call.byPlayer) return;
+    noteHonestHit(call, sim.time);
     const eta = etaOf(call, sim.time);
     sim.toast = eta == null
       ? `${call.victimName} is calling for help. Nobody is coming.`
@@ -4061,6 +4069,9 @@ function stepWorld(d) {
     stepSecurity(sim.time, d, stations);
     stepRogues(sim.time, d, stations, sim.ship.pos);
   }
+  /* the security ◆ is the pilot's, not the sky's: every client steps its own (0.3.48) */
+  stepSecLevel(sim.ship, sim.time, d, { authority: sim.worldAuthority !== false });
+
   sim.engagement = stepBattles(sim.time, d, sim.ship.pos, npcTracer, stations, currentSystem);
   stepFlow(sim.time, stations);
   stepEconomy(d, stations);
@@ -4138,7 +4149,8 @@ function onKill(c, shot = null) {
       /* a pirate: the charters pay for that, and so does anyone they were working over */
       const e = pirateKilled(c.id, sim.time);
       noteKill(c.id);
-      const bounty = 420 + Math.round((shipById(n.ship)?.stats.massT ?? 30) * 6) + (e ? 600 : 0);
+      /* 0.3.47: 420 + 6/t + 600 for a rescue was a starter hull every eight kills */
+      const bounty = 240 + Math.round((shipById(n.ship)?.stats.massT ?? 30) * 4) + (e ? 350 : 0);
       sim.ship.credits += bounty;
       bookRevenue("bounty", bounty, `Bounty on ${c.name}`);
       sim.toast = e ? `${c.name} destroyed — ${e.victimName} saved. Bounty ${bounty} cr` : `${c.name} destroyed. Bounty ${bounty} cr`;
@@ -4158,11 +4170,14 @@ function onKill(c, shot = null) {
       return;
     }
     /* an honest hull: its flag remembers, its flag's allies remember, its flag's enemies approve */
+    noteKillBySelf({ n, t: sim.time });   // 0.3.48: and so does the Directorate
     const flag = blameKill(n, `destroyed ${c.name}`);
     if (flag) logEvent(`${flag.name} will remember ${c.name}`, "combat");
     sim.send({ t: "vdown", id: c.id, until });
     return;
   }
+  /* another pilot: the heaviest thing the Directorate files (0.3.48) */
+  if (c.kind === "peer") { noteKillBySelf({ peer: true, t: sim.time }); return; }
   /* Somebody owned that gun. */
   if (c.stationId) {
     const st = stationById(c.stationId);

@@ -29,7 +29,12 @@ export const CHAIN = {
   cool: 2400,          // s a failed chain stays off the boards
   carry: 900,          // s of extra deadline a chain stage gets over a one-off
   hop: 4,              // how many nearby ports an "at: next" stage may pick from
+  /* 0.3.47: the closing bonus in data/chains.js is authored at 5,500–9,500 —
+   * more than a starter hull — on top of stages that already paid. Half of it
+   * is still the best single payday on the desk. */
+  bonusK: 0.5,
 };
+export const chainBonus = (chain) => Math.round((chain?.bonus ?? 0) * CHAIN.bonusK);
 
 /** live: chainId → { chainId, idx, stationId, held, started, paid, stages } */
 export const chains = { live: new Map(), done: new Map(), cold: new Map() };
@@ -154,8 +159,8 @@ export function noteChainDone(a) {
   version++;
   if (next >= chain.stages.length) {
     chains.live.delete(chain.id);
-    chains.done.set(chain.id, { at: sim.time, paid: e.paid + (chain.bonus ?? 0), stages: chain.stages.length });
-    return { chain, idx, last: true, bonus: chain.bonus ?? 0, standing: chain.standing ?? 0, nextStationId: null, nextName: null, nextTitle: null };
+    chains.done.set(chain.id, { at: sim.time, paid: e.paid + chainBonus(chain), stages: chain.stages.length });
+    return { chain, idx, last: true, bonus: chainBonus(chain), standing: chain.standing ?? 0, nextStationId: null, nextName: null, nextTitle: null };
   }
   const here = stationById(a.stationId) ?? stationById(e.stationId);
   const stage = chain.stages[next];
@@ -184,7 +189,7 @@ export function chainReport() {
     return {
       id: e.chainId, name: chain?.name ?? e.chainId, cat: chain?.cat ?? null, blurb: chain?.blurb ?? "",
       stage: e.idx + 1, of: e.stages, held: Boolean(e.held), paid: e.paid,
-      bonus: chain?.bonus ?? 0, stationId: e.stationId, stationName: st?.name ?? "—",
+      bonus: chainBonus(chain), stationId: e.stationId, stationName: st?.name ?? "—",
       title: chain?.stages[e.idx]?.title ?? "", corpName: e.corpName,
     };
   });

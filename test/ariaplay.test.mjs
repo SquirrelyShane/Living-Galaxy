@@ -23,7 +23,7 @@ import {
   jobPlan, jobsFor, canFly, sourceFor, movesNow, nearestPort, holdUsed, setPlayRng, netWorth, CAREER_DEPT, PLAY,
 } from "../js/ariaplay.js";
 import { rngFromSeed } from "../js/generate.js";
-import { resetCompany, company } from "../js/company.js";
+import { resetCompany, company, COMPANY } from "../js/company.js";
 import { resetCrew, crew } from "../js/crew.js";
 
 /* A SEEDED SKY. 0.3.33.
@@ -160,7 +160,11 @@ const ship = sim.ship;
   let ticks = 0;
   while (ticks++ < 60 * 60 * 35 && play.stats.done < 1) { tickSim(1 / 60); stepPlay(1 / 60); }
   ok(play.stats.done >= 1, `a trader closed ${play.stats.done} job(s) too`);
-  ok(netWorth() > cr0, `${cr0.toLocaleString("en-US")} → ${netWorth().toLocaleString("en-US")} cr (purse + treasury)`);
+  /* 0.3.47: the charter she registers on the way is capital, not a loss. At the
+   * old desk rates one procurement paid for the registrar with change; at the
+   * new ones it pays for itself, which is the point. */
+  const charter = company.founded ? COMPANY.registration : 0;
+  ok(netWorth() + charter > cr0, `${cr0.toLocaleString("en-US")} → ${netWorth().toLocaleString("en-US")} cr (purse + treasury${charter ? `, plus the ${charter.toLocaleString("en-US")} cr charter` : ""})`);
   endPlay();
 }
 
