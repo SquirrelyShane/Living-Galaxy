@@ -10,6 +10,72 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.60 — 2026-09-26
+
+Room between things, and rogues that are an event.
+
+Reported: bodies and asteroids sit too close, and a rogue is guaranteed to hit
+a core planet within minutes.
+
+**Rogues** (`js/impactors.js` `ROGUE`), measured with the ship parked by its
+home world, 4 skies × 3 runs × 3 h:
+
+| | 0.3.59 | 0.3.60 |
+| --- | --- | --- |
+| rogues an hour | 21 | 7.3 |
+| alive at once | 3 | 2 |
+| first rogue | from 14 s | after 5 min |
+| thrown at a world / of those to hit | 66% / 45% | 30% / 20% |
+| world strikes an hour | 3.7 (first at a median 13 min, as early as 3) | 0 by a settled world; 0.13–0.3 by a wild one |
+| strikes that were not aimed | most | none |
+
+Why they hit so often: aim was taken at where a world *was*, while it rides
+its orbit at hundreds of u/s for the minutes a rock is in flight, and the rock
+falls in the star's well while the worlds ride kinematic orbits — the two drift
+thousands of units apart over a two-minute flight. Every rock is now flown
+first with the same gravity solver (8 min, 2 s steps, worlds in reach only —
+11 ms worst case per spawn on the dev box) and a pass that would
+come within 2.2 contact distances of any world is re-rolled; a strike is
+steered onto its world by the flown miss. A settled world — the one you start
+by, or any world with a port in its family — is never aimed at
+(`rogueHooks.spare`).
+
+**Spacing** (`js/bodies.js` `SPACING`), measured over Sol and 40 skies:
+
+| | 0.3.59 | 0.3.60 |
+| --- | --- | --- |
+| closest neighbouring planets (capped SOIs apart) | −0.29 (orbits crossing) | 1.25 |
+| closest belt to a planet's orbit (SOIs) | −22.9 (belt through it) | 1.2 |
+| closest neighbouring moons (radii apart) | −1.0 (overlapping) | 3.0 |
+
+A pushed body keeps its orbital speed. Sol: main belt 1,200–1,455k →
+1,163–1,418k (off Jupiter's sphere), Kuiper belt 4,035–5,179k → 5,655–6,799k
+(it ran through Uranus and Neptune), Pluto 6,318k → 7,088k; the inner worlds
+do not move.
+
+**Mining, measured after** (starter hull, MINE LOOP, 20 min, 3 seeds): 0.3.59
+made 1,214 / 176 / 176 cr/min — on two seeds the loop never reached a rock in
+20 minutes; 0.3.60 makes 1,793 / 1,935 / 1,538. The belt is off Jupiter's
+sphere and 37k nearer the inner ports, so the loop runs. Hull prices (0.3.59)
+are what keep that from being riches.
+
+Found on the way:
+
+- **Traffic** (`js/npc/traffic.js`): a hull in its bay run finishes it before a
+  security claim or a battle pose takes it, and a battle pose (an outright
+  teleport to the engagement) also waits until the hull is off its exit lane —
+  the bay test caught a law corvette leaving its hangar for a fight 30 Mu away
+  in one tick.
+- **ARIA** (`js/ariaplay.js`): a re-flown restock buys only what the hold is
+  short. When an NPC freighter emptied her source shelf (278 stainless) on the
+  way, pass 2 bought the whole order again on top of the 18 she had. The
+  commerce test now bounds a market-moved loss at 10% (the job still ran
+  under: the shelf moved) and checks nothing is left over.
+
+Files: `js/impactors.js`, `js/bodies.js`, `js/sim.js`, `js/npc/traffic.js`,
+`js/ariaplay.js`, `js/version.js`, `README.md`; `test/spacing.test.mjs` (new,
+50), `test/ariaplay.test.mjs`.
+
 ## 0.3.59 — 2026-09-26
 
 Ships are the long game; a port's drones are its guards and repair crew.

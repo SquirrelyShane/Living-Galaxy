@@ -454,8 +454,8 @@ gravity, escape velocity, sphere of influence, resource richness and rarity
 tier. Big worlds pull harder, need more power to climb out of, and pay
 exponentially better.
 
-Orbits scale with them. Earth sits 278,000 units out, Pluto 2.87 million, and
-the far side of the system is nearly six million units from the near one. Under
+Orbits scale with them. Earth sits 612,000 units out, Pluto 7.1 million, and
+the far side of the system is over fourteen million units from the near one. Under
 continuous full burn a Sol–Pluto run is minutes of real thrust — which is also
 minutes of reactor output you are not spending on anything else. The warp core
 skips the boring part, but it will not do it just because you asked.
@@ -463,6 +463,19 @@ skips the boring part, but it will not do it just because you asked.
 Gravity is patched-conic: you are always inside exactly one sphere of
 influence — the deepest one containing you — and crossing a boundary
 cross-fades to the parent. Orbits hold. Jupiter can capture you.
+
+**Room between things** (0.3.60, `SPACING` in `js/bodies.js`). After scaling,
+each planet's periapsis clears the apoapsis of the one inside it by 1.25 of
+their two spheres summed (each capped at 12% of its orbit — this sky's giants
+carry spheres a fifth to half their orbit wide, and spacing against those ran
+away); neighbouring moons clear each other by three of their radii summed (the
+old SOI clamp parked several on one orbit); and a belt keeps 1.2 spheres off
+every planet's orbit, moving whole to the nearest clear lane (a dwarf is a
+belt's own kind of body and only keeps its room about its mean orbit). A body
+pushed outward keeps its orbital speed. In Sol that moves the main belt 37k
+inward, off Jupiter's sphere (1,163k–1,418k), the Kuiper belt out past Neptune
+(5,655k–6,799k, it used to run through Uranus and Neptune), and Pluto off
+Neptune's orbit; the inner worlds do not move.
 
 ### The cockpit (portrait)
 
@@ -1347,6 +1360,18 @@ and fly the same gravity you do, which means passing a world bends them. A
 shallow pass turns one onto a new heading and sends it somewhere else; a deep
 one drops it into the surface.
 
+They are an event, not the weather (0.3.60, `ROGUE` in `js/impactors.js`):
+none in a sky's first five minutes, then one every seven minutes or so, two at
+most. Most sail past you or past a world at 4.5–7 radii; one in about sixteen
+is thrown to hit. Every rock is **flown before it is thrown** — the same
+gravity it will fly, for eight minutes — and a pass that would come within 2.2
+contact distances of any world is re-rolled, so a near miss stays a near miss.
+A strike is steered onto its world, and never aimed at a **settled** one: the
+world you start by, or any world with a port in its family's wells
+(`rogueHooks.spare`, wired in `sim.js`). The frontier takes the hits; measured
+with the ship parked by its home world, 3.7 world strikes an hour on 0.3.59
+became none there, and 0.13–0.3 an hour on unsettled worlds.
+
 When one connects, the world it hits does not walk away from it. Severity is
 measured against the target — the rock that leaves a scar on a gas giant will
 end a moon — and drives everything downstream:
@@ -1389,7 +1414,7 @@ its **own** body off the same generator the belt uses (`js/bodygen/`): a
 taxonomic class drawn on its own seed, real craters, a per-vertex mineral assay,
 metal standing proud of the matrix, outcrops where a seam breaks the surface.
 
-There are never more than three alive (`MAX_LIVE` in `js/impactors.js`). Each
+There are never more than two alive (`ROGUE.maxLive` in `js/impactors.js`). Each
 rogue's body is requested from the grower the moment the rock exists, tens of
 kilometres out, grown at the finest tier (H48 / 64 / 72 by device — the
 generator's own survey detail on a full device) and baked; cached by id and
@@ -3660,6 +3685,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
 | `ground` | 0.3.16: speech units carry real hull, place and grade; maydays only from hulls really under fire (never a raider), naming real attackers, integrity and place; port reports only from hulls at that port with its real census; claim reports name the ores in reach, amounts, value and the raiders/drones on the belt; a finished claim hauls the ore it said pays; the engine's claim topics never fire untrue over a long band |
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
+| `spacing` | 0.3.60: across Sol and 30 skies no neighbouring planets inside 1.25 capped spheres, no neighbouring moons inside 3 radii, no belt inside 1.2 spheres of a planet's orbit, pushed planets keep their speed; Sol's belts off Jupiter and past Neptune; rogues: none in the first 5 min, 3–12 an hour, 2 at most, no stray lands, a spared world is never struck, strikes under 0.6 an hour; the sim spares the start world and every port's family |
 | `portdrones` | 0.3.59: at most three delivery haulers in any sky; honest ports field miners, guards and repair drones, every major a repair drone, a hold only gun drones, your cap untouched; a guard kills a rogue drone off its port and the kill is the port's; a repair drone patches you out of a fight — not mid-fight, not at bad standing, not beyond its reach; each hull tier costs well over the one below |
 | `belt` | 0.3.58: rocks per cell (2.7, was 6.3), empty cells, most rock is matrix, veins rare, a rock looks like what it carries, and the starter hull's MINE LOOP pays a living (100–1,500 cr/min) rather than a fortune |
 | `childtalk` | 0.3.57: little / child / teen; eight topics answered from the child's own life (parents by name, the port out of the window, a teenager who wants out until you put the time in); a topic moves the bond once a watch; they ask, three answers, the bond moves, a curious child learns a point capped by the body (and a skill past it is never lowered); parents and hands do things with them in the log |

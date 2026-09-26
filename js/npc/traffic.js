@@ -732,14 +732,20 @@ function stepHullOnce(n, t, dt, ctx) {
 
   /* anything with a claim on this hull flies it: a security response, a
    * pirate run-in, a hull that is running for its life (npc/combat.js,
-   * npc/security.js). The timetable waits. */
-  if (trafficHooks.director?.(n, t, dt, ctx)) {
+   * npc/security.js). The timetable waits. 0.3.60: but a hull in its bay run
+   * finishes it first (a few seconds) — a claim or a battle pose that landed
+   * mid-hangar used to lift it off the clamps and put it at the fight in one
+   * tick (bay.test caught a law corvette leaving its bay for a battle 30 Mu out). */
+  const inBay = n.state === "berth" || n.state === "unberth";
+  if (!inBay && trafficHooks.director?.(n, t, dt, ctx)) {
     n.visible = true;
     n.docked = null;
     return;
   }
   /* the legacy outright-pose override, for anything still using it */
-  const posed = trafficHooks.battlePose?.(n, t, SL, system);
+  /* …and a battle pose (an outright teleport to the engagement) also waits
+   * until the hull is off its exit lane: near a port is where you watch them */
+  const posed = inBay || n.state === "launch" ? null : trafficHooks.battlePose?.(n, t, SL, system);
   if (posed) {
     if (dt > 0 && n.visible && posed.visible) { n.vx = (posed.x - n.x) / dt; n.vy = (posed.y - n.y) / dt; n.vz = (posed.z - n.z) / dt; }
     else { n.vx = 0; n.vy = 0; n.vz = 0; }

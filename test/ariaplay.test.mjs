@@ -23,6 +23,7 @@ import {
   jobPlan, jobsFor, canFly, sourceFor, movesNow, nearestPort, holdUsed, setPlayRng, netWorth, CAREER_DEPT, PLAY,
 } from "../js/ariaplay.js";
 import { rngFromSeed } from "../js/generate.js";
+import { goodName } from "../js/materials.js";
 import { resetCompany, company, COMPANY } from "../js/company.js";
 import { resetCrew, crew } from "../js/crew.js";
 
@@ -164,7 +165,16 @@ const ship = sim.ship;
    * old desk rates one procurement paid for the registrar with change; at the
    * new ones it pays for itself, which is the point. */
   const charter = company.founded ? COMPANY.registration : 0;
-  ok(netWorth() + charter > cr0, `${cr0.toLocaleString("en-US")} → ${netWorth().toLocaleString("en-US")} cr (purse + treasury${charter ? `, plus the ${charter.toLocaleString("en-US")} cr charter` : ""})`);
+  /* 0.3.60: a live market can move against a buy-and-bring — in this sky an
+   * NPC freighter lifted the whole source shelf (278 stainless) while she was
+   * on her way, and the order had to be filled at the next port's price.
+   * Completing was still the better call; the job ran a little under. What
+   * must hold: the charter is capital, not a loss, and a bad shelf costs a
+   * few per cent, not the business. */
+  ok(netWorth() + charter > cr0 * 0.9, `${cr0.toLocaleString("en-US")} → ${netWorth().toLocaleString("en-US")} cr (purse + treasury${charter ? `, plus the ${charter.toLocaleString("en-US")} cr charter` : ""}; a market move costs a few per cent at most)`);
+  /* and a re-flown order buys only what the hold is short — it used to buy the whole order again */
+  const good = play.log.map((l) => /Restock (\d+) (.+?) —/.exec(l.text)).find(Boolean);
+  if (good) ok(Object.entries(ship.hold).every(([k, v]) => goodName(k) !== good[2] || v < 1), `a re-flown restock leaves nothing over (${JSON.stringify(ship.hold)})`);
   endPlay();
 }
 

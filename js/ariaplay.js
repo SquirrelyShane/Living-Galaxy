@@ -300,10 +300,15 @@ export function jobPlan(a) {
     at = a.spot ? { x: a.spot.x, y: a.spot.y, z: a.spot.z } : sim.ship.pos;
     go(a.stationId, a.stationName);
   } else if (a.good) {
-    /* buy it where it is actually on the shelf, then bring it here */
-    const src = (a.sourceId && stockOf(stationById(a.sourceId), a.good) >= a.qty ? stationById(a.sourceId) : null) ?? sourceFor(a.good, a.qty, a.stationId);
-    if (src) go(src.id, src.name); else steps.push(makeStep("DOCK", { kind: "nearest-port" }));
-    steps.push(makeStep("BUY", null, { args: { good: a.good, qty: a.qty } }));
+    /* buy it where it is actually on the shelf, then bring it here. 0.3.60:
+     * only what the hold is SHORT — a re-flown restock whose first shelf ran
+     * dry bought the whole order again on top of what it already carried */
+    const need = Math.max(0, Math.ceil((a.qty ?? 0) - (sim.ship.hold[a.good] ?? 0)));
+    if (need > 0) {
+      const src = (a.sourceId && stockOf(stationById(a.sourceId), a.good) >= need ? stationById(a.sourceId) : null) ?? sourceFor(a.good, need, a.stationId);
+      if (src) go(src.id, src.name); else steps.push(makeStep("DOCK", { kind: "nearest-port" }));
+      steps.push(makeStep("BUY", null, { args: { good: a.good, qty: need } }));
+    }
     go(a.stationId, a.stationName);
   } else {
     go(a.stationId, a.stationName);

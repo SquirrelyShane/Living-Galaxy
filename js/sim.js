@@ -47,7 +47,7 @@ import { chat, post, resetChat } from "./chat.js";
 import { gnn, gnnPost, resetGnn } from "./gnn.js";
 import { benchValue } from "./icework.js";
 import { addChunk, bindDebris, burst, chunkMass, chunks, nearDebris, removeChunk, resetDebris, rubbleRing, stepDebris } from "./debris.js";
-import { addRogue, adoptImpactors, impactorWire, impactors, resetImpactors, setImpactorAuthority, stepImpactors, threatBoard, emptyThreatBoard } from "./impactors.js";
+import { addRogue, adoptImpactors, impactorWire, impactors, resetImpactors, rogueHooks as rockHooks, setImpactorAuthority, stepImpactors, threatBoard, emptyThreatBoard } from "./impactors.js";
 import { HOLE, adoptHoles, collapseStar, holeRadii, holeWarpBlock, holeWire, holes, nearestHole, resetHoles, spawnTransit, stepHoles } from "./holes.js";
 import {
   OUTCOME,
@@ -1075,6 +1075,14 @@ function wireReactiveSky() {
     if (!call.byPlayer) return;
     sim.toast = `${n.name} is on scene.`;
     sim.lastToastAt = sim.time;
+  };
+  /* 0.3.60: a rogue is never AIMED at a settled world — one with a port in its
+   * family's wells — or at the world this sky spawns you by */
+  rockHooks.spare = (b) => {
+    const fam = (id) => BODIES.find((x) => x.id === id)?.parent ?? id;
+    const f = fam(b.id);
+    if (f === fam(spawnBodyId(currentSystem))) return true;
+    return stations.some((st) => st.hostId && fam(st.hostId) === f);
   };
   /* 0.3.59: a port's guard drones fire at hostiles on the board; its repair drones patch you */
   npcDroneHooks.hostiles = () => contacts.filter((c) => c.relation === "hostile" && c.hp > 0 && c.kind !== "cdrone");

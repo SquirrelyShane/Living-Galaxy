@@ -226,17 +226,45 @@ export const SOL_SYSTEM = {
 
 const scaledCache = new Map();
 
-function scaleBody(b, parentScaled) {
+/* 0.3.60 — room between things. Reported: bodies and asteroids sit too close.
+ * Measured over Sol and 40 generated skies on 0.3.59: one pair of neighbouring
+ * planets in ten had less than half their spheres of influence between their
+ * orbits (some crossed outright), belts ran through a giant's sphere (Sol's
+ * main belt reached 67k into Jupiter's), and one moon in ten overlapped the
+ * next — the SOI clamp parked several on the same orbit. Now:
+ *   planetClear  a planet's closest approach (periapsis) clears the one inside
+ *                it's farthest (apoapsis) by this many of their two SOIs summed
+ *                (each SOI capped at soiCap of its orbit)
+ *   moonGap      neighbouring moons clear by this many of their radii summed
+ *   beltClear    a belt keeps this many SOIs off every planet's orbit, moving
+ *                (not shrinking, where it fits) to the nearest clear lane
+ * A body pushed outward keeps its orbital SPEED (its period grows with it), so
+ * a port riding it moves as fast as it did. */
+export const SPACING = { planetClear: 1.25, moonGap: 3, beltClear: 1.2, soiCap: 0.12 };
+/* the room a planet claims: its SOI, but never more than soiCap of its orbit —
+ * this sky's giants carry SOIs of a fifth to half their orbit, and spacing
+ * against those ran away (a chain of giants pushed each other out tenfold) */
+const roomOf = (p) => Math.min(p.soi, p.orbit * SPACING.soiCap);
+
+function scaleBody(b, parentScaled, prevMoon = null) {
   const radius = scaleRadius(b.radius);
   let orbit = scaleOrbit(b.orbit);
+  let stretch = 1;
   if (b.parent && parentScaled) {
     /* A moon has to sit outside its world and inside its world's SOI, or it
      * is not a moon at all. */
     const lo = parentScaled.radius * 3.2 + radius * 2.4;
     const hi = Math.max(lo * 1.05, parentScaled.soi * 0.7);
     orbit = Math.min(Math.max(orbit, lo), hi);
+    /* …and clear of the moon inside it (0.3.60): the clamp above used to park
+     * two or three on the same orbit */
+    if (prevMoon) {
+      const e = b.eccentricity ?? 0;
+      const need = (prevMoon.orbit * (1 + (prevMoon.eccentricity ?? 0)) + SPACING.moonGap * (prevMoon.radius + radius)) / (1 - e);
+      if (orbit < need) { stretch = need / Math.max(1, scaleOrbit(b.orbit)); orbit = need; }
+    }
   }
-  const out = { ...b, radius, orbit, period: Math.max(6, b.period * PERIOD_K) };
+  const out = { ...b, radius, orbit, period: Math.max(6, b.period * PERIOD_K * Math.max(1, stretch)) };
   /* Worlds keep a condition now. Something can take it away. */
   out.baseRadius = radius;
   out.integrity = 1;
@@ -278,15 +306,22 @@ export function scaleSystem(sys) {
   ];
   const star = sys.bodies.find((b) => b.kind === "star");
   const bodies = [];
+  const lastMoon = new Map();   // parent id → the moon placed inside the next one
+  let spaced = false;
   for (const b of order) {
+    /* every planet is sized before the first moon: space the planets then,
+     * so a moon's clamp sees its world's final sphere */
+    if (b.parent && !spaced) { spacePlanets(bodies, scaledById.get(star?.id)); spaced = true; }
     const parentScaled = b.parent ? scaledById.get(b.parent) : null;
-    const out = scaleBody(b, parentScaled);
+    const out = scaleBody(b, parentScaled, b.parent ? lastMoon.get(b.parent) ?? null : null);
     const host = parentScaled ?? (b.kind === "star" ? null : scaledById.get(star?.id));
     out.soi = b.kind === "star" ? Infinity : sphereOfInfluence(out.orbit, out.mass, host?.mass ?? 1);
     out.host = b.kind === "star" ? null : (b.parent ?? star?.id ?? null);
     scaledById.set(b.id, out);
     bodies.push(out);
+    if (b.parent) lastMoon.set(b.parent, out);
   }
+  if (!spaced) spacePlanets(bodies, scaledById.get(star?.id));
   /* keep the authored order so menus and maps read the same as before */
   bodies.sort((a, z) => sys.bodies.findIndex((b) => b.id === a.id) - sys.bodies.findIndex((b) => b.id === z.id));
   const beacons = sys.beacons.map((b) => ({
@@ -294,23 +329,84 @@ export function scaleSystem(sys) {
     orbit: scaleOrbit(b.orbit),
     period: Math.max(6, b.period * PERIOD_K),
   }));
+  const planets = bodies.filter((b) => b.kind !== "star" && !b.parent);
   const belt = sys.belt
-    ? {
+    ? clearBelt({
         inner: scaleOrbit(sys.belt.inner),
         outer: scaleOrbit(sys.belt.outer),
         count: sys.belt.count,
-      }
+      }, planets)
     : null;
   const outerBelt = sys.outerBelt
-    ? {
+    ? clearBelt({
         inner: scaleOrbit(sys.outerBelt.inner),
         outer: scaleOrbit(sys.outerBelt.outer),
         count: sys.outerBelt.count,
-      }
+      }, planets, belt)
     : null;
   const out = { ...sys, bodies, beacons, belt, outerBelt, scaled: true };
   scaledCache.set(sys.seed, { src: sys, out });
   return out;
+}
+
+/* 0.3.60: push planets outward, innermost first, until each one's periapsis
+ * clears the apoapsis of the one inside it by SPACING.planetClear of their
+ * SOIs. A planet's SOI grows with its orbit, so each is settled in a few
+ * passes before the next is looked at. */
+function spacePlanets(bodies, star) {
+  const planets = bodies.filter((b) => b.kind !== "star" && !b.parent).sort((a, z) => a.orbit - z.orbit);
+  for (let i = 1; i < planets.length; i++) {
+    const a = planets[i - 1], b = planets[i];
+    const e = b.eccentricity ?? 0;
+    for (let k = 0; k < 4; k++) {
+      const need = (a.orbit * (1 + (a.eccentricity ?? 0)) + SPACING.planetClear * (roomOf(a) + roomOf(b))) / (1 - e);
+      if (b.orbit >= need) break;
+      const f = need / b.orbit;
+      b.orbit = need;
+      b.period *= f;   // same speed along a longer orbit
+      b.soi = sphereOfInfluence(b.orbit, b.mass, star?.mass ?? 1);
+      b.spaced = (b.spaced ?? 1) * f;
+    }
+  }
+}
+
+/* 0.3.60: a belt keeps SPACING.beltClear SOIs off every planet's orbit. If it
+ * crosses one, it moves to the clear lane nearest its middle — whole where the
+ * lane is wide enough, filling the lane (never under 40% of its width) where
+ * not. `inside` is a belt this one must stay outside of. */
+function clearBelt(belt, planets, inside = null) {
+  const c = SPACING.beltClear;
+  const zones = planets
+    /* a dwarf is a belt's own kind of body: it keeps its room about its mean
+     * orbit, not across the whole of an eccentric one */
+    .map((p) => {
+      const e = p.kind === "dwarf" ? 0 : p.eccentricity ?? 0;
+      return [p.orbit * (1 - e) - c * roomOf(p), p.orbit * (1 + e) + c * roomOf(p)];
+    })
+    .sort((a, z) => a[0] - z[0]);
+  const floor = inside ? inside.outer * 1.08 : 0;
+  const clear = (lo, hi) => lo >= floor && zones.every(([zl, zh]) => hi <= zl || lo >= zh);
+  if (clear(belt.inner, belt.outer)) return belt;
+  const width = belt.outer - belt.inner, mid = (belt.inner + belt.outer) / 2;
+  /* the lanes between the zones */
+  const lanes = [];
+  let at = floor;
+  for (const [zl, zh] of zones) {
+    if (zl > at) lanes.push([at, zl]);
+    at = Math.max(at, zh);
+  }
+  lanes.push([at, Infinity]);
+  let best = null, bestD = Infinity;
+  for (const [lo, hi] of lanes) {
+    const room = hi - lo;
+    if (room < width * 0.4) continue;
+    const w = Math.min(width, room * 0.9);
+    const pad = Number.isFinite(room) ? room * 0.05 : width * 0.05;
+    const m = Math.min(Math.max(mid, lo + pad + w / 2), hi - pad - w / 2);
+    const d = Math.abs(m - mid);
+    if (d < bestD) { bestD = d; best = { ...belt, inner: m - w / 2, outer: m + w / 2, moved: Math.round(m - mid) }; }
+  }
+  return best ?? belt;
 }
 
 export let BODIES = scaleSystem(SOL_SYSTEM).bodies;

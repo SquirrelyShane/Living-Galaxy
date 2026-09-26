@@ -9,10 +9,27 @@
 import { WORLD_SCALE, remnantRadius } from "./scale.js";
 import { rockName, surveyYear } from "./names.js";
 
-const MAX_LIVE = 3;
+/* 0.3.60 — reported: a rogue hit a core world within minutes of every
+ * session. Measured on 0.3.59 (ship parked by its spawn world, 4 skies × 3
+ * runs): 21 rogues an hour, 3.7 world strikes an hour, the first at a median
+ * 13 min and as early as 3. Rogues are rarer and aimed with care now:
+ *   every     seconds between arrivals, average (was 55); none in the first 5 min
+ *   maxLive   in the sky at once (was 3)
+ *   aimWorld  thrown at a world rather than sailing past you (was 0.66)
+ *   strike    of those, aimed to hit rather than pass (was 0.45)
+ *   passR     a pass misses by this many radii (was 3.2 — deep enough that the
+ *             well bent a third of them in)
+ *   clearR    a rock sailing past you or a world is flown first (planSecs,
+ *             the same gravity it will fly) and re-rolled if it would come
+ *             within this many contact distances (world + rock radius) of any
+ *             world — passMargin of the world it is passing
+ * and a settled world — one with a port in its well — is never the one aimed
+ * at (rogueHooks.spare). A strike is an event again, not the weather. */
+export const ROGUE = { every: 420, firstAfter: 300, maxLive: 2, aimWorld: 0.3, strike: 0.2, passR: [4.5, 7], clearR: 2.2, passMargin: 1.5, planSecs: 480, planStep: 2, tries: 8 };
+/** The sim says which worlds are spared an aimed strike (settled ones). */
+export const rogueHooks = { spare: null };
 const SPAWN_R = 90000;       // they arrive from your neighbourhood, not the rim
 const DESPAWN_R = 260000;
-const SPAWN_EVERY = 55;      // seconds, average
 
 export const impactors = [];
 
@@ -25,7 +42,7 @@ const namedRocks = new Set();
 
 let seq = 1;
 let clock = 0;
-let nextAt = SPAWN_EVERY;    // rolled once per spawn, not per frame
+let nextAt = ROGUE.every;    // rolled once per spawn, not per frame
 let rng = Math.random;
 
 /* Who rolls the rocks. In a shared sky only the host spawns and integrates
@@ -73,25 +90,15 @@ export function resetImpactors(seedFn) {
    * as one catalogue rather than a scatter of unrelated years. */
   year = surveyYear(rng);
   namedRocks.clear();
-  nextAt = SPAWN_EVERY * (0.5 + rng());
+  nextAt = ROGUE.firstAfter + 14 + ROGUE.every * rng();
 }
 
-function spawn(ship, bodies, bodyPosition, time) {
+function spawn(ship, bodies, bodyPosition, time, gravityAt = null) {
   /* Come in from a random direction, aimed either at a nearby world or at a
    * near-miss past the ship — the near misses are what make the deflections
    * worth watching. */
-  const a = rng() * Math.PI * 2;
-  const el = (rng() - 0.5) * 0.7;
-  const from = {
-    x: ship.pos.x + Math.cos(a) * Math.cos(el) * SPAWN_R,
-    y: ship.pos.y + Math.sin(el) * SPAWN_R * 0.5,
-    z: ship.pos.z + Math.sin(a) * Math.cos(el) * SPAWN_R,
-  };
-
-  /* Two thirds are thrown at a world, the rest sail past you. */
-  let aim;
   const near = bodies
-    .filter((b) => b.kind !== "star" && !b.shattered)
+    .filter((b) => b.kind !== "star" && !b.shattered && !b.collapsed)
     .map((b) => {
       const p = bodyPosition(b.id, time, { x: 0, y: 0, z: 0 });
       return { b, p, d: Math.hypot(p.x - ship.pos.x, p.y - ship.pos.y, p.z - ship.pos.z) };
@@ -99,33 +106,118 @@ function spawn(ship, bodies, bodyPosition, time) {
     .filter((x) => x.d < SPAWN_R * 1.6)
     .sort((x, y) => x.d - y.d);
 
-  if (near.length && rng() < 0.66) {
-    const t = near[Math.floor(rng() * Math.min(3, near.length))];
-    const j = t.b.radius * (rng() < 0.45 ? 0.4 : 3.2);
-    aim = {
-      x: t.p.x + (rng() - 0.5) * j,
-      y: t.p.y + (rng() - 0.5) * j,
-      z: t.p.z + (rng() - 0.5) * j,
-    };
-  } else {
-    const j = 8000;
-    aim = {
-      x: ship.pos.x + (rng() - 0.5) * j,
-      y: ship.pos.y + (rng() - 0.5) * j,
-      z: ship.pos.z + (rng() - 0.5) * j,
-    };
-  }
+  /* 0.3.60: what it is for — a strike (rare), a pass by a world, or a pass by you */
+  const toWorld = near.length && rng() < ROGUE.aimWorld;
+  const striking = toWorld && rng() < ROGUE.strike;
+  const targets = striking ? near.filter((x) => !rogueHooks.spare?.(x.b)) : near;
+  if (striking && !targets.length) return null;   // every world near you is settled: nothing is thrown
 
+  for (let attempt = 0; attempt < ROGUE.tries; attempt++) {
+    const a = rng() * Math.PI * 2;
+    const el = (rng() - 0.5) * 0.7;
+    const from = {
+      x: ship.pos.x + Math.cos(a) * Math.cos(el) * SPAWN_R,
+      y: ship.pos.y + Math.sin(el) * SPAWN_R * 0.5,
+      z: ship.pos.z + Math.sin(a) * Math.cos(el) * SPAWN_R,
+    };
+    const speed = 280 + rng() * 620;
+    let aim, target = null;
+    if (toWorld) {
+      target = targets[Math.floor(rng() * Math.min(3, targets.length))];
+      const j = target.b.radius * (striking ? 0.4 : ROGUE.passR[0] + rng() * (ROGUE.passR[1] - ROGUE.passR[0]));
+      /* 0.3.60: lead the world — it rides its orbit at hundreds of u/s for the
+       * minutes the rock is in flight, so aiming at where it IS turned a pass
+       * into a strike (and a strike into a pass) about as often as not */
+      const at = leadWorld(target.b, from, speed, time, bodyPosition);
+      const ox = rng() - 0.5, oy = rng() - 0.5, oz = rng() - 0.5;
+      const on = Math.hypot(ox, oy, oz) || 1;
+      const k = striking ? j * rng() : j;
+      aim = { x: at.x + (ox / on) * k, y: at.y + (oy / on) * k, z: at.z + (oz / on) * k };
+    } else {
+      /* past you — where you will be, riding your world's orbit, not where you are */
+      const j = 8000;
+      const t = SPAWN_R / speed;
+      const v = ship.vel ?? { x: 0, y: 0, z: 0 };
+      aim = { x: ship.pos.x + v.x * t + (rng() - 0.5) * j, y: ship.pos.y + v.y * t + (rng() - 0.5) * j, z: ship.pos.z + v.z * t + (rng() - 0.5) * j };
+    }
+    /* heavy tail: mostly mountains, rarely something that ends a moon */
+    const r = (120 + 780 * Math.pow(rng(), 2.5)) * WORLD_SCALE;
+    /* 0.3.60: fly it first. A pass that would come near any world (the one it
+     * passes included) is re-rolled; a strike that would take a settled world
+     * on the way is too. Straight lines were not enough: the worlds ride
+     * kinematic orbits while the rock falls in the star's well, and the two
+     * drift thousands of units apart over a two-minute flight. */
+    let ratio = gravityAt ? flyPlan(from, aim, speed, r, bodies, time, bodyPosition, gravityAt, striking ? target.b : null) : null;
+    /* a strike is steered onto its world: shift the aim by what the flown
+     * plan missed by, and fly it again (twice is plenty) */
+    for (let k = 0; striking && ratio && k < 2 && ratio.get(target.b) >= 1; k++) {
+      const off = ratio.off;
+      aim.x -= off.x; aim.y -= off.y; aim.z -= off.z;
+      ratio = flyPlan(from, aim, speed, r, bodies, time, bodyPosition, gravityAt, target.b);
+    }
+    if (ratio && !striking && [...ratio].some(([b, k]) => k < (b === target?.b ? ROGUE.passMargin : ROGUE.clearR))) continue;
+    if (ratio && striking && [...ratio].some(([b, k]) => k < ROGUE.clearR && b !== target.b && rogueHooks.spare?.(b))) continue;
+    const m = launch(from, aim, speed, r, time);
+    m.aim = striking ? "strike" : toWorld ? "pass" : "by-you";   // what it was thrown for (the tests read it)
+    return m;
+  }
+  return null;
+}
+
+/** Where a world will be when a rock leaving `from` at `speed` gets to it. */
+function leadWorld(b, from, speed, time, bodyPosition) {
+  const p = bodyPosition(b.id, time, { x: 0, y: 0, z: 0 });
+  for (let i = 0; i < 3; i++) {
+    const t = Math.hypot(p.x - from.x, p.y - from.y, p.z - from.z) / speed;
+    bodyPosition(b.id, time + t, p);
+  }
+  return p;
+}
+
+/**
+ * Fly a rock that has not been thrown yet: the same gravity it will fly
+ * (2 s steps), for ROGUE.planSecs. Returns, per world in reach, its closest pass
+ * in contact distances (world + rock radius) — under 1 is a strike.
+ */
+const _pg = { x: 0, y: 0, z: 0 }, _pb = { x: 0, y: 0, z: 0 };
+function flyPlan(from, aim, speed, r, bodies, time, bodyPosition, gravityAt, target = null) {
+  const dx = aim.x - from.x, dy = aim.y - from.y, dz = aim.z - from.z;
+  const len = Math.hypot(dx, dy, dz) || 1;
+  const m = { x: from.x, y: from.y, z: from.z, vx: (dx / len) * speed, vy: (dy / len) * speed, vz: (dz / len) * speed };
+  /* only worlds it could reach in the plan's time (a phone pays for every one) */
+  const reach = speed * ROGUE.planSecs + len;
+  const worlds = bodies.filter((b) => {
+    if (b.kind === "star" || b.collapsed) return false;
+    bodyPosition(b.id, time, _pb);
+    return Math.hypot(_pb.x - from.x, _pb.y - from.y, _pb.z - from.z) < reach;
+  });
+  const out = new Map(worlds.map((b) => [b, Infinity]));
+  out.off = { x: 0, y: 0, z: 0 };   // for `target`: rock minus world at the closest pass
+  const h = ROGUE.planStep;
+  for (let t = 0; t < ROGUE.planSecs; t += h) {
+    gravityAt(m, time + t, bodyPosition, _pg);
+    m.vx += _pg.x * h; m.vy += _pg.y * h; m.vz += _pg.z * h;
+    m.x += m.vx * h; m.y += m.vy * h; m.z += m.vz * h;
+    for (const b of worlds) {
+      bodyPosition(b.id, time + t + h, _pb);
+      const k = Math.hypot(m.x - _pb.x, m.y - _pb.y, m.z - _pb.z) / (remnantRadius(b) + r);
+      if (k < out.get(b)) {
+        out.set(b, k);
+        if (b === target) { out.off.x = m.x - _pb.x; out.off.y = m.y - _pb.y; out.off.z = m.z - _pb.z; }
+      }
+    }
+  }
+  return out;
+}
+
+function launch(from, aim, speed, r, time) {
   const dx = aim.x - from.x;
   const dy = aim.y - from.y;
   const dz = aim.z - from.z;
   const d = Math.hypot(dx, dy, dz) || 1;
-  const speed = 280 + rng() * 620;
-  /* heavy tail: mostly mountains, rarely something that ends a moon */
-  const r = (120 + 780 * Math.pow(rng(), 2.5)) * WORLD_SCALE;
 
   const n = ++seq;
-  impactors.push({
+  const m = {
     id: `imp${n}`,
     name: rockName(n, r / WORLD_SCALE, rng, year, namedRocks),
     x: from.x, y: from.y, z: from.z,
@@ -138,7 +230,9 @@ function spawn(ship, bodies, bodyPosition, time) {
     born: time,
     deflected: 0,
     lastWell: null,
-  });
+  };
+  impactors.push(m);
+  return m;
 }
 
 /**
@@ -161,10 +255,10 @@ export function stepImpactors(dt, ship, bodies, bodyPosition, gravityAt, gOut, t
     return;
   }
   clock += dt;
-  if (clock > nextAt && impactors.length < MAX_LIVE) {
+  if (clock > nextAt && impactors.length < ROGUE.maxLive) {
     clock = 0;
-    nextAt = SPAWN_EVERY * (0.5 + rng());
-    spawn(ship, bodies, bodyPosition, time);
+    nextAt = ROGUE.every * (0.5 + rng());
+    spawn(ship, bodies, bodyPosition, time, gravityAt);
   }
 
   const bp = { x: 0, y: 0, z: 0 };
