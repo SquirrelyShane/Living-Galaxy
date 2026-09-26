@@ -95,7 +95,7 @@ import { crewEffects, updateCrewMods } from "./npc/crewfx.js";
 import { eventAt, eventLine, markVesselDown, populateTraffic, resetTraffic, stepTraffic, traffic, trafficCensus, trafficDown, trafficHooks, vesselById, HOSTILE_ROLES, LAW_ROLES, SLOT_S } from "./npc/traffic.js";
 import { battleHooks, fightCentre, pirateKilled, resetBattles, stepBattles } from "./npc/battles.js";
 import { resetSecurity, stepSecurity, mountSecurity, assignGuards, securityHooks, securityCorp, securityReport, callForHelp, distress, nearestCall, etaOf } from "./npc/security.js";
-import { stepSecLevel, resetSecLevel, secHooks, selfVictim, noteKillBySelf, noteHonestHit } from "./seclevel.js";
+import { stepSecLevel, resetSecLevel, secHooks, selfVictim, noteKillBySelf, noteHonestHit, noteShot, wingArrived } from "./seclevel.js";
 import { resetNpcCombat, stepNpcCombat, mountNpcCombat, combatHooksOut, combatReport, combatLog, damageHull } from "./npc/combat.js";
 import { populateNests, stepRogues, mountRogues, rogueHooks, rogueReport, nests, waves } from "./npc/rogues.js";
 import { resetPerf, notePerf, perf, perfReport } from "./perf.js";
@@ -1065,10 +1065,18 @@ function wireReactiveSky() {
     logEvent(`${law?.name ?? "Security"} dispatched to ${call.victimName} — ${Math.round(etaOf(call, sim.time) ?? 0)}s out`, "comms");
   };
   securityHooks.onArrive = (call, n) => {
+    /* 0.3.56: your own SOS — the wing checks whether what was on you is still at it */
+    if (call.sos) {
+      const pay = wingArrived(call, sim.time, sim.ship);   // toasts the bounty itself when there is one
+      if (pay && !pay.cr) { sim.toast = `${n.name} is on scene.`; sim.lastToastAt = sim.time; }
+      return;
+    }
     if (!call.byPlayer) return;
     sim.toast = `${n.name} is on scene.`;
     sim.lastToastAt = sim.time;
   };
+  /* 0.3.56: your turrets fired — self-defence, or a fight you picked? */
+  combatHooks.onFire = (c, t) => noteShot(c, t, sim.lock?.id ?? null);
 
   /* a port's batteries, fighting something the player cannot see. Damage goes
    * through the same path a round would take, so a raider driven off a port on
@@ -4176,6 +4184,15 @@ function stepWorld(d) {
 }
 
 function onKill(c, shot = null) {
+  /* 0.3.56: the Directorate's wing made the kill — theirs, not yours: no heat, no bounty, no credit */
+  if (shot && shot.faction === "npc-law") {
+    const n = vesselById(shot.owner);
+    sim.toast = `${n?.name ?? "The wing"} destroyed ${c.name}`;
+    sim.lastToastAt = sim.time;
+    logEvent(`${n?.name ?? "The Directorate wing"} destroyed ${c.name}`, "combat");
+    burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ?? 0) * 0.3, count: 6, speed: 24, size: 8, good: "iron_ore", tint: 0.35 });
+    return;
+  }
   /* one of your work drones made the kill: it is yours — bounty, standing, the lot */
   if (shot && String(shot.owner).startsWith("pdrone-")) noteDroneKill(shot.owner);
   const byPort = shot && shot.faction === "station" && !String(shot.owner).startsWith("pdrone-");

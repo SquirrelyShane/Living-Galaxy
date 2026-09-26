@@ -8,7 +8,7 @@
  */
 
 import { sim } from "./sim.js";
-import { secLevel, callSOS, payFine, SEC, LEVELS } from "./seclevel.js";
+import { secLevel, callSOS, payFine, SEC, LEVELS, BOUNTY } from "./seclevel.js";
 import { UI } from "./audio.js";
 
 const DOC = globalThis.document ?? null;
@@ -61,8 +61,10 @@ export function mountSecBadge() {
     card.append(head);
     const line = lv.id === "red"
       ? `${lv.corp ?? "The Directorate"} has posted you. Its patrols will fire on sight and nobody answers your SOS. Heat ${lv.heat.toFixed(1)} of ${SEC.red} — it cools in about ${mins(lv.cools)}, or pay the fine at any honest port.`
-      : lv.id === "yellow"
-        ? `In combat. ${lv.corp ?? "The Directorate"} does not dispatch into a fight already running — SOS opens again ${SEC.combatWindow} s after the last shot either way.`
+      : lv.id === "yellow" && lv.assault
+        ? `Under attack — ${[...new Set(lv.assault.kinds)].map((k) => BOUNTY[k]?.label ?? k).join(", ")} on you, and you did not start it. SOS is open: ${lv.corp ?? "the Directorate"} answers a fight that picked you. A wing that finds them still at it pays${lv.assault.bounty.cr ? ` about ${lv.assault.bounty.cr.toLocaleString()} cr` : ""} for the call.`
+        : lv.id === "yellow"
+        ? `In combat. ${lv.corp ?? "The Directorate"} does not dispatch into a fight you picked — P-LOCK an attacker, or fire first, and SOS stays closed until ${SEC.combatWindow} s after the last shot. Turrets returning fire is self-defence.`
         : lv.corp ? `Protected by ${lv.corp}. SOS brings its quick-reaction wing to wherever you are.` : "Nobody polices this sky. There is no one to call.";
     card.append(mk("p", null, line));
     if (lv.heat > 0 && lv.id !== "red") card.append(mk("p", "sec-dim", `Heat ${lv.heat.toFixed(1)} of ${SEC.red} on file — honest hulls you destroyed. It cools in about ${mins(lv.cools)}.`));
@@ -106,7 +108,7 @@ export function mountSecBadge() {
     }
     card.classList.toggle("hidden", !open);
     if (!open) return;
-    const k = `${lv.id}|${lv.canSOS}|${lv.why}|${lv.heat.toFixed(1)}|${lv.sos ? `${lv.sos.state}${Math.ceil(lv.sos.eta ?? -1)}` : ""}|${sim.ship.dockedAt ?? ""}|${said}`;
+    const k = `${lv.id}|${lv.canSOS}|${lv.why}|${lv.assault ? lv.assault.bounty.cr : ""}|${lv.heat.toFixed(1)}|${lv.sos ? `${lv.sos.state}${Math.ceil(lv.sos.eta ?? -1)}` : ""}|${sim.ship.dockedAt ?? ""}|${said}`;
     if (k === key) return;
     key = k;
     build(lv);

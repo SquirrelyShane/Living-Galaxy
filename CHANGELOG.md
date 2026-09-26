@@ -10,6 +10,43 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.56 — 2026-09-25
+
+A fight that picked you: call the wing.
+
+Reported: SOS closed the moment you were in combat, so the one time you
+needed the Directorate — rogue drones or pirates on you — you could not call
+it. Now the question is who started it:
+
+| | SOS |
+| --- | --- |
+| rogue drones / pirates hitting you, you did not go after them | **open** |
+| your turrets returning fire on something that hit you (22 s) | still open — that is self-defence |
+| you P-LOCKed one and your turrets fired on it | closed until it is dead or 90 s pass |
+| you fired first on something that had not hit you | closed the same way |
+| something honest hit you (not a drone or a pirate) | closed, as before, until 20 s quiet |
+
+**The bounty.** When the wing is on scene it looks for what was on you. If it
+is still at it the Directorate pays for the call, by what it found — 120 cr a
+rogue drone, 160 a hold gun drone, 200 a nest drone, 350 + 1.5 a point of hull
+for a pirate (900 at most) — capped at 2,500 cr and 5 standing a call. A call
+whose attackers are already dead pays nothing (and a wing that found nothing
+at all still costs a point, as before).
+
+**The wing fights what is on you.** A quick-reaction hull within 2,400 u of
+you puts rounds on the rogue drones your turrets were fighting (they were
+never in the NPC war, so the wing used to hold station and watch). Its kills
+are its own: no bounty and no heat for you.
+
+The ◆ card says which it is: "Under attack — rogue drone on you, and you did
+not start it. SOS is open… a wing that finds them still at it pays about 120
+cr", or why it is closed.
+
+Files: `js/seclevel.js`, `js/secbadge.js`, `js/turrets.js`, `js/sim.js`,
+`js/version.js`, `README.md`; `test/qrf.test.mjs` (new, 23).
+
+---
+
 ## 0.3.55 — 2026-09-25
 
 You spawn where you spawn.

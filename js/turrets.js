@@ -73,7 +73,7 @@ export const shots = [];         // tracer pool
  * on a contact, whoever fired it. npc/security.js listens so a hull being
  * worked over can put out a call; npc/combat.js listens so a hull that is
  * being shot at knows to run or answer. */
-export const combatHooks = { onHit: null };
+export const combatHooks = { onHit: null, onFire: null };
 let lastCutNote = -1;
 
 export const mining = { active: false, key: null, name: "", x: 0, y: 0, z: 0, r: 0, heat: 0, progress: 0, assayed: null };
@@ -532,6 +532,7 @@ export function stepTurrets(ship, dt, time) {
     turretAim.cooldown = rate;
     turretAim.firing = true;
     ship.lastFireAt = time;   // 0.3.48: shooting is being in a fight (js/seclevel.js)
+    combatHooks.onFire?.(target, time);   // 0.3.56: …and whether it was self-defence
     const lead = 0.35;
     fire(
       ship.pos,

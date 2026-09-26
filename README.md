@@ -1136,7 +1136,7 @@ docked the deck covers the HUD — says where you stand with the Directorate:
 | ◆ | Means | SOS |
 | --- | --- | --- |
 | **GREEN · SAFE** | nothing against you; the Directorate covers you | open — a quick-reaction wing flies to *you* on the same honest clock the NPCs get (coverage 1, a wave of up to three, 150 s between calls; a wing that arrives to find nothing costs 1 standing) |
-| **YELLOW · IN COMBAT** | hit by a contact, or your turrets fired, in the last 20 s | closed until it has been quiet 20 s — call early |
+| **YELLOW · IN COMBAT** | hit by a contact, or your turrets fired, in the last 20 s | **open** when rogue drones or pirates are on you and you did not start it (0.3.56 — no P-LOCK attack, no first shot; turrets returning fire is self-defence); closed for a fight you picked, or one with anything else, until it has been quiet 20 s |
 | **RED · WANTED** | heat ≥ 3 | never; the Directorate posts you (−15 standing) and its patrols read you as hostile and open fire |
 
 **Heat** is what you have done: +1 an honest hull destroyed, +2 a Directorate
@@ -1148,6 +1148,19 @@ port (1,200 cr a point, 800 minimum) clears it and buys back 8 standing. Tap
 the diamond for the card: who polices the sky, why you are the colour you are,
 SOS with its reason when closed, and the response clock once you have called.
 In a shared sky only the host runs the Directorate, so a mirror's SOS says so.
+
+**A fight that picked you** (0.3.56). The Directorate answers an SOS made
+under attack as long as everything that hit you in the last 20 s is a rogue
+drone, a hold's gun drone, a nest drone or a pirate, and you have not picked a
+fight with anything still alive in the last 90 s — a P-LOCK on it while your
+turrets fire, or firing on something that had not hit you inside 22 s. Your
+turrets returning fire on an attacker is self-defence and changes nothing.
+When the wing is on scene it checks whether what was on you is still at it:
+if so the Directorate pays for the call — 120 cr a rogue drone, 160 a hold
+gun drone, 200 a nest drone, 350 + 1.5 a point of hull for a pirate (900 at
+most), capped at 2,500 cr and 5 standing a call — and its hulls put rounds on
+the drones your turrets were fighting. A kill by the wing is the wing's: no
+bounty and no heat for you.
 
 **Fights are decided by the rounds.** Near you they are real ordnance that can
 miss; out of sensor range the same fight resolves on the same numbers, so a
@@ -3610,6 +3623,11 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
 | `ground` | 0.3.16: speech units carry real hull, place and grade; maydays only from hulls really under fire (never a raider), naming real attackers, integrity and place; port reports only from hulls at that port with its real census; claim reports name the ores in reach, amounts, value and the raiders/drones on the belt; a finished claim hauls the ore it said pays; the engine's claim topics never fire untrue over a long band |
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
+| `qrf` | 0.3.56: SOS open when a drone or pirate picked the fight, turrets returning fire is self-defence, a P-LOCK attack or a first shot closes it until the one you picked is dead or 90 s pass, an honest attacker keeps it closed, the call names the attacker, the wing pays once for hostiles found still on you (capped) and nothing when they are dead, and its rounds land on the drone with no heat to you |
+| `spawn` | 0.3.55: a hull beside its world stays there — place and relative motion — through any clock jump: joining a day-41 room, joining before the first tick, a relay restart moving the clock back, a month-old room, the quarter-second chase |
+| `gdb` | 0.3.54: no hall candidate at two ports; no look-alike names in a hall or a hull crew; no two people on file share a name; a person on file keeps their name when made again; a paid-off hand lives and returns where you left them; numbers, search, death, chronicle, merge (first filing wins), the device write; one flourish per name |
+| `orders` | 0.3.53: a GENOME read is a peek; every need's order is a real watch in the LOG, one a watch; company, closeness, backlog, grievance heard, shore leave; TRAIN to the ceiling; ENCOURAGE/CURB; the settled hand's job, shift, hours, housing, day off, course, meal and night out |
+| `stafflife` | 0.3.52: port standard time; a settled hand's day (8 h work, 8 h sleep, night shift, overtime, part-time, strike); needs, pay by hours, labour on the lines; accidents at work; the line knows the hour; the hold as hu with per-good bulk and no ceiling |
 | `seclevel` | 0.3.48: GREEN with SOS open, a real wing flown to the player and a call that is not closed as "victim gone"; one call at a time; YELLOW from a hit or a round fired, clearing after 20 s; pirates add no heat, honest hulls and pilots do; RED closes SOS, drops Directorate standing, marks the hull an outlaw and turns patrol contacts hostile; heat rides the pilot record, cools, and is paid off at an honest port only |
 | `line` | 0.3.46: regard from trust aboard and its lift on mood; every line topic moves the number it names (bonus, cut, promotion, family, passage, release) with its cooldown and limits; nobody earns in transit and the books count raises; the rolls' events reach the inbox; an ask is answered or lapses and costs; towns, children and the inbox survive a save; a port in another sky cannot be called |
 | `nose` | 0.3.51: an autopilot jump out of a well — the ship moves where it points above 150 u/s, the drift is shed nose-first before the core is lit, the jump flies the lane at 0° and still arrives; a manual jump flies the lane nose-first |
