@@ -8,3 +8,6 @@ id_rsa*
 # 0.3.54: the relay's Galactic Database catalogue — the galaxy's, not the repo's
 gdb.json
 gdb.json.*
+
+# smoke screenshots
+_scratch/

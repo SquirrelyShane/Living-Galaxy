@@ -10,6 +10,36 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.58 — 2026-09-26
+
+A belt is mostly empty, and mostly rock.
+
+Reported: too many asteroids in the belts, and mining alone makes you rich.
+Measured on 0.3.57, the starter hull on the MINE LOOP made **2,600–4,300 cr a
+minute**; one hold out of a vein cell (762 monazite) sold for 28,971 cr.
+
+| | 0.3.57 | 0.3.58 |
+| --- | --- | --- |
+| rocks per belt cell | 6.3 | 2.7 |
+| empty cells | 0% | 23% |
+| rocks that are the matrix (silicates, regolith, iron-stone, carbon rock) | 44% | 78% |
+| vein cells | 7.5% | ~2% |
+| rocks in a vein cell carrying the vein ore | 80% | 55% |
+| cutter pull (`MINE_YIELD`) | 0.5 | 0.38 |
+| "the odd rock" platinum | 1 in 7, ⅛ of the pull | 1 in 20, 1⁄40 |
+| rocks drawn around you (smoke-rocks) | 358 | 152 |
+| starter hull, MINE LOOP | 2,600–4,300 cr/min | ~850–1,300 cr/min |
+
+A matrix rock is drawn as the class that carries its ore, so the rock you see
+is still the rock you cut (94% of rocks match their class's suite). Most
+holds now come home as silicates and regolith at 2–3 cr a unit; a vein is
+still the day you remember. Fewer rocks is also fewer instances to draw.
+
+Files: `js/field.js`, `js/turrets.js`, `js/version.js`, `README.md`,
+`.gitignore` (smoke screenshots in `_scratch/`); `test/belt.test.mjs` (new, 9).
+
+---
+
 ## 0.3.57 — 2026-09-25
 
 Talking with the children aboard.

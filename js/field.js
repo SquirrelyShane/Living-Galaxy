@@ -9,7 +9,7 @@
 import { currentSystem } from "./bodies.js";
 import { ORES } from "./materials.js";
 import { classFor, classOre } from "./bodygen/classes.js";
-import { siteRocksInCell, siteHooks } from "./sites.js";
+import { siteRocksInCell, siteHooks, classForOre } from "./sites.js";
 
 const ASTEROID_ORES = ORES.filter((o) => o.found.includes("asteroid"));
 const byIds = (...ids) => ORES.filter((o) => ids.includes(o.id));
@@ -40,7 +40,35 @@ export function pickOre(table, h) {
 const ORE_BY_ID = new Map(ORES.map((o) => [o.id, o]));
 
 export const CELL = 3000;
-const PER_CELL = 10;
+
+/* 0.3.58 — a belt is mostly empty, and mostly rock.
+ *
+ * Reported: too many asteroids, and mining alone made you rich. Measured on
+ * 0.3.57, a starter hull on the MINE LOOP made 2,641 cr a minute — one hold of
+ * monazite out of a vein cell sold for 28,971 cr — with two to eleven rocks in
+ * every cell of the belt (~330 in reach at once) and a class's headline ore in
+ * nearly every one of them.
+ *
+ *   BELT.emptyCell   the share of cells with nothing in them at all
+ *   BELT.perCell     up to this many more rocks in a cell that has any (1 + …)
+ *   BELT.matrix      the share of rocks, by band, that are the belt's MATRIX —
+ *                    silicates and regolith, iron-stone at the sunward rim,
+ *                    carbon rock in the cold — rather than the class's ore
+ *   BELT.veinCells   the share of main-belt cells owned by a rare ore (was 7%)
+ *   BELT.veinShare   …and the share of rocks in one that carry it (was 80%)
+ *
+ * A matrix rock is drawn as the class that carries its ore, so the rock you
+ * see is still the rock you cut. */
+export const BELT = { emptyCell: 0.22, perCell: 7, perCellExp: 1.25, matrix: { metal: 0.5, stone: 0.72, carbon: 0.7 }, veinCells: 0.03, veinShare: 0.55 };
+const MATRIX = {
+  metal: [["iron_ore", 0.6], ["silicate", 1]],
+  stone: [["silicate", 0.6], ["regolith", 1]],
+  carbon: [["carbonaceous", 0.65], ["regolith", 1]],
+};
+function matrixOre(band, h) {
+  for (const [id, upTo] of MATRIX[band] ?? MATRIX.stone) if (h < upTo) return id;
+  return "silicate";
+}
 /* A belt is a DISC, not a cloud: six and a half kilometres thick and hundreds
  * of thousands wide. That asymmetry is the cheapest way out of the rocks —
  * climbing is a few seconds, flying to the rim is a journey — so the autopilot
@@ -103,13 +131,13 @@ export function bandNameAt(belt, rad, ice) {
 }
 
 /**
- * Vein check for a cell: ~7% of main-belt cells are owned by one uncommon
+ * Vein check for a cell: ~3% (BELT.veinCells) of main-belt cells are owned by one uncommon
  * ore; rocks in them are that ore and cut rich. Deterministic per cell.
  */
 export function veinAt(cx, cy, cz, belt) {
   if (!belt || belt === currentSystem.outerBelt) return null;
   const h = hash(cx, cy, cz, 29);
-  if (h > 0.07) return null;
+  if (h > BELT.veinCells) return null;
   const ore = VEIN_ORES[Math.floor(hash(cx, cy, cz, 31) * VEIN_ORES.length) % VEIN_ORES.length];
   return ore;
 }
@@ -123,7 +151,8 @@ function cellRocks(cx, cy, cz, out) {
   const belt = beltAt(Math.hypot(bx, bz));
   if (!belt) return;
   const density = hash(cx, cy, cz, 7);
-  const n = Math.floor(density * PER_CELL) + 2;
+  if (density < BELT.emptyCell) return;
+  const n = 1 + Math.floor(Math.pow((density - BELT.emptyCell) / (1 - BELT.emptyCell), BELT.perCellExp) * BELT.perCell);
   for (let i = 0; i < n; i++) {
     const h1 = hash(cx * 31 + i, cy, cz, 11);
     const h2 = hash(cx, cy * 31 + i, cz, 13);
@@ -142,9 +171,15 @@ function cellRocks(cx, cy, cz, out) {
     /* the taxonomic class comes off its own hash so it is stable under wear,
      * and the headline ore comes out of that class — the rock you can see is
      * the rock you will cut, all the way down to the assay */
-    const cls = classFor(bandNameAt(belt, rad, ice), hash(cx * 17 + i, cy, cz, 23));
+    const band = bandNameAt(belt, rad, ice);
+    let cls = classFor(band, hash(cx * 17 + i, cy, cz, 23));
     const oreObj = ice ? pickOre(ICE_ORES, h2) : null;
-    const oreId = ice ? oreObj.id : vein && h2 < 0.8 ? vein.id : classOre(cls, h2);
+    const rich = Boolean(vein && h2 < BELT.veinShare);
+    /* 0.3.58: most of a belt is its matrix — plain stone — and only the rest
+     * carries what its class is known for */
+    const plain = !ice && !rich && hash(cx * 7 + i, cy * 3 + i, cz, 41) < (BELT.matrix[band] ?? 0.7);
+    const oreId = ice ? oreObj.id : rich ? vein.id : plain ? matrixOre(band, h2) : classOre(cls, h2);
+    if (plain) cls = classForOre(oreId);
     const ore = ORE_BY_ID.get(oreId) ?? ASTEROID_ORES[0];
     /* 0.3.28 — the rock is stored where it BELONGS; the wobble is applied at
      * read time (refreshCell). Everything above this line is a pure function
@@ -162,13 +197,16 @@ function cellRocks(cx, cy, cz, out) {
       seed: h4,
       cls,
       ice,
-      rich: Boolean(vein && h2 < 0.8),
+      rich,
       ore: ore.id,
       oreName: ore.name,
       worn: depleted.get(key) ?? 0,
     });
   }
 }
+
+/** One cell's rocks, freshly grown (tests and tools; the game reads the cache). */
+export function rocksInCell(cx, cy, cz) { const out = []; cellRocks(cx, cy, cz, out); return out; }
 
 /* ---- the rock query, and why it is cached twice ---------------------------
  *

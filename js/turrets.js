@@ -22,7 +22,7 @@
 import { DRAW, addCargo, applyDamage, holdRoom } from "./ship.js";
 import { nearbyRocks, wearRock } from "./field.js";
 
-export const MINE_YIELD = 0.5;   // 0.3.11: half the old gather rate
+export const MINE_YIELD = 0.38;  // 0.3.11: half the old gather rate; 0.3.58: three-quarters of that
 
 /** sim.js hangs the stow here: the cutter cannot reach setMiningMode from a leaf. */
 export const miningHooks = { onHoldFull: null };
@@ -651,7 +651,8 @@ export function stepMining(ship, dt, time, lock = null, want = null) {
      * frame — one example a second is plenty and keeps the tally honest */
     if (!handsOff() && Math.floor(time) !== lastCutNote) { lastCutNote = Math.floor(time); notePlayerChoice("ore", best.ore ?? "iron_ore", 1); }
     /* the odd rock carries something better than what it looks like */
-    if (best.seed > 0.86) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate * dt * (best.ice ? 0.05 : 0.12));
+    /* 0.3.58: one rock in twenty, a fortieth of the pull (was one in seven, an eighth) */
+    if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate * dt * (best.ice ? 0.02 : 0.025));
     mining.fullSince = 0;
   } else if (!mining.fullSince) {
     /* The hold is full and the cutter is still burning: power into a beam that

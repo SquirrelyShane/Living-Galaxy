@@ -882,6 +882,18 @@ in units of the good it wants.
 
 ### Rocks that mean something
 
+**A belt is mostly empty, and mostly rock** (`BELT` in `js/field.js`, 0.3.58).
+22% of a belt's cells hold nothing; the rest hold one to eight rocks (2.7 a
+cell on average, down from 6.3). Of the rocks, most are the belt's MATRIX —
+silicates and regolith in the broad middle, iron-stone at the sunward rim,
+carbon rock in the cold (78% of what you meet) — and only the rest carry what
+their class is known for. A vein owns 3% of main-belt cells, not 7%, and 55%
+of the rocks in one, not 80%. The cutter pulls 0.38 of the old gather rate's
+base (was 0.5), and the odd rock that hides platinum is one in twenty at a
+fortieth of the pull. Measured, the starter hull's MINE LOOP: 2,600–4,300 cr a
+minute on 0.3.57, ~850–1,300 now — a living, and a vein is still the day you
+remember.
+
 Every rock in the game used to be the same object: `IcosahedronGeometry(1, 1)`,
 flat-shaded, `0x8a8178`. A belt was four hundred copies of one grey pebble at
 different sizes — and since the field's hash decides a rock's ore long before it
@@ -3640,6 +3652,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
 | `ground` | 0.3.16: speech units carry real hull, place and grade; maydays only from hulls really under fire (never a raider), naming real attackers, integrity and place; port reports only from hulls at that port with its real census; claim reports name the ores in reach, amounts, value and the raiders/drones on the belt; a finished claim hauls the ore it said pays; the engine's claim topics never fire untrue over a long band |
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
+| `belt` | 0.3.58: rocks per cell (2.7, was 6.3), empty cells, most rock is matrix, veins rare, a rock looks like what it carries, and the starter hull's MINE LOOP pays a living (100–1,500 cr/min) rather than a fortune |
 | `childtalk` | 0.3.57: little / child / teen; eight topics answered from the child's own life (parents by name, the port out of the window, a teenager who wants out until you put the time in); a topic moves the bond once a watch; they ask, three answers, the bond moves, a curious child learns a point capped by the body (and a skill past it is never lowered); parents and hands do things with them in the log |
 | `qrf` | 0.3.56: SOS open when a drone or pirate picked the fight, turrets returning fire is self-defence, a P-LOCK attack or a first shot closes it until the one you picked is dead or 90 s pass, an honest attacker keeps it closed, the call names the attacker, the wing pays once for hostiles found still on you (capped) and nothing when they are dead, and its rounds land on the drone with no heat to you |
 | `spawn` | 0.3.55: a hull beside its world stays there — place and relative motion — through any clock jump: joining a day-41 room, joining before the first tick, a relay restart moving the clock back, a month-old room, the quarter-second chase |
