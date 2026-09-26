@@ -10,6 +10,62 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.61 — 2026-09-26
+
+First light: the start card to the seat.
+
+Reported: signed in on the site, PLAY, and up to ten seconds of the sky
+rendering behind the card before FLY AS could be used.
+
+Measured on the dev box (desktop CPU, swiftshader; a phone runs the CPU parts
+3–4× slower), a returning pilot on Sol:
+
+| | 0.3.60 | 0.3.61 |
+| --- | --- | --- |
+| FLY AS on screen | at boot, 4.5 s | first paint, 0.37 s |
+| FLY AS tapped → in the seat | 0.8–0.9 s | 0.25–0.47 s |
+| in the seat → every world painted | 2.0–2.5 s | 0.4–0.5 s |
+| reloading the same sky (`loadSky`) | 1,659 ms | 29 ms |
+| boot over HTTP/2, 120 / 250 ms a request | 4.1 / 5.1 s | 3.5 / 4.3 s |
+
+Four causes:
+
+- **The menu built the sky twice.** The start card grows the sky as a
+  backdrop, then FLY AS calls `launchSim` → `loadSky` → every port rebuilt from
+  the station generator (most of `loadSky`) and `rebuildWorld` → every surface
+  repainted, one a frame. Same seed, same result, all of it thrown away.
+  `js/stationyard.js` now holds a roster's hulls across a reload of the SAME
+  sky, keyed by full build config (`carryBuilt`/`dropCarried`), and
+  `js/engine.js` keeps painted skins per sky (`texCache`, marked `keep` so
+  `disposeObject` passes them by, let go on a sky change). Found on the way: a
+  held hull still hangs off its old engine holder out in the scene, and
+  measuring its port mouths there put them in world space — it is detached
+  before it is measured (the docking smoke caught it; the test pins it).
+- **The backdrop was the wrong sky.** A returning pilot last in a private sky
+  had the menu grow Sol, then grow theirs from nothing on the tap. The backdrop
+  is now `lastSky` whenever FLY AS is on offer.
+- **FLY AS waited for all 308 modules.** It needs two storage reads. An inline
+  script in index.html paints it on the first frame; a tap before the game is
+  up is held (`__lgFlyQueued`, the button pulses "spooling up…") and
+  `js/hud.js` honours it before the preview sky is grown — one sky build, not
+  two. The site's nonce stamping covers the new tag.
+- **The module graph is 34 imports deep.** A browser learns each level only
+  after fetching the last. `tools/preload.mjs` (new) writes a
+  `<link rel="modulepreload">` for every module in the static graph into
+  index.html between markers; `--check` fails when stale.
+
+Files: `index.html`, `css/style.css`, `js/hud.js`, `js/sim.js`,
+`js/stationyard.js`, `js/engine.js`, `js/version.js`, `README.md`;
+`tools/preload.mjs` (new), `test/firstlight.test.mjs` (new, 22).
+
+Verified: 84 node suites green (the new one included; `asteroids`' ms-per-tick
+line only fails under a 6-way parallel run, green alone); smokes continue,
+account, attract, ui, docking, immersive, bay, economy, mining, rocks, site,
+trade, desk, talk, clipping, freeze, seclevel, line, orders, genome green.
+`smoke-chart`'s "WARP hands the jump to nav" fails identically on 0.3.60.
+`smoke-impact` outruns a 150 s timeout on both trees. Not measured: a real
+phone over the tunnel.
+
 ## 0.3.60 — 2026-09-26
 
 Room between things, and rogues that are an event.

@@ -3698,6 +3698,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `line` | 0.3.46: regard from trust aboard and its lift on mood; every line topic moves the number it names (bonus, cut, promotion, family, passage, release) with its cooldown and limits; nobody earns in transit and the books count raises; the rolls' events reach the inbox; an ask is answered or lapses and costs; towns, children and the inbox survive a save; a port in another sky cannot be called |
 | `nose` | 0.3.51: an autopilot jump out of a well — the ship moves where it points above 150 u/s, the drift is shed nose-first before the core is lit, the jump flies the lane at 0° and still arrives; a manual jump flies the lane nose-first |
 | `chartquiet` | 0.3.50: nothing beyond the dish or under drive is on the chart, a hull leaves it the moment its drive lights, the register holds only what is near, your own fleet stays visible anywhere |
+| `firstlight` | 0.3.61: index.html's modulepreload block is the static graph (`tools/preload.mjs --check`); FLY AS is painted from storage before the modules and a held tap is honoured; the same sky loaded twice keeps every port hull (same object, same frames, measured off its old holder), a different sky releases them; skins cached per sky |
 | `balance` | 0.3.47: every mineral and part equals `VALUE_RULE`; the multiple over raw ore climbs with depth, nothing under 1.3× or over 3.6×; the curve still falls past twice target and lands on the floor; `BOARD.pay` is 1; a mining job pays 1.05–1.8× the bid, buying for the desk under 1.7× book, freight under 35% of cargo value; a flying job under 30% of a starter hull; the chain bonus is `CHAIN.bonusK` of authored; staff share ≤ 35% |
 | `deck` | 0.3.45/0.3.49: every deck tab in index.html has a panel and every panel a tab; the treasury, fleet and flight log are not on the deck; the HALL never opens the console — crew TALK/SETTLE/PAY OFF inline, the company line inline, a registrar that takes a typed name |
 | `robots`, `drones`, `droneops`, `speech`, `comms`, `careers`, `experimental` | the rest |
@@ -3781,6 +3782,12 @@ mode cyclers for poking at from the browser console; `window.__lg.comms` has
 the director, `hail()`, `hailStation(id)` and `hailContact(id)`;
 `window.__lg.console` has `openConsole`, `jumpTo`, `query` and `registerJump`.
 `window.__lgGL` exposes the scene, camera and renderer.
+
+**Adding a module (0.3.61):** run `node tools/preload.mjs` so index.html's
+`modulepreload` list carries it — the graph is ~34 imports deep, and without
+the list every level is a round trip on the live site. `test/firstlight`
+fails while the list is stale. A module that is only ever `import()`ed stays
+off the list on purpose.
 
 Three habits that have earned their keep:
 

@@ -1400,6 +1400,10 @@ html[data-orient="landscape"] .instruments {
 /* 0.3.42 — FLY AS <callsign> takes the accent; New pilot steps back to a ghost */
 .start-card .btn-ghost { background: transparent; border: 1px solid var(--border, rgba(255,255,255,0.18)); color: var(--muted, #aab); }
 .start-card #btn-continue + #btn-create { margin-top: 8px; }
+/* 0.3.61 — a FLY AS tapped before the game is up: held, and says so */
+.start-card #btn-continue.btn-queued { opacity: 0.75; animation: fly-queued 1.1s ease-in-out infinite alternate; }
+@keyframes fly-queued { from { filter: brightness(0.85); } to { filter: brightness(1.15); } }
+@media (prefers-reduced-motion: reduce) { .start-card #btn-continue.btn-queued { animation: none; } }
 
 /* 0.3.40 — the account line under the callsign on the start card: who is
  * signed in at living-galaxy.com, or the one link to get there. Hidden on a

@@ -22,6 +22,321 @@
     <link rel="stylesheet" href="./css/console.css" />
     <link rel="stylesheet" href="./css/comms.css" />
     <link rel="stylesheet" href="./css/interior.css" />
+    <!-- 0.3.61 — every module in the static graph, up front. The graph is 34
+         imports deep and a browser only learns the next level once it has the
+         last, so over the tunnel each level was a round trip. Generated; do not
+         edit by hand — node tools/preload.mjs rewrites it, test/preload.test.mjs
+         fails when it is stale. -->
+    <!-- preload:begin (node tools/preload.mjs) -->
+    <link rel="modulepreload" href="./js/account.js" />
+    <link rel="modulepreload" href="./js/addon-loader.js" />
+    <link rel="modulepreload" href="./js/archetypes.js" />
+    <link rel="modulepreload" href="./js/aria-pilot.js" />
+    <link rel="modulepreload" href="./js/aria.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/addons/Pass.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/blackhole.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/debris.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/fracture.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/generator.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/impact-shaders.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/impact-sim.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/impact.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/kerr.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/ores.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/rng.js" />
+    <link rel="modulepreload" href="./js/asteroidgen/tidal.js" />
+    <link rel="modulepreload" href="./js/atmoworks.js" />
+    <link rel="modulepreload" href="./js/attract.js" />
+    <link rel="modulepreload" href="./js/audio.js" />
+    <link rel="modulepreload" href="./js/audio/ambience.js" />
+    <link rel="modulepreload" href="./js/audio/cues.js" />
+    <link rel="modulepreload" href="./js/audio/graph.js" />
+    <link rel="modulepreload" href="./js/audio/voices.js" />
+    <link rel="modulepreload" href="./js/autopilot.js" />
+    <link rel="modulepreload" href="./js/avoid.js" />
+    <link rel="modulepreload" href="./js/blueprint.js" />
+    <link rel="modulepreload" href="./js/boardview.js" />
+    <link rel="modulepreload" href="./js/bodies.js" />
+    <link rel="modulepreload" href="./js/bodygen/bake.js" />
+    <link rel="modulepreload" href="./js/bodygen/baked.js" />
+    <link rel="modulepreload" href="./js/bodygen/body.js" />
+    <link rel="modulepreload" href="./js/bodygen/classes.js" />
+    <link rel="modulepreload" href="./js/bodygen/gl.js" />
+    <link rel="modulepreload" href="./js/bodygen/grower.js" />
+    <link rel="modulepreload" href="./js/boot.js" />
+    <link rel="modulepreload" href="./js/careers/careerEngine.js" />
+    <link rel="modulepreload" href="./js/careers/complexes.js" />
+    <link rel="modulepreload" href="./js/careers/effects.js" />
+    <link rel="modulepreload" href="./js/careers/index.js" />
+    <link rel="modulepreload" href="./js/careers/skills.js" />
+    <link rel="modulepreload" href="./js/cataclysm.js" />
+    <link rel="modulepreload" href="./js/chains.js" />
+    <link rel="modulepreload" href="./js/chat.js" />
+    <link rel="modulepreload" href="./js/comms/call-scripts.js" />
+    <link rel="modulepreload" href="./js/comms/call-session.js" />
+    <link rel="modulepreload" href="./js/comms/call-ui.js" />
+    <link rel="modulepreload" href="./js/comms/comms.js" />
+    <link rel="modulepreload" href="./js/company.js" />
+    <link rel="modulepreload" href="./js/console/console.js" />
+    <link rel="modulepreload" href="./js/console/kit.js" />
+    <link rel="modulepreload" href="./js/console/panels/corp-account.js" />
+    <link rel="modulepreload" href="./js/console/panels/corp-marshal.js" />
+    <link rel="modulepreload" href="./js/console/panels/corp-town.js" />
+    <link rel="modulepreload" href="./js/console/panels/corp.js" />
+    <link rel="modulepreload" href="./js/console/panels/crew-brig.js" />
+    <link rel="modulepreload" href="./js/console/panels/crew-gdb.js" />
+    <link rel="modulepreload" href="./js/console/panels/crew-gene.js" />
+    <link rel="modulepreload" href="./js/console/panels/crew-sky.js" />
+    <link rel="modulepreload" href="./js/console/panels/crew.js" />
+    <link rel="modulepreload" href="./js/console/panels/market.js" />
+    <link rel="modulepreload" href="./js/console/panels/nav.js" />
+    <link rel="modulepreload" href="./js/console/panels/ship.js" />
+    <link rel="modulepreload" href="./js/console/panels/work-drones.js" />
+    <link rel="modulepreload" href="./js/console/panels/work-fleet.js" />
+    <link rel="modulepreload" href="./js/console/panels/work-tape.js" />
+    <link rel="modulepreload" href="./js/console/panels/work.js" />
+    <link rel="modulepreload" href="./js/console/search.js" />
+    <link rel="modulepreload" href="./js/contacts.js" />
+    <link rel="modulepreload" href="./js/contracts.js" />
+    <link rel="modulepreload" href="./js/controls-test.js" />
+    <link rel="modulepreload" href="./js/corps.js" />
+    <link rel="modulepreload" href="./js/creation.js" />
+    <link rel="modulepreload" href="./js/crew.js" />
+    <link rel="modulepreload" href="./js/crew/beats.js" />
+    <link rel="modulepreload" href="./js/crew/bonds.js" />
+    <link rel="modulepreload" href="./js/crew/captive.js" />
+    <link rel="modulepreload" href="./js/crew/children.js" />
+    <link rel="modulepreload" href="./js/crew/childtalk.js" />
+    <link rel="modulepreload" href="./js/crew/deckacts.js" />
+    <link rel="modulepreload" href="./js/crew/deckgraph.js" />
+    <link rel="modulepreload" href="./js/crew/deckmind.js" />
+    <link rel="modulepreload" href="./js/crew/duties.js" />
+    <link rel="modulepreload" href="./js/crew/heritage.js" />
+    <link rel="modulepreload" href="./js/crew/hooks.js" />
+    <link rel="modulepreload" href="./js/crew/hull.js" />
+    <link rel="modulepreload" href="./js/crew/journal.js" />
+    <link rel="modulepreload" href="./js/crew/learn.js" />
+    <link rel="modulepreload" href="./js/crew/orders.js" />
+    <link rel="modulepreload" href="./js/crew/robots.js" />
+    <link rel="modulepreload" href="./js/crew/robotyard.js" />
+    <link rel="modulepreload" href="./js/crew/romance.js" />
+    <link rel="modulepreload" href="./js/crew/roster.js" />
+    <link rel="modulepreload" href="./js/crew/talk-threads.js" />
+    <link rel="modulepreload" href="./js/crew/talk-trees.js" />
+    <link rel="modulepreload" href="./js/crew/talk-wants.js" />
+    <link rel="modulepreload" href="./js/crew/talk.js" />
+    <link rel="modulepreload" href="./js/crew/talkview.js" />
+    <link rel="modulepreload" href="./js/crew/tiers.js" />
+    <link rel="modulepreload" href="./js/crew/voice-bank.js" />
+    <link rel="modulepreload" href="./js/crew/voice.js" />
+    <link rel="modulepreload" href="./js/data/chains.js" />
+    <link rel="modulepreload" href="./js/data/factions.js" />
+    <link rel="modulepreload" href="./js/data/lexicons.js" />
+    <link rel="modulepreload" href="./js/debris.js" />
+    <link rel="modulepreload" href="./js/deckhall.js" />
+    <link rel="modulepreload" href="./js/deckworks.js" />
+    <link rel="modulepreload" href="./js/defence.js" />
+    <link rel="modulepreload" href="./js/dockwork.js" />
+    <link rel="modulepreload" href="./js/droneforge.js" />
+    <link rel="modulepreload" href="./js/drones/board.js" />
+    <link rel="modulepreload" href="./js/drones/npcdrones.js" />
+    <link rel="modulepreload" href="./js/drones/ops.js" />
+    <link rel="modulepreload" href="./js/drones/roles.js" />
+    <link rel="modulepreload" href="./js/dronespec.js" />
+    <link rel="modulepreload" href="./js/economy.js" />
+    <link rel="modulepreload" href="./js/engine.js" />
+    <link rel="modulepreload" href="./js/fabricate.js" />
+    <link rel="modulepreload" href="./js/fabyard.js" />
+    <link rel="modulepreload" href="./js/family.js" />
+    <link rel="modulepreload" href="./js/field.js" />
+    <link rel="modulepreload" href="./js/fleet.js" />
+    <link rel="modulepreload" href="./js/gdb.js" />
+    <link rel="modulepreload" href="./js/generate.js" />
+    <link rel="modulepreload" href="./js/genome/behavior-graph.js" />
+    <link rel="modulepreload" href="./js/genome/context.js" />
+    <link rel="modulepreload" href="./js/genome/genome-256.js" />
+    <link rel="modulepreload" href="./js/genome/spacer.js" />
+    <link rel="modulepreload" href="./js/gnn.js" />
+    <link rel="modulepreload" href="./js/holdview.js" />
+    <link rel="modulepreload" href="./js/holefx.js" />
+    <link rel="modulepreload" href="./js/holes.js" />
+    <link rel="modulepreload" href="./js/hud.js" />
+    <link rel="modulepreload" href="./js/hullpool.js" />
+    <link rel="modulepreload" href="./js/hullspec.js" />
+    <link rel="modulepreload" href="./js/icework.js" />
+    <link rel="modulepreload" href="./js/impactfx.js" />
+    <link rel="modulepreload" href="./js/impactors.js" />
+    <link rel="modulepreload" href="./js/impacts.js" />
+    <link rel="modulepreload" href="./js/input.js" />
+    <link rel="modulepreload" href="./js/insurance.js" />
+    <link rel="modulepreload" href="./js/interior/boarding.js" />
+    <link rel="modulepreload" href="./js/interior/deckplan.js" />
+    <link rel="modulepreload" href="./js/interior/interior.js" />
+    <link rel="modulepreload" href="./js/map.js" />
+    <link rel="modulepreload" href="./js/materials.js" />
+    <link rel="modulepreload" href="./js/mission/run.js" />
+    <link rel="modulepreload" href="./js/mission/script.js" />
+    <link rel="modulepreload" href="./js/mission/tradeops.js" />
+    <link rel="modulepreload" href="./js/names.js" />
+    <link rel="modulepreload" href="./js/naming.js" />
+    <link rel="modulepreload" href="./js/net.js" />
+    <link rel="modulepreload" href="./js/npc/battles.js" />
+    <link rel="modulepreload" href="./js/npc/bay.js" />
+    <link rel="modulepreload" href="./js/npc/bounty.js" />
+    <link rel="modulepreload" href="./js/npc/brain.js" />
+    <link rel="modulepreload" href="./js/npc/captain.js" />
+    <link rel="modulepreload" href="./js/npc/chat.js" />
+    <link rel="modulepreload" href="./js/npc/combat.js" />
+    <link rel="modulepreload" href="./js/npc/cradle.js" />
+    <link rel="modulepreload" href="./js/npc/crewfx.js" />
+    <link rel="modulepreload" href="./js/npc/flight.js" />
+    <link rel="modulepreload" href="./js/npc/flow.js" />
+    <link rel="modulepreload" href="./js/npc/ground.js" />
+    <link rel="modulepreload" href="./js/npc/lanes.js" />
+    <link rel="modulepreload" href="./js/npc/npccrew.js" />
+    <link rel="modulepreload" href="./js/npc/reports.js" />
+    <link rel="modulepreload" href="./js/npc/rogues.js" />
+    <link rel="modulepreload" href="./js/npc/security.js" />
+    <link rel="modulepreload" href="./js/npc/speech.js" />
+    <link rel="modulepreload" href="./js/npc/traffic.js" />
+    <link rel="modulepreload" href="./js/perf.js" />
+    <link rel="modulepreload" href="./js/pilot.js" />
+    <link rel="modulepreload" href="./js/postfx.js" />
+    <link rel="modulepreload" href="./js/probes.js" />
+    <link rel="modulepreload" href="./js/profile.js" />
+    <link rel="modulepreload" href="./js/races.js" />
+    <link rel="modulepreload" href="./js/recorder.js" />
+    <link rel="modulepreload" href="./js/refityard.js" />
+    <link rel="modulepreload" href="./js/repair.js" />
+    <link rel="modulepreload" href="./js/robotgen/attach.js" />
+    <link rel="modulepreload" href="./js/robotgen/build.js" />
+    <link rel="modulepreload" href="./js/robotgen/data/bom.js" />
+    <link rel="modulepreload" href="./js/robotgen/data/catalog-base.js" />
+    <link rel="modulepreload" href="./js/robotgen/data/catalog.js" />
+    <link rel="modulepreload" href="./js/robotgen/data/parts.js" />
+    <link rel="modulepreload" href="./js/robotgen/fly.js" />
+    <link rel="modulepreload" href="./js/robotgen/kit.js" />
+    <link rel="modulepreload" href="./js/robotgen/parts.js" />
+    <link rel="modulepreload" href="./js/robotgen/physics.js" />
+    <link rel="modulepreload" href="./js/robotgen/spec.js" />
+    <link rel="modulepreload" href="./js/rockfx.js" />
+    <link rel="modulepreload" href="./js/rockgen.js" />
+    <link rel="modulepreload" href="./js/scale.js" />
+    <link rel="modulepreload" href="./js/secbadge.js" />
+    <link rel="modulepreload" href="./js/seclevel.js" />
+    <link rel="modulepreload" href="./js/ship.js" />
+    <link rel="modulepreload" href="./js/shipcost.js" />
+    <link rel="modulepreload" href="./js/shipdb.js" />
+    <link rel="modulepreload" href="./js/shipforge.js" />
+    <link rel="modulepreload" href="./js/shipgen/anim.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/StarshipBuilder.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/details.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/docking.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/drives.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/faces.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/glazing.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/hull.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/placement.js" />
+    <link rel="modulepreload" href="./js/shipgen/builder/weapons.js" />
+    <link rel="modulepreload" href="./js/shipgen/core/geometry.js" />
+    <link rel="modulepreload" href="./js/shipgen/core/rng.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/bom.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/00-identity.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/01-propulsion.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/02-fluids.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/03-power.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/04-epds.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/05-structure.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/06-materials.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/07-thermal.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/08-computing.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/09-gnc.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/10-comms.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/11-sensors.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/12-atmosphere.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/13-water-waste-food.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/14-habitation.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/15-eva-docking.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/16-robotics.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/17-cargo.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/18-safety-defense.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/19-manufacturing.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/20-standards.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/_part.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/catalog/index.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/classes.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/drives.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/environment.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/flight.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/loadouts.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/materials.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/palettes.js" />
+    <link rel="modulepreload" href="./js/shipgen/data/weapons.js" />
+    <link rel="modulepreload" href="./js/shipgen/generate.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/_common.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/acs.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/docking.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/extra.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/index.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/industrial.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/internal.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/power.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/sensors.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/structure.js" />
+    <link rel="modulepreload" href="./js/shipgen/prefabs/weapons.js" />
+    <link rel="modulepreload" href="./js/sim.js" />
+    <link rel="modulepreload" href="./js/sites.js" />
+    <link rel="modulepreload" href="./js/speech/npc-speech.js" />
+    <link rel="modulepreload" href="./js/staffcare.js" />
+    <link rel="modulepreload" href="./js/stafflife.js" />
+    <link rel="modulepreload" href="./js/staffline.js" />
+    <link rel="modulepreload" href="./js/stationclock.js" />
+    <link rel="modulepreload" href="./js/stationdeck.js" />
+    <link rel="modulepreload" href="./js/stationgen/anim.js" />
+    <link rel="modulepreload" href="./js/stationgen/builder/StationBuilder.js" />
+    <link rel="modulepreload" href="./js/stationgen/builder/frames.js" />
+    <link rel="modulepreload" href="./js/stationgen/builder/hangar.js" />
+    <link rel="modulepreload" href="./js/stationgen/builder/hull.js" />
+    <link rel="modulepreload" href="./js/stationgen/builder/placement.js" />
+    <link rel="modulepreload" href="./js/stationgen/core/geometry.js" />
+    <link rel="modulepreload" href="./js/stationgen/core/rng.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/archetypes.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/bom.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/doctrine.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/materials.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/modules.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/parts.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/styles.js" />
+    <link rel="modulepreload" href="./js/stationgen/data/tiers.js" />
+    <link rel="modulepreload" href="./js/stationgen/generate.js" />
+    <link rel="modulepreload" href="./js/stationgen/index.js" />
+    <link rel="modulepreload" href="./js/stationgen/prefabs/forms.js" />
+    <link rel="modulepreload" href="./js/stationgen/prefabs/modules.js" />
+    <link rel="modulepreload" href="./js/stationlife.js" />
+    <link rel="modulepreload" href="./js/stations.js" />
+    <link rel="modulepreload" href="./js/stationworks.js" />
+    <link rel="modulepreload" href="./js/stationyard.js" />
+    <link rel="modulepreload" href="./js/store.js" />
+    <link rel="modulepreload" href="./js/textures.js" />
+    <link rel="modulepreload" href="./js/traderoutes.js" />
+    <link rel="modulepreload" href="./js/turrets.js" />
+    <link rel="modulepreload" href="./js/tutorial-core.js" />
+    <link rel="modulepreload" href="./js/tutorial.js" />
+    <link rel="modulepreload" href="./js/ui/charts.js" />
+    <link rel="modulepreload" href="./js/ui/chatbox.js" />
+    <link rel="modulepreload" href="./js/ui/coverage.js" />
+    <link rel="modulepreload" href="./js/ui/dockboot.js" />
+    <link rel="modulepreload" href="./js/ui/fullscreen.js" />
+    <link rel="modulepreload" href="./js/ui/glyphs.js" />
+    <link rel="modulepreload" href="./js/upgrades.js" />
+    <link rel="modulepreload" href="./js/vendor/stellar-names/classified-names.js" />
+    <link rel="modulepreload" href="./js/vendor/stellar-names/index.js" />
+    <link rel="modulepreload" href="./js/version.js" />
+    <link rel="modulepreload" href="./js/warpfx.js" />
+    <link rel="modulepreload" href="./js/worldsync.js" />
+    <link rel="modulepreload" href="./vendor/three.core.min.js" />
+    <link rel="modulepreload" href="./vendor/three.module.min.js" />
+    <!-- preload:end -->
   </head>
   <body>
     <h1 class="sr-only">Living Galaxy — Ad Astrum: a first-person solar system</h1>
@@ -80,6 +395,34 @@
         <p class="build" id="build-line"></p>
       </section>
     </div>
+    <!-- 0.3.61 — FLY AS from the first paint. The button used to wait for the
+         whole module graph; the record it needs is two storage reads. A tap
+         before the game is up is held (window.__lgFlyQueued) and js/hud.js
+         honours it the moment it mounts. Once booted this handler stands down. -->
+    <script>
+      (function () {
+        try {
+          var sv = JSON.parse(localStorage.getItem("lgaa-save-v1") || "null");
+          var rec = JSON.parse(localStorage.getItem("lgaa.pilot.v1") || "null");
+          if (!sv || sv.version !== 2 || !sv.callsign || !rec || !rec.character || !rec.character.careers) return;
+          var btn = document.getElementById("btn-continue");
+          var make = document.getElementById("btn-create");
+          var call = String(sv.callsign).slice(0, 18);
+          btn.hidden = false;
+          btn.textContent = "Fly as " + call;
+          make.textContent = "New pilot";
+          make.classList.remove("btn-accent");
+          make.classList.add("btn-ghost");
+          document.getElementById("callsign").value = call;
+          btn.addEventListener("click", function () {
+            if (window.__lgBooted) return;
+            window.__lgFlyQueued = true;
+            btn.classList.add("btn-queued");
+            btn.textContent = "Fly as " + call + " — spooling up…";
+          });
+        } catch (e) { /* storage blocked: the game paints the card itself */ }
+      })();
+    </script>
 
     <!-- Pilot creation. Surfaces stream in behind this. -->
     <div id="create" class="create hidden">

@@ -107,7 +107,7 @@ import { resetIcework, stepIcework } from "./icework.js";
 import { applyTerraformSnapshot, resetAtmoWorks, stepAtmoWorks, terraformSnapshot } from "./atmoworks.js";
 import { autopilot, disengageAutopilot, engageAutopilot, tickAutopilot } from "./autopilot.js";
 import { TRACTOR_R, TRACTOR_V } from "./stations.js";
-import { releaseBuilt } from "./stationyard.js";
+import { releaseBuilt, carryBuilt, dropCarried } from "./stationyard.js";
 import { eatRocks, inBelt, nearbyRocks, resetField } from "./field.js";
 import { threatTo, avoidAim, avoidLevel, deliberate, surfaceOnly, AVOID } from "./avoid.js";
 import { tickContacts, resetContacts } from "./contacts.js";
@@ -920,6 +920,9 @@ export function hydrateProgress() {
 }
 
 export function loadSky(seed) {
+  /* 0.3.61 — the same sky again (the menu grew it as a backdrop; FLY AS or a
+   * launch grows it for real): the ports are the same hulls, so hold them */
+  if (sim.skySeed === seed && stations.length) carryBuilt(stations);
   sim.skySeed = seed;
   const sys = applySystem(generateSystem(seed));
   useGameStore.getState().patchHud({
@@ -942,6 +945,7 @@ export function loadSky(seed) {
   bindDebris(sim);
   resetStations();
   buildStations(sys, rngFromSeed(`${seed}:ports`), String(seed));
+  dropCarried();
   stepStations(sim.time);
   buildCorps(rngFromSeed(`${seed}:corps`));
   /* 0.3.42 — standing is the pilot's, per sky: the corps are regrown from the

@@ -713,6 +713,14 @@ export function mountHud() {
 
   /* The seed IS the sky. Sol is the shared one; anything else grows its own. */
   let seedKey = initialRoom && initialRoom !== PUBLIC_ROOM ? sanitizeRoom(initialRoom) : PUBLIC_ROOM;
+  /* 0.3.61 — a returning pilot's backdrop is the sky FLY AS will take them to.
+   * It used to be Sol regardless, so a pilot last in a private sky had the
+   * menu grow Sol (ports, surfaces) and then grow their own sky from nothing
+   * on the tap. */
+  if (!initialRoom) {
+    const sv0 = loadSave();
+    if (sv0.lastSky && sv0.callsign && loadPilot()) seedKey = sv0.lastSky === PUBLIC_ROOM ? PUBLIC_ROOM : sanitizeRoom(sv0.lastSky);
+  }
 
   $("callsign").value = store.getState().callsign;
 
@@ -822,6 +830,14 @@ export function mountHud() {
     creation.show();
   });
   if (globalThis.window?.__lg) window.__lg.start = { paintStart, continueRun: () => contBtn?.click() };
+  /* 0.3.61 — index.html paints FLY AS from storage before a module has
+   * loaded, and a tap in that window is held rather than lost. It is honoured
+   * here, before the menu's preview sky is grown, so the tap costs one sky
+   * build instead of two. */
+  if (globalThis.window?.__lgFlyQueued && contBtn && !contBtn.hidden) {
+    window.__lgFlyQueued = false;
+    queueMicrotask(() => contBtn.click());
+  }
 
   /* --- pan stick: this is the nose --- */
   bindPad(

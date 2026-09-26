@@ -71,12 +71,20 @@ function dirOf(obj, x, y, z, out = new THREE.Vector3()) { worldOf(obj, x, y, z, 
 export function ensureBuilt(st, skySeed = st.skySeed ?? "sky") {
   if (st.gen) return st.gen;
   const cfg = stationConfig(st, skySeed);
-  const g = buildStation(cfg);
+  const key = JSON.stringify(cfg);
+  /* 0.3.61 — the same sky loaded again (the menu's preview, then FLY AS) hands
+   * its hulls across instead of growing every port a second time */
+  let g = carried.get(key);
+  if (g) carried.delete(key);
+  else g = { ...buildStation(cfg), key };
   const root = g.root;
+  /* a held hull still hangs off the last engine's holder, out in the scene;
+   * everything below is measured in the hull's own frame, so it comes off first */
+  root.parent?.remove(root);
   root.name = `station:${st.id}`;
   root.scale.setScalar(SIM_SCALE);
   root.updateMatrixWorld(true);
-  st.gen = { ...g, cfg };
+  st.gen = g.cfg === cfg ? g : { ...g, cfg };
   st.skySeed = skySeed;
   /* the hull's real size takes over from the roll that picked the tier */
   st.radius = Math.max(12, Math.max(g.stats.size.x, g.stats.size.y, g.stats.size.z) * 0.5 * SIM_SCALE);
@@ -124,6 +132,26 @@ export function orientStation(st, yaw) {
   st.yaw = yaw;
   st.portVersion = (st.portVersion ?? 0) + 1;
 }
+
+/* 0.3.61 — hulls held across a reload of the same sky, keyed by their full
+ * build config. A port is a pure function of that config, and nothing in the
+ * game edits a built hull (only its animation state moves), so a held hull is
+ * the hull a fresh build would make. Anything not claimed is released. */
+const carried = new Map();
+/** Hold a roster's hulls for the next build of the same sky; the roster lets go of them. */
+export function carryBuilt(list) {
+  for (const st of list) {
+    if (!st.gen) continue;
+    if (st.gen.key) carried.set(st.gen.key, st.gen); else releaseBuilt(st);
+    st.gen = null;
+  }
+}
+/** Release whatever a reload did not claim. */
+export function dropCarried() {
+  for (const g of carried.values()) { try { releaseStation(g); } catch { /* already gone */ } }
+  carried.clear();
+}
+export const carriedCount = () => carried.size;
 
 export function releaseBuilt(st) {
   if (!st.gen) return;

@@ -874,6 +874,21 @@ export function mountGame(canvas) {
    * each body gets its real skin over the following frames. */
   const texQueue = [];
   let texTotal = 0;
+  /* 0.3.61 — painted skins outlive a rebuild of the SAME sky. The menu grows
+   * the backdrop, FLY AS grows the sky again, and every world used to come up
+   * flat and be repainted one a frame (100–300 ms each on a phone) all over
+   * again. A skin is a pure function of its arguments, so it is kept, marked
+   * `keep` so disposeObject passes it by, and let go when the sky changes. */
+  const texCache = new Map();
+  let texCacheSky = null;
+  const texArgs = (b) => [b.kind, b.color, b.id.length * 17 + b.orbit * 0.003, b.radius > 1400 ? 384 : 256, b.arch];
+  const texKey = (b) => { const a = texArgs(b); return `${a[0]}|${a[1]}|${a[2]}|${a[3]}|${a[4] ? JSON.stringify(a[4]) : ""}`; };
+  function texCacheFor(sky) {
+    if (sky === texCacheSky) return;
+    for (const t of texCache.values()) t.dispose();
+    texCache.clear();
+    texCacheSky = sky;
+  }
 
   /* Deterministic per-vertex jitter, hashed off the QUANTIZED surface normal so
    * the sphere's UV seam (duplicated vertices at the same position) jags the
@@ -980,8 +995,12 @@ export function mountGame(canvas) {
       color: hexColor(b.arch?.palette?.[2] ?? b.color),
     });
     /* a rebuild hands the painted skin across: craters are vertex colour, the surface is the same */
+    const cachedMap = keepMap ? null : texCache.get(texKey(b));
     if (keepMap) {
       mat.map = keepMap;
+    } else if (cachedMap) {
+      mat.map = cachedMap;
+      mat.color.setRGB(1, 1, 1);
     } else {
       texQueue.push({ b, mat });
       texTotal = Math.max(texTotal, texQueue.length);
@@ -1113,6 +1132,7 @@ export function mountGame(canvas) {
 
   function rebuildWorld() {
     clearWorld();
+    texCacheFor(sim.skySeed);
     const star = starBody();
     if (star) {
       applyStar(star);
@@ -2678,13 +2698,14 @@ export function mountGame(canvas) {
       const job = texQueue.shift();
       sim.texLoad = { done: texTotal - texQueue.length, total: texTotal };
       if (job.mat && !job.mat.__disposed) {
-        job.mat.map = makePlanetTexture(
-          job.b.kind,
-          job.b.color,
-          job.b.id.length * 17 + job.b.orbit * 0.003,
-          job.b.radius > 1400 ? 384 : 256,
-          job.b.arch,
-        );
+        const key = texKey(job.b);
+        let map = texCache.get(key);
+        if (!map) {
+          map = makePlanetTexture(...texArgs(job.b));
+          map.userData.keep = true;
+          texCache.set(key, map);
+        }
+        job.mat.map = map;
         job.mat.color.setRGB(1, 1, 1);
         job.mat.needsUpdate = true;
       }

@@ -11,7 +11,7 @@
  */
 export const NAME = "Living Galaxy";
 export const SUBTITLE = "Ad Astrum";
-export const VERSION = "0.3.60";
+export const VERSION = "0.3.61";
 
 /** "Living Galaxy — Ad Astrum" — the full mark, for a tab title or a banner. */
 export const FULL_NAME = `${NAME} — ${SUBTITLE}`;
