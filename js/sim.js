@@ -3197,7 +3197,7 @@ export function worldSnapshot() {
   return { v: 1, time: sim.time, bodies, ports, lost: [...(sim.lostPorts ?? [])], impactors: impactorWire(), holes: holeWire(), trafficDown: { ...trafficDown } };
 }
 
-export function applyWorldSnapshot(snap) {
+export function applyWorldSnapshot(snap, { includeLive = true } = {}) {
   if (!snap || snap.v !== 1) return false;
   for (const [id, w] of Object.entries(snap.bodies ?? {})) {
     const b = bodyById(id);
@@ -3227,12 +3227,12 @@ export function applyWorldSnapshot(snap) {
     if (!st) continue;
     st.guards = w.guards; st.claimed = w.claimed; st.hostile = w.hostile;
   }
-  if (snap.impactors) adoptImpactors(snap.impactors);
+  if (includeLive && snap.impactors) adoptImpactors(snap.impactors);
   if (snap.holes) {
     for (const w of snap.holes) if (w.kind === "remnant" && w.starId) { const st = bodyById(w.starId); if (st) st.collapsed = true; }
-    adoptHoles(snap.holes);
+    if (includeLive) adoptHoles(snap.holes);
   }
-  for (const [id, until] of Object.entries(snap.trafficDown ?? {})) trafficDown[id] = until;
+  if (includeLive) for (const [id, until] of Object.entries(snap.trafficDown ?? {})) trafficDown[id] = until;
   return true;
 }
 
@@ -4645,3 +4645,14 @@ export function wireControlsTest() {
 }
 
 export { setInjectedKeys, setInjectedPan };
+
+/** Dedicated service: advance the existing world directors without a player flight loop. */
+export function tickSolHost(dt) {
+  const d = Math.min(Math.max(dt, 0), 0.1);
+  sim.phase = "play";
+  sim.timeScale = 1;
+  sim.worldAuthority = true;
+  sim.time += d;
+  sim.wall += d;
+  stepWorld(d);
+}

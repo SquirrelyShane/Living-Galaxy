@@ -1,3 +1,11 @@
+# 0.3.64 — persistent Sol sync fix
+
+Apply this changed-files-only patch over 0.3.63. See [PATCH-0.3.64.md](PATCH-0.3.64.md) for deployment and tests.
+
+# Persistent Sol update — 0.3.63
+
+Read [PERSISTENT-SOL.md](PERSISTENT-SOL.md) to install the dedicated Node host and matching website 0.2.3. This package updates your supplied 0.3.62 source.
+
 # Living Galaxy — Ad Astrum
 
 **Version 0.3**

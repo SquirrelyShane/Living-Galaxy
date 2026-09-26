@@ -59,6 +59,9 @@ NO_COLOR=1 keeps the console but drops the escapes.
 from __future__ import annotations
 
 import atexit
+import hashlib
+import hmac
+import sqlite3
 import json
 import os
 import re
@@ -67,7 +70,7 @@ import threading
 import time
 from collections import deque
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse, unquote
 
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -954,11 +957,78 @@ def _referer_path(ref: str | None) -> str:
     return ref
 
 
+# Optional dedicated Sol authority. Enabled only by the installer/environment.
+SOL_HOST_ID = "__sol_authority__"
+SOL_TOKEN = os.environ.get("SOL_HOST_TOKEN", "")
+SOL_DB = os.environ.get("SOL_STATE_DB", os.path.join(ROOT, "sol-state.sqlite3"))
+
+
+def world_revision(world):
+    """Structural world changes only; checkpoint time/live motion/cooling are not revisions."""
+    if not isinstance(world, dict):
+        return None
+    fields = ("integrity", "scarred", "radius", "shattered", "terraform", "atmo", "nova", "ring")
+    crater_fields = ("nx", "ny", "nz", "r", "depth0", "rough", "seed")
+    bodies = {}
+    for ident, body in world.get("bodies", {}).items():
+        projected = {key: body.get(key) for key in fields}
+        ring = body.get("ring")
+        projected["ring"] = {key: ring.get(key) for key in ("inner", "outer", "roche", "born")} if isinstance(ring, dict) else None
+        projected["craters"] = [{key: crater.get(key) for key in crater_fields} for crater in body.get("craters", [])]
+        # A thermal-only body can disappear from the sparse snapshot as it cools.
+        if (projected["integrity"] in (None, 1) and not projected["scarred"]
+                and not projected["shattered"] and not projected["terraform"]
+                and not projected["nova"] and not projected["ring"] and not projected["craters"]):
+            continue
+        bodies[ident] = projected
+    shape = {"bodies": bodies, "ports": world.get("ports", {}), "lost": sorted(world.get("lost", []))}
+    return hashlib.sha256(json.dumps(shape, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+class SolStore:
+    def __init__(self, path):
+        self.path = path
+        with self.connect() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS checkpoint(id INTEGER PRIMARY KEY CHECK(id=1), payload TEXT NOT NULL)")
+            db.execute("CREATE TABLE IF NOT EXISTS broadcasts(key TEXT PRIMARY KEY, received REAL NOT NULL, payload TEXT NOT NULL)")
+
+    def connect(self):
+        return sqlite3.connect(self.path, timeout=10)
+
+    def load(self):
+        with self.connect() as db:
+            row = db.execute("SELECT payload FROM checkpoint WHERE id=1").fetchone()
+        return json.loads(row[0]) if row else None
+
+    def save(self, record):
+        # World checkpoint and news commit together; a killed process cannot leave half a save.
+        with self.connect() as db:
+            db.execute("INSERT OR REPLACE INTO checkpoint VALUES(1,?)", (json.dumps(record),))
+            for item in record["world"].get("gnn", [])[-80:]:
+                if not isinstance(item, dict) or not isinstance(item.get("title"), str) or not isinstance(item.get("body"), str):
+                    continue
+                post = {"title": item["title"][:180], "body": item["body"][:1600], "desk": str(item.get("desk", "news"))[:24], "publishedAt": item.get("publishedAt", 0), "at": item.get("at", 0)}
+                key = hashlib.sha256(json.dumps(post, sort_keys=True).encode()).hexdigest()
+                db.execute("INSERT OR IGNORE INTO broadcasts VALUES(?,?,?)", (key, time.time(), json.dumps(post)))
+            db.execute("DELETE FROM broadcasts WHERE key NOT IN (SELECT key FROM broadcasts ORDER BY received DESC, rowid DESC LIMIT 2000)")
+
+    def news(self):
+        with self.connect() as db:
+            rows = db.execute("SELECT payload FROM broadcasts ORDER BY received DESC, rowid DESC LIMIT 80").fetchall()
+        return [json.loads(row[0]) for row in rows]
+
+
 class Relay:
     def __init__(self) -> None:
         self.lock = threading.Lock()
         self.rooms: dict[str, dict] = {}
         self.swept = time.time()
+        self.sol_store = SolStore(SOL_DB) if SOL_TOKEN else None
+        if self.sol_store:
+            saved = self.sol_store.load()
+            if saved:
+                room = self._room("sol")
+                room.update(world=saved["world"], wseq=saved["wseq"], world_at=saved["at"], world_by=SOL_HOST_ID, born=saved["born"], host_state=saved.get("hostState", {}), world_revision=world_revision(saved["world"]))
 
     def _room(self, name: str) -> dict:
         r = self.rooms.get(name)
@@ -966,7 +1036,7 @@ class Relay:
             # born: when this sky first had a pilot in it — the shared clock's zero.
             # world: the host's last snapshot of everything that has happened to the sky.
             # last: the last send/poll/world write, so an abandoned room can be forgotten.
-            r = {"states": {}, "msgs": deque(maxlen=MSG_KEEP), "seq": 0, "born": time.time(), "world": None, "wseq": 0, "world_at": 0.0, "last": time.time()}
+            r = {"states": {}, "msgs": deque(maxlen=MSG_KEEP), "seq": 0, "born": time.time(), "world": None, "wseq": 0, "world_at": 0.0, "world_revision": None, "last": time.time()}
             self.rooms[name] = r
         return r
 
@@ -977,7 +1047,7 @@ class Relay:
         self.swept = now
         dead = [
             name for name, r in self.rooms.items()
-            if now - r["last"] > ROOM_TTL and not any(now - v["at"] <= STATE_TTL for v in r["states"].values())
+            if not (SOL_TOKEN and name == "sol") and now - r["last"] > ROOM_TTL and not any(now - v["at"] <= STATE_TTL for v in r["states"].values())
         ]
         for name in dead:
             del self.rooms[name]
@@ -1012,7 +1082,7 @@ class Relay:
             states = {k: v["data"] for k, v in r["states"].items() if k != me}
             # since < 0 is a fresh join: hand back the cursor only, never the ring
             msgs = [] if since < 0 else [m for m in r["msgs"] if m["seq"] > since and m["from"] != me and (m["to"] in (None, "", me))]
-            host = min(r["states"].items(), key=lambda kv: kv[1]["since"])[0] if r["states"] else None
+            host = SOL_HOST_ID if SOL_TOKEN and room == "sol" else (min(r["states"].items(), key=lambda kv: kv[1]["since"])[0] if r["states"] else None)
             return {
                 "now": now,
                 "seq": r["seq"],
@@ -1022,6 +1092,8 @@ class Relay:
                 "pilots": len(r["states"]),
                 "host": host,
                 "wseq": r["wseq"],
+                "worldRevision": r.get("world_revision"),
+                "solTime": r["world"].get("time", 0) + min(5, max(0, now - r["world_at"])) if SOL_TOKEN and room == "sol" and r["world"] else None,
             }
 
     def put_world(self, room: str, sender: str, world) -> int:
@@ -1029,6 +1101,7 @@ class Relay:
         with self.lock:
             r = self._room(room)
             r["world"] = world
+            r["world_revision"] = world_revision(world) if SOL_TOKEN and room == "sol" else None
             r["wseq"] += 1
             r["world_at"] = time.time()
             r["last"] = r["world_at"]
@@ -1038,7 +1111,26 @@ class Relay:
     def get_world(self, room: str) -> dict:
         with self.lock:
             r = self._room(room)
-            return {"wseq": r["wseq"], "world": r["world"], "at": r["world_at"], "by": r.get("world_by"), "born": r["born"], "now": time.time()}
+            return {"wseq": r["wseq"], "world": r["world"], "at": r["world_at"], "by": r.get("world_by"), "worldRevision": r.get("world_revision"), "born": r["born"], "now": time.time()}
+
+    def save_sol(self, world, host_state):
+        with self.lock:
+            r = self._room("sol")
+            stamp = time.time()
+            record = {"world": world, "hostState": host_state, "wseq": r["wseq"] + 1, "at": stamp, "born": r["born"]}
+            self.sol_store.save(record)
+            r.update(world=world, host_state=host_state, wseq=record["wseq"], world_at=stamp, last=stamp, world_by=SOL_HOST_ID, world_revision=world_revision(world))
+            return record["wseq"]
+
+    def resume_sol(self):
+        with self.lock:
+            r = self._room("sol")
+            return {"world": r["world"], "hostState": r.get("host_state", {}), "wseq": r["wseq"]}
+
+    def sol_news(self):
+        with self.lock:
+            r = self._room("sol")
+            return {"room": "sol", "at": r["world_at"], "broadcasts": self.sol_store.news() if self.sol_store else [], "persistent": bool(self.sol_store)}
 
     def describe(self) -> list:
         """One row per room for the console's STATISTICS screen.
@@ -1434,6 +1526,7 @@ class Handler(SimpleHTTPRequestHandler):
         body = json.dumps(obj).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -1447,6 +1540,14 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _get(self):
         u = urlparse(self.path)
+        if u.path == "/net/sol-host":
+            if not self._sol_auth():
+                return self._json(403, {"error": "host authentication required"})
+            return self._json(200, RELAY.resume_sol())
+        if u.path == "/net/gnn":
+            return self._json(200, RELAY.sol_news())
+        if "sol-state" in unquote(u.path) or os.path.normpath(unquote(u.path)).startswith("/host/"):
+            return self._json(404, {"error": "not public"})
         if u.path == "/net/poll":
             q = parse_qs(u.query)
             room = (q.get("room") or ["sol"])[0][:32]
@@ -1477,6 +1578,9 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(200, {"gdb": 1, "entries": GDB.all(room)})
         return super().do_GET()
 
+    def _sol_auth(self):
+        return bool(SOL_TOKEN) and hmac.compare_digest(self.headers.get("X-Sol-Token", ""), SOL_TOKEN)
+
     def do_POST(self):
         self._t0 = time.time()
         try:
@@ -1486,6 +1590,22 @@ class Handler(SimpleHTTPRequestHandler):
 
     def _post(self):
         u = urlparse(self.path)
+        if u.path == "/net/sol-host":
+            if not self._sol_auth():
+                return self._json(403, {"error": "host authentication required"})
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if not 0 < length <= 8 * 1024 * 1024:
+                    return self._json(413, {"error": "checkpoint size"})
+                body = json.loads(self.rfile.read(length))
+                world = body.get("world")
+                state = body.get("hostState", {})
+                if not isinstance(world, dict) or world.get("v") != 1 or not isinstance(state, dict):
+                    return self._json(400, {"error": "invalid checkpoint"})
+                return self._json(200, {"wseq": RELAY.save_sol(world, state)})
+            except (ValueError, TypeError, AttributeError):
+                return self._json(400, {"error": "invalid checkpoint"})
+
         if u.path == "/llm/proxy":
             # Pass-through to a llama.cpp on this machine, so the browser needs
             # no CORS flag on llama-server. Loopback only, on purpose.
@@ -1551,6 +1671,8 @@ class Handler(SimpleHTTPRequestHandler):
                 sender = str(body.get("from", ""))[:48]
                 if not sender or not isinstance(body.get("world"), dict):
                     return self._json(400, {"error": "from and world required"})
+                if SOL_TOKEN and room == "sol":
+                    return self._json(403, {"error": "Sol is managed by its dedicated host"})
                 STATS.note("worlds")
                 return self._json(200, {"ok": True, "wseq": RELAY.put_world(room, sender, body["world"])})
             except (ValueError, UnicodeDecodeError) as e:
@@ -1571,7 +1693,12 @@ class Handler(SimpleHTTPRequestHandler):
             to = str(to)[:48] if to else None
             if not sender:
                 return self._json(400, {"error": "from required"})
-            seq = RELAY.send(room, sender, kind, to, msg.get("data"))
+            data = msg.get("data")
+            authority_message = isinstance(data, dict) and data.get("t") in ("wstate", "strike", "rockhit")
+            if SOL_TOKEN and room == "sol" and (sender == SOL_HOST_ID or authority_message):
+                if sender != SOL_HOST_ID or not self._sol_auth():
+                    return self._json(403, {"error": "Sol authority required"})
+            seq = RELAY.send(room, sender, kind, to, data)
             return self._json(200, {"ok": True, "seq": seq})
         except (ValueError, UnicodeDecodeError) as e:
             return self._json(400, {"error": str(e)})
@@ -1625,7 +1752,7 @@ def main():
         for ip in LAN_IPS:
             print(f"        http://{ip}:{PORT}/   (same Wi-Fi)")
         print(f"Logs:   {os.path.join('logs', LOG.name)}   (this run; LOG_POLLS=1 for raw poll lines, LOG_KEEP to change retention)")
-        print("Open a URL in your browser. Ctrl+C to stop.")
+        print("Open a URL in your browser. Ctrl+C to stop.", flush=True)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

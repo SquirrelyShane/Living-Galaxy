@@ -61,6 +61,7 @@ export const worldsync = {
   applied: false,      // have we applied the host's snapshot this join
   pending: false,
   wseqSeen: 0,
+  revisionSeen: null,
   lastState: 0,
   lastPush: 0,
   lastImpactAt: -1,
@@ -138,6 +139,16 @@ export function adoptHulls(wire) {
 }
 
 let mounted = false;
+let joinGeneration = 0;
+let liveStateSeen = false;
+let bodySignatures = new Map();
+
+function bodySignature(body) {
+  const fields = ["integrity", "scarred", "radius", "shattered", "terraform", "atmo", "nova"];
+  const craters = (body.craters ?? []).map(c => [c.nx, c.ny, c.nz, c.r, c.depth0, c.rough, c.seed]);
+  const ring = body.ring ? [body.ring.inner, body.ring.outer, body.ring.roche, body.ring.born] : null;
+  return JSON.stringify([fields.map(key => body[key] ?? null), ring, craters]);
+}
 
 export function mountWorldSync() {
   if (mounted) return;
@@ -148,6 +159,10 @@ export function mountWorldSync() {
 
 /** Call before connectNet on each launch. */
 export function resetWorldSync() {
+  joinGeneration++;
+  liveStateSeen = false;
+  bodySignatures.clear();
+  worldsync.revisionSeen = null;
   worldsync.host = true;
   worldsync.applied = false;
   worldsync.pending = false;
@@ -175,31 +190,48 @@ function setHost(on) {
 }
 
 function handleRoom(info) {
+  if (info.offline && net.room === "sol" && net.hostId === "__sol_authority__") { setHost(false); return; }
   if (info.offline) {
     setHost(true);
     worldsync.applied = false;
     return;
   }
   setHost(info.host);
-  if (!info.host && !worldsync.applied && info.wseq > 0 && !worldsync.pending) pull();
+  if (!info.host && info.wseq > 0 && !worldsync.pending && (!worldsync.applied || (net.hostId === "__sol_authority__" && typeof info.worldRevision === "string" && info.worldRevision !== worldsync.revisionSeen))) pull();
 }
 
 async function pull() {
   worldsync.pending = true;
+  const generation = joinGeneration;
   try {
     const j = await fetchWorld();
-    if (j?.world && applyWorldSnapshot(j.world)) {
-      worldsync.wseqSeen = j.wseq ?? 0;
-      worldsync.stats.pulls++;
-      sim.toast = "Sky synced with the host";
-      sim.lastToastAt = sim.time;
-      logEvent(`Sky snapshot applied (${Object.keys(j.world.bodies ?? {}).length} worlds marked, ${(j.world.lost ?? []).length} ports lost)`, "net");
+    if (generation !== joinGeneration || !j?.world || j.world.v !== 1) return;
+    const first = !worldsync.applied;
+    // Later snapshots repair durable changes only. Never rewind the two-second live stream.
+    const bodies = {};
+    const nextSignatures = new Map();
+    for (const [id, body] of Object.entries(j.world.bodies ?? {})) {
+      const signature = bodySignature(body);
+      nextSignatures.set(id, signature);
+      if (first || signature !== bodySignatures.get(id)) bodies[id] = body;
     }
-    worldsync.applied = true;
+    const includeLive = first && !liveStateSeen;
+    if (applyWorldSnapshot({ ...j.world, bodies }, { includeLive })) {
+      bodySignatures = nextSignatures;
+      worldsync.wseqSeen = j.wseq ?? 0;
+      worldsync.revisionSeen = j.worldRevision ?? null;
+      worldsync.stats.pulls++;
+      worldsync.applied = true;
+      if (first) {
+        sim.toast = "Sky synced with the host";
+        sim.lastToastAt = sim.time;
+        logEvent(`Sky snapshot applied (${Object.keys(j.world.bodies ?? {}).length} worlds marked, ${(j.world.lost ?? []).length} ports lost)`, "net");
+      }
+    }
   } catch {
-    /* next poll tries again */
+    /* next poll retries the unacknowledged revision */
   } finally {
-    worldsync.pending = false;
+    if (generation === joinGeneration) worldsync.pending = false;
   }
 }
 
@@ -215,6 +247,7 @@ function handleMessage(from, d) {
     worldsync.stats.strikesIn++;
   } else if (d.t === "wstate") {
     if (worldsync.host) return;
+    liveStateSeen = true;
     worldsync.hostSeenAt = performance.now();
     worldsync.stats.statesIn++;
     if (Array.isArray(d.impactors)) adoptImpactors(d.impactors);

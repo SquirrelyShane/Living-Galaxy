@@ -10,6 +10,22 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.64 — 2026-09-26
+
+Persistent Sol client sync and service startup fixes. Delivered as a changed-files-only patch over 0.3.63; see `PATCH-0.3.64.md`.
+
+- Structural world revisions replace checkpoint-sequence polling for dedicated Sol client refreshes. Cooling, crater relaxation, ring settling and moving objects do not trigger world reloads.
+- Subsequent snapshots repair changed bodies without overwriting the live rogue/holes/traffic stream. Only initial sync shows the toast/log; stale join responses are ignored and failed snapshots retry.
+- Removed the default-type Node service flag. The host loader explicitly treats game JavaScript as ESM even where the deployment copier excludes package.json.
+- Added client sync, real snapshot-applier, relay revision and loader tests; extended restart coverage to restored revisions.
+
+## 0.3.63 — 2026-09-26
+
+Persistent Sol host release (historical entry added in 0.3.64).
+
+- Added a dedicated Node simulation service, authenticated Sol checkpoints, SQLite world/GNN persistence, resume support and zero-player integration tests.
+- Added the systemd installer and persistent Sol deployment guide.
+
 ## 0.3.62 — 2026-09-26
 
 One rock, one shape.

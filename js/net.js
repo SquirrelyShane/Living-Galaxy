@@ -176,7 +176,7 @@ async function poll() {
     if (typeof j.born === "number" && typeof j.now === "number") {
       net.worldBorn = j.born;
       net.serverNow = j.now;
-      const shared = Math.max(0, j.now - j.born);
+      const shared = Math.max(0, Number.isFinite(j.solTime) ? j.solTime : j.now - j.born);
       if (!sim.clockSynced) {
         shiftClock(shared - sim.time);
         sim.clockSynced = true;
@@ -240,7 +240,7 @@ async function poll() {
     net.host = j.host == null || j.host === me; // no live state yet means nobody else is here
     const wseqBefore = net.wseq;
     net.wseq = j.wseq ?? net.wseq;
-    for (const fn of net.roomListeners) fn({ host: net.host, hostId: net.hostId, wseq: net.wseq, wseqMoved: net.wseq !== wseqBefore, peers: net.peers, fresh });
+    for (const fn of net.roomListeners) fn({ host: net.host, hostId: net.hostId, wseq: net.wseq, worldRevision: j.worldRevision, wseqMoved: net.wseq !== wseqBefore, peers: net.peers, fresh });
     useGameStore.getState().patchHud({ joined: true, peers: [...sim.remotes.values()].map((r) => ({ id: r.id, name: r.name })) });
   } catch (e) {
     if (gen !== pollGen) return;
@@ -248,7 +248,7 @@ async function poll() {
     net.online = false;
     net.peers = 0;
     net.host = true; // offline: our sky, our rocks
-    for (const fn of net.roomListeners) fn({ host: true, hostId: null, wseq: net.wseq, wseqMoved: false, peers: 0, fresh: false, offline: true });
+    for (const fn of net.roomListeners) fn({ host: true, hostId: null, wseq: net.wseq, worldRevision: j.worldRevision, wseqMoved: false, peers: 0, fresh: false, offline: true });
     net.lastError = String(e?.message ?? e);
     delay = net.relay === false ? Math.min(NO_RELAY_MAX_MS, NO_RELAY_MS * 2 ** Math.min(5, noRelayMisses++)) : BACKOFF_MS;
   } finally {
@@ -300,7 +300,7 @@ export function disconnectNet() {
 
 /* The tab going to sleep should not leave a ghost on everybody's sensors:
  * the relay expires us on its own, but polling stops the moment we wake. */
-document.addEventListener("visibilitychange", () => {
+globalThis.document?.addEventListener("visibilitychange", () => {
   clearTimeout(pollTimer); // a poll that lands while hidden does not reschedule (see finally); one chain, not two
   if (!document.hidden && !stopped && !inflight) poll();
 });
