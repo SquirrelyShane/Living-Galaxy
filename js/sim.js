@@ -4151,7 +4151,10 @@ function stepWorld(d) {
   stepStations(sim.time);
   /* the player's position is what decides the far-field detail budget and
    * which fights fly real rounds, so the sky is told where the player is */
-  stepTraffic(sim.time, d, stations, currentSystem, sim.ship.pos);
+  /* 0.3.65: the dedicated Sol host has no pilot, so its far-field budget must not
+   * centre on the observatory's parked hull — it flies every hull at full detail
+   * (null = everything near), and the positions it hands mirrors are real ones */
+  stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);
   /* A mirror flies the hulls — it has to, or they would freeze between the
    * host's packets — but it does not get to decide anything. Who is hunting
    * whom, who called for help and what a nest launched are the host's to
@@ -4652,6 +4655,7 @@ export function tickSolHost(dt) {
   sim.phase = "play";
   sim.timeScale = 1;
   sim.worldAuthority = true;
+  sim.soloHost = true;
   sim.time += d;
   sim.wall += d;
   stepWorld(d);

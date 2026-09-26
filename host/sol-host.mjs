@@ -8,6 +8,8 @@ const token = process.env.SOL_HOST_TOKEN;
 if (!token) throw new Error('SOL_HOST_TOKEN is required');
 if (!['127.0.0.1','localhost','[::1]'].includes(new URL(relay).hostname)) throw new Error('Host connects to a loopback relay only');
 const hostId='__sol_authority__';
+// 0.3.65: no pilot sits in this seat, so every hull goes out (bounded), not an arbitrary first 46.
+const HOST_HULLS=160;
 const fetchNative=globalThis.fetch;
 globalThis.fetch=(url, options={})=>fetchNative(new URL(url, relay), options);
 async function api(path, body) {
@@ -30,7 +32,7 @@ sim.selfId=hostId;
 if(saved.world) {
   if(!applyWorldSnapshot(saved.world)) throw new Error('Unsupported stored world format; refusing to overwrite it');
   sim.time=Number(saved.world.time)||0;
-  if(Array.isArray(saved.hostState?.hulls)) adoptHulls(saved.hostState.hulls);
+  if(Array.isArray(saved.hostState?.hulls)) adoptHulls(saved.hostState.hulls,{snap:true});
   for (const st of stations) {
     const record=saved.hostState?.stationEconomy?.[st.id];
     if(record){st.stock=record.stock;st.credits=record.credits;st.econ=record.econ;}
@@ -71,7 +73,7 @@ async function loop(){
         // Preserve the existing player-reported vessel-down interaction.
         for(const m of poll.msgs||[]){const d=m.data;if(d?.t==='vdown' && typeof d.id==='string'){markVesselDown(d.id,sim.time);if(Number.isFinite(d.until))trafficDown[d.id]=d.until;}}
         const w=worldSnapshot();
-        await api('/net/send',{room:'sol',from:hostId,kind:'msg',data:{t:'wstate',impactors:w.impactors,holes:w.holes,trafficDown:w.trafficDown,hulls:hullWire(null,46)}});
+        await api('/net/send',{room:'sol',from:hostId,kind:'msg',data:{t:'wstate',at:sim.time,impactors:w.impactors,holes:w.holes,trafficDown:w.trafficDown,hulls:hullWire(null,HOST_HULLS)}});
       }
       while(pending.length){await api('/net/send',pending[0]);pending.shift();}
       if(now-lastSave>=5000){await save();lastSave=now;status();}

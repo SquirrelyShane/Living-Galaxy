@@ -248,7 +248,7 @@ async function poll() {
     net.online = false;
     net.peers = 0;
     net.host = true; // offline: our sky, our rocks
-    for (const fn of net.roomListeners) fn({ host: true, hostId: null, wseq: net.wseq, worldRevision: j.worldRevision, wseqMoved: false, peers: 0, fresh: false, offline: true });
+    for (const fn of net.roomListeners) fn({ host: true, hostId: null, wseq: net.wseq, worldRevision: null, wseqMoved: false, peers: 0, fresh: false, offline: true }); // 0.3.66: `j` is the try block's; reading it here threw
     net.lastError = String(e?.message ?? e);
     delay = net.relay === false ? Math.min(NO_RELAY_MAX_MS, NO_RELAY_MS * 2 ** Math.min(5, noRelayMisses++)) : BACKOFF_MS;
   } finally {

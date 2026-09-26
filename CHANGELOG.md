@@ -10,6 +10,96 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.66 — 2026-09-26
+
+Player-hosted skies work again.
+
+Found while testing 0.3.65: `test/smoke-shared-sky.mjs` (two pilots in one
+player-hosted sky, a late joiner, host hand-off) passes on 0.3.62 and failed
+every run on 0.3.64 and 0.3.65: B stopped mirroring A's rocks, A's strike never
+reached B, a late joiner did not inherit the crater, and host election flapped
+until B never took over. This is the path you play when `server.py` serves the
+game directly (Termux, the LAN) and any sky the dedicated Sol host does not run.
+
+- **The relay's JSON replies no longer send `Cache-Control: no-store`**
+  (`server.py` `_json`). Bisected file by file and then hunk by hunk: 0.3.62's
+  client with 0.3.64's `server.py` fails; 0.3.64's client with 0.3.62's
+  `server.py` passes; 0.3.64's `server.py` minus that one header passes. With it
+  the smoke failed all 12 runs (including once with the duplicate no-cache
+  removed, so it is no-store itself); without it, all 9 passed. `end_headers()` already marks every
+  reply `no-cache`, and the client polls with `cache: "no-store"`, so nothing
+  can be served stale. Why a browser behaves this way with it was not found:
+  requests still reach the relay at the same rate, and single or 30-concurrent
+  keepalive POSTs complete normally in isolation.
+- **A failed poll goes offline cleanly** (`js/net.js`). The catch block read
+  `j.worldRevision`, but `j` is the try block's, so every failed poll threw a
+  ReferenceError from inside its own error handler: the room listeners never
+  heard `offline`, `lastError` and the back-off were never set, and the promise
+  rejected unhandled.
+
+Files: `server.py`, `js/net.js`, `js/version.js`, `CHANGELOG.md`;
+`test/netoffline.test.mjs` (new, 5 — fails on 0.3.65 with the ReferenceError).
+
+Verified: 89 node suites green; `sol-persistent` and `world-revision` green;
+smoke-shared-sky 3 of 3 OK on this tree. Not checked: living-galaxy.com's own
+proxy (`lgsite.py` `_relay`) also stamps `no-store` on every `/net/*` reply, so
+if the cause is browser-side, player-hosted skies on the live site may be hit
+the same way; the dedicated Sol host does not depend on player hosting.
+
+## 0.3.65 — 2026-09-26
+
+Traffic without the hop.
+
+Reported: since the persistent Sol patch, drones and NPCs flying in the system
+stutter.
+
+Before 0.3.63 a pilot alone in Sol WAS the host and never received a hull
+packet. Now every pilot in Sol mirrors the dedicated host, and every 2 s the
+packet corrected each hull it carried with 40% of the error in a single frame
+and replaced its velocity outright. The mirror flies its own copy of each
+hull's state machine between packets, so there was always an error to correct:
+measured near the player, median 128–300 u and p90 1.2–1.6 km. Hulls the host's
+combat directors had taken over (the mirror never runs them) disagreed by tens
+of kilometres and were snapped, then flown straight back along the mirror's
+timetable, so the same hull teleported every packet. And the host sent the
+first 46 hulls in list order from a detail budget centred on the observatory's
+parked hull, not on anyone.
+
+- **No hop** (`js/worldsync.js`). Under `HULL_DEAD` (400 u) a disagreement is
+  left alone. Above it the error is held on the hull (`n.sync`) and bled off
+  from the render loop (`blendHulls`, called from `tickWorldSync` on a mirror),
+  capped at max(150 u/s, 0.6× the hull's speed) so it reads as drift; heading
+  and pitch blend with it and the mirror keeps its own velocity. Hulls in a bay
+  run or on the clamps are posed by their port every step and are left to it.
+- **Held hulls** (`js/worldsync.js`, `js/npc/traffic.js`). Past `HULL_SNAP`, or
+  when host and mirror disagree about whether the hull can be seen, it is placed
+  once and held: `stepTraffic` dead-reckons it on the host's velocity until
+  `heldUntil` (refreshed by each packet, lapses 6 s after the host goes quiet,
+  cleared on a respawn), so the next packet finds it close and blends.
+- **Packets carry `at`**, the sender's sky time; a report is carried forward by
+  its velocity before it is compared. Player-hosted skies send it too.
+- **The Sol host flies every hull at full detail** (`sim.soloHost` → `stepTraffic`
+  gets no ship position) and sends all of them (`HOST_HULLS` 160, was the first
+  46). It restores its own checkpoint exactly (`adoptHulls(…, {snap:true})`;
+  it had been easing to 40% of the saved positions).
+
+Measured, one pilot in Sol against a live Sol host, 40 s × 2 runs each under
+swiftshader (7–8 fps): hops over 300 u on a visible hull within 30 km went from
+25.5 / 49.5 a minute to 16.5 / 15; the p90 packet-frame move of a near hull from
+247 / 277 u to 35 / 33 u. `test/hullsync.test.mjs` (new, 10) at 60 Hz: no move
+in the packet frame for a 1,500 u error (0.3.64: 600 u), worst blend frame
+2.5 u, converged in 12 s; a diverged hull held and coasting on the host's
+velocity, blended by the next packet, released when packets stop.
+
+Files: `js/worldsync.js`, `js/npc/traffic.js`, `js/sim.js`, `host/sol-host.mjs`,
+`js/version.js`, `README.md`, `CHANGELOG.md`; `test/hullsync.test.mjs` (new).
+
+Not measured: frame-to-frame smoothness at a phone's frame rate (the headless
+browser runs 7–8 fps, where a blend step and a small hop look alike to the
+probe), and drones directly — they were not instrumented; if they were
+stuttering by following hulls that hopped, this covers them, otherwise it does
+not. Not seen on a phone.
+
 ## 0.3.64 — 2026-09-26
 
 Persistent Sol client sync and service startup fixes. Delivered as a changed-files-only patch over 0.3.63; see `PATCH-0.3.64.md`.

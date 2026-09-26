@@ -102,6 +102,20 @@ line-uppable that way, so the longest-present live pilot in a room is its
 and `/net/world` is the snapshot a late joiner inherits so they arrive into the
 same scarred system.
 
+With the persistent Sol host (0.3.63) every pilot in Sol is a mirror, so the
+hull packet (`wstate`, every 2 s) is how every player sees the traffic. A
+mirror still flies the hulls between packets and so drifts from the host; it
+reconciles without a visible hop (0.3.65): disagreements under `HULL_DEAD`
+(400 u) are left alone, larger ones are held on the hull and bled off from the
+render loop (`blendHulls`, rate-capped against the hull's own speed), hulls on
+a bay run or the clamps are left to the port, and a hull past `HULL_SNAP` — the
+host's directors have it in a fight the mirror never runs — is placed once and
+**held**: dead-reckoned on the host's velocity (`heldUntil`) instead of flown
+back along its timetable. Packets carry `at`, the host's sky time, and are
+carried forward by velocity before comparison. The Sol host itself flies every
+hull at full detail (`sim.soloHost`) and sends them all, since no pilot sits in
+its seat to centre a detail budget on.
+
 Joining jumps your clock by the room's whole age in one step (and a relay
 restart can move it back). `shiftClock` carries the hull by where the world
 it is beside actually is at the new time, velocity included (0.3.55) — a

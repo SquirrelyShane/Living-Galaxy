@@ -1526,7 +1526,10 @@ class Handler(SimpleHTTPRequestHandler):
         body = json.dumps(obj).encode("utf-8")
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Cache-Control", "no-store")
+        # 0.3.66: no `Cache-Control: no-store` here. end_headers() already marks
+        # every reply no-cache, and 0.3.64's extra no-store broke player-hosted
+        # skies served by this relay directly (Termux, LAN): smoke-shared-sky
+        # failed 12 of 12 runs with it and passed 9 of 9 without (see CHANGELOG).
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

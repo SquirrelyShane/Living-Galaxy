@@ -1047,11 +1047,20 @@ export function stepTraffic(t, dt, stationList = liveStations, system = currentS
       /* its ten minutes are up: a replacement hull under the same name takes
        * the run over, which is why the roster count never sags */
       delete trafficDown[n.id];
+      n.heldUntil = 0;
       n.hp = n.hpMax ?? n.hp;
       n.shield = n.shieldMax ?? n.shield;
       n.underAttack = 0;
       seatHull(n, t, stationList, system);
       continue;
+    }
+
+    /* 0.3.65: a mirror holding the host's word for this hull (worldsync.js
+     * adoptHulls) dead-reckons it instead of flying its own timetable, which
+     * would carry it straight back to where the host says it is not */
+    if (n.heldUntil) {
+      if (n.heldUntil > t) { coastStep(n, dt); continue; }
+      n.heldUntil = 0;
     }
 
     /* Far field: stepped on a stride with the time it missed, coasting in

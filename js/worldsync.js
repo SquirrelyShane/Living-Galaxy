@@ -102,37 +102,111 @@ export function hullWire(pos, cap = HULL_CAP) {
   return wire;
 }
 
-/** Apply a host's hull packet. Anything not in it keeps flying its timetable. */
-export function adoptHulls(wire) {
+/* 0.3.65 — how a mirror takes the host's word without juddering.
+ *
+ * Until the persistent Sol host, a pilot alone in a sky WAS the host and never
+ * received a hull packet; mirroring was a two-pilot edge case. Now every pilot
+ * in Sol is a mirror, every 2 s, and each packet was a visible hop:
+ *
+ *   The mirror flies the hulls itself between packets, but its hull state
+ *   machine (leg, bay run, clamps) is its own, so it drifts from the host's.
+ *   Measured on 0.3.64 over 25 s near the player: median 128 u, p90 1.2 km
+ *   apart when a packet lands. 40% of that was applied in ONE frame — a median
+ *   10 and a p90 51 frames' worth of the hull's own motion, every 2 s — and the
+ *   velocity was replaced outright, a kink in the path on top of the hop.
+ *
+ * Now:
+ *   - HULL_DEAD: a disagreement under 400 u is left alone. Nobody alone in a
+ *     sky can see it, and correcting it is exactly what juddered.
+ *   - a larger one is held on the hull (`n.sync`) and bled off over about a
+ *     second from the render loop (`blendHulls`), heading and pitch with it,
+ *     and the mirror keeps its own velocity: a drift, not a hop.
+ *   - a hull riding a bay run or the clamps is posed by the port every step, so
+ *     a correction there lasts one frame and flickers; those are left to the port.
+ *   - the packet carries `at`, the host's sky time, and the report is carried
+ *     forward by its velocity before it is compared.
+ *
+ * Past HULL_SNAP, or when the host and the mirror disagree about whether it can
+ * be seen, the two are flying different states (the host's directors have it in
+ * a fight or a response the mirror never runs). The old code snapped it and let
+ * the mirror's timetable fly it straight back, so the same hull teleported every
+ * packet. Now it is placed once and HELD: the mirror stops running its own state
+ * machine for it and dead-reckons on the host's velocity (`heldUntil`, refreshed
+ * by each packet), so the next packet finds it close and blends. If the host
+ * goes quiet the hold lapses after HULL_HOLD seconds and the timetable resumes. */
+export const HULL_DEAD = 400;
+export const HULL_BLEND = 0.8;
+export const HULL_HOLD = 6;
+/* how fast a blend may move a hull beyond its own motion: a correction reads as
+ * drift only while it is slower than the hull (or this floor, for the slow ones) */
+const BLEND_RATE_FLOOR = 150, BLEND_RATE_K = 0.6;
+const MAX_AGE = 4;
+const POSED = new Set(["dock", "berth", "unberth"]);
+
+function wrapPi(a) { return Math.atan2(Math.sin(a), Math.cos(a)); }
+
+/** Apply a host's hull packet. Anything not in it keeps flying its timetable.
+ *  `at` is the host's sky time when it read the hulls; `snap` places them
+ *  exactly (a host restoring its own checkpoint has no render loop to blend). */
+export function adoptHulls(wire, { at = null, snap = false } = {}) {
   if (!Array.isArray(wire)) return 0;
+  const age = Number.isFinite(at) ? Math.min(MAX_AGE, Math.max(0, sim.time - at)) : 0;
   let k = 0;
   for (const row of wire) {
     if (!Array.isArray(row) || row.length < 13) continue;
-    const [id, x, y, z, vx, vy, vz, yaw, pitch, job, hp, shield, vis, drive] = row;
+    const [id, x0, y0, z0, vx, vy, vz, yaw, pitch, job, hp, shield, vis, drive] = row;
     const n = vesselById(id);
     if (!n) continue;
-    const drift = Math.hypot(n.x - x, n.y - y, n.z - z);
-    if (drift > HULL_SNAP) {
-      /* too far wrong to reconcile: take the host's word outright */
+    /* where the host's hull is NOW, not where it was when the packet left */
+    const x = x0 + vx * age, y = y0 + vy * age, z = z0 + vz * age;
+    const ex = x - n.x, ey = y - n.y, ez = z - n.z;
+    const drift = Math.hypot(ex, ey, ez);
+    const held = n.heldUntil > sim.time;
+    const diverged = !snap && (drift > HULL_SNAP || (vis !== 0) !== (n.visible !== false));
+    if (snap || diverged || n.visible === false) {
+      /* too far wrong to reconcile, or nobody can see it: take the host's word outright */
       n.x = x; n.y = y; n.z = z;
-    } else {
-      /* close enough to ease onto, so a mirror does not judder every 2 s */
-      n.x += (x - n.x) * 0.4;
-      n.y += (y - n.y) * 0.4;
-      n.z += (z - n.z) * 0.4;
+      n.yaw = yaw; n.pitch = pitch;
+      n.sync = null;
+    } else if (held ? drift > 1 : drift > HULL_DEAD && !POSED.has(n.state)) {
+      /* close enough to ease onto: the residual is spent a little each frame */
+      n.sync = { x: ex, y: ey, z: ez, yaw: wrapPi(yaw - (n.yaw ?? 0)), pitch: pitch - (n.pitch ?? 0) };
     }
-    n.vx = vx; n.vy = vy; n.vz = vz;
-    n.yaw = yaw; n.pitch = pitch;
+    /* a held hull flies the host's velocity; one on its own timetable keeps its own */
+    if (snap || diverged || held || n.visible === false) { n.vx = vx; n.vy = vy; n.vz = vz; n.speed = Math.hypot(vx, vy, vz); }
+    if (diverged || held) n.heldUntil = sim.time + HULL_HOLD;
     n.job = job || n.job;
     n.hp = hp; n.shield = shield;
     n.visible = vis !== 0;
     n.drive = drive ? 1 : 0;
-    n.speed = Math.hypot(vx, vy, vz);
     /* a mirror never runs the directors: the host decides who is hunting whom,
      * and a mirror that made its own mind up would fight a different war */
     n.hunt = null;
     n.fleeFrom = null;
     n.respondTo = null;
+    k++;
+  }
+  return k;
+}
+
+/** Mirror, every frame: spend each hull's held correction. Exponential, so a
+ *  new packet arriving mid-blend simply replaces what is left of the old one. */
+export function blendHulls(dt) {
+  if (!(dt > 0)) return 0;
+  const f = 1 - Math.exp(-Math.min(dt, 0.25) / (HULL_BLEND / 2));
+  let k = 0;
+  for (const n of traffic) {
+    const c = n.sync;
+    if (!c) continue;
+    if (n.job === "down" || POSED.has(n.state)) { n.sync = null; continue; }
+    let g = f;
+    const want = Math.hypot(c.x, c.y, c.z) * f;
+    const cap = Math.max(BLEND_RATE_FLOOR, BLEND_RATE_K * (n.speed ?? 0)) * Math.min(dt, 0.25);
+    if (want > cap) g = f * cap / want;
+    const dx = c.x * g, dy = c.y * g, dz = c.z * g, dyaw = c.yaw * f, dp = c.pitch * f;
+    n.x += dx; n.y += dy; n.z += dz; n.yaw = (n.yaw ?? 0) + dyaw; n.pitch = (n.pitch ?? 0) + dp;
+    c.x -= dx; c.y -= dy; c.z -= dz; c.yaw -= dyaw; c.pitch -= dp;
+    if (Math.abs(c.x) + Math.abs(c.y) + Math.abs(c.z) < 0.5 && Math.abs(c.yaw) + Math.abs(c.pitch) < 1e-3) n.sync = null;
     k++;
   }
   return k;
@@ -253,7 +327,7 @@ function handleMessage(from, d) {
     if (Array.isArray(d.impactors)) adoptImpactors(d.impactors);
     if (Array.isArray(d.holes)) adoptHoles(d.holes);
     if (d.trafficDown) for (const [id, until] of Object.entries(d.trafficDown)) trafficDown[id] = until;
-    if (Array.isArray(d.hulls)) worldsync.stats.hullsIn = adoptHulls(d.hulls);
+    if (Array.isArray(d.hulls)) worldsync.stats.hullsIn = adoptHulls(d.hulls, { at: d.at });
   } else if (d.t === "vdown") {
     markVesselDown(d.id, sim.time);
     if (Number.isFinite(d.until)) trafficDown[d.id] = d.until;
@@ -261,15 +335,20 @@ function handleMessage(from, d) {
 }
 
 /** From the render loop. Host duties live here. */
+let lastBlend = 0;
 export function tickWorldSync() {
-  if (sim.phase !== "play" || !net.online || !worldsync.host) return;
   const now = performance.now();
+  const dt = lastBlend ? (now - lastBlend) / 1000 : 0;
+  lastBlend = now;
+  if (sim.phase !== "play") return;
+  if (!worldsync.host) { blendHulls(dt); return; }
+  if (!net.online) return;
   const alone = lonely();
   if (!alone && now - worldsync.lastState > 2000) {
     worldsync.lastState = now;
     const hulls = hullWire(sim.ship?.pos ?? null);
     worldsync.stats.hullsOut = hulls.length;
-    sim.send({ t: "wstate", impactors: impactorWire(), holes: holeWire(), trafficDown, hulls });
+    sim.send({ t: "wstate", at: sim.time, impactors: impactorWire(), holes: holeWire(), trafficDown, hulls });
   }
   const impactAt = sim.lastImpact?.at ?? -1;
   const changed = impactAt !== worldsync.lastImpactAt;
@@ -281,7 +360,7 @@ export function tickWorldSync() {
 }
 
 export function wireWorldSyncTest() {
-  if (globalThis.window?.__lg) window.__lg.worldsync = { worldsync, worldSnapshot, applyWorldSnapshot, tickWorldSync, hullWire, adoptHulls };
+  if (globalThis.window?.__lg) window.__lg.worldsync = { worldsync, worldSnapshot, applyWorldSnapshot, tickWorldSync, hullWire, adoptHulls, blendHulls };
 }
 
 /**
