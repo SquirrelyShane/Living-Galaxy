@@ -10,6 +10,60 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.62 — 2026-09-26
+
+One rock, one shape.
+
+Reported: an asteroid turns into a different asteroid as you close on it, and
+rocks keep re-rendering. They should be built once and change only when
+something happens to them (mining, impacts).
+
+Both were by design. Far away a rock drew as one of its class's 18 prototypes
+(`belt-prototype:<cls>:<v>`). Inside 3.4 km it swapped to a body grown off
+the rock's OWN key: a different seed, so a different body kind, lobes and
+craters. And every rock you passed filed its own ~150–200 ms grow in the
+worker, then dropped it when it left the body budget.
+
+Measured with `test/smoke-oneshape.mjs` (new), 24 bodies over an 18 km pass
+through Sol's belt:
+
+| | 0.3.61 low / full | 0.3.62 low / full |
+| --- | --- | --- |
+| close-aboard body is its instance's shape | 0 / 0 of 24 | 24 / 24 of 24 |
+| mean silhouette difference from what you saw far off | 27.6% / 27.8% | 0.0% / 4.0% (finer lattice of the same surface) |
+| grows filed during the pass | 18 / 32 (one per rock) | 0 / 3 (one per prototype, once a session) |
+| geometries for the rocks passed | 22 / 42 | 4 / 6, shared |
+
+- **The prototype is the shape** (`js/engine.js` `shapeFor`/`bodyFor`/`mountShared`).
+  Close aboard it is the same seed and rolls grown at the device's lattice. On
+  `low` that lattice is the prototype's own, so the body is the identical
+  mesh. Each shape is grown once per prototype per session. A close-aboard
+  rock is a mesh on that shared geometry with its own material only for its
+  tint, which is the instance's tint (`rockTint`). Evicting a body from the
+  budget now hands the rock back to an instance of the same shape, so nothing
+  visible changes. The ore `favour` roll was dropped from the close-aboard body
+  because it spends the generator's draws and moved the silhouette 12–21% by
+  itself. The ore still rides the tint, the assay card is unchanged
+  (`assayRock`, its own maths), and the cutter's yield never read the mesh.
+- **Variety kept by a stretch.** Sharing 18 shapes up close would repeat, so
+  each rock gets a stretch off its seed: two axes pulled in by up to a fifth,
+  never out, so it stays inside the sphere the sim collides with. The instance
+  and the body both wear it.
+- **Lattice hysteresis** (`LOD_HYST` 1.2). A rock sitting on the 768/192/48
+  triangle threshold flipped lattice frame to frame as it spun, which reads
+  as the rock re-forming. It now has to clear the threshold by a fifth to
+  change lattice.
+- A rock changes only when something happens to it: worn by the cutter (scale,
+  as before), shattered when cut out (the shatter field reads the shared body),
+  or struck.
+
+Files: `js/engine.js`, `js/version.js`, `README.md`; `test/smoke-oneshape.mjs` (new, 14).
+
+Verified: 84 node suites green; smokes oneshape (both tiers), rocks, mining,
+site, impact (shatter from a shared body), rogue, craters, cataclysm, attract,
+immersive green. Not measured: the lattice hysteresis is in the code but no
+test counts lattice flips. Not seen on a phone.
+
 ## 0.3.61 — 2026-09-26
 
 First light: the start card to the seat.

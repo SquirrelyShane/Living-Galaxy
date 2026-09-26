@@ -2201,6 +2201,18 @@ every frame it burns — so mining invalidated the entire belt sixty times a
 second. It flushes only when a rock is finished and has to stop existing; wear
 rides the refresh.
 
+**One rock, one shape** (0.3.62, `js/engine.js`). A rock's prototype IS its
+shape at every range: close aboard it is the same seed and rolls grown at the
+device's finer lattice (on `low` the identical mesh), grown once per prototype
+per session and shared — a close-aboard rock is a mesh on shared geometry with
+its own material for its tint only. Before, the near body was grown off the
+rock's own key: a different body (27% mean silhouette difference measured) and
+a grow in the worker for every rock passed. A per-rock stretch (two axes pulled
+in by up to a fifth, never out) is worn by instance and body alike, and the
+instance lattices change only after clearing a threshold by a fifth either way
+(`LOD_HYST`). A rock changes only when something happens to it: worn, shattered,
+struck. The notes below predate it and describe the swap it removed.
+
 **A rock keeps its own shape** (0.3.28, `js/engine.js`). A grown body is that
 rock's real geometry and everything else draws as a class prototype, so a rock
 crossing the body budget changes shape rather than fading — and on a phone the
@@ -3753,6 +3765,7 @@ node test/smoke-<name>.mjs "$(npm root -g)/playwright/index.mjs"
 | `smoke-attract` | the shot composes, the hull is on screen and not behind the card, orbits hidden, every added object gone in play |
 | `smoke-audio` | all 47 sounds: nothing silent, nothing clipping, the alert hierarchy the right way up, the bed under the cues on RMS, the voice cap |
 | `smoke-cataclysm`, `smoke-craters` | impacts and what they leave |
+| `smoke-oneshape` | 0.3.62, on `low` and `full`: every close-aboard body is its instance's prototype (seed, silhouette within 5%, size and stretch), bodies share geometry, and an 18 km pass through the belt files no per-rock grows |
 | `smoke-rogue` | a rogue rock grows its own baked body in the worker at the generator's resolution: class, assay, world radius, no crystals, and nothing left behind on despawn |
 | `smoke-shared-sky` | two pages in one room |
 

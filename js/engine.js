@@ -14,9 +14,9 @@ import {
 import { remnantRadius } from "./scale.js";
 import { makeGlowTexture, makePlanetTexture, makeRingTexture } from "./textures.js";
 import { rockLook } from "./rockgen.js";
-import { BAKE, rockParams, rogueParams } from "./bodygen/body.js";
+import { BAKE, rogueParams } from "./bodygen/body.js";
 import { CLASSES } from "./bodygen/classes.js";
-import { mountBakedData } from "./bodygen/baked.js";
+import { mountBakedData, bakedMaterial } from "./bodygen/baked.js";
 import { grow, peek, pump, cancel as cancelGrowth, growerStats } from "./bodygen/grower.js";
 import { makeRockFx } from "./rockfx.js";
 import { makeImpactFx } from "./impactfx.js";
@@ -376,6 +376,8 @@ export function mountGame(canvas) {
   /* angular radius (radius / distance) under which a rock drops to the next
    * lattice: on a phone-width canopy about eighty pixels across, then about twenty-five */
   const PROTO_LOD_ANG = [0.1, 0.03];
+  const LOD_HYST = 1.2;            // 0.3.62: a lattice change has to clear its threshold by this factor
+  const lodMemo = new Map();       // rock key → the lattice it drew at last frame
 
   /* Dust. Belt haze was cut in the chart patch because a static Points band
    * read as fog; this is the opposite idea — a small parallax cloud that only
@@ -1807,45 +1809,144 @@ export function mountGame(canvas) {
   const beltBake = BAKE.belt[bakeTier];
   const rogueBake = BAKE.rogue[bakeTier];
   const bodyDetail = beltBake.H;
-  const beltKey = (rock) => `belt:${rock.key}:${beltBake.H}`;
   const rogueKey = (m) => `rogue:${m.id}:${Math.round(m.r)}:${rogueBake.H}`;
 
+  /* 0.3.62 — ONE ROCK, ONE SHAPE.
+   *
+   * Reported: a rock turned into a different rock as you closed on it, and the
+   * belt kept rebuilding. Both were by design. Far away a rock drew as its
+   * class prototype (`belt-prototype:<cls>:<v>`); inside BODY_R it swapped to a
+   * body grown off its OWN key — a different seed, so a different body kind,
+   * different lobes, different craters: measured 9–25% mean radial difference,
+   * up to 55% at the worst point of the silhouette. And every rock you passed
+   * filed its own grow in the worker (~150–200 ms each) and dropped it again
+   * when it left the budget, so a pass through the belt was a stream of
+   * rebuilds. (The ore `favour` alone moves the silhouette 12–21% — it spends
+   * the generator's draws — so it could not simply be carried across.)
+   *
+   * Now the prototype IS the rock's shape at every range. Close aboard it is
+   * the SAME seed and rolls grown at the device's finer lattice — the same
+   * surface function sampled denser, 2–3% mean difference, which reads as
+   * detail resolving, not as a new rock (on `low` the belt lattice is the
+   * prototype's own, so it is the identical mesh). Each shape is grown ONCE per
+   * prototype per session and shared: a close-aboard rock is a mesh on shared
+   * geometry with its own material only for its tint, which is the instance's
+   * tint to the digit. Nothing is regrown as you fly; a rock changes only when
+   * something happens to it (worn by the cutter, shattered, struck). */
+  const shapes = new Map();      // `${cls}:${v}` → { mount, built, unitR, owned }
+  const shapeKey = (b) => `shape:${b.cls}:${b.v}:${beltBake.H}`;
+  const bucketOf = (rock) => protoIndex.get(`${CLASSES[rock.cls] ? rock.cls : "S"}:${Math.floor((rock.seed ?? 0.5) * 9973) % PROTO_VARIANTS}`);
+  /** A rock's stretch, off its seed: two axes pulled in by up to a fifth, never out,
+   * so the rock stays inside the sphere the sim collides with. Worn by the
+   * instance and the close-aboard body alike, or they would disagree. */
+  function stretchOf(rock, out) {
+    const s = rock.seed ?? 0.5;
+    out.x = 0.8 + ((s * 3571) % 1) * 0.2;
+    out.y = 0.8 + ((s * 6007) % 1) * 0.2;
+    out.z = 1;
+    return out;
+  }
+  const _stretch = { x: 1, y: 1, z: 1 };
+  /** The instance's tint for a rock — the prototype carries the class's surface,
+   * this carries THE rock: a lightness jitter off its seed and a lean toward its ore. */
+  function rockTint(r, out) {
+    const look = rockLook(r);
+    const lum = Math.max(0.05, (look.r + look.g + look.b) / 3);
+    const j = 0.84 + ((r.seed * 7919) % 1) * 0.3;
+    const lean = r.rich ? 0.45 : 0.25;
+    return out.setRGB(j * (1 - lean + lean * look.r / lum), j * (1 - lean + lean * look.g / lum), j * (1 - lean + lean * look.b / lum));
+  }
+
+  /** The close-aboard shape of a prototype, grown once, or null while it grows. */
+  function shapeFor(bucket) {
+    if (!bucket?.mesh) return null;                       // the field itself has not landed
+    const id = `${bucket.cls}:${bucket.v}`;
+    const have = shapes.get(id);
+    if (have) return have;
+    if (beltBake.H === BAKE.proto.H && String(beltBake.L) === String(BAKE.proto.L[0])) {
+      /* the belt lattice is the prototype's own: the very mesh the field draws */
+      const rec = { mount: bucket.mount, built: bucket.mount.built, unitR: bucket.unitR, owned: false };
+      shapes.set(id, rec);
+      return rec;
+    }
+    const key = shapeKey(bucket);
+    const d = peek(key);
+    if (!d) {
+      grow(key, { seed: `belt-prototype:${bucket.cls}:${bucket.v}`, classId: bucket.cls, radiusM: 700 + bucket.v * 900, H: beltBake.H, L: beltBake.L });
+      return null;
+    }
+    const mb = mountBakedData(THREE, d);
+    mb.material.userData.keep = true;
+    for (const g of mb.geometries) g.userData.keep = true;
+    for (const t of mb.textures) t.userData.keep = true;
+    const rec = { mount: mb, built: mb.built, unitR: bucket.unitR, owned: true };
+    shapes.set(id, rec);
+    return rec;
+  }
+
   /**
-   * The body for this rock, or null while it grows. The first ask files the
-   * request with the worker; the rock keeps drawing as its class prototype until
-   * the bake lands, then the next frame mounts it.
+   * The body for this rock, or null while its shape grows. The rock keeps
+   * drawing as its prototype meanwhile — the same shape, so nothing changes
+   * when the body takes over.
    */
   function bodyFor(rock, dist = Infinity, now = 0) {
     const have = bodies.get(rock.key);
     if (have) return have;
-    const d = peek(beltKey(rock));
-    if (!d) {
-      grow(beltKey(rock), { ...rockParams(rock), favour: rock.ice ? null : rock.ore, H: beltBake.H, L: beltBake.L });
-      return null;
-    }
+    const bucket = bucketOf(rock);
+    const shape = shapeFor(bucket);
+    if (!shape) return null;
     if (bodies.size >= bodyBudget) {
       /* 0.3.28: evict the one that has been out of sight longest AND is
        * further away than the rock asking for its slot — never the rock under
-       * the lock or the cutter, and never one mounted moments ago, or a burst
-       * of arrivals evicts each other in turn and the belt boils. */
+       * the lock or the cutter, and never one mounted moments ago. (0.3.62: an
+       * eviction no longer changes what you see — the rock goes back to an
+       * instance of the same shape — so this is about draw calls, not looks.) */
       let victim = null, worst = -Infinity;
       for (const [k, b] of bodies) {
         if (k === sim.lock?.id || k === mining.key) continue;
         if (now - (b.born ?? -Infinity) < BODY_HOLD) continue;
         const bd = b.rock ? Math.hypot(b.rock.x - sim.ship.pos.x, b.rock.y - sim.ship.pos.y, b.rock.z - sim.ship.pos.z) : Infinity;
-        if (bd <= dist) continue;                       // it is nearer than the challenger: it keeps the slot
-        const score = (now - b.used) * 1000 + bd;       // unseen longest first, then furthest
+        if (bd <= dist) continue;
+        const score = (now - b.used) * 1000 + bd;
         if (score > worst) { worst = score; victim = k; }
       }
-      if (!victim) return null;                          // nothing worth displacing: the rock waits its turn
+      if (!victim) return null;
       releaseBody(victim);
     }
-    const rec = mountBody(d, rock.r);
+    const rec = mountShared(shape, rock);
     rec.used = now;
     rec.born = now;
     rec.rock = { key: rock.key, r: rock.r, x: rock.x, y: rock.y, z: rock.z, ore: rock.ore, cls: rock.cls };
     bodies.set(rock.key, rec);
     return rec;
+  }
+
+  /** A close-aboard rock on its prototype's shared shape: its own mesh and tint, nothing else of its own. */
+  function mountShared(shape, rock) {
+    const u = shape.mount.material.userData.bake;
+    const material = bakedMaterial(THREE, { texA: u.tBakeA.value, texB: u.tBakeB.value, texC: u.uEmitScale.value ? u.tBakeC.value : null, emitScale: u.uEmitScale.value });
+    rockTint(rock, material.color);
+    const built = { ...shape.built, scale: rock.r / shape.unitR };
+    const group = new THREE.Group();
+    const unit = new THREE.Group();
+    unit.scale.setScalar(built.scale);
+    group.add(unit);
+    const mesh = new THREE.Mesh(shape.mount.geometries[0], material);
+    mesh.frustumCulled = false;
+    unit.add(mesh);
+    scene.add(group);
+    return { group, unit, mesh, mount: { dispose: () => material.dispose() }, assay: built, built, cls: built.cls, shape: built.shape, shared: true, r: rock.r, used: 0 };
+  }
+
+  /** Place a close-aboard body exactly where, and as, its instance would be. */
+  function poseBody(b, r, t) {
+    b.rock.x = r.x; b.rock.y = r.y; b.rock.z = r.z;
+    b.group.position.set(r.x - origin.x, r.y - origin.y, r.z - origin.z);
+    b.group.rotation.set(t * r.spin * 0.1, t * r.spin * 0.14, r.seed * 6.28);
+    const w = 1 - r.worn * 0.45;
+    stretchOf(r, _stretch);
+    b.group.scale.set(w * _stretch.x, w * _stretch.y, w * _stretch.z);
+    b.group.visible = true;
   }
 
   /**
@@ -1899,11 +2000,13 @@ export function mountGame(canvas) {
     drainBrokenRocks();
     if (!inBelt(sim.ship.pos)) {
       clearRockBuckets();
+      lodMemo.clear();
       cancelGrowth((key) => !key.startsWith("belt:"));
       return;
     }
     const rocks = nearbyRocks(sim.ship.pos, t, 2);
     const sp = sim.ship.pos;
+    if (lodMemo.size > 4 * MAX_ROCKS) lodMemo.clear();   // rocks flown past long ago
     for (const b of rockBuckets) b.counts.fill(0);
     let drawn = 0;
     /* Who gets grown: the nearest big rocks, plus whatever is locked or under
@@ -1926,18 +2029,13 @@ export function mountGame(canvas) {
       near.sort((a, b) => a.rank - b.rank);
       let built = 0;
       for (const { r, d } of near.slice(0, bodyBudget)) {
-        _wantKeys.add(beltKey(r));
         const had = bodies.has(r.key);
-        if (!had && built >= 1) { if (!peek(beltKey(r))) grow(beltKey(r), { ...rockParams(r), favour: r.ice ? null : r.ore, H: beltBake.H, L: beltBake.L }); continue; }
+        if (!had && built >= 1) { shapeFor(bucketOf(r)); continue; }
         const body = bodyFor(r, d, t);
         if (!body) continue;
         if (!had) built++;
         body.used = t;
-        body.rock.x = r.x; body.rock.y = r.y; body.rock.z = r.z;
-        body.group.position.set(r.x - origin.x, r.y - origin.y, r.z - origin.z);
-        body.group.rotation.set(t * r.spin * 0.1, t * r.spin * 0.14, r.seed * 6.28);
-        body.group.scale.setScalar(1 - r.worn * 0.45);
-        body.group.visible = true;
+        poseBody(body, r, t);
         grown.add(r.key);
       }
       /* 0.3.28 — a body that is mounted STAYS drawn while its rock is still in
@@ -1950,11 +2048,7 @@ export function mountGame(canvas) {
         if (grown.has(r.key)) continue;
         const b = bodies.get(r.key);
         if (!b) continue;
-        b.rock.x = r.x; b.rock.y = r.y; b.rock.z = r.z;
-        b.group.position.set(r.x - origin.x, r.y - origin.y, r.z - origin.z);
-        b.group.rotation.set(t * r.spin * 0.1, t * r.spin * 0.14, r.seed * 6.28);
-        b.group.scale.setScalar(1 - r.worn * 0.45);
-        b.group.visible = true;
+        poseBody(b, r, t);
         grown.add(r.key);
       }
       /* and one that really has left the range goes back to the field */
@@ -1968,27 +2062,35 @@ export function mountGame(canvas) {
       const d = Math.hypot(r.x - sp.x, r.y - sp.y, r.z - sp.z);
       if (d > ROCK_DRAW_R) continue;
       if (grown.has(r.key)) { drawn++; continue; }   // it has a real body; the instance would sit inside it
-      const cls = CLASSES[r.cls] ? r.cls : "S";
-      const v = Math.floor((r.seed ?? 0.5) * 9973) % PROTO_VARIANTS;
-      const bucket = protoIndex.get(`${cls}:${v}`);
+      const bucket = bucketOf(r);
       if (!bucket?.mesh) continue;
       const ang = r.r / Math.max(1, d);
-      const lod = ang >= PROTO_LOD_ANG[0] ? 0 : ang >= PROTO_LOD_ANG[1] ? 1 : 2;
+      /* 0.3.62 — lattice hysteresis: a rock sitting on a threshold used to flip
+       * between 768 and 192 triangles frame to frame as it spun and drifted,
+       * which reads as the rock re-forming. It now has to clear the threshold
+       * by a fifth to change lattice, either way. */
+      const prev = lodMemo.get(r.key);
+      const raw = ang >= PROTO_LOD_ANG[0] ? 0 : ang >= PROTO_LOD_ANG[1] ? 1 : 2;
+      let lod = raw;
+      if (prev != null) {
+        const finer = ang >= PROTO_LOD_ANG[0] * LOD_HYST ? 0 : ang >= PROTO_LOD_ANG[1] * LOD_HYST ? 1 : 2;
+        const coarser = ang >= PROTO_LOD_ANG[0] / LOD_HYST ? 0 : ang >= PROTO_LOD_ANG[1] / LOD_HYST ? 1 : 2;
+        lod = finer < prev ? finer : coarser > prev ? coarser : prev;
+      }
+      lodMemo.set(r.key, lod);
       if (bucket.counts[lod] >= bucket.cap) continue;
       /* grow in across the outer slice of the range: nothing pops */
       const k = Math.min(1, (ROCK_DRAW_R - d) / ROCK_FADE);
       _dummy.position.set(r.x - origin.x, r.y - origin.y, r.z - origin.z);
       _dummy.rotation.set(t * r.spin * 0.1, t * r.spin * 0.14, r.seed * 6.28);
-      _dummy.scale.setScalar((r.r * (1 - r.worn * 0.45) * (0.15 + 0.85 * k)) / bucket.unitR);
+      const sc = (r.r * (1 - r.worn * 0.45) * (0.15 + 0.85 * k)) / bucket.unitR;
+      stretchOf(r, _stretch);
+      _dummy.scale.set(sc * _stretch.x, sc * _stretch.y, sc * _stretch.z);
       _dummy.updateMatrix();
       /* the prototype carries the class's surface; the instance carries THIS
        * rock: a lightness jitter off its seed and a lean toward its ore, so the
        * rock you can see is the rock you are about to cut */
-      const look = rockLook(r);
-      const lum = Math.max(0.05, (look.r + look.g + look.b) / 3);
-      const j = 0.84 + ((r.seed * 7919) % 1) * 0.3;
-      const lean = r.rich ? 0.45 : 0.25;
-      _rcol.setRGB(j * (1 - lean + lean * look.r / lum), j * (1 - lean + lean * look.g / lum), j * (1 - lean + lean * look.b / lum));
+      rockTint(r, _rcol);
       const lm = bucket.lods[lod];
       lm.setColorAt(bucket.counts[lod], _rcol);
       lm.setMatrixAt(bucket.counts[lod]++, _dummy.matrix);
@@ -3126,6 +3228,8 @@ export function mountGame(canvas) {
     for (const b of rockBuckets) { for (const m of b.lods) m.dispose(); b.mount?.dispose(); }
     dustGeo.dispose();
     for (const key of [...bodies.keys()]) releaseBody(key);
+    for (const sh of shapes.values()) if (sh.owned) sh.mount.dispose();
+    shapes.clear();
     for (const id of [...impBodies.keys()]) releaseImpactorBody(id);
     rockFx.dispose();
     impactFx.dispose();
