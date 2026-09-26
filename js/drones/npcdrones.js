@@ -1,5 +1,20 @@
 /* LIVING GALAXY — the corporations' drones.
  *
+ * 0.3.59 — a port's drones are its guards and its repair crew. Reported:
+ * too many drones making deliveries, and stations should field combat and
+ * repair drones instead. A corporation's line is now:
+ *
+ *   major    a miner (the corporation's own property — it feeds the shelves),
+ *            a DELIVERY hauler while the sky has fewer than
+ *            DRONE_LINE.deliveryCap of them (else a guard), and a repair drone
+ *   alt      a miner and a guard
+ *   hostile  a gun drone, as before
+ *
+ * A guard of an honest port patrols it and puts rounds on anything hostile
+ * inside its reach — rogue drones, pirates — and its kills are the port's,
+ * not yours. A repair drone patches YOUR hull when you are near its port, out
+ * of a fight, and not wanted by it. Your own drones are untouched.
+ *
  * Every NPC corporation with a port fields a small drone line of its own:
  * miners on the belt nearest its home, haulers on the shared work board
  * (board.js). They are the same machines you build — the same roles, holds
@@ -29,7 +44,16 @@ export const npcDrones = { units: [], lastT: null };
 
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 const STEP = 1;
-const PER_CORP = { major: 3, alt: 2, hostile: 1 };
+export const DRONE_LINE = {
+  deliveryCap: 3,                            // delivery haulers in a whole sky, at most
+  major: ["miner", "haul", "repair"],        // "haul": a hauler while under the cap, a guard after
+  alt: ["miner", "combat"],
+  hostile: ["combat"],
+  guardReach: 3500, guardRange: 1400, guardRate: 1.3, guardDamage: 6,
+  repairReach: 2600, repairRate: 0.8, quietFor: 20,
+};
+/* the sim wires these: rounds, and the hull a repair drone may patch */
+export const npcDroneHooks = { fire: null, patchFor: null, hostiles: null };
 
 function beltPointNear(p, rnd) {
   const b = currentSystem.belt ?? currentSystem.outerBelt;
@@ -45,14 +69,16 @@ export function populateNpcDrones(seed) {
   npcDrones.units.length = 0;
   npcDrones.lastT = null;
   const rnd = rngFromSeed(`${seed}:corpdrones`);
+  let haulers = 0;
   for (const c of corps) {
     const homes = c.ports.map((id) => stationById(id)).filter((s) => s && !s.gnn);
     if (!homes.length) continue;
-    const n = PER_CORP[c.tier] ?? 1;
+    const line = DRONE_LINE[c.tier] ?? ["combat"];
     const tag = c.name.split(/\s+/)[0].toUpperCase().slice(0, 8);
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < line.length; i++) {
       const home = homes[Math.floor(rnd() * homes.length)];
-      const role = c.tier === "hostile" ? (i === 0 ? "combat" : "miner") : i === 0 ? "miner" : rnd() < 0.55 ? "hauler" : "miner";
+      let role = line[i];
+      if (role === "haul") role = haulers < DRONE_LINE.deliveryCap ? (haulers++, "hauler") : "combat";
       const r = DRONE_ROLES[role];
       const site = role === "miner" ? beltPointNear(home, rnd) : null;
       npcDrones.units.push({
@@ -126,6 +152,7 @@ function stepUnit(u, dt) {
   if (u.role === "miner") return stepMiner(u, dt, home);
   if (u.role === "hauler") return stepHauler(u, dt, home);
   if (u.role === "combat") return stepCombat(u, dt, home);
+  if (u.role === "repair") return stepRepair(u, dt, home);
 }
 
 function stepMiner(u, dt, home) {
@@ -169,7 +196,10 @@ function stepHauler(u, dt, home) {
     u.lookAt ??= -1e9;
     if (sim.time - u.lookAt < 20) { u.note = "waiting on the board"; return; }
     u.lookAt = sim.time;
-    const slot = openFreight({ home, cap: u.holdCap, who: u.id, n: 1, maxKm: 60000 })[0];
+    /* 0.3.59: three delivery haulers in a whole sky are a freight line, not a port's
+     * shuttle — local work first, then the best-paying run anywhere on the board */
+    const slot = openFreight({ home, cap: u.holdCap, who: u.id, n: 1, maxKm: 60000 })[0]
+      ?? openFreight({ home, cap: u.holdCap, who: u.id, n: 1 })[0];
     if (!slot || !claim(slot.key, u.id)) { u.note = "no work on the board"; return; }
     u.assign = slot; u.fleg = "pickup";
   }
@@ -197,14 +227,47 @@ function stepHauler(u, dt, home) {
   if (!startDroneBay(u, B, "in")) { u.x = B.x; u.y = B.y; u.z = B.z; }
 }
 
-function stepCombat(u, dt, home) {
-  /* a hold's gun drone: circles its port; the turret board (turrets.js) makes it a hostile contact */
+function patrol(u, dt, home, what) {
   u.t2 = (u.t2 ?? 0) + dt;
-  const a = u.t2 * 0.05;
+  const a = u.t2 * 0.05 + (u.seed?.length ?? 0);
   const R = (home.radius ?? 100) * 3.5;
   flyTo(u, { x: home.x + Math.cos(a) * R, y: home.y + Math.sin(a * 0.7) * 60, z: home.z + Math.sin(a) * R }, dt, 30);
   u.state = "patrol";
-  u.note = `patrolling ${home.name}`;
+  u.note = `${what} ${home.name}`;
+}
+
+function stepCombat(u, dt, home) {
+  /* a hold's gun drone: circles its port; the turret board (turrets.js) makes it a hostile contact */
+  if (u.hostile) return patrol(u, dt, home, "patrolling");
+  /* 0.3.59: an honest port's guard — anything hostile inside its reach gets rounds */
+  const foes = npcDroneHooks.hostiles?.() ?? [];
+  let best = null, bd = DRONE_LINE.guardReach;
+  for (const c of foes) {
+    if (d3(c, home) > DRONE_LINE.guardReach) continue;
+    const d = d3(c, u);
+    if (d < bd) { bd = d; best = c; }
+  }
+  if (!best) return patrol(u, dt, home, "guarding");
+  u.state = "engaged";
+  u.note = `engaging ${best.name ?? "a hostile"} off ${home.name}`;
+  if (bd > DRONE_LINE.guardRange * 0.7) flyTo(u, best, dt, DRONE_LINE.guardRange * 0.6);
+  u.gunCd = (u.gunCd ?? 0) - dt;
+  if (bd < DRONE_LINE.guardRange && u.gunCd <= 0) {
+    u.gunCd = DRONE_LINE.guardRate;
+    const lead = bd / 800;
+    npcDroneHooks.fire?.(u, { x: best.x + (best.vx ?? 0) * lead, y: best.y + (best.vy ?? 0) * lead, z: best.z + (best.vz ?? 0) * lead }, best.id);
+  }
+}
+
+/* 0.3.59: a port's repair drone patches a hull near its port that is out of a fight */
+function stepRepair(u, dt, home) {
+  const job = npcDroneHooks.patchFor?.(u, home) ?? null;
+  if (!job) return patrol(u, dt, home, "standing by off");
+  u.state = "repairing";
+  if (!flyTo(u, job, dt, 90)) { u.note = `to ${job.name}`; return; }
+  job.heal(DRONE_LINE.repairRate * dt);
+  u.note = `patching ${job.name}`;
+  u.patched = (u.patched ?? 0) + DRONE_LINE.repairRate * dt;
 }
 
 /** Drones inside `range` of a point, for the engine's labels and meshes. */

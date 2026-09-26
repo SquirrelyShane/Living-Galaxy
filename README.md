@@ -1085,8 +1085,10 @@ from its bill of materials, with each raw stock the generator knows mapped
 onto a mineral the refineries sell — a Claim Warden costs what its drill
 booms, hopper, kilopower plant and pulse core cost in titanium, aluminium,
 copper and uranium at book value, plus the frame and 18% yard labour, and
-the same bill prints the raw stock you would need to bring instead. Tiers
-still land in the bands the wages and issue rates were balanced against.
+the same bill prints the raw stock you would need to bring instead. Since
+0.3.59 each tier climbs faster than the one below (`TIER_SCALE`: A ×0.8 —
+the only tier still under its parts bill — then B 1.6, C 2.6, D 4.5, E 6.5,
+F 9, G 14): a B hull is half an hour of mining, a capital hull a career.
 
 `shipyard.html` is the registry browser: every hull, its doctrine, drive,
 manifest by catalogue section, flight figures and raw stock; toggle between
@@ -2985,11 +2987,17 @@ holds, `claim/touch/release` track who has what (claims expire in 15 min of
 silence, so a dead drone frees its job). Your haulers, the corporations' drones
 and — through the same calls — fleet hulls share it.
 
-**`js/drones/npcdrones.js`**: every corporation with a port fields 1–3 drones
-(majors 3, alts 2, holds 1): miners on the belt nearest home delivering to their
-port's shelves, haulers taking board slots, a hold's combat drone circling its
-port as a hostile contact that shoots inside 900 u. Same roles, holds and speeds
-as yours; rendered as robots in the port's livery, labelled by flag.
+**`js/drones/npcdrones.js`**: every corporation with a port fields a small line
+(`DRONE_LINE`, 0.3.59): majors a miner, a delivery hauler while the sky has
+fewer than three (a guard after) and a repair drone; alts a miner and a guard;
+holds a gun drone circling the port as a hostile contact that shoots inside
+900 u. Miners deliver to their port's shelves; the three haulers are a freight
+line on the board, local first and then anywhere. An honest port's **guard**
+puts rounds on anything hostile within 3.5 km of its port (the kill is the
+port's); its **repair drone** patches your hull within 2.6 km of the port when
+you are undocked, 20 s out of a fight and not in bad standing. Same roles,
+holds and speeds as yours; rendered as robots in the port's livery, labelled
+by flag.
 
 **Drones vs crewed hulls**: miner 36 / hauler 80 / salvager 48 / harvester 42 /
 courier 30 units of hold (a crewed hauler carries hundreds), 36,000 u/s on the
@@ -3652,6 +3660,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
 | `ground` | 0.3.16: speech units carry real hull, place and grade; maydays only from hulls really under fire (never a raider), naming real attackers, integrity and place; port reports only from hulls at that port with its real census; claim reports name the ores in reach, amounts, value and the raiders/drones on the belt; a finished claim hauls the ore it said pays; the engine's claim topics never fire untrue over a long band |
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
+| `portdrones` | 0.3.59: at most three delivery haulers in any sky; honest ports field miners, guards and repair drones, every major a repair drone, a hold only gun drones, your cap untouched; a guard kills a rogue drone off its port and the kill is the port's; a repair drone patches you out of a fight — not mid-fight, not at bad standing, not beyond its reach; each hull tier costs well over the one below |
 | `belt` | 0.3.58: rocks per cell (2.7, was 6.3), empty cells, most rock is matrix, veins rare, a rock looks like what it carries, and the starter hull's MINE LOOP pays a living (100–1,500 cr/min) rather than a fortune |
 | `childtalk` | 0.3.57: little / child / teen; eight topics answered from the child's own life (parents by name, the port out of the window, a teenager who wants out until you put the time in); a topic moves the bond once a watch; they ask, three answers, the bond moves, a curious child learns a point capped by the body (and a skill past it is never lowered); parents and hands do things with them in the log |
 | `qrf` | 0.3.56: SOS open when a drone or pirate picked the fight, turrets returning fire is self-defence, a P-LOCK attack or a first shot closes it until the one you picked is dead or 90 s pass, an honest attacker keeps it closed, the call names the attacker, the wing pays once for hostiles found still on you (capped) and nothing when they are dead, and its rounds land on the drone with no heat to you |

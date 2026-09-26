@@ -10,6 +10,53 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.59 — 2026-09-26
+
+Ships are the long game; a port's drones are its guards and repair crew.
+
+Reported: ships should cost way more, the economy needs tuning, too many
+drones make deliveries, and stations should field combat and repair drones
+instead — keeping your drones and the corporations' own.
+
+**Hull prices** (`js/shipcost.js` `TIER_SCALE`, yard list average per tier):
+
+| tier | 0.3.58 | 0.3.59 | at ~1,000 cr/min mining (0.3.58 rates) |
+| --- | --- | --- | --- |
+| A | 5,727 | 8,330 | 8 min |
+| B | 15,104 | 34,523 | 35 min |
+| C | 27,252 | 83,359 | 1.4 h |
+| D | 59,433 | 267,447 | 4.5 h |
+| E | 100,143 | 650,929 | 11 h |
+| F | 185,067 | 1,665,602 | 28 h |
+| G | 450,614 | 6,308,598 | 105 h |
+
+Only the A-tier starter keeps the yard-scale cut; from B up a hull costs more
+than its parts bill. Issue rates for your own line still apply on top.
+
+**The corporations' drones** (`js/drones/npcdrones.js` `DRONE_LINE`):
+
+- at most **3 delivery haulers in a whole sky** (`deliveryCap`); a major's
+  third slot is a hauler while under the cap, a guard after. The three are a
+  freight line: local work first, then the best-paying run anywhere.
+- majors: miner, hauler-or-guard, **repair**; alts: miner, **guard**; holds:
+  gun drone as before; the Directorate's port: a guard.
+- a **guard** patrols its port and puts rounds on anything hostile inside
+  3.5 km of it (rogue drones, pirates) — 6 dmg a round every 1.3 s. Its kills
+  are the port's: no heat, no bounty, a toast and a log line.
+- a **repair drone** flies to your hull when you are within 2.6 km of its
+  port, not docked, not hit for 20 s, not an outlaw, and not at −10 standing or
+  worse with it — 0.8 hull a second, logged once per 5 min.
+- sky census: miners 8 → 5, haulers 6 → 3, repair 0 → 4, guards 1 → 3.
+- your own company's drones are untouched (cap 10).
+
+Files: `js/shipcost.js`, `js/drones/npcdrones.js`, `js/sim.js`,
+`js/version.js`, `README.md`; tests `test/portdrones.test.mjs` (new, 24),
+`test/hullspec.test.mjs` (bands), `test/experimental.test.mjs` (the cut is
+A-tier only), `test/droneops.test.mjs` (board sampled across the run),
+`test/smoke-drones-speech.mjs` (the probe check was failing since before
+0.3.58 — a 9,000 u/s probe leaves draw range inside a slow headless frame's
+wait; it now watches for the probe through the wait).
+
 ## 0.3.58 — 2026-09-26
 
 A belt is mostly empty, and mostly rock.

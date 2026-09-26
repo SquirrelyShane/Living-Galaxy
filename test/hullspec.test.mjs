@@ -91,7 +91,8 @@ for (const d of SHIP_DB) {
 
 /* Tiers stay ordered on average, and the bands stay where the economy was balanced. */
 const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
-const bands = { A: 4873, B: 13106, C: 24514, D: 50967, E: 88381, F: 168238, G: 416900 };
+/* 0.3.59: ships are the long game — each tier climbs faster than the one below (shipcost.js TIER_SCALE) */
+const bands = { A: 8330, B: 34523, C: 83359, D: 267447, E: 650929, F: 1665602, G: 6308598 };
 let prev = 0;
 for (const t of "ABCDEFG") {
   const m = avg(byTier[t]);

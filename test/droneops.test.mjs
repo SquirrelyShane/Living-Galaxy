@@ -359,12 +359,18 @@ if (mil) {
   ok(npcDrones.units.every((u) => DRONE_ROLES[u.role] && u.holdCap === DRONE_ROLES[u.role].hold && stations.find((s) => s.id === u.home)), "same roles, holds and a real home port");
   ok(new Set(npcDrones.units.map((u) => u.name)).size === npcDrones.units.length, "distinct names");
   const rep0 = npcDroneReport();
-  run(600, 2);
+  /* 0.3.59: three delivery haulers in a whole sky — sample the board through the run,
+   * not at one instant that may land between their jobs */
+  const seen = new Set();
+  for (let k = 0; k < 60; k++) {
+    run(10, 2);
+    for (const h of boardReport()) if (h.who.startsWith("cd:")) seen.add(h.key);
+  }
   const rep1 = npcDroneReport();
   ok(rep1.some((r) => r.state !== "docked"), `they go out to work (${rep1.filter((r) => r.state !== "docked").length} out)`);
   ok(npcDrones.units.some((u) => u.stats.mined > 0 || u.stats.hauled > 0 || u.hold > 0), "and cut or haul something");
+  ok(seen.size > 0 || !npcDrones.units.some((u) => u.role === "hauler"), `their haulers take board slots (${seen.size} across the run)`);
   const held = boardReport().filter((h) => h.who.startsWith("cd:"));
-  ok(held.length > 0 || !npcDrones.units.some((u) => u.role === "hauler"), `their haulers hold board slots (${held.length})`);
   if (held.length) {
     const k = held[0].key;
     ok(!openFreight({ home: ind, cap: 80, who: "d999" }).some((x) => x.key === k), "a slot a corporation's drone holds is closed to yours");

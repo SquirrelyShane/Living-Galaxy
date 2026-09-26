@@ -41,7 +41,7 @@ import { remnantRadius, surfaceGravity } from "./scale.js";
 import { resetImpacts, startCollision, startStrike, stepImpacts } from "./impacts.js";
 import { resetProbes, stepProbes } from "./probes.js";
 import { stepDroneOps, loadDroneOps, noteDroneKill } from "./drones/ops.js";
-import { populateNpcDrones, stepNpcDrones } from "./drones/npcdrones.js";
+import { populateNpcDrones, stepNpcDrones, npcDroneHooks, npcDrones, DRONE_LINE } from "./drones/npcdrones.js";
 import { board, resetBoard } from "./drones/board.js";
 import { chat, post, resetChat } from "./chat.js";
 import { gnn, gnnPost, resetGnn } from "./gnn.js";
@@ -76,7 +76,7 @@ import { ORES, baseValue, good, goodName, priceAt, rollOre } from "./materials.j
 import { stepEconomy, stockMult, lotMult, askPrice, econReport, wantsOf, econHooks } from "./economy.js";
 import { labourAt } from "./stafflife.js";
 import { bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, stepDockwork } from "./dockwork.js";
-import { buildCorps, corpOfStation, corpOfVessel, blameKill, adjustStanding, standingMargin, corps } from "./corps.js";
+import { buildCorps, corpOfStation, corpOfVessel, corpById, blameKill, adjustStanding, standingMargin, corps } from "./corps.js";
 import { applyRaceToShip, applyRaceTune, loadPilot, pilot, rankStatus, savePilot, serveTime, syncMods, takePayout, title, work } from "./pilot.js";
 import { DEFAULT_SHIP_ID, hullTuneFor, issuedShips, shipById } from "./shipdb.js";
 import { yardQuote } from "./shipcost.js";
@@ -115,6 +115,7 @@ import { notePlayerChoice } from "./aria.js";
 import {
   combatHooks,
   contacts,
+  fireRound,
   mining,
   npcTracer,
   resetCombat,
@@ -1074,6 +1075,21 @@ function wireReactiveSky() {
     if (!call.byPlayer) return;
     sim.toast = `${n.name} is on scene.`;
     sim.lastToastAt = sim.time;
+  };
+  /* 0.3.59: a port's guard drones fire at hostiles on the board; its repair drones patch you */
+  npcDroneHooks.hostiles = () => contacts.filter((c) => c.relation === "hostile" && c.hp > 0 && c.kind !== "cdrone");
+  npcDroneHooks.fire = (u, to, targetId) => fireRound(u, to, 800, DRONE_LINE.guardDamage, u.id, "npc-port", null, targetId);
+  npcDroneHooks.patchFor = (u, home) => {
+    const ship = sim.ship;
+    if (!ship || ship.dockedAt || ship.outlaw || sim.phase !== "play") return null;
+    const max = hullMaxOf(ship);
+    if (ship.hull >= max - 0.5) return null;
+    if (sim.time - (ship.lastHitAt ?? -1e9) < DRONE_LINE.quietFor) return null;   // not mid-fight
+    if (Math.hypot(ship.pos.x - home.x, ship.pos.y - home.y, ship.pos.z - home.z) > DRONE_LINE.repairReach) return null;
+    const co = corpById(u.corpId);
+    if (co && (co.standing ?? 0) < -10) return null;   // a port that does not like you does not fix you
+    if (!u.toldAt || sim.time - u.toldAt > 300) { u.toldAt = sim.time; logEvent(`${home.name}'s repair drone is patching your hull`, "port"); }
+    return { x: ship.pos.x, y: ship.pos.y, z: ship.pos.z, vx: 0, vy: 0, vz: 0, name: "your hull", heal: (a) => { ship.hull = Math.min(max, ship.hull + a); } };
   };
   /* 0.3.56: your turrets fired — self-defence, or a fight you picked? */
   combatHooks.onFire = (c, t) => noteShot(c, t, sim.lock?.id ?? null);
@@ -4184,6 +4200,17 @@ function stepWorld(d) {
 }
 
 function onKill(c, shot = null) {
+  /* 0.3.59: a port's guard drone made the kill — the port's, not yours */
+  if (shot && shot.faction === "npc-port") {
+    const u = npcDrones.units.find((x) => x.id === shot.owner);
+    const home = u ? stationById(u.home) : null;
+    sim.toast = `${home?.name ?? "A port"}'s guard drones destroyed ${c.name}`;
+    sim.lastToastAt = sim.time;
+    logEvent(`${u?.name ?? "A port guard"} destroyed ${c.name}`, "combat");
+    burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ?? 0) * 0.3, count: 6, speed: 24, size: 8, good: "iron_ore", tint: 0.35 });
+    if (c.kind === "npc") { const until = markVesselDown(c.id, sim.time); const n = traffic.find((x) => x.id === c.id); if (n && HOSTILE_ROLES.has(n.role)) pirateKilled(c.id, sim.time); sim.send({ t: "vdown", id: c.id, until }); }
+    return;
+  }
   /* 0.3.56: the Directorate's wing made the kill — theirs, not yours: no heat, no bounty, no credit */
   if (shot && shot.faction === "npc-law") {
     const n = vesselById(shot.owner);

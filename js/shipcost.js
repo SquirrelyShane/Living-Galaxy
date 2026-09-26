@@ -156,8 +156,17 @@ export function stockLines(def) {
 
 /* Entry hulls were priced like flagships. Two corrections a real yard makes:
  * small frames are cheap to lay down (A/B tiers take a scale discount), and a
- * complex sells its own line to its own members at the issue rate. */
-const TIER_SCALE = { A: 0.55, B: 0.7, C: 0.85 };
+ * complex sells its own line to its own members at the issue rate.
+ *
+ * 0.3.59 — and then the ladder was too short. A mining career on the starter
+ * made a D-tier hull in under an hour and a flagship in an afternoon, while
+ * 0.3.52's holds made every size up worth more to own. Ships are the long game
+ * now: the starter tier costs half again what it did, and each tier above it
+ * climbs faster than the one below — a D is an evening's saving, an F a
+ * company's, and a G is what corporations are for. (Tier: 0.3.58 → 0.3.59
+ * multiplier on the part bill: A 0.55 → 0.8, B 0.7 → 1.6, C 0.85 → 2.6,
+ * D 1 → 4.5, E 1 → 6.5, F 1 → 9, G 1 → 14.) */
+export const TIER_SCALE = { A: 0.8, B: 1.6, C: 2.6, D: 4.5, E: 6.5, F: 9, G: 14 };
 export const ISSUE_RATE = 0.45; // members pay 45% for hulls in their line, up to their rank
 
 /**

@@ -774,7 +774,9 @@ const { addWaypointAt } = await import("../js/sim.js");
   const sled = SHIP_DB.find((d) => d.id === "mining_b");
   const list = yardQuote(sled);
   const mine = yardQuote(sled, { complexId: "mining", letter: "B" });
-  ok(list.total < componentBill(sled).total, `entry frames took the yard-scale cut (${componentBill(sled).total} → ${list.total})`);
+  /* 0.3.59: only the A-tier starter keeps the yard-scale cut; from B up a hull costs more than its parts */
+  ok(yardQuote(skiff).total < componentBill(skiff).total, `the starter frame took the yard-scale cut (${componentBill(skiff).total} → ${yardQuote(skiff).total})`);
+  ok(list.total > componentBill(sled).total, `a B-tier hull costs more than its parts (${componentBill(sled).total} → ${list.total})`);
   ok(mine.inLine && mine.total === Math.round(list.total * ISSUE_RATE), `a miner buys their own line at the issue rate (${mine.total} cr)`);
   ok(!yardQuote(sled, { complexId: "mining", letter: "A" }).inLine, "issue rate stops at your rank");
   ok(!yardQuote(sled, { complexId: "salvage", letter: "G" }).inLine, "and at your complex");

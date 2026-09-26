@@ -49,7 +49,14 @@ const setup = await page.evaluate(async () => {
   return { hold: hold?.name ?? null, guards: hold?.guards ?? 0, civ: civ.name };
 });
 console.log("setup:", JSON.stringify(setup));
-await sleep(2500);
+/* 0.3.59: a probe flies 9,000 u/s and leaves draw range inside a couple of
+ * seconds on a slow headless frame — watch for it through the wait rather than
+ * only at the end of it */
+let seenProbe = false;
+for (let i = 0; i < 25; i++) {
+  await sleep(100);
+  seenProbe ||= await page.evaluate(() => window.__lgGL.scene.children.some((c) => /^drone:probe/.test(c.name)));
+}
 const drones = await page.evaluate(() => {
   const { scene } = window.__lgGL;
   const bots = scene.children.filter((c) => /^drone:/.test(c.name));
@@ -64,7 +71,7 @@ console.log("drones:", JSON.stringify(drones));
 ok((drones.kinds.sdrone ?? 0) >= 1, "the interceptor is a robotgen machine");
 if (setup.hold && drones.guards) ok((drones.kinds.guard ?? 0) >= 1 && drones.tetra === 0, `gun drones are robots, no placeholders left (${drones.kinds.guard}/${drones.guards})`);
 else ok(true, "no free port with guns in this sky (guard render skipped)");
-ok((drones.kinds.probe ?? 0) >= 1, "the probe in flight is drawn");
+ok((drones.kinds.probe ?? 0) >= 1 || seenProbe, "the probe in flight is drawn");
 ok(drones.draws.every((n) => n <= 6), `drones stay cheap (${drones.draws.join(",")} meshes each)`);
 /* look at the interceptor from the external camera and grab a frame */
 await page.evaluate(() => { const { sim } = window.__lg; sim.ship.yaw = Math.atan2(30, -40) + Math.PI; });
