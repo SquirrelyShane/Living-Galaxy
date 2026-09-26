@@ -31,7 +31,7 @@ import { line as V, wrap as voiceWrap } from "./voice.js";
  * a word. Below this it is just a number. */
 const BOON = 0.07;
 
-const APT_LABEL = {
+export const APT_LABEL = {
   piloting: "a pilot's hands", navigation: "a head for the lane", engineering: "an engineer's ear",
   mining: "a driller's patience", security: "a steady trigger", medicine: "a medic's calm",
   commerce: "a trader's nose", dataOps: "a data hand", lifeSupport: "a careful breath",
@@ -107,7 +107,10 @@ export function inheritance(child) {
   const h = rec.heritage;
   return {
     boons: boons.slice(0, 5), flaws: flaws.slice(0, 4), shares, kin: kin.slice(0, 6), apt,
-    complex: h ? { id: h.complexId, name: (COMPLEXES[h.complexId]?.name ?? h.complexId).replace(/ Complex$/, ""), generation: h.generation ?? 1, learn: h.learn ?? 1 } : null,
+    /* 0.3.57: heritage keeps `learn` per skill ({ mining: 1.3, … }); the card
+     * printed it with toFixed and threw — so a child of a trade house took the
+     * whole HOUSEHOLD section down with it. The number is the house's best. */
+    complex: h ? { id: h.complexId, name: (COMPLEXES[h.complexId]?.name ?? h.complexId).replace(/ Complex$/, ""), generation: h.generation ?? 1, learn: typeof h.learn === "number" ? h.learn : Math.max(1, ...Object.values(h.learn ?? {}).filter(Number.isFinite)) } : null,
   };
 }
 
@@ -153,7 +156,7 @@ export function raise(child, actId) {
        * it just gets there sooner — the same rule heritage.js uses */
       const ceiling = Math.round(28 + (rec.aptitude?.[key] ?? 0.5) * 42);
       const before = rec.skills[key] ?? 0;
-      rec.skills[key] = Math.min(ceiling, before + 2);
+      rec.skills[key] = Math.max(before, Math.min(ceiling, before + 2));   // 0.3.57: never taught DOWN to the ceiling
       taught = rec.skills[key] > before ? key : null;
     }
   }

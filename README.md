@@ -2761,6 +2761,23 @@ skill they beat both parents at, −3 in one they came in under both at, filed o
 the record as `inherited`. A child raised to 55+ bond comes of age saying the
 berth they want is this one. It all renders as a card in CONSOLE › CREW › BONDS.
 
+**Talking with them** (`js/crew/childtalk.js`, 0.3.57). Eight things you can say
+to a child — how are you doing, what did you learn, how are your parents, what
+do you want to be, look out the port with me, a story, I'm proud of you, a
+rule — and each is answered by who they are: little (under 6 cycles), a child,
+or a teenager (16+); their temperament; what they have actually been taught;
+their parents, aboard or gone; the bond you have put in; and where the ship is
+(docked, the window is that port). A topic moves the bond once a watch. Every
+few watches a child brings YOU a question — why the stars move when we turn,
+can I fly the ship, where do people go when they die, why the grown-ups get the
+good ration packs, why can't I sign on somewhere else, can I have a real watch
+— with three answers; the answer moves the bond, and an honest one to a curious
+child teaches a point, never past what the body can carry. And the grown-ups:
+each watch a parent (or a hand) may do something with a child — reads them the
+docking manual doing the voices, lets them run the pre-flight checklist, loses
+an argument about the rota — into the crew log, and one time in three a point
+of that adult's trade sticks.
+
 **The house** (`js/crew/heritage.js`). Three generations of miners is a family
 with rock in it, and **every complex works this way**, not just the drills. Two
 parents in the same complex make a house; the child is the next generation of it,
@@ -3623,6 +3640,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
 | `ground` | 0.3.16: speech units carry real hull, place and grade; maydays only from hulls really under fire (never a raider), naming real attackers, integrity and place; port reports only from hulls at that port with its real census; claim reports name the ores in reach, amounts, value and the raiders/drones on the belt; a finished claim hauls the ore it said pays; the engine's claim topics never fire untrue over a long band |
 | `bay` | 0.3.15: no scenery shuttles or sorties in any built port; the bay path ends on the lane's own doors and stays inside the hangar; flow boats, captains and corporate drones fly it both ways with no jump across the handover |
+| `childtalk` | 0.3.57: little / child / teen; eight topics answered from the child's own life (parents by name, the port out of the window, a teenager who wants out until you put the time in); a topic moves the bond once a watch; they ask, three answers, the bond moves, a curious child learns a point capped by the body (and a skill past it is never lowered); parents and hands do things with them in the log |
 | `qrf` | 0.3.56: SOS open when a drone or pirate picked the fight, turrets returning fire is self-defence, a P-LOCK attack or a first shot closes it until the one you picked is dead or 90 s pass, an honest attacker keeps it closed, the call names the attacker, the wing pays once for hostiles found still on you (capped) and nothing when they are dead, and its rounds land on the drone with no heat to you |
 | `spawn` | 0.3.55: a hull beside its world stays there — place and relative motion — through any clock jump: joining a day-41 room, joining before the first tick, a relay restart moving the clock back, a month-old room, the quarter-second chase |
 | `gdb` | 0.3.54: no hall candidate at two ports; no look-alike names in a hall or a hull crew; no two people on file share a name; a person on file keeps their name when made again; a paid-off hand lives and returns where you left them; numbers, search, death, chronicle, merge (first filing wins), the device write; one flourish per name |

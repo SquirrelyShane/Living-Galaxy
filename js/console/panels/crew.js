@@ -9,6 +9,7 @@
 import { el, section, note, row, button, group, chips, setBar, card } from "../kit.js";
 import { crew, crewWageTotal, firstName, genderMark } from "../../crew.js";
 import { childrenAboard, CHILD_ACTS, raise } from "../../crew/children.js";
+import { CHILD_TOPICS, talkToChild, openChildAsk, answerChild, childTalkLog, stageOf } from "../../crew/childtalk.js";
 import { tiersOf } from "../../crew/tiers.js";
 import { sim } from "../../sim.js";
 import { social, setSocial, loadSocial, household, settleFamily, berthsUsed, trustOf } from "../../family.js";
@@ -164,13 +165,44 @@ function childCard(root, k, rebuild) {
   const { c, bond, parents, inherit } = k;
   const cd = card(c.name, `${c.age} cycles${parents.length ? ` · ${parents.join(" & ")}` : ""}${c.pronouns ? ` · ${c.pronouns.subj}/${c.pronouns.obj}` : ""}`);
   cd.card.dataset.id = c.id;
-  row(cd.body, "Bond", { value: `${bond}`, bar: true, hint: bond >= 55 ? "would sign on here the day they can" : bond >= 25 ? "knows you" : "you are the person who signs the wages" });
+  const bondRow = row(cd.body, "Bond", { value: `${bond}`, bar: true, hint: bond >= 55 ? "would sign on here the day they can" : bond >= 25 ? "knows you" : "you are the person who signs the wages" });
+  setBar(bondRow.bar, bond / 100, bond >= 55 ? "ok" : bond >= 25 ? "warn" : "hot");   // 0.3.57: the bar was always drawn full
   if (inherit.complex) row(cd.body, "House", { value: inherit.complex.name, hint: `generation ${inherit.complex.generation} · learns this trade ×${inherit.complex.learn.toFixed(2)}` });
   for (const sh of inherit.shares) if (sh.share != null) row(cd.body, `From ${firstName(sh)}`, { value: `${sh.share}%`, hint: "measured, not assumed" });
   for (const b of inherit.boons) row(cd.body, `▲ ${b.label}`, { value: b.kind === "apt" ? `+${Math.round(b.delta * 100)}` : "", hint: b.note });
   for (const f of inherit.flaws) row(cd.body, `▼ ${f.label}`, { value: f.kind === "apt" ? `${Math.round(f.delta * 100)}` : "", hint: f.note });
   if (!inherit.boons.length && !inherit.flaws.length) note(cd.body, "Nothing yet that either parent would not recognise.");
   if (inherit.kin.length) row(cd.body, "Kin aboard", { value: "", hint: inherit.kin.map((x) => `${firstName(x)} ${x.r.toFixed(2)}`).join(" · ") });
+
+  /* 0.3.57 — talk WITH them: what you ask, what they ask you, and the transcript */
+  const stage = stageOf(c);
+  row(cd.body, "Talk", { value: stage === "little" ? "little one" : stage === "teen" ? "teenager" : "child", hint: "they answer as who they are — age, temperament, what they have been taught, the bond" });
+  const ask = openChildAsk(c);
+  if (ask?.ask) {
+    const q = el("div", "tchild-ask");
+    q.append(el("p", "warm", `${firstName(c)} asks: "${ask.ask.q}"`));
+    const g = el("div", "tgroup");
+    for (const a of ask.ask.answers) {
+      const b = button(a.label.toUpperCase(), () => { const r = answerChild(c, a.id); said.textContent = r.ok ? `${firstName(c)}: ${r.line}${r.taught ? ` (+1 ${r.taught})` : ""}` : r.why; rebuild?.(); }, "tiny accent");
+      b.dataset.answer = a.id;
+      g.append(b);
+    }
+    q.append(g);
+    cd.body.append(q);
+  }
+  const tg = el("div", "tgroup tchild-topics");
+  for (const t of CHILD_TOPICS) {
+    const b = button(t.label.toUpperCase(), () => { const r = talkToChild(c, t.id); said.textContent = r.ok ? `${firstName(c)}: ${r.line}${r.delta ? ` (${r.delta > 0 ? "+" : ""}${r.delta} bond)` : ""}` : r.why; rebuild?.(); }, "tiny");
+    b.dataset.childTopic = t.id;
+    tg.append(b);
+  }
+  cd.body.append(tg);
+  const lines = childTalkLog(c, 6).slice().reverse();
+  if (lines.length) {
+    const log = el("div", "in-talk-log");
+    for (const l of lines) log.append(el("p", l.who === "you" ? "you" : "them", `${l.who === "you" ? "You" : firstName(c)}: ${l.text}`));
+    cd.body.append(log);
+  }
 
   const said = el("div", "tfx", "");
   for (const act of CHILD_ACTS) {

@@ -273,6 +273,8 @@ html[data-orient="landscape"] .console .con-sheet.glass { width: min(52rem, 100%
 .tcard .tcare { margin: 6px 0 8px; padding-top: 6px; border-top: 1px dashed var(--glass-line); }
 .tcard .tcare .tgroup { max-width: none; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .tcard .tcare select.tinput { flex: 1 1 44%; max-width: none; min-width: 0; }
+.tcard .tchild-topics, .tcard .tchild-ask .tgroup { max-width: none; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.tcard .tchild-ask { margin: 6px 0; padding: 6px 8px; border-left: 2px solid var(--glass-warm); }
 .tcard .day-log { max-height: 110px; font-size: 11px; border-left: 2px solid var(--glass-line); padding-left: 8px; }
 .tcard .in-talk-log p.them { color: var(--glass-ink); }
 .tcard p.warm { color: var(--glass-warm); font-size: 12px; margin: 4px 0; }

@@ -10,6 +10,53 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.57 — 2026-09-25
+
+Talking with the children aboard.
+
+A child aboard had four buttons and one greeting line, the same one any hand
+gave. **And a child of a trade house did not show at all**: the household card
+printed the house's learning rate with `toFixed`, heritage keeps it per skill,
+and the throw took the whole HOUSEHOLD section down — so on BONDS, children
+were simply missing.
+
+**You ask** (`js/crew/childtalk.js`, new) — eight things on the child's card:
+
+| | answered by |
+| --- | --- |
+| How are you doing? | age and bond — a little one is being a comet; a teenager you have not put the time into says "can we not do this" |
+| What did you learn today? | what they have actually been taught, and in which house's way |
+| How are your parents? | their real parents by name — aboard, and working, or gone, and missed |
+| What do you want to be? | their best aptitude and their house; a neglected teenager: "somewhere that isn't here" |
+| Look out the port with me | where the ship is — the port you are docked at, the world below |
+| Tell them a story | age and curiosity (a curious child asks what happened after) |
+| I'm proud of you | the gift they got from both parents, if they have one |
+| Set a rule | loyalty and caution — some take it (and learn to check a seal), some do not |
+
+Each moves the bond once a watch.
+
+**They ask.** Every few watches a child brings you a question with three
+answers — why do the stars move when we turn · can I fly the ship · where do
+people go when they die · why do the grown-ups get the good ration packs · why
+can't I sign on with another ship · can I have a real watch. The answer moves
+the bond (a brush-off costs), and an honest answer to a curious child teaches a
+point of navigation, piloting, commerce or the house trade — never past what
+their body can carry.
+
+**The grown-ups.** Each watch, a parent aboard (or a hand) may do something
+with a child — reads them the docking manual doing all the voices, lets them
+hold the torque driver, loses an argument about the rota — and it goes in the
+crew log. One time in three a point of that adult's own trade sticks.
+
+Also: teaching never lowers a skill that was already past the body's ceiling
+(`raise()` did), and the child's bond bar is drawn at its value, not full.
+
+Files: `js/crew/childtalk.js` (new), `js/crew/children.js`,
+`js/console/panels/crew.js`, `css/console.css`, `js/version.js`, `README.md`;
+`test/childtalk.test.mjs` (new, 28), `test/smoke-childtalk.mjs` (new, 6).
+
+---
+
 ## 0.3.56 — 2026-09-25
 
 A fight that picked you: call the wing.
