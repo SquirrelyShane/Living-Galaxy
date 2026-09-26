@@ -425,7 +425,7 @@ export async function postNews() {
   const seen = seenNews();
   const fresh = items.filter((n) => n && n.id != null && !seen.has(n.id)).slice(0, NEWS_MAX_AT_ONCE).reverse();
   for (const n of fresh) {
-    gnnPost({ desk: "news", title: `${KIND_TAG[n.kind] ?? ""}${plainText(n.title)}`.slice(0, 120), body: plainText(n.text).slice(0, 400), actions: newsActions(n) });
+    gnnPost({ source: "site", desk: "news", title: `${KIND_TAG[n.kind] ?? ""}${plainText(n.title)}`.slice(0, 120), body: plainText(n.text).slice(0, 400), actions: newsActions(n) });
   }
   markSeen(items.map((n) => n.id));
   account.news.posted += fresh.length;

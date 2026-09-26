@@ -28,8 +28,8 @@ export function gnnStation() {
 }
 
 /** File a bulletin: archived on the desk, auto-accepted into chat with a desk link. */
-export function gnnPost({ desk = "news", title = "", body = "", actions = [] } = {}) {
-  const b = { id: `gnn${gnn.seq++}`, at: gnn.clock(), desk, title, body, actions: actions.filter(Boolean).map((a) => ({ ...a, done: false })) };
+export function gnnPost({ desk = "news", title = "", body = "", actions = [], source = "simulation" } = {}) {
+  const b = { id: `gnn${gnn.seq++}`, at: gnn.clock(), publishedAt: Date.now(), source, desk, title, body, actions: actions.filter(Boolean).map((a) => ({ ...a, done: false })) };
   gnn.posts.push(b);
   if (gnn.posts.length > gnn.cap) gnn.posts.splice(0, gnn.posts.length - gnn.cap);
   const st = gnnStation();
@@ -59,3 +59,13 @@ export function runAction(b, i) {
 export function gnnById(id) { return gnn.posts.find((p) => p.id === id) ?? null; }
 
 export function resetGnn() { gnn.posts.length = 0; }
+
+/** Public text-only broadcast wire. Never publish action callbacks or site announcements. */
+export function gnnBroadcastWire() {
+  return gnn.posts.filter(p => p.source !== "site").slice(-40).map(p => ({
+    id: String(p.id).slice(0, 80), at: Number(p.at) || 0,
+    publishedAt: Number(p.publishedAt) || 0,
+    desk: String(p.desk).slice(0, 24), title: String(p.title).slice(0, 180),
+    body: String(p.body).slice(0, 1600)
+  }));
+}

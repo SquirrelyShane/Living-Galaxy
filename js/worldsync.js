@@ -44,6 +44,7 @@
  * is exactly what `routePose` is still for.
  */
 
+import { gnnBroadcastWire } from "./gnn.js";
 import { fetchWorld, lonely, net, onMessage, onRoom, pushWorld } from "./net.js";
 import { applyRemoteRockHit, applyRemoteStrike, applyWorldSnapshot, logEvent, sim, worldSnapshot } from "./sim.js";
 import { adoptHoles, holeWire } from "./holes.js";
@@ -242,7 +243,7 @@ export function tickWorldSync() {
   if (changed || now - worldsync.lastPush > (alone ? 60000 : 20000)) {
     worldsync.lastPush = now;
     worldsync.lastImpactAt = impactAt;
-    pushWorld(worldSnapshot()).then(() => worldsync.stats.pushes++).catch(() => {});
+    pushWorld({ ...worldSnapshot(), gnn: net.room === "sol" ? gnnBroadcastWire() : [] }).then(() => worldsync.stats.pushes++).catch(() => {});
   }
 }
 
