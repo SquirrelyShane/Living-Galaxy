@@ -23,7 +23,7 @@ import { setAudioMuted, unlockAudio, UI, busLevels, setBusLevel, resetMix, BUSES
 import { loadSave, randomCallsign, skyProgress, useGameStore } from "./store.js";
 import { loadPilot, restorePilot } from "./pilot.js";
 import { mountComms, wireCommsTest } from "./comms/comms.js";
-import { connectNet, disconnectNet } from "./net.js";
+import { connectNet, disconnectNet, primeSol } from "./net.js";
 import { mountInterior } from "./interior/interior.js";
 import { captain, wireCaptainTest } from "./npc/captain.js";
 import { connectCradle, disconnectCradle } from "./npc/cradle.js";
@@ -38,7 +38,7 @@ import { wireNpcChat } from "./npc/chat.js";
 import { renderHold } from "./holdview.js";
 import { wireFleet } from "./fleet.js";
 import { startTutorial } from "./tutorial.js";
-import { mountWorldSync, resetWorldSync } from "./worldsync.js";
+import { applySolPrime, mountWorldSync, resetWorldSync } from "./worldsync.js";
 import { mountChatbox } from "./ui/chatbox.js";
 
 const THR_SPAN = THROTTLE_MAX - THROTTLE_MIN;   // 1.8
@@ -745,16 +745,33 @@ export function mountHud() {
   };
 
   let previewTimer = 0;
+  /* 0.3.73: Sol's clock and state are asked for while the start card is up, so
+   * FLY AS into Sol builds the live sky once instead of building one and then
+   * jumping it (net.js primeSol). Refreshed if it is older than 20 s. */
+  let solPrime = null;
+  const askSol = () => {
+    if (solPrime && performance.now() - solPrime.asked < 20000) return solPrime.p;
+    solPrime = { asked: performance.now(), p: primeSol() };
+    return solPrime.p;
+  };
   const queueSky = () => {
+    if (seedKey === PUBLIC_ROOM) askSol();
     refreshPreview();
     clearTimeout(previewTimer);
     previewTimer = window.setTimeout(() => loadSky(seedKey), seedKey === PUBLIC_ROOM ? 40 : 240);
   };
 
-  const go = (seed) => {
+  let launching = false;
+  const go = async (seed) => {
+    if (launching) return;
+    launching = true;
     unlockAudio();
     clearTimeout(previewTimer);
     seedKey = seed;
+    let prime = null;
+    try { if (seed === PUBLIC_ROOM) prime = await askSol(); } catch { prime = null; }
+    solPrime = null;   // one prime, one launch
+    launching = false;
     store.getState().setRoom(seed, seed === PUBLIC_ROOM);
     launchSim(store.getState().callsign.trim() || "Pilot", seed);
     /* first flight on this device gets the walkthrough; it reads the sky it is in */
@@ -763,6 +780,7 @@ export function mountHud() {
      * one host runs the rocks, one clock runs the ports and the traffic */
     resetWorldSync();
     mountWorldSync();
+    if (prime) applySolPrime(prime);
     connectNet(seed);
     connectCradle(seed);
     connectGdb(seed);

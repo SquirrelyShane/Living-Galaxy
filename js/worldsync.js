@@ -46,7 +46,7 @@
 
 import { gnnBroadcastWire } from "./gnn.js";
 import { fetchWorld, lonely, net, onMessage, onRoom, pushWorld } from "./net.js";
-import { applyRemoteRockHit, applyRemoteStrike, applyWorldSnapshot, logEvent, sim, worldSnapshot } from "./sim.js";
+import { applyRemoteRockHit, applyRemoteStrike, applyWorldSnapshot, logEvent, shiftClock, sim, worldSnapshot } from "./sim.js";
 import { adoptHoles, holeWire } from "./holes.js";
 import { adoptImpactors, impactorWire, setImpactorAuthority } from "./impactors.js";
 import { markVesselDown, trafficDown, traffic, vesselById } from "./npc/traffic.js";
@@ -222,6 +222,27 @@ function bodySignature(body) {
   const craters = (body.craters ?? []).map(c => [c.nx, c.ny, c.nz, c.r, c.depth0, c.rough, c.seed]);
   const ring = body.ring ? [body.ring.inner, body.ring.outer, body.ring.roche, body.ring.born] : null;
   return JSON.stringify([fields.map(key => body[key] ?? null), ring, craters]);
+}
+
+/**
+ * 0.3.73 — put a freshly launched Sol on the room's clock and state before its
+ * first frame (net.js primeSol). Everything the first poll and the first pull
+ * would have done a second later is done here, and recorded as done, so they
+ * find nothing to change. Call after resetWorldSync(), before connectNet().
+ */
+export function applySolPrime(prime) {
+  if (!prime) return false;
+  shiftClock(prime.time + (performance.now() - prime.at) / 1000 - sim.time);
+  sim.clockSynced = true;
+  if (!prime.world) return true;
+  if (!applyWorldSnapshot(prime.world, { includeLive: true })) return true;
+  bodySignatures = new Map(Object.entries(prime.world.bodies ?? {}).map(([id, b]) => [id, bodySignature(b)]));
+  worldsync.wseqSeen = prime.wseq;
+  worldsync.revisionSeen = prime.worldRevision;
+  worldsync.applied = true;
+  worldsync.stats.pulls++;
+  logEvent(`Sol joined on its own clock (${Object.keys(prime.world.bodies ?? {}).length} worlds marked, ${(prime.world.lost ?? []).length} ports lost)`, "net");
+  return true;
 }
 
 export function mountWorldSync() {

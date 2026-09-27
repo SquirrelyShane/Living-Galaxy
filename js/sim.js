@@ -4038,7 +4038,13 @@ export function tickSim(dt) {
     /* the ore a contract named, but only while the loop is flying: your own hand at the cutter cuts whatever you point it at */
   stepMining(sim.ship, d, sim.time, sim.lock, sim.handsOff ? sim.autoPlan?.seamOre ?? null : null);
     stepWorld(d);
+    /* 0.3.73: the ship is still flying with the console up — it still picks up
+     * beacons, and it still tells the room where it is. This branch returned
+     * before the broadcast, so the relay aged the pilot out after a few seconds
+     * of reading gauges; closing the console rejoined it as a stranger. */
+    collectBeaconsNear();
     setEngineLevel(speedOf(sim.ship, sim.frameVel), sim.ship.throttle > 1, sim.ship.throttle);
+    broadcastShip(d);
     return;
   }
 
@@ -4082,13 +4088,21 @@ export function tickSim(dt) {
   stepMining(sim.ship, d, sim.time, sim.lock);
   stepWorld(d);
 
+  collectBeaconsNear();
+
+  setEngineLevel(speedOf(sim.ship, sim.frameVel), sim.ship.throttle > 1, sim.ship.throttle);
+  broadcastShip(d);
+}
+
+function collectBeaconsNear() {
   for (const b of BEACONS) {
     if (sim.beaconsGot.has(b.id)) continue;
     if (dist3(sim.ship.pos, beaconPosition(b, sim.time)) < 420) collectBeacon(b.id, true);
   }
+}
 
-  setEngineLevel(speedOf(sim.ship, sim.frameVel), sim.ship.throttle > 1, sim.ship.throttle);
-
+/** Where this pilot is, for the room — 20 Hz at most, the relay rate-limits further. */
+function broadcastShip(d) {
   sim.netSendAcc += d;
   if (sim.netSendAcc >= 0.05) {
     sim.netSendAcc = 0;

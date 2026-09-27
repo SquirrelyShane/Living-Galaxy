@@ -124,6 +124,36 @@ export async function fetchWorld() {
   return res.json();
 }
 
+/**
+ * 0.3.73 — the shared Sol, asked for BEFORE its sky is built: the clock the room
+ * is on and the state of its worlds. Entering Sol used to build the sky at time
+ * 0, then the first poll jumped the clock by the room's whole age (the sun and
+ * every world swung to where they really are) and the first snapshot re-skinned
+ * the worlds it had marked (Earth changed colour) — a second or two after the
+ * pilot arrived. → { time, world, wseq, worldRevision, at } or null (no relay,
+ * too slow, or not answering); the caller falls back to the old join.
+ */
+export async function primeSol(timeoutMs = 2500) {
+  const ctl = typeof AbortController === "function" ? new AbortController() : null;
+  const timer = setTimeout(() => ctl?.abort(), timeoutMs);
+  try {
+    const res = await fetch("/net/world?room=sol", { cache: "no-store", signal: ctl?.signal });
+    if (!res.ok) return null;
+    const j = await res.json();
+    if (typeof j?.now !== "number") return null;
+    const world = j.world && j.world.v === 1 ? j.world : null;
+    /* the same reading the relay gives a poll (server.py: solTime), so the chase that follows has nothing to correct */
+    const time = world && Number.isFinite(world.time)
+      ? world.time + Math.min(5, Math.max(0, j.now - (j.at ?? j.now)))
+      : Math.max(0, j.now - (j.born ?? j.now));
+    return { time, world, wseq: j.wseq ?? 0, worldRevision: j.worldRevision ?? null, at: performance.now() };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Host only: publish the sky. */
 export async function pushWorld(world) {
   const body = JSON.stringify({ room: net.room, from: selfId(), world });

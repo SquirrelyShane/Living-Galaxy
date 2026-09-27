@@ -37,7 +37,11 @@ function stretch(v, amp) {
   return Math.max(0, Math.min(1, (v - 0.5) * amp + 0.5));
 }
 
+/* 0.3.73: a close-up repaint adds octaves to every painter at once (see planetPainter) */
+let OCT_BOOST = 0;
+
 function fbm(x, y, seed, oct = 4) {
+  oct += OCT_BOOST;
   let v = 0;
   let a = 0.5;
   let f = 1;
@@ -57,6 +61,7 @@ function ridge(x, y, seed, oct = 3) {
   let a = 0.5;
   let f = 1;
   let norm = 0;
+  oct += OCT_BOOST;
   for (let i = 0; i < oct; i++) {
     v += a * (1 - Math.abs(noise(x * f, y * f, seed + i * 31) * 2 - 1));
     norm += a;
@@ -425,6 +430,69 @@ export function makePlanetTexture(kind, baseHex, seed, size = 256, arch = null) 
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.ClampToEdgeWrapping;
   return tex;
+}
+
+/**
+ * 0.3.73 — the close-up skin of the world you are flying at. The sky's skins
+ * are 512–768 px across a whole globe, so at a few radii every texel is a
+ * blurred block the size of a country. This paints the SAME surface (same
+ * painter, palette and seed, so it is the same world) at a higher resolution
+ * with two more noise octaves, a few rows per call so no frame stalls:
+ *   const p = planetPainter(...texArgs, 768); while (!p.step(8)) {…}; p.texture
+ */
+export function planetPainter(kind, baseHex, seed, size = 768, arch = null, boost = 2) {
+  const w = size * 2, h = size;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  const surface = arch?.surface ?? KIND_SURFACE[kind] ?? "barren";
+  seed = Math.round(seed) | 0;
+  const paint = PAINT[surface] ?? PAINT.barren;
+  const pal = arch?.palette ? arch.palette.map(hexToRgb) : paletteFrom(baseHex);
+  let y = 0;
+  let texture = null;
+  return {
+    get done() { return y >= h; },
+    get progress() { return y / h; },
+    get texture() { return texture; },
+    size,
+    /** paint `rows` more rows; → true when the skin is finished */
+    step(rows = 8) {
+      if (y >= h) return true;
+      const n = Math.min(rows, h - y);
+      const img = ctx.createImageData(w, n);
+      OCT_BOOST = boost;
+      try {
+        for (let r = 0; r < n; r++, y++) {
+          const v = y / h;
+          const lat = v * 2 - 1;
+          const pinch = 1 - Math.pow(Math.abs(lat), 8) * 0.35;
+          for (let x = 0; x < w; x++) {
+            const c = paint(x / w, v, lat, pal, seed);
+            const i = (r * w + x) * 4;
+            img.data[i] = Math.max(0, Math.min(255, c[0] * pinch));
+            img.data[i + 1] = Math.max(0, Math.min(255, c[1] * pinch));
+            img.data[i + 2] = Math.max(0, Math.min(255, c[2] * pinch));
+            img.data[i + 3] = 255;
+          }
+        }
+      } finally {
+        OCT_BOOST = 0;
+      }
+      ctx.putImageData(img, 0, y - n);
+      if (y >= h) {
+        texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = 8;
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.userData.closeUp = true;
+        return true;
+      }
+      return false;
+    },
+  };
 }
 
 export function makeRingTexture(seed = 1) {

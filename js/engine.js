@@ -12,7 +12,7 @@ import {
   starBody,
 } from "./bodies.js";
 import { remnantRadius } from "./scale.js";
-import { makeGlowTexture, makePlanetTexture, makeRingTexture } from "./textures.js";
+import { makeGlowTexture, makePlanetTexture, makeRingTexture, planetPainter } from "./textures.js";
 import { rockLook } from "./rockgen.js";
 import { BAKE, rogueParams } from "./bodygen/body.js";
 import { CLASSES } from "./bodygen/classes.js";
@@ -849,6 +849,7 @@ export function mountGame(canvas) {
     for (const [, l] of laneRigs) { scene.remove(l); disposeObject(l, keepMats); }
     for (const id of [...navLights.keys()]) dropNavLight(id);
     laneRigs.clear();
+    dropCloseUp();
     disposeObject(worldRoot, keepMats);
     while (worldRoot.children.length) worldRoot.remove(worldRoot.children[0]);
     texQueue.length = 0;
@@ -883,6 +884,49 @@ export function mountGame(canvas) {
    * `keep` so disposeObject passes it by, and let go when the sky changes. */
   const texCache = new Map();
   let texCacheSky = null;
+
+  /* 0.3.73 — the world you are near gets a close-up skin (js/textures.js
+   * planetPainter): same surface, 1536 px across and two more octaves, painted
+   * a few rows a frame once the sky's own skins are done. One world at a time;
+   * it hands the ordinary skin back when you leave. Tier 0–1 devices skip it. */
+  const CLOSE_IN = 8, CLOSE_OUT = 11;    // radii from the centre: start painting / let go (spawn sits at ~4.6)
+  const closeUp = { id: null, painter: null, tex: null, base: null };
+  const _cu = { x: 0, y: 0, z: 0 };
+  function dropCloseUp() {
+    if (!closeUp.id) return;
+    const p = planets.find((x) => x.id === closeUp.id);
+    if (p && closeUp.tex && p.mat.map === closeUp.tex) { p.mat.map = closeUp.base; p.mat.needsUpdate = true; }
+    closeUp.tex?.dispose();
+    closeUp.id = null; closeUp.painter = null; closeUp.tex = null; closeUp.base = null;
+    sim.closeUpSkin = null;
+  }
+  function stepCloseUp() {
+    const dom = sim.phase !== "menu" && perf.tier >= 2 ? sim.dominant : null;
+    let near = false;
+    if (dom && dom.kind !== "star" && !dom.shattered && bodyPosition(dom.id, sim.time, _cu)) {
+      const d = Math.hypot(_cu.x - sim.ship.pos.x, _cu.y - sim.ship.pos.y, _cu.z - sim.ship.pos.z) / Math.max(1, dom.radius);
+      near = d < (closeUp.id === dom.id ? CLOSE_OUT : CLOSE_IN);
+    }
+    if (closeUp.id && (!near || closeUp.id !== dom.id)) dropCloseUp();
+    if (!near || texQueue.length) return;          // the sky's own skins come first
+    const p = planets.find((x) => x.id === dom.id);
+    if (!p) return;
+    if (!closeUp.id) {
+      const a = texArgs(dom);
+      closeUp.id = dom.id;
+      closeUp.painter = planetPainter(a[0], a[1], a[2], 768, a[4]);
+    }
+    if (closeUp.tex) return;
+    sim.closeUpSkin = { id: dom.id, px: closeUp.painter.size * 2, painting: closeUp.painter.progress };
+    if (closeUp.painter.step(perf.tier >= 3 ? 4 : 2)) {   // ~7 ms a frame on a desktop core at 4 rows; a phone about 2–3×
+      closeUp.tex = closeUp.painter.texture;
+      closeUp.base = p.mat.map;
+      p.mat.map = closeUp.tex;
+      p.mat.color.setRGB(1, 1, 1);
+      p.mat.needsUpdate = true;
+      sim.closeUpSkin = { id: dom.id, px: closeUp.painter.size * 2, painting: 1 };
+    }
+  }
   const texArgs = (b) => [b.kind, b.color, b.id.length * 17 + b.orbit * 0.003, b.radius > 1400 ? 384 : 256, b.arch];
   const texKey = (b) => { const a = texArgs(b); return `${a[0]}|${a[1]}|${a[2]}|${a[3]}|${a[4] ? JSON.stringify(a[4]) : ""}`; };
   function texCacheFor(sky) {
@@ -2812,6 +2856,7 @@ export function mountGame(canvas) {
         job.mat.needsUpdate = true;
       }
     }
+    stepCloseUp();
     updateStations(dt);
     updateAsteroids(sim.time);
     rockFx.update(frameDt, bodies.values());

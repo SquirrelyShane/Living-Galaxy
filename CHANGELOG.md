@@ -10,6 +10,55 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.73 — 2026-09-27
+
+Sol is built once, the console keeps you in the room, and the world you are near gets a close-up skin.
+
+Reported: FLY AS into Sol, then "the entire system reloads, the sun is now moved
+and Earth is a different colour"; opening the console in flight "seems to
+disconnect from the system server", closing it rerenders and reconnects; Earth
+and other planets not rendering well up close.
+
+- **Sol on its own clock from the first frame** (`js/net.js` `primeSol`,
+  `js/worldsync.js` `applySolPrime`, `js/hud.js`). Entering Sol built the sky at
+  time 0; the first poll then jumped the clock by the room's whole age (every
+  world swung to where it really is — the "sun moved") and the first snapshot
+  re-skinned the worlds the host had marked (Earth changed colour). The start
+  card now asks the relay for Sol's clock and state while it is up (refreshed
+  after 20 s, one per launch); FLY AS puts the new sky on that clock and state
+  before its first frame and records the revision as applied, so the first poll
+  and the first pull find nothing to change. No relay, or no answer in 2.5 s:
+  the old join, unchanged. Measured in a browser against a relay made to report
+  a 40-day-old room: 0.3.72's first frames ran at 0.1 s and jumped 3,455,999 s
+  on the third; 0.3.73's first frame is at the room's time and its largest
+  step is 0.1 s.
+- **The console no longer drops you from the room** (`js/sim.js`). With the
+  console up, the tick returned before the ship's state went to the relay, so
+  after a few seconds of reading gauges the room aged the pilot out and closing
+  the console rejoined as a newcomer. The console branch now broadcasts the
+  same 20 Hz state and still picks up beacons (`broadcastShip`,
+  `collectBeaconsNear`). Measured: 0 states a second with the console open on
+  0.3.72, 20 on 0.3.73.
+- **Close-up skin** (`js/textures.js` `planetPainter`, `js/engine.js`). The
+  sky's skins are 512–768 px across a whole globe. Within 8 radii of a world
+  (the spawn sits at about 4.6), once the sky's own skins are done, that world
+  is repainted — same painter, palette and seed, 1536 px across, two more noise
+  octaves — 4 rows a frame (2 on a mid-tier device, none on tier 0–1), and the
+  ordinary skin is handed back past 11 radii. One world at a time. Measured on
+  a desktop core: ~7 ms a frame at 4 rows, ~1.3 s of painting in all.
+
+Files: `js/net.js`, `js/worldsync.js`, `js/hud.js`, `js/sim.js`,
+`js/engine.js`, `js/textures.js`, `js/version.js`, `CHANGELOG.md`;
+`test/solprime.test.mjs` (new, 13).
+
+Verified: 92 node suites green (91 on 0.3.72 + solprime); smokes continue,
+chart, desk and mining green (smoke-chart failed its contact-dwell checks once
+while the full suite ran beside it on the same machine, and passed alone; the
+untouched 0.3.72 failed a different smoke-chart check in the same conditions).
+The close-up skin engaged in a headless flight beside Earth and swapped with no
+errors, but that shot was of the night side — how much sharper it looks on a
+phone is not verified.
+
 ## 0.3.72 — 2026-09-27
 
 MINE IT delivers the job.
