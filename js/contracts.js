@@ -786,6 +786,29 @@ export function deliverableAt(stId = sim.ship.dockedAt) {
   });
 }
 
+/**
+ * 0.3.72 — cargo the player OWES: every open delivery job's good, up to its
+ * quantity. The mining loop's SELL and the market's SELL ALL ORE keep it, so
+ * ore cut for a job is never sold to the best bidder on the way to the desk
+ * that ordered it. → { good: qty }
+ */
+export function owedCargo() {
+  const out = {};
+  for (const a of contracts.active) {
+    const mech = a.mech ?? "deliver";
+    if (mech !== "deliver" || !a.good || !(a.qty > 0)) continue;
+    out[a.good] = (out[a.good] ?? 0) + a.qty;
+  }
+  return out;
+}
+
+/** 0.3.72 — the delivery job a seam site belongs to, or null. */
+export function jobForSite(siteId) {
+  if (siteId == null) return null;
+  const a = contracts.active.find((x) => String(x.id) === String(siteId));
+  return a && (a.mech ?? "deliver") === "deliver" && a.good && a.qty > 0 && a.stationId ? a : null;
+}
+
 /** Close everything deliverable here. Returns credits paid. */
 export function deliverContracts(stId = sim.ship.dockedAt) {
   let paid = 0;

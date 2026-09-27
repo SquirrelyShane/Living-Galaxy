@@ -111,7 +111,7 @@ export function marketBlock(body, st, { repaint = () => {}, ui = "deck" } = {}) 
     U.btn("WITHDRAW", () => { const e = stashWithdraw("all"); if (e) sim.notice = e; repaint(); }));
   const w = U.row(hold, "Smelter", canSmeltAt(st) ? `runs every ore aboard through the works — refine ratios, ${Math.round(6)}% of the value kept` : "no works here — an industrial, military or logistic port smelts");
   if (canSmeltAt(st)) w.append(U.btn("SMELT ALL", () => { const e = smeltAll(); if (e) sim.notice = e; repaint(); }));
-  w.append(U.btn("SELL ALL ORE", () => { const got = sellAllOre(); sim.notice = got > 0 ? `Sold ore and minerals for ${Math.round(got)} cr.` : "Nothing the port buys."; repaint(); }));
+  w.append(U.btn("SELL ALL ORE", () => { const got = sellAllOre(); const kept = Object.entries(sim.oreKept ?? {}).map(([k, q]) => `${Math.round(q)} ${k.replace(/_/g, " ")}`).join(", "); sim.notice = (got > 0 ? `Sold ore and minerals for ${Math.round(got)} cr.` : "Nothing the port buys.") + (kept ? ` Kept ${kept} for your jobs.` : ""); repaint(); }));
   /* 0.3.19: where this shelf sells for more — the trader's first question at any desk */
   const out = U.sec("ROUTES FROM HERE");
   const rs = tradeRoutes({ only: { from: st.id }, pos: st, n: 3 });

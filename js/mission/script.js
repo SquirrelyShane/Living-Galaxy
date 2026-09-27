@@ -43,6 +43,7 @@ export const OPS = {
   UNDOCK:   { label: "Undock" },
   MINE:     { label: "Mine",     target: "seam|point|here", until: { k: "hold", op: ">=", v: 0.9 } },
   SELL:     { label: "Sell",     args: { what: "ore" } },
+  DELIVER:  { label: "Deliver" },   // 0.3.72: close the delivery jobs due at this port
   STASH:    { label: "Stash",    args: { what: "all" } },
   SMELT:    { label: "Smelt" },
   BUY:      { label: "Buy",      args: { good: null, qty: 20 } },

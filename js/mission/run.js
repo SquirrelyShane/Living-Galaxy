@@ -435,7 +435,7 @@ export const EXEC = {
     autopilot.phase = "seek";
     return "flying";
   },
-  SELL: (s) => T.SELL(s),
+  SELL: (s) => T.SELL(s), DELIVER: (s) => T.DELIVER(s),
   STASH(s) {
     const st = stationById(sim.ship.dockedAt);
     if (!st) return "fail:not docked";

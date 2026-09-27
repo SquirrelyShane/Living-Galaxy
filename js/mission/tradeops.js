@@ -16,6 +16,7 @@ import { sim, sellAllOre, tradeBuy, tradeSell, logEvent } from "../sim.js";
 import { holdRoom, roomFor } from "../ship.js";
 import { stationById } from "../stations.js";
 import { bestRoute, sellable, routeLine } from "../traderoutes.js";
+import { deliverContracts, deliverableAt, jobForSite } from "../contracts.js";
 
 export function makeTradeOps({ mission, note, ap }) {
   /**
@@ -73,6 +74,35 @@ export function makeTradeOps({ mission, note, ap }) {
       ap().earned = mission.stats.earned;
       mission.run.why = `sold for ${Math.round(got)} cr at ${st.name}`;
       logEvent(`${mission.active.name}: sold for ${Math.round(got)} cr at ${st.name}`, "trade");
+      return "done";
+    },
+    /* 0.3.72 — close what is due here. A job loop (MINE IT) carries its site: once
+     * that job is paid the loop has done its work and ends after this round;
+     * short of cargo, it goes round again for the rest. */
+    DELIVER(s) {
+      const ship = sim.ship;
+      const st = stationById(ship.dockedAt);
+      if (!st) return "fail:not docked";
+      ap().phase = "trade"; ap().task = `deliver · ${st.name}`;
+      const due = deliverableAt(st.id).length;
+      const paid = due ? deliverContracts(st.id) : 0;
+      const site = s.args?.site ?? null;
+      if (paid > 0) {
+        mission.stats.earned += paid;
+        ap().earned = mission.stats.earned;
+        mission.run.why = `delivered at ${st.name} — ${Math.round(paid).toLocaleString()} cr`;
+        logEvent(`${mission.active.name}: ${mission.run.why}`, "trade");
+      }
+      if (site && !jobForSite(site)) {
+        if (mission.active) mission.active.loop = { mode: "none" };
+        if (!paid) mission.run.why = "the job is closed";
+        return "done";
+      }
+      if (site) {
+        const a = jobForSite(site);
+        mission.run.why = `${st.name} wants ${a.qty} ${a.good.replace(/_/g, " ")} — ${Math.round(ship.hold[a.good] ?? 0)} aboard, back to the seam`;
+        note(mission.run.why);
+      }
       return "done";
     },
     BUY(s) {

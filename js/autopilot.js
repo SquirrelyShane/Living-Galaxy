@@ -49,6 +49,8 @@ import { mining, MINE_RANGE } from "./turrets.js";
 import { preferenceFor } from "./aria.js";
 import { oneStep, makeMission, makeStep } from "./mission/script.js";
 import { mission, startMission, stopMission, resumeMission, tickMission, missionStatusLine, restoreRun, answerAsk } from "./mission/run.js";
+import { jobForSite } from "./contracts.js";
+import { goodName } from "./materials.js";
 
 /** package D's batteryCap(ship) once it lands; the rated battery until then */
 const batteryCap = (ship) => shipMod.batteryCap?.(ship) ?? BATTERY;
@@ -283,6 +285,12 @@ export function engageMiningLoop(seam = null) {
   if (!inBelt(s)) { sim.notice = `${s.name ?? "That point"} is not in a belt — nothing to cut there.`; return false; }
   sim.autoPlan.seam = { x: s.x, y: s.y, z: s.z, name: s.name ?? "the seam", ...(s.site ? { site: String(s.site) } : {}) };
   ariaHooks.onPlayerJob?.("mine", 3);
+  /* 0.3.72: MINE IT on a delivery job flies the JOB, not the market loop: cut
+   * until the order is aboard, dock at the desk that ordered it, deliver, sell
+   * only what is left over — and stop once it is paid. The plain loop sold the
+   * job's ore at the best bidder and never went to the desk at all. */
+  const job = s.site ? jobForSite(s.site) : null;
+  if (job) return engageJobLoop(job);
   const onDock = sim.autoPlan.onDock;
   const desk = onDock === "stash" ? [makeStep("STASH", null, { args: { what: "all" } })]
     : onDock === "smelt" ? [makeStep("SMELT", null, { onFail: "skip" }), makeStep("SELL", null, { args: { what: "ore" } })]
@@ -302,6 +310,27 @@ export function engageMiningLoop(seam = null) {
   if (!startMission(m)) return false;
   setNoticeAbout(`Mining loop on — ${sim.autoPlan.seam.name}, then ${onDock} at the best port${sim.autoPlan.loop ? ", and back out" : ""}. Touch the stick to take it back.`, "AUTO");
   logEvent(`Mining loop engaged — ${sim.autoPlan.seam.name} · on dock: ${onDock} · loop ${sim.autoPlan.loop ? "on" : "off"}`, "nav");
+  return true;
+}
+
+function engageJobLoop(job) {
+  const seam = sim.autoPlan.seam;
+  const d = planDefaults();
+  const m = makeMission({
+    name: "JOB LOOP", builtin: true, mode: "mine",
+    steps: [
+      makeStep("MINE", { kind: "seam", ...seam }, { until: { any: [{ k: "cargoOf", id: job.good, op: ">=", v: job.qty }, { k: "hold", op: ">=", v: 0.9 }] } }),
+      makeStep("DOCK", { kind: "station", id: job.stationId, name: job.stationName }),
+      makeStep("DELIVER", null, { args: { site: String(job.id) } }),
+      makeStep("SELL", null, { args: { what: "ore" }, onFail: "skip" }),
+      makeStep("CHARGE", null, { until: { k: "charge", op: ">=", v: 0.85 } }),
+    ],
+    loop: { mode: "count", count: Infinity },
+    defaults: { thrustCap: d.thrustCap ?? 1, warp: d.warp ?? "auto" },
+  });
+  if (!startMission(m)) return false;
+  setNoticeAbout(`Job loop on — cut ${job.qty} ${goodName(job.good)} at ${seam.name}, deliver to ${job.stationName}. Touch the stick to take it back.`, "AUTO");
+  logEvent(`Job loop engaged — ${job.title} · ${seam.name} → ${job.stationName}`, "nav");
   return true;
 }
 

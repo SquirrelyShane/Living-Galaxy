@@ -48,7 +48,7 @@ function idle({ credits = 400000, hull = 100 } = {}) {
 
 /* ---- the ops exist and are shaped like the others -------------------------- */
 {
-  ok(Object.keys(OPS).length === 18, `eighteen ops (${Object.keys(OPS).length}) — 0.3.10 added FAB`);
+  ok(Object.keys(OPS).length === 19 && typeof EXEC.DELIVER === "function", `nineteen ops (${Object.keys(OPS).length}) — 0.3.10 added FAB, 0.3.72 DELIVER`);
   ok(OPS.REFIT && OPS.BUILD, "REFIT and BUILD are in the op table");
   ok(typeof EXEC.REFIT === "function" && typeof EXEC.BUILD === "function", "and both have an executor registered");
 

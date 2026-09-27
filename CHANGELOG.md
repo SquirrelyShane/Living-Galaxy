@@ -10,6 +10,36 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.72 — 2026-09-27
+
+MINE IT delivers the job.
+
+Reported: accept a mining job on the board, press MINE IT, and the ship went
+into the ordinary mine loop — it docked at whichever port bid best and sold the
+job's ore there, never taking it to the desk that ordered it.
+
+- **MINE IT on a delivery job flies a JOB LOOP** (`js/autopilot.js`
+  `engageJobLoop`): MINE the seam until the order is aboard (or the hold is
+  full) → DOCK at the ordering port → DELIVER → SELL what is left over →
+  CHARGE. Paid, it ends after that round; short, it goes back out for the rest.
+  With no job behind the seam, MINE is the market loop it always was.
+- **New mission op DELIVER** (`js/mission/script.js`, `js/mission/tradeops.js`,
+  one line in `js/mission/run.js`, which is at its 600-line gate): closes the
+  jobs due at the port it is docked at; given the loop's site, it ends the loop
+  once that job is closed.
+- **Nothing sells ore a job is owed** (`js/contracts.js` `owedCargo`,
+  `js/sim.js` `sellAllOre`): the loop's SELL and the market's SELL ALL ORE keep
+  every open delivery job's good up to its quantity, and the market says what
+  it kept ("Kept 60 hematite for your jobs").
+
+Files: `js/autopilot.js`, `js/contracts.js`, `js/sim.js`,
+`js/mission/{script,tradeops,run}.js`, `js/console/panels/market.js`,
+`js/version.js`, `CHANGELOG.md`; `test/jobloop.test.mjs` (new, 19); `test/aria-invest.test.mjs` and `test/mission.test.mjs` count 19 ops.
+
+Verified: 91 node suites green (90 on 0.3.71 + jobloop; the two op-count
+assertions moved 18 → 19). Not checked in a browser or on a phone; the loop's
+fly-to-the-desk leg is the existing DOCK op with a station target.
+
 ## 0.3.71 — 2026-09-27
 
 `lg-patch.sh` keeps its settings in a file, and will not half-patch a folder.

@@ -40,7 +40,7 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
   ok(presets().map((p) => p.name).join(",") === "MINE LOOP,TRADE RUN,SURVEY SWEEP,PATROL", "the four presets");
   const one = oneStep("APPROACH", { kind: "body", id: "mars", name: "Mars" }, { thrustCap: 0.5 });
   ok(one.steps.length === 1 && one.loop.mode === "none" && one.defaults.thrustCap === 0.5 && one.defaults.warp === "auto" && one.builtin, "oneStep builds a one-step builtin mission with defaults");
-  ok(Object.keys(OPS).length === 18, "eighteen ops (0.3.03: REPAIR; 0.3.06: REFIT, BUILD; 0.3.10: FAB)");
+  ok(Object.keys(OPS).length === 19, "nineteen ops (0.3.03: REPAIR; 0.3.06: REFIT, BUILD; 0.3.10: FAB; 0.3.72: DELIVER)");
 }
 
 /* ---- conditions --------------------------------------------------------------- */

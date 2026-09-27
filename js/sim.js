@@ -88,7 +88,7 @@ import { fx as upgradeFx, loadUpgrades, upgradeResists, resistKey } from "./upgr
 import { tickPatchDrone, hullMaxOf } from "./repair.js";
 import { bookRevenue, loadCompany, tickCompany, treasuryPay } from "./company.js";
 import { resetHousehold } from "./family.js";
-import { noteKill, noteDestroyed, resetContracts, tickContracts } from "./contracts.js";
+import { noteKill, noteDestroyed, resetContracts, tickContracts, owedCargo } from "./contracts.js";
 import { resetFleet, tickFleet } from "./fleet.js";
 import { captain, retakeCommand, tickCaptain } from "./npc/captain.js";
 import { crewEffects, updateCrewMods } from "./npc/crewfx.js";
@@ -609,11 +609,17 @@ export function sellAllOre() {
   if (!st) return 0;
   const before = ship.credits;
   let sold = 0;
+  /* 0.3.72: ore a delivery job is waiting on stays aboard (contracts.js owedCargo) */
+  const owed = owedCargo();
+  sim.oreKept = {};
   for (const k of Object.keys(ship.hold)) {
     const g = good(k);
     if (!g || (g.tier !== "ore" && g.tier !== "mineral")) continue;
-    sold += ship.hold[k];
-    tradeSell(k, ship.hold[k]);
+    const q = Math.max(0, ship.hold[k] - (owed[k] ?? 0));
+    if (ship.hold[k] > q) sim.oreKept[k] = ship.hold[k] - q;
+    if (q <= 0) continue;
+    sold += q;
+    tradeSell(k, q);
   }
   /* this is a labelled example: of every desk in reach you chose this one, and
    * the size of the load is how much of a choice it was (js/aria.js) */
