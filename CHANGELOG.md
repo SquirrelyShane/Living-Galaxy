@@ -10,6 +10,31 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.68 — 2026-09-27
+
+The mark follows the cutter.
+
+Left open by 0.3.67: when the mining loop gave up on a seam's marked rock
+(240 s without closing on it), it skipped the rock for 900 s and cut another,
+but the mark stayed on the rock nobody was working.
+
+- **A skipped mark moves** (`js/autopilot.js` `apMine`, `js/field.js`). When
+  the rock the loop gives up on is the seam's marked rock, it is passed over by
+  `siteMarkRock` for the same 900 s (`skipMarkRock` / `markSkipped`), so the
+  chart mark moves to the next rock of the seam and the cutter's +8 goes with
+  it. The log says so: "Could not close on the marked … — mark moved to the
+  next rock of …". When the skip lapses the mark stays where it is while that
+  rock is live; if every rock left has been skipped, the biggest still carries
+  it rather than the mark going to "(last seen)". Skips clear with the field.
+
+Files: `js/autopilot.js`, `js/field.js`, `js/version.js`, `CHANGELOG.md`;
+`test/marks.test.mjs` (+5, 35 — the move and the cutter's follow fail on
+0.3.67).
+
+Verified: 90 node suites green; smokes mining, desk and droneops green. Not
+checked on a phone; the 240 s give-up itself is driven in the test by backdating
+`rockSince`, not by flying into an unreachable rock.
+
 ## 0.3.67 — 2026-09-27
 
 Marks sit on the thing they mark.

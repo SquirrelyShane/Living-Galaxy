@@ -44,7 +44,7 @@ import { bodyPosition, currentSystem, dist3 } from "./bodies.js";
 import { stations, TRACTOR_V } from "./stations.js";
 import { lanePoint } from "./npc/lanes.js";
 import { requestDock } from "./stationworks.js";
-import { inBelt, nearbyRocks, beltExit, siteMarkRock } from "./field.js";
+import { inBelt, nearbyRocks, beltExit, siteMarkRock, skipMarkRock } from "./field.js";
 import { mining, MINE_RANGE } from "./turrets.js";
 import { preferenceFor } from "./aria.js";
 import { oneStep, makeMission, makeStep } from "./mission/script.js";
@@ -956,7 +956,17 @@ export function apMine(seam) {
     if (rel > 4) touch.brake = true;
   }
   /* a rock that the cutter cannot reach for a long while is skipped */
-  if (sim.time - autopilot.rockSince > 240 && !mining.active) { autopilot.skip.set(autopilot.rockKey, sim.time + 900); autopilot.rockKey = null; autopilot.rockSince = sim.time; }
+  if (sim.time - autopilot.rockSince > 240 && !mining.active) {
+    autopilot.skip.set(autopilot.rockKey, sim.time + 900);
+    /* 0.3.68: the seam's mark moves with the cutter, for the same 900 s */
+    if (autopilot.rockKey === marked) {
+      skipMarkRock(marked, sim.time + 900);
+      const next = siteMarkRock(seam.site, sim.time);
+      if (next && next.key !== marked) logEvent(`Could not close on the marked ${best.oreName} — mark moved to the next rock of ${seam.name ?? "the seam"}`, "nav");
+      autopilot.siteRock = next?.key ?? null;
+    }
+    autopilot.rockKey = null; autopilot.rockSince = sim.time;
+  }
   return "cutting";
 }
 

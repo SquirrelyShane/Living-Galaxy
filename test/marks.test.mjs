@@ -98,6 +98,26 @@ let job = null, a = null;
     const res = apMine(sim.autoPlan.seam);
     ok(res === "cutting" && autopilot.rockKey === marked.key, `parked on another rock of the seam, the cutter still goes to the marked one (${res}, ${autopilot.rockKey})`);
   } else ok(true, "single-rock seam");
+  /* 0.3.68 — the cutter gives up on the marked rock (240 s without closing): the mark goes with it */
+  {
+    const jobMark = sim.waypoints.find((w) => w.job === a.id);
+    const was = siteMarkRock(a.id, sim.time).key;
+    waypointPosition(jobMark, {});
+    ok(jobMark.anchor.key === was, "before: chart and cutter on the same rock");
+    autopilot.rockKey = was; autopilot.rockSince = sim.time - 300;
+    ship.pos.x = a.spot.x; ship.pos.y = a.spot.y; ship.pos.z = a.spot.z;   // on the seam, not latched
+    apMine(sim.autoPlan.seam);
+    ok(autopilot.skip.get(was) > sim.time, "the loop skips the rock it cannot close on");
+    sim.time += 1;
+    const moved = waypointPosition(jobMark, {});
+    const now = siteMarkRock(a.id, sim.time);
+    ok(jobMark.anchor.key !== was && jobMark.anchor.key === now.key && d3(moved, now) < 1e-6 && !jobMark.lost, `the mark moves to the next rock (${was} → ${jobMark.anchor.key})`);
+    apMine(sim.autoPlan.seam);
+    ok(autopilot.rockKey === now.key, "and the cutter goes to the rock the mark is on now");
+    sim.time += 901;
+    waypointPosition(jobMark, {});
+    ok(jobMark.anchor.key === now.key, "when the skip lapses the mark does not jump back while its rock is live");
+  }
   disengageAutopilot("test");
   ok(!sim.waypoints.some((w) => w.transient && w.job === a.id), "the mission's own transient mark is not the job's");
 }

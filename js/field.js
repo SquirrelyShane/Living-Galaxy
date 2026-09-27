@@ -362,16 +362,35 @@ export function rockByKey(key, time) {
  * mark never jumps while you are cutting it.
  */
 export function siteMarkRock(siteId, time, prefer = null) {
-  if (prefer) {
+  if (prefer && !markSkipped(prefer, time)) {
     const r = rockByKey(prefer, time);
     if (r && r.site === String(siteId)) return r;
   }
-  let best = null;
+  /* 0.3.68: a rock the cutter gave up on is passed over — unless every rock
+   * left has been, in which case the biggest of them still carries the mark */
+  let best = null, fallback = null;
   for (const b of siteRocks(siteId)) {
     if ((depleted.get(b.key) ?? 0) >= 1) continue;
+    if (!fallback || b.r > fallback.r) fallback = b;
+    if (markSkipped(b.key, time)) continue;
     if (!best || b.r > best.r) best = b;
   }
-  return best ? rockByKey(best.key, time) : null;
+  const pick = best ?? fallback;
+  return pick ? rockByKey(pick.key, time) : null;
+}
+
+/* 0.3.68 — the mark follows the cutter. When the mining loop gives up on a rock
+ * (autopilot.js: 240 s without closing on it), it tells the mark here, for the
+ * same 900 s it leaves the rock alone, so the chart never points at a rock the
+ * loop has stopped working. */
+const markSkip = new Map();          // rock key → sky time the skip lapses
+export function skipMarkRock(key, until) { if (key) markSkip.set(key, until); }
+export function markSkipped(key, time) {
+  const until = markSkip.get(key);
+  if (until === undefined) return false;
+  if (until > time) return true;
+  markSkip.delete(key);
+  return false;
 }
 
 /**
@@ -441,6 +460,7 @@ export function eatRocks(keys) {
 
 export function resetField() {
   depleted.clear();
+  markSkip.clear();
   brokenRocks.length = 0;
   forgetRocks();
 }
