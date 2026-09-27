@@ -34,7 +34,7 @@
  * desk without the desk knowing who hates whom.
  */
 
-import { logEvent, sim, sellPriceAt, currentShipId, addWaypointAt } from "./sim.js";
+import { logEvent, sim, sellPriceAt, currentShipId, addWaypointAt, addAnchoredWaypoint, removeWaypoint } from "./sim.js";
 import { stations, stationById } from "./stations.js";
 import { corpOfStation, corpRelation, corps, adjustStanding, standingLabel } from "./corps.js";
 import { POWERS } from "./data/factions.js";
@@ -203,10 +203,42 @@ export function targetPos(t, time = sim.time, out = {}) {
 
 /** Put a job's next target on the chart as a waypoint. */
 export function markTarget(a) {
+  /* 0.3.67 — the mark is pinned to the THING the job is about, not to where
+   * it was when you pressed MARK: a seam job's biggest live rock, the world,
+   * the beacon, the picket off its moving port, the wanted hull, the boat you
+   * are escorting, the nest. Only a job whose target is a bare point (a wreck
+   * or pod drop) marks a point. */
+  const anchor = anchorFor(a);
+  if (anchor) {
+    const n0 = sim.waypoints.length;
+    const wp = addAnchoredWaypoint(`${a.title} · ${anchor.name}`, anchor.ref, anchor.at);
+    if (sim.waypoints.length === n0) return wp;          // an existing mark on the same thing, now active — yours, left alone
+    if (wp.lost) { removeWaypoint(wp.id); return null; }
+    wp.job = a.id;
+    return wp;
+  }
   const t = a.targets?.[Math.min(a.leg ?? 0, (a.targets?.length ?? 1) - 1)];
   const p = targetPos(t);
   if (!p) return null;
-  return addWaypointAt(`${a.title} · ${t.name ?? "target"}`, p.x, p.y, p.z);
+  const wp = addWaypointAt(`${a.title} · ${t.name ?? "target"}`, p.x, p.y, p.z);
+  wp.job = a.id;
+  return wp;
+}
+
+/** What a job's mark should follow → { ref, name, at } or null (a bare point). */
+export function anchorFor(a) {
+  if (!a) return null;
+  if (a.markId) return { ref: { kind: "vessel", id: a.markId }, name: a.markName ?? "the mark" };
+  if (a.boatId) return { ref: { kind: "boat", id: a.boatId }, name: a.boatName ?? "the boat" };
+  if (a.nestId) return { ref: { kind: "nest", id: a.nestId }, name: a.nestName ?? "the nest" };
+  const t = a.targets?.[Math.min(a.leg ?? 0, (a.targets?.length ?? 1) - 1)];
+  if (!t) return null;
+  const at = targetPos(t);
+  if (t.kind === "point" && a.spot && siteById(a.id)) return { ref: { kind: "site", id: String(a.id) }, name: `${a.spot.name} · ${a.good ? goodName(a.good) : "ore"} rock`, at };
+  if (t.kind === "body") return { ref: { kind: "body", id: t.id }, name: t.name ?? "target", at };
+  if (t.kind === "beacon") return { ref: { kind: "beacon", id: t.id }, name: t.name ?? "target", at };
+  if (t.kind === "station") return { ref: { kind: "station", id: t.id, off: t.off ? { ...t.off } : null }, name: t.name ?? "target", at };
+  return null;
 }
 
 /* 0.3.20 — a job with rock in it names a stretch of belt, and accepting it
@@ -666,19 +698,22 @@ export function acceptContract(c) {
   /* 0.3.20: the rock the job wants is laid in at the place the job names */
   if (a.spot && a.good) {
     openSite({ id: a.id, ore: a.good, count: a.siteCount ?? 8, x: a.spot.x, y: a.spot.y, z: a.spot.z, r: a.spot.r, name: a.spot.name, title: a.title, at: sim.time, rich: a.type === "vein" });
-    sim.autoPlan.seam = { x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name };   // MINE HERE / MINE LOOP work the site
+    sim.autoPlan.seam = { x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name, site: String(a.id) };   // MINE HERE / MINE LOOP work the site (0.3.67: and its marked rock)
     sim.autoPlan.seamOre = a.good;    // 0.3.22: and the cutter works the ore the job asked for
   }
-  if (a.targets?.length) markTarget(a);
+  if (a.targets?.length || a.markId || a.boatId || a.nestId) markTarget(a);   // 0.3.67: hunts and escorts get a mark on the hull too
   const mins = Math.round((a.deadline - sim.time) / 60);
   logEvent(`Accepted: ${c.title} for ${c.corpName} — ${c.pay} cr, ${mins} min`, "contract");
-  sim.notice = `${a.chain ? `${a.chainName} · ${a.tierName} — ` : ""}${c.title} — ${c.pay} cr on completion. ${mins} minutes.${a.targets?.length ? " Waypoint set." : ""}`;
+  sim.notice = `${a.chain ? `${a.chainName} · ${a.tierName} — ` : ""}${c.title} — ${c.pay} cr on completion. ${mins} minutes.${a.targets?.length || a.markId || a.boatId || a.nestId ? " Waypoint set." : ""}`;
   return null;
 }
 
 function settle(a, ok, why) {
   contracts.active.splice(contracts.active.indexOf(a), 1);
   if (a.spot) closeSite(a.id);
+  /* 0.3.67: the job's own marks go with it (they follow a seam, a hull, a nest
+   * that is no longer the player's business; a mark you made yourself stays) */
+  for (const w of sim.waypoints.filter((x) => x.job === a.id)) removeWaypoint(w.id);
   if (sim.autoPlan.seamOre === a.good && !contracts.active.some((x) => x.spot && x.good === a.good)) sim.autoPlan.seamOre = null;
   /* 0.3.47: …and the site stops being "the seam". A closed job's spot stayed in
    * autoPlan.seam, so the next free MINE flew back to wherever that job had

@@ -108,7 +108,8 @@ import { applyTerraformSnapshot, resetAtmoWorks, stepAtmoWorks, terraformSnapsho
 import { autopilot, disengageAutopilot, engageAutopilot, tickAutopilot } from "./autopilot.js";
 import { TRACTOR_R, TRACTOR_V } from "./stations.js";
 import { releaseBuilt, carryBuilt, dropCarried } from "./stationyard.js";
-import { eatRocks, inBelt, nearbyRocks, resetField } from "./field.js";
+import { eatRocks, inBelt, nearbyRocks, resetField, rockByKey, siteMarkRock } from "./field.js";
+import { registerAnchor, resolveAnchor } from "./anchors.js";
 import { threatTo, avoidAim, avoidLevel, deliberate, surfaceOnly, AVOID } from "./avoid.js";
 import { tickContacts, resetContacts } from "./contacts.js";
 import { notePlayerChoice } from "./aria.js";
@@ -350,15 +351,95 @@ export function setActiveWaypoint(id) {
   sim.activeWaypoint = id;
 }
 
-/** Live position of a waypoint — body-locked marks track their world. */
+/**
+ * 0.3.67 — a mark pinned to a THING (js/anchors.js): a rock, a port, a hull, a
+ * drone, a job's seam. Where it is is asked of the thing every read; `fallback`
+ * is where it was when marked. Returns the waypoint (same shape as ever).
+ */
+export function addAnchoredWaypoint(name, anchor, fallback = null, { reuse = true } = {}) {
+  /* the same thing marked twice is one mark: it is made active and renamed, not doubled */
+  const had = sim.waypoints.find((w) => w.anchor && !w.lost && w.anchor.kind === anchor.kind && w.anchor.id === anchor.id && !w.anchor.off && !w.transient);
+  if (reuse && had && !anchor.off) { had.name = name || had.name; sim.activeWaypoint = had.id; return had; }
+  const wp = addWaypoint(name);
+  wp.anchor = { ...anchor };
+  const p = resolveAnchor(wp.anchor, sim.time, _ap);
+  if (p) { wp.x = p.x; wp.y = p.y; wp.z = p.z; }
+  else {
+    if (fallback) { wp.x = fallback.x; wp.y = fallback.y; wp.z = fallback.z; }
+    markLost(wp);
+  }
+  wp._at = sim.time;
+  return wp;
+}
+
+/** A mark whose thing is gone keeps where it last was, and says so, once. */
+function markLost(wp) {
+  if (wp.lost) return;
+  wp.lost = true;
+  if (!/\(last seen\)$/.test(wp.name)) wp.name = `${wp.name} (last seen)`;
+}
+const _ap = { x: 0, y: 0, z: 0 };
+
+/** Live position of a waypoint — body-locked marks track their world, anchored marks their thing. */
 export function waypointPosition(wp, out) {
   const o = out ?? { x: 0, y: 0, z: 0 };
   if (wp.body) return bodyPosition(wp.body, sim.time, o);
+  if (wp.anchor && !wp.lost) {
+    /* one resolve per sky time per mark: the HUD, chart, engine and autopilot all read it */
+    if (wp._at !== sim.time) {
+      const was = wp.anchor.key;
+      const p = resolveAnchor(wp.anchor, sim.time, _ap);
+      if (p) {
+        const dt = sim.time - (wp._at ?? sim.time);
+        if (was !== wp.anchor.key) { wp.vx = 0; wp.vy = 0; wp.vz = 0; }   // the seam's mark moved to its next rock: a hop, not a speed
+        else if (dt > 0) {
+          wp.vx = (p.x - wp.x) / dt; wp.vy = (p.y - wp.y) / dt; wp.vz = (p.z - wp.z) / dt;
+          /* the mark moved to the next rock of a seam, or a hull respawned: a hop, not a speed */
+          if (Math.hypot(wp.vx, wp.vy, wp.vz) > 6000) { wp.vx = 0; wp.vy = 0; wp.vz = 0; }
+        }
+        wp.x = p.x; wp.y = p.y; wp.z = p.z;
+      } else markLost(wp);
+      wp._at = sim.time;
+    }
+  }
   o.x = wp.x;
   o.y = wp.y;
   o.z = wp.z;
   return o;
 }
+
+/** How a waypoint is moving (u/s): its world's, its thing's (measured), or still. */
+export function waypointVelocity(wp, out) {
+  const o = out ?? { x: 0, y: 0, z: 0 };
+  if (wp.body) return bodyVelocity(wp.body, sim.time, o);
+  const live = wp.anchor && !wp.lost;
+  o.x = live ? wp.vx ?? 0 : 0; o.y = live ? wp.vy ?? 0 : 0; o.z = live ? wp.vz ?? 0 : 0;
+  return o;
+}
+
+/* ---- what a mark can be pinned to (the kinds sim.js can see; contracts.js,
+ * drones/ops.js register theirs) ---------------------------------------------- */
+const put = (out, q) => { out.x = q.x; out.y = q.y; out.z = q.z; return out; };
+registerAnchor("body", (a, t, out) => (bodyById(a.id) ? bodyPosition(a.id, t, out) : null));
+registerAnchor("station", (a, t, out) => {
+  const st = stationById(a.id);
+  if (!st) return null;
+  out.x = st.x + (a.off?.x ?? 0); out.y = st.y + (a.off?.y ?? 0); out.z = st.z + (a.off?.z ?? 0);
+  return out;
+});
+registerAnchor("asteroid", (a, t, out) => { const r = rockByKey(a.id, t); if (!r) return null; a.label = r.oreName; return put(out, r); });
+registerAnchor("site", (a, t, out) => {
+  const r = siteMarkRock(a.id, t, a.key);
+  if (!r) return null;
+  a.key = r.key; a.label = r.oreName; a.r = r.r;
+  return put(out, r);
+});
+registerAnchor("vessel", (a, t, out) => { const n = vesselById(a.id); return n && n.job !== "down" ? put(out, n) : null; });
+registerAnchor("boat", (a, t, out) => { const n = flow.find((b) => b.id === a.id); return n ? put(out, n) : null; });
+registerAnchor("nest", (a, t, out) => { const n = nests.find((x) => x.id === a.id); return n && n.hp > 0 ? put(out, n) : null; });
+registerAnchor("beacon", (a, t, out) => { const d = BEACONS.find((b) => b.id === a.id); return d ? put(out, beaconPosition(d, t)) : null; });
+registerAnchor("rock", (a, t, out) => { const m = impactors.find((x) => x.id === a.id); return m ? put(out, m) : null; });
+registerAnchor("debris", (a, t, out) => { const c = chunks.find((x) => x.id === a.id); return c ? put(out, c) : null; });
 
 export function activeWaypoint() {
   return sim.waypoints.find((w) => w.id === sim.activeWaypoint) ?? null;
@@ -1773,7 +1854,7 @@ export function warpNodeById(id) {
     return {
       id, name: wp.name, kind: "point", radius: 0, arriveR: POINT_ARRIVE_R, body: null, point: wp,
       pos: (out) => waypointPosition(wp, out ?? { x: 0, y: 0, z: 0 }),
-      vel: (out) => { const o = out ?? { x: 0, y: 0, z: 0 }; o.x = 0; o.y = 0; o.z = 0; return o; },
+      vel: (out) => waypointVelocity(wp, out ?? { x: 0, y: 0, z: 0 }),
     };
   }
   return null;
@@ -2474,7 +2555,7 @@ export function targetVelocity(kind, id, out) {
   if (kind === "body") return bodyVelocity(id, sim.time, o);
   if (kind === "waypoint") {
     const wp = sim.waypoints.find((w) => w.id === id);
-    if (wp?.body) return bodyVelocity(wp.body, sim.time, o);
+    if (wp) return waypointVelocity(wp, o);
     o.x = 0; o.y = 0; o.z = 0;
     return o;
   }

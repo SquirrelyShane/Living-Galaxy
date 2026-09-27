@@ -21,7 +21,7 @@
  * Kept out of tutorial.js because that file is on the 600-line gate.
  */
 
-import { acquireLock, addWaypointAt, sim, warpBlock, warpDestination, warpNodeById } from "./sim.js";
+import { acquireLock, addAnchoredWaypoint, sim, warpBlock, warpDestination, warpNodeById } from "./sim.js";
 import { stations } from "./stations.js";
 import { UPGRADES, hasUpgrade } from "./upgrades.js";
 import { missionCore, oneStep } from "./mission/script.js";
@@ -111,7 +111,7 @@ export const CORE_STEPS = [
     },
     action: () => {
       const y = coreYard(sim.ship?.pos);
-      return y ? { label: "SET COURSE", run: () => { acquireLock({ kind: "station", id: y.st.id }); addWaypointAt(y.st.name, y.st.x, y.st.y, y.st.z); } } : null;
+      return y ? { label: "SET COURSE", run: () => { acquireLock({ kind: "station", id: y.st.id }); addAnchoredWaypoint(y.st.name, { kind: "station", id: y.st.id }, y.st); } } : null;
     },
     alt: () => {
       const y = coreYard(sim.ship?.pos);

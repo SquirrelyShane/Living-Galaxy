@@ -9,6 +9,7 @@ import { button, el, group, note, row, section, fmtDist } from "../kit.js";
 import { BODIES, bodyById, bodyPosition, dist3, tempLabel } from "../../bodies.js";
 import { contacts } from "../../turrets.js";
 import { TURRET_MODES, forwardOf, rightOf, upOf } from "../../ship.js";
+import { anchorHint } from "../../anchors.js";
 import { addBodyWaypoint, addWaypoint, cycleRelation, removeWaypoint, requestScan, selectBody, setActiveWaypoint, setRelation, sim, stationStatus, toggleWarp, warpBlock, warpStatus, waypointPosition } from "../../sim.js";
 import { mission, missionStatusLine, startMission, stopMission, pauseMission, resumeMission, answerAsk } from "../../mission/run.js";
 import { oneStep } from "../../mission/script.js";
@@ -20,6 +21,9 @@ import { shipFx } from "../../ship.js";
 import { ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceReport, adviceReport } from "../../aria.js";
 import { stationById } from "../../stations.js";
 import { goodName } from "../../materials.js";
+
+/* 0.3.67: what a mark follows, in words */
+const markHint = (w) => (w.body ? "tracks the body" : w.lost ? "last seen — the thing it followed is gone" : anchorHint(w.anchor));
 
 /* `nearestSeam` is a primitive package C exports from autopilot.js; reach it through the namespace so the panel loads either way. */
 const autopilot = AP.autopilot;
@@ -196,7 +200,7 @@ function mountMarks(root, push) {
     if (!sim.waypoints.length) { body.append(el("div", "tempty", "No marks set.")); return; }
     for (const w of sim.waypoints) {
       const active = w.id === sim.activeWaypoint;
-      const r = row(body, w.name, { hint: w.body ? "tracks the body" : "fixed point" });
+      const r = row(body, w.name, { hint: markHint(w) });
       const dist = el("span", "v", "");
       r.value.replaceChildren(group(dist,
         button(active ? "ACTIVE" : "SET", () => { setActiveWaypoint(w.id); rebuild(); }, active ? "on tiny" : "tiny"),
@@ -390,7 +394,7 @@ export default {
   search() {
     const out = [];
     for (const b of BODIES) out.push({ label: b.name, hint: `${b.stats.tierName} · lock or mark`, sub: "targets", focus: `body-${b.id}`, keywords: `body world ${b.stats.deposits?.join(" ") ?? ""}`, status: () => (sim.selected === b.id ? "● LOCKED" : "") });
-    for (const w of sim.waypoints ?? []) out.push({ label: `Mark: ${w.name}`, hint: w.body ? "tracks the body" : "fixed point", sub: "marks", focus: `wp-${w.id}`, keywords: "waypoint mark", status: () => (sim.activeWaypoint === w.id ? "● ACTIVE" : "") });
+    for (const w of sim.waypoints ?? []) out.push({ label: `Mark: ${w.name}`, hint: markHint(w), sub: "marks", focus: `wp-${w.id}`, keywords: "waypoint mark", status: () => (sim.activeWaypoint === w.id ? "● ACTIVE" : "") });
     for (const c of contacts) out.push({ label: c.name, hint: `${c.kind} · ${c.relation}`, sub: "contacts", focus: `contact-${c.id}`, keywords: "contact sensor" });
     out.push({ label: "Warp", hint: "spool the core at the locked body", sub: "targets", keywords: "jump core", run: () => toggleWarp() });
     out.push({ label: "Approach autopilot", hint: "fly to the locked body", sub: "autopilot", keywords: "auto fly", status: () => (mission.active ? missionStatusLine() : autopilot.on ? "ON" : "READY") });

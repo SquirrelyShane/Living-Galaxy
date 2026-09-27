@@ -133,9 +133,12 @@ export function renderHeld(host, st, { btn, onChange = null, rowCls = "bd-offer"
     const v = mk("div", "bd-v");
     v.append(mk("span", "bd-pay", `${a.pay.toLocaleString("en-US")} cr`));
     if (due.includes(a)) v.append(btn("DELIVER", () => { deliverContracts(st.id); onChange?.(); }, true));
-    if (a.targets?.length && (a.progress ?? 0) < 1) v.append(btn("MARK", () => { const wp = markTarget(a); sim.notice = wp ? `Waypoint: ${wp.name}` : "No fix on that target."; onChange?.(); }, false));
-    /* 0.3.20: a job with a seam of its own can be handed straight to the mining loop */
-    if (a.spot && siteById(a.id) && (sim.ship.hold[a.good] ?? 0) < a.qty) v.append(btn("MINE IT", () => { engageMiningLoop({ x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name }); sim.notice = `Mining loop set for ${a.spot.name}.`; onChange?.(); }, true));
+    /* 0.3.67: hunts and escorts can be marked too — the mark follows the hull */
+    if ((a.targets?.length && (a.progress ?? 0) < 1) || a.markId || a.boatId || a.nestId) v.append(btn("MARK", () => { const wp = markTarget(a); sim.notice = wp ? `Waypoint: ${wp.name}` : "No fix on that target."; onChange?.(); }, false));
+    /* 0.3.20: a job with a seam of its own can be handed straight to the mining loop.
+     * 0.3.67: to the seam's ROCK — the loop carries the site, so its mark sits on
+     * the rock the cutter goes to first, not on the empty middle of the scatter */
+    if (a.spot && siteById(a.id) && (sim.ship.hold[a.good] ?? 0) < a.qty) v.append(btn("MINE IT", () => { engageMiningLoop({ x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name, site: String(a.id) }); sim.notice = `Mining loop set for ${a.spot.name}.`; onChange?.(); }, true));
     v.append(btn("ABANDON", () => { abandonContract(a.id); onChange?.(); }, false, true));
     r.append(k, v);
     host.append(r);

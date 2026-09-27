@@ -9,7 +9,7 @@
  */
 
 import { el, section, note, row, button, group, chips, card, pct, setBar } from "../kit.js";
-import { addWaypointAt, sim } from "../../sim.js";
+import { addAnchoredWaypoint, sim } from "../../sim.js";
 import { stationById } from "../../stations.js";
 import { DRONE_ROLES, ASK_LABEL } from "../../drones/roles.js";
 import {
@@ -51,7 +51,7 @@ function droneCard(u, render, ctx) {
   if (u.state === "setup") acts.push(button(asks.length ? "BEGIN · DEFAULTS" : "BEGIN WORK", () => { beginWork(u); render(); }, "accent"));
   if (u.recalled) acts.push(button("RESUME", () => { beginWork(u); render(); }, "accent"));
   if (u.state !== "setup" && !u.recalled) acts.push(button("RECALL", () => { recall(u); render(); }));
-  acts.push(button("MARK", () => { addWaypointAt(u.name, u.x, u.y, u.z); tell(`${u.name} marked.`); }));
+  acts.push(button("MARK", () => { addAnchoredWaypoint(u.name, { kind: "drone", id: u.id }, u); tell(`${u.name} marked.`); }));
   acts.push(button(opened.has(u.id) ? "ORDERS ▴" : "ORDERS ▾", () => { if (opened.has(u.id)) opened.delete(u.id); else opened.add(u.id); render(); }));
   acts.push(button("SCRAP 30%", () => { scrapDrone(u); render(); }, "danger"));
   b.append(group(...acts));

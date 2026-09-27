@@ -27,7 +27,8 @@
  * to GNN's contractors desk. Saved per sky and callsign in localStorage.
  */
 
-import { sim, logEvent, addWaypointAt, waypointPosition } from "../sim.js";
+import { sim, logEvent, addWaypointAt, addAnchoredWaypoint, waypointPosition } from "../sim.js";
+import { registerAnchor } from "../anchors.js";
 import { cargoTotal } from "../ship.js";
 import { stations, stationById } from "../stations.js";
 import { nearbyRocks, wearRock, depleted, CELL } from "../field.js";
@@ -182,6 +183,8 @@ function rollOff(job) {
 /* ---- orders --------------------------------------------------------------- */
 
 export function unitById(id) { return droneOps.units.find((u) => u.id === id) ?? null; }
+/* 0.3.67: a MARK on a drone follows the drone (and turns "last seen" when it is lost or scrapped) */
+registerAnchor("drone", (a, t, out) => { const u = unitById(a.id); if (!u) return null; out.x = u.x; out.y = u.y; out.z = u.z; return out; });
 export function unitsHomedAt(stId) { return droneOps.units.filter((u) => u.home === stId); }
 
 export function setHome(u, stId) {
@@ -776,7 +779,7 @@ const ROLE_STEP = {
       droneOps.veins ??= new Set();
       if (!droneOps.veins.has(cell)) {
         droneOps.veins.add(cell);
-        const wp = addWaypointAt(`Survey · ${rich.oreName} vein`, rich.x, rich.y, rich.z);
+        const wp = addAnchoredWaypoint(`Survey · ${rich.oreName} vein`, { kind: "asteroid", id: rich.key }, rich);   // 0.3.67: on the rock, not where it was
         u.stats.marks++;
         const a2 = assayPoint(rich.x, rich.y, rich.z);
         fileReport("survey", u.name, a2);

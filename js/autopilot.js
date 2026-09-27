@@ -44,7 +44,7 @@ import { bodyPosition, currentSystem, dist3 } from "./bodies.js";
 import { stations, TRACTOR_V } from "./stations.js";
 import { lanePoint } from "./npc/lanes.js";
 import { requestDock } from "./stationworks.js";
-import { inBelt, nearbyRocks, beltExit } from "./field.js";
+import { inBelt, nearbyRocks, beltExit, siteMarkRock } from "./field.js";
 import { mining, MINE_RANGE } from "./turrets.js";
 import { preferenceFor } from "./aria.js";
 import { oneStep, makeMission, makeStep } from "./mission/script.js";
@@ -66,6 +66,7 @@ export const autopilot = {
   chargeSince: null,
   chargeWas: 0,
   seam: null,           // { x, y, z } the mining loop returns to
+  siteRock: null,       // 0.3.67: the key of the job seam's marked rock (field.js siteMarkRock)
   rockKey: null,
   rockSince: 0,
   skip: new Map(),      // rock key → sim time until which the loop leaves it alone
@@ -280,7 +281,7 @@ export function engageMiningLoop(seam = null) {
   const s = seam ?? sim.autoPlan.seam ?? nearestSeam();
   if (!s) { sim.notice = "No belt in this sky to work."; return false; }
   if (!inBelt(s)) { sim.notice = `${s.name ?? "That point"} is not in a belt — nothing to cut there.`; return false; }
-  sim.autoPlan.seam = { x: s.x, y: s.y, z: s.z, name: s.name ?? "the seam" };
+  sim.autoPlan.seam = { x: s.x, y: s.y, z: s.z, name: s.name ?? "the seam", ...(s.site ? { site: String(s.site) } : {}) };
   ariaHooks.onPlayerJob?.("mine", 3);
   const onDock = sim.autoPlan.onDock;
   const desk = onDock === "stash" ? [makeStep("STASH", null, { args: { what: "all" } })]
@@ -904,6 +905,10 @@ export function apMine(seam) {
   const want = sim.autoPlan.seamOre;
   const onOre = want ? all.filter((r) => r.ore === want && (r.worn ?? 0) < 0.97) : null;
   const rocks = onOre?.length ? onOre : all;
+  /* 0.3.67: a job seam has ONE marked rock (field.js siteMarkRock — the same
+   * pick the mark on the chart shows); the cutter goes to that one first */
+  const marked = seam.site ? siteMarkRock(seam.site, sim.time, autopilot.siteRock)?.key ?? null : null;
+  autopilot.siteRock = marked;
   let best = null, bestScore = -Infinity;
   for (const r of rocks) {
     if ((r.worn ?? 0) >= 0.97) continue;
@@ -915,7 +920,7 @@ export function apMine(seam) {
      * contract — the loop used to wander off onto whatever was richest nearby
      * and dock with a full hold and an unfilled order. */
     const wanted = sim.autoPlan.seamOre && r.ore === sim.autoPlan.seamOre ? 6 : 0;
-    const score = (wanted + (r.rich ? 3 : 0) + Math.min(2, r.r / 200) - d / 3000 + (r.key === autopilot.rockKey ? 1.5 : 0)) * preferenceFor("ore", r.ore);
+    const score = (wanted + (r.rich ? 3 : 0) + Math.min(2, r.r / 200) - d / 3000 + (r.key === autopilot.rockKey ? 1.5 : 0) + (r.key === marked ? 8 : 0)) * preferenceFor("ore", r.ore);
     if (score > bestScore) { bestScore = score; best = r; }
   }
   if (!best) {

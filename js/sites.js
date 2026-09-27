@@ -225,6 +225,20 @@ export function siteRocksInCell(cx, cy, cz, cell, out, depleted) {
   }
 }
 
+/** 0.3.67 — a site's rocks as laid (base positions, no wobble, no wear). [] if it is not open. */
+export function siteRocks(id) {
+  const site = sites.get(String(id));
+  return site ? layOut(site) : [];
+}
+
+/** 0.3.67 — the laid rock behind a `site:<id>:<i>` key, or null. */
+export function siteRockBase(key) {
+  if (typeof key !== "string" || !key.startsWith("site:")) return null;
+  const cut = key.lastIndexOf(":");
+  const id = key.slice(5, cut);
+  return siteRocks(id).find((r) => r.key === key) ?? null;
+}
+
 /** For the console: what is open, with how much of it is left. */
 export function siteReport(depleted) {
   return [...sites.values()].map((s) => {

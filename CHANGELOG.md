@@ -10,6 +10,69 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.67 — 2026-09-27
+
+Marks sit on the thing they mark.
+
+Reported: MINE IT on a mining job left the mark in empty space instead of on
+an asteroid; the same for other careers' marks.
+
+A waypoint was a copied point: `addWaypointAt` stored where something was the
+moment you pressed MARK, and only a world (`wp.body`) was ever followed. Ports
+ride their hosts, belt rocks drift on their cells, hulls and drones fly, so
+every other mark was left behind. And a seam job's mark was its SURVEY POINT —
+the middle of the site's scatter, which by construction has no rock in it
+(measured in the test: 50 u of empty space to the nearest surface).
+
+- **Anchored marks** (`js/anchors.js`, new; `js/sim.js`). A mark carries an
+  `anchor` ({ kind, id }) and asks the thing where it is on every read, once per
+  sky time. Kinds: `site`, `asteroid`, `station` (with an offset for pickets),
+  `vessel`, `boat`, `nest`, `beacon`, `body`, `rock`, `debris`, and `drone`
+  (registered by `js/drones/ops.js`). The registry has no imports so any module
+  can add a kind without a load-order cycle. `addAnchoredWaypoint(name, anchor,
+  fallback)`; the same thing marked twice is one mark, made active.
+  `waypointVelocity` gives the thing's measured velocity to `targetVelocity`
+  and the warp node, so an approach leads a moving port instead of chasing it.
+- **When the thing is gone** (hull down, drone lost, seam mined out, site
+  closed) the mark keeps where it last was and is renamed "(last seen)"; it
+  never jumps to a respawn.
+- **Seam jobs mark a rock** (`js/field.js` `rockByKey`, `siteMarkRock`;
+  `js/sites.js` `siteRocks`, `siteRockBase`). The mark is the seam's biggest
+  rock not yet mined out, kept while it lasts, moving to the next when it is
+  gone (a hop, not read as a speed). Accept, MARK and MINE IT all use it.
+- **The cutter goes to the marked rock** (`js/autopilot.js` `apMine`). MINE IT,
+  accepting a seam job and the loop's MINE step carry the site
+  (`sim.autoPlan.seam.site`), and the mission marks its seam on the same rock
+  (`js/mission/run.js`). One pick, `siteMarkRock`, so chart and cutter agree.
+- **Other careers** (`js/contracts.js` `anchorFor`, `js/boardview.js`): surveys
+  and field trips follow the world, lane and relay jobs the beacon, pickets
+  their point off the moving port; bounties, escorts and drone culls get a MARK
+  button and a mark on accept, on the wanted hull, the boat, the nest. A job's
+  own marks come off the chart when it settles; a mark you made yourself stays.
+- **Port marks ride the port**: board, trade routes (MARKET), GNN (CORP), comms
+  offers, the tutorial's SET COURSE and the chart's MARK/SAVE on a port. Drone
+  MARK follows the drone; a survey drone's vein mark sits on the vein rock.
+  CONSOLE › NAV › marks says what each one follows.
+
+Unchanged on purpose: probe drops, chart points and wreck/pod drops are places,
+not things, and stay fixed; a hull saved off the chart stays "(last seen)" so
+the chart does not track hulls your sensors have not resolved.
+
+Files: `js/anchors.js` (new), `js/sim.js`, `js/field.js`, `js/sites.js`,
+`js/contracts.js`, `js/boardview.js`, `js/autopilot.js`, `js/mission/run.js`,
+`js/drones/ops.js`, `js/map.js`, `js/comms/comms.js`, `js/tutorial-core.js`,
+`js/console/panels/{nav,corp,market,work-drones}.js`, `js/version.js`,
+`index.html` (preload list), `CHANGELOG.md`; `test/marks.test.mjs` (new, 30).
+
+Verified: 90 node suites green (89 on 0.3.66 + marks); sites, board, mission,
+autopilot, chart, droneops and console green at their 0.3.66 counts. Smokes
+desk, chart, droneops, economy and continue green. In headless Chromium on
+`server.py`: a mining job accepted in the running game put its mark 0 u from a
+559 u Ilmenite rock, 1,325 u from the survey point the old mark sat on; no page
+errors. Not checked: on a phone, and the canopy diamond itself (it reads the
+same `waypointPosition`). Known: if the cutter skips the marked rock as
+unreachable (240 s), the mark stays on it while the cutter works another.
+
 ## 0.3.66 — 2026-09-26
 
 Player-hosted skies work again.

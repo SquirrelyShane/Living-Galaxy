@@ -17,7 +17,7 @@ import { upgradeLines } from "../../upgrades.js";
 import { tradeRoutes, routeLine } from "../../traderoutes.js";
 import { makeMission, makeStep, presets } from "../../mission/script.js";
 import { startMission } from "../../mission/run.js";
-import { addWaypointAt } from "../../sim.js";
+import { addAnchoredWaypoint } from "../../sim.js";
 
 const DOC = globalThis.document ?? null;
 const YARD_SECTORS = ["industrial", "military"];
@@ -162,7 +162,7 @@ function mountRoutes(root, push) {
       const rr = row(list, `${r.name}: ${r.from.name} → ${r.to.name}`, { hint: `buy ${r.qty} at ${r.buy} · sell at ${r.sell} · +${Math.round(r.margin)} a unit · ~${Math.max(1, Math.round(r.secs / 60))} min · ${Math.round(r.perMin).toLocaleString()} cr/min` });
       rr.value.replaceChildren(group(el("span", "v good", `+${Math.round(r.profit).toLocaleString()}`),
         button("FLY IT", () => { flyRoute(r); key = ""; }, "tiny on"),
-        button("MARK", () => { addWaypointAt(`Buy ${r.name} · ${r.from.name}`, r.from.x, r.from.y, r.from.z); sim.notice = `Waypoint: ${r.from.name}`; }, "tiny")));
+        button("MARK", () => { addAnchoredWaypoint(`Buy ${r.name} · ${r.from.name}`, { kind: "station", id: r.from.id }, r.from); sim.notice = `Waypoint: ${r.from.name}`; }, "tiny")));
     }
     host.append(list);
   });

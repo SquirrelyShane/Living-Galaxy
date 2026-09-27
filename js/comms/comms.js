@@ -23,7 +23,7 @@ import { approachScript, guardScript, laneScript, marketScript, newsScript, pira
 import { traffic, trafficHooks, vesselById, vesselStatus, captainLine } from "../npc/traffic.js";
 import { fightCentre } from "../npc/battles.js";
 import { cradle, traitLine } from "../npc/cradle.js";
-import { addBodyWaypoint, addWaypointAt, logEvent, selectBody, sim, takeSalvageContract, toggleDock, portWants } from "../sim.js";
+import { addBodyWaypoint, addWaypointAt, addAnchoredWaypoint, logEvent, selectBody, sim, takeSalvageContract, toggleDock, portWants } from "../sim.js";
 import { BODIES, bodyTempK } from "../bodies.js";
 import { nearestStation, stationById, stations } from "../stations.js";
 import { contacts } from "../turrets.js";
@@ -236,7 +236,7 @@ function stepMarkets() {
               const ship = sim.ship;
               const st = buyers.sort((a, b) => d3(a, ship.pos) - d3(b, ship.pos))[0];
               selectBody(st.id);
-              const wp = addWaypointAt(st.name, st.x, st.y, st.z);
+              const wp = addAnchoredWaypoint(st.name, { kind: "station", id: st.id }, st);
             },
           }
         : null,
@@ -268,7 +268,7 @@ function stepMarkets() {
           label: "MARK BUYER",
           text: "Mark it on my chart.",
           reply: `${st.name} is on your chart. Bring them ${short.name}. GNN, clear.`,
-          effect: () => { selectBody(st.id); addWaypointAt(st.name, st.x, st.y, st.z); },
+          effect: () => { selectBody(st.id); addAnchoredWaypoint(st.name, { kind: "station", id: st.id }, st); },
         },
       ));
     }

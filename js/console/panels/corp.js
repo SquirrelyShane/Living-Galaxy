@@ -23,7 +23,7 @@ import { CHARTERS, CHARTER_KEYS, COMPANY, boardBrief, company, contacts, foundCo
 import { boardFor, contracts, timeLeft, BOARD } from "../../contracts.js";
 import { renderDesk, renderHeld } from "../../boardview.js";
 import { DESKS, gnn, gnnStation, runAction } from "../../gnn.js";
-import { addWaypointAt } from "../../sim.js";
+import { addAnchoredWaypoint } from "../../sim.js";
 import { mountTown } from "./corp-town.js";
 import { lineSummary, unread } from "../../staffline.js";
 
@@ -313,7 +313,7 @@ function mountGnn(root, push) {
     if (st) {
       const head = section("Galactic News Network");
       const r = row(head, st.name, { hint: "this sky's GNN station — dock for the full desk" });
-      r.value.replaceChildren(button("MARK", () => { addWaypointAt(st.name, st.x, st.y, st.z); sim.notice = `${st.name} marked on your chart.`; }, "tiny"));
+      r.value.replaceChildren(button("MARK", () => { addAnchoredWaypoint(st.name, { kind: "station", id: st.id }, st); sim.notice = `${st.name} marked on your chart.`; }, "tiny"));
       host.append(head);
     }
     for (const [desk, info] of Object.entries(DESKS)) {

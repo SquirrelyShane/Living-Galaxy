@@ -13,7 +13,7 @@ import { BEACONS, BODIES, beaconPosition, bodyById, bodyPosition, currentSystem,
 import {
   acquireLock,
   addBodyWaypoint,
-  addWaypoint,
+  addAnchoredWaypoint,
   addWaypointAt,
   removeWaypoint,
   warpNodeById,
@@ -328,7 +328,7 @@ export function mountMap(store) {
     scan: { label: "SCAN", run: () => { const p = actPoint(); if (!p) return; const rep = remoteScan(p.x, p.y, p.z, p.name); if (rep) { if (pickedPoint) pickedPoint.report = rep; drawSheet(); } } },
     save: { label: "SAVE", run: () => {
       if (menuTarget?.kind === "body") { addBodyWaypoint(menuTarget.id); return; }
-      if (menuTarget?.kind === "station") { const wp = addWaypoint(menuTarget.name); wp.x = menuTarget.x; wp.y = menuTarget.y; wp.z = menuTarget.z; return; }
+      if (menuTarget?.kind === "station") { addAnchoredWaypoint(menuTarget.name, { kind: "station", id: menuTarget.id }, menuTarget); return; }   // 0.3.67: rides the port
       if (menuTarget?.kind === "waypoint") { menuTarget.wp.transient = false; sim.notice = `${menuTarget.name} kept.`; return; }
       if (menuTarget?.kind === "vessel") { addWaypointAt(`${menuTarget.name} (last seen)`, menuTarget.x, menuTarget.y, menuTarget.z); return; }
       const id = nodeFor(true); if (id) { picked = id; pickedPoint = null; sim.notice = "Location saved. It is a warp node now — WARP or APPROACH from the chart, or G with it locked."; drawSheet(); }
@@ -578,8 +578,7 @@ export function mountMap(store) {
       return;
     }
     if (port) {
-      const wp = addWaypoint(port.name);
-      wp.x = port.x; wp.y = port.y; wp.z = port.z;
+      addAnchoredWaypoint(port.name, { kind: "station", id: port.id }, port);   // 0.3.67: rides the port
       return;
     }
     addBodyWaypoint(picked);

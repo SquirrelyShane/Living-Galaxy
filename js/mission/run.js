@@ -12,13 +12,14 @@
  * paused, so a reload never flies by itself.
  */
 
-import { sim, losBlocker, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim.js";
+import { sim, losBlocker, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, addAnchoredWaypoint, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim.js";
 import * as shipMod from "../ship.js";
 import { holdRoom, BATTERY } from "../ship.js";
 import { BODIES, bodyPosition, dist3 } from "../bodies.js";
 import { stationById } from "../stations.js";
 import { tractor } from "../stationworks.js";
 import { inBelt } from "../field.js";
+import { siteById } from "../sites.js";
 import { captain } from "../npc/captain.js";
 import { post } from "../chat.js";
 import { hasUpgrade } from "../upgrades.js";
@@ -246,8 +247,9 @@ export function stepWarpPolicy(s = step()) {
 
 /* ---- targets ------------------------------------------------------------------ */
 
-function markAt(name, p) {
-  const wp = addWaypointAt(name, p.x, p.y, p.z);
+function markAt(name, p, anchor = null) {
+  /* 0.3.67: a seam with a job site behind it is marked ON its rock */
+  const wp = anchor ? addAnchoredWaypoint(name, anchor, p, { reuse: false }) : addWaypointAt(name, p.x, p.y, p.z);
   wp.transient = true;
   mission.run.wpId = wp.id;
   return warpNodeById(wp.id);
@@ -279,7 +281,10 @@ function resolve(s) {
     case "here": node = markAt("the start", mission.origin ?? sim.ship.pos); break;
     case "seam": {
       const seam = typeof ref.x === "number" ? ref : sim.autoPlan.seam ?? nearestSeam();
-      if (seam) { r.seam = { x: seam.x, y: seam.y, z: seam.z, name: seam.name ?? ref.name ?? "the seam" }; node = markAt(r.seam.name, r.seam); }
+      if (seam) {
+        r.seam = { x: seam.x, y: seam.y, z: seam.z, name: seam.name ?? ref.name ?? "the seam", ...(seam.site ? { site: String(seam.site) } : {}) };
+        node = markAt(r.seam.name, r.seam, r.seam.site && siteById(r.seam.site) ? { kind: "site", id: r.seam.site } : null);
+      }
       break;
     }
     case "trade-source": {

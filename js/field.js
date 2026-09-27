@@ -9,7 +9,7 @@
 import { currentSystem } from "./bodies.js";
 import { ORES } from "./materials.js";
 import { classFor, classOre } from "./bodygen/classes.js";
-import { siteRocksInCell, siteHooks, classForOre } from "./sites.js";
+import { siteRocksInCell, siteHooks, classForOre, siteRocks, siteRockBase } from "./sites.js";
 
 const ASTEROID_ORES = ORES.filter((o) => o.found.includes("asteroid"));
 const byIds = (...ids) => ORES.filter((o) => ids.includes(o.id));
@@ -329,6 +329,49 @@ export function nearbyRocks(pos, time, span = 2) {
   }
   _memo.set(key, out);
   return out;
+}
+
+/**
+ * 0.3.67 — one rock by its key, anywhere in the sky, where it is at `time`.
+ * Grows (or reads) only the one cell the key names. null once it is mined out,
+ * the site that laid it has closed, or the key is not a rock's.
+ */
+export function rockByKey(key, time) {
+  if (typeof key !== "string") return null;
+  let cx, cy, cz;
+  if (key.startsWith("site:")) {
+    const b = siteRockBase(key);
+    if (!b) return null;
+    cx = Math.floor(b.x / CELL); cy = Math.floor(b.y / CELL); cz = Math.floor(b.z / CELL);
+  } else {
+    const p = key.split("|");
+    if (p.length !== 4) return null;
+    cx = Number(p[0]); cy = Number(p[1]); cz = Number(p[2]);
+    if (!Number.isInteger(cx) || !Number.isInteger(cy) || !Number.isInteger(cz)) return null;
+  }
+  const rocks = cellCached(cx, cy, cz, time);
+  for (let i = 0; i < rocks.length; i++) if (rocks[i].key === key) return (rocks[i].worn ?? 0) < 1 ? rocks[i] : null;
+  return null;
+}
+
+/**
+ * 0.3.67 — THE rock of a job site: the one its mark sits on and the cutter
+ * goes to first. The biggest rock of the seam that is not mined out — stable
+ * while it lasts, and the mark moves to the next biggest when it is gone.
+ * `prefer` keeps a rock that is still live (the one already marked), so a
+ * mark never jumps while you are cutting it.
+ */
+export function siteMarkRock(siteId, time, prefer = null) {
+  if (prefer) {
+    const r = rockByKey(prefer, time);
+    if (r && r.site === String(siteId)) return r;
+  }
+  let best = null;
+  for (const b of siteRocks(siteId)) {
+    if ((depleted.get(b.key) ?? 0) >= 1) continue;
+    if (!best || b.r > best.r) best = b;
+  }
+  return best ? rockByKey(best.key, time) : null;
 }
 
 /**
