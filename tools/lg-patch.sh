@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# LIVING GALAXY 0.3.69 (0.3.70) — apply a patch zip, ship it, deploy it. From Termux.
+# LIVING GALAXY 0.3.69 (0.3.71) — apply a patch zip, ship it, deploy it. From Termux.
 #
 #   tools/lg-patch.sh apply    FROM TO [ZIP|-] [TEST...]  check, branch update/TO, unzip, run the tests
 #   tools/lg-patch.sh ship     TO                         commit, fast-forward main, push, drop the branch
-#   tools/lg-patch.sh deploy   TO [ZIP|-]                 lg-deploy on the host, check origin + public, update the desktop copy
+#   tools/lg-patch.sh deploy   TO [ZIP|-] [FROM]          lg-deploy on the host, check origin + public, update the desktop copy
 #   tools/lg-patch.sh all      FROM TO [ZIP|-] [TEST...]  apply → (you say y) → ship → deploy
 #   tools/lg-patch.sh abort    TO                         throw away update/TO and go back to main
 #   tools/lg-patch.sh rollback [VERSION]                  revert main's last commit, push, redeploy
 #   tools/lg-patch.sh site     TO [ZIP|-] [TEST]          site zip → host, test, install, restart, check /health
+#   tools/lg-patch.sh config   [set KEY VALUE | unset KEY] show the settings and where each came from; change the file
 #
 # ZIP "-" or left out: $LG_DOWNLOADS/LivingGalaxy-TO-patch.zip (game) or LivingGalaxy-Site-TO.zip (site).
 # TEST left out on apply: every test/*.test.mjs the zip carries.
 #
-# Settings (environment; defaults in brackets):
+# Settings — the environment wins, then the settings file
+# ($LG_CONFIG, default ~/.config/lg-patch.env: KEY=value lines, read not run),
+# then the defaults in brackets:
 #   LG_REPO       the game repo                  [the repo this script sits in]
 #   LG_HOST       ssh host                       [mpcbb]
 #   LG_DESK       desktop game copy on the host  [Desktop/Living-Galaxy]  (relative to home; "" skips it)
@@ -36,6 +39,38 @@ if [ -z "${LG_PATCH_COPY:-}" ]; then
   LG_PATCH_COPY="$tmp" LG_PATCH_SELF="$self" exec bash "$tmp" "$@"
 fi
 trap 'rm -f "$LG_PATCH_COPY"' EXIT
+
+# ---- settings file (0.3.71) ------------------------------------------------------
+# KEY=value lines (an `export ` in front and quotes around the value are fine,
+# # comments and blank lines are skipped). It is PARSED, never sourced: nothing
+# in it runs. A key the environment already has is left to the environment.
+KEYS="LG_REPO LG_HOST LG_DESK LG_SITE_DIR LG_URL LG_PLAY LG_DOWNLOADS LG_BRANCH"
+CONF="${LG_CONFIG:-$HOME/.config/lg-patch.env}"
+declare -A FROM_WHERE=()
+for k in $KEYS; do [ -n "${!k+x}" ] && FROM_WHERE[$k]="environment"; done
+confval() {  # confval RAW → the value: quotes off, ~/ and $HOME/ expanded
+  local v="$1"
+  if [[ "$v" =~ ^\"(.*)\"$ ]] || [[ "$v" =~ ^\'(.*)\'$ ]]; then v="${BASH_REMATCH[1]}"; fi
+  case "$v" in "~/"*) v="$HOME/${v#\~/}" ;; '$HOME/'*) v="$HOME/${v#\$HOME/}" ;; esac
+  printf '%s' "$v"
+}
+if [ -f "$CONF" ]; then
+  n=0
+  while IFS= read -r ln || [ -n "$ln" ]; do
+    n=$((n + 1))
+    ln="${ln%$'\r'}"
+    [[ "$ln" =~ ^[[:space:]]*(#|$) ]] && continue
+    if [[ "$ln" =~ ^[[:space:]]*(export[[:space:]]+)?(LG_[A-Z_]+)=(.*)$ ]]; then
+      k="${BASH_REMATCH[2]}"; raw="${BASH_REMATCH[3]}"
+      case " $KEYS " in *" $k "*) ;; *) printf 'lg-patch: %s:%d: unknown setting %s — ignored\n' "$CONF" "$n" "$k" >&2; continue ;; esac
+      [ -n "${FROM_WHERE[$k]:-}" ] && continue
+      printf -v "$k" '%s' "$(confval "$raw")"
+      FROM_WHERE[$k]="$CONF"
+    else
+      printf 'lg-patch: %s:%d: not a KEY=value line — ignored\n' "$CONF" "$n" >&2
+    fi
+  done < "$CONF"
+fi
 
 HERE="$(cd "$(dirname "$LG_PATCH_SELF")/.." && pwd)"
 REPO="${LG_REPO:-$HERE}"
@@ -153,9 +188,19 @@ cmd_ship() {
 
 # ---- deploy --------------------------------------------------------------------
 fetchver() { sed -n 's/^export const VERSION = "\(.*\)";$/\1/p'; }
+prevver() {  # prevver TO → the version main had before TO (from js/version.js's history), or ""
+  local c v
+  for c in $(git -C "$REPO" log --format=%H -n 40 "$BRANCH" -- js/version.js 2>/dev/null); do
+    v="$(git -C "$REPO" show "$c:js/version.js" 2>/dev/null | fetchver || true)"
+    [ -n "$v" ] && [ "$v" != "$1" ] && ! vge "$v" "$1" && { printf '%s' "$v"; return 0; }
+  done
+  return 0
+}
 cmd_deploy() {
-  need "${1:-}" "deploy TO [ZIP|-]"; local to="$1"; vers "$to"
+  need "${1:-}" "deploy TO [ZIP|-] [FROM]"; local to="$1"; vers "$to"
   local zip; zip="$(zipof "${2:-}" "LivingGalaxy-$to-patch.zip")"
+  local from="${3:-}"; [ -n "$from" ] || from="$(prevver "$to")"
+  [ -z "$from" ] || vers "$from"
   say "lg-deploy on $HOST"
   ssh "$HOST" lg-deploy
   local got
@@ -171,20 +216,75 @@ cmd_deploy() {
   [ "$got" = "$to" ] || stop "public $URL serves ${got:-nothing} — expected $to (Cloudflare cache? purge $PLAY/js/version.js)"
   good "public: $to"
   [ -n "$DESK" ] || { say "LG_DESK empty — desktop copy skipped"; return 0; }
-  [ -f "$zip" ] || say "no zip at $zip — a plain-folder desktop copy cannot be patched (a git clone still pulls)"
-  [ -f "$zip" ] && scp -q "$zip" "$HOST:/tmp/lg-game-patch.zip"
+  # the zip travels under its own version's name, so a stale one from an
+  # earlier run can never be the one unpacked
+  local rz="/tmp/lg-game-patch-$to.zip"
+  if [ -f "$zip" ]; then scp -q "$zip" "$HOST:$rz"; else say "no zip at $zip — a plain-folder desktop copy cannot be patched (a git clone still pulls)"; fi
   remote '
 set -e
-d="$HOME/$1"; to="$2"; branch="$3"
-[ -d "$d" ] || { echo "STOP: no desktop copy at $d (set LG_DESK)"; exit 1; }
-if [ -d "$d/.git" ]; then git -C "$d" pull -q --ff-only origin "$branch"
-elif [ -f /tmp/lg-game-patch.zip ]; then python3 -m zipfile -e /tmp/lg-game-patch.zip "$d"
-else echo "STOP: $d is not a git clone and there is no zip to apply"; exit 1; fi
-rm -f /tmp/lg-game-patch.zip /tmp/lg-remote.sh
-grep -Fqx "export const VERSION = \"$to\";" "$d/js/version.js" || { echo "STOP: desktop copy is not at $to"; exit 1; }
+d="$HOME/$1"; to="$2"; branch="$3"; from="$4"; rz="$5"
+ver() { sed -n "s/^export const VERSION = \"\(.*\)\";\$/\1/p" "$d/js/version.js" 2>/dev/null; }
+done_() { rm -f "$rz" /tmp/lg-remote.sh; }
+[ -d "$d" ] || { done_; echo "STOP: no desktop copy at $d — tools/lg-patch.sh config set LG_DESK <folder under your home>"; exit 1; }
+was="$(ver)"
+if [ -d "$d/.git" ]; then
+  git -C "$d" pull -q --ff-only origin "$branch"
+elif [ "$was" = "$to" ]; then
+  echo "desktop copy already at $to"
+elif [ -z "$from" ] || [ "$was" != "$from" ]; then
+  # 0.3.71: a changed-files-only zip over a folder at any OTHER version would
+  # stamp it $to while leaving out everything between — refuse, and say how
+  done_
+  echo "STOP: $d is a plain folder at ${was:-an unknown version}; this zip takes ${from:-the previous version} to $to."
+  echo "      Make it a git clone once and every deploy pulls it instead:"
+  echo "      on $(hostname): cd ~ && mv $1 $1.old && git clone -q \$(git -C /srv/living-galaxy/src/game remote get-url origin) $1"
+  exit 1
+elif [ -f "$rz" ]; then
+  python3 -m zipfile -e "$rz" "$d"
+else
+  done_; echo "STOP: $d is a plain folder at $was and there is no zip to apply"; exit 1
+fi
+done_
+[ "$(ver)" = "$to" ] || { echo "STOP: desktop copy is at $(ver), not $to"; exit 1; }
 echo "desktop copy: $to"
-' "$DESK" "$to" "$BRANCH"
+' "$DESK" "$to" "$BRANCH" "$from" "$rz"
   good "$to deployed"
+}
+
+# ---- config (0.3.71) ---------------------------------------------------------------
+cmd_config() {
+  case "${1:-}" in
+    "")
+      echo "settings file: $CONF$([ -f "$CONF" ] || echo " (none yet)")"
+      local k val
+      for k in $KEYS; do
+        case "$k" in
+          LG_REPO) val="$REPO" ;; LG_HOST) val="$HOST" ;; LG_DESK) val="$DESK" ;; LG_SITE_DIR) val="$SITE_DIR" ;;
+          LG_URL) val="$URL" ;; LG_PLAY) val="$PLAY" ;; LG_DOWNLOADS) val="$DL" ;; LG_BRANCH) val="$BRANCH" ;;
+        esac
+        printf '  %-13s %-44s %s\n' "$k" "${val:-\"\"}" "${FROM_WHERE[$k]:-default}"
+      done ;;
+    set)
+      local k="${2:-}"; [ $# -ge 3 ] || stop "config set KEY VALUE"
+      case " $KEYS " in *" $k "*) ;; *) stop "$k is not a setting ($KEYS)" ;; esac
+      local v="$3"
+      [[ "$v" != *$'\n'* ]] || stop "a value is one line"
+      mkdir -p "$(dirname "$CONF")"
+      touch "$CONF"
+      grep -v -E "^[[:space:]]*(export[[:space:]]+)?$k=" "$CONF" > "$CONF.tmp" || true
+      printf '%s="%s"\n' "$k" "$v" >> "$CONF.tmp"
+      mv "$CONF.tmp" "$CONF"
+      good "$k=\"$v\" in $CONF"
+      [ "${FROM_WHERE[$k]:-}" = "environment" ] && say "note: $k is also set in your environment, which wins — remove it there (~/.bashrc?) for the file to count"
+      return 0 ;;
+    unset)
+      local k="${2:-}"; need "$k" "config unset KEY"
+      [ -f "$CONF" ] || { say "no settings file"; return 0; }
+      grep -v -E "^[[:space:]]*(export[[:space:]]+)?$k=" "$CONF" > "$CONF.tmp" || true
+      mv "$CONF.tmp" "$CONF"
+      good "$k removed from $CONF" ;;
+    *) stop "config [set KEY VALUE | unset KEY]" ;;
+  esac
 }
 
 # ---- all -----------------------------------------------------------------------
@@ -204,7 +304,7 @@ cmd_all() {
     *) say "left on update/$to (answer read as $(printf '%q' "$raw")) — ship or abort when ready"; return 0 ;;
   esac
   cmd_ship "$to"
-  cmd_deploy "$to" "$zip"
+  cmd_deploy "$to" "$zip" "$1"
 }
 
 # ---- abort ---------------------------------------------------------------------
@@ -272,5 +372,6 @@ case "${1:-}" in
   abort) shift; cmd_abort "$@" ;;
   rollback) shift; cmd_rollback "$@" ;;
   site) shift; cmd_site "$@" ;;
-  *) sed -n '2,24p' "$LG_PATCH_SELF" | sed 's/^# \{0,1\}//'; [ -n "${1:-}" ] && exit 2 || exit 0 ;;
+  config) shift; cmd_config "$@" ;;
+  *) sed -n '2,28p' "$LG_PATCH_SELF" | sed 's/^# \{0,1\}//'; [ -n "${1:-}" ] && exit 2 || exit 0 ;;
 esac

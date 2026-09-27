@@ -9,7 +9,7 @@
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync, chmodSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync, chmodSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,7 +52,7 @@ cmd="\${args[*]:1}"
 case "$cmd" in
   lg-deploy) git --git-dir="${origin}" show main:js/version.js > "${host}/srv/play/js/version.js"; echo "game moved";;
   *127.0.0.1:8200*) cat "${host}/srv/play/js/version.js";;
-  "bash /tmp/lg-remote.sh"*) sed 's#/tmp/#${ftmp}/#g' "${ftmp}/lg-remote.sh" > "${ftmp}/run.sh"; shift_args=("\${args[@]:3}"); HOME="${host}" PATH="${bin}:$PATH" bash "${ftmp}/run.sh" "\${shift_args[@]}";;
+  "bash /tmp/lg-remote.sh"*) sed 's#/tmp/#${ftmp}/#g' "${ftmp}/lg-remote.sh" > "${ftmp}/run.sh"; shift_args=(); for x in "\${args[@]:3}"; do shift_args+=("\${x//\/tmp\//${ftmp}/}"); done; HOME="${host}" PATH="${bin}:$PATH" bash "${ftmp}/run.sh" "\${shift_args[@]}";;
   *) echo "ssh stub: unknown $cmd" >&2; exit 9;;
 esac`);
 stub("scp", `src=""; dst=""; for a in "$@"; do case "$a" in -*) ;; *) if [ -z "$src" ]; then src="$a"; else dst="$a"; fi;; esac; done; cp "$src" "${ftmp}/$(basename "\${dst#*:}")"`);
@@ -71,7 +71,8 @@ const passing = "process.exit(0);\n", failing = "console.error('nope'); process.
 
 /* nothing from a calling lg-patch.sh (LG_REPO above all) may leak into the runs below */
 const clean = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith("LG_")));
-const env = { ...clean, PATH: `${bin}:${process.env.PATH}`, LG_DOWNLOADS: dl, LG_HOST: "fakehost", GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t" };
+const conf = join(base, "lg-patch.env");   // never the real ~/.config
+const env = { ...clean, PATH: `${bin}:${process.env.PATH}`, LG_DOWNLOADS: dl, LG_HOST: "fakehost", LG_CONFIG: conf, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t" };
 const runIn = (input, ...a) => { const r = spawnSync("bash", [join(work, "tools/lg-patch.sh"), ...a], { cwd: work, env, encoding: "utf8", input }); return { code: r.status, out: (r.stdout ?? "") + (r.stderr ?? "") }; };
 const run = (...a) => runIn("", ...a);
 const ver = () => /"(.*)"/.exec(readFileSync(join(work, "js/version.js"), "utf8"))[1];
@@ -139,7 +140,8 @@ try {
   run("ship", "0.9.5");
   ok(originVer() === "0.9.5", "then shipped by hand");
 
-  /* all: answered y → applied, shipped, deployed */
+  /* all: answered y → applied, shipped, deployed (0.3.71: a plain-folder desktop copy is only patched from FROM) */
+  writeFileSync(join(host, "Desktop/Living-Galaxy/js/version.js"), V("0.9.5"));
   mkzip("LivingGalaxy-0.9.6-patch.zip", { "js/version.js": V("0.9.6"), "test/d.test.mjs": passing });
   r = runIn("y\n", "all", "0.9.5", "0.9.6");
   ok(r.code === 0 && originVer() === "0.9.6" && /origin: 0\.9\.6/.test(r.out) && readFileSync(join(host, "Desktop/Living-Galaxy/js/version.js"), "utf8") === V("0.9.6"), `all + y: applied, shipped, deployed, desktop copy patched${r.code ? "\n" + r.out : ""}`);
@@ -162,6 +164,7 @@ try {
   git(work, "branch", "-q", "-D", "update/0.9.2");
 
   /* the y/N answer however a phone keyboard sends it */
+  writeFileSync(join(host, "Desktop/Living-Galaxy/js/version.js"), V("0.9.5"));
   mkzip("LivingGalaxy-0.9.7-patch.zip", { "js/version.js": V("0.9.7"), "test/e.test.mjs": passing });
   r = runIn("Y \r\n", "all", "0.9.5", "0.9.7");
   ok(r.code === 0 && originVer() === "0.9.7" && /0\.9\.7 deployed/.test(r.out), `"Y " with a carriage return is a yes${r.code ? "\n" + r.out : ""}`);
@@ -169,6 +172,45 @@ try {
   r = runIn("nope\n", "all", "0.9.7", "0.9.8");
   ok(r.code === 0 && originVer() === "0.9.7" && /answer read as nope/.test(r.out) && branch() === "update/0.9.8", "anything else is a no, and says what it read");
   run("abort", "0.9.8");
+
+  /* 0.3.71 — the settings file, and a plain-folder desktop copy at the wrong version */
+  {
+    writeFileSync(conf, `# mine\nexport LG_DESK="Desktop/Other"\nLG_URL='https://example.test'\nLG_NOPE=1\n$(touch ${join(base, "PWNED")})\n`);
+    r = run("config");
+    ok(r.code === 0 && /LG_DESK\s+Desktop\/Other\s+.*lg-patch\.env/.test(r.out) && /LG_URL\s+https:\/\/example\.test/.test(r.out) && /LG_BRANCH\s+main\s+default/.test(r.out), "config: values from the file, with where each came from");
+    ok(/LG_HOST\s+fakehost\s+environment/.test(r.out), "…the environment wins over the file");
+    ok(/unknown setting LG_NOPE/.test(r.out) && /not a KEY=value line/.test(r.out), "…unknown keys and junk lines are named and ignored");
+    ok(!existsSync(join(base, "PWNED")), "…and nothing in the file is ever run");
+    r = run("config", "set", "LG_DESK", "Desktop/Living-Galaxy-recovery");
+    ok(r.code === 0 && readFileSync(conf, "utf8").split("\n").filter((l) => /LG_DESK=/.test(l)).length === 1 && /LG_DESK="Desktop\/Living-Galaxy-recovery"/.test(readFileSync(conf, "utf8")), "config set replaces the line (one LG_DESK)");
+    ok(run("config", "set", "LG_BOGUS", "x").code !== 0, "config set refuses an unknown key");
+    r = run("config", "set", "LG_HOST", "other");
+    ok(r.code === 0 && /environment, which wins/.test(r.out), "config set warns when the environment will override it");
+    writeFileSync(conf, "");
+
+    /* desktop copy from the file: a plain folder two versions behind is refused, untouched */
+    writeFileSync(conf, 'LG_DESK="Desktop/Other"\n');
+    put(host, "Desktop/Other/js/version.js", V("0.9.1"));
+    put(host, "Desktop/Other/keep.txt", "mine");
+    mkzip("LivingGalaxy-0.9.9-patch.zip", { "js/version.js": V("0.9.9"), "test/g.test.mjs": passing, "js/only-in-099.js": "export {};\n" });
+    r = runIn("y\n", "all", "0.9.7", "0.9.9");
+    ok(r.code !== 0 && originVer() === "0.9.9" && /plain folder at 0\.9\.1; this zip takes 0\.9\.7 to 0\.9\.9/.test(r.out) && /git clone/.test(r.out), `a plain folder not at FROM is refused, with how to make it a clone${r.code ? "" : "\n" + r.out}`);
+    ok(readFileSync(join(host, "Desktop/Other/js/version.js"), "utf8") === V("0.9.1") && !existsSync(join(host, "Desktop/Other/js/only-in-099.js")), "…and left exactly as it was");
+    ok(!readdirSync(ftmp).some((f) => /lg-game-patch/.test(f)), "…with no zip left behind on the host");
+    /* the same folder at FROM: patched. deploy on its own finds FROM from main's history */
+    writeFileSync(join(host, "Desktop/Other/js/version.js"), V("0.9.7"));
+    r = run("deploy", "0.9.9");
+    ok(r.code === 0 && readFileSync(join(host, "Desktop/Other/js/version.js"), "utf8") === V("0.9.9") && existsSync(join(host, "Desktop/Other/js/only-in-099.js")), `deploy alone works out FROM (0.9.7) from main's history and patches the folder${r.code ? "\n" + r.out : ""}`);
+    r = run("deploy", "0.9.9");
+    ok(r.code === 0 && /already at 0\.9\.9/.test(r.out), "a folder already at TO is left alone");
+    /* a stale zip of another version on the host is never the one unpacked */
+    writeFileSync(join(host, "Desktop/Other/js/version.js"), V("0.9.7"));
+    copyFileSync(join(dl, "LivingGalaxy-0.9.8-patch.zip"), join(ftmp, "lg-game-patch.zip"));
+    execFileSync("rm", [join(dl, "LivingGalaxy-0.9.9-patch.zip")]);
+    r = run("deploy", "0.9.9");
+    ok(r.code !== 0 && /no zip to apply/.test(r.out) && readFileSync(join(host, "Desktop/Other/js/version.js"), "utf8") === V("0.9.7"), "with no zip for TO, a stale zip on the host is not used");
+    writeFileSync(conf, "");
+  }
 
   /* site */
   mkzip("LivingGalaxy-Site-0.2.6.zip", { "lgsite.py": 'VERSION = "0.2.6"\n', "test/s.test.mjs": passing });

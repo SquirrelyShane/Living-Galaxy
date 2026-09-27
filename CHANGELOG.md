@@ -10,6 +10,33 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.71 — 2026-09-27
+
+`lg-patch.sh` keeps its settings in a file, and will not half-patch a folder.
+
+- **Settings file** (`~/.config/lg-patch.env`, or `$LG_CONFIG`). `KEY=value`
+  lines — `export ` and quotes allowed, `~/` and `$HOME/` expanded, `#`
+  comments — PARSED, never sourced, so nothing in it runs; unknown keys and
+  junk lines are named and skipped. The environment still wins over the file,
+  the file over the defaults. `tools/lg-patch.sh config` lists every setting
+  with where it came from; `config set KEY VALUE` / `config unset KEY` edit
+  the file (and warn when the environment will override what was just set).
+- **A plain-folder desktop copy is only patched from the version the zip
+  starts at.** A changed-files-only zip unpacked over a folder at any other
+  version stamps it with the new version while leaving out everything in
+  between, and the version check after cannot see it. `deploy` now refuses,
+  leaves the folder untouched and prints the one line that turns it into a git
+  clone. A folder already at TO is left alone. `all` passes FROM through;
+  `deploy TO` on its own reads FROM from main's `js/version.js` history, or
+  takes it as a third argument. A git-clone desktop copy is unchanged (pull).
+- **The zip goes to the host under its own version's name**
+  (`/tmp/lg-game-patch-TO.zip`), and is removed on every exit path, so a stale
+  zip left by an earlier failed run can never be the one unpacked.
+- The "no desktop copy" stop now says how to set it (`config set LG_DESK …`).
+
+Files: `tools/lg-patch.sh`, `js/version.js`, `README.md`, `CHANGELOG.md`;
+`test/lgpatch.test.mjs` (+13, 45).
+
 ## 0.3.70 — 2026-09-27
 
 `lg-patch.sh` on a real phone.

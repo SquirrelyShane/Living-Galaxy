@@ -101,7 +101,11 @@ Asking for a version main already has is a no-op (0.3.70), and a leftover
 `update/` branch main already contains is tidied away. The zip path defaults to the download folder (pass it third to use another,
 `-` for the default); the tests default to every `test/*.test.mjs` the zip
 carries (name them after the zip to choose). Host, desktop-copy and site
-folders, URL and branch are `LG_*` settings at the top of the script. A zip
+folders, URL and branch are `LG_*` settings — kept in `~/.config/lg-patch.env`
+(0.3.71; `tools/lg-patch.sh config` shows them and where each came from,
+`config set LG_DESK Desktop/…` changes one), overridable from the environment.
+A plain-folder desktop copy is only patched from the version the zip starts at;
+a git clone is pulled. A zip
 can carry a new copy of the script itself — it runs from a private copy so
 that is safe. `test/lgpatch.test.mjs` runs every command against a
 throwaway repo with the host stubbed.
