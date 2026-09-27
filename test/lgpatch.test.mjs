@@ -151,6 +151,25 @@ try {
   r = run("rollback", "0.9.9");
   ok(r.code !== 0 && originVer() === "0.9.5", "rollback refuses when main is not at the version named");
 
+  /* 0.3.70 — already applied is done, not an error; leftover branches */
+  git(work, "branch", "update/0.9.4");                     // a leftover that main already contains
+  r = run("all", "0.9.3", "0.9.4");
+  ok(r.code === 0 && /already at 0\.9\.5 — 0\.9\.4 is applied/.test(r.out) && !/\[y\/N\]/.test(r.out), "all FROM TO when main is already past TO: nothing to do, no prompt");
+  ok(!git(work, "branch", "--list", "update/0.9.4") && /dropped update\/0\.9\.4/.test(r.out), "…and the merged leftover branch is dropped");
+  git(work, "switch", "-q", "-c", "update/0.9.2"); put(work, "extra.txt", "x"); git(work, "add", "-A"); git(work, "commit", "-q", "-m", "work"); git(work, "switch", "-q", "main");
+  r = run("apply", "0.9.1", "0.9.2");
+  ok(r.code !== 0 && /has commits main does not/.test(r.out) && git(work, "branch", "--list", "update/0.9.2"), "a leftover with work main does not have is kept, and the run stops");
+  git(work, "branch", "-q", "-D", "update/0.9.2");
+
+  /* the y/N answer however a phone keyboard sends it */
+  mkzip("LivingGalaxy-0.9.7-patch.zip", { "js/version.js": V("0.9.7"), "test/e.test.mjs": passing });
+  r = runIn("Y \r\n", "all", "0.9.5", "0.9.7");
+  ok(r.code === 0 && originVer() === "0.9.7" && /0\.9\.7 deployed/.test(r.out), `"Y " with a carriage return is a yes${r.code ? "\n" + r.out : ""}`);
+  mkzip("LivingGalaxy-0.9.8-patch.zip", { "js/version.js": V("0.9.8"), "test/f.test.mjs": passing });
+  r = runIn("nope\n", "all", "0.9.7", "0.9.8");
+  ok(r.code === 0 && originVer() === "0.9.7" && /answer read as nope/.test(r.out) && branch() === "update/0.9.8", "anything else is a no, and says what it read");
+  run("abort", "0.9.8");
+
   /* site */
   mkzip("LivingGalaxy-Site-0.2.6.zip", { "lgsite.py": 'VERSION = "0.2.6"\n', "test/s.test.mjs": passing });
   r = run("site", "0.2.6");

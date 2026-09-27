@@ -97,7 +97,8 @@ tools/lg-patch.sh rollback 0.3.69       # revert main's last patch, push, redepl
 tools/lg-patch.sh site 0.2.5            # site zip → mpcbb:~/Desktop/lgsite-deploy, its test, install, restart, /health
 ```
 
-The zip path defaults to the download folder (pass it third to use another,
+Asking for a version main already has is a no-op (0.3.70), and a leftover
+`update/` branch main already contains is tidied away. The zip path defaults to the download folder (pass it third to use another,
 `-` for the default); the tests default to every `test/*.test.mjs` the zip
 carries (name them after the zip to choose). Host, desktop-copy and site
 folders, URL and branch are `LG_*` settings at the top of the script. A zip

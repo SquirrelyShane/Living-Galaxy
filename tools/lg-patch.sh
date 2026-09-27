@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# LIVING GALAXY 0.3.69 — apply a patch zip, ship it, deploy it. From Termux.
+# LIVING GALAXY 0.3.69 (0.3.70) — apply a patch zip, ship it, deploy it. From Termux.
 #
 #   tools/lg-patch.sh apply    FROM TO [ZIP|-] [TEST...]  check, branch update/TO, unzip, run the tests
 #   tools/lg-patch.sh ship     TO                         commit, fast-forward main, push, drop the branch
@@ -46,6 +46,7 @@ URL="${LG_URL:-https://living-galaxy.com}"
 PLAY="${LG_PLAY-/play}"
 DL="${LG_DOWNLOADS:-$HOME/storage/shared/download}"
 BRANCH="${LG_BRANCH:-main}"
+SKIPPED=0
 # Read once, then kept from every child: a patch's tests (this repo's own
 # test/lgpatch.test.mjs runs this script against a throwaway repo) must never
 # inherit LG_REPO and act on the real one.
@@ -59,6 +60,14 @@ vers() { [[ "$1" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || stop "\"$1\" is not a vers
 line() { printf 'export const VERSION = "%s";' "$1"; }
 at()   { grep -Fqx "$(line "$1")" "$REPO/js/version.js"; }
 now()  { sed -n 's/^export const VERSION = "\(.*\)";$/\1/p' "$REPO/js/version.js"; }
+vge() {      # vge A B — is version A at or past B? (pure bash: Termux sort may lack -V)
+  local IFS=. i; local -a a=($1) b=($2)
+  for i in 0 1 2; do
+    (( ${a[i]:-0} > ${b[i]:-0} )) && return 0
+    (( ${a[i]:-0} < ${b[i]:-0} )) && return 1
+  done
+  return 0
+}
 zipof() { local z="${1:--}"; [ "$z" = "-" ] && z="$DL/$2"; printf '%s' "$z"; }
 
 unpack() {   # unpack ZIP DIR — unzip if there is one, python's zipfile if not
@@ -86,14 +95,26 @@ cmd_apply() {
   need "${1:-}" "apply FROM TO [ZIP|-] [TEST...]"; need "${2:-}" "apply FROM TO [ZIP|-] [TEST...]"
   local from="$1" to="$2"; vers "$from"; vers "$to"
   local zip; zip="$(zipof "${3:-}" "LivingGalaxy-$to-patch.zip")"; shift $(( $# >= 3 ? 3 : $# ))
-  [ -f "$zip" ] || stop "no patch at $zip"
   cd "$REPO"
   clean
-  git show-ref --verify -q "refs/heads/update/$to" && stop "branch update/$to already exists — ship it, or: tools/lg-patch.sh abort $to"
   say "main ← origin"
   git switch -q "$BRANCH"
   git pull -q --ff-only origin "$BRANCH"
-  at "$from" || stop "main is at $(now), not $from — apply the patches in order"
+  local cur; cur="$(now)"
+  # 0.3.70: already there (applied by hand, or an earlier run) is done, not an error;
+  # a leftover update/TO that main already contains is dropped (git refuses if it is not)
+  if [ -n "$cur" ] && vge "$cur" "$to"; then
+    if git show-ref --verify -q "refs/heads/update/$to"; then
+      git branch -q -d "update/$to" 2>/dev/null && say "dropped update/$to — main already has it" \
+        || stop "main is at $cur but update/$to has commits main does not — look at it: git log $BRANCH..update/$to"
+    fi
+    good "main is already at $cur — $to is applied, nothing to do"
+    SKIPPED=1
+    return 0
+  fi
+  [ -f "$zip" ] || stop "no patch at $zip"
+  git show-ref --verify -q "refs/heads/update/$to" && stop "branch update/$to already exists — ship it, or: tools/lg-patch.sh abort $to"
+  at "$from" || stop "main is at $cur, not $from — apply the patches in order"
   git switch -q -c "update/$to"
   say "unzipping $(basename "$zip")"
   unpack "$zip" .
@@ -170,10 +191,18 @@ echo "desktop copy: $to"
 cmd_all() {
   need "${1:-}" "all FROM TO [ZIP|-] [TEST...]"; need "${2:-}" "all FROM TO [ZIP|-] [TEST...]"
   local to="$2" zip="${3:--}"
+  SKIPPED=0
   cmd_apply "$@"
-  local yes=""
-  read -r -p "Ship $to to origin/$BRANCH and deploy it? [y/N] " yes || true   # no answer (EOF) is a no, not a crash
-  [ "$yes" = "y" ] || [ "$yes" = "Y" ] || { say "left on update/$to — ship or abort when ready"; return 0; }
+  [ "$SKIPPED" = 1 ] && return 0
+  local raw="" yes
+  read -r -p "Ship $to to origin/$BRANCH and deploy it? [y/N] " raw || true   # no answer (EOF) is a no, not a crash
+  # 0.3.70: a phone keyboard can add a trailing space or a capital, and a
+  # terminal a carriage return — "y" means y however it arrives
+  yes="$(printf '%s' "$raw" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+  case "$yes" in
+    y|yes) ;;
+    *) say "left on update/$to (answer read as $(printf '%q' "$raw")) — ship or abort when ready"; return 0 ;;
+  esac
   cmd_ship "$to"
   cmd_deploy "$to" "$zip"
 }

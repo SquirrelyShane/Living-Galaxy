@@ -10,6 +10,31 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.70 — 2026-09-27
+
+`lg-patch.sh` on a real phone.
+
+Reported from the first run on Termux: `all 0.3.66 0.3.67` and
+`all 0.3.67 0.3.68` stopped on "branch update/… already exists" (both had been
+applied and pushed by hand), and `all 0.3.68 0.3.69` was answered `y` and
+still said "left on update/0.3.69".
+
+- **Already applied is done, not an error** (`tools/lg-patch.sh` `apply`).
+  After the pull, if main is already at TO or past it, the run says so and
+  stops cleanly — `all` does not prompt — and a leftover `update/TO` branch
+  that main already contains is dropped (`git branch -d`, which refuses
+  anything unmerged; an unmerged one stops the run with the `git log` to look
+  at). The zip is only required once there is something to apply.
+- **The y/N answer is read the way a phone sends it.** The same script
+  answered `y` through a pseudo-terminal here and shipped, so the phone's `y`
+  arrived as something else — a keyboard's trailing space or capital, or a
+  carriage return. Whitespace and case are ignored now and `y`/`yes` both
+  count; any other answer is echoed back as it was read
+  ("answer read as …"), so if this happens again the line says why.
+
+Files: `tools/lg-patch.sh`, `js/version.js`, `README.md`, `CHANGELOG.md`;
+`test/lgpatch.test.mjs` (+5, 32).
+
 ## 0.3.69 — 2026-09-27
 
 One command from a patch zip to the live site.
