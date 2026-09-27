@@ -25,7 +25,7 @@ on it. What changed between releases lives in
 
 ## Contents
 
-1. [Running it](#running-it)
+1. [Running it](#running-it) — Termux, the website, applying a patch
 2. [The module map](#the-module-map)
 3. [Flying it](#flying-it) — the flight model, the cockpit, the console, power, turrets, the warp core, the chart
 4. [The sky](#the-sky) — worlds, materials, rocks, ports, hulls, the working sky, impacts
@@ -78,6 +78,32 @@ versioned blob. Two devices that both changed get asked which copy wins;
 nothing is ever overwritten silently. The site's news posts land on the GNN
 desk. On a plain `server.py` none of this exists and the game says so in one
 line; nothing else changes.
+
+### Applying a patch
+
+Patches arrive as changed-files-only zips (`LivingGalaxy-<version>-patch.zip`,
+site ones `LivingGalaxy-Site-<version>.zip`) in `~/storage/shared/download`.
+`tools/lg-patch.sh` (0.3.69) takes one from the zip to the live site, from
+Termux, stopping at the first thing that is not as expected:
+
+```sh
+tools/lg-patch.sh apply 0.3.68 0.3.69   # clean repo? main at 0.3.68? → update/0.3.69, unzip, version now 0.3.69, run the zip's tests
+tools/lg-patch.sh ship 0.3.69           # commit, fast-forward main, push, drop the branch
+tools/lg-patch.sh deploy 0.3.69         # ssh mpcbb lg-deploy, check origin and public serve 0.3.69, patch the desktop copy
+tools/lg-patch.sh all 0.3.68 0.3.69     # apply, ask y/N, then ship and deploy
+
+tools/lg-patch.sh abort 0.3.69          # a failed apply: drop the branch and its files, back to main
+tools/lg-patch.sh rollback 0.3.69       # revert main's last patch, push, redeploy
+tools/lg-patch.sh site 0.2.5            # site zip → mpcbb:~/Desktop/lgsite-deploy, its test, install, restart, /health
+```
+
+The zip path defaults to the download folder (pass it third to use another,
+`-` for the default); the tests default to every `test/*.test.mjs` the zip
+carries (name them after the zip to choose). Host, desktop-copy and site
+folders, URL and branch are `LG_*` settings at the top of the script. A zip
+can carry a new copy of the script itself — it runs from a private copy so
+that is safe. `test/lgpatch.test.mjs` runs every command against a
+throwaway repo with the host stubbed.
 
 ### What server.py is, besides a file server
 

@@ -10,6 +10,41 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.69 — 2026-09-27
+
+One command from a patch zip to the live site.
+
+Asked for: the apply/test commands used by hand since 0.3.67 as a script in the
+repo, taking the versions, the zip and the tests as arguments, plus the git
+push and the mpcbb side (live game and the desktop copy).
+
+- **`tools/lg-patch.sh`** (new). `apply FROM TO [ZIP|-] [TEST…]` refuses a
+  dirty repo, an existing `update/TO`, a missing zip, main not at FROM after a
+  fast-forward pull, and a zip whose `js/version.js` is not TO; runs
+  `git diff --check` and the tests (by default every `test/*.test.mjs` the zip
+  carries). `ship TO` commits, fast-forwards main, pushes, drops the branch.
+  `deploy TO` runs `lg-deploy` on the host, checks the origin
+  (`127.0.0.1:8200/play/js/version.js` over ssh) and the public site (four
+  tries, 20 s apart) both serve TO, then updates the desktop copy — `git pull`
+  if it is a clone, the same zip unpacked over it if it is a plain folder.
+  `all` is apply → y/N → ship → deploy. `abort TO`, `rollback [VERSION]`, and
+  `site TO [ZIP|-] [TEST]` (to `~/Desktop/lgsite-deploy`, its test, install,
+  restart, `/health` must report TO). Settings are `LG_*` variables.
+- It runs from a private copy of itself, because a zip that carries a new
+  `lg-patch.sh` would otherwise be rewriting the script bash is reading.
+  Unpacks with `unzip`, or Python's `zipfile` where there is none (the host
+  side always uses Python). Remote steps are one script copied over and run
+  with a terminal, so `sudo` can ask.
+- Found in a dry run on a copy of the real repo: the patch's own test runs the
+  script against a throwaway repo, and under `apply` it inherited `LG_REPO`
+  (and the private-copy markers) and acted on the REAL repo. The script now
+  keeps every `LG_*` variable from its children, and the test scrubs them.
+- Found writing the test: an unanswered y/N prompt (stdin closed) ended the
+  run with an error under `set -e` instead of reading as "no".
+
+Files: `tools/lg-patch.sh` (new), `js/version.js`, `README.md` (Running it ›
+Applying a patch), `CHANGELOG.md`; `test/lgpatch.test.mjs` (new, 27).
+
 ## 0.3.68 — 2026-09-27
 
 The mark follows the cutter.
