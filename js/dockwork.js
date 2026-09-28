@@ -30,6 +30,13 @@ export const HANDLING = {
   floor: 2,            // s: even one crate is a pallet, a signature and a scan
   cap: 300,            // s: a port does not take more than five minutes on one call
   perUnit: 0.6,        // s a unit, for goods with no mass on the books
+  /* 0.3.76 — raw ore and ice are not craned in pallets: they go down a chute.
+   * At the pallet rate a mining hull's full hold (≈1,200 units, ≈3,500 t) was
+   * 106 s of clamps on every loop — reported from an ARIA mine loop, where the
+   * port call took as long as the mining. Bulk goes at 140 t/s and never holds
+   * a hull more than 45 s: the same full hold is ≈25 s. */
+  bulkRate: 140,       // tonnes a second, raw ore and ice
+  bulkCap: 45,         // s: the most a hold of bulk keeps the clamps on
 };
 
 /** The berth's clock: { stationId, secs, left, done, items: [...] } or null. */
@@ -37,6 +44,8 @@ export const dockwork = { job: null };
 export const dockworkHooks = { onBegin: null, onDone: null };
 
 const massOf = (id) => good(id)?.mass ?? 1;
+/** Raw ore and ice go down a chute, not onto a pallet (0.3.76). */
+export const isBulk = (id) => good(id)?.tier === "ore";
 
 /** Seconds a lot of `id` takes over the side, for a hull with this rig. */
 export function handlingSeconds(id, qty, mods = null) {
@@ -44,7 +53,10 @@ export function handlingSeconds(id, qty, mods = null) {
   if (n <= 0) return 0;
   const tonnes = n * massOf(id);
   const rig = Math.max(0.35, mods?.handling ?? 1);
-  return Math.max(HANDLING.floor, Math.min(HANDLING.cap, (tonnes / (HANDLING.rate * rig)) + n * 0 + (massOf(id) ? 0 : n * HANDLING.perUnit)));
+  const bulk = isBulk(id);
+  const rate = bulk ? HANDLING.bulkRate : HANDLING.rate;
+  const cap = bulk ? HANDLING.bulkCap : HANDLING.cap;
+  return Math.max(HANDLING.floor, Math.min(cap, (tonnes / (rate * rig)) + (massOf(id) ? 0 : n * HANDLING.perUnit)));
 }
 
 /**
@@ -59,11 +71,15 @@ export function bookHandling(stationId, kind, id, qty, mods = null) {
     dockworkHooks.onBegin?.(dockwork.job);
   }
   const j = dockwork.job;
-  j.secs += secs;
-  j.left += secs;
+  /* 0.3.76: one port call never holds a hull past the cap, however many lots it is
+   * made of (a loop sells each ore as its own lot) */
+  const room = Math.max(0, HANDLING.cap - j.left);
+  const add = Math.min(secs, room);
+  j.secs += add;
+  j.left += add;
   j.items.push({ kind, id, qty: Math.round(qty), secs: Math.round(secs) });
   if (j.items.length > 8) j.items.shift();
-  return secs;
+  return add;
 }
 
 /** Seconds still to run at this berth (0 when there is nothing on the crane). */

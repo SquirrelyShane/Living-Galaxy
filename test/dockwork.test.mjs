@@ -9,13 +9,13 @@
  * which is the whole reason it exists.
  */
 
-import { sim, launchSim, tickSim, tradeBuy, tradeSell, toggleDock } from "../js/sim.js";
+import { sim, launchSim, tickSim, tradeBuy, tradeSell, toggleDock, sellAllOre } from "../js/sim.js";
 import { makePilot } from "../js/pilot.js";
 import { stations, stationById } from "../js/stations.js";
 import { corps } from "../js/corps.js";
 import { good } from "../js/materials.js";
 import { deliver } from "../js/economy.js";
-import { HANDLING, dockwork, bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, handlingSeconds } from "../js/dockwork.js";
+import { HANDLING, dockwork, bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, handlingSeconds, isBulk } from "../js/dockwork.js";
 import { boardFor, acceptContract, deliverContracts, contracts, resetContracts } from "../js/contracts.js";
 
 let pass = 0, fail = 0;
@@ -75,6 +75,34 @@ const st = stations.find((s) => !(s.hostile && !s.claimed));
   ok(toggleDock() !== false || ship.dockedAt === null, "and then the clamps let go");
   ship.dockedAt = null;
   for (const k of Object.keys(ship.hold)) delete ship.hold[k];
+}
+
+/* ---- 0.3.76: bulk goes down a chute ---------------------------------------------------
+ * Reported from an ARIA mine loop: "after ARIA docked on a mine loop, it set the undock
+ * timer to 106 s" — a full mining hold of ore at the pallet rate. */
+{
+  clearDockwork();
+  ok(isBulk("iron_ore") && !isBulk("iron") && !isBulk("girder"), "raw ore is bulk; refined minerals and components are not");
+  const hold = 1224;                                   // the hold in the report's cockpit (CGO 1224)
+  const old = Math.min(HANDLING.cap, hold * good("iron_ore").mass / HANDLING.rate);
+  const now = handlingSeconds("iron_ore", hold);
+  ok(old > 100 && now <= HANDLING.bulkCap && now < 30, `a full hold of iron ore: ${old.toFixed(0)} s at the pallet rate → ${now.toFixed(1)} s down the chute`);
+  ok(handlingSeconds("iron_ore", 1e9) <= HANDLING.bulkCap, `and a hold of bulk never holds a hull past ${HANDLING.bulkCap} s`);
+  ok(handlingSeconds("girder", 200) > handlingSeconds("iron_ore", 200 * good("girder").mass / good("iron_ore").mass) * 2, "pallet goods still take their time");
+  /* the loop's own SELL: every ore in the hold, each its own lot, on one port call */
+  ship.dockedAt = st.id;
+  const ores = ["iron_ore", "nickel_ore", "silicate"].filter((id) => good(id));
+  for (const id of ores) ship.hold[id] = Math.floor(hold / ores.length);
+  sellAllOre();
+  const booked = handlingLeft(st.id);
+  ok(booked > 0 && booked < 30, `SELL ALL ORE on a full mixed hold books ${booked.toFixed(1)} s (was ≈${old.toFixed(0)} s)`);
+  ship.dockedAt = null;
+  for (const k of Object.keys(ship.hold)) delete ship.hold[k];
+  /* and one port call is capped as a whole */
+  clearDockwork();
+  for (let i = 0; i < 6; i++) bookHandling(st.id, "buy", "girder", 1e6);
+  ok(handlingLeft(st.id) <= HANDLING.cap + 1e-9, `six capped lots on one call still stop at ${HANDLING.cap} s (${handlingLeft(st.id).toFixed(0)} s)`);
+  clearDockwork();
 }
 
 /* ---- leaving the berth ends it ------------------------------------------------------- */

@@ -10,6 +10,26 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.76 — 2026-09-28
+
+Ore unloads in seconds, not minutes.
+
+### Players
+
+- **Selling ore is quick now.** Raw ore and ice go down a chute instead of being craned off in pallets. A full mining hold used to keep your clamps on for about a minute and a half; it now takes about 25 seconds, and never more than 45.
+- Refined metals, parts and other crated cargo still take their normal time to load and unload.
+
+### Developers
+
+Reported: "after ARIA docked on a mine loop, it set the undock timer to 106 s". That is a full mining hold (1,224 units of ore, about 3,500 t) at the pallet rate of 34 t/s — the port call took as long as the mining, and every mine loop, ARIA's or the player's, paid it.
+
+- `js/dockwork.js`: goods of tier `ore` are bulk (`isBulk`) and handle at `HANDLING.bulkRate` 140 t/s with `HANDLING.bulkCap` 45 s a lot; everything else is unchanged (34 t/s, 2 s floor, 300 s cap). One port call is also capped as a whole at 300 s — a loop sells each ore as its own lot, and the per-lot cap alone let a call add up past it. `bookHandling` returns the seconds actually added.
+- Measured: a full hold of iron ore 104 s → 25.4 s; the loop's SELL ALL ORE on a full mixed hold books 24.2 s.
+
+Files: `js/dockwork.js`, `js/version.js`, `CHANGELOG.md`; `test/dockwork.test.mjs` (+5, 27).
+
+Verified: all 95 node suites green; smoke-mining green. Not flown as a full ARIA loop on a phone.
+
 ## 0.3.75 — 2026-09-28
 
 UNDOCK after a contract, a start card that waits for your account, and new pilots named on the record.
