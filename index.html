@@ -378,6 +378,10 @@
           Fly it from the seat. The nose goes where you look, momentum is yours to
           cancel, and the worlds are hundreds of times longer than your hull.
         </p>
+        <!-- 0.3.75: on the site the card waits for the account (a few hundred ms) instead of
+             showing CREATE PILOT and then turning into the hangar under your thumb -->
+        <script>if (location.pathname.indexOf("/play") === 0) document.documentElement.classList.add("start-pending");</script>
+        <p class="start-wait">Checking your account…</p>
         <!-- 0.3.74: signed in, the start card is a hangar — system, then pilots (js/hangar.js) -->
         <div id="hangar" class="hangar" hidden></div>
         <label>

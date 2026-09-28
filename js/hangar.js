@@ -89,10 +89,12 @@ export function mountHangar(opts) {
 
     /* 2 · pilots here */
     const here = groups.get(seed) ?? [];
+    const loading = opts.account.pilots == null;       // 0.3.75: the list is on its way
     root.append(el("p", "hangar-step", `2 · Pilots in ${opts.name(seed)}`));
     const list = el("div", "hangar-list");
     list.id = "hangar-list";
-    if (!here.length) list.append(el("p", "hangar-empty", "No pilot of yours flies here yet."));
+    if (loading) list.append(el("p", "hangar-empty hangar-loading", "Loading your pilots…"));
+    else if (!here.length) list.append(el("p", "hangar-empty", "No pilot of yours flies here yet."));
     for (const p of here) {
       const card = el("div", "hangar-pilot");
       const who = el("div", "hangar-who");
@@ -126,10 +128,10 @@ export function mountHangar(opts) {
     }
 
     /* 3 · new pilot */
-    const full = pilots.length >= opts.maxPilots;
+    const full = !loading && pilots.length >= opts.maxPilots;
     const make = btn(`btn ${here.length ? "btn-ghost" : "btn-accent"}`, full ? `${opts.maxPilots} of ${opts.maxPilots} pilots` : `New pilot in ${opts.name(seed)}`, () => { if (!full && !busy) opts.onNew(seed); });
     make.id = "hangar-new";
-    make.disabled = full;
+    make.disabled = full || loading;
     root.append(make);
     if (full) root.append(el("p", "hangar-empty", "Delete a pilot to make room for another."));
     if (note) root.append(el("p", "hangar-note", note));

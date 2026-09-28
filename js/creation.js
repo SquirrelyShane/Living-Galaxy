@@ -68,7 +68,16 @@ export function mountCreation(opts) {
     if (step === 0) close();
     else setStep(step - 1);
   });
-  nextBtn.addEventListener("click", () => setStep(step + 1));
+  /* 0.3.75: a new pilot from the hangar is NAMED here, on the record, not on the start card */
+  let askName = false;
+  const nameOk = () => !askName || $("callsign").value.trim().length >= 2;
+  const needName = () => {
+    const f = $("create-callsign");
+    f?.focus();
+    f?.classList.add("need");
+    setTimeout(() => f?.classList.remove("need"), 900);
+  };
+  nextBtn.addEventListener("click", () => { if (!nameOk()) { needName(); return; } setStep(step + 1); });
 
   /* ---- panels ---- */
 
@@ -356,6 +365,7 @@ export function mountCreation(opts) {
   }
 
   function finish(seed) {
+    if (!nameOk()) { needName(); return; }
     const target = opts.normalizeSeed ? opts.normalizeSeed(seed) : seed;
     if (opts.loadedSeed && target !== opts.loadedSeed()) choice.corpId = "";
     const callsign = $("callsign").value.trim() || "Pilot";
@@ -391,10 +401,31 @@ export function mountCreation(opts) {
   }
 
   return {
-    show() {
+    /** show({ askName }) — askName: the callsign is typed here (hangar NEW PILOT), not taken from the start card */
+    show(o = {}) {
       open = true;
       root.classList.remove("hidden");
-      $("create-title").textContent = $("callsign").value.trim() || "New pilot";
+      askName = Boolean(o.askName);
+      const title = $("create-title");
+      if (askName) {
+        title.textContent = "";
+        const f = document.createElement("input");
+        f.id = "create-callsign";
+        f.className = "create-callsign";
+        f.maxLength = 18;
+        f.autocomplete = "off";
+        f.placeholder = "Callsign";
+        f.setAttribute("aria-label", "New pilot's callsign");
+        f.value = "";
+        $("callsign").value = "";
+        f.addEventListener("input", () => {
+          const c = $("callsign");
+          c.value = f.value.replace(/\s+/g, " ").slice(0, 18);
+          c.dispatchEvent(new Event("input", { bubbles: true }));   // the start card's own listener keeps the store's callsign in step
+        });
+        title.append(f);
+        setTimeout(() => f.focus(), 60);
+      } else title.textContent = $("callsign").value.trim() || "New pilot";
       /* Corporations belong to the sky that is loaded behind this screen. */
       if (!corps.length) buildCorps(Math.random);
       if (!choice.raceId) choice.raceId = "terran";

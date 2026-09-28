@@ -863,12 +863,15 @@ export function mountHud() {
   const callLabel = $("callsign")?.closest("label");
   let hangar = null;
   const setMode = (mode) => {
+    const again = startMode === mode;
     startMode = mode;
+    globalThis.document?.documentElement.classList.remove("start-pending");   // 0.3.75: index.html held the card until now
+    if (mode === "hangar" && again && hangar) { hangar.render(); return; }    // the pilot list arriving after the probe
+    if (callLabel) callLabel.style.display = mode === "hangar" ? "none" : "";   // the label's CSS display beats [hidden]
     if (mode === "hangar") {
       contBtn.hidden = true;
       createBtn.hidden = true;
       if (hangarEl) hangarEl.hidden = false;
-      if (callLabel?.firstChild?.nodeType === 3) callLabel.firstChild.textContent = "New pilot's callsign";
       if (!seedKey || !account.pilots?.some((p) => (p.sky || "sol") === seedKey)) {
         const last = account.pilots?.[0];
         if (last?.sky && last.sky !== seedKey) { seedKey = last.sky === "public" ? PUBLIC_ROOM : last.sky; queueSky(); }
@@ -894,7 +897,7 @@ export function mountHud() {
           if (!newPilotSlot()) { hangar.setNote(`An account keeps ${MAX_PILOTS} pilots.`); return; }
           seedKey = seed;
           unlockAudio();
-          creation.show();
+          creation.show({ askName: true });   // 0.3.75: named on the record, not on the start card
         },
         onDelete: (p) => deletePilot(p.slot),
       }) : null;
@@ -919,6 +922,8 @@ export function mountHud() {
   const onAccount = () => setMode(!account.site ? "local" : account.user?.verified ? "hangar" : "guest");
   globalThis.document?.addEventListener("lg-account", onAccount);
   if (account.site !== null && account.status !== "probing" && account.status !== "idle") onAccount();
+  /* never hold the card forever: no answer from the account probe in 6 s → the card as it always was */
+  setTimeout(() => { if (startMode === "pending") setMode("local"); }, 6000);
   if (globalThis.window?.__lg) window.__lg.start = { paintStart, continueRun: () => contBtn?.click(), mode: () => startMode, hangar: () => hangar };
 
   /* --- pan stick: this is the nose --- */

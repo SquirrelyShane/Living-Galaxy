@@ -3250,3 +3250,17 @@ html.boot-failed body > *:not(#boot-fail) { display: none !important; }
   .hangar .btn { min-height: 44px; }
   .hangar .hangar-del { min-width: 44px; }
 }
+
+/* 0.3.75: the callsign typed on the pilot record (hangar NEW PILOT) */
+.create-callsign { width: 100%; max-width: 18ch; font: inherit; letter-spacing: inherit; text-transform: uppercase; color: inherit; background: rgba(0,0,0,0.35); border: 1px solid var(--border, rgba(255,255,255,0.18)); border-radius: 4px; padding: 4px 8px; }
+.create-callsign::placeholder { color: var(--muted, #8fa3b3); text-transform: none; }
+.create-callsign.need { border-color: #ff7a7a; box-shadow: 0 0 0 2px rgba(255,122,122,0.35); }
+@media (pointer: coarse) { .create-callsign { min-height: 44px; font-size: 16px; } }
+
+/* 0.3.75: until the account answers (js/hud.js removes it; 6 s at most) */
+.start-wait { display: none; margin: 10px 0; color: var(--muted, #8fa3b3); font-size: 0.9rem; }
+.start-pending .start-wait { display: block; }
+.start-pending #btn-create, .start-pending #btn-continue, .start-pending #callsign, .start-pending label:has(> #callsign) { display: none !important; }
+
+/* 0.3.75: UNDOCK while the crane holds the clamps */
+.sd-btn.sd-wait { opacity: 0.85; border-style: dashed; }

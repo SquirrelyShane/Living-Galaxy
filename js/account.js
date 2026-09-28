@@ -589,7 +589,8 @@ export function mountAccount({ meta = null, flushers = [] } = {}) {
     tryNews(useGameStore.getState());
     if (!posted) useGameStore.subscribe(tryNews);
     /* 0.3.74: no reconcile, no restore-and-reload on boot — the hangar lists, the pilot picks */
-    if (account.user?.verified) listPilots().then(() => { paintStartLine(); emitReady(); });
+    /* 0.3.75: the hangar opens on the probe (the list shows "loading"), and fills when the list lands */
+    if (account.user?.verified) { account.pilots = null; emitReady(); listPilots().then(() => { paintStartLine(); emitReady(); }); }
     else { eraseGuest(); emitReady(); }
     timer = setInterval(() => sync(), SYNC_EVERY_MS);
     timer.unref?.();

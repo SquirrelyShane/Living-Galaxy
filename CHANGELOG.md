@@ -10,6 +10,28 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.75 — 2026-09-28
+
+UNDOCK after a contract, a start card that waits for your account, and new pilots named on the record.
+
+### Players
+
+- **Undocking after taking a job works.** Some jobs load cargo the moment you accept them, and the port keeps your clamps on until the crane is done. The UNDOCK button now shows the wait (for example "UNDOCK · 38s"). Tap it once and you leave by yourself the moment loading finishes; tap again to stay.
+- **The start screen no longer jumps.** When you open the game signed in, it waits a moment for your account instead of showing CREATE PILOT and then changing under your thumb. Your hangar appears straight away and fills in your pilots as they arrive.
+- **New pilots are named on the pilot record.** NEW PILOT opens pilot creation with the callsign field first. It must be filled in before you can go on, and the start screen no longer shows a stray callsign box.
+
+### Developers
+
+Reported: "at the board, once accepted a contract and hitting undock it doesn't undock"; "still some lag behind the site and its loading"; "hitting new pilot should take to new pilot creation including entering a name".
+
+- **UNDOCK** (`js/sim.js` `toggleDock({ queue })`, `js/stationdeck.js`). A haul loads on accept and books crane time (0.3.25); `toggleDock` refused with a notice on the HUD, which the station deck covers, so the button did nothing visible. The deck now calls `toggleDock({ queue: true })`: while the crane runs it books a departure (`sim.undockWhenClear`), which the tick spends the moment `handlingLeft` reaches 0; a second press cancels. The deck button reads `UNDOCK · Ns` / `LEAVING · Ns`. A plain `toggleDock()` (autopilot, missions, HUD) keeps the 0.3.25 rule.
+- **Start card** (`index.html` `start-pending`, `js/hud.js`, `js/account.js`, `js/hangar.js`, `css/style.css`). On the site the card hides CALLSIGN / CREATE / FLY AS and says "Checking your account…" until the account probe answers (6 s at most, then the old card). Signed in, the hangar opens on the probe with "Loading your pilots…" and re-renders when the list lands, instead of waiting for both round trips. The start card's callsign box is hidden in hangar mode.
+- **Naming** (`js/creation.js` `show({ askName })`). The pilot record's title becomes a callsign input, focused; Next and the launch button refuse until it has 2+ characters. The value is mirrored into `#callsign` with an input event so the store's callsign — which `go()` launches with — follows.
+
+Files: `js/sim.js`, `js/stationdeck.js`, `js/creation.js`, `js/hud.js`, `js/account.js`, `js/hangar.js`, `index.html`, `css/style.css`, `js/version.js`, `CHANGELOG.md`; `test/undock.test.mjs` (new, 9).
+
+Verified: all node suites green (95, with undock); smokes account (28, real site + relay), continue, desk and docking green (docking timed out once while the full suite shared the machine, passed alone). In a browser against site 0.2.10 signed in: the card opens in "Checking your account…" with CREATE hidden, becomes the hangar with no stray callsign box, NEW PILOT opens the record with an empty focused callsign field, Next refuses without a name, and the pilot launches under the typed name; no page or CSP errors. Not checked on a phone.
+
 ## 0.3.74 — 2026-09-27
 
 The hangar: choose a system, then a pilot.

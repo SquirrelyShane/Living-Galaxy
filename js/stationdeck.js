@@ -11,6 +11,7 @@
  */
 
 import { currentShipId, issuedHullId, sim, toggleDock } from "./sim.js";
+import { handlingLeft, handlingLine } from "./dockwork.js";
 import { SHIP_DB, shipById, sizeBand } from "./shipdb.js";
 import { componentBill, stockLines, yardQuote } from "./shipcost.js";
 import { pilot, rankStatus } from "./pilot.js";
@@ -403,7 +404,17 @@ export function mountStationDeck() {
   });
   $("sd-stow").addEventListener("click", () => { stowed = true; });
   $("sd-reopen").addEventListener("click", () => { stowed = false; });
-  $("sd-undock").addEventListener("click", () => { toggleDock(); });
+  $("sd-undock").addEventListener("click", () => { toggleDock({ queue: true }); paintUndock(); });
+  /* 0.3.75: the button says when the crane is holding the clamps, and when a departure is booked */
+  const paintUndock = () => {
+    const b = $("sd-undock");
+    const left = Math.ceil(handlingLeft(sim.ship?.dockedAt ?? null));
+    const queued = sim.undockWhenClear && sim.undockWhenClear === sim.ship?.dockedAt;
+    const text = left > 0 ? (queued ? `LEAVING · ${left}s` : `UNDOCK · ${left}s`) : "UNDOCK";
+    if (b.textContent !== text) b.textContent = text;
+    b.classList.toggle("sd-wait", left > 0);
+    b.title = left > 0 ? (queued ? `Cargo handling — ${handlingLine()}. You leave when it is done; tap again to stay.` : `Cargo handling — ${handlingLine()}. Tap to leave as soon as it is done.`) : "";
+  };
   wireDeckRepair($("sd-repair"), () => { if (tab === "refit") paintPanel(); });
   root.addEventListener("pointerdown", (e) => e.stopPropagation());
 
@@ -440,6 +451,7 @@ export function mountStationDeck() {
     { const c = clockAt(sim.time); const line = `${stationById(dockedAt)?.sector ?? ""} deck · ${c.weekday} ${c.hhmm} · ${c.shift} shift`;
       const sub = $("sd-sub"); if (sub.textContent !== line) sub.textContent = line; if (root.dataset.part !== c.part) root.dataset.part = c.part; }
     $("sd-credits").textContent = `${Math.round(sim.ship.credits).toLocaleString()} CR`;
+    paintUndock();
     paintDeckRepair($("sd-repair"), stationById(dockedAt));
 
     /* progress bar screen — station processes, ticking on their own clocks */

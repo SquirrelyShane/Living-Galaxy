@@ -661,7 +661,14 @@ export function setNoticeAbout(text, name) {
 
 const fmtKm = (u) => `${(u / 100).toFixed(u < 10000 ? 1 : 0)} km`;
 
-export function toggleDock() {
+/**
+ * 0.3.75: `queue` — the deck's UNDOCK while the crane is still working. The
+ * refusal was a notice on the HUD, which the station deck covers, so the button
+ * simply did nothing (a haul loads on accept, and a big one is minutes of
+ * crane). Now the press is held: the clamps come off by themselves the moment
+ * the last pallet is aboard, and a second press cancels it.
+ */
+export function toggleDock({ queue = false } = {}) {
   const ship = sim.ship;
   if (tractor.active) {
     const st = stationById(tractor.stId);
@@ -684,9 +691,20 @@ export function toggleDock() {
     const wait = handlingLeft(ship.dockedAt);
     if (wait > 0) {
       const at = stationById(ship.dockedAt);
+      if (queue) {
+        if (sim.undockWhenClear === ship.dockedAt) {
+          sim.undockWhenClear = null;
+          setNoticeAbout(`${at?.name ?? "Port"} control: departure cancelled — clamps stay on.`, at?.name ?? "PORT");
+          return false;
+        }
+        sim.undockWhenClear = ship.dockedAt;
+        setNoticeAbout(`${at?.name ?? "Port"} control: departure booked — clamps off when the crane is done (${handlingLine()}).`, at?.name ?? "PORT");
+        return false;
+      }
       setNoticeAbout(`${at?.name ?? "Port"} control: cargo handling — ${handlingLine()}. Clamps stay on.`, at?.name ?? "PORT");
       return false;
     }
+    sim.undockWhenClear = null;
     const st = stationById(ship.dockedAt);
     if (st) st.docked = false;
     ship.dockedAt = null;
@@ -3991,6 +4009,11 @@ export function tickSim(dt) {
 
   /* the crane runs whether or not the hull is flying — it is the reason it is not */
   stepDockwork(d * (sim.phase === "play" ? sim.timeScale : 1), sim.ship?.dockedAt ?? null);
+  /* 0.3.75: a departure booked while the crane worked goes the moment it is done */
+  if (sim.undockWhenClear) {
+    if (sim.ship?.dockedAt !== sim.undockWhenClear) sim.undockWhenClear = null;
+    else if (sim.phase === "play" && handlingLeft(sim.undockWhenClear) <= 0) { sim.undockWhenClear = null; toggleDock(); }
+  }
 
   if (sim.phase !== "play") {
     setEngineLevel(0, false, 0);
