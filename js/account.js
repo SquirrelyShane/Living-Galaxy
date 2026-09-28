@@ -48,7 +48,9 @@ import { useGameStore } from "./store.js";
 import { gnnPost } from "./gnn.js";
 
 export const SNAP_VERSION = 1;
-export const SLOT = "default";
+export const SLOT = "default";           // the one slot before 0.3.74; still a pilot's slot if it holds one
+export const PILOT_SLOTS = ["p1", "p2", "p3"];   // 0.3.74: up to three pilots an account (with "default", if used, counting as one)
+export const MAX_PILOTS = 3;
 export const SYNC_EVERY_MS = 120000;      // the periodic check while playing
 export const MIN_GAP_MS = 15000;          // never two uploads closer than this (server: 60 / 10 min)
 export const NEWS_MAX_AT_ONCE = 5;        // bulletins posted per boot at most, newest of the unseen
@@ -67,7 +69,10 @@ export const account = {
   user: null,          // { id, username, verified, role } or null when signed out
   status: "idle",      // idle · probing · offline · signed-out · unverified · syncing · synced · conflict · error
   error: "",
-  version: 0,          // the server version of SLOT this device last synced to
+  slot: SLOT,          // 0.3.74: which of the account's pilots this device is flying
+  pilots: null,        // 0.3.74: the account's pilots, metadata only (GET /api/save) — null until listed
+  guest: false,        // 0.3.74: a site with nobody signed in (or unverified): pilots are not kept
+  version: 0,          // the server version of the slot this device last synced to
   hash: "",            // hash of the snapshot that version holds
   lastSync: 0,         // Date.now() of the last successful upload
   lastTry: 0,
@@ -155,7 +160,7 @@ function readState() {
   return null;
 }
 function writeState() {
-  try { store()?.setItem(STATE_KEY, JSON.stringify({ version: account.version, hash: account.hash, user: account.user?.username ?? null, at: account.lastSync })); } catch { /* quota */ }
+  try { store()?.setItem(STATE_KEY, JSON.stringify({ version: account.version, hash: account.hash, user: account.user?.username ?? null, at: account.lastSync, slot: account.slot })); } catch { /* quota */ }
 }
 
 /* ---- HTTP --------------------------------------------------------------- */
@@ -190,8 +195,9 @@ export async function probe() {
 function adopt(user) {
   account.user = user ?? null;
   const st = readState();
-  if (user && st && st.user === user.username) { account.version = st.version | 0; account.hash = st.hash ?? ""; account.lastSync = st.at ?? 0; }
-  else { account.version = 0; account.hash = ""; account.lastSync = 0; }
+  if (user && st && st.user === user.username) { account.version = st.version | 0; account.hash = st.hash ?? ""; account.lastSync = st.at ?? 0; account.slot = st.slot || SLOT; }
+  else { account.version = 0; account.hash = ""; account.lastSync = 0; account.slot = SLOT; }
+  account.guest = !user?.verified;
   account.status = !user ? "signed-out" : !user.verified ? "unverified" : "synced";
   account.error = "";
 }
@@ -223,7 +229,7 @@ export async function signOut() {
 
 /** The account's copy of SLOT, or null when there is none yet. */
 export async function pull() {
-  const r = await call(`/api/save?slot=${encodeURIComponent(SLOT)}`);
+  const r = await call(`/api/save?slot=${encodeURIComponent(account.slot)}`);
   if (r.status === 404) return null;
   if (r.status !== 200 || !r.json?.data) throw new Error(r.json?.error || `pull failed (${r.status})`);
   return { version: r.json.version, updatedAt: r.json.updated_at, data: r.json.data };
@@ -287,7 +293,7 @@ export async function push({ force = false, keepalive = false } = {}) {
   account.lastTry = account.now();
   let r;
   try {
-    r = await call("/api/save", { method: "POST", keepalive, body: { slot: SLOT, data: snap, base_version: base, meta } });
+    r = await call("/api/save", { method: "POST", keepalive, body: { slot: account.slot, data: snap, base_version: base, meta } });
   } catch (e) { return fail(`sync failed: ${e?.message ?? e}`); }
   if (r.status === 409) {
     let remote = null;
@@ -347,7 +353,7 @@ export async function checkRemote({ auto = true } = {}) {
   if (!account.site || !account.user?.verified || account.conflict) return false;
   let r;
   try { r = await call("/api/save"); } catch { return false; }
-  const row = (r.json?.saves ?? []).find((s) => s.slot === SLOT);
+  const row = (r.json?.saves ?? []).find((s) => s.slot === account.slot);
   account.newer = null;
   if (!row || row.version <= account.version) return false;
   const local = snapshot();
@@ -479,6 +485,75 @@ export function accountLine() {
   }
 }
 
+/* ---- 0.3.74: the hangar — pick a pilot rather than have one restored ------------
+ *
+ * Signing in used to RECONCILE: pull the account's whole pilot on boot and, if
+ * it differed from the device, write it over the device and reload the page —
+ * and again on the next check, which is how one sign-in reloaded three times
+ * and why "recalling a pilot" took so long (every key of it, before the menu).
+ * Now boot lists the account's pilots (a few hundred bytes of metadata), the
+ * start card shows them, and only the pilot you pick is fetched and put on the
+ * device — no reload. */
+
+/** The account's pilots, newest first: [{ slot, callsign, career, sky, credits, version, updated_at }]. */
+export async function listPilots() {
+  if (!account.site || !account.user?.verified) { account.pilots = []; return []; }
+  let r;
+  try { r = await call("/api/save"); } catch { account.pilots = account.pilots ?? []; return account.pilots; }
+  account.pilots = r.status === 200 ? (r.json?.saves ?? []).filter((p) => p.slot === SLOT || PILOT_SLOTS.includes(p.slot)) : [];
+  return account.pilots;
+}
+
+/** Put one of the account's pilots on this device and make it the one that syncs. No reload. */
+export async function flyPilot(slot) {
+  if (!account.site || !account.user?.verified) return false;
+  const was = account.slot;
+  account.slot = slot;
+  let remote;
+  try { remote = await pull(); } catch (e) { account.slot = was; return fail(e.message); }
+  if (!remote) { account.slot = was; return fail("that pilot is not on the account any more"); }
+  restore(remote.data);
+  account.version = remote.version; account.hash = hashOf(remote.data); account.lastSync = account.now();
+  account.conflict = null; account.newer = null;
+  account.status = "synced";
+  writeState();
+  return true;
+}
+
+/** A free slot for a new pilot, or null when the account has MAX_PILOTS. Clears the device for it. */
+export function newPilotSlot() {
+  const taken = new Set((account.pilots ?? []).map((p) => p.slot));
+  if (taken.size >= MAX_PILOTS) return null;
+  const slot = PILOT_SLOTS.find((s) => !taken.has(s)) ?? null;
+  if (!slot) return null;
+  restore({ keys: {} });            // the device holds the pilot being made, nobody else's
+  account.slot = slot; account.version = 0; account.hash = ""; account.lastSync = 0;
+  account.conflict = null; account.newer = null;
+  writeState();
+  return slot;
+}
+
+/** Remove one of the account's pilots (the hangar's delete). */
+export async function deletePilot(slot) {
+  if (!account.site || !account.user?.verified) return false;
+  let r;
+  try { r = await call("/api/save", { method: "DELETE", body: { slot } }); } catch { return false; }
+  if (r.status !== 200) return false;
+  account.pilots = (account.pilots ?? []).filter((p) => p.slot !== slot);
+  if (account.slot === slot) { account.slot = SLOT; account.version = 0; account.hash = ""; writeState(); }
+  return true;
+}
+
+/** A guest's pilot is not kept: whatever the last guest session left is cleared before the next one flies. */
+export function eraseGuest() {
+  if (!account.site || !account.guest) return 0;
+  return restore({ keys: {} });
+}
+
+function emitReady() {
+  try { globalThis.document?.dispatchEvent?.(new CustomEvent("lg-account", { detail: account })); } catch { /* no DOM */ }
+}
+
 /** The line under the callsign on the start card, when there is a site to speak of. */
 function paintStartLine() {
   const el = globalThis.document?.getElementById?.("account-line");
@@ -488,11 +563,11 @@ function paintStartLine() {
   el.classList.toggle("on", Boolean(account.user?.verified));
   el.textContent = "";
   if (account.status === "restoring") { el.textContent = "Loading your pilot from the account…"; return; }
-  if (account.user?.verified) { el.textContent = `Signed in as ${account.user.username} · this pilot syncs to your account`; return; }
-  if (account.user) { el.textContent = `${account.user.username} — verify your email to sync this pilot`; return; }
+  if (account.user?.verified) { el.textContent = `Signed in as ${account.user.username} · pilots save to your account`; return; }
+  if (account.user) { el.textContent = `${account.user.username} — verify your email to save pilots. Until then you fly as a guest in Sol.`; return; }
   const a = globalThis.document.createElement("a");
   a.href = "/login?next=/play/"; a.textContent = "Sign in";
-  el.append(a, ` at living-galaxy.com to bring your pilot here, or play as a guest.`);
+  el.append(a, " to save pilots and pick a system. Guests fly in Sol and are not kept.");
 }
 
 /**
@@ -507,28 +582,27 @@ export function mountAccount({ meta = null, flushers = [] } = {}) {
   let timer = 0;
   probe().then((ok) => {
     paintStartLine();
-    if (!ok) return;
+    if (!ok) { emitReady(); return; }
     /* the feed lands once the pilot is flying, not on the menu screen */
     let posted = false;
     const tryNews = (s) => { if (!posted && s.phase === "play") { posted = true; postNews(); } };
     tryNews(useGameStore.getState());
     if (!posted) useGameStore.subscribe(tryNews);
-    if (account.user?.verified) {
-      const p = !account.version ? reconcile() : checkRemote({ auto: useGameStore.getState().phase !== "play" });
-      p.then(paintStartLine);
-    }
+    /* 0.3.74: no reconcile, no restore-and-reload on boot — the hangar lists, the pilot picks */
+    if (account.user?.verified) listPilots().then(() => { paintStartLine(); emitReady(); });
+    else { eraseGuest(); emitReady(); }
     timer = setInterval(() => sync(), SYNC_EVERY_MS);
     timer.unref?.();
   });
   if (doc?.addEventListener) {
     doc.addEventListener("visibilitychange", () => {
       if (doc.visibilityState === "hidden") setTimeout(() => sync({ keepalive: true, force: true }), 0);
-      else if (account.site && account.user?.verified) checkRemote({ auto: useGameStore.getState().phase !== "play" });
+      else if (account.site && account.user?.verified && useGameStore.getState().phase === "play") checkRemote({ auto: false });
     });
   }
   if (globalThis.window?.addEventListener) {
     window.addEventListener("pagehide", () => { sync({ keepalive: true, force: true }); });
   }
-  if (globalThis.window?.__lg) window.__lg.account = { account, sync, push, pull, signIn, signOut, resolve, snapshot, restore, postNews, checkRemote, takeNewer, loadBoard };
+  if (globalThis.window?.__lg) window.__lg.account = { account, sync, push, pull, signIn, signOut, resolve, snapshot, restore, postNews, checkRemote, takeNewer, loadBoard, listPilots, flyPilot, newPilotSlot, deletePilot, eraseGuest };
   return () => { if (timer) clearInterval(timer); };
 }

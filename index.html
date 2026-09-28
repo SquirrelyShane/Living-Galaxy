@@ -158,6 +158,7 @@
     <link rel="modulepreload" href="./js/genome/genome-256.js" />
     <link rel="modulepreload" href="./js/genome/spacer.js" />
     <link rel="modulepreload" href="./js/gnn.js" />
+    <link rel="modulepreload" href="./js/hangar.js" />
     <link rel="modulepreload" href="./js/holdview.js" />
     <link rel="modulepreload" href="./js/holefx.js" />
     <link rel="modulepreload" href="./js/holes.js" />
@@ -377,6 +378,8 @@
           Fly it from the seat. The nose goes where you look, momentum is yours to
           cancel, and the worlds are hundreds of times longer than your hull.
         </p>
+        <!-- 0.3.74: signed in, the start card is a hangar — system, then pilots (js/hangar.js) -->
+        <div id="hangar" class="hangar" hidden></div>
         <label>
           Callsign
           <input id="callsign" maxlength="18" autocomplete="off" />

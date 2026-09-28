@@ -10,6 +10,62 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.74 — 2026-09-27
+
+The hangar: choose a system, then a pilot.
+
+Reported: signing in reloaded the page three times; loading or recalling a
+pilot took an extremely long time; there was no good way to pick or make
+pilots; guests could reach the system picker though they may only fly the
+live Sol, and guest pilots were kept.
+
+- **Why it reloaded and why it was slow** (`js/account.js`). Every boot
+  signed in RECONCILED: it pulled the account's whole pilot, and if it
+  differed from the device wrote it over the device and reloaded — and the
+  next check could do it again. Boot now only LISTS the account's pilots
+  (`listPilots`: GET /api/save, metadata, a few hundred bytes). The pilot you
+  pick is the only one fetched (`flyPilot`), put on the device, and flown —
+  no reload. Measured end to end in a browser against the real lgsite.py:
+  0 page loads between FLY and the cockpit.
+- **Up to three pilots an account** (`PILOT_SLOTS` p1–p3, `MAX_PILOTS`; the
+  old "default" slot counts as one if it holds a pilot). `newPilotSlot` gives
+  a new pilot its own slot and a clean device; `deletePilot` removes one
+  (DELETE /api/save). Sync goes to the pilot being flown (`account.slot`,
+  kept in the device's sync record). No site change: lgsite.py already keys
+  saves by slot.
+- **The start card, by who is at it** (`js/hud.js`, new `js/hangar.js`,
+  `index.html` #hangar, `css/style.css`):
+  - signed in and verified — **1 · System** (Sol · live, Random, or a named
+    system) → **2 · Pilots in that system** (callsign, career, purse, when
+    last flown; FLY, ✕) with a quick switch to the systems your other pilots
+    fly in → **New pilot in <system>** (disabled at 3 of 3). The backdrop grows
+    the system you pick. A new pilot's creation ends in that system.
+  - guest (signed out, or unverified) — one button, **Play as guest**; the
+    creation's last step is **Enter Sol** only; the last guest's pilot is
+    erased when the page opens and again when a guest starts (`eraseGuest`).
+  - no site behind the page (server.py) — FLY AS / CREATE, unchanged.
+  The early FLY AS tap (0.3.61) is honoured only in that last case.
+- `creation.js`: `fixedSky` — when the system is already decided the Sky step
+  is a single launch button (still `#btn-sol`).
+- In-game sign-in (CON › ACCOUNT) is unchanged: it is a deliberate action and
+  still reconciles.
+
+Files: `js/account.js`, `js/hangar.js` (new), `js/hud.js`, `js/creation.js`,
+`index.html`, `css/style.css`, `js/version.js`, `CHANGELOG.md`;
+`test/hangar.test.mjs` (new, 19 — runs against the real lgsite.py when it can
+find one); `test/smoke-account.mjs` (device B now meets the hangar: listed,
+nothing pulled, FLY, no reload); `test/profile.test.mjs` (the `lg-account`
+event name is not a storage key).
+
+Verified: 93 node suites green, with account.test's live half (120) and
+hangar.test run against site 0.2.8's lgsite.py; smokes account (28, against
+the real site and relay), continue, attract and desk green. In a browser
+against the real site: a guest gets PLAY AS GUEST and only ENTER SOL; a
+signed-in account gets the hangar, makes a pilot in Sol that syncs to slot p1,
+and on the next visit the hangar lists it and FLY lands in the cockpit with 0
+page loads. An account's pre-0.3.74 pilot (slot "default") is listed and flies
+the same. Not checked on a phone.
+
 ## 0.3.73 — 2026-09-27
 
 Sol is built once, the console keeps you in the room, and the world you are near gets a close-up skin.

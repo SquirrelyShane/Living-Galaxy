@@ -18,6 +18,8 @@ import { ariaHasConn, ariaTakeConn, ariaRelease } from "./aria.js";
 import { ariaPilot } from "./aria-pilot.js";
 import { mountMap } from "./map.js";
 import { mountCreation } from "./creation.js";
+import { account, flyPilot, newPilotSlot, deletePilot, eraseGuest, MAX_PILOTS } from "./account.js";
+import { mountHangar } from "./hangar.js";
 import { MINING_MODES, THROTTLE_MAX, THROTTLE_MIN, TURRET_MODES, cargoTotal } from "./ship.js";
 import { setAudioMuted, unlockAudio, UI, busLevels, setBusLevel, resetMix, BUSES } from "./audio.js";
 import { loadSave, randomCallsign, skyProgress, useGameStore } from "./store.js";
@@ -808,6 +810,8 @@ export function mountHud() {
     loadedSeed: () => seedKey,
     normalizeSeed: (seed) => (seed === "sol" ? PUBLIC_ROOM : sanitizeRoom(seed)),
     onLaunch: (seed) => go(seed === "sol" ? PUBLIC_ROOM : sanitizeRoom(seed)),
+    /* 0.3.74: a guest flies in Sol; a signed-in pilot is made in the system the hangar chose */
+    fixedSky: () => startMode === "guest" ? PUBLIC_ROOM : startMode === "hangar" ? seedKey : null,
   });
   /* 0.3.42 — FLY AS <callsign>. A device with a pilot record and a save flies
    * on as that pilot: race, rank, skills, hulls, cover, purse, corp, fleet,
@@ -839,6 +843,7 @@ export function mountHud() {
     go(sky);
   });
   createBtn.addEventListener("click", () => {
+    if (startMode === "guest") { eraseGuest(); unlockAudio(); creation.show(); return; }   // 0.3.74: a guest's pilot is never kept
     if (loadPilot() && loadSave().callsign) {
       const name = loadSave().callsign;
       const sure = globalThis.confirm ? confirm(`Start a NEW pilot?\n\n${name}'s rank, hulls, corp, fleet, refits and purse on this device are cleared. If ${name} is synced to an account, the next sync replaces the account copy too.\n\nFly as ${name} instead to keep them.`) : true;
@@ -847,15 +852,74 @@ export function mountHud() {
     unlockAudio();
     creation.show();
   });
-  if (globalThis.window?.__lg) window.__lg.start = { paintStart, continueRun: () => contBtn?.click() };
-  /* 0.3.61 — index.html paints FLY AS from storage before a module has
-   * loaded, and a tap in that window is held rather than lost. It is honoured
-   * here, before the menu's preview sky is grown, so the tap costs one sky
-   * build instead of two. */
-  if (globalThis.window?.__lgFlyQueued && contBtn && !contBtn.hidden) {
-    window.__lgFlyQueued = false;
-    queueMicrotask(() => contBtn.click());
-  }
+  /* ---- 0.3.74: who is at the start card decides what it offers ------------
+   *   "local"  — no site behind this page (server.py): FLY AS / CREATE, as ever
+   *   "guest"  — the site, nobody verified signed in: one CREATE, straight into
+   *              Sol, and nothing kept (account.js erased the last guest's pilot)
+   *   "hangar" — signed in: system first, then that system's pilots, or a new one
+   * js/account.js announces which once its probe is back ("lg-account"). */
+  let startMode = "pending";
+  const hangarEl = $("hangar");
+  const callLabel = $("callsign")?.closest("label");
+  let hangar = null;
+  const setMode = (mode) => {
+    startMode = mode;
+    if (mode === "hangar") {
+      contBtn.hidden = true;
+      createBtn.hidden = true;
+      if (hangarEl) hangarEl.hidden = false;
+      if (callLabel?.firstChild?.nodeType === 3) callLabel.firstChild.textContent = "New pilot's callsign";
+      if (!seedKey || !account.pilots?.some((p) => (p.sky || "sol") === seedKey)) {
+        const last = account.pilots?.[0];
+        if (last?.sky && last.sky !== seedKey) { seedKey = last.sky === "public" ? PUBLIC_ROOM : last.sky; queueSky(); }
+      }
+      hangar = hangarEl ? mountHangar({
+        root: hangarEl, account, maxPilots: MAX_PILOTS,
+        system: () => seedKey,
+        setSystem: (seed) => { if (seed !== seedKey) { seedKey = seed; queueSky(); } },
+        rollSeed: () => makePrivateCode() + makePrivateCode().slice(0, 1),
+        clean: (t) => { const s = String(t ?? "").trim(); return s ? (s.toLowerCase() === "sol" ? PUBLIC_ROOM : sanitizeRoom(s)) : ""; },
+        describe: describeSeed,
+        name: (seed) => generateSystem(seed).name,
+        onFly: async (p, seed) => {
+          if (!(await flyPilot(p.slot))) { hangar.setNote(account.error || "Could not load that pilot."); return; }
+          const rec = loadPilot();
+          const sv = loadSave();
+          if (!rec || !sv.callsign || !restorePilot(rec)) { hangar.setNote("That pilot's record is incomplete — fly them once from the device they were made on."); return; }
+          $("callsign").value = sv.callsign;
+          store.getState().setCallsign(sv.callsign);
+          go(seed);
+        },
+        onNew: (seed) => {
+          if (!newPilotSlot()) { hangar.setNote(`An account keeps ${MAX_PILOTS} pilots.`); return; }
+          seedKey = seed;
+          unlockAudio();
+          creation.show();
+        },
+        onDelete: (p) => deletePilot(p.slot),
+      }) : null;
+    } else if (mode === "guest") {
+      if (hangarEl) hangarEl.hidden = true;
+      contBtn.hidden = true;
+      createBtn.hidden = false;
+      createBtn.textContent = "Play as guest";
+      createBtn.classList.add("btn-accent");
+      createBtn.classList.remove("btn-ghost");
+      if (seedKey !== PUBLIC_ROOM) { seedKey = PUBLIC_ROOM; queueSky(); }
+    } else {
+      if (hangarEl) hangarEl.hidden = true;
+      paintStart();
+    }
+    /* 0.3.61's early FLY AS tap is honoured only where FLY AS still exists */
+    if (globalThis.window?.__lgFlyQueued) {
+      window.__lgFlyQueued = false;
+      if (mode === "local" && contBtn && !contBtn.hidden) queueMicrotask(() => contBtn.click());
+    }
+  };
+  const onAccount = () => setMode(!account.site ? "local" : account.user?.verified ? "hangar" : "guest");
+  globalThis.document?.addEventListener("lg-account", onAccount);
+  if (account.site !== null && account.status !== "probing" && account.status !== "idle") onAccount();
+  if (globalThis.window?.__lg) window.__lg.start = { paintStart, continueRun: () => contBtn?.click(), mode: () => startMode, hangar: () => hangar };
 
   /* --- pan stick: this is the nose --- */
   bindPad(

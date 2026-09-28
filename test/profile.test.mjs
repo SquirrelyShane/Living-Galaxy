@@ -185,11 +185,12 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   };
   for (const r of roots) walk(r);
 
-  /* Two `lgaa-`/`lg-` strings in the tree are not storage at all, and saying so
+  /* Three `lgaa-`/`lg-` strings in the tree are not storage at all, and saying so
    * here is cheaper than a cleverer regex that would go wrong later. */
   const NOT_STORAGE = new Map([
     ["lg-rockbody", "js/bodygen/body.js — a three.js shader program cache key"],
     ["lgaa-net-id", "js/net.js — sessionStorage, one tab, dies with the tab"],
+    ["lg-account", "js/account.js — a DOM event name (0.3.74: the probe is back), not a key"],
   ]);
   const known = new Set([...P.RUN_KEYS, ...P.DEVICE_KEYS, ...P.LEARNED_KEYS, ...P.SKY_KEYS, "lgaa.profile.v1"]);
   const found = new Map();                // key (or prefix stem) → the file that owns it

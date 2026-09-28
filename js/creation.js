@@ -31,6 +31,7 @@ function $(id) {
 
 /**
  * @param opts.onLaunch  (seed) => void
+ * @param opts.fixedSky  () => seed | null — 0.3.74: the system is already chosen (guest: Sol; hangar: its pick)
  * @param opts.onSeed    (seed) => void   preview a sky without launching
  * @param opts.rollSeed  () => string
  * @param opts.textureProgress () => ({done, total})
@@ -214,6 +215,25 @@ export function mountCreation(opts) {
   }
 
   function renderSky() {
+    /* 0.3.74 — the system is already decided: a guest flies in Sol, and a
+     * signed-in pilot is made in the system the hangar chose. One button. */
+    const fixed = opts.fixedSky?.() ?? null;
+    if (fixed) {
+      const target = opts.normalizeSeed ? opts.normalizeSeed(fixed) : fixed;
+      const f = el("div", "detail");
+      f.append(el("h4", null, "Where to"), el("p", null, target === "sol" || target === opts.normalizeSeed?.("sol")
+        ? "Sol — the live, shared sky. Everyone else is here too."
+        : `${opts.systemName(target)} — the system you chose.`));
+      body.append(f);
+      const go = el("button", "btn btn-accent", target === "sol" || target === opts.normalizeSeed?.("sol") ? "Enter Sol" : `Launch into ${opts.systemName(target)}`);
+      go.type = "button";
+      go.id = "btn-sol";
+      go.addEventListener("click", () => finish(target));
+      const picks = el("div", "sky-picks");
+      picks.append(go);
+      body.append(picks);
+      return;
+    }
     const d = el("div", "detail");
     d.append(
       el("h4", null, "Where to"),

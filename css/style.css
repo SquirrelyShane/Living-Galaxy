@@ -3229,3 +3229,24 @@ html.boot-failed body > *:not(#boot-fail) { display: none !important; }
 .sd-care .sd-btnrow .sd-select { flex: 1 1 44%; min-width: 0; }
 .sd-val { flex-wrap: wrap; }
 @media (pointer: coarse) { .sd-btn { min-height: 36px; } .sd-input { min-height: 40px; font-size: 16px; } }
+
+/* ---- 0.3.74: the hangar (js/hangar.js) — system, then pilots ---------------- */
+.hangar { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 10px; }
+.hangar .hangar-step { margin: 8px 0 0; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted, #8fa3b3); }
+.hangar .hangar-chips, .hangar .hangar-named { display: flex; gap: 8px; }
+.hangar .hangar-chips .btn { flex: 1; }
+.hangar .hangar-named input { flex: 1; min-width: 0; }
+.hangar .hangar-sys { margin: 0; }
+.hangar .hangar-list { display: flex; flex-direction: column; gap: 6px; }
+.hangar .hangar-pilot { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--border, rgba(255,255,255,0.14)); border-radius: 6px; background: rgba(0,0,0,0.25); }
+.hangar .hangar-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hangar .hangar-who strong { font-family: var(--mono, monospace); letter-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hangar .hangar-who span { font-size: 0.8rem; color: var(--muted, #8fa3b3); }
+.hangar .hangar-del { padding: 6px 10px; }
+.hangar .hangar-others { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted, #8fa3b3); }
+.hangar .hangar-empty, .hangar .hangar-note { margin: 0; font-size: 0.85rem; color: var(--muted, #8fa3b3); }
+.hangar .hangar-note { color: var(--accent, #7ce7ff); }
+@media (pointer: coarse) {
+  .hangar .btn { min-height: 44px; }
+  .hangar .hangar-del { min-width: 44px; }
+}

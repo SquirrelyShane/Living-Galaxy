@@ -123,22 +123,23 @@ try {
   await B.addCookies([...jar].map(([name, value]) => ({ name, value, url: BASE })));
   const b = await B.newPage();
   b.on("pageerror", (e) => { errors.push(e.message); console.error("PAGE ERROR B", e.message); });
+  let loadsB = 0;
+  b.on("load", () => { loadsB++; });
   await b.goto(`${BASE}/play/`, { waitUntil: "networkidle" });
-  /* the boot probe finds the session, sees an empty device, restores and reloads */
-  let got = null;
-  for (let i = 0; i < 40; i++) { await sleep(250); got = await b.evaluate(() => ({ callsign: document.getElementById("callsign")?.value, save: localStorage.getItem("lgaa-save-v1"), company: localStorage.getItem("lgaa-company"), state: localStorage.getItem("lgaa.account.v1"), line: document.getElementById("account-line")?.textContent })).catch(() => null); if (got?.save && got?.callsign === "AcctSmoke") break; }
-  ok(got?.save?.includes("AcctSmoke") && got?.company?.includes("Smoke Holdings"), "B got A's pilot without creating one");
-  ok(got?.callsign === "AcctSmoke", `…and after the reload the start card already carries the callsign (${got?.callsign})`);
-  ok(JSON.parse(got?.state ?? "{}").version === 2, `…tracking v2 (${got?.state})`);
-  let line = got?.line ?? "";
-  for (let i = 0; i < 20 && !/Signed in/.test(line); i++) { await sleep(250); line = await b.evaluate(() => document.getElementById("account-line")?.textContent ?? "").catch(() => ""); }
-  ok(/Signed in as smoke_pilot/.test(line), `the start card names the account (${line})`);
-  /* 0.3.42: and offers to fly on as the restored pilot — no creation screen */
-  const cont = await b.evaluate(() => ({ hidden: document.getElementById("btn-continue")?.hidden, text: document.getElementById("btn-continue")?.textContent }));
-  ok(cont.hidden === false && cont.text === "Fly as AcctSmoke", `…and offers FLY AS the restored pilot (${cont.text})`);
-  await b.click("#btn-continue");
+  /* 0.3.74: the boot probe finds the session and LISTS the account's pilots —
+   * nothing is restored and nothing reloads until a pilot is picked (the old
+   * boot pulled the whole pilot and reloaded, up to three times) */
+  let hang = null;
+  for (let i = 0; i < 40; i++) { await sleep(250); hang = await b.evaluate(() => ({ mode: window.__lg?.start?.mode?.(), names: [...document.querySelectorAll(".hangar-pilot strong")].map((e) => e.textContent), save: localStorage.getItem("lgaa-save-v1"), line: document.getElementById("account-line")?.textContent })).catch(() => null); if (hang?.names?.length) break; }
+  ok(hang?.mode === "hangar" && hang.names.includes("AcctSmoke"), `B's start card is the hangar, listing A's pilot (${JSON.stringify(hang?.names)})`);
+  ok(!hang?.save && loadsB === 1, `…with nothing pulled onto the device and no reload (${loadsB} load)`);
+  ok(/Signed in as smoke_pilot/.test(hang?.line ?? ""), `the start card names the account (${hang?.line})`);
+  await b.click(".hangar-pilot button[data-slot]");
   await b.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
   await sleep(1500);
+  const got = await b.evaluate(() => ({ callsign: document.getElementById("callsign")?.value, company: localStorage.getItem("lgaa-company"), state: localStorage.getItem("lgaa.account.v1") }));
+  ok(got.company?.includes("Smoke Holdings") && got.callsign === "AcctSmoke", "FLY brought A's pilot down — company and callsign");
+  ok(JSON.parse(got.state ?? "{}").version === 2 && loadsB === 1, `…tracking v2, still without a reload (${got.state}; ${loadsB} load)`);
   const flown = await b.evaluate(async () => { const { pilot } = await import("/play/js/pilot.js"); return { name: pilot.name, restored: pilot.restored, complex: pilot.complexId, status: window.__lg.account.account.status, version: window.__lg.account.account.version }; });
   ok(flown.name === "AcctSmoke" && flown.restored && flown.complex === "mining", `B is flying A's pilot: ${flown.name}, ${flown.complex}`);
   ok(flown.status === "synced" && flown.version === 2, `…still synced at v2, nothing re-uploaded for a launch (${flown.status} v${flown.version})`);
