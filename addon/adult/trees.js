@@ -2,10 +2,10 @@
  * Core talk.choose now keeps returning choices, so a topic can walk
  * approach → terms → act → aftercare without dumping you to the list.
  */
-import { firstName } from "../../js/crew.js";
-import { social, loadSocial, playerAsPerson, adjustMorale, adjustTrust } from "../../js/family.js";
+import { firstName } from "../../js/crew/ledger.js";
+import { social, loadSocial, playerAsPerson, adjustMorale, adjustTrust } from "../../js/crew/family.js";
 import { tryConceive, conceptionOdds, canHavePrivacy } from "../../js/crew/romance.js";
-import { sim } from "../../js/sim.js";
+import { sim } from "../../js/sim/sim.js";
 import { scene } from "./scenes.js";
 import { adultLine, flavorBags } from "./voice.js";
 

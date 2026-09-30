@@ -1,6 +1,6 @@
 # js/core/addon-loader.js
 
-[index](../../../README.md) · 20 lines · 3 symbols · 1 imports · 1 importers
+[index](../../../README.md) · 31 lines · 4 symbols · 1 imports · 1 importers
 
 ## About
 
@@ -18,7 +18,7 @@ what tells you it was expected rather than broken.
 | line | from | names | target |
 |---|---|---|---|
 | 1 | `../crew/hooks.js` | `addons` | [js/crew/hooks.js](../crew/hooks.js.md) |
-| 8 | `../../addon/${…}/index.js` | dynamic `import()` in `loadAddons` | runtime-resolved |
+| 18 | `../../addon/${…}/index.js` | dynamic `import()` in `loadAddons` | runtime-resolved |
 
 ## Imported by
 
@@ -32,7 +32,7 @@ what tells you it was expected rather than broken.
 
 ## Effects
 
-_none detected_
+- **net.fetch** — `‹(new)› HEAD` (installed:8)
 
 ## Symbols
 
@@ -43,21 +43,35 @@ const · **exported** · L3–3
 <!-- note:PACKS -->
 <!-- /note -->
 
+### <a id="s-installed"></a>`installed(id)`
+
+function · async · L5–13
+
+- called by: [`loadAddons`](#s-loadAddons)
+- effects: net.fetch `‹(new)›`
+
+<!-- note:installed -->
+A pack folder that is there but fails to load (a stale import path, a syntax error) used to be
+reported as "not installed", because a failed sub-import in a browser says "Failed to fetch" just
+as a missing folder does. Ask the server whether index.js exists and only then decide which it is.
+<!-- /note -->
+
 ### <a id="s-loadAddons"></a>`loadAddons()`
 
-function · async · **exported** · L5–18
+function · async · **exported** · L15–29
 
+- calls: [`installed`](#s-installed)
 - via [js/crew/hooks.js](../crew/hooks.js.md): `addons.mark`
 - called by: [`addonsReady`](#s-addonsReady)
 
 <!-- note:loadAddons -->
-- L12 · `const missing = /Failed to fetch|not found|404|Cannot find module/i.test(String(err?.messa` — a missing folder is the normal case; anything else is the pack itself
+- L? · `const missing = /Failed to fetch|not found|404|Cannot find module/i.test(String(err?.messa` — a missing folder is the normal case; anything else is the pack itself
   throwing, and that is worth seeing
 <!-- /note -->
 
 ### <a id="s-addonsReady"></a>`addonsReady`
 
-const · **exported** · L20–20
+const · **exported** · L31–31
 
 - calls: [`loadAddons`](#s-loadAddons)
 

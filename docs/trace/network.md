@@ -4,11 +4,15 @@
 
 fetch() endpoints (server.py routes), workers, sockets, postMessage.
 
-15 distinct values across 8 files.
+16 distinct values across 9 files.
 
 ### `./worker.js`
 
 - net.Worker — [js/bodygen/grower.js › boot](../files/js/bodygen/grower.js.md#s-boot) L19
+
+### `‹(new)›`
+
+- net.fetch HEAD — [js/core/addon-loader.js › installed](../files/js/core/addon-loader.js.md#s-installed) L8
 
 ### `‹(spreadelement)›`
 

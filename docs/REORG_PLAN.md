@@ -21,7 +21,7 @@ Written against 0.3.77 (323 files, 89k code lines after comment migration). **0.
 
 | domain | files |
 |---|---|
-| `core/` boot, save, frame | boot, store, profile, perf, input, addon-loader, controls-test (empty side-effect import from engine.js — delete in 0.3.79) |
+| `core/` boot, save, frame | boot, store, profile, perf, input, addon-loader, controls-test (empty side-effect import from engine.js — delete in 0.3.80) |
 | `sim/` | sim → `sim/sim.js` (split in 0.3.80+) |
 | `net/` | net, worldsync, account |
 | `world/` sky, bodies, rocks | bodies, archetypes, generate, scale, anchors, names, naming, field, rockgen, debris, textures |
@@ -47,9 +47,10 @@ Result: `js/` root keeps only `main.js` (entry, loaded by index.html) and `versi
 |---|---|---|
 | 0.3.77 | codedocs tool, comment migration, traces, this plan | shipped inside 0.3.78 |
 | **0.3.78** (done) | `tools/codedocs/move.mjs` (plan-file driven, dry run by default) + the table executed; `tools/prune/<ver>.txt` + lg-patch.sh prune so a zip can delete | — |
-| 0.3.79 | hygiene: unused imports, unreferenced symbols, dead files confirmed against tests | — |
-| 0.3.80 | break the 37-file cycle: lift `sim` state object + constants into `sim/state.js`, leave behaviour in `sim.js`; target ≤10-file cycle | — |
-| 0.3.81+ | split `sim.js` along its symbol clusters (warp/route, dock/tractor, career, cataclysm, HUD publish) into `sim/*.js`; then lift `mountGame` closure state into `render/scene.js` so its 2.5k lines can split by layer | — |
+| 0.3.79 | addon path fix (`move.mjs --after`) + addon-loader reports a broken pack as broken | — |
+| 0.3.80 | hygiene: unused imports, unreferenced symbols, dead files confirmed against tests | — |
+| 0.3.81 | break the 37-file cycle: lift `sim` state object + constants into `sim/state.js`, leave behaviour in `sim.js`; target ≤10-file cycle | — |
+| 0.3.82+ | split `sim.js` along its symbol clusters (warp/route, dock/tractor, career, cataclysm, HUD publish) into `sim/*.js`; then lift `mountGame` closure state into `render/scene.js` so its 2.5k lines can split by layer | — |
 
 ## Forward-looking upgrades in line with this
 

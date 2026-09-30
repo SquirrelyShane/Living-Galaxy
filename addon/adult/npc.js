@@ -23,7 +23,7 @@
 
 import { registerVoice } from "../../js/npc/chat.js";
 import { adultLine } from "./voice.js";
-import { social } from "../../js/family.js";
+import { social } from "../../js/crew/family.js";
 
 const WARM = 0.45;            // regard at or above which a hull will talk like this
 const INTENTS = new Set(["greet", "gossip", "about", "offer", "help", "thanks", "banter"]);

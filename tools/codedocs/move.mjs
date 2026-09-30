@@ -10,13 +10,15 @@ const opt = (f, d) => { const i = argv.indexOf(f); return i >= 0 ? argv[i + 1] :
 const ROOT = path.resolve(opt("--root", path.join(path.dirname(fileURLToPath(import.meta.url)), "../..")));
 const PLAN = opt("--plan", null);
 const WRITE = flag("--write");
-if (!PLAN) { console.error("usage: node tools/codedocs/move.mjs --plan <moves.json> [--write] [--root DIR] [--prune-list OUT]"); process.exit(2); }
+const AFTER = flag("--after");
+const ONLY = opt("--only", "addon").split(",").map((d) => d.trim()).filter(Boolean);
+if (!PLAN) { console.error("usage: node tools/codedocs/move.mjs --plan <moves.json> [--write] [--root DIR] [--prune-list OUT] | --after [--only addon,dir]"); process.exit(2); }
 
 const posix = (p) => p.split(path.sep).join("/");
 const moves = JSON.parse(fs.readFileSync(path.resolve(PLAN), "utf8")).moves;
 const M = new Map(Object.entries(moves));
 const problems = [];
-for (const [a, b] of M) {
+if (!AFTER) for (const [a, b] of M) {
   if (!fs.existsSync(path.join(ROOT, a))) problems.push(`source missing: ${a}`);
   if (fs.existsSync(path.join(ROOT, b)) && !M.has(b)) problems.push(`destination exists: ${b}`);
 }
@@ -25,7 +27,7 @@ if (problems.length) { console.error(problems.join("\n")); process.exit(1); }
 
 const newPath = (r) => M.get(r) ?? r;
 const relSpec = (fromFile, target) => { let s = posix(path.posix.relative(path.posix.dirname(fromFile), target)); if (!s.startsWith(".")) s = "./" + s; return s; };
-const JS_ROOTS = ["js", "test", "tools", "host", "addon"];
+const JS_ROOTS = AFTER ? ONLY : ["js", "test", "tools", "host", "addon"];
 const TEXT_FILES = ["index.html", "server.py", "README.md", "PERSISTENT-SOL.md", "manifest.webmanifest", "wrangler.jsonc"];
 const TEXT_DIRS = [["deploy", /\.(sh|md|txt|conf|service)$/], ["tools", /\.(sh|py|html)$/], ["test", /\.py$/], ["docs/files", /\.md$/]];
 
@@ -48,7 +50,7 @@ for (const dir of JS_ROOTS) {
     if (rel.startsWith("tools/codedocs/vendor/") || rel.startsWith("js/vendor/")) continue;
     const src = fs.readFileSync(abs, "utf8");
     let ast, comments; try { ({ ast, comments } = parse(src, true)); } catch (e) { problems.push(`parse ${rel}: ${e.message}`); continue; }
-    const fileNew = newPath(rel);
+    const fileNew = AFTER ? rel : newPath(rel);
     const reps = [];
     const lit = (n, value) => { reps.push([n.start + 1, n.end - 1, value]); };
     const handled = new Set();
@@ -76,7 +78,7 @@ for (const dir of JS_ROOTS) {
       else if (n.type === "ImportExpression") specNode(n.source);
       else if (n.type === "NewExpression" && n.callee.type === "Identifier" && n.callee.name === "URL" && n.arguments.length >= 2 && n.arguments[1].type === "MemberExpression" && n.arguments[1].property?.name === "url") specNode(n.arguments[0]);
     });
-    walk(ast, (n) => {
+    if (!AFTER) walk(ast, (n) => {
       if (handled.has(n)) return;
       if (n.type === "Literal" && typeof n.value === "string") {
         const raw = src.slice(n.start + 1, n.end - 1);
@@ -87,17 +89,18 @@ for (const dir of JS_ROOTS) {
         const raw = n.value.raw, r = rewriteRootRel(raw); if (r !== raw) reps.push([n.start, n.end, r]);
       }
     });
-    for (const c of comments) { const raw = src.slice(c.start, c.end), r = rewriteRootRel(raw); if (r !== raw) reps.push([c.start, c.end, r]); }
+    if (!AFTER) for (const c of comments) { const raw = src.slice(c.start, c.end), r = rewriteRootRel(raw); if (r !== raw) reps.push([c.start, c.end, r]); }
     if (!reps.length && fileNew === rel) continue;
     reps.sort((a, b) => b[0] - a[0]);
+    if (AFTER) for (const [a, b, v] of [...reps].reverse()) console.log(`  ${rel}:${src.slice(0, a).split("\n").length}  ${src.slice(a, b)}  →  ${v}`);
     let out = src;
     for (const [a, b, v] of reps) out = out.slice(0, a) + v + out.slice(b);
     edits.set(rel, { to: fileNew, out, n: reps.length });
   }
 }
 
-const textFiles = [...TEXT_FILES.filter((f) => fs.existsSync(path.join(ROOT, f)))];
-for (const [d, re] of TEXT_DIRS) for (const abs of listFiles(path.join(ROOT, d), re)) textFiles.push(posix(path.relative(ROOT, abs)));
+const textFiles = AFTER ? [] : [...TEXT_FILES.filter((f) => fs.existsSync(path.join(ROOT, f)))];
+if (!AFTER) for (const [d, re] of TEXT_DIRS) for (const abs of listFiles(path.join(ROOT, d), re)) textFiles.push(posix(path.relative(ROOT, abs)));
 for (const rel of textFiles) {
   const src = fs.readFileSync(path.join(ROOT, rel), "utf8");
   const out = rewriteRootRel(src);
@@ -107,7 +110,8 @@ for (const rel of textFiles) {
   if (out !== src || to !== rel) edits.set(rel, { to, out, n: 1 });
 }
 
-console.log(`move: ${M.size} files · ${edits.size} files touched · ${specCount} specifiers · ${strCount} path strings${problems.length ? "\n" + problems.join("\n") : ""}`);
+if (AFTER) console.log(`after-move: ${ONLY.join(", ")} — import specifiers only; nothing else in those files is read for meaning or changed`);
+console.log(`move: ${AFTER ? 0 : M.size} files · ${edits.size} files touched · ${specCount} specifiers · ${strCount} path strings${problems.length ? "\n" + problems.join("\n") : ""}`);
 if (!WRITE) { console.log("dry run — pass --write to apply"); process.exit(problems.some((p) => !p.includes("check by hand")) ? 1 : 0); }
 for (const [rel, e] of edits) {
   const dst = path.join(ROOT, e.to);
@@ -115,7 +119,7 @@ for (const [rel, e] of edits) {
   fs.writeFileSync(dst, e.out);
   if (e.to !== rel) fs.rmSync(path.join(ROOT, rel));
 }
-for (const [a, b] of M) if (!edits.has(a) && fs.existsSync(path.join(ROOT, a))) { fs.mkdirSync(path.dirname(path.join(ROOT, b)), { recursive: true }); fs.renameSync(path.join(ROOT, a), path.join(ROOT, b)); }
+if (!AFTER) for (const [a, b] of M) if (!edits.has(a) && fs.existsSync(path.join(ROOT, a))) { fs.mkdirSync(path.dirname(path.join(ROOT, b)), { recursive: true }); fs.renameSync(path.join(ROOT, a), path.join(ROOT, b)); }
 const pl = opt("--prune-list", null);
 if (pl) {
   const gone = [...M.keys(), ...[...M.keys()].map((k) => `docs/files/${k}.md`)];

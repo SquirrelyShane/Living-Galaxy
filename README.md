@@ -224,6 +224,9 @@ flight/ aria/ render/ ui/ station/ economy/ corp/ ships/ drones/ crew/ comms/
 audio/` beside the vendored generators; only `main.js` (the entry) and
 `version.js` (read by `tools/lg-patch.sh`) stay at the top. The move table is
 `tools/codedocs/moves-0.3.78.json`.
+Folders outside the repo uploads that import from `js/` (your `addon/`) are
+updated with `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.json --after --write`
+— import specifiers only, each change printed (0.3.79).
 
 ### The sim
 

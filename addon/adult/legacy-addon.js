@@ -1,7 +1,7 @@
 /** Host adapter. Family history is separate from the adult scene pack toggle. */
 import { addHook } from '../../js/crew/hooks.js';
-import { social, loadSocial, playerAsPerson } from '../../js/family.js';
-import { sim } from '../../js/sim.js';
+import { social, loadSocial, playerAsPerson } from '../../js/crew/family.js';
+import { sim } from '../../js/sim/sim.js';
 import { createRegistry, legacyTopics, recordFamilyEvent } from './legacy.js';
 
 let database = null;

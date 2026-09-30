@@ -10,6 +10,27 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.79 — 2026-09-30
+
+The adult addon stopped loading after 0.3.78, and the loader said it was "not installed".
+
+### Players
+
+- Nothing changes unless you use the adult pack: it works again once you run the one command below.
+
+### Developers
+
+Reported from `logs/run-20260930-071204-50bc.log`: `GET 404 /js/family.js`, `/js/crew.js`, `/js/sim.js`, all `from=/addon/adult/index.js`. 0.3.78 rewrote every import under `js/ test/ tools/ host/`, but `addon/` is not in the repo uploads, so its specifiers still named the old flat files. Everything else in that log is clean: 650 module requests, no 404 on a moved file, 592 POSTs answered, and `/api/me` is the site-only account endpoint the local server does not have.
+
+- **Fix your addon folder (once, on each machine that has one):** `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.json --after --write` (drop `--write` first for a dry run). `--after` reads only `import`/`export … from`/`import()`/`new URL(…, import.meta.url)` specifiers in `addon/` (`--only a,b` for other folders), rewrites the ones that name a moved file, and prints each change as `file:line old → new`. Prose, strings and comments are never touched. A second run changes nothing.
+- `js/core/addon-loader.js`: a failed sub-import in a browser says "Failed to fetch", exactly like a missing pack, so a pack that was installed but broken was reported as "not installed — the 404 above is expected". It now asks the server (`HEAD addon/<id>/index.js`) and says `"adult" is installed but failed to load` with the error when the folder is there. Node (no `location`) keeps the old message match.
+- Checked in a browser against a stand-in addon: no folder → info line as before; stale import → the new warning; after `--after` → loads, no message.
+- Renumbered in `docs/REORG_PLAN.md`: hygiene is now 0.3.80, the import-cycle work 0.3.81.
+
+Files: `js/core/addon-loader.js`, `js/version.js`, `tools/codedocs/move.mjs`, `docs/files/js/core/addon-loader.js.md` (+ rebuilt docs), `docs/REORG_PLAN.md`, `README.md`, `CHANGELOG.md`.
+
+Verified: suites below green; loader behaviour in three browser cases; `--after` on a stand-in addon (4 specifiers rewritten, a prose string and a comment naming `js/sim.js` left alone, second run 0 changes). Not run on your real `addon/adult/`: I have not read it and did not need to.
+
 ## 0.3.78 — 2026-09-30
 
 Code files carry code; the docs carry everything else. `js/` grouped by domain.

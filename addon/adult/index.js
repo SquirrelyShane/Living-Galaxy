@@ -4,11 +4,11 @@ import "./legacy-addon.js"; // Non-graphic family legacy conversations.
  */
 
 import { addHook, addons } from "../../js/crew/hooks.js";
-import { social, loadSocial, setSocial, playerAsPerson, adjustMorale, adjustTrust } from "../../js/family.js";
-import { firstName, crewNote } from "../../js/crew.js";
+import { social, loadSocial, setSocial, playerAsPerson, adjustMorale, adjustTrust } from "../../js/crew/family.js";
+import { firstName, crewNote } from "../../js/crew/ledger.js";
 import { scene, pickAct } from "./scenes.js";
 import { adultLine, flavorBags } from "./voice.js";
-import { sim } from "../../js/sim.js";
+import { sim } from "../../js/sim/sim.js";
 import { tryConceive, conceptionOdds, canHavePrivacy } from "../../js/crew/romance.js";
 import { adultTopics } from "./trees.js";
 

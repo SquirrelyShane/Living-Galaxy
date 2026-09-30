@@ -21774,7 +21774,7 @@
   },
   {
    "file": "js/core/addon-loader.js",
-   "lines": 20,
+   "lines": 31,
    "vendor": false,
    "summary": "Try optional addon packs. Missing folders are not errors.",
    "imports": [
@@ -21792,7 +21792,7 @@
    "dynamic": [
     {
      "spec": "../../addon/${…}/index.js",
-     "line": 8,
+     "line": 18,
      "at": "loadAddons",
      "target": null
     }
@@ -21815,25 +21815,43 @@
      "calls": []
     },
     {
-     "key": "loadAddons",
+     "key": "installed",
      "kind": "function",
      "line": 5,
-     "end": 18,
-     "exported": true,
+     "end": 13,
+     "exported": false,
      "calls": []
+    },
+    {
+     "key": "loadAddons",
+     "kind": "function",
+     "line": 15,
+     "end": 29,
+     "exported": true,
+     "calls": [
+      "js/core/addon-loader.js#installed"
+     ]
     },
     {
      "key": "addonsReady",
      "kind": "const",
-     "line": 20,
-     "end": 20,
+     "line": 31,
+     "end": 31,
      "exported": true,
      "calls": [
       "js/core/addon-loader.js#loadAddons"
      ]
     }
    ],
-   "effects": []
+   "effects": [
+    {
+     "kind": "net.fetch",
+     "value": "‹(new)›",
+     "at": "installed",
+     "line": 8,
+     "method": "HEAD"
+    }
+   ]
   },
   {
    "file": "js/core/boot.js",

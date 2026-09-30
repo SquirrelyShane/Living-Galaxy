@@ -312,7 +312,7 @@ flowchart LR
 ## Dynamic imports
 
 - [js/bodygen/worker.js › ready](../files/js/bodygen/worker.js.md#s-ready) L32 → `‹(await)›` (runtime-resolved)
-- [js/core/addon-loader.js › loadAddons](../files/js/core/addon-loader.js.md#s-loadAddons) L8 → `../../addon/${…}/index.js` (runtime-resolved)
+- [js/core/addon-loader.js › loadAddons](../files/js/core/addon-loader.js.md#s-loadAddons) L18 → `../../addon/${…}/index.js` (runtime-resolved)
 
 ## Every edge
 
