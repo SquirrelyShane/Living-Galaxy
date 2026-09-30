@@ -1,6 +1,6 @@
 # js/crew/hooks.js
 
-[index](../../../README.md) · 32 lines · 6 symbols · 0 imports · 6 importers
+[index](../../../README.md) · 32 lines · 6 symbols · 0 imports · 8 importers
 
 ## About
 
@@ -25,13 +25,15 @@ _none_
 - [js/crew/romance.js](romance.js.md) — `runHooks`
 - [js/crew/talk.js](talk.js.md) — `runHooks`
 - test/beats.test.mjs _(outside js/)_ — `addHook`, `runHooks`, `addons`
+- addon/adult/index.js _(outside js/)_ — `addHook`, `addons`
+- addon/adult/legacy-addon.js _(outside js/)_ — `addHook`
 
 ## Exports
 
-- [`addHook`](#s-addHook) · function — used by test/beats.test.mjs
+- [`addHook`](#s-addHook) · function — used by addon/adult/index.js, addon/adult/legacy-addon.js, test/beats.test.mjs
 - [`runHooks`](#s-runHooks) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/romance.js](romance.js.md), [js/crew/talk.js](talk.js.md), test/beats.test.mjs
 - [`listHooks`](#s-listHooks) · function — **no importer in scanned roots**
-- [`addons`](#s-addons) · const — used by [js/core/addon-loader.js](../core/addon-loader.js.md), test/beats.test.mjs
+- [`addons`](#s-addons) · const — used by addon/adult/index.js, [js/core/addon-loader.js](../core/addon-loader.js.md), test/beats.test.mjs
 
 ## Effects
 

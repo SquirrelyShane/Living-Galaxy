@@ -1,6 +1,6 @@
 # js/npc/chat.js
 
-[index](../../../README.md) · 132 lines · 20 symbols · 0 imports · 3 importers
+[index](../../../README.md) · 132 lines · 20 symbols · 0 imports · 4 importers
 
 ## About
 
@@ -43,6 +43,7 @@ _none_
 - [js/npc/speech.js](speech.js.md) — `dressLine`, `dressReply`, `extraChips`, `loadChatRating`
 - [js/ui/hud.js](../ui/hud.js.md) — `wireNpcChat`
 - test/npcchat.test.mjs _(outside js/)_ — `npcChat`, `RATINGS`, `CHANNELS`, `registerVoice`, `unregisterVoice`, `clearVoices`, `voicesFor`, `dressLine`, `dressReply`, `extraChips`, `setChatRating`, `chatRating`, `chatReport`, `loadChatRating`
+- addon/adult/npc.js _(outside js/)_ — `registerVoice`
 
 ## Exports
 
@@ -52,7 +53,7 @@ _none_
 - [`loadChatRating`](#s-loadChatRating) · function — used by [js/npc/speech.js](speech.js.md), test/npcchat.test.mjs
 - [`setChatRating`](#s-setChatRating) · function — used by test/npcchat.test.mjs
 - [`chatRating`](#s-chatRating) · function — used by test/npcchat.test.mjs
-- [`registerVoice`](#s-registerVoice) · function — used by test/npcchat.test.mjs
+- [`registerVoice`](#s-registerVoice) · function — used by addon/adult/npc.js, test/npcchat.test.mjs
 - [`unregisterVoice`](#s-unregisterVoice) · function — used by test/npcchat.test.mjs
 - [`clearVoices`](#s-clearVoices) · function — used by test/npcchat.test.mjs
 - [`voicesFor`](#s-voicesFor) · function — used by test/npcchat.test.mjs

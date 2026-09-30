@@ -148,7 +148,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
 
-## Exports with no importer (923)
+## Exports with no importer (922)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `aria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
@@ -395,7 +395,6 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/crew/robots.js](../files/js/crew/robots.js.md) `robotDesign`
 - [js/crew/robots.js](../files/js/crew/robots.js.md) `engineerAboard`
 - [js/crew/robotyard.js](../files/js/crew/robotyard.js.md) `default`
-- [js/crew/romance.js](../files/js/crew/romance.js.md) `tryConceive`
 - [js/crew/talk.js](../files/js/crew/talk.js.md) `WANT_TOPICS`
 - [js/crew/talk.js](../files/js/crew/talk.js.md) `TIERS`
 - [js/crew/talk.js](../files/js/crew/talk.js.md) `talkContext`

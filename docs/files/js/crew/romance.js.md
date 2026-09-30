@@ -1,6 +1,6 @@
 # js/crew/romance.js
 
-[index](../../../README.md) · 372 lines · 48 symbols · 7 imports · 6 importers
+[index](../../../README.md) · 372 lines · 48 symbols · 7 imports · 8 importers
 
 ## About
 
@@ -45,6 +45,8 @@ on hooks.onPrivateNight; core never imports that pack.
 - [js/crew/deckmind.js](deckmind.js.md) — `courtingTarget`, `stageOf`, `pairOf`, `attraction`, `canPropose`, `canBond`, `canHavePrivacy`, `triangleFor`, `forgetRomanceGenome`, `resetRomance`, `moment`
 - [js/crew/tiers.js](tiers.js.md) — `STAGES`, `STAGE_LABEL`, `stageIndex`, `MIN_ATTRACTION`, `attraction`
 - test/skycrew.test.mjs _(outside js/)_ — `STAGES`, `STAGE_LABEL`, `RUNG`, `MIN_ATTRACTION`, `MOMENT`, `attraction`, `pairOf`, `stageOf`, `stageIndex`, `moment`, `setStage`, `canPropose`, `makePartners`, `canBond`, `bond`, `breakOff`, `privateNight`, `canHavePrivacy`, `privacyAboard`, `conceptionOdds`, `fertilityOf`, `carrierAndSire`, `triangleFor`, `ladderReport`, `ladderLine`, `kinBetween`, `prospectsFor`, `resetRomance`
+- addon/adult/index.js _(outside js/)_ — `tryConceive`, `conceptionOdds`, `canHavePrivacy`
+- addon/adult/trees.js _(outside js/)_ — `tryConceive`, `conceptionOdds`, `canHavePrivacy`
 
 ## Exports
 
@@ -71,12 +73,12 @@ on hooks.onPrivateNight; core never imports that pack.
 - [`triangleFor`](#s-triangleFor) · function — used by [js/crew/deckmind.js](deckmind.js.md), test/skycrew.test.mjs
 - [`actOnJealousy`](#s-actOnJealousy) · function — used by [js/crew/deckacts.js](deckacts.js.md)
 - [`privacyAboard`](#s-privacyAboard) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), test/skycrew.test.mjs
-- [`canHavePrivacy`](#s-canHavePrivacy) · function — used by [js/crew/deckmind.js](deckmind.js.md), test/skycrew.test.mjs
+- [`canHavePrivacy`](#s-canHavePrivacy) · function — used by addon/adult/index.js, addon/adult/trees.js, [js/crew/deckmind.js](deckmind.js.md), test/skycrew.test.mjs
 - [`privateNight`](#s-privateNight) · function — used by [js/crew/deckacts.js](deckacts.js.md), test/skycrew.test.mjs
 - [`fertilityOf`](#s-fertilityOf) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), test/skycrew.test.mjs
-- [`conceptionOdds`](#s-conceptionOdds) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), test/skycrew.test.mjs
+- [`conceptionOdds`](#s-conceptionOdds) · function — used by addon/adult/index.js, addon/adult/trees.js, [js/console/panels/crew.js](../console/panels/crew.js.md), test/skycrew.test.mjs
 - [`carrierAndSire`](#s-carrierAndSire) · function — used by test/skycrew.test.mjs
-- [`tryConceive`](#s-tryConceive) · function — **no importer in scanned roots**
+- [`tryConceive`](#s-tryConceive) · function — used by addon/adult/index.js, addon/adult/trees.js
 - [`ladderReport`](#s-ladderReport) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), test/skycrew.test.mjs
 - [`ladderLine`](#s-ladderLine) · function — used by test/skycrew.test.mjs
 - [`resetRomance`](#s-resetRomance) · function — used by [js/crew/deckmind.js](deckmind.js.md), test/skycrew.test.mjs
