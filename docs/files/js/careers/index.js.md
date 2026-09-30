@@ -1,6 +1,6 @@
 # js/careers/index.js
 
-[index](../../../README.md) · 32 lines · 0 symbols · 0 imports · 3 importers
+[index](../../../README.md) · 32 lines · 0 symbols · 0 imports · 4 importers
 
 ## About
 
@@ -23,6 +23,7 @@ Barrel export for the space-age career system.
 - [js/console/panels/corp.js](../console/panels/corp.js.md) — `SKILLS`, `studySkills`
 - [js/flight/pilot.js](../flight/pilot.js.md) — `COMPLEXES`, `COMPLEX_IDS`, `SKILLS`, `createCharacter`, `displayTitle`, `enroll`, `getComplex`, `promote`, `promotionCheck`, `specialize`, `specializationCheck`, `tickCycle`, `trainSkill`, `transferEligibility`
 - test/careers.test.mjs _(outside js/)_ — `COMPLEXES`, `RANK_LETTERS`, `createCharacter`, `enroll`, `promote`, `promotionCheck`, `specialize`, `tickCycle`, `studySkills`
+- test/careerstatus.test.mjs _(outside js/)_ — `COMPLEX_IDS`
 
 ## Exports
 
@@ -31,7 +32,7 @@ Barrel export for the space-age career system.
 - `SKILL_CAP` · from `./skills.js` — **no importer in scanned roots**
 - `createEmptySkills` · from `./skills.js` — **no importer in scanned roots**
 - `COMPLEXES` · from `./complexes.js` — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careers.test.mjs
-- `COMPLEX_IDS` · from `./complexes.js` — used by [js/flight/pilot.js](../flight/pilot.js.md)
+- `COMPLEX_IDS` · from `./complexes.js` — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careerstatus.test.mjs
 - `RANK_LETTERS` · from `./complexes.js` — used by test/careers.test.mjs
 - `getComplex` · from `./complexes.js` — used by [js/flight/pilot.js](../flight/pilot.js.md)
 - `getRank` · from `./complexes.js` — **no importer in scanned roots**

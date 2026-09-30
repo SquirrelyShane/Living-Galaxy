@@ -4,7 +4,9 @@
     python server.py
     python server.py 8080
 
-Then open the printed URL in your phone browser.
+The server automatically opens your default browser on desktop or Termux.
+Set LG_BROWSER=0 to disable this, or LG_BROWSER=1 to force it over SSH.
+Headless/service starts only print the URL.
 
 Besides serving the files it is a tiny in-memory relay so pilots on the same
 server can see each other and talk (js/net/net.js):
@@ -39,16 +41,20 @@ beside this file. Delete them to forget everyone.
 
 THE CONSOLE (0.3.36)
 --------------------
-Started on a terminal, the server opens a colour console with three screens,
+Started on a terminal, the server opens a colour console with four screens,
 chosen by a single keypress and all live:
 
     [1] STATS   throughput, status mix, rooms and pilots, ledger, top paths
     [2] CHAT    every hail, line and beacon crossing the relay, as it happens
     [3] LOG     the request log, as it is written
+    [4] ERRORS  failed HTTP requests, server exceptions, and warnings
 
 Each is a menu as well as a view — CHAT can be filtered to one room and
 written to its own file, LOG can turn raw poll lines on and off without a
-restart. `?` lists the keys on any screen.
+restart. ERRORS keeps its own history so successful requests cannot bury failures.
+Set LG_ERRORS=1 to start on ERRORS and echo failures in headless mode.
+Browser JavaScript errors are available in your browser Developer Tools console.
+`?` lists the keys on any screen.
 
 The console is OPT-OUT BY DETECTION, not by flag: it opens only when stdin and
 stdout are both terminals. Redirect either — which is what every scripted start
@@ -66,6 +72,10 @@ import json
 import os
 import re
 import sys
+import shutil
+import subprocess
+import webbrowser
+import traceback
 import threading
 import time
 from collections import deque
@@ -456,6 +466,7 @@ class LogBook:
         self.name = f"run-{self.run_id}.log"
         self.file = os.path.join(self.dir, self.name)
         self.ring: deque = deque(maxlen=FEED_KEEP)
+        self.error_ring: deque = deque(maxlen=FEED_KEEP)
         self.written = 0
         self.log_polls = LOG_POLLS
         self.echo = True            # mirror non-chatty lines to the terminal
@@ -498,7 +509,10 @@ class LogBook:
         stamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) + f".{int(time.time() * 1000) % 1000:03d}Z"
         entry = f"{stamp}  {text}"
         with self.lock:
-            self.ring.append((time.time(), level, text))
+            item = (time.time(), level, text)
+            self.ring.append(item)
+            if level in ("error", "warn"):
+                self.error_ring.append(item)
             try:
                 os.makedirs(self.dir, exist_ok=True)
                 with open(self._path(), "a", encoding="utf-8") as f:
@@ -506,7 +520,7 @@ class LogBook:
                 self.written += 1
             except OSError:
                 pass
-            mirror = echo and self.echo
+            mirror = (echo and self.echo) or (level == "error" and os.environ.get("LG_ERRORS") == "1")
         # Only when there is no console owning the screen: otherwise a stray
         # line would tear a hole in whatever the console is drawing.
         if mirror and not CONSOLE.owns_screen():
@@ -533,6 +547,10 @@ class LogBook:
         with self.lock:
             items = [e for e in self.ring if not level or e[1] == level]
             return items[-n:]
+
+    def recent_errors(self, n: int = 200) -> list:
+        with self.lock:
+            return list(self.error_ring)[-n:]
 
     def summary(self) -> dict:
         with self.lock:
@@ -583,6 +601,7 @@ class Console:
         ("1", "statistics — throughput, rooms, ledger, live"),
         ("2", "chat log — every hail crossing the relay"),
         ("3", "request log — what the browser is fetching"),
+        ("4", "errors — failed requests, server exceptions, warnings"),
         ("r", "reset the counters (statistics screen)"),
         ("f", "toggle writing the chat to logs/chat.log"),
         ("c", "clear the held lines on this screen"),
@@ -594,7 +613,7 @@ class Console:
     ]
 
     def __init__(self) -> None:
-        self.screen = "menu"
+        self.screen = "errors" if os.environ.get("LG_ERRORS") == "1" else "menu"
         self.running = False
         self.thread: threading.Thread | None = None
         self.room_filter: str | None = None
@@ -726,6 +745,7 @@ class Console:
         rows.append(f"  {C.bold}{C.yellow}1{C.reset}  {C.white}STATISTICS{C.reset}  {C.dim}live throughput, rooms, pilots, ledger{C.reset}")
         rows.append(f"  {C.bold}{C.yellow}2{C.reset}  {C.white}CHAT LOG{C.reset}    {C.dim}hails and lines crossing the relay{C.reset}")
         rows.append(f"  {C.bold}{C.yellow}3{C.reset}  {C.white}REQUEST LOG{C.reset} {C.dim}what the browser is fetching{C.reset}")
+        rows.append(f"  {C.bold}{C.yellow}4{C.reset}  {C.white}ERRORS{C.reset}      {C.dim}failed requests, exceptions, warnings{C.reset}")
         rows.append("")
         rows.append(f"  {C.bold}{C.yellow}?{C.reset}  {C.dim}keys{C.reset}        {C.bold}{C.yellow}q{C.reset}  {C.dim}stop the server{C.reset}")
         return rows
@@ -850,6 +870,25 @@ class Console:
         rows.append(self._keys([("p", "raw polls"), ("e", "echo"), ("c", "clear"), ("q", "back")]))
         return rows
 
+    def _error_rows(self, w: int) -> list:
+        entries = LOG.recent_errors(FEED_KEEP)
+        rows = self._frame("ERRORS & WARNINGS", w, f"{len(entries)} held; successful requests hidden")
+        rows.append(f"  {C.dim}file{C.reset} {os.path.relpath(LOG.file, ROOT)}")
+        rows.append("  Browser JavaScript errors: open Developer Tools > Console.")
+        rows.append("")
+        body = max(1, self._size()[1] - len(rows) - 3)
+        lines = []
+        for at, level, text in entries:
+            when = time.strftime("%H:%M:%S", time.localtime(at))
+            colour = C.red if level == "error" else C.yellow
+            for line in text.splitlines():
+                lines.append(f"  {C.dark}{when}{C.reset} {colour}{level.upper()}: {line}{C.reset}")
+        rows.extend(lines[-body:] if lines else ["  No server errors or warnings recorded."])
+        while len(rows) < self._size()[1] - 2:
+            rows.append("")
+        rows.append(self._keys([("c", "clear view"), ("3", "all requests"), ("q", "back")]))
+        return rows
+
     def _help_rows(self, w: int) -> list:
         rows = self._frame("KEYS", w)
         for k, lbl in self.HELP:
@@ -870,6 +909,8 @@ class Console:
             return self._chat_rows(w)
         if self.screen == "log":
             return self._log_rows(w)
+        if self.screen == "errors":
+            return self._error_rows(w)
         if self.screen == "help":
             return self._help_rows(w)
         return self._menu_rows(w)
@@ -889,6 +930,8 @@ class Console:
             self.screen = "chat"
         elif k == "3":
             self.screen = "log"
+        elif k == "4":
+            self.screen = "errors"
         elif k == "?":
             self.screen = "help"
         elif k == "r" and self.screen == "stats":
@@ -907,6 +950,9 @@ class Console:
         elif k == "c":
             if self.screen == "chat":
                 CHAT.clear()
+            elif self.screen == "errors":
+                with LOG.lock:
+                    LOG.error_ring.clear()
             elif self.screen == "log":
                 with LOG.lock:
                     LOG.ring.clear()
@@ -1510,7 +1556,8 @@ class Handler(SimpleHTTPRequestHandler):
         STATS.hit(method, status, u.path, nbytes, ms)
         # `log_polls` is read off LOG rather than the module constant so the
         # console's `p` key can turn raw poll lines on mid-run.
-        if u.path in ("/net/poll", "/net/ping") and not LOG.log_polls:
+        failed = isinstance(status, int) and status >= 400
+        if u.path in ("/net/poll", "/net/ping") and not LOG.log_polls and not failed:
             return LOG.quiet_hit(u.path, client)
         ref = _referer_path(self.headers.get("Referer"))
         chatty = u.path.startswith("/net/") or u.path.startswith("/cradle/") or u.path.startswith("/gdb/")
@@ -1734,6 +1781,41 @@ def _lan_ips():
     return sorted(ips)
 
 
+
+def _open_browser(url: str) -> None:
+    """Open locally without blocking the relay or interactive console."""
+    mode = os.environ.get("LG_BROWSER", "auto").strip().lower()
+    if mode in ("0", "false", "no", "off"):
+        return
+    forced = mode in ("1", "true", "yes", "on")
+    termux = shutil.which("termux-open-url")
+    remote = bool(os.environ.get("SSH_CONNECTION") or os.environ.get("SSH_TTY"))
+    desktop = (sys.platform in ("win32", "darwin") or
+               bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")))
+    if not forced and (remote or not (termux or desktop)):
+        return
+    try:
+        if termux:
+            result = subprocess.run([termux, url], stdin=subprocess.DEVNULL,
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                    timeout=10, check=False)
+            if result.returncode == 0:
+                LOG.line(f"BROWSER OPEN {url}")
+                return
+        if webbrowser.open(url, new=2):
+            LOG.line(f"BROWSER OPEN {url}")
+        else:
+            LOG.line(f"Browser could not open automatically. Open {url}", level="warn")
+    except (OSError, subprocess.TimeoutExpired, webbrowser.Error) as exc:
+        LOG.line(f"Browser could not open automatically: {exc}. Open {url}", level="warn")
+
+
+class LocalHTTPServer(ThreadingHTTPServer):
+    def handle_error(self, request, client_address):
+        LOG.line(f"SERVER EXCEPTION client={client_address[0]}\n{traceback.format_exc()}",
+                 echo=True, level="error")
+
+
 def main():
     global LAN_IPS
     os.chdir(ROOT)
@@ -1741,31 +1823,37 @@ def main():
     # LG_HOST=127.0.0.1 keeps a relay behind a tunnel or proxy off the LAN
     # entirely (the site's deploy/lg-relay.service sets it); the default stays
     # open so a phone on Wi-Fi can be joined from the next device over.
-    httpd = ThreadingHTTPServer((os.environ.get("LG_HOST", "0.0.0.0"), PORT), Handler)
+    httpd = LocalHTTPServer((os.environ.get("LG_HOST", "0.0.0.0"), PORT), Handler)
+    browser_url = f"http://127.0.0.1:{httpd.server_port}/"
     LOG.begin(f"SERVER START v{VERSION} run={LOG.run_id} port={PORT} pid={os.getpid()} root={ROOT}")
 
     console = Console.wanted()
     C.enable(console and os.environ.get("NO_COLOR") is None)
 
+    server_thread = threading.Thread(target=httpd.serve_forever, name="http", daemon=True)
+    server_thread.start()
+    threading.Thread(target=_open_browser, args=(browser_url,),
+                     name="browser", daemon=True).start()
+
     if not console:
         # Headless, exactly as before: a scripted start redirects stdout, so
         # this is the path every browser smoke in test/ takes.
         print(f"LIVING GALAXY — Ad Astrum {VERSION}")
-        print(f"        http://127.0.0.1:{PORT}/   (this device)")
+        print(f"        http://127.0.0.1:{httpd.server_port}/   (this device)")
         for ip in LAN_IPS:
-            print(f"        http://{ip}:{PORT}/   (same Wi-Fi)")
+            print(f"        http://{ip}:{httpd.server_port}/   (same Wi-Fi)")
         print(f"Logs:   {os.path.join('logs', LOG.name)}   (this run; LOG_POLLS=1 for raw poll lines, LOG_KEEP to change retention)")
-        print("Open a URL in your browser. Ctrl+C to stop.", flush=True)
+        print("Browser opens automatically when available; otherwise open the URL above. Ctrl+C to stop.", flush=True)
         try:
-            httpd.serve_forever()
+            server_thread.join()
         except KeyboardInterrupt:
             print("\nStopped.")
+        finally:
             LOG.line("SERVER STOP")
+            httpd.shutdown()
             httpd.server_close()
         return
 
-    server_thread = threading.Thread(target=httpd.serve_forever, name="http", daemon=True)
-    server_thread.start()
     CONSOLE.start()
     try:
         while not SHUTDOWN.is_set():

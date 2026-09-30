@@ -116,18 +116,18 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `$()` → `(inline)` — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L119
 - event.listen on `$()` → `send` — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L121
 - event.listen on `b` → `(inline)` — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L125
-- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L50
-- event.listen on `backBtn` → `(inline)` — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L52
-- event.listen on `nextBtn` → `(inline)` — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L64
-- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation>renderRace](../files/js/ui/creation.js.md#s-mountCreation-renderRace) L81
-- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation>renderCareer](../files/js/ui/creation.js.md#s-mountCreation-renderCareer) L111
-- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation>renderCorp](../files/js/ui/creation.js.md#s-mountCreation-renderCorp) L180
-- event.listen on `indie` → `(inline)` — [js/ui/creation.js › mountCreation>renderCorp](../files/js/ui/creation.js.md#s-mountCreation-renderCorp) L194
-- event.listen on `go` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L220
-- event.listen on `sol` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L241
-- event.listen on `rnd` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L245
-- event.listen on `launch` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L264
-- event.listen on `join` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L279
+- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L53
+- event.listen on `backBtn` → `(inline)` — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L55
+- event.listen on `nextBtn` → `(inline)` — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L67
+- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation>renderRace](../files/js/ui/creation.js.md#s-mountCreation-renderRace) L84
+- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation>renderCareer](../files/js/ui/creation.js.md#s-mountCreation-renderCareer) L116
+- event.listen on `b` → `(inline)` — [js/ui/creation.js › mountCreation>renderCorp](../files/js/ui/creation.js.md#s-mountCreation-renderCorp) L188
+- event.listen on `indie` → `(inline)` — [js/ui/creation.js › mountCreation>renderCorp](../files/js/ui/creation.js.md#s-mountCreation-renderCorp) L202
+- event.listen on `go` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L228
+- event.listen on `sol` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L249
+- event.listen on `rnd` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L253
+- event.listen on `launch` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L272
+- event.listen on `join` → `(inline)` — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L287
 - event.listen on `button` → `(inline)` — [js/ui/fullscreen.js › mountFullscreen](../files/js/ui/fullscreen.js.md#s-mountFullscreen) L120
 - event.listen on `b` → `fn` — [js/ui/hangar.js › mountHangar>btn](../files/js/ui/hangar.js.md#s-mountHangar-btn) L27
 - event.listen on `sell` → `(inline)` — [js/ui/holdview.js › renderHold](../files/js/ui/holdview.js.md#s-renderHold) L113
@@ -220,8 +220,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `qEl` → `(inline)` — [js/console/console.js › mountConsole](../files/js/console/console.js.md#s-mountConsole) L285
 - event.listen on `input` → `(inline)` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L88
 - event.listen on `input` → `(inline)` — [js/console/panels/crew-gdb.js › mountGdb](../files/js/console/panels/crew-gdb.js.md#s-mountGdb) L72
-- event.listen on `f` → `(inline)` — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L381
-- event.dispatch on `c` — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L384
+- event.listen on `f` → `(inline)` — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L389
+- event.dispatch on `c` — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L392
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L557
 - event.listen on `r` → `(inline)` — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L822
 

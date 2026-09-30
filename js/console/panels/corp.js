@@ -220,8 +220,8 @@ function mountPilot(root, push) {
       xferKey = xk;
       xferBody.innerHTML = "";
       for (const x of xo) {
-        const r = row(xferBody, x.name, { hint: x.resume ? `held · resume at ${x.start}` : x.related ? `related · starts at ${x.start}` : `unrelated · starts at ${x.start}` });
-        const b = button(x.resume ? `RESUME ${x.start}` : `TO ${x.start}`, () => { const res = tryTransfer(x.id); sim.notice = res.ok ? `Transferred — ${title()}` : res.error ?? "Transfer refused."; xferKey = ""; specKey = ""; missKey = ""; modKey = ""; }, "tiny");
+        const r = row(xferBody, x.name, { hint: x.shut ? `planned · opens in ${x.eta}` : x.resume ? `held · resume at ${x.start}` : x.related ? `related · starts at ${x.start}` : `unrelated · starts at ${x.start}` });
+        const b = button(x.shut ? `IN ${x.eta}` : x.resume ? `RESUME ${x.start}` : `TO ${x.start}`, () => { const res = tryTransfer(x.id); sim.notice = res.ok ? `Transferred — ${title()}` : res.error ?? "Transfer refused."; xferKey = ""; specKey = ""; missKey = ""; modKey = ""; }, "tiny");
         b.disabled = !x.ok;
         r.value.replaceChildren(b);
       }

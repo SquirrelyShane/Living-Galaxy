@@ -10,6 +10,26 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.80 — 2026-09-30
+
+Only Mining is selectable. The other fifteen careers are greyed until they are playable.
+
+### Players
+
+- New pilots choose from **Mining** only. The other fifteen careers stay on the creation screen, greyed and tagged with the version they open in (Salvage first, in 0.4). Tapping one shows its ladder, along with a line saying what you will do in it once it opens. NEXT stays tied to the career you picked, so looking at a greyed one never changes it.
+- Lateral transfer lists the same fifteen as `IN 0.x`. A pilot already enrolled in one of them keeps flying it and can still resume a held ladder, so no save changes.
+
+### Developers
+
+- `js/careers/status.js` (new) is the single switch. `OPEN_GATE` holds the nine things Mining has (verb, site, board, feeds, tutorial, hull, aria, bench, smoke). `CAREER_STATUS` records what each career `has` today, `CAREER_ARCS` sets the order of the arcs, and `careerStatus(id)` also returns what is `missing`. To open a career, flip one line and update its test.
+- `flight/pilot.js`: `careerCatalog()` returns `open/eta/arc/verb`, `transferOptions()` marks planned careers `shut`, and `tryTransfer()` refuses a new enrolment into one. Resuming a held ladder still works. `makePilot()` does not check the gate, so `aria-play`/`aria-bench` still run every career.
+- `ui/creation.js`: open careers come first, and shut cards are `aria-disabled` and only preview. The default career was `"navigation"` and is now the first open one. `finish()` coerces to an open career too.
+- `console/panels/corp.js`: shows shut careers in the transfer list. `css/style.css`: `.pick.shut`, `.peek`, `.detail.shut`, `.soon`.
+- `docs/CAREER_ROADMAP.md` (new) has the gate, the audit of all sixteen with what each can build on, and the arcs from 0.4 to 0.10, one `.PP` per gate item. `docs/REORG_PLAN.md` is renumbered: hygiene moves to 0.3.81, the cycle to 0.3.82, and the `sim.js` split to 0.3.83+.
+- `test/careerstatus.test.mjs` (new, 79 assertions).
+
+Files: `js/careers/status.js` (new), `js/flight/pilot.js`, `js/ui/creation.js`, `js/console/panels/corp.js`, `js/version.js`, `css/style.css`, `index.html` (preload), `docs/CAREER_ROADMAP.md` (new), `docs/REORG_PLAN.md`, `docs/files/js/careers/status.js.md` (new) + rebuilt docs, `test/careerstatus.test.mjs` (new), `README.md`, `CHANGELOG.md`.
+
 ## 0.3.79 — 2026-09-30
 
 The adult addon stopped loading after 0.3.78, and the loader said it was "not installed".

@@ -160,7 +160,7 @@ Resolved calls only: direct calls to local symbols and imported bindings (named,
 - [js/flight/autopilot.js](../files/js/flight/autopilot.js.md) → js/sim/sim.js ×40, js/mission/script.js ×15, js/mission/run.js ×11, js/world/bodies.js ×11, js/world/field.js ×8, js/flight/avoid.js ×8, js/flight/ship.js ×7, js/core/input.js ×3, js/aria/aria.js ×2, js/npc/lanes.js ×2, js/economy/contracts.js ×1, js/economy/materials.js ×1, js/station/stationworks.js ×1
 - [js/flight/avoid.js](../files/js/flight/avoid.js.md) → js/world/bodies.js ×6, js/world/scale.js ×1, js/world/events/holes.js ×1, js/world/field.js ×1
 - [js/flight/contacts.js](../files/js/flight/contacts.js.md) → js/flight/ship.js ×1
-- [js/flight/pilot.js](../files/js/flight/pilot.js.md) → js/careers/careerEngine.js ×15, js/crew/races.js ×6, js/careers/complexes.js ×5, js/careers/effects.js ×4, js/corp/corps.js ×2
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) → js/careers/careerEngine.js ×15, js/crew/races.js ×6, js/careers/complexes.js ×6, js/careers/effects.js ×4, js/careers/status.js ×3, js/corp/corps.js ×2
 - [js/flight/probes.js](../files/js/flight/probes.js.md) → js/world/bodies.js ×7, js/sim/sim.js ×5, js/world/field.js ×3
 - [js/flight/repair.js](../files/js/flight/repair.js.md) → js/sim/sim.js ×2, js/corp/corps.js ×1, js/station/stations.js ×1, js/economy/upgrades.js ×1
 - [js/flight/ship.js](../files/js/flight/ship.js.md) → js/flight/defence.js ×2, js/economy/materials.js ×2, js/careers/effects.js ×1, js/world/events/holes.js ×1

@@ -9891,6 +9891,7 @@
    "importedBy": [
     "js/careers/careerEngine.js",
     "js/careers/index.js",
+    "js/careers/status.js",
     "js/crew/children.js",
     "js/crew/childtalk.js",
     "js/crew/family.js",
@@ -10288,6 +10289,95 @@
      "kind": "function",
      "line": 193,
      "end": 198,
+     "exported": true,
+     "calls": []
+    }
+   ],
+   "effects": []
+  },
+  {
+   "file": "js/careers/status.js",
+   "lines": 55,
+   "vendor": false,
+   "summary": "LIVING GALAXY 0.3.80 — which careers a new pilot can take.",
+   "imports": [
+    {
+     "spec": "./complexes.js",
+     "target": "js/careers/complexes.js",
+     "names": [
+      {
+       "local": "COMPLEX_IDS",
+       "imported": "COMPLEX_IDS"
+      }
+     ]
+    }
+   ],
+   "dynamic": [],
+   "importedBy": [
+    "js/flight/pilot.js"
+   ],
+   "exports": [
+    "OPEN_GATE",
+    "CAREER_ARCS",
+    "CAREER_STATUS",
+    "careerStatus",
+    "isCareerOpen",
+    "openCareers"
+   ],
+   "symbols": [
+    {
+     "key": "OPEN_GATE",
+     "kind": "const",
+     "line": 3,
+     "end": 13,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "CAREER_ARCS",
+     "kind": "const",
+     "line": 15,
+     "end": 23,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "CAREER_STATUS",
+     "kind": "const",
+     "line": 25,
+     "end": 42,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "arcOf",
+     "kind": "const",
+     "line": 44,
+     "end": 44,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "careerStatus",
+     "kind": "function",
+     "line": 46,
+     "end": 51,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "isCareerOpen",
+     "kind": "function",
+     "line": 53,
+     "end": 53,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "openCareers",
+     "kind": "function",
+     "line": 55,
+     "end": 55,
      "exported": true,
      "calls": []
     }
@@ -48644,7 +48734,7 @@
   },
   {
    "file": "js/flight/pilot.js",
-   "lines": 359,
+   "lines": 369,
    "vendor": false,
    "summary": "the pilot.",
    "imports": [
@@ -48725,6 +48815,16 @@
       {
        "local": "effectLines",
        "imported": "effectLines"
+      }
+     ]
+    },
+    {
+     "spec": "../careers/status.js",
+     "target": "js/careers/status.js",
+     "names": [
+      {
+       "local": "careerStatus",
+       "imported": "careerStatus"
       }
      ]
     },
@@ -48826,8 +48926,8 @@
     {
      "key": "pilot",
      "kind": "const",
-     "line": 21,
-     "end": 38,
+     "line": 22,
+     "end": 39,
      "exported": true,
      "calls": [
       "js/careers/effects.js#composeMods"
@@ -48836,24 +48936,24 @@
     {
      "key": "crewBag",
      "kind": "const",
-     "line": 40,
-     "end": 40,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "upgradeBag",
-     "kind": "const",
      "line": 41,
      "end": 41,
      "exported": false,
      "calls": []
     },
     {
+     "key": "upgradeBag",
+     "kind": "const",
+     "line": 42,
+     "end": 42,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "setCrewMods",
      "kind": "function",
-     "line": 43,
-     "end": 46,
+     "line": 44,
+     "end": 47,
      "exported": true,
      "calls": [
       "js/flight/pilot.js#refreshMods"
@@ -48862,8 +48962,8 @@
     {
      "key": "setUpgradeMods",
      "kind": "function",
-     "line": 48,
-     "end": 51,
+     "line": 49,
+     "end": 52,
      "exported": true,
      "calls": [
       "js/flight/pilot.js#refreshMods"
@@ -48872,8 +48972,8 @@
     {
      "key": "refreshMods",
      "kind": "function",
-     "line": 53,
-     "end": 61,
+     "line": 54,
+     "end": 62,
      "exported": false,
      "calls": [
       "js/careers/effects.js#composeMods",
@@ -48884,18 +48984,19 @@
     {
      "key": "careerCatalog",
      "kind": "function",
-     "line": 63,
-     "end": 78,
+     "line": 64,
+     "end": 84,
      "exported": true,
      "calls": [
-      "js/careers/complexes.js#getComplex"
+      "js/careers/complexes.js#getComplex",
+      "js/careers/status.js#careerStatus"
      ]
     },
     {
      "key": "makePilot",
      "kind": "function",
-     "line": 80,
-     "end": 106,
+     "line": 86,
+     "end": 112,
      "exported": true,
      "calls": [
       "js/crew/races.js#raceById",
@@ -48908,40 +49009,40 @@
     {
      "key": "PILOT_KEY",
      "kind": "const",
-     "line": 108,
-     "end": 108,
+     "line": 114,
+     "end": 114,
      "exported": true,
      "calls": []
     },
     {
      "key": "PILOT_RECORD_VERSION",
      "kind": "const",
-     "line": 109,
-     "end": 109,
+     "line": 115,
+     "end": 115,
      "exported": true,
      "calls": []
     },
     {
      "key": "store",
      "kind": "function",
-     "line": 111,
-     "end": 111,
+     "line": 117,
+     "end": 117,
      "exported": false,
      "calls": []
     },
     {
      "key": "serializePilot",
      "kind": "function",
-     "line": 113,
-     "end": 128,
+     "line": 119,
+     "end": 134,
      "exported": true,
      "calls": []
     },
     {
      "key": "restorePilot",
      "kind": "function",
-     "line": 130,
-     "end": 149,
+     "line": 136,
+     "end": 155,
      "exported": true,
      "calls": [
       "js/flight/pilot.js#refreshMods"
@@ -48950,8 +49051,8 @@
     {
      "key": "savePilot",
      "kind": "function",
-     "line": 151,
-     "end": 153,
+     "line": 157,
+     "end": 159,
      "exported": true,
      "calls": [
       "js/flight/pilot.js#store",
@@ -48961,8 +49062,8 @@
     {
      "key": "loadPilot",
      "kind": "function",
-     "line": 155,
-     "end": 160,
+     "line": 161,
+     "end": 166,
      "exported": true,
      "calls": [
       "js/flight/pilot.js#store"
@@ -48971,8 +49072,8 @@
     {
      "key": "applyRaceToShip",
      "kind": "function",
-     "line": 162,
-     "end": 170,
+     "line": 168,
+     "end": 176,
      "exported": true,
      "calls": [
       "js/crew/races.js#traitsOf",
@@ -48983,8 +49084,8 @@
     {
      "key": "syncMods",
      "kind": "function",
-     "line": 172,
-     "end": 179,
+     "line": 178,
+     "end": 185,
      "exported": true,
      "calls": [
       "js/crew/races.js#traitsOf"
@@ -48993,8 +49094,8 @@
     {
      "key": "applyRaceTune",
      "kind": "function",
-     "line": 181,
-     "end": 185,
+     "line": 187,
+     "end": 191,
      "exported": true,
      "calls": [
       "js/crew/races.js#traitsOf"
@@ -49003,8 +49104,8 @@
     {
      "key": "raceTraits",
      "kind": "function",
-     "line": 187,
-     "end": 189,
+     "line": 193,
+     "end": 195,
      "exported": true,
      "calls": [
       "js/crew/races.js#traitsOf"
@@ -49013,8 +49114,8 @@
     {
      "key": "work",
      "kind": "function",
-     "line": 191,
-     "end": 202,
+     "line": 197,
+     "end": 208,
      "exported": true,
      "calls": [
       "js/careers/careerEngine.js#trainSkill"
@@ -49023,24 +49124,24 @@
     {
      "key": "PAY_SHARE",
      "kind": "const",
-     "line": 204,
-     "end": 204,
+     "line": 210,
+     "end": 210,
      "exported": true,
      "calls": []
     },
     {
      "key": "PROBATION_SHARE",
      "kind": "const",
-     "line": 205,
-     "end": 205,
+     "line": 211,
+     "end": 211,
      "exported": true,
      "calls": []
     },
     {
      "key": "serveTime",
      "kind": "function",
-     "line": 207,
-     "end": 221,
+     "line": 213,
+     "end": 227,
      "exported": true,
      "calls": [
       "js/careers/careerEngine.js#tickCycle"
@@ -49049,16 +49150,16 @@
     {
      "key": "takePayout",
      "kind": "function",
-     "line": 223,
-     "end": 228,
+     "line": 229,
+     "end": 234,
      "exported": true,
      "calls": []
     },
     {
      "key": "rankStatus",
      "kind": "function",
-     "line": 230,
-     "end": 250,
+     "line": 236,
+     "end": 256,
      "exported": true,
      "calls": [
       "js/careers/careerEngine.js#promotionCheck",
@@ -49068,8 +49169,8 @@
     {
      "key": "tryPromote",
      "kind": "function",
-     "line": 252,
-     "end": 262,
+     "line": 258,
+     "end": 268,
      "exported": true,
      "calls": [
       "js/careers/careerEngine.js#promote",
@@ -49079,22 +49180,24 @@
     {
      "key": "transferOptions",
      "kind": "function",
-     "line": 264,
-     "end": 273,
+     "line": 270,
+     "end": 281,
      "exported": true,
      "calls": [
       "js/careers/complexes.js#getComplex",
+      "js/careers/status.js#careerStatus",
       "js/careers/careerEngine.js#transferEligibility"
      ]
     },
     {
      "key": "tryTransfer",
      "kind": "function",
-     "line": 275,
-     "end": 293,
+     "line": 283,
+     "end": 303,
      "exported": true,
      "calls": [
       "js/careers/complexes.js#getComplex",
+      "js/careers/status.js#careerStatus",
       "js/careers/careerEngine.js#transferEligibility",
       "js/careers/careerEngine.js#enroll",
       "js/flight/pilot.js#refreshMods"
@@ -49103,8 +49206,8 @@
     {
      "key": "specOptions",
      "kind": "function",
-     "line": 295,
-     "end": 302,
+     "line": 305,
+     "end": 312,
      "exported": true,
      "calls": [
       "js/careers/complexes.js#getComplex",
@@ -49115,8 +49218,8 @@
     {
      "key": "trySpecialize",
      "kind": "function",
-     "line": 304,
-     "end": 312,
+     "line": 314,
+     "end": 322,
      "exported": true,
      "calls": [
       "js/careers/careerEngine.js#specialize",
@@ -49126,8 +49229,8 @@
     {
      "key": "specEffectLines",
      "kind": "function",
-     "line": 314,
-     "end": 316,
+     "line": 324,
+     "end": 326,
      "exported": true,
      "calls": [
       "js/careers/effects.js#effectLines"
@@ -49136,8 +49239,8 @@
     {
      "key": "certSheet",
      "kind": "function",
-     "line": 318,
-     "end": 320,
+     "line": 328,
+     "end": 330,
      "exported": true,
      "calls": [
       "js/flight/pilot.js#certName"
@@ -49146,8 +49249,8 @@
     {
      "key": "title",
      "kind": "function",
-     "line": 322,
-     "end": 325,
+     "line": 332,
+     "end": 335,
      "exported": true,
      "calls": [
       "js/careers/careerEngine.js#displayTitle"
@@ -49156,16 +49259,16 @@
     {
      "key": "skillSheet",
      "kind": "function",
-     "line": 327,
-     "end": 334,
+     "line": 337,
+     "end": 344,
      "exported": true,
      "calls": []
     },
     {
      "key": "corp",
      "kind": "function",
-     "line": 336,
-     "end": 338,
+     "line": 346,
+     "end": 348,
      "exported": true,
      "calls": [
       "js/corp/corps.js#corpById"
@@ -49174,24 +49277,24 @@
     {
      "key": "standingSheet",
      "kind": "function",
-     "line": 340,
-     "end": 342,
+     "line": 350,
+     "end": 352,
      "exported": true,
      "calls": []
     },
     {
      "key": "CERT_WORDS",
      "kind": "const",
-     "line": 346,
-     "end": 351,
+     "line": 356,
+     "end": 361,
      "exported": false,
      "calls": []
     },
     {
      "key": "certName",
      "kind": "function",
-     "line": 353,
-     "end": 359,
+     "line": 363,
+     "end": 369,
      "exported": true,
      "calls": []
     }
@@ -103538,7 +103641,7 @@
   },
   {
    "file": "js/ui/creation.js",
-   "lines": 403,
+   "lines": 412,
    "vendor": false,
    "summary": "pilot creation.",
    "imports": [
@@ -103693,7 +103796,7 @@
      "key": "mountCreation",
      "kind": "function",
      "line": 24,
-     "end": 403,
+     "end": 412,
      "exported": true,
      "calls": [
       "js/ui/creation.js#$",
@@ -103705,10 +103808,26 @@
      ]
     },
     {
-     "key": "mountCreation>setStep",
+     "key": "mountCreation>isOpenCareer",
      "kind": "function",
      "line": 37,
-     "end": 44,
+     "end": 37,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "mountCreation>firstOpen",
+     "kind": "function",
+     "line": 38,
+     "end": 38,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "mountCreation>setStep",
+     "kind": "function",
+     "line": 40,
+     "end": 47,
      "exported": false,
      "calls": [
       "js/ui/creation.js#mountCreation>stepDone",
@@ -103718,16 +103837,18 @@
     {
      "key": "mountCreation>stepDone",
      "kind": "function",
-     "line": 46,
-     "end": 47,
+     "line": 49,
+     "end": 50,
      "exported": false,
-     "calls": []
+     "calls": [
+      "js/ui/creation.js#mountCreation>isOpenCareer"
+     ]
     },
     {
      "key": "mountCreation>nameOk",
      "kind": "function",
-     "line": 57,
-     "end": 57,
+     "line": 60,
+     "end": 60,
      "exported": false,
      "calls": [
       "js/ui/creation.js#$"
@@ -103736,8 +103857,8 @@
     {
      "key": "mountCreation>needName",
      "kind": "function",
-     "line": 58,
-     "end": 63,
+     "line": 61,
+     "end": 66,
      "exported": false,
      "calls": [
       "js/ui/creation.js#$"
@@ -103746,8 +103867,8 @@
     {
      "key": "mountCreation>detail",
      "kind": "function",
-     "line": 66,
-     "end": 71,
+     "line": 69,
+     "end": 74,
      "exported": false,
      "calls": [
       "js/ui/creation.js#el"
@@ -103756,8 +103877,8 @@
     {
      "key": "mountCreation>renderRace",
      "kind": "function",
-     "line": 73,
-     "end": 102,
+     "line": 76,
+     "end": 105,
      "exported": false,
      "calls": [
       "js/ui/creation.js#el",
@@ -103770,8 +103891,8 @@
     {
      "key": "mountCreation>renderCareer",
      "kind": "function",
-     "line": 104,
-     "end": 150,
+     "line": 107,
+     "end": 158,
      "exported": false,
      "calls": [
       "js/ui/creation.js#el",
@@ -103781,8 +103902,8 @@
     {
      "key": "mountCreation>renderCorp",
      "kind": "function",
-     "line": 152,
-     "end": 206,
+     "line": 160,
+     "end": 214,
      "exported": false,
      "calls": [
       "js/ui/creation.js#el",
@@ -103794,8 +103915,8 @@
     {
      "key": "mountCreation>renderSky",
      "kind": "function",
-     "line": 208,
-     "end": 286,
+     "line": 216,
+     "end": 294,
      "exported": false,
      "calls": [
       "js/ui/creation.js#el",
@@ -103806,8 +103927,8 @@
     {
      "key": "mountCreation>renderCompile",
      "kind": "function",
-     "line": 289,
-     "end": 315,
+     "line": 297,
+     "end": 323,
      "exported": false,
      "calls": [
       "js/crew/races.js#raceById",
@@ -103819,48 +103940,48 @@
     {
      "key": "mountCreation>renderCompile.format",
      "kind": "prop",
-     "line": 294,
-     "end": 294,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "mountCreation>renderCompile.format~2",
-     "kind": "prop",
-     "line": 297,
-     "end": 297,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "mountCreation>renderCompile.format~3",
-     "kind": "prop",
      "line": 302,
      "end": 302,
      "exported": false,
      "calls": []
     },
     {
+     "key": "mountCreation>renderCompile.format~2",
+     "kind": "prop",
+     "line": 305,
+     "end": 305,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "mountCreation>renderCompile.format~3",
+     "kind": "prop",
+     "line": 310,
+     "end": 310,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "mountCreation>renderCompile.format~4",
      "kind": "prop",
-     "line": 303,
-     "end": 303,
+     "line": 311,
+     "end": 311,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountCreation>renderCompile.format~5",
      "kind": "prop",
-     "line": 306,
-     "end": 306,
+     "line": 314,
+     "end": 314,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountCreation>render",
      "kind": "function",
-     "line": 318,
-     "end": 341,
+     "line": 326,
+     "end": 349,
      "exported": false,
      "calls": [
       "js/ui/creation.js#mountCreation>renderRace",
@@ -103875,8 +103996,8 @@
     {
      "key": "mountCreation>finish",
      "kind": "function",
-     "line": 343,
-     "end": 356,
+     "line": 351,
+     "end": 364,
      "exported": false,
      "calls": [
       "js/ui/creation.js#mountCreation>nameOk",
@@ -103886,42 +104007,46 @@
       "js/corp/company.js#resetCompany",
       "js/core/profile.js#startRun",
       "js/flight/pilot.js#makePilot",
+      "js/ui/creation.js#mountCreation>isOpenCareer",
+      "js/ui/creation.js#mountCreation>firstOpen",
       "js/ui/creation.js#mountCreation>close"
      ]
     },
     {
      "key": "mountCreation>close",
      "kind": "function",
-     "line": 358,
-     "end": 362,
+     "line": 366,
+     "end": 370,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountCreation.show",
      "kind": "prop",
-     "line": 365,
-     "end": 394,
+     "line": 373,
+     "end": 403,
      "exported": false,
      "calls": [
       "js/ui/creation.js#$",
       "js/corp/corps.js#buildCorps",
+      "js/ui/creation.js#mountCreation>isOpenCareer",
+      "js/ui/creation.js#mountCreation>firstOpen",
       "js/ui/creation.js#mountCreation>setStep"
      ]
     },
     {
      "key": "mountCreation.isOpen",
      "kind": "prop",
-     "line": 395,
-     "end": 395,
+     "line": 404,
+     "end": 404,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountCreation.progress",
      "kind": "prop",
-     "line": 396,
-     "end": 401,
+     "line": 405,
+     "end": 410,
      "exported": false,
      "calls": [
       "js/ui/creation.js#$"
@@ -103981,19 +104106,19 @@
      "kind": "dom.query",
      "value": "button",
      "at": "mountCreation>setStep",
-     "line": 39
+     "line": 42
     },
     {
      "kind": "dom.query",
      "value": "button[data-step]",
      "at": "mountCreation",
-     "line": 49
+     "line": 52
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation",
-     "line": 50,
+     "line": 53,
      "target": "b",
      "handler": "(inline)"
     },
@@ -104001,7 +104126,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation",
-     "line": 52,
+     "line": 55,
      "target": "backBtn",
      "handler": "(inline)"
     },
@@ -104009,25 +104134,25 @@
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountCreation>nameOk",
-     "line": 57
+     "line": 60
     },
     {
      "kind": "dom.id",
      "value": "create-callsign",
      "at": "mountCreation>needName",
-     "line": 59
+     "line": 62
     },
     {
      "kind": "timer",
      "value": "setTimeout",
      "at": "mountCreation>needName",
-     "line": 62
+     "line": 65
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation",
-     "line": 64,
+     "line": 67,
      "target": "nextBtn",
      "handler": "(inline)"
     },
@@ -104035,7 +104160,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderRace",
-     "line": 81,
+     "line": 84,
      "target": "b",
      "handler": "(inline)"
     },
@@ -104043,7 +104168,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderCareer",
-     "line": 111,
+     "line": 116,
      "target": "b",
      "handler": "(inline)"
     },
@@ -104051,7 +104176,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderCorp",
-     "line": 180,
+     "line": 188,
      "target": "b",
      "handler": "(inline)"
     },
@@ -104059,7 +104184,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderCorp",
-     "line": 194,
+     "line": 202,
      "target": "indie",
      "handler": "(inline)"
     },
@@ -104067,7 +104192,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderSky",
-     "line": 220,
+     "line": 228,
      "target": "go",
      "handler": "(inline)"
     },
@@ -104075,7 +104200,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderSky",
-     "line": 241,
+     "line": 249,
      "target": "sol",
      "handler": "(inline)"
     },
@@ -104083,7 +104208,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderSky",
-     "line": 245,
+     "line": 253,
      "target": "rnd",
      "handler": "(inline)"
     },
@@ -104091,7 +104216,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderSky",
-     "line": 264,
+     "line": 272,
      "target": "launch",
      "handler": "(inline)"
     },
@@ -104099,13 +104224,13 @@
      "kind": "dom.create",
      "value": "input",
      "at": "mountCreation>renderSky",
-     "line": 272
+     "line": 280
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountCreation>renderSky",
-     "line": 279,
+     "line": 287,
      "target": "join",
      "handler": "(inline)"
     },
@@ -104113,58 +104238,25 @@
      "kind": "dom.query",
      "value": "button",
      "at": "mountCreation>render",
-     "line": 338
+     "line": 346
     },
     {
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountCreation>finish",
-     "line": 347
+     "line": 355
     },
     {
      "kind": "dom.id",
      "value": "create-title",
      "at": "mountCreation.show",
-     "line": 369
+     "line": 377
     },
     {
      "kind": "dom.create",
      "value": "input",
      "at": "mountCreation.show",
-     "line": 372
-    },
-    {
-     "kind": "dom.id",
-     "value": "callsign",
-     "at": "mountCreation.show",
      "line": 380
-    },
-    {
-     "kind": "event.listen",
-     "value": "input",
-     "at": "mountCreation.show",
-     "line": 381,
-     "target": "f",
-     "handler": "(inline)"
-    },
-    {
-     "kind": "dom.id",
-     "value": "callsign",
-     "at": "mountCreation.show",
-     "line": 382
-    },
-    {
-     "kind": "event.dispatch",
-     "value": "input",
-     "at": "mountCreation.show",
-     "line": 384,
-     "target": "c"
-    },
-    {
-     "kind": "timer",
-     "value": "setTimeout",
-     "at": "mountCreation.show",
-     "line": 387
     },
     {
      "kind": "dom.id",
@@ -104173,16 +104265,49 @@
      "line": 388
     },
     {
+     "kind": "event.listen",
+     "value": "input",
+     "at": "mountCreation.show",
+     "line": 389,
+     "target": "f",
+     "handler": "(inline)"
+    },
+    {
+     "kind": "dom.id",
+     "value": "callsign",
+     "at": "mountCreation.show",
+     "line": 390
+    },
+    {
+     "kind": "event.dispatch",
+     "value": "input",
+     "at": "mountCreation.show",
+     "line": 392,
+     "target": "c"
+    },
+    {
+     "kind": "timer",
+     "value": "setTimeout",
+     "at": "mountCreation.show",
+     "line": 395
+    },
+    {
+     "kind": "dom.id",
+     "value": "callsign",
+     "at": "mountCreation.show",
+     "line": 396
+    },
+    {
      "kind": "dom.id",
      "value": "load-fill",
      "at": "mountCreation.progress",
-     "line": 399
+     "line": 408
     },
     {
      "kind": "dom.id",
      "value": "load-text",
      "at": "mountCreation.progress",
-     "line": 400
+     "line": 409
     }
    ]
   },

@@ -52,8 +52,8 @@ setInterval / setTimeout / requestAnimationFrame / requestIdleCallback call site
 - timer — [js/ui/chatbox.js › send](../files/js/ui/chatbox.js.md#s-send) L105
 - timer — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L129
 - timer — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L139
-- timer — [js/ui/creation.js › mountCreation>needName](../files/js/ui/creation.js.md#s-mountCreation-needName) L62
-- timer — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L387
+- timer — [js/ui/creation.js › mountCreation>needName](../files/js/ui/creation.js.md#s-mountCreation-needName) L65
+- timer — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L395
 - timer — [js/ui/dockboot.js › mountDockBoot>bootDeck](../files/js/ui/dockboot.js.md#s-mountDockBoot-bootDeck) L54
 - timer — [js/ui/glyphs.js › compileBlock](../files/js/ui/glyphs.js.md#s-compileBlock) L137
 - timer — [js/ui/glyphs.js › compileBlock>spin](../files/js/ui/glyphs.js.md#s-compileBlock-spin) L155

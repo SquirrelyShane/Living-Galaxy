@@ -15,6 +15,7 @@ import {
   transferEligibility,
 } from "../careers/index.js";
 import { SPEC_EFFECTS, composeMods, effectLines } from "../careers/effects.js";
+import { careerStatus } from "../careers/status.js";
 import { RACES, raceById, traitsOf } from "../crew/races.js";
 import { corpById, corps, setStandingMods } from "../corp/corps.js";
 
@@ -63,8 +64,13 @@ function refreshMods() {
 export function careerCatalog() {
   return COMPLEX_IDS.map((id) => {
     const c = getComplex(id);
+    const st = careerStatus(id);
     return {
       id,
+      open: st.open,
+      eta: st.eta,
+      arc: st.arc?.name ?? "",
+      verb: st.verb ?? "",
       name: c.name ?? id,
       blurb: c.blurb ?? c.summary ?? c.setting ?? "",
       primary: (c.primarySkills ?? []).map((s) => SKILLS[s]?.name ?? s),
@@ -267,6 +273,8 @@ export function transferOptions() {
     const c = getComplex(id);
     const held = pilot.character.careers?.[id];
     if (held) return { id, name: c.name ?? id, related: true, start: held.rank, note: "resume where you left it", ok: true, resume: true };
+    const st = careerStatus(id);
+    if (!st.open) return { id, name: c.name ?? id, related: false, start: "A", note: `opens in ${st.eta}`, ok: false, resume: false, shut: true, eta: st.eta };
     const e = transferEligibility(pilot.character, pilot.complexId, id);
     return { id, name: c.name ?? id, related: Boolean(e.related), start: e.recommendedStart ?? "A", note: e.note ?? e.error ?? "", ok: Boolean(e.ok), resume: false };
   });
@@ -278,6 +286,8 @@ export function tryTransfer(toId) {
   if (!getComplex(toId) || toId === pilot.complexId) return { ok: false, error: "Already in that complex" };
   let e = { ok: true, recommendedStart: pilot.character.careers?.[toId]?.rank, related: true };
   if (!pilot.character.careers?.[toId]) {
+    const st = careerStatus(toId);
+    if (!st.open) return { ok: false, error: `${getComplex(toId).name ?? toId} opens in ${st.eta}` };
     e = transferEligibility(pilot.character, pilot.complexId, toId);
     if (!e.ok) return e;
     const r = enroll(pilot.character, toId, { force: true, startLetter: e.recommendedStart });

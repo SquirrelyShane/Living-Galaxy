@@ -48,9 +48,10 @@ Result: `js/` root keeps only `main.js` (entry, loaded by index.html) and `versi
 | 0.3.77 | codedocs tool, comment migration, traces, this plan | shipped inside 0.3.78 |
 | **0.3.78** (done) | `tools/codedocs/move.mjs` (plan-file driven, dry run by default) + the table executed; `tools/prune/<ver>.txt` + lg-patch.sh prune so a zip can delete | — |
 | 0.3.79 | addon path fix (`move.mjs --after`) + addon-loader reports a broken pack as broken | — |
-| 0.3.80 | hygiene: unused imports, unreferenced symbols, dead files confirmed against tests | — |
-| 0.3.81 | break the 37-file cycle: lift `sim` state object + constants into `sim/state.js`, leave behaviour in `sim.js`; target ≤10-file cycle | — |
-| 0.3.82+ | split `sim.js` along its symbol clusters (warp/route, dock/tractor, career, cataclysm, HUD publish) into `sim/*.js`; then lift `mountGame` closure state into `render/scene.js` so its 2.5k lines can split by layer | — |
+| 0.3.80 | (taken) career gate: only Mining selectable, `docs/CAREER_ROADMAP.md` | — |
+| 0.3.81 | hygiene: unused imports, unreferenced symbols, dead files confirmed against tests; `tools/codedocs/build.mjs` stops scanning `addon/` for importers | — |
+| 0.3.82 | break the 37-file cycle: lift `sim` state object + constants into `sim/state.js`, leave behaviour in `sim.js`; target ≤10-file cycle | — |
+| 0.3.83+ | split `sim.js` along its symbol clusters (warp/route, dock/tractor, career, cataclysm, HUD publish) into `sim/*.js`; then lift `mountGame` closure state into `render/scene.js` so its 2.5k lines can split by layer | — |
 
 ## Forward-looking upgrades in line with this
 

@@ -32,7 +32,10 @@ export function mountCreation(opts) {
   const choice = { raceId: null, complexId: null, corpId: null, seed: null };
   let step = 0;
   let open = false;
-  const careers = careerCatalog();
+  const careers = careerCatalog().sort((a, b) => Number(b.open) - Number(a.open));
+  let peekId = null;
+  const isOpenCareer = (id) => careers.some((c) => c.id === id && c.open);
+  const firstOpen = () => careers.find((c) => c.open)?.id ?? "mining";
 
   const setStep = (n) => {
     step = Math.max(0, Math.min(STEPS.length - 1, n));
@@ -44,7 +47,7 @@ export function mountCreation(opts) {
   };
 
   const stepDone = (i) =>
-    (i === 0 && choice.raceId) || (i === 1 && choice.complexId) || (i === 2 && choice.corpId !== null) || i === 3;
+    (i === 0 && choice.raceId) || (i === 1 && isOpenCareer(choice.complexId)) || (i === 2 && choice.corpId !== null) || i === 3;
 
   stepsEl.querySelectorAll("button[data-step]").forEach((b, i) => {
     b.addEventListener("click", () => setStep(i));
@@ -104,22 +107,27 @@ export function mountCreation(opts) {
   function renderCareer() {
     const grid = el("div", "pick-grid");
     for (const c of careers) {
-      const b = el("button", `pick ${choice.complexId === c.id ? "on" : ""}`);
+      const b = el("button", `pick ${choice.complexId === c.id ? "on" : ""} ${c.open ? "" : "shut"} ${peekId === c.id ? "peek" : ""}`);
       b.type = "button";
+      b.dataset.career = c.id;
       b.style.setProperty("--dot", "#7fb8c9");
-      b.append(el("b", null, c.name.replace(/ Complex$/, "")), el("small", null, c.primary.slice(0, 2).join(" · ")));
+      if (!c.open) b.setAttribute("aria-disabled", "true");
+      b.append(el("b", null, c.name.replace(/ Complex$/, "")), el("small", null, c.open ? c.primary.slice(0, 2).join(" · ") : `PLANNED · ${c.eta}`));
       b.addEventListener("click", () => {
-        choice.complexId = c.id;
+        if (c.open) { choice.complexId = c.id; peekId = null; }
+        else peekId = c.id;
         render();
       });
       grid.append(b);
     }
     body.append(grid);
 
-    if (choice.complexId) {
-      const c = careers.find((x) => x.id === choice.complexId);
-      const d = el("div", "detail");
+    const shownId = peekId ?? choice.complexId;
+    if (shownId) {
+      const c = careers.find((x) => x.id === shownId);
+      const d = el("div", `detail ${c.open ? "" : "shut"}`);
       d.append(el("h4", null, c.name));
+      if (!c.open) d.append(el("p", "soon", `Not open yet — arrives in ${c.eta} "${c.arc}", when you will ${c.verb}. Mining is the career with its full loop today.`));
       if (c.blurb) d.append(el("p", "lede", c.blurb));
       if (c.entry) {
         d.append(el("p", null, `You start at ${c.entry.letter} — ${c.entry.title}. ${c.entry.duties ?? ""}`));
@@ -350,7 +358,7 @@ export function mountCreation(opts) {
     resetCompany();
     startRun(callsign);
 
-    makePilot(callsign, choice.raceId, choice.complexId, choice.corpId || null);
+    makePilot(callsign, choice.raceId, isOpenCareer(choice.complexId) ? choice.complexId : firstOpen(), choice.corpId || null);
     close();
     opts.onLaunch(seed);
   }
@@ -388,7 +396,8 @@ export function mountCreation(opts) {
       } else title.textContent = $("callsign").value.trim() || "New pilot";
       if (!corps.length) buildCorps(Math.random);
       if (!choice.raceId) choice.raceId = "terran";
-      if (!choice.complexId) choice.complexId = "navigation";
+      if (!isOpenCareer(choice.complexId)) choice.complexId = firstOpen();
+      peekId = null;
       if (choice.corpId === null) choice.corpId = "";
       setStep(0);
     },

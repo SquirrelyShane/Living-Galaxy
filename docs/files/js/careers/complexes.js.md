@@ -1,6 +1,6 @@
 # js/careers/complexes.js
 
-[index](../../../README.md) · 1966 lines · 6 symbols · 0 imports · 13 importers
+[index](../../../README.md) · 1966 lines · 6 symbols · 0 imports · 14 importers
 
 ## About
 
@@ -25,6 +25,7 @@ _none_
 
 - [js/careers/careerEngine.js](careerEngine.js.md) — `COMPLEXES`, `COMPLEX_IDS`, `getComplex`, `getRank`, `getSpecialization`, `RANK_LETTERS`
 - [js/careers/index.js](index.js.md) — `COMPLEXES`, `COMPLEX_IDS`, `RANK_LETTERS`, `getComplex`, `getRank`, `getSpecialization`
+- [js/careers/status.js](status.js.md) — `COMPLEX_IDS`
 - [js/crew/children.js](../crew/children.js.md) — `COMPLEXES`
 - [js/crew/childtalk.js](../crew/childtalk.js.md) — `COMPLEXES`
 - [js/crew/family.js](../crew/family.js.md) — `COMPLEXES`
@@ -41,7 +42,7 @@ _none_
 
 - [`RANK_LETTERS`](#s-RANK_LETTERS) · const — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md), [js/crew/heritage.js](../crew/heritage.js.md), [js/crew/ledger.js](../crew/ledger.js.md), [js/interior/deckplan.js](../interior/deckplan.js.md), [js/npc/cradle.js](../npc/cradle.js.md)
 - [`COMPLEXES`](#s-COMPLEXES) · const — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md), [js/crew/children.js](../crew/children.js.md), [js/crew/childtalk.js](../crew/childtalk.js.md), [js/crew/family.js](../crew/family.js.md), [js/crew/heritage.js](../crew/heritage.js.md), [js/crew/ledger.js](../crew/ledger.js.md), [js/interior/deckplan.js](../interior/deckplan.js.md), [js/npc/cradle.js](../npc/cradle.js.md), [js/station/stationlife.js](../station/stationlife.js.md), test/desk.test.mjs
-- [`COMPLEX_IDS`](#s-COMPLEX_IDS) · const — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md), test/ariaplay.test.mjs
+- [`COMPLEX_IDS`](#s-COMPLEX_IDS) · const — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md), [js/careers/status.js](status.js.md), test/ariaplay.test.mjs
 - [`getComplex`](#s-getComplex) · function — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md)
 - [`getRank`](#s-getRank) · function — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md)
 - [`getSpecialization`](#s-getSpecialization) · function — used by [js/careers/careerEngine.js](careerEngine.js.md), [js/careers/index.js](index.js.md)
@@ -79,7 +80,7 @@ const · **exported** · L1950–1950
 
 function · **exported** · L1952–1954
 
-- called by: [`displayTitle`](careerEngine.js.md#s-displayTitle) _js/careers/careerEngine.js_ · [`enroll`](careerEngine.js.md#s-enroll) _js/careers/careerEngine.js_ · [`ladderSummary`](careerEngine.js.md#s-ladderSummary) _js/careers/careerEngine.js_ · [`nextRank`](careerEngine.js.md#s-nextRank) _js/careers/careerEngine.js_ · [`studySkills`](careerEngine.js.md#s-studySkills) _js/careers/careerEngine.js_ · [`tickCycle`](careerEngine.js.md#s-tickCycle) _js/careers/careerEngine.js_ · [`transferEligibility`](careerEngine.js.md#s-transferEligibility) _js/careers/careerEngine.js_ ×2 · [`getRank`](#s-getRank) · [`getSpecialization`](#s-getSpecialization) · [`careerCatalog`](../flight/pilot.js.md#s-careerCatalog) _js/flight/pilot.js_ · [`rankStatus`](../flight/pilot.js.md#s-rankStatus) _js/flight/pilot.js_ · [`specOptions`](../flight/pilot.js.md#s-specOptions) _js/flight/pilot.js_ · [`transferOptions`](../flight/pilot.js.md#s-transferOptions) _js/flight/pilot.js_ · [`tryTransfer`](../flight/pilot.js.md#s-tryTransfer) _js/flight/pilot.js_
+- called by: [`displayTitle`](careerEngine.js.md#s-displayTitle) _js/careers/careerEngine.js_ · [`enroll`](careerEngine.js.md#s-enroll) _js/careers/careerEngine.js_ · [`ladderSummary`](careerEngine.js.md#s-ladderSummary) _js/careers/careerEngine.js_ · [`nextRank`](careerEngine.js.md#s-nextRank) _js/careers/careerEngine.js_ · [`studySkills`](careerEngine.js.md#s-studySkills) _js/careers/careerEngine.js_ · [`tickCycle`](careerEngine.js.md#s-tickCycle) _js/careers/careerEngine.js_ · [`transferEligibility`](careerEngine.js.md#s-transferEligibility) _js/careers/careerEngine.js_ ×2 · [`getRank`](#s-getRank) · [`getSpecialization`](#s-getSpecialization) · [`careerCatalog`](../flight/pilot.js.md#s-careerCatalog) _js/flight/pilot.js_ · [`rankStatus`](../flight/pilot.js.md#s-rankStatus) _js/flight/pilot.js_ · [`specOptions`](../flight/pilot.js.md#s-specOptions) _js/flight/pilot.js_ · [`transferOptions`](../flight/pilot.js.md#s-transferOptions) _js/flight/pilot.js_ · [`tryTransfer`](../flight/pilot.js.md#s-tryTransfer) _js/flight/pilot.js_ ×2
 
 <!-- note:getComplex -->
 <!-- /note -->

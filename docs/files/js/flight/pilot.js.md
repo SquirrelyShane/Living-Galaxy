@@ -1,6 +1,6 @@
 # js/flight/pilot.js
 
-[index](../../../README.md) · 359 lines · 38 symbols · 4 imports · 65 importers
+[index](../../../README.md) · 369 lines · 38 symbols · 5 imports · 66 importers
 
 ## About
 
@@ -18,8 +18,9 @@ actually do out there, not off a menu.
 |---|---|---|---|
 | 1 | `../careers/index.js` | `COMPLEXES`, `COMPLEX_IDS`, `SKILLS`, `createCharacter`, `displayTitle`, `enroll`, `getComplex`, `promote`, `promotionCheck`, `specialize`, `specializationCheck`, `tickCycle`, `trainSkill`, `transferEligibility` | [js/careers/index.js](../careers/index.js.md) |
 | 17 | `../careers/effects.js` | `SPEC_EFFECTS`, `composeMods`, `effectLines` | [js/careers/effects.js](../careers/effects.js.md) |
-| 18 | `../crew/races.js` | `RACES`, `raceById`, `traitsOf` | [js/crew/races.js](../crew/races.js.md) |
-| 19 | `../corp/corps.js` | `corpById`, `corps`, `setStandingMods` | [js/corp/corps.js](../corp/corps.js.md) |
+| 18 | `../careers/status.js` | `careerStatus` | [js/careers/status.js](../careers/status.js.md) |
+| 19 | `../crew/races.js` | `RACES`, `raceById`, `traitsOf` | [js/crew/races.js](../crew/races.js.md) |
+| 20 | `../corp/corps.js` | `corpById`, `corps`, `setStandingMods` | [js/corp/corps.js](../corp/corps.js.md) |
 
 ## Imported by
 
@@ -50,6 +51,7 @@ actually do out there, not off a menu.
 - test/beats.test.mjs _(outside js/)_ — `makePilot`
 - test/board.test.mjs _(outside js/)_ — `makePilot`
 - test/bounty.test.mjs _(outside js/)_ — `makePilot`
+- test/careerstatus.test.mjs _(outside js/)_ — `careerCatalog`, `makePilot`, `pilot`, `transferOptions`, `tryTransfer`
 - test/chains.test.mjs _(outside js/)_ — `makePilot`
 - test/chart.test.mjs _(outside js/)_ — `makePilot`
 - test/chartquiet.test.mjs _(outside js/)_ — `makePilot`
@@ -91,11 +93,11 @@ actually do out there, not off a menu.
 
 ## Exports
 
-- [`pilot`](#s-pilot) · const — used by [js/aria/play.js](../aria/play.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/corp/company.js](../corp/company.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/crew/family.js](../crew/family.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/main.js](../main.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/ariaplay.test.mjs, test/qrf.test.mjs, test/seclevel.test.mjs, test/upgrades.test.mjs
+- [`pilot`](#s-pilot) · const — used by [js/aria/play.js](../aria/play.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/corp/company.js](../corp/company.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/crew/family.js](../crew/family.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/main.js](../main.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/ariaplay.test.mjs, test/careerstatus.test.mjs, test/qrf.test.mjs, test/seclevel.test.mjs, test/upgrades.test.mjs
 - [`setCrewMods`](#s-setCrewMods) · function — used by [js/npc/crewfx.js](../npc/crewfx.js.md)
 - [`setUpgradeMods`](#s-setUpgradeMods) · function — used by [js/economy/upgrades.js](../economy/upgrades.js.md)
-- [`careerCatalog`](#s-careerCatalog) · function — used by [js/ui/creation.js](../ui/creation.js.md)
-- [`makePilot`](#s-makePilot) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/ariabiz.test.mjs, test/ariaplay.test.mjs, test/ariasense.test.mjs, test/autopilot.test.mjs, test/avoid.test.mjs, test/balance.test.mjs, test/bay.test.mjs, test/beats.test.mjs, test/board.test.mjs, test/bounty.test.mjs, test/chains.test.mjs, test/chart.test.mjs, test/chartquiet.test.mjs, test/childtalk.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/economy.test.mjs, test/gdb.test.mjs, test/genome.test.mjs, test/ground.test.mjs, test/hold.test.mjs, test/jobloop.test.mjs, test/line.test.mjs, test/marks.test.mjs, test/mission.test.mjs, test/nose.test.mjs, test/npcchat.test.mjs, test/orders.test.mjs, test/people.test.mjs, test/portcontrol.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/robots.test.mjs, test/rogues.test.mjs, test/seclevel.test.mjs, test/sites.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/solprime.test.mjs, test/speech.test.mjs, test/stafflife.test.mjs, test/systems.test.mjs, test/trade.test.mjs, test/undock.test.mjs, test/upgrades.test.mjs
+- [`careerCatalog`](#s-careerCatalog) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/careerstatus.test.mjs
+- [`makePilot`](#s-makePilot) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/ariabiz.test.mjs, test/ariaplay.test.mjs, test/ariasense.test.mjs, test/autopilot.test.mjs, test/avoid.test.mjs, test/balance.test.mjs, test/bay.test.mjs, test/beats.test.mjs, test/board.test.mjs, test/bounty.test.mjs, test/careerstatus.test.mjs, test/chains.test.mjs, test/chart.test.mjs, test/chartquiet.test.mjs, test/childtalk.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/economy.test.mjs, test/gdb.test.mjs, test/genome.test.mjs, test/ground.test.mjs, test/hold.test.mjs, test/jobloop.test.mjs, test/line.test.mjs, test/marks.test.mjs, test/mission.test.mjs, test/nose.test.mjs, test/npcchat.test.mjs, test/orders.test.mjs, test/people.test.mjs, test/portcontrol.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/robots.test.mjs, test/rogues.test.mjs, test/seclevel.test.mjs, test/sites.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/solprime.test.mjs, test/speech.test.mjs, test/stafflife.test.mjs, test/systems.test.mjs, test/trade.test.mjs, test/undock.test.mjs, test/upgrades.test.mjs
 - [`PILOT_KEY`](#s-PILOT_KEY) · const — **no importer in scanned roots**
 - [`PILOT_RECORD_VERSION`](#s-PILOT_RECORD_VERSION) · const — **no importer in scanned roots**
 - [`serializePilot`](#s-serializePilot) · function — used by test/seclevel.test.mjs
@@ -113,8 +115,8 @@ actually do out there, not off a menu.
 - [`takePayout`](#s-takePayout) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`rankStatus`](#s-rankStatus) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md)
 - [`tryPromote`](#s-tryPromote) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md)
-- [`transferOptions`](#s-transferOptions) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md)
-- [`tryTransfer`](#s-tryTransfer) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md)
+- [`transferOptions`](#s-transferOptions) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md), test/careerstatus.test.mjs
+- [`tryTransfer`](#s-tryTransfer) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md), test/careerstatus.test.mjs
 - [`specOptions`](#s-specOptions) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md)
 - [`trySpecialize`](#s-trySpecialize) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md)
 - [`specEffectLines`](#s-specEffectLines) · function — used by [js/console/panels/corp.js](../console/panels/corp.js.md)
@@ -135,39 +137,39 @@ _none detected_
 
 ### <a id="s-pilot"></a>`pilot`
 
-const · **exported** · L21–38
+const · **exported** · L22–39
 
 - calls: [`composeMods`](../careers/effects.js.md#s-composeMods) _js/careers/effects.js_
 
 <!-- note:pilot -->
-- L27 · `drip: {},` — skill drip accumulators, so a second of mining is not a whole point
-- L30 · `mods: composeMods(null, null, null),` — composed race × specialisation multipliers — the sim reads this every tick
-- L31 · `busy: false,` — did any work() land this cycle? idle cycles do not train
-- L32 · `payout: 0,` — scrip earned by the ladder and not yet paid into the ship's account
-- L33 · `probation: false,` — probationary: enrolled under the rank A bar; cleared on first promotion
-- L34 · `restored: false,` — true when this pilot came back from the record rather than the creation screen
-- L36 · `dirty: false,` — something worth writing changed (skill, rank, cert, hull) — the sim's 30 s writer reads it
-- L37 · `secHeat: 0,` — 0.3.48: what the Directorate holds against you (js/corp/seclevel.js). Rides the
+- L28 · `drip: {},` — skill drip accumulators, so a second of mining is not a whole point
+- L31 · `mods: composeMods(null, null, null),` — composed race × specialisation multipliers — the sim reads this every tick
+- L32 · `busy: false,` — did any work() land this cycle? idle cycles do not train
+- L33 · `payout: 0,` — scrip earned by the ladder and not yet paid into the ship's account
+- L34 · `probation: false,` — probationary: enrolled under the rank A bar; cleared on first promotion
+- L35 · `restored: false,` — true when this pilot came back from the record rather than the creation screen
+- L37 · `dirty: false,` — something worth writing changed (skill, rank, cert, hull) — the sim's 30 s writer reads it
+- L38 · `secHeat: 0,` — 0.3.48: what the Directorate holds against you (js/corp/seclevel.js). Rides the
   pilot record, so a reload is not an amnesty
 <!-- /note -->
 
 ### <a id="s-crewBag"></a>`crewBag`
 
-const · L40–40
+const · L41–41
 
 <!-- note:crewBag -->
 <!-- /note -->
 
 ### <a id="s-upgradeBag"></a>`upgradeBag`
 
-const · L41–41
+const · L42–42
 
 <!-- note:upgradeBag -->
 <!-- /note -->
 
 ### <a id="s-setCrewMods"></a>`setCrewMods(bag)`
 
-function · **exported** · L43–46
+function · **exported** · L44–47
 
 - calls: [`refreshMods`](#s-refreshMods)
 - called by: [`updateCrewMods`](../npc/crewfx.js.md#s-updateCrewMods) _js/npc/crewfx.js_
@@ -178,7 +180,7 @@ The crew's contribution (from npc/crewfx.js). Multiplies into the composed bag.
 
 ### <a id="s-setUpgradeMods"></a>`setUpgradeMods(bag)`
 
-function · **exported** · L48–51
+function · **exported** · L49–52
 
 - calls: [`refreshMods`](#s-refreshMods)
 - called by: [`applyMods`](../economy/upgrades.js.md#s-applyMods) _js/economy/upgrades.js_
@@ -189,7 +191,7 @@ The refit's contribution (from upgrades.js). Multiplies into the composed bag li
 
 ### <a id="s-refreshMods"></a>`refreshMods()`
 
-function · L53–61
+function · L54–62
 
 - calls: [`composeMods`](../careers/effects.js.md#s-composeMods) _js/careers/effects.js_ · [`setStandingMods`](../corp/corps.js.md#s-setStandingMods) _js/corp/corps.js_ · [`traitsOf`](../crew/races.js.md#s-traitsOf) _js/crew/races.js_
 - called by: [`applyRaceToShip`](#s-applyRaceToShip) · [`makePilot`](#s-makePilot) · [`restorePilot`](#s-restorePilot) · [`setCrewMods`](#s-setCrewMods) · [`setUpgradeMods`](#s-setUpgradeMods) · [`trySpecialize`](#s-trySpecialize) · [`tryTransfer`](#s-tryTransfer)
@@ -199,9 +201,9 @@ function · L53–61
 
 ### <a id="s-careerCatalog"></a>`careerCatalog()`
 
-function · **exported** · L63–78
+function · **exported** · L64–84
 
-- calls: [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_
+- calls: [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_ · [`careerStatus`](../careers/status.js.md#s-careerStatus) _js/careers/status.js_
 - via [js/careers/index.js](../careers/index.js.md): `COMPLEX_IDS.map`
 - called by: [`mountCreation`](../ui/creation.js.md#s-mountCreation) _js/ui/creation.js_
 
@@ -211,19 +213,19 @@ Everything the creation screen needs to describe a career.
 
 ### <a id="s-makePilot"></a>`makePilot(name, raceId, complexId, corpId)`
 
-function · **exported** · L80–106
+function · **exported** · L86–112
 
 - calls: [`createCharacter`](../careers/careerEngine.js.md#s-createCharacter) _js/careers/careerEngine.js_ · [`enroll`](../careers/careerEngine.js.md#s-enroll) _js/careers/careerEngine.js_ ×2 · [`trainSkill`](../careers/careerEngine.js.md#s-trainSkill) _js/careers/careerEngine.js_ · [`raceById`](../crew/races.js.md#s-raceById) _js/crew/races.js_ · [`refreshMods`](#s-refreshMods)
 - called by: [`mountCreation>finish`](../ui/creation.js.md#s-mountCreation-finish) _js/ui/creation.js_
 
 <!-- note:makePilot -->
-- L83 · `for (const [skill, amount] of Object.entries(race.affinity ?? {})) {` — Racial affinity is a head start, not a rank — and it counts at the door.
-- L88 · `if (!res.ok) res = enroll(ch, complexId, { force: true });` — taken on as a probationary aide
+- L89 · `for (const [skill, amount] of Object.entries(race.affinity ?? {})) {` — Racial affinity is a head start, not a rank — and it counts at the door.
+- L94 · `if (!res.ok) res = enroll(ch, complexId, { force: true });` — taken on as a probationary aide
 <!-- /note -->
 
 ### <a id="s-PILOT_KEY"></a>`PILOT_KEY`
 
-const · **exported** · L108–108
+const · **exported** · L114–114
 
 <!-- note:PILOT_KEY -->
 ---- the pilot record: what "fly on as the same pilot" needs ---------------
@@ -240,14 +242,14 @@ they were reset at launch with everything else.
 
 ### <a id="s-PILOT_RECORD_VERSION"></a>`PILOT_RECORD_VERSION`
 
-const · **exported** · L109–109
+const · **exported** · L115–115
 
 <!-- note:PILOT_RECORD_VERSION -->
 <!-- /note -->
 
 ### <a id="s-store"></a>`store()`
 
-function · L111–111
+function · L117–117
 
 - called by: [`loadPilot`](#s-loadPilot) · [`savePilot`](#s-savePilot)
 
@@ -256,7 +258,7 @@ function · L111–111
 
 ### <a id="s-serializePilot"></a>`serializePilot(extra=)`
 
-function · **exported** · L113–128
+function · **exported** · L119–134
 
 - called by: [`savePilot`](#s-savePilot)
 
@@ -266,7 +268,7 @@ The record, as JSON-safe data. `extra` is what the sim owns (hulls, cover).
 
 ### <a id="s-restorePilot"></a>`restorePilot(rec)`
 
-function · **exported** · L130–149
+function · **exported** · L136–155
 
 - calls: [`refreshMods`](#s-refreshMods)
 - via [js/crew/races.js](../crew/races.js.md): `RACES.some`
@@ -275,12 +277,12 @@ function · **exported** · L130–149
 <!-- note:restorePilot -->
 Put a record back on `pilot`. Returns false (and touches nothing) for a bad one.
 
-- L145 · `pilot.record = rec;` — the sim reads hulls and cover off it at launch
+- L151 · `pilot.record = rec;` — the sim reads hulls and cover off it at launch
 <!-- /note -->
 
 ### <a id="s-savePilot"></a>`savePilot(extra=)`
 
-function · **exported** · L151–153
+function · **exported** · L157–159
 
 - calls: [`serializePilot`](#s-serializePilot) · [`store`](#s-store)
 - called by: [`savePilotRecord`](../sim/sim.js.md#s-savePilotRecord) _js/sim/sim.js_
@@ -290,7 +292,7 @@ function · **exported** · L151–153
 
 ### <a id="s-loadPilot"></a>`loadPilot()`
 
-function · **exported** · L155–160
+function · **exported** · L161–166
 
 - calls: [`store`](#s-store)
 - called by: [`savePilotRecord`](../sim/sim.js.md#s-savePilotRecord) _js/sim/sim.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×3 · [`mountHud>paintStart`](../ui/hud.js.md#s-mountHud-paintStart) _js/ui/hud.js_ · [`mountHud>setMode.onFly`](../ui/hud.js.md#s-mountHud-setMode-onFly) _js/ui/hud.js_
@@ -301,7 +303,7 @@ The record on this device, or null. Does not touch `pilot`.
 
 ### <a id="s-applyRaceToShip"></a>`applyRaceToShip(ship)`
 
-function · **exported** · L162–170
+function · **exported** · L168–176
 
 - calls: [`traitsOf`](../crew/races.js.md#s-traitsOf) _js/crew/races.js_ · [`applyRaceTune`](#s-applyRaceTune) · [`refreshMods`](#s-refreshMods)
 - called by: [`launchSim`](../sim/sim.js.md#s-launchSim) _js/sim/sim.js_
@@ -312,7 +314,7 @@ Applies race traits to a fresh ship. Called once, at launch.
 
 ### <a id="s-syncMods"></a>`syncMods(ship)`
 
-function · **exported** · L172–179
+function · **exported** · L178–185
 
 - calls: [`traitsOf`](../crew/races.js.md#s-traitsOf) _js/crew/races.js_
 - called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
@@ -323,7 +325,7 @@ Called by the sim each tick: keeps the hull's modifier bag and hold in step with
 
 ### <a id="s-applyRaceTune"></a>`applyRaceTune(ship, t=)`
 
-function · **exported** · L181–185
+function · **exported** · L187–191
 
 - calls: [`traitsOf`](../crew/races.js.md#s-traitsOf) _js/crew/races.js_
 - called by: [`applyRaceToShip`](#s-applyRaceToShip) · [`resetTune`](../sim/sim.js.md#s-resetTune) _js/sim/sim.js_
@@ -334,7 +336,7 @@ Re-applies the race's tune multipliers to a fresh `ship.tune` (used by RESET ALL
 
 ### <a id="s-raceTraits"></a>`raceTraits()`
 
-function · **exported** · L187–189
+function · **exported** · L193–195
 
 - calls: [`traitsOf`](../crew/races.js.md#s-traitsOf) _js/crew/races.js_
 
@@ -343,7 +345,7 @@ function · **exported** · L187–189
 
 ### <a id="s-work"></a>`work(skillId, amount)`
 
-function · **exported** · L191–202
+function · **exported** · L197–208
 
 - calls: [`trainSkill`](../careers/careerEngine.js.md#s-trainSkill) _js/careers/careerEngine.js_
 - called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ ×2 · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ ×2 · [`finishDock`](../sim/sim.js.md#s-finishDock) _js/sim/sim.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ ×4 · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_ ×13 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_ ×2 · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_ ×3 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ ×2 · [`warpDropout`](../sim/sim.js.md#s-warpDropout) _js/sim/sim.js_ · [`stepAtmoWorks`](../world/events/atmoworks.js.md#s-stepAtmoWorks) _js/world/events/atmoworks.js_ ×2
@@ -357,7 +359,7 @@ accumulator crosses one, so a long shift pays and a tap does not.
 
 ### <a id="s-PAY_SHARE"></a>`PAY_SHARE`
 
-const · **exported** · L204–204
+const · **exported** · L210–210
 
 <!-- note:PAY_SHARE -->
 The ladder's rate is the complex's book rate; the pilot's share of it lands
@@ -369,14 +371,14 @@ the company. Probationary aides draw a reduced share until first promotion.
 
 ### <a id="s-PROBATION_SHARE"></a>`PROBATION_SHARE`
 
-const · **exported** · L205–205
+const · **exported** · L211–211
 
 <!-- note:PROBATION_SHARE -->
 <!-- /note -->
 
 ### <a id="s-serveTime"></a>`serveTime(seconds, {…}=)`
 
-function · **exported** · L207–221
+function · **exported** · L213–227
 
 - calls: [`tickCycle`](../careers/careerEngine.js.md#s-tickCycle) _js/careers/careerEngine.js_
 - called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
@@ -386,24 +388,24 @@ Time in grade. Ranks want cycles as well as skill. A cycle only trains if
 you did something in it — or you are docked, where a port is a classroom at
 half pace. Idling in the dark serves time and pays, and teaches nothing.
 
-- L212 · `pilot.dirty = true;` — a cycle ticked: scrip, maybe a skill — worth writing; the seconds between are not
+- L218 · `pilot.dirty = true;` — a cycle ticked: scrip, maybe a skill — worth writing; the seconds between are not
 <!-- /note -->
 
 ### <a id="s-takePayout"></a>`takePayout()`
 
-function · **exported** · L223–228
+function · **exported** · L229–234
 
 - called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:takePayout -->
 Drains earned scrip; the sim credits it to the ship.
 
-- L225 · `if (p) pilot.dirty = true;` — paid something: the record moved (and so did the wallet)
+- L231 · `if (p) pilot.dirty = true;` — paid something: the record moved (and so did the wallet)
 <!-- /note -->
 
 ### <a id="s-rankStatus"></a>`rankStatus()`
 
-function · **exported** · L230–250
+function · **exported** · L236–256
 
 - calls: [`promotionCheck`](../careers/careerEngine.js.md#s-promotionCheck) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_ · [`issuedHullId`](../sim/sim.js.md#s-issuedHullId) _js/sim/sim.js_ · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_ · [`PANELS.shipyard`](../station/stationdeck.js.md#s-PANELS-shipyard) _js/station/stationdeck.js_
@@ -414,7 +416,7 @@ function · **exported** · L230–250
 
 ### <a id="s-tryPromote"></a>`tryPromote()`
 
-function · **exported** · L252–262
+function · **exported** · L258–268
 
 - calls: [`displayTitle`](../careers/careerEngine.js.md#s-displayTitle) _js/careers/careerEngine.js_ · [`promote`](../careers/careerEngine.js.md#s-promote) _js/careers/careerEngine.js_
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
@@ -424,9 +426,9 @@ function · **exported** · L252–262
 
 ### <a id="s-transferOptions"></a>`transferOptions()`
 
-function · **exported** · L264–273
+function · **exported** · L270–281
 
-- calls: [`transferEligibility`](../careers/careerEngine.js.md#s-transferEligibility) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_
+- calls: [`transferEligibility`](../careers/careerEngine.js.md#s-transferEligibility) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_ · [`careerStatus`](../careers/status.js.md#s-careerStatus) _js/careers/status.js_
 - via [js/careers/index.js](../careers/index.js.md): `COMPLEX_IDS.filter`, `COMPLEX_IDS.filter.map`
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
 
@@ -436,18 +438,18 @@ Lateral transfer to another complex: cycles kept, ladder restarts at A (B if rel
 
 ### <a id="s-tryTransfer"></a>`tryTransfer(toId)`
 
-function · **exported** · L275–293
+function · **exported** · L283–303
 
-- calls: [`enroll`](../careers/careerEngine.js.md#s-enroll) _js/careers/careerEngine.js_ · [`transferEligibility`](../careers/careerEngine.js.md#s-transferEligibility) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_ · [`refreshMods`](#s-refreshMods)
+- calls: [`enroll`](../careers/careerEngine.js.md#s-enroll) _js/careers/careerEngine.js_ · [`transferEligibility`](../careers/careerEngine.js.md#s-transferEligibility) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_ ×2 · [`careerStatus`](../careers/status.js.md#s-careerStatus) _js/careers/status.js_ · [`refreshMods`](#s-refreshMods)
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
 
 <!-- note:tryTransfer -->
-- L281 · `e = transferEligibility(pilot.character, pilot.complexId, toId);` — a ladder you have never climbed: enrol fresh
+- L291 · `e = transferEligibility(pilot.character, pilot.complexId, toId);` — a ladder you have never climbed: enrol fresh
 <!-- /note -->
 
 ### <a id="s-specOptions"></a>`specOptions()`
 
-function · **exported** · L295–302
+function · **exported** · L305–312
 
 - calls: [`specializationCheck`](../careers/careerEngine.js.md#s-specializationCheck) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_ · [`effectLines`](../careers/effects.js.md#s-effectLines) _js/careers/effects.js_
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
@@ -457,7 +459,7 @@ function · **exported** · L295–302
 
 ### <a id="s-trySpecialize"></a>`trySpecialize(specId)`
 
-function · **exported** · L304–312
+function · **exported** · L314–322
 
 - calls: [`specialize`](../careers/careerEngine.js.md#s-specialize) _js/careers/careerEngine.js_ · [`refreshMods`](#s-refreshMods)
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
@@ -467,7 +469,7 @@ function · **exported** · L304–312
 
 ### <a id="s-specEffectLines"></a>`specEffectLines(specId=)`
 
-function · **exported** · L314–316
+function · **exported** · L324–326
 
 - calls: [`effectLines`](../careers/effects.js.md#s-effectLines) _js/careers/effects.js_
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
@@ -478,7 +480,7 @@ function · **exported** · L314–316
 
 ### <a id="s-certSheet"></a>`certSheet()`
 
-function · **exported** · L318–320
+function · **exported** · L328–330
 
 - calls: [`certName`](#s-certName)
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
@@ -489,7 +491,7 @@ Certificates held — the record of the climb, not a gate.
 
 ### <a id="s-title"></a>`title()`
 
-function · **exported** · L322–325
+function · **exported** · L332–335
 
 - calls: [`displayTitle`](../careers/careerEngine.js.md#s-displayTitle) _js/careers/careerEngine.js_
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_ ×3 · [`meta`](../main.js.md#s-meta) _js/main.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_
@@ -499,7 +501,7 @@ function · **exported** · L322–325
 
 ### <a id="s-skillSheet"></a>`skillSheet()`
 
-function · **exported** · L327–334
+function · **exported** · L337–344
 
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
 
@@ -509,7 +511,7 @@ Skills sorted by value, for the terminal.
 
 ### <a id="s-corp"></a>`corp()`
 
-function · **exported** · L336–338
+function · **exported** · L346–348
 
 - calls: [`corpById`](../corp/corps.js.md#s-corpById) _js/corp/corps.js_
 - called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_
@@ -519,7 +521,7 @@ function · **exported** · L336–338
 
 ### <a id="s-standingSheet"></a>`standingSheet()`
 
-function · **exported** · L340–342
+function · **exported** · L350–352
 
 - via [js/corp/corps.js](../corp/corps.js.md): `corps.map`
 - called by: [`mountStanding`](../console/panels/corp.js.md#s-mountStanding) _js/console/panels/corp.js_ · [`search`](../console/panels/corp.js.md#s-search) _js/console/panels/corp.js_
@@ -529,7 +531,7 @@ function · **exported** · L340–342
 
 ### <a id="s-CERT_WORDS"></a>`CERT_WORDS`
 
-const · L346–351
+const · L356–361
 
 <!-- note:CERT_WORDS -->
 ---- certificate names --------------------------------------------------
@@ -537,7 +539,7 @@ const · L346–351
 
 ### <a id="s-certName"></a>`certName(id)`
 
-function · **exported** · L353–359
+function · **exported** · L363–369
 
 - called by: [`certSheet`](#s-certSheet)
 

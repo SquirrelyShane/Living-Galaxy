@@ -473,8 +473,8 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.query — [js/station/stationdeck.js](../files/js/station/stationdeck.js.md) L302
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L369
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L403
-- dom.query — [js/ui/creation.js › mountCreation>setStep](../files/js/ui/creation.js.md#s-mountCreation-setStep) L39
-- dom.query — [js/ui/creation.js › mountCreation>render](../files/js/ui/creation.js.md#s-mountCreation-render) L338
+- dom.query — [js/ui/creation.js › mountCreation>setStep](../files/js/ui/creation.js.md#s-mountCreation-setStep) L42
+- dom.query — [js/ui/creation.js › mountCreation>render](../files/js/ui/creation.js.md#s-mountCreation-render) L346
 - dom.query — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L724
 - dom.create — [js/ui/map.js › mountMap>openMenu](../files/js/ui/map.js.md#s-mountMap-openMenu) L329
 - dom.create — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L371
@@ -503,15 +503,15 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `button[data-step]`
 
-- dom.query — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L49
+- dom.query — [js/ui/creation.js › mountCreation](../files/js/ui/creation.js.md#s-mountCreation) L52
 
 ### `callsign`
 
-- dom.id — [js/ui/creation.js › mountCreation>nameOk](../files/js/ui/creation.js.md#s-mountCreation-nameOk) L57
-- dom.id — [js/ui/creation.js › mountCreation>finish](../files/js/ui/creation.js.md#s-mountCreation-finish) L347
-- dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L380
-- dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L382
+- dom.id — [js/ui/creation.js › mountCreation>nameOk](../files/js/ui/creation.js.md#s-mountCreation-nameOk) L60
+- dom.id — [js/ui/creation.js › mountCreation>finish](../files/js/ui/creation.js.md#s-mountCreation-finish) L355
 - dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L388
+- dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L390
+- dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L396
 - dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L494
 - dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L557
 - dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L591
@@ -644,7 +644,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `create-callsign`
 
-- dom.id — [js/ui/creation.js › mountCreation>needName](../files/js/ui/creation.js.md#s-mountCreation-needName) L59
+- dom.id — [js/ui/creation.js › mountCreation>needName](../files/js/ui/creation.js.md#s-mountCreation-needName) L62
 
 ### `create-next`
 
@@ -660,7 +660,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `create-title`
 
-- dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L369
+- dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L377
 
 ### `dash`
 
@@ -847,8 +847,8 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 - dom.create — [js/comms/call-ui.js › CallUI.constructor](../files/js/comms/call-ui.js.md#s-CallUI-constructor) L61
 - dom.create — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L79
-- dom.create — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L272
-- dom.create — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L372
+- dom.create — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L280
+- dom.create — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L380
 - dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L816
 
 ### `instruments`
@@ -870,11 +870,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `load-fill`
 
-- dom.id — [js/ui/creation.js › mountCreation.progress](../files/js/ui/creation.js.md#s-mountCreation-progress) L399
+- dom.id — [js/ui/creation.js › mountCreation.progress](../files/js/ui/creation.js.md#s-mountCreation-progress) L408
 
 ### `load-text`
 
-- dom.id — [js/ui/creation.js › mountCreation.progress](../files/js/ui/creation.js.md#s-mountCreation-progress) L400
+- dom.id — [js/ui/creation.js › mountCreation.progress](../files/js/ui/creation.js.md#s-mountCreation-progress) L409
 
 ### `lock-fill`
 

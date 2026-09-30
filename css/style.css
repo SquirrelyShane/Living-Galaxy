@@ -3264,3 +3264,30 @@ html.boot-failed body > *:not(#boot-fail) { display: none !important; }
 
 /* 0.3.75: UNDOCK while the crane holds the clamps */
 .sd-btn.sd-wait { opacity: 0.85; border-style: dashed; }
+
+.pick.shut {
+  opacity: 0.45;
+  filter: grayscale(1);
+  border-style: dashed;
+  cursor: help;
+}
+
+.pick.shut small {
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.pick.shut.peek {
+  opacity: 0.75;
+  border-color: var(--subtle);
+}
+
+.detail.shut {
+  border-style: dashed;
+}
+
+.detail .soon {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--subtle);
+}
