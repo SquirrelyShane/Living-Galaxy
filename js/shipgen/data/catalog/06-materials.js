@@ -1,5 +1,4 @@
 import { P } from "./_part.js";
-/* 06 — MATERIALS, SHIELDING & ISRU */
 export default {
   id: "d06", name: "06 Materials, Shielding & ISRU",
   sheet: {

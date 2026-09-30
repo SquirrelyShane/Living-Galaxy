@@ -1,28 +1,11 @@
-/* LIVING GALAXY experimental — the deck.
- *
- * Press I (or DECK on dash page 3) and the hull dematerialises: the forged
- * mesh goes to wireframe and fades while a scan line sweeps the canopy and
- * leaves the deck plan behind it — the same blueprint ink the station decks
- * use, but this one is *your* hull, grown from its def and your callsign.
- *
- * On it: every deck stacked, every room named, the crew walking their shift
- * (station → mess → quarters on a 270 s rota), the hull's maintenance
- * robotics, the interior sensor nodes, and whoever holds the conn on the
- * bridge. The rail beside it is the sensor board: what is inside the hull
- * (allied, synthetic, robotics, intruders) and what is inside scan range
- * outside it. Tap a hand to talk — and to give them the ship.
- *
- * Mounted on <body>, like comms, so it survives the terminal and the deck.
- */
-
-import { sim, logEvent, currentShipId } from "../sim.js";
-import { VIEW } from "../audio.js";
-import { setInjectedKeys, setInjectedPan } from "../input.js";
-import { crew, dismissCrew } from "../crew.js";
+import { sim, logEvent, currentShipId } from "../sim/sim.js";
+import { VIEW } from "../audio/index.js";
+import { setInjectedKeys, setInjectedPan } from "../core/input.js";
+import { crew, dismissCrew } from "../crew/ledger.js";
 import { mountTalk } from "../crew/talkview.js";
-import { shipById } from "../shipdb.js";
-import { contacts } from "../turrets.js";
-import { stations } from "../stations.js";
+import { shipById } from "../ships/shipdb.js";
+import { contacts } from "../flight/turrets.js";
+import { stations } from "../station/stations.js";
 import { hullPlan, stationRoomFor, quartersFor } from "./deckplan.js";
 import { captain, transferCommand, retakeCommand, holderName, interiorReport } from "../npc/captain.js";
 import { crewEffects, shiftPhase } from "../npc/crewfx.js";
@@ -30,12 +13,12 @@ import { boarding } from "./boarding.js";
 
 export const interior = {
   open: false,
-  fade: 0,            // 0 = hull solid, 1 = blueprint
+  fade: 0,
   plan: null,
   planKey: "",
-  peds: new Map(),    // crew id → walker
+  peds: new Map(),
   robots: [],
-  selected: null,     // crew id
+  selected: null,
   view: { zoom: 1, panX: 0, panY: 0 },
   root: null,
   canvas: null,
@@ -45,7 +28,6 @@ export const interior = {
   camBefore: null,
 };
 
-
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
@@ -53,8 +35,6 @@ const el = (tag, cls, text) => {
   if (text != null) e.textContent = text;
   return e;
 };
-
-/* ---- plan + walkers ----------------------------------------------------- */
 
 function ensurePlan() {
   const id = currentShipId();
@@ -94,7 +74,6 @@ function roomFor(plan, m, phase) {
   return quartersFor(plan, m);
 }
 
-/* room → door → corridor → (lift, deck change) → corridor → door → room */
 function routeTo(plan, p, dst) {
   const cur = plan.rooms[p.room];
   const path = [];
@@ -129,7 +108,6 @@ function walk(p, dt) {
   }
 }
 
-/* boarders come through the airlock and go where it hurts */
 function syncIntruders(plan) {
   const lock = plan.rooms.find((r) => r.kind === "airlock") ?? plan.rooms[0];
   for (const i of boarding.intruders) {
@@ -146,14 +124,12 @@ function tickWalkers(plan, dt) {
   for (const m of crew.aboard) {
     const p = interior.peds.get(m.id);
     if (!p) continue;
-    /* the same deterministic rota crewfx.js prices — the dot on the deck IS the trim on the hull */
     const phase = captain.holder === m.id ? 0 : shiftPhase(m.id, sim.time);
     if (phase !== p.phase && !p.path.length) {
       p.phase = phase;
       const dst = roomFor(plan, m, phase);
       if (dst && dst.id !== p.room) routeTo(plan, p, dst);
     } else if (phase === 0 && !p.path.length && p.wait <= 0) {
-      /* a new duty from the roster: walk to it without waiting for the next phase */
       const dst = roomFor(plan, m, 0);
       if (dst && dst.id !== p.room) routeTo(plan, p, dst);
     }
@@ -176,24 +152,18 @@ function tickWalkers(plan, dt) {
   }
 }
 
-/* ---- open / close -------------------------------------------------------- */
-
 export function openInterior() {
   if (interior.open || sim.phase !== "play") return;
   interior.open = true;
-  /* The engine's ambient bed reads this: inside the hull the sky cuts off
-   * and the room tone comes up. A flag on sim rather than an import of this
-   * module, so the engine does not take a dependency on the deck plan. */
   sim.interiorOpen = true;
   VIEW.interiorIn();
   ensurePlan();
   interior.camBefore = sim.cameraMode ?? 0;
-  sim.cameraMode = 1; // the hull has to be on screen to dematerialise
+  sim.cameraMode = 1;
   interior.root.hidden = false;
   interior.root.classList.add("in");
   interior.root.classList.remove("out");
   if (captain.holder === "player") {
-    /* you left the seat: the stick goes dead until you come back */
     setInjectedKeys([]);
     setInjectedPan({ x: 0, y: 0 });
   }
@@ -215,8 +185,6 @@ export function toggleInterior() {
   else openInterior();
 }
 
-/* ---- drawing ------------------------------------------------------------- */
-
 function draw() {
   const plan = interior.plan;
   const c = interior.canvas;
@@ -227,7 +195,6 @@ function draw() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
 
-  /* fit every deck stacked */
   const gap = 1.6;
   const totalH = plan.decks.reduce((a, d) => a + (d.bottom - d.top) + gap, 0) - gap;
   const maxW = Math.max(...plan.decks.map((d) => d.width));
@@ -235,7 +202,6 @@ function draw() {
   const ox = w / 2 - (maxW / 2) * U + interior.view.panX;
   let oy = h / 2 - (totalH / 2) * U + interior.view.panY;
 
-  /* grid */
   ctx.strokeStyle = "rgba(90,140,190,0.08)";
   ctx.lineWidth = 1;
   const g = U / 2;
@@ -244,21 +210,18 @@ function draw() {
 
   interior.deckOrigins = [];
   for (const d of plan.decks) {
-    const base = oy - d.top * U; // y of corridor top (grid 0)
+    const base = oy - d.top * U;
     interior.deckOrigins[d.index] = { ox, oy: base, U };
     const X = (u) => ox + u * U, Y = (u) => base + u * U;
-    /* deck label */
     ctx.fillStyle = "rgba(160,205,235,0.55)";
     ctx.font = `${Math.max(9, U * 0.22)}px ui-monospace, monospace`;
     ctx.fillText(`${d.name} · ${plan.hullName.toUpperCase()}`, X(0), Y(d.top) - 4);
-    /* corridor */
     ctx.fillStyle = "rgba(110,180,230,0.07)";
     ctx.fillRect(X(0), Y(0), d.width * U, U);
     ctx.strokeStyle = "rgba(126,200,255,0.45)";
     ctx.setLineDash([6, 4]);
     ctx.strokeRect(X(0), Y(0), d.width * U, U);
     ctx.setLineDash([]);
-    /* lift */
     if (plan.decks.length > 1) {
       ctx.strokeStyle = "#ffc857";
       ctx.lineWidth = 1.5;
@@ -275,7 +238,6 @@ function draw() {
       ctx.strokeStyle = sel ? "#7ce7ff" : r.kind === "brig" ? "rgba(255,120,120,0.7)" : "rgba(126,200,255,0.6)";
       ctx.lineWidth = sel ? 2 : 1.2;
       ctx.strokeRect(X(r.x), Y(r.y), r.w * U, r.h * U);
-      /* door */
       ctx.strokeStyle = "#9fe8b0";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -283,7 +245,6 @@ function draw() {
       ctx.moveTo(X(r.door.x) - U * 0.14, dy);
       ctx.lineTo(X(r.door.x) + U * 0.14, dy);
       ctx.stroke();
-      /* sensor nodes: diamonds in the corners */
       ctx.fillStyle = "rgba(159,232,176,0.8)";
       for (let i = 0; i < r.sensors; i++) {
         const sx = i === 0 ? X(r.x) + 5 : X(r.x + r.w) - 5;
@@ -298,7 +259,6 @@ function draw() {
     }
   }
 
-  /* people */
   const P = (p) => { const o = interior.deckOrigins[p.deck]; return [o.ox + p.x * o.U, o.oy + p.y * o.U, o.U]; };
   for (const b of interior.robots) {
     const [x, y, u] = P(b);
@@ -318,7 +278,6 @@ function draw() {
     if (interior.selected === m.id) { ctx.strokeStyle = "#7ce7ff"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, r + 5, 0, Math.PI * 2); ctx.stroke(); }
     if (u > 18) { ctx.fillStyle = "rgba(207,238,255,0.85)"; ctx.font = `${Math.max(8, u * 0.16)}px ui-monospace, monospace`; ctx.fillText(m.name.split(" ")[0], x + r + 3, y + 3); }
   }
-  /* you */
   const cap = plan.bridge;
   const o = interior.deckOrigins[cap.deck];
   const yx = o.ox + (cap.x + cap.w * 0.5) * o.U, yy = o.oy + (cap.y + cap.h * 0.55) * o.U;
@@ -326,7 +285,6 @@ function draw() {
   ctx.fillStyle = "#fff2aa"; ctx.fill();
   if (captain.holder === "player") { ctx.strokeStyle = "#fff2aa"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(yx, yy, Math.max(3, o.U * 0.08) + 3, 0, Math.PI * 2); ctx.stroke(); }
   if (o.U > 18) { ctx.fillStyle = "#fff2aa"; ctx.font = `${Math.max(8, o.U * 0.16)}px ui-monospace, monospace`; ctx.fillText((sim.callsign || "YOU").toUpperCase(), yx + 8, yy + 3); }
-  /* intruders */
   for (const i of boarding.intruders) {
     if (i.deck == null) continue;
     const [x, y, u] = P(i);
@@ -348,8 +306,6 @@ function crewAt(px, py) {
   return null;
 }
 
-/* ---- the rail ------------------------------------------------------------ */
-
 function paintRail() {
   const plan = interior.plan;
   const rep = interior.rep;
@@ -367,7 +323,6 @@ function paintRail() {
   if (boarding.pods.length) line("BREACH POD", `${Math.max(0, Math.round(boarding.pods[0].eta - sim.time))} s`, "hot");
   if (r.lowMorale.length) line("UNSETTLED", r.lowMorale.join(", "), "hot");
 
-  /* who is at a console right now, and what it is doing for the hull */
   const fx = crewEffects(interior.planKey.split(":")[0], sim.callsign, sim.time);
   const man = $("in-manned");
   man.innerHTML = "";
@@ -385,7 +340,6 @@ function paintRail() {
     man.append(d);
   }
 
-  /* outside: scan range */
   const scan = (sim.ship.mods?.scan ?? 1) * 12000;
   const out = $("in-scan");
   out.innerHTML = "";
@@ -401,7 +355,6 @@ function paintRail() {
     out.append(d);
   }
 
-  /* crew list — rebuilt only when it changes, so a tap never lands on a detached button */
   const list = $("in-crew");
   const key = crew.aboard.map((m) => `${m.id}:${interior.peds.get(m.id)?.room}:${interior.selected === m.id}:${captain.holder === m.id}`).join("|");
   if (key === interior.crewKey) return;
@@ -429,7 +382,6 @@ function paintDialogue() {
   else if (captain.holder === m.id) extra.push({ label: "Stand down — I have the ship", cls: "danger", run: () => { retakeCommand(); paintRail(); return `${m.name.split(" ")[0]}: "Aye. She's yours."`; } });
   extra.push({ label: "Dismiss", cls: "danger", run: () => { if (captain.holder === m.id) retakeCommand(); dismissCrew(m.id); closeTalk(); } });
   extra.push({ label: "Close", run: closeTalk });
-  /* the shared talk view (crew/talkview.js) — the console's CREW › TALK mounts the same thing */
   interior.talkRefresh?.stop?.();
   interior.talkRefresh = mountTalk(box, m.id, { onChange: paintRail, extra, btnClass: "btn tiny" });
   if (captain.holder === m.id && captain.log.length) {
@@ -446,8 +398,6 @@ function connLine(m) {
   if (t.greed > 0.6) return `${f}: "I have the conn. Let's make this hull pay."`;
   return `${f}: "I have the conn."`;
 }
-
-/* ---- mount ---------------------------------------------------------------- */
 
 export function mountInterior() {
   if (interior.root) return interior;
@@ -495,7 +445,6 @@ export function mountInterior() {
     const now = performance.now();
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    /* the fade is on the wall clock; the hull is a thing you can see dissolve */
     interior.fade += (interior.open ? 1 : -1) * dt * 1.8;
     interior.fade = Math.max(0, Math.min(1, interior.fade));
     sim.hullFade = interior.fade;

@@ -1,10 +1,3 @@
-// robotgen/src/physics.js — mass, balance and part separation.
-//
-// Portable on purpose: it walks node.position / rotation / scale, which real
-// three.js and the test stub expose identically, and composes its own matrices.
-// That means the same code runs in the browser and in `node test/physics.js`.
-
-/* ---------- portable forward kinematics ---------- */
 function compose(p, r, s) {
   const cx = Math.cos(r.x), sx = Math.sin(r.x);
   const cy = Math.cos(r.y), sy = Math.sin(r.y);
@@ -32,7 +25,6 @@ function mul(a, b) {
 }
 const IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-/** World matrix of `node` measured in `frame`'s space. `cache` is per-pass. */
 export function matrixIn(node, frame, cache) {
   if (node === frame || !node) return IDENTITY;
   const hit = cache.get(node);
@@ -54,15 +46,12 @@ function applyPoint(m, x, y, z) {
   };
 }
 
-/* ---------- mass ---------- */
-// kg/m³ by material role, already scaled down: a robot is a shell over a frame,
-// not a solid billet, so a hollow factor is folded in below.
 const DENSITY = {
   base: 2400, second: 2500, trim: 3100, dark: 3200, rubber: 1250, belt: 2100,
   composite: 1650, ablative: 950, riot: 1500, blade: 5100,
   accent: 900, glow: 60, beam: 20, plume: 15, jet: 15, stripe: 500, decal: 500, hazard: 300
 };
-const HOLLOW = 0.22;   // shells, frames and voids — not solid billets
+const HOLLOW = 0.22;
 
 export function computeMassModel(root) {
   const parts = [];
@@ -80,7 +69,6 @@ export function computeMassModel(root) {
   return { parts, totalKg: total };
 }
 
-/** Centre of mass of everything under `frame`, expressed in `frame` space. */
 export function centreOfMass(model, frame) {
   const cache = new Map();
   let mx = 0, my = 0, mz = 0, m = 0;
@@ -97,11 +85,8 @@ function isUnder(node, frame) {
   return false;
 }
 
-/** Weight in newtons under a given gravity. */
 export const weightN = (kg, gravity) => kg * gravity;
 
-/* ---------- collision boxes ---------- */
-/** World-space AABBs for every registered collider, in `frame` space. */
 export function colliderBoxes(rig, frame) {
   const out = [];
   const cache = new Map();
@@ -127,11 +112,6 @@ export function boxesOverlap(a, b, slack = 0) {
     && a.minZ < b.maxZ - slack && a.maxZ > b.minZ + slack;
 }
 
-/**
- * Push limbs out of the torso and out of each other. Arms abduct at the
- * shoulder; legs add splay at the hip. Both relax back when clear, so a robot
- * that is not colliding keeps the pose the animation asked for.
- */
 export function resolveSeparation(rig, dt, iterations = 3) {
   const torso = rig.torso;
   if (!torso || !rig.hull) return 0;
@@ -166,7 +146,6 @@ export function resolveSeparation(rig, dt, iterations = 3) {
     arm.shoulder.rotation.z = arm.abduct;
   }
 
-  // legs: keep left and right out of each other
   if (rig.legs.length === 2) {
     const [a, b] = rig.legs;
     a.splayExtra = (a.splayExtra || 0) * decay;
@@ -193,13 +172,7 @@ export function resolveSeparation(rig, dt, iterations = 3) {
   return worst;
 }
 
-/* ---------- gravity ---------- */
 export const EARTH_G = 9.81;
-/**
- * How the walk changes with the pull it is under. Step rate follows the
- * pendulum relation (√g), swing gets floatier as g drops, and the stance
- * crouches deeper as g rises because the legs carry more weight.
- */
 export function gravityProfile(gravity) {
   const g = Math.max(0.05, gravity);
   const r = g / EARTH_G;
@@ -208,8 +181,6 @@ export function gravityProfile(gravity) {
     ratio: r,
     freq: Math.sqrt(r),
     swing: Math.min(1.35, Math.max(0.7, Math.pow(r, -0.32))),
-    // heavier pull, deeper stance. Below Earth there is nothing to brace against,
-    // so the crouch simply goes away rather than hyperextending the knee.
     crouch: Math.max(0, Math.min(0.5, 0.3 * (r - 1) / (1 + 0.35 * Math.abs(r - 1)))),
     sway: Math.min(2.2, Math.max(0.4, Math.pow(r, -0.4))),
     settle: Math.min(6, Math.max(0.8, 2.4 * Math.sqrt(r)))

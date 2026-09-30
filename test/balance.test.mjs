@@ -7,18 +7,18 @@
  * own words promise, and a start purse is a start — not a fleet.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { ALL_GOODS, ORES, VALUE_RULE, baseValue, derivedValue } from "../js/materials.js";
-import { fabMargin, recipeFor } from "../js/fabricate.js";
-import { boardFor, BOARD, TIERS } from "../js/contracts.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { ALL_GOODS, ORES, VALUE_RULE, baseValue, derivedValue } from "../js/economy/materials.js";
+import { fabMargin, recipeFor } from "../js/economy/fabricate.js";
+import { boardFor, BOARD, TIERS } from "../js/economy/contracts.js";
 import { CHAINS } from "../js/data/chains.js";
-import { CHAIN, chainBonus } from "../js/chains.js";
-import { bidPrice, stockMultAt, targetFor, PRICE_FLOOR, PRICE_CEIL, GLUT_FRAC } from "../js/economy.js";
-import { COMPANY } from "../js/company.js";
-import { SHIP_DB } from "../js/shipdb.js";
-import { yardQuote } from "../js/shipcost.js";
+import { CHAIN, chainBonus } from "../js/economy/chains.js";
+import { bidPrice, stockMultAt, targetFor, PRICE_FLOOR, PRICE_CEIL, GLUT_FRAC } from "../js/economy/economy.js";
+import { COMPANY } from "../js/corp/company.js";
+import { SHIP_DB } from "../js/ships/shipdb.js";
+import { yardQuote } from "../js/economy/shipcost.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

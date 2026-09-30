@@ -1,56 +1,29 @@
-/* LIVING GALAXY — what ARIA can see.
- *
- * 0.3.25. Until now the bot decided from three numbers: the board, the trade
- * routes, and how full the hold was. That is not a pilot looking out of a
- * canopy, it is a spreadsheet with a throttle — and it is why a mining run
- * would happily buy a hundred girders, why a job was taken at a port whose
- * smelter had been stalled for ten minutes, and why nobody noticed the
- * raiders on the belt the job was sending her to.
- *
- * This is the instrument panel instead. One call builds a SNAPSHOT of the
- * whole situation from the live sim — the hull, where it is and what is
- * pulling on it, what is in weapons range, the belt under the nose, every
- * honest port with its prices, its industry lines and what has stalled on
- * them, the board, the routes, the traffic and the standing — and everything
- * downstream reads that snapshot rather than reaching into the world itself.
- *
- * Two reasons it is a snapshot and not a set of getters. It is CHEAP: the
- * expensive parts (per-port ledgers, route search) are rebuilt on their own
- * cadence, not per tick. And it is HONEST: every decision in one think is made
- * against one consistent picture of the sky, the way a pilot decides from what
- * the panel said when they looked at it.
- *
- * Nothing here mutates anything. If a field is missing the sky did not have
- * it, which is a fact and not an error.
- */
-
-import { sim, losBlocker, sellPriceAt, buyPriceAt, currentShipId } from "../sim.js";
-import { stations, stationById } from "../stations.js";
-import { BODIES, bodyPosition, currentSystem, dist3 } from "../bodies.js";
-import { wellRadius } from "../scale.js";
-import { econReport, stockOf, shortagesOf, wantsOf } from "../economy.js";
-import { nearbyRocks, inBelt, depleted } from "../field.js";
-import { contacts } from "../turrets.js";
+import { sim, losBlocker, sellPriceAt, buyPriceAt, currentShipId } from "../sim/sim.js";
+import { stations, stationById } from "../station/stations.js";
+import { BODIES, bodyPosition, currentSystem, dist3 } from "../world/bodies.js";
+import { wellRadius } from "../world/scale.js";
+import { econReport, stockOf, shortagesOf, wantsOf } from "../economy/economy.js";
+import { nearbyRocks, inBelt, depleted } from "../world/field.js";
+import { contacts } from "../flight/turrets.js";
 import { traffic, HOSTILE_ROLES } from "../npc/traffic.js";
 import { flow } from "../npc/flow.js";
 import { nests } from "../npc/rogues.js";
-import { corps, corpOfStation, standingLabel } from "../corps.js";
-import { holdRoom, batteryCap } from "../ship.js";
-import { hullMaxOf, repairsAt, pricePerPoint } from "../repair.js";
-import { shipById } from "../shipdb.js";
-import { goodName, bulkOf } from "../materials.js";
-import { sites, sitesNear } from "../sites.js";
-import { boardByCategory } from "../contracts.js";
-import { tradeRoutes } from "../traderoutes.js";
-import { chainReport } from "../chains.js";
-import { SECTORS } from "../materials.js";
+import { corps, corpOfStation, standingLabel } from "../corp/corps.js";
+import { holdRoom, batteryCap } from "../flight/ship.js";
+import { hullMaxOf, repairsAt, pricePerPoint } from "../flight/repair.js";
+import { shipById } from "../ships/shipdb.js";
+import { goodName, bulkOf } from "../economy/materials.js";
+import { sites, sitesNear } from "../economy/sites.js";
+import { boardByCategory } from "../economy/contracts.js";
+import { tradeRoutes } from "../economy/traderoutes.js";
+import { chainReport } from "../economy/chains.js";
+import { SECTORS } from "../economy/materials.js";
 
-/** How stale each layer is allowed to get, in sim seconds. */
 export const SENSE = {
-  hull: 0,             // every look
-  space: 2,            // what is around the hull
-  ports: 20,           // ledgers and prices: the economy ticks every 20 s anyway
-  board: 45,           // the desk re-posts every 480 s; 45 is plenty
+  hull: 0,
+  space: 2,
+  ports: 20,
+  board: 45,
   routes: 30,
 };
 
@@ -58,7 +31,6 @@ const cache = { hull: null, space: null, ports: null, board: null, routes: null,
 const fresh = (k) => cache[k] && (sim.time - (cache.at[k] ?? -1e9)) < SENSE[k];
 const keep = (k, v) => { cache[k] = v; cache.at[k] = sim.time; return v; };
 
-/** Drop everything: a new sky, a new hull, a new run. */
 export function forgetSenses() {
   for (const k of Object.keys(cache)) if (k !== "at") cache[k] = null;
   cache.at = {};
@@ -66,8 +38,6 @@ export function forgetSenses() {
 
 const honest = (st) => st && !(st.hostile && !st.claimed) && st.sector !== "pirate";
 const _p = { x: 0, y: 0, z: 0 };
-
-/* ---- the hull ------------------------------------------------------------------- */
 
 export function senseHull() {
   const ship = sim.ship;
@@ -96,12 +66,6 @@ export function senseHull() {
   };
 }
 
-/* ---- the space around it ---------------------------------------------------------- */
-
-/**
- * Wells, contacts, rock. `well` is the radius inside which the core will not
- * hold geometry, which is the thing a pilot actually plans around.
- */
 export function senseSpace() {
   if (fresh("space")) return cache.space;
   const p = sim.ship.pos;
@@ -144,15 +108,6 @@ export function senseSpace() {
   });
 }
 
-/* ---- the ports -------------------------------------------------------------------- */
-
-/**
- * Every honest port: where it is, what it pays, what it is short of, what its
- * lines are eating and what they have stalled on. A stalled smelter is a
- * standing order for the thing it stalled on, which is a mining job nobody
- * posted yet — and knowing that is the difference between a bot that reads a
- * board and a pilot who reads a port.
- */
 export function sensePorts() {
   if (fresh("ports")) return cache.ports;
   const p = sim.ship.pos;
@@ -172,13 +127,11 @@ export function sensePorts() {
       corpId: co?.id ?? null, corpName: co?.name ?? null,
       standing: co ? Math.round(co.standing) : null,
       standingLabel: co ? standingLabel(co.standing) : null,
-      /* what its factories are doing right now */
       lines: e.lines.map((l) => ({ id: l.id, name: l.name, running: l.running, stalledOn: l.stalledOn, stalledName: l.stalledName })),
       stalled: stalled.map((l) => ({ line: l.name, good: l.stalledOn, name: l.stalledName })),
       shortages: e.shortages.slice(0, 6).map((s) => ({ id: s.id, name: goodName(s.id), mult: Number((s.mult ?? 1).toFixed(2)) })),
       wants: wantsOf(st, 4).map((w) => ({ id: w.id, name: w.name, over: Number((w.over ?? 1).toFixed(2)) })),
       gluts: e.gluts.slice(0, 4).map((g) => ({ id: g.id, name: goodName(g.id) })),
-      /* the shelf, priced for one unit — a lot is priced when a lot is proposed */
       stock: e.stock.filter((l) => l.qty >= 1).map((l) => ({ id: l.id, name: l.name, qty: l.qty, fill: Number(l.fill.toFixed(2)), ask: l.ask, bid: l.bid, trend: l.trend })),
       blocked: dist3(st, p) > 3000 ? Boolean(losBlocker(p, st, null)) : false,
     });
@@ -186,8 +139,6 @@ export function sensePorts() {
   out.sort((a, b) => a.d - b.d);
   return keep("ports", out);
 }
-
-/* ---- the work on offer -------------------------------------------------------------- */
 
 export function senseBoard() {
   if (fresh("board")) return cache.board;
@@ -212,9 +163,6 @@ export function senseRoutes(opts = {}) {
   })));
 }
 
-/* ---- the whole panel ---------------------------------------------------------------- */
-
-/** One consistent picture of the sky. Everything downstream reads this. */
 export function sense(opts = {}) {
   return {
     at: sim.time,
@@ -228,18 +176,11 @@ export function sense(opts = {}) {
   };
 }
 
-/* ---- reading the panel --------------------------------------------------------------- */
-
-/** The port nearest the hull that a leg can actually be flown to. */
 export function nearestReachablePort(s = null, except = null) {
   const ports = s?.ports ?? sensePorts();
   return ports.find((P) => P.id !== except && !P.blocked) ?? ports[0] ?? null;
 }
 
-/**
- * What a port would pay over the odds for, that somebody else has on the
- * shelf: a stalled line is a standing order nobody has posted yet.
- */
 export function unpostedWork(s = null, room = holdRoom(sim.ship), purse = sim.ship.credits) {
   const ports = s?.ports ?? sensePorts();
   const out = [];
@@ -266,7 +207,6 @@ export function unpostedWork(s = null, room = holdRoom(sim.ship), purse = sim.sh
   return out.sort((a, b) => b.profit - a.profit).slice(0, 8);
 }
 
-/** One line a terminal can print: what she is looking at. */
 export function senseLine(s = null) {
   const v = s ?? sense();
   const w = v.space.inWell;

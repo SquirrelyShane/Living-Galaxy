@@ -1,25 +1,3 @@
-/* Hull grammars — the bones a station's modules hang on.
- *
- * Every style lays its long axis along +Z: command end at −Z (zone 0),
- * power end at +Z (zone 1). Each returns the structure it drew plus the
- * slot list the placement solver fills and the AABBs it must not intrude on.
- *
- *   spindle    a pressurised spine, one rotating ring, a boom past the power end
- *   torus      a wide ring on spokes about a short hub — the agricultural classic
- *   lattice    an open truss keel with a small pressurised core; everything bolts on
- *   cross      a hub with radial arms in the plane, nodes at the tips
- *   drum       a long spine carrying the Tier III habitat drum amidships
- *   cluster    pressurised pods on a despun mast, joined by tubes
- *   cathedral  a nave with aisles, flying buttresses, a transept, a crossing spire,
- *              twin west towers and a rose window over the great door — the hangar
- *   bastion    an armoured octagonal core with a citadel belt, star-fort arms with
- *              faceted bastions at the tips, and a prow for the spinal gun
- *   ziggurat   a stepped hulk of welded holds, terraces on every face
- *
- * Spines are drawn *after* placement so a recessed hangar can notch the
- * skin and a throat can trim the end. A ring or a drum is added to any
- * style when the manifest calls for one. Every grammar rolls its own
- * proportions and counts, so no two hulls of a style match. */
 import * as THREE from "three";
 import { G, latheOf, addMesh, trussGeometry, extrude, extrudeOwned, archOutline, bittenDisc, instanced } from "../core/geometry.js";
 import { slot } from "./frames.js";
@@ -29,10 +7,6 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const Z = V(0, 0, 1);
 const PI = Math.PI, H = PI / 2;
 
-/* ---- shared pieces ------------------------------------------------------- */
-
-/** A pressurised spine along Z: segments with bulkhead rings, and grid slots on its skin.
- * Drawing is deferred (B.deferred) so hangars placed on it can notch or trim it. */
 function spine(B, root, R, L, z0, opts = {}) {
   const { mats, rng } = B;
   const g = new THREE.Group(); g.name = "spine"; root.add(g);
@@ -42,7 +16,6 @@ function spine(B, root, R, L, z0, opts = {}) {
   const desc = { R, L, z0, form, notches: [], trim: { lo: 0, hi: 0 }, zc: z0 + L / 2 };
   const own = new THREE.Box3(V(-R, -R, z0), V(R, R, z0 + L));
   B.occ.push(own);
-  /* per-segment looks rolled now (deterministic), drawn later */
   const segs = [];
   for (let i = 0; i < seg; i++) segs.push({ r: form === "welded" ? R * rng.range(0.86, 1.08) : form === "banded" ? R * (i % 2 ? 0.94 : 1) : R, mat: form === "welded" ? rng.pick([mats.hull, mats.panel, mats.hull, mats.dark]) : i % 3 === 1 ? mats.panel : mats.hull });
   B.deferred.push(() => {
@@ -51,7 +24,6 @@ function spine(B, root, R, L, z0, opts = {}) {
     for (let i = 0; i < seg; i++) {
       const a = z0 + segL * i, b = a + segL;
       const s = segs[i];
-      /* split the segment where notches start and end, so a bite is exactly as long as its bay */
       const cuts = [Math.max(a, zStart), Math.min(b, zEnd)];
       for (const n of desc.notches) for (const c of [n.z0, n.z1]) if (c > cuts[0] && c < cuts[cuts.length - 1]) cuts.push(c);
       cuts.sort((p, q) => p - q);
@@ -69,7 +41,6 @@ function spine(B, root, R, L, z0, opts = {}) {
       if (a >= zStart && a <= zEnd && !desc.notches.some((n) => n.z0 < a && n.z1 > a)) addMesh(g, form === "armoured" ? G.cyl(8) : G.torus(0.04, 8, 40), mats.dark, 0, 0, a, form === "armoured" ? H : 0, form === "armoured" ? PI / 8 : 0, 0, R * 1.03, form === "armoured" ? 2.2 : R * 1.03, R * 1.03);
       const zc = (a + b) / 2, len = segL;
       if (desc.notches.some((n) => n.z0 < b && n.z1 > a)) continue;
-      /* style dressing along the segment */
       if (form === "ribbed") for (let k = 0; k < 6; k++) { const t = (k / 6) * PI * 2; addMesh(g, G.box(), mats.dark, Math.cos(t) * s.r, Math.sin(t) * s.r, zc, 0, 0, t, 1.6, 2.4, len * 0.9); }
       if (form === "armoured" && i % 2 === 0) addMesh(g, G.cyl(8), mats.armour, 0, 0, zc, H, PI / 8, 0, s.r * 1.06, len * 0.5, s.r * 1.06);
       if (form === "welded" && rng.chance(0.6)) addMesh(g, G.box(), rng.pick([mats.panel, mats.cargo, mats.dark]), Math.cos(i) * s.r, Math.sin(i) * s.r, zc, 0, 0, i, 1, rng.range(6, 14), rng.range(8, 20));
@@ -77,7 +48,6 @@ function spine(B, root, R, L, z0, opts = {}) {
     }
     addMesh(g, G.torus(0.04, 8, 40), mats.dark, 0, 0, zEnd, 0, 0, 0, R * 1.03, R * 1.03, R * 1.03);
   });
-  /* skin slots: rows along Z, spokes around */
   const around = opts.around ?? Math.max(6, Math.min(12, Math.round(R / 4)));
   const rows = Math.max(3, Math.round(L / 34));
   for (let i = 0; i < rows; i++) {
@@ -93,7 +63,6 @@ function spine(B, root, R, L, z0, opts = {}) {
   return desc;
 }
 
-/** A spin ring at z: torus + spokes + a hub collar. Slots on the outer rim (ring) and rim faces. */
 function ring(B, root, R, tube, z, spokes = 6) {
   const { mats, rng } = B;
   const g = new THREE.Group(); g.name = "ring"; g.position.z = z; root.add(g);
@@ -113,7 +82,6 @@ function ring(B, root, R, tube, z, spokes = 6) {
   }
   addMesh(g, G.cyl(24), mats.panel, 0, 0, 0, H, 0, 0, tube * 1.6, tube * 2.2, tube * 1.6);
   B.count(spokes + 3);
-  /* occupancy: the rim as four boxes, so the middle (spokes only) stays free for the spine's own business */
   const own = new THREE.Box3(V(-R - tube, R - tube, z - tube), V(R + tube, R + tube, z + tube));
   B.occ.push(own, new THREE.Box3(V(-R - tube, -R - tube, z - tube), V(R + tube, -R + tube, z + tube)), new THREE.Box3(V(R - tube, -R, z - tube), V(R + tube, R, z + tube)), new THREE.Box3(V(-R - tube, -R, z - tube), V(-R + tube, R, z + tube)));
   const rimOwner = (a) => { const c = Math.cos(a), sn = Math.sin(a); return Math.abs(sn) > Math.abs(c) ? (sn > 0 ? B.occ[B.occ.length - 4] : B.occ[B.occ.length - 3]) : (c > 0 ? B.occ[B.occ.length - 2] : B.occ[B.occ.length - 1]); };
@@ -129,7 +97,6 @@ function ring(B, root, R, tube, z, spokes = 6) {
   return g;
 }
 
-/** A truss boom along Z from z0 for length L, with slots on all four faces. */
 function boom(B, root, z0, L, width = 10, name = "boom") {
   const { mats } = B;
   const g = new THREE.Group(); g.name = name; root.add(g);
@@ -149,14 +116,12 @@ function boom(B, root, z0, L, width = 10, name = "boom") {
   return g;
 }
 
-/** A radial arm from the axis in the XY plane at angle a, out to length L, with slots along its top/bottom. */
 function arm(B, root, a, L, z, width = 12, o = {}) {
   const { mats, rng } = B;
   const dir = V(Math.cos(a), Math.sin(a), 0);
   const g = new THREE.Group(); g.name = "arm"; root.add(g);
   if (o.solid) {
-    /* a wedge arm: a tapered armoured box */
-    addMesh(g, G.frustum(0.6, 4), mats.armour, dir.x * L * 0.5, dir.y * L * 0.5, z, 0, 0, a - H, width * 0.95, L, width * 0.95);   // a diamond section: sloped faces
+    addMesh(g, G.frustum(0.6, 4), mats.armour, dir.x * L * 0.5, dir.y * L * 0.5, z, 0, 0, a - H, width * 0.95, L, width * 0.95);
   } else {
     const bays = Math.max(4, Math.round(L / 12));
     addMesh(g, trussGeometry(bays, width / L, 0.45 / L), mats.truss, dir.x * L * 0.5, dir.y * L * 0.5, z, 0, 0, a - H, L, L, L);
@@ -167,7 +132,6 @@ function arm(B, root, a, L, z, width = 12, o = {}) {
   if (node === "faceted") addMesh(g, G.ico(1), mats.armour, tip.x, tip.y, tip.z, 0, 0, a, width * 1.2, width * 1.2, width * 1.2);
   else if (node === "pod") addMesh(g, latheOf(rng, "pod", 16), mats.hull, tip.x, tip.y, tip.z, 0, 0, a - H, width * 1.1, width * 2.2, width * 1.1);
   else addMesh(g, G.sphere(14, 10), mats.hull, tip.x, tip.y, tip.z, 0, 0, 0, width * 1.1, width * 1.1, width * 1.1);
-  /* occupancy in short lengths along the arm, so a diagonal arm does not fence off the whole quadrant */
   const r0 = o.from ?? 0;
   const segs = Math.max(1, Math.ceil((L - r0) / 45));
   let own = null;
@@ -190,14 +154,11 @@ function arm(B, root, a, L, z, width = 12, o = {}) {
   return g;
 }
 
-/** End caps: a slot facing straight along the axis at each end. */
 function endSlots(B, zMin, zMax, R, sp = null) {
   const lo = sp && Math.abs(sp.z0 - zMin) < 5 ? sp : null, hi = sp && Math.abs(sp.z0 + sp.L - zMax) < 5 ? sp : null;
   B.slots.push(slot("end", V(0, 0, zMin - 1), Z.clone().negate(), V(0, 1, 0), 0, { width: R * 2.2, cap: true, owner: B.occ[0], spine: lo }));
   B.slots.push(slot("end", V(0, 0, zMax + 1), Z, V(0, 1, 0), 1, { width: R * 2.2, cap: true, owner: B.occ[B.occ.length - 1], spine: hi }));
 }
-
-/* ---- styles ---------------------------------------------------------------- */
 
 export const STYLES = {
   spindle(B, root, needs) {
@@ -210,7 +171,7 @@ export const STYLES = {
     if (needs.ring) ring(B, root, R * rng.range(3.2, 4), R * 0.55, zRing, rng.int(5, 8));
     if (needs.drum) B.drumSlot = { z: z0 + L * 0.34, R };
     boom(B, root, z0 + spineL, L - spineL, R * rng.range(0.5, 0.7));
-    if (rng.chance(0.4)) { /* a keel fin */ const zf = z0 + spineL * 0.5; addMesh(root, G.box(), B.mats.panel, 0, -R * 1.2, zf, 0, 0, 0, 3, R * 0.8, spineL * 0.4); B.occ.push(new THREE.Box3(V(-2, -R * 1.6, zf - spineL * 0.2), V(2, -R, zf + spineL * 0.2))); }
+    if (rng.chance(0.4)) {const zf = z0 + spineL * 0.5; addMesh(root, G.box(), B.mats.panel, 0, -R * 1.2, zf, 0, 0, 0, 3, R * 0.8, spineL * 0.4); B.occ.push(new THREE.Box3(V(-2, -R * 1.6, zf - spineL * 0.2), V(2, -R, zf + spineL * 0.2))); }
     endSlots(B, z0, z0 + L, R, sp);
   },
   torus(B, root, needs) {
@@ -264,7 +225,6 @@ export const STYLES = {
     endSlots(B, z0, z0 + L + B.L * 0.3, R, sp);
   },
   drum(B, root, needs) {
-    /* without the drum to carry, the spine is a fatter city core */
     const L = B.L * 1.6, R = B.R * (needs.drum ? 0.8 : 1.4);
     const z0 = -L / 2;
     const sp = spine(B, root, R, L * 0.82, z0, { around: needs.drum ? undefined : 10 });
@@ -305,16 +265,14 @@ export const STYLES = {
     endSlots(B, z0, z0 + L, R);
   },
 
-  /* the cathedral: nave, aisles, buttresses, transept, crossing spire, west towers, rose, apse */
   cathedral(B, root, needs) {
     const { mats, rng } = B;
     const L = B.L * 1.1, R = B.R;
-    const W = Math.max(150, R * rng.range(2.6, 3.2)), Hn = Math.max(190, R * rng.range(3.8, 4.6));   // nave section: always wide enough for the great door
+    const W = Math.max(150, R * rng.range(2.6, 3.2)), Hn = Math.max(190, R * rng.range(3.8, 4.6));
     const Ln = L * 0.72, z0 = -L / 2;
     const nave = { W, H: Hn, z0, L: Ln, trim: { lo: 0, hi: 0 }, notches: [], R: W / 2, zc: z0 + Ln / 2, notchable: false };
     const naveOwn = new THREE.Box3(V(-W / 2, -Hn / 2, z0), V(W / 2, Hn / 2, z0 + Ln));
     B.occ.push(naveOwn);
-    /* the nave body is drawn after placement so the great door (a throat hangar) can trim it */
     B.deferred.push(() => {
       const zs = z0 + nave.trim.lo, ze = z0 + Ln - nave.trim.hi, len = ze - zs;
       addMesh(root, vaultGeo("pointed"), mats.hull, 0, -Hn / 2, (zs + ze) / 2, 0, 0, 0, W, Hn, len);
@@ -322,7 +280,6 @@ export const STYLES = {
       for (let i = 0; i <= ribs; i++) {
         const z = zs + (len * i) / ribs;
         addMesh(root, ribGeo("pointed", 0.05), mats.dark, 0, -Hn / 2 - Hn * 0.02, z, 0, 0, 0, W * 1.06, Hn * 1.05, 3);
-        /* flying buttresses: a pier out from each aisle and a strut up to the clerestory */
         for (const s of [-1, 1]) {
           const px = s * (W / 2 + Wa + Hn * 0.12);
           addMesh(root, G.box(), mats.panel, px, -Hn / 2 + Hn * 0.2, z, 0, 0, 0, 4, Hn * 0.55, 6);
@@ -332,13 +289,11 @@ export const STYLES = {
         }
         B.count(7);
       }
-      /* window bands along the clerestory: lit, pointed */
       const win = extrude("win:pointed", archOutline("pointed", 1, 1), 1, [], { curveSegments: 6 });
       const n = Math.floor(len / 9);
       for (let i = 0; i < n; i++) for (const s of [-1, 1]) addMesh(root, win, rng.chance(0.9) ? mats.window : mats.dark, s * (W / 2 - 0.5), Hn * 0.05, zs + 9 * (i + 0.5), 0, s * H, 0, 4, 10, 1.4);
       B.count(n * 2);
     });
-    /* aisles: lower round vaults along both sides */
     const Wa = R * rng.range(1.0, 1.4), Ha = Hn * 0.42;
     for (const s of [-1, 1]) {
       addMesh(root, vaultGeo("round"), mats.panel, s * (W / 2 + Wa / 2), -Hn / 2, z0 + Ln / 2, 0, 0, 0, Wa, Ha, Ln);
@@ -348,7 +303,6 @@ export const STYLES = {
       for (let i = 0; i < rows; i++) { const z = z0 + Ln * ((i + 0.5) / rows); B.slots.push(slot("spine", V(s * (W / 2 + Wa / 2), -Hn / 2 + Ha, z), V(0, 1, 0), Z, B.zoneOf(z), { width: Wa * 0.9, owner: own })); }
       B.count();
     }
-    /* nave roof ridge and floor: rows of big slots; clerestory walls: side slots */
     const rows = Math.max(4, Math.round(Ln / 50));
     for (let i = 0; i < rows; i++) {
       const z = z0 + Ln * ((i + 0.5) / rows);
@@ -356,7 +310,6 @@ export const STYLES = {
       B.slots.push(slot("spine", V(0, -Hn / 2, z), V(0, -1, 0), Z, B.zoneOf(z), { width: W * 0.9, owner: naveOwn, spine: nave }));
       if (i % 2) for (const s of [-1, 1]) B.slots.push(slot("surface", V(s * W / 2, Hn * 0.25, z), V(s, 0, 0), Z, B.zoneOf(z), { width: Hn * 0.3, owner: naveOwn }));
     }
-    /* transept across the nave, and the crossing: a lantern with spires both ways */
     const zc = z0 + Ln * rng.range(0.58, 0.7), Wt = W * 0.9, Ht = Hn * 0.92, Lt = W * rng.range(2.4, 3.2);
     addMesh(root, vaultGeo("pointed"), mats.hull, 0, -Ht / 2, zc, 0, H, 0, Wt, Ht, Lt);
     const tOwn = new THREE.Box3(V(-Lt / 2, -Ht / 2, zc - Wt / 2), V(Lt / 2, Ht / 2, zc + Wt / 2));
@@ -376,7 +329,6 @@ export const STYLES = {
       B.count(3);
     }
     B.occ.push(new THREE.Box3(V(-lr * 1.2, -Hn / 2 - lr * 1.2 - Hn * 1.1, zc - lr * 1.2), V(lr * 1.2, Hn / 2 + lr * 1.2 + Hn * 1.1, zc + lr * 1.2)));
-    /* west front: twin towers flanking the great door, a rose window above it */
     const tw = R * rng.range(0.9, 1.2), th = Hn * rng.range(1.15, 1.4);
     for (const s of [-1, 1]) {
       const x = s * (W / 2 + tw * 0.5 + 2);
@@ -392,12 +344,9 @@ export const STYLES = {
     addMesh(root, G.torus(0.12, 8, 32), mats.glow, 0, Hn * 0.28, z0 - 0.5, 0, 0, 0, rr, rr, rr);
     for (let i = 0; i < 8; i++) addMesh(root, G.box(), mats.glow, 0, Hn * 0.28, z0 - 0.5, 0, 0, (i / 8) * PI, rr * 1.9, 0.5, 0.4);
     B.count(9);
-    /* the great west door: the nave's own end slot, marked so the hangar bores in as a throat */
     B.slots.push(slot("end", V(0, 0, z0 - 1), Z.clone().negate(), V(0, 1, 0), 0, { width: W, cap: true, owner: naveOwn, nave: { W: W * 0.93, H: Hn * 0.96 }, spine: nave }));
-    /* apse and the power boom behind it */
     addMesh(root, G.dome(24), mats.hull, 0, 0, z0 + Ln, H, 0, 0, W / 2, W / 2, Hn / 2);
     B.occ.push(new THREE.Box3(V(-W / 2, -Hn / 2, z0 + Ln), V(W / 2, Hn / 2, z0 + Ln + W / 2)));
-    /* the halo: a ring about the apse; a Tier III drum sits behind it on a longer boom */
     const Rd = Math.min(330, Math.max(R * 4.5, 120)), LdMax = Rd * 1.5;
     const boomL = needs.drum ? Math.max(L - Ln - W / 2, LdMax + R * 3.5) : L - Ln - W / 2;
     boom(B, root, z0 + Ln + W / 2, boomL, R * 0.6);
@@ -407,13 +356,11 @@ export const STYLES = {
     B.count(2);
   },
 
-  /* the bastion: armoured octagonal core, citadel belt, star-fort arms, faceted bastions, a prow */
   bastion(B, root, needs) {
     const { mats, rng } = B;
     const L = B.L * 0.8, R = B.R * 1.25;
     const z0 = -L / 2;
     const sp = spine(B, root, R, L * 0.8, z0 + L * 0.1, { form: "armoured", around: 8 });
-    /* the citadel: a belt of sloped plate amidships, hard points on its faces */
     const zc = z0 + L * (needs.drum ? 0.72 : rng.range(0.42, 0.55)), Rc = R * rng.range(1.9, 2.4), Lc = R * rng.range(1.4, 1.9);
     addMesh(root, G.cyl(8), mats.armour, 0, 0, zc, H, PI / 8, 0, Rc, Lc * 0.5, Rc);
     for (const s of [-1, 1]) addMesh(root, G.taper(0.55, 8), mats.armour, 0, 0, zc + s * Lc * 0.5, s > 0 ? H : -H, PI / 8, 0, Rc, Lc * 0.5, Rc);
@@ -422,22 +369,18 @@ export const STYLES = {
     B.occ.push(cOwn);
     for (let k = 0; k < 8; k++) { const a = (k / 8) * PI * 2; const n = V(Math.cos(a), Math.sin(a), 0); B.slots.push(slot("surface", n.clone().multiplyScalar(Rc * 0.97).setZ(zc), n, Z, B.zoneOf(zc), { width: Rc * 0.7, owner: cOwn, hard: true })); }
     B.count(4);
-    /* star-fort arms with faceted bastions */
     const arms = rng.pick([4, 4, 5, 6]);
     const off = rng.range(0, PI * 2);
     const armL = B.L * rng.range(0.32, 0.45);
     for (let i = 0; i < arms; i++) arm(B, root, (i / arms) * PI * 2 + off, armL, zc, R * 0.6, { solid: true, node: "faceted", hard: true, from: Rc * 0.9 });
-    /* armour belts on the core between the arms and the prow */
     const plates = [];
     const nP = Math.round(28 * B.tier.hullScale);
     for (let i = 0; i < nP; i++) { const a = rng.range(0, PI * 2), z = z0 + L * rng.range(0.14, 0.86); if (Math.abs(z - zc) < Lc) continue; plates.push({ x: Math.cos(a) * R * 1.02, y: Math.sin(a) * R * 1.02, z, rz: a, sx: rng.range(4, 9), sy: 1.6, sz: rng.range(8, 20) }); }
     if (plates.length) instanced(root, G.box(), mats.armour, plates, "belt");
-    /* the prow: an armoured cone with the spinal gun's slot at its tip */
     const pL = R * rng.range(1.4, 2.2);
     B.deferred.push(() => { if (!sp.noProw) addMesh(root, G.taper(0.35, 8), mats.armour, 0, 0, z0 + L * 0.1 - pL / 2, -H, PI / 8, 0, R, pL, R); });
     B.occ.push(new THREE.Box3(V(-R, -R, z0 + L * 0.1 - pL), V(R, R, z0 + L * 0.1)));
     B.slots.push(slot("end", V(0, 0, z0 + L * 0.1 - pL - 1), Z.clone().negate(), V(0, 1, 0), 0, { width: R * 0.8, cap: true, owner: B.occ[B.occ.length - 1], spine: sp, prow: true, hard: true }));
-    /* stern boom and its cap */
     boom(B, root, z0 + L * 0.9, L * 0.1 + B.L * 0.12, R * 0.55);
     B.slots.push(slot("end", V(0, 0, z0 + L + B.L * 0.12 + 1), Z, V(0, 1, 0), 1, { width: R * 2, cap: true, owner: B.occ[B.occ.length - 1] }));
     if (needs.ring) ring(B, root, Math.max(Rc * 1.4, R * 3.2), R * 0.55, z0 + L * 0.25, 8);
@@ -445,7 +388,6 @@ export const STYLES = {
     B.count(1);
   },
 
-  /* the ziggurat: a stepped hulk — tiers of welded holds along the axis, terraces on every face */
   ziggurat(B, root, needs) {
     const { mats, rng } = B;
     const L = B.L * 0.9, R = B.R;
@@ -456,7 +398,7 @@ export const STYLES = {
     let zc = z0 + L * 0.08;
     let lastOwn = null;
     for (let i = 0; i < tiers; i++) {
-      const k = 1 - Math.abs(i - (tiers - 1) / 2) / ((tiers - 1) / 2 + 0.6);   // fattest in the middle
+      const k = 1 - Math.abs(i - (tiers - 1) / 2) / ((tiers - 1) / 2 + 0.6);
       const w = W0 * (0.45 + 0.55 * k) * rng.range(0.9, 1.1), h = H0 * (0.45 + 0.55 * k) * rng.range(0.9, 1.1), len = (L * 0.84) / tiers;
       const z = zc + len / 2;
       const kind = rng.pick(["box", "box", "prism", "frustum"]);
@@ -468,7 +410,6 @@ export const STYLES = {
       const own = new THREE.Box3(V(-w / 2, -h / 2, zc), V(w / 2, h / 2, zc + len));
       B.occ.push(own);
       lastOwn = own;
-      /* terraces: slots on all four faces of this tier */
       const cols = Math.max(1, Math.round(len / 40));
       for (let c = 0; c < cols; c++) {
         const zz = zc + len * ((c + 0.5) / cols);
@@ -481,7 +422,6 @@ export const STYLES = {
       zc += len;
       B.count(2);
     }
-    /* a keel girder the length of the hulk, a mast off the fat tier */
     boom(B, root, z0, L, R * 0.5, "keel");
     const fat = zcs.reduce((a, b) => (b.w > a.w ? b : a));
     addMesh(root, G.cyl(6), mats.metal, 0, fat.h / 2 + R * 1.2, fat.z, 0, 0, 0, R * 0.12, R * 2.4, R * 0.12);
@@ -493,7 +433,6 @@ export const STYLES = {
   },
 };
 
-/** The Tier III habitat drum: a rotating cylinder about the spine with end plates, bearings and window bands. */
 export function habitatDrum(B, root, z, R) {
   const { mats, rng } = B;
   const Rd = Math.min(330, Math.max(R * 4.5, 120)), Ld = Rd * rng.range(1.15, 1.45);
@@ -505,7 +444,7 @@ export function habitatDrum(B, root, z, R) {
   for (const s of [-1, 1]) {
     addMesh(g, G.cyl(sides), mats.panel, 0, 0, s * Ld * 0.5, H, 0, 0, Rd, Rd * 0.02, Rd);
     addMesh(g, G.torus(0.06, 10, 64), mats.accent, 0, 0, s * Ld * 0.5, 0, 0, 0, Rd * 1.01, Rd * 1.01, Rd * 1.01);
-    addMesh(g, G.cyl(32), mats.dark, 0, 0, s * (Ld * 0.5 + R * 0.8), H, 0, 0, R * 1.6, R * 1.6, R * 1.6); // bearing housings
+    addMesh(g, G.cyl(32), mats.dark, 0, 0, s * (Ld * 0.5 + R * 0.8), H, 0, 0, R * 1.6, R * 1.6, R * 1.6);
     B.count(3);
   }
   const ribs = rng.int(8, 14);

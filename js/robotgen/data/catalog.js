@@ -1,25 +1,7 @@
-/* robotgen/src/data/catalog.js — the shared build parts list.
- *
- * `catalog-base.js` is a VERBATIM copy of NEWSHIPGEN/src/data/materials.js, so a
- * robot, a ship and a station are all quoted out of the same stock: the same
- * material ids (`m.*`) and the same manufactured components (`c.*`), with the
- * same unit masses. Nothing here rewrites a shared id — this file only ADDS the
- * small, robot-scale hardware the ship catalogue has no reason to carry
- * (servos, harmonic joints, rotor blades, tyres, track links, hand tools).
- *
- * MATERIALS   raw stock                    { name, kind }
- * COMPONENTS  manufactured items           { name, kg, bom }   bom: kg of a material, or count of a sub-component
- * KIND_PRICE  book price per kg by kind, and FAB_RATE over stock — the same
- *             two-step costing STATIONGEN uses, so estimates are comparable.
- *
- * STATION_ALIAS maps STATIONGEN's bare material ids onto the prefixed ones, so a
- * station BOM and a robot BOM can be summed without a translation pass.
- */
 import { MATERIALS as SHIP_MATERIALS, COMPONENTS as SHIP_COMPONENTS } from './catalog-base.js';
 
 const C = (name, kg, bom) => ({ name, kg, bom });
 
-/* ---- robot-scale materials the ship list does not stock ------------------ */
 const ROBOT_MATERIALS = {
   'm.abs':        { name: 'ABS / PA12 printed polymer', kind: 'polymer' },
   'm.tpu':        { name: 'TPU elastomer',              kind: 'polymer' },
@@ -37,9 +19,7 @@ const ROBOT_MATERIALS = {
   'm.fert':       { name: 'Fertiliser concentrate',     kind: 'bio' },
 };
 
-/* ---- robot-scale components --------------------------------------------- */
 const ROBOT_COMPONENTS = {
-  /* micro-scale hardware — a 0.5 m scout is not a small starship */
   'c.motor_micro':  C('Micro BLDC motor',                  0.055,{ 'm.cu': 0.02, 'm.ndfeb_sm': 0.01, 'm.al6061': 0.025 }),
   'c.esc_micro':    C('Micro ESC',                         0.020,{ 'c.pcb_sm': 0.33 }),
   'c.pcb_sm':       C('Small PCB assembly',                0.060,{ 'm.si': 0.005, 'm.cu': 0.02, 'm.fused_si': 0.02, 'm.solder': 0.015 }),
@@ -65,7 +45,6 @@ const ROBOT_COMPONENTS = {
   'c.speaker_micro':C('Micro hailer',                      0.080,{ 'm.ndfeb_sm': 0.02, 'm.abs': 0.03, 'c.pcb_sm': 0.5 }),
   'c.led_micro':    C('Micro strobe / nav light',          0.020,{ 'm.gan': 0.002, 'c.pcb_sm': 0.2, 'm.pmma': 0.005 }),
   'c.gripper_micro':C('Micro gripper',                     0.100,{ 'c.servo_micro': 0.8, 'm.abs': 0.02 }),
-  /* structure */
   'c.frame_rib':    C('Robot frame rib / bulkhead',        0.45, { 'm.al6061': 0.3, 'm.cfrp': 0.15 }),
   'c.frame_tube':   C('Structural tube 0.5 m',             0.30, { 'm.cfrp': 0.22, 'm.al6061': 0.08 }),
   'c.shell_panel':  C('Moulded shell panel 0.1 m²',        0.35, { 'm.abs': 0.2, 'm.cfrp': 0.15 }),
@@ -74,7 +53,6 @@ const ROBOT_COMPONENTS = {
   'c.riot_shield':  C('Riot shield panel',                 4.20, { 'm.pmma': 2.6, 'm.uhmwpe': 1.2, 'm.al6061': 0.4 }),
   'c.bumper_foam':  C('Compliant bumper section',          0.25, { 'm.foam_eva': 0.15, 'm.tpu': 0.1 }),
   'c.glazing_sm':   C('Small glazing / lens cover',        0.15, { 'm.pmma': 0.12, 'm.al6061': 0.03 }),
-  /* actuation */
   'c.servo_micro':  C('Micro servo (2 Nm)',                0.09, { 'm.abs': 0.03, 'm.cu': 0.02, 'm.ndfeb_sm': 0.01, 'c.pcb': 0.06 }),
   'c.servo_joint':  C('Servo joint (25 Nm)',               0.85, { 'm.al6061': 0.35, 'm.cu': 0.2, 'm.ndfeb_sm': 0.08, 'c.pcb': 0.3, 'c.bearing': 0.15 }),
   'c.hd_joint':     C('Harmonic-drive limb joint',         2.60, { 'c.motor': 1, 'c.gearbox': 0.5, 'c.pcb': 0.4, 'm.ti64': 0.3 }),
@@ -82,7 +60,6 @@ const ROBOT_COMPONENTS = {
   'c.tendon_drive': C('Tendon / cable drive set',          0.55, { 'm.uhmwpe': 0.2, 'm.steel304': 0.2, 'c.bearing': 0.2 }),
   'c.esc':          C('Motor controller / ESC',            0.22, { 'c.pcb': 0.3, 'm.al6061': 0.06 }),
   'c.brake_park':   C('Fail-safe parking brake',           0.40, { 'm.steel304': 0.3, 'c.pcb': 0.1, 'm.ndfeb_sm': 0.02 }),
-  /* drives */
   'c.wheel_hub':    C('Hub-motor wheel unit',              2.80, { 'c.motor': 1, 'm.al6061': 0.9, 'c.bearing': 0.6 }),
   'c.tyre':         C('Tyre / non-pneumatic wheel',        1.40, { 'm.rubber': 1.1, 'm.uhmwpe': 0.3 }),
   'c.track_link':   C('Track link + pin',                  0.35, { 'm.steel304': 0.25, 'm.rubber': 0.1 }),
@@ -91,7 +68,6 @@ const ROBOT_COMPONENTS = {
   'c.foot_pad':     C('Compliant foot pad + load cell',    0.60, { 'm.tpu': 0.3, 'm.al6061': 0.15, 'c.pcb': 0.15 }),
   'c.lift_fan':     C('Ducted lift fan',                   1.90, { 'c.motor': 1, 'm.cfrp': 0.3, 'm.abs': 0.15 }),
   'c.skirt_seg':    C('Hover skirt segment',               0.50, { 'm.tpu': 0.35, 'm.uhmwpe': 0.15 }),
-  /* flight */
   'c.rotor_blade':  C('Composite rotor blade',             0.18, { 'm.cfrp': 0.14, 'm.epoxy': 0.04 }),
   'c.rotor_hub':    C('Rotor hub + pitch link',            0.45, { 'm.al6061': 0.3, 'c.bearing': 0.15 }),
   'c.prop_disc':    C('Tractor propeller + spinner',       0.30, { 'm.cfrp': 0.22, 'm.al6061': 0.08 }),
@@ -103,14 +79,12 @@ const ROBOT_COMPONENTS = {
   'c.landing_skid': C('Landing skid / leg set',            0.55, { 'm.cfrp': 0.35, 'm.tpu': 0.1, 'm.al6061': 0.1 }),
   'c.parachute':    C('Ballistic recovery chute',          0.85, { 'm.uhmwpe': 0.5, 'm.abs': 0.2, 'c.sep_bolt': 0.4 }),
   'c.pitot':        C('Air-data boom (pitot + vanes)',     0.20, { 'm.steel304': 0.1, 'c.pcb': 0.2 }),
-  /* power */
   'c.lipo_pack':    C('High-rate battery pack (0.5 kWh)',  2.40, { 'm.li': 1.7, 'm.al6061': 0.5, 'm.cu': 0.2 }),
   'c.fuel_cell_sm': C('PEM fuel-cell stack (1 kW)',        5.00, { 'm.nafion': 0.4, 'm.pt': 0.02, 'm.steel304': 2.6, 'm.ti64': 1.5, 'c.pcb': 0.8 }),
   'c.solar_wing_sm':C('Folding solar wing 0.5 m²',         0.90, { 'm.gaas': 0.1, 'm.cfrp': 0.5, 'm.kapton': 0.3 }),
   'c.pdb':          C('Power distribution board',          0.35, { 'c.pcb': 0.5, 'm.cu': 0.1 }),
   'c.charge_port':  C('Docking / charge contact set',      0.45, { 'm.cu': 0.25, 'm.al6061': 0.15, 'm.ptfe': 0.05 }),
   'c.rtg_pellet':   C('Isotope trickle-charger',           3.00, { 'm.w': 1.6, 'm.steel304': 1.0, 'm.pu238': 0.05, 'm.alumina': 0.35 }),
-  /* sensing + compute */
   'c.cam_module':   C('Machine-vision camera module',      0.18, { 'c.pcb_sm': 1.5, 'c.glazing_sm': 0.4, 'm.al6061': 0.03 }),
   'c.thermal_cam':  C('LWIR thermal camera',               0.35, { 'm.si': 0.05, 'm.ge': 0.08, 'c.pcb': 0.4, 'm.al6061': 0.08 }),
   'c.lidar_puck':   C('Spinning lidar puck',                0.85, { 'c.lidar_head': 0.12, 'c.motor_micro': 2, 'c.pcb': 0.6, 'm.al6061': 0.1 }),
@@ -128,13 +102,11 @@ const ROBOT_COMPONENTS = {
   'c.nn_module':    C('Neural inference module',           0.45, { 'm.si': 0.1, 'c.pcb': 0.7, 'm.al6061': 0.1 }),
   'c.safety_plc':   C('Safety controller (dual channel)',  0.50, { 'c.pcb': 0.8, 'm.al6061': 0.1 }),
   'c.estop':        C('E-stop + contactor set',            0.35, { 'm.steel304': 0.2, 'c.pcb': 0.2 }),
-  /* signalling / human interface */
   'c.beacon_led':   C('Beacon / strobe head',              0.12, { 'm.gan': 0.01, 'c.pcb': 0.2, 'm.pmma': 0.04 }),
   'c.work_lamp':    C('Work lamp head',                    0.30, { 'm.gan': 0.02, 'm.al6061': 0.2, 'c.pcb': 0.2 }),
   'c.speaker':      C('Speaker / hailer',                  0.45, { 'm.ndfeb_sm': 0.1, 'm.abs': 0.2, 'c.pcb': 0.25 }),
   'c.display_pan':  C('Face / status display',             0.40, { 'm.pmma': 0.15, 'm.si': 0.03, 'c.pcb': 0.45 }),
   'c.siren':        C('Siren + light bar',                 1.20, { 'c.beacon_led': 4, 'c.speaker': 1, 'm.al6061': 0.2 }),
-  /* end effectors + tools */
   'c.gripper_2f':   C('Two-finger gripper',                1.20, { 'c.servo_joint': 1, 'm.al6061': 0.3, 'm.tpu': 0.05 }),
   'c.hand_5f':      C('Five-finger dexterous hand',        2.60, { 'c.servo_micro': 12, 'c.tendon_drive': 1, 'm.al6061': 0.3, 'c.pcb': 0.4 }),
   'c.clamp_heavy':  C('Heavy industrial clamp',            9.00, { 'c.hydraulic_ram': 2, 'm.steel304': 2.0, 'c.bearing': 0.3 }),
@@ -152,7 +124,6 @@ const ROBOT_COMPONENTS = {
   'c.med_pack':     C('Field medical pack',                6.00, { 'c.medical_kit': 0.2, 'm.abs': 0.6, 'c.pcb': 0.6 }),
   'c.tray_service': C('Service tray + stabiliser',         1.30, { 'm.al6061': 0.8, 'c.servo_joint': 0.5 }),
   'c.tool_changer': C('Quick tool changer',                1.10, { 'm.ti64': 0.7, 'c.actuator': 0.15, 'c.connector': 0.5 }),
-  /* payload bays and career kit */
   'c.cargo_bin':    C('Cargo bin / locker',                3.20, { 'm.abs': 1.8, 'm.al6061': 1.2, 'c.latch': 0.2 }),
   'c.pallet_fork':  C('Fork / pallet lift set',           14.00, { 'm.steel304': 11.0, 'c.hydraulic_ram': 0.8 }),
   'c.tank_liquid':  C('Liquid payload tank 20 L',          2.40, { 'm.abs': 1.4, 'm.al6061': 0.8, 'c.valve_latch': 0.4 }),
@@ -175,7 +146,6 @@ const ROBOT_COMPONENTS = {
   'c.decon_kit':    C('Decon foam applicator',             3.90, { 'c.tank_liquid': 1, 'c.spray_head': 1, 'c.pump': 0.2 }),
 };
 
-/* the ship list stocks no Ge optics and no lead: add them rather than fake them */
 const EXTRA_MATERIALS = {
   'm.ge': { name: 'Germanium optic',        kind: 'glass' },
   'm.pb': { name: 'Lead / bismuth shielding', kind: 'alloy' },
@@ -185,7 +155,6 @@ export const MATERIALS = { ...SHIP_MATERIALS, ...ROBOT_MATERIALS, ...EXTRA_MATER
 export const COMPONENTS = { ...SHIP_COMPONENTS, ...ROBOT_COMPONENTS };
 export const ROBOT_ONLY = Object.keys(ROBOT_COMPONENTS);
 
-/* STATIONGEN's bare ids → this catalogue, so the three manifests can be summed. */
 export const STATION_ALIAS = {
   al_li: 'm.al_li', al6061: 'm.al6061', ti64: 'm.ti64', steel304: 'm.steel304', inconel: 'm.inconel',
   cu: 'm.cu', w: 'm.w', cfrp: 'm.cfrp', cnt: 'm.cnt', kevlar: 'm.kevlar', kapton: 'm.kapton',
@@ -196,8 +165,6 @@ export const STATION_ALIAS = {
   lh2: 'm.lh2', lox: 'm.lox', xe: 'm.xe', hale: 'm.hale', pb: 'm.pb', regolith: 'm.regolith',
 };
 
-/* Book price per kg of raw stock by kind, and what fabrication adds on top —
-   the same two-step estimate STATIONGEN uses, in the same credits. */
 export const KIND_PRICE = {
   alloy: 3.0, refractory: 20.0, 'light metal': 9.0, composite: 18.0, polymer: 4.0,
   insulation: 30.0, ceramic: 8.0, glass: 12.0, semiconductor: 140.0, magnet: 60.0,

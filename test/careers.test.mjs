@@ -21,7 +21,7 @@ import {
   studySkills,
 } from "../js/careers/index.js";
 import { MOD_KEYS, SPEC_EFFECTS, RACE_EFFECTS, composeMods } from "../js/careers/effects.js";
-import { RACES } from "../js/races.js";
+import { RACES } from "../js/crew/races.js";
 
 let pass = 0;
 let fail = 0;

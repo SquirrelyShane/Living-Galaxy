@@ -16,14 +16,14 @@
  * This suite is the guard on that promise. It starts the server exactly as
  * the smokes do, and checks it comes up, serves, speaks the whole relay
  * protocol, and exits — plus the two new things worth pinning, that the chat
- * book reads a hail out of what js/chat.js actually sends, and that the
+ * book reads a hail out of what js/comms/chat.js actually sends, and that the
  * request log still gets written.
  */
 import { spawn } from "node:child_process";
 import { readFileSync, existsSync, rmSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 
-const ROOT = new URL("../", import.meta.url).pathname;
+const ROOT = new URL("..", import.meta.url).pathname;
 const PORT = 8137;
 const BASE = `http://127.0.0.1:${PORT}`;
 
@@ -80,7 +80,7 @@ try {
   /* ---- 2. it still serves the game ------------------------------------- */
   const idx = await get("/index.html");
   ok(idx.status === 200 && /LIVING GALAXY/.test(idx.text), "index.html is served");
-  const mod = await get("/js/sim.js");
+  const mod = await get("/js/sim/sim.js");
   ok(mod.status === 200 && mod.text.length > 1000, `a module is served (${mod.text.length} bytes)`);
   const miss = await get("/no-such-file.js");
   ok(miss.status === 404, "a missing file is a 404, not a crash");
@@ -140,7 +140,7 @@ try {
 
   /* ---- 5. the chat book ------------------------------------------------- */
   {
-    /* what js/chat.js actually sends: the text is under one of several keys,
+    /* what js/comms/chat.js actually sends: the text is under one of several keys,
      * and the kind under another. The book has to find both. */
     await post("/net/send", { room: "t", from: "control", kind: "msg", data: { channel: "comms", line: "Cleared for lane two." } });
     await post("/net/send", { room: "t", from: "beacon", kind: "msg", data: { kind: "beacon", body: "SURGE WARNING" } });

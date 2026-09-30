@@ -10,22 +10,22 @@
  * or a person.
  */
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot, pilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { contracts, boardFor, resetContracts, CATEGORY_ORDER, CATEGORIES, acceptContract } from "../js/contracts.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot, pilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { contracts, boardFor, resetContracts, CATEGORY_ORDER, CATEGORIES, acceptContract } from "../js/economy/contracts.js";
 import { validate } from "../js/mission/script.js";
 import { mission, stopMission } from "../js/mission/run.js";
 import { COMPLEX_IDS } from "../js/careers/complexes.js";
 import {
   play, beginPlay, stepPlay, endPlay, playReport, brainReport, brainNote, scoreOf, weightOf,
   jobPlan, jobsFor, canFly, sourceFor, movesNow, nearestPort, holdUsed, setPlayRng, netWorth, CAREER_DEPT, PLAY,
-} from "../js/ariaplay.js";
-import { rngFromSeed } from "../js/generate.js";
-import { goodName } from "../js/materials.js";
-import { resetCompany, company, COMPANY } from "../js/company.js";
-import { resetCrew, crew } from "../js/crew.js";
+} from "../js/aria/play.js";
+import { rngFromSeed } from "../js/world/generate.js";
+import { goodName } from "../js/economy/materials.js";
+import { resetCompany, company, COMPANY } from "../js/corp/company.js";
+import { resetCrew, crew } from "../js/crew/ledger.js";
 
 /* A SEEDED SKY. 0.3.33.
  *

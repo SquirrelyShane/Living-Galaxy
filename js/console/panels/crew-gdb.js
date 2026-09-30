@@ -1,19 +1,9 @@
-/* Living Galaxy — CONSOLE › CREW › GDB: the Galactic Database (0.3.54).
- *
- * Everyone the galaxy has produced, on one page: the census at the top (how
- * many, how many peoples, how many still alive — and the number of names two
- * people share, which should read nought), a search over name, number,
- * people, trade and title, the filters a researcher would reach for, a card
- * per person with their record, and the CHRONICLE — every line the ledger's
- * histories hold, newest first. It reads js/gdb.js and changes nothing.
- */
-
 import { el, section, note, row, button, chips, card } from "../kit.js";
-import { sim } from "../../sim.js";
-import { stationById } from "../../stations.js";
+import { sim } from "../../sim/sim.js";
+import { stationById } from "../../station/stations.js";
 import { traffic } from "../../npc/traffic.js";
 import { describeNPC } from "../../npc/cradle.js";
-import { census, search, entryOf, chronicle, raceName } from "../../gdb.js";
+import { census, search, entryOf, chronicle, raceName } from "../../corp/gdb.js";
 
 const view = { q: "", filter: "sky", open: null, page: 0 };
 const PAGE = 30;
@@ -90,7 +80,6 @@ export function mountGdb(root, ctx) {
   let key = "";
   let lastAt = -1e9;
   const paint = () => {
-    /* the catalogue is hundreds of people: read it when asked, or every two seconds */
     const now = globalThis.performance?.now?.() ?? Date.now();
     if (key && now - lastAt < 2000) return;
     lastAt = now;

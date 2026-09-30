@@ -1,21 +1,3 @@
-/* LIVING GALAXY — the CONSOLE shell.
- *
- * One sheet for everything that is not a thumb control: six panels (SHIP ·
- * NAV · CREW · WORK · MARKET · CORP), each with its own sub-tabs, a global
- * jump box that searches every panel and the static leaves that never
- * belonged to one, and a recents row for the six things you actually touch.
- *
- * The lifecycle is the old terminal's: a panel builds its DOM once per
- * open/tab change and pushes refresher closures; `paintConsole(state)` runs
- * them every HUD frame while open, so live values tick without tearing the
- * tree out from under a slider you are dragging. `sim.terminalOpen` stays the
- * flag (the sim suppresses stick/RCS while it is up; HOLD still brakes).
- *
- * No DOM at import: `mountConsole()` is the only DOM entry.
- * NOTE: the exported `console` shadows the global inside this module — use
- * `globalThis.console` for logging here.
- */
-
 import * as kit from "./kit.js";
 import { fmtDist } from "./kit.js";
 import { query, registerJump, runHit, jumps } from "./search.js";
@@ -25,17 +7,16 @@ import crewPanel from "./panels/crew.js";
 import workPanel from "./panels/work.js";
 import marketPanel from "./panels/market.js";
 import corpPanel from "./panels/corp.js";
-import { setTermHold, setTerminal, sim } from "../sim.js";
-import { UI } from "../audio.js";
-import { currentSystem } from "../bodies.js";
-import { useGameStore } from "../store.js";
-import { gnn } from "../gnn.js";
+import { setTermHold, setTerminal, sim } from "../sim/sim.js";
+import { UI } from "../audio/index.js";
+import { currentSystem } from "../world/bodies.js";
+import { useGameStore } from "../core/store.js";
+import { gnn } from "../comms/gnn.js";
 import { droneOps } from "../drones/ops.js";
-import { openMapDirectory } from "../map.js";
+import { openMapDirectory } from "../ui/map.js";
 import { toggleInterior } from "../interior/interior.js";
-import { startTutorial } from "../tutorial.js";
+import { startTutorial } from "../ui/tutorial.js";
 
-/* one warning per panel, not one per repaint */
 const statusFaults = new Set();
 
 const DOC = globalThis.document ?? null;
@@ -44,17 +25,8 @@ const $ = (id) => DOC?.getElementById(id) ?? null;
 export const RECENTS_KEY = "lgaa.con.recents.v1";
 const PANEL_ORDER = [shipPanel, navPanel, crewPanel, workPanel, marketPanel, corpPanel];
 
-/** Shell state. `panels` is id → panel record in registration order. */
 export const console = { open: false, panel: "ship", sub: {}, recents: [], panels: new Map(), focus: null, query: "" };
 
-/* ---- registry ------------------------------------------------------------ */
-
-/**
- * registerPanel({ id, title, order = 0, subtabs = [],   // [{ id, label, when?: () => bool }]
- *   mount(root, ctx), paint(state, ctx), unmount?(ctx), search?() })
- * search() → [{ label, hint, sub, run?, keywords?, focus? }]
- * ctx = { sub, setSub(id), push(fn), focus, kit, openConsole, state }
- */
 export function registerPanel(panel) {
   if (!panel || !panel.id) return null;
   const rec = { order: 0, subtabs: [], mount() {}, paint() {}, unmount() {}, search() { return []; }, ...panel };
@@ -66,7 +38,6 @@ function panelOf(id) {
   return console.panels.get(id) ?? null;
 }
 
-/** The sub-tabs a panel shows right now (`when()` hides e.g. the PORT desk undocked). */
 function liveSubs(p) {
   return (p?.subtabs ?? []).filter((s) => { try { return s.when ? Boolean(s.when()) : true; } catch { return true; } });
 }
@@ -78,14 +49,7 @@ function subOf(p) {
   return subs.some((s) => s.id === want) ? want : subs[0].id;
 }
 
-/* ---- open / close -------------------------------------------------------- */
-
-/** Sets sim.terminalOpen via setTerminal(true); the paint loop builds the DOM. */
 export function openConsole(panelId = null, subId = null, opts = { focus: null }) {
-  /* Three different sounds, because these are three different events: the
-   * console coming up, a panel changing under an open console, and a sub-tab
-   * inside one. Playing the same cue for all three is how a UI ends up
-   * sounding like one repeated tone. */
   const wasOpen = console.open;
   const wasPanel = console.panel;
   const wasSub = console.sub[panelId ?? console.panel];
@@ -113,7 +77,6 @@ export function toggleConsole() {
   return sim.terminalOpen ? closeConsole() : openConsole();
 }
 
-/** "work/drones#d3" → openConsole("work","drones",{focus:"d3"}) */
 export function jumpTo(path) {
   if (typeof path !== "string" || !path) return false;
   const [route, focus = null] = path.split("#");
@@ -121,23 +84,18 @@ export function jumpTo(path) {
   return openConsole(panel || null, sub || null, { focus });
 }
 
-/* ---- recents ------------------------------------------------------------- */
-
 function loadRecents() {
   try { console.recents = JSON.parse(globalThis.localStorage?.getItem(RECENTS_KEY) || "[]").slice(0, 6); } catch { console.recents = []; }
 }
 function saveRecents() {
-  try { globalThis.localStorage?.setItem(RECENTS_KEY, JSON.stringify(console.recents.slice(0, 6))); } catch { /* fine */ }
+  try { globalThis.localStorage?.setItem(RECENTS_KEY, JSON.stringify(console.recents.slice(0, 6))); } catch {}
 }
-/** Remember a jump: `{ path, label }`, path is "panel/sub#focus" or "@jumpId" for run-only leaves. */
 export function noteRecent(path, label) {
   if (!path) return;
   console.recents = [{ path, label }, ...console.recents.filter((r) => r.path !== path)].slice(0, 6);
   saveRecents();
   paintRecents();
 }
-
-/* ---- the sheet ----------------------------------------------------------- */
 
 const shell = { mounted: false, dirty: false, refreshers: [], built: null, ctx: null, open: false };
 
@@ -178,7 +136,6 @@ function paintTabs() {
   $("con-title").textContent = p ? p.title : "CONSOLE";
 }
 
-/** Tear down and rebuild the body for the current panel/sub. */
 function build() {
   const body = $("con-body");
   if (!body) return;
@@ -201,16 +158,6 @@ function build() {
   }
 }
 
-/**
- * Run the open panel's refreshers, and let none of them out.
- *
- * The console paints from the HUD paint, which the ENGINE calls inside its
- * frame tick (sim.publishHud → store → hud paint). So a refresher that threw
- * took the whole tick with it, every frame, before the renderer ran: the canopy
- * froze solid and nothing short of a reload brought it back. A panel that
- * cannot draw a line is a panel with a stale line, not a dead game — it is
- * dropped from the list and logged once.
- */
 function runRefreshers() {
   const fs = shell.refreshers;
   for (let i = 0; i < fs.length; i++) {
@@ -258,10 +205,6 @@ function paintHits() {
     const main = kit.el("span", "cmd-main");
     main.append(kit.el("span", "cmd-label", h.label), kit.el("span", "cmd-hint", h.hint || ""));
     const st = kit.el("span", "cmd-st", "");
-    /* A panel's status() is arbitrary application code, and swallowing every
-     * error class from it means a panel that throws renders as a blank cell
-     * forever — indistinguishable from one that legitimately has no status.
-     * Show that it broke, and say once in the log which one. */
     try {
       st.textContent = h.status?.() ?? "";
     } catch (err) {
@@ -286,8 +229,6 @@ function act(h) {
   runHit(h);
   if (sim.terminalOpen) { paintHits(); if (h.path) build(); }
 }
-
-/* ---- static jumps: the leaves that never belonged to a panel -------------- */
 
 const click = (id) => () => DOC?.getElementById(id)?.click();
 const stText = (id, dflt = "—") => () => DOC?.getElementById(id)?.textContent ?? dflt;
@@ -323,13 +264,9 @@ function registerStaticJumps() {
   }
 }
 
-/* ---- mount --------------------------------------------------------------- */
-
-/** Returns paintConsole(state) for hud.js. */
 export function mountConsole() {
   if (!console.panels.size) for (const p of PANEL_ORDER) registerPanel(p);
   if (!jumps.size) registerStaticJumps();
-  /* hooks from chat links and drone prompts open the console where they point */
   gnn.open = (id) => openConsole("corp", "gnn", { focus: id });
   droneOps.openDrone = (id) => openConsole("work", "drones", { focus: id });
   droneOps.onBuilt = (u) => { if (sim.ship.dockedAt && sim.ship.dockedAt === u.home) openConsole("work", "drones", { focus: u.id }); };
@@ -350,12 +287,10 @@ export function mountConsole() {
     if (e.key === "Enter") { const first = query(console.query.trim())[0]; if (first) act(first); }
     if (e.key === "Escape") { qEl.value = ""; console.query = ""; paintHits(); }
   });
-  /* Taps inside the console must never reach the canvas look-drag. */
   root.addEventListener("pointerdown", (e) => e.stopPropagation());
   shell.mounted = true;
 
   return function paintConsole(state) {
-    /* Panels capture the live ship object, so never survive a relaunch. */
     const want = state.terminalOpen && state.phase === "play";
     if (want !== shell.open) {
       shell.open = want;

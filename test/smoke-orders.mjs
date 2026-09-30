@@ -31,9 +31,9 @@ await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await sleep(1200);
 
 const setup = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
   const DM = await import("/js/crew/deckmind.js");
   const honest = stations.filter((s) => !s.hostile);
   const a = honest.find((s) => s.sector === "industrial") ?? honest[0];
@@ -60,7 +60,7 @@ ok(!g0.overflow, "the sheet does not overflow sideways");
 await page.evaluate(() => document.querySelector('#con-body .tbtn[data-order="fatigue"]')?.click());
 await sleep(500);
 const g1 = await page.evaluate(async (id) => {
-  const { crew } = await import("/js/crew.js");
+  const { crew } = await import("/js/crew/ledger.js");
   const m = crew.aboard.find((x) => x.id === id);
   return { fatigue: m.need.fatigue, disabled: [...document.querySelectorAll("#con-body .tbtn[data-order]")].every((b) => b.disabled), said: document.querySelector("#con-body .term-sec p.warm")?.textContent ?? "" };
 }, setup.id);
@@ -69,7 +69,7 @@ ok(g1.disabled, "and every order is spent for this watch");
 ok(g1.said.length > 10, `the sheet says what happened ("${g1.said.slice(0, 70)}")`);
 await page.evaluate(() => document.querySelector("#con-body .tbtn[data-train]")?.click());
 await sleep(400);
-const tr = await page.evaluate(async (id) => { const { crew } = await import("/js/crew.js"); return { focus: crew.aboard.find((x) => x.id === id).trainFocus, label: [...document.querySelectorAll("#con-body .tbtn[data-train]")].map((b) => b.textContent) }; }, setup.id);
+const tr = await page.evaluate(async (id) => { const { crew } = await import("/js/crew/ledger.js"); return { focus: crew.aboard.find((x) => x.id === id).trainFocus, label: [...document.querySelectorAll("#con-body .tbtn[data-train]")].map((b) => b.textContent) }; }, setup.id);
 ok(tr.focus && tr.label.includes("TRAINING"), `TRAIN sets a skill (${tr.focus})`);
 await page.evaluate(() => document.querySelector('#con-body .tbtn[data-coach$=":+"]')?.click());
 await sleep(400);
@@ -81,13 +81,13 @@ await page.locator('#con-body [data-shot="carrying"]').screenshot({ path: "/tmp/
 
 /* ---- CORP › TOWN ---- */
 const co2 = await page.evaluate(async (port) => {
-  const { sim } = await import("/js/sim.js");
-  const { crew } = await import("/js/crew.js");
-  const CO = await import("/js/company.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { crew } = await import("/js/crew/ledger.js");
+  const CO = await import("/js/corp/company.js");
   sim.ship.dockedAt = port;
   CO.foundCompany("Smoke Orders", "industrial");
   CO.company.treasury = 40000;
-  const st = (await import("/js/stations.js")).stationById(port);
+  const st = (await import("/js/station/stations.js")).stationById(port);
   for (const m of [...crew.aboard].slice(1)) CO.settleAsStaff(m, [], st);
   sim.ship.dockedAt = null;
   return { staff: CO.company.staff.length, first: CO.company.staff[0]?.id };
@@ -107,7 +107,7 @@ await page.evaluate(() => { const s = document.querySelector('#con-body .tcare s
 await sleep(500);
 await page.evaluate(() => document.querySelector('#con-body .tcare .tbtn[data-care="dayoff"]')?.click());
 await sleep(500);
-const town2 = await page.evaluate(async (id) => { const CO = await import("/js/company.js"); const s = CO.company.staff.find((x) => x.id === id); return { shift: s.shift, off: s.offShift?.kind, terms: document.querySelector("#con-body .tcare small")?.textContent ?? "", overflow: document.querySelector("#con-body").scrollWidth > document.querySelector("#con-body").clientWidth + 1 }; }, co2.first);
+const town2 = await page.evaluate(async (id) => { const CO = await import("/js/corp/company.js"); const s = CO.company.staff.find((x) => x.id === id); return { shift: s.shift, off: s.offShift?.kind, terms: document.querySelector("#con-body .tcare small")?.textContent ?? "", overflow: document.querySelector("#con-body").scrollWidth > document.querySelector("#con-body").clientWidth + 1 }; }, co2.first);
 ok(town2.shift === "night" && /night shift/.test(town2.terms), `a shift change lands (${town2.terms})`);
 ok(town2.off === "off", "and a DAY OFF takes their next shift");
 ok(!town2.overflow, "the town page does not overflow sideways");
@@ -117,9 +117,9 @@ await page.locator("#con-body .tcard").first().screenshot({ path: "/tmp/orders-t
 /* ---- the deck's HALL ---- */
 await page.evaluate(async () => (await import("/js/console/console.js")).closeConsole());
 const hall = await page.evaluate(async (port) => {
-  const { sim, toggleDock } = await import("/js/sim.js");
-  const { stationById } = await import("/js/stations.js");
-  const CO = await import("/js/company.js");
+  const { sim, toggleDock } = await import("/js/sim/sim.js");
+  const { stationById } = await import("/js/station/stations.js");
+  const CO = await import("/js/corp/company.js");
   const st = stationById(port);
   const m = st.hangars[0];
   sim.ship.pos.x = st.x + m.x + m.dir.x * 60; sim.ship.pos.y = st.y + m.y + m.dir.y * 60; sim.ship.pos.z = st.z + m.z + m.dir.z * 60;

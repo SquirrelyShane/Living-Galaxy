@@ -33,9 +33,9 @@ const ok = (c, m) => { if (c) { pass++; console.log("  ok ", m); } else { fail++
 
 const r = await page.evaluate(async () => {
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
   const { mountTalk } = await import("/js/crew/talkview.js");
   sim.ship.credits = 100000;
   const st = stations.find((s) => s.sector !== "pirate");

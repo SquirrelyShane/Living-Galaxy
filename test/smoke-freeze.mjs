@@ -41,9 +41,9 @@ const frames = () => page.evaluate(() => new Promise((res) => {
 
 /* a mission in the air: the chart's auto-warp, the way a pilot starts one */
 const target = await page.evaluate(async () => {
-  const { sim, selectBody } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const AP = await import("/js/autopilot.js");
+  const { sim, selectBody } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const AP = await import("/js/flight/autopilot.js");
   const s = sim.ship;
   s.dockedAt = null;
   s.pos.y += 60000;
@@ -52,8 +52,8 @@ const target = await page.evaluate(async () => {
   AP.engageAutoWarp(st.id);
   return st.name;
 });
-for (let i = 0; i < 90; i++) { await page.waitForTimeout(400); const w = await page.evaluate(async () => (await import("/js/sim.js")).sim.warp.state); if (w !== "idle") break; }
-const state = await page.evaluate(async () => { const { mission } = await import("/js/mission/run.js"); const { sim } = await import("/js/sim.js"); return { mission: Boolean(mission.active), warp: sim.warp.state }; });
+for (let i = 0; i < 90; i++) { await page.waitForTimeout(400); const w = await page.evaluate(async () => (await import("/js/sim/sim.js")).sim.warp.state); if (w !== "idle") break; }
+const state = await page.evaluate(async () => { const { mission } = await import("/js/mission/run.js"); const { sim } = await import("/js/sim/sim.js"); return { mission: Boolean(mission.active), warp: sim.warp.state }; });
 ok(state.mission, `a mission is flying to ${target} (warp ${state.warp})`);
 
 const before = await frames();
@@ -78,7 +78,7 @@ await sweep("auto-warp");
 /* the reported case: ARIA has the conn (so a mission is always in the air) and
  * the pilot taps through every panel */
 const aria = await page.evaluate(async () => {
-  const A = await import("/js/aria.js");
+  const A = await import("/js/aria/aria.js");
   const r = A.ariaTakeConn();
   return r.ok || r.error;
 });

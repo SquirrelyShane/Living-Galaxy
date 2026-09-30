@@ -1,5 +1,4 @@
 import { P } from "./_part.js";
-/* 19 — MANUFACTURING & INDUSTRIAL BAYS */
 export default {
   id: "d19", name: "19 Manufacturing & Industrial Bays",
   sheet: {

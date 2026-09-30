@@ -3,12 +3,12 @@
  *   node --import ./test/three-register.mjs test/beats.test.mjs
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, dismissCrew, resetCrew } from "../js/crew.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, dismissCrew, resetCrew } from "../js/crew/ledger.js";
 import { cradle } from "../js/npc/cradle.js";
-import { setSocial, social, trustOf, couldCourt, pairWithPlayer, bumpTrust } from "../js/family.js";
+import { setSocial, social, trustOf, couldCourt, pairWithPlayer, bumpTrust } from "../js/crew/family.js";
 import { addHook, runHooks, addons } from "../js/crew/hooks.js";
 import { CORE_BEATS, beatsFor, playBeat, isRunning, stopAllBeats, advanceBeat } from "../js/crew/beats.js";
 

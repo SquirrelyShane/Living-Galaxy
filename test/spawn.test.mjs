@@ -13,10 +13,10 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { sim, launchSim, tickSim, shiftClock } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { bodyPosition, bodyVelocity } = await import("../js/bodies.js");
-const { inBelt } = await import("../js/field.js");
+const { sim, launchSim, tickSim, shiftClock } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { bodyPosition, bodyVelocity } = await import("../js/world/bodies.js");
+const { inBelt } = await import("../js/world/field.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

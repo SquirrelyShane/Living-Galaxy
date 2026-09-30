@@ -1,16 +1,8 @@
-/* LIVING GALAXY — CONSOLE › WORK › FLEET: the company's crewed hulls.
- *
- * `fleetReport()` rows with SELL BACK, and the yard's offer (commission an
- * extract or haul hull with a member of staff in the chair) when docked at an
- * industrial or military yard — the same calls the port deck used to make. The
- * deck no longer carries a fleet at all (0.3.45).
- */
-
 import { el, section, note, row, button } from "../kit.js";
-import { sim } from "../../sim.js";
-import { stationById } from "../../stations.js";
-import { company, hasCompany, staffAt } from "../../company.js";
-import { commissionOptions, commissionHull, decommissionHull, fleetReport, fleet } from "../../fleet.js";
+import { sim } from "../../sim/sim.js";
+import { stationById } from "../../station/stations.js";
+import { company, hasCompany, staffAt } from "../../corp/company.js";
+import { commissionOptions, commissionHull, decommissionHull, fleetReport, fleet } from "../../corp/fleet.js";
 
 const DOC = globalThis.document ?? null;
 void DOC;

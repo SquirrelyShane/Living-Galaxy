@@ -1,18 +1,5 @@
-/* LIVING GALAXY — what the crew will talk about.
- *
- * Data for crew/talk.js. Every node: { id, label, cls?, tier, when?, once?,
- * cooldown?, say(m, c) → string | { text, choices }, remember? }. `c` is
- * talk.talkContext(): f (first name), t (traits 0..1 on cradle's five axes:
- * grit, caution, greed, loyalty, curiosity), pr (pronouns), rec (cradle
- * record), docked, partner, kids, ties, mission, cycle, memory, others.
- *
- * Voice rules: lines are theirs, first person, short. A trait leans a line,
- * it never scripts a person — a greedy hand can still be kind, and the
- * choices are the captain's, with consequences the roster shows.
- */
-
-import { firstName, rapportBetween } from "../crew.js";
-import { trustOf } from "../family.js";
+import { firstName, rapportBetween } from "./ledger.js";
+import { trustOf } from "./family.js";
 import { duties, wearLine } from "./duties.js";
 import { dutyOptions, dutyOf, KIND_LABEL } from "./roster.js";
 import { line as V, byTrait } from "./voice.js";
@@ -20,7 +7,6 @@ import { line as V, byTrait } from "./voice.js";
 const Q = (c, s) => `${c.f}: "${s}"`;
 const hi = (t, k) => (t[k] ?? 0.5) > 0.6;
 const lo = (t, k) => (t[k] ?? 0.5) < 0.4;
-/** First trait in `table`'s key order that leans high, else `else`. */
 function pick(t, table) {
   for (const k of Object.keys(table)) if (k !== "else" && hi(t, k)) return table[k];
   return table.else;
@@ -28,21 +14,9 @@ function pick(t, table) {
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
 const lowest = (c) => c.others.filter((o) => !o.robot).sort((a, b) => (a.morale ?? 70) - (b.morale ?? 70))[0] ?? null;
 
-/* 0.3.17 — conversations are threads now, not one line and done.
- *
- * A choice's `say` may return a string (the exchange ends) or `{ text,
- * choices }` — the hand answers AND carries it on, and the captain's next
- * options answer what was just said. Every topic below runs two or three
- * turns. And the ends of threads leave flags that later conversations pick
- * up (talk-threads.js): what you promised, what they told you, who you said
- * you would look after — so the next time you sit down with them it is the
- * next part of the same conversation, not a fresh one. */
 const go = (c, text, choices) => ({ text: Q(c, text), choices });
 
-/* ---- the human tree -------------------------------------------------------- */
-
 export const TREE = [
-  /* STATION — tier 0 */
   {
     id: "station", label: "What needs fixing?", tier: 0, cooldown: 1,
     say(m, c) {
@@ -64,7 +38,6 @@ export const TREE = [
       return { text: `${Q(c, wearLine())} ${Q(c, own)}`, choices };
     },
   },
-  /* THE RUN — tier 0, reads mission.active */
   {
     id: "run", label: "The run", tier: 0, cooldown: 1,
     say(m, c) {
@@ -102,7 +75,6 @@ export const TREE = [
       return { text: Q(c, view), choices };
     },
   },
-  /* RECORD — tier 0 */
   {
     id: "record", label: "Your record", tier: 0, cooldown: 2,
     say(m, c) {
@@ -117,7 +89,6 @@ export const TREE = [
       ] };
     },
   },
-  /* PAST — tier 1 */
   {
     id: "origin", label: "Where are you from?", tier: 1, cooldown: 4, remember: "past",
     say(m, c) {
@@ -162,7 +133,6 @@ export const TREE = [
       ] };
     },
   },
-  /* MESS TALK — tier 1 */
   {
     id: "mess", label: "Mess talk", tier: 1, cooldown: 2, when: (m, c) => c.others.some((o) => !o.robot),
     say(m, c) {
@@ -178,7 +148,6 @@ export const TREE = [
       ] };
     },
   },
-  /* CREWMATES — tier 1, one choice per tie */
   {
     id: "mates", label: "About the others", tier: 1, cooldown: 1, when: (m, c) => c.ties.length > 0,
     say(m, c) {
@@ -205,7 +174,6 @@ export const TREE = [
       return { text: lines.map((s) => Q(c, s)).join(" "), choices };
     },
   },
-  /* FEARS / HOPES — tier 2 */
   {
     id: "fears", label: "What keeps you up?", tier: 2, cooldown: 5, need: { morale: "steady" },
     say(m, c) {
@@ -239,7 +207,6 @@ export const TREE = [
       ] };
     },
   },
-  /* WAGE — tier 2 */
   {
     id: "wage", label: "About your wage", tier: 2, cooldown: 4, when: (m) => !m.robot,
     say(m, c) {
@@ -254,7 +221,6 @@ export const TREE = [
       ] };
     },
   },
-  /* APOLOGY — after a dressing-down */
   {
     id: "apology", label: "About earlier", tier: 0, when: (m, c) => (c.memory.topics.chew ?? 0) > 0 && c.memory.flags.settledChew === false,
     say(m, c) {
@@ -267,7 +233,6 @@ export const TREE = [
       ] };
     },
   },
-  /* PARTNER (crew) — tier 2 */
   {
     id: "partnerDeep", label: (m, c) => `Are you and ${c.partner ? firstName(c.partner) : "they"} alright?`, tier: 2, cooldown: 3, when: (m, c) => c.partner && c.partner.id !== "player",
     say(m, c) {
@@ -284,7 +249,6 @@ export const TREE = [
       ] };
     },
   },
-  /* KIDS — tier 2 */
   {
     id: "kidsFuture", label: "What do you want for the children?", tier: 2, cooldown: 4, need: { morale: "sullen" }, when: (m, c) => c.kids.length > 0,
     say(m, c) {
@@ -298,7 +262,6 @@ export const TREE = [
       ] };
     },
   },
-  /* PROMISE — tier 3, once */
   {
     id: "promise", label: "Stay on after this contract?", tier: 3, once: true, cls: "accent", need: { morale: "willing" },
     say(m, c) {
@@ -319,7 +282,6 @@ export const TREE = [
       return { text: Q(c, text), choices };
     },
   },
-  /* THE CONN — tier 3 */
   {
     id: "captaincy", label: "Could you hold the conn?", tier: 3, cooldown: 6, need: { friend: "confidant", morale: "steady" },
     say(m, c) {
@@ -333,8 +295,6 @@ export const TREE = [
     },
   },
 ];
-
-/* ---- robots: three topics, no wage, no dinner --------------------------------- */
 
 export const ROBOT_TOPICS = [
   {

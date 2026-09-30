@@ -25,7 +25,7 @@
  */
 import { readFileSync } from "node:fs";
 
-const ROOT = new URL("../", import.meta.url).pathname;
+const ROOT = new URL("..", import.meta.url).pathname;
 const read = (p) => readFileSync(ROOT + p, "utf8");
 
 let pass = 0, fail = 0;
@@ -65,7 +65,7 @@ const style = read("css/style.css");
 
 /* ---- 2. hud.js measures, rather than trusting the count ------------------ */
 {
-  const hud = read("js/hud.js");
+  const hud = read("js/ui/hud.js");
   ok(/function measureDock\(/.test(hud), "hud.js measures the column");
   ok(/setProperty\("--g-dock"/.test(hud), "…and publishes it as --g-dock");
   ok(/ResizeObserver/.test(hud), "…and watches the box, so a chip that merely unhides is caught");
@@ -76,7 +76,7 @@ const style = read("css/style.css");
 
 /* ---- 3. the comms puck clears the switches it shares a rail with --------- */
 {
-  const hud = read("js/hud.js");
+  const hud = read("js/ui/hud.js");
   const comms = read("css/comms.css");
   ok(/function measureRail\(/.test(hud), "hud.js measures the systems strip");
   ok(/setProperty\("--g-rail-top"/.test(hud), "…and publishes it as --g-rail-top");
@@ -103,7 +103,7 @@ const style = read("css/style.css");
 
 /* ---- 4. the puck is placed by search, not by a number -------------------- */
 {
-  const hud = read("js/hud.js");
+  const hud = read("js/ui/hud.js");
   const comms = read("css/comms.css");
   ok(/PUCK_AVOID/.test(hud), "there is a list of what the puck must not sit on");
   ok(/#hud button/.test(hud) && /\.rcs-btn/.test(hud),

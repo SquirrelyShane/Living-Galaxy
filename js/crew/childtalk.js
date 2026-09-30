@@ -1,46 +1,18 @@
-/* LIVING GALAXY — talking with the children aboard (0.3.57).
- *
- * A child aboard had four buttons — spend the watch, teach, the terminal,
- * shadow a watch — and each answered with the same greeting line anybody on
- * the crew would give. Nobody ever talked WITH them. This is that:
- *
- *   YOU ASK      eight things a captain says to a child, answered by who they
- *                are: how old (little, a child, a teenager), their temperament,
- *                what they have been taught and by whom, their parents, the
- *                bond you have put in, where the ship is right now.
- *
- *   THEY ASK     every few watches a child brings YOU a question — why the
- *                stars move when we turn, whether they can fly the ship, where
- *                people go when they die, why they cannot sign on somewhere
- *                else — with three ways to answer. What you answer moves the
- *                bond, and an honest answer to a curious child teaches them
- *                something, up to what their body can carry.
- *
- *   THE GROWN-UPS  a working ship is a village: every watch there is a chance
- *                a parent or a hand does something with a child — reads to
- *                them, lets them hold the torque driver, loses an argument
- *                about the rota — and it goes in the crew log, and now and
- *                then the child picks up a point of that adult's trade.
- *
- * Everything is seeded per child and per watch: the same question twice in a
- * watch gets the same answer; a new watch answers fresh.
- */
-
 import { cradle } from "../npc/cradle.js";
-import { household, note, personById } from "../family.js";
-import { crew, crewHooks, firstName, CYCLE_SECONDS } from "../crew.js";
-import { sim } from "../sim.js";
-import { stationById } from "../stations.js";
+import { household, note, personById } from "./family.js";
+import { crew, crewHooks, firstName, CYCLE_SECONDS } from "./ledger.js";
+import { sim } from "../sim/sim.js";
+import { stationById } from "../station/stations.js";
 import { COMPLEXES } from "../careers/complexes.js";
 import { bondWith, inheritance, APT_LABEL } from "./children.js";
 
 export const CHILD = {
-  little: 6,          // under this many cycles: little
-  teen: 16,           // this many and over: a teenager
-  askEvery: 3,        // watches between a child's questions, at the least
-  askChance: 0.45,    // …and the chance each watch after that
-  momentChance: 0.3,  // an adult–child moment per child per watch
-  skillEvery: 3,      // one moment in this many teaches a point of the adult's trade
+  little: 6,
+  teen: 16,
+  askEvery: 3,
+  askChance: 0.45,
+  momentChance: 0.3,
+  skillEvery: 3,
   logMax: 8,
 };
 
@@ -70,14 +42,13 @@ function addBond(c, d) {
   return bondWith(c);
 }
 
-/** A point of a skill, capped by what the body can carry (the rule heritage and raise() use). */
 function teach(c, skill, n = 1) {
   const rec = cradle.get(c.id);
   if (!rec || !skill) return false;
   rec.skills ??= {};
   const ceiling = Math.round(28 + (rec.aptitude?.[skill] ?? 0.5) * 42);
   const before = rec.skills[skill] ?? 0;
-  if (before >= ceiling) return false;   // teaching gets them there sooner; it does not get them past it
+  if (before >= ceiling) return false;
   rec.skills[skill] = Math.min(ceiling, before + n);
   if (rec.skills[skill] > before) { cradle.put(rec); return true; }
   return false;
@@ -115,15 +86,12 @@ function topApt(c) {
   const a = Object.entries(rec?.aptitude ?? {}).sort((x, y) => y[1] - x[1])[0];
   return a ? a[0] : null;
 }
-/* "checks the seal twice" → "check the seal twice": the trait lines are written about them */
 function firstPerson(label) {
   const [w, ...rest] = String(label).split(" ");
   const verb = w === "does" ? "do" : w === "content" ? "am content" : /(ch|sh|ss|x)es$/.test(w) ? w.slice(0, -2) : /s$/.test(w) && !/ss$/.test(w) ? w.slice(0, -1) : w;
   return [verb, ...rest].join(" ");
 }
 const aptWord = (k) => APT_LABEL[k] ?? (k ? k.replace(/([A-Z])/g, " $1").toLowerCase() : "something");
-
-/* ---- you ask ------------------------------------------------------------------ */
 
 export const CHILD_TOPICS = [
   {
@@ -221,7 +189,6 @@ export const CHILD_TOPICS = [
 
 export const childTopicById = (id) => CHILD_TOPICS.find((t) => t.id === id) ?? null;
 
-/** Ask a child something. → { ok, line, bond, why? } — each topic once a watch per child. */
 export function talkToChild(c, topicId) {
   if (!c || !household.children.includes(c)) return { ok: false, why: "not aboard" };
   const t = childTopicById(topicId);
@@ -236,8 +203,6 @@ export function talkToChild(c, topicId) {
   if (!again) { household.talked[key] = cyc; addBond(c, out.d ?? 0); }
   return { ok: true, line: out.line, bond: bondWith(c), delta: again ? 0 : (out.d ?? 0) };
 }
-
-/* ---- they ask ------------------------------------------------------------------ */
 
 export const CHILD_ASKS = [
   {
@@ -290,14 +255,12 @@ export const CHILD_ASKS = [
   },
 ];
 
-/** The question a child has open for you, if any. */
 export function openChildAsk(c) {
   household.asks ??= {};
   const a = household.asks[c.id];
   return a && !a.answered ? { ...a, ask: CHILD_ASKS.find((x) => x.id === a.id) } : null;
 }
 
-/** Answer it. → { ok, line, bond, taught? } */
 export function answerChild(c, answerId) {
   const open = openChildAsk(c);
   if (!open?.ask) return { ok: false, why: "nothing asked" };
@@ -316,13 +279,11 @@ export function answerChild(c, answerId) {
   return { ok: true, line: ans.line, bond: bondWith(c), taught };
 }
 
-/** Once a watch: children ask, and the grown-ups do things with them. */
 export function tickChildren() {
   const cyc = cycleNow();
   household.asks ??= {};
   for (const c of household.children) {
     const s = stageOf(c);
-    /* a question */
     const cur = household.asks[c.id];
     if ((!cur || cur.answered) && cyc - (cur?.cycle ?? -99) >= CHILD.askEvery && roll(`${c.id}:ask:${cyc}`) < CHILD.askChance) {
       const pool = CHILD_ASKS.filter((a) => a.stages.includes(s) && a.id !== cur?.id);
@@ -333,7 +294,6 @@ export function tickChildren() {
         note(`${firstName(c)} has a question for you: "${a.q}"`);
       }
     }
-    /* a grown-up and a child */
     if (roll(`${c.id}:moment:${cyc}`) < CHILD.momentChance) momentFor(c, cyc);
   }
 }
@@ -351,7 +311,6 @@ function momentFor(c, cyc) {
   const a = pool[hash(`${c.id}:who:${cyc}`) % pool.length];
   const line = pick(`${c.id}:line:${cyc}`, MOMENTS[stageOf(c)]).replace(/\{a\}/g, firstName(a)).replace(/\{c\}/g, firstName(c));
   note(line);
-  /* now and then it sticks: a point of the grown-up's own trade */
   if (hash(`${c.id}:skill:${cyc}`) % CHILD.skillEvery === 0) {
     const sk = Object.entries(a.skills ?? cradle.get(a.id)?.skills ?? {}).sort((x, y) => y[1] - x[1])[0]?.[0];
     if (sk) teach(c, sk);

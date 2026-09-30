@@ -1,26 +1,16 @@
-/* LIVING GALAXY — CONSOLE › CORP › TOWN: the company's people, on the line.
- *
- * Was a read-only list (corp.js, to 0.3.45). Now every row opens the company
- * line to that person (js/staffline.js): what they say, what the two of you
- * last said, and what you can do about it from wherever you are — a bonus, a
- * bigger cut, a push for promotion, passage to another port or out to the
- * ship, a clean release. Above the towns is THE LINE: what they called about,
- * newest first, with the answers an ask would take right there on the row.
- */
-
 import { button, el, note, row, section, setBar, chips } from "../kit.js";
-import { sim } from "../../sim.js";
-import { company, hasCompany } from "../../company.js";
-import { townReport, townLog, townLine, roleAt } from "../../stationlife.js";
+import { sim } from "../../sim/sim.js";
+import { company, hasCompany } from "../../corp/company.js";
+import { townReport, townLog, townLine, roleAt } from "../../station/stationlife.js";
 import { cradle, traitLine } from "../../npc/cradle.js";
-import { lifeLine, needsLine, dayLogOf } from "../../stafflife.js";
-import { clockLine } from "../../stationclock.js";
-import { CARE, careAct, setHousing, setHours, setJob, setShift, termsLine, workOptions } from "../../staffcare.js";
+import { lifeLine, needsLine, dayLogOf } from "../../station/stafflife.js";
+import { clockLine } from "../../station/stationclock.js";
+import { CARE, careAct, setHousing, setHours, setJob, setShift, termsLine, workOptions } from "../../station/staffcare.js";
 import { sigil } from "../../ui/glyphs.js";
 import {
   TOPICS, callTopic, cutOf, lineLog, lineState, lineSummary, markRead, openAsk,
   regardOf, staffById, topicById, unread, whereOf,
-} from "../../staffline.js";
+} from "../../station/staffline.js";
 
 const view = { open: null, arm: null, move: null, said: null, scrolled: null };
 const ago = (at) => { const s = Math.max(0, Math.round((sim.time ?? 0) - at)); return s < 90 ? `${s}s` : s < 5400 ? `${Math.round(s / 60)}m` : `${Math.round(s / 3600)}h`; };
@@ -35,7 +25,6 @@ function act(staffId, topicId, arg, render) {
   render();
 }
 
-/* 0.3.53 — WORK · HOME · CARE (js/staffcare.js): the settled hand's menu */
 function careBlock(s, render) {
   const box = el("div", "tcare");
   box.append(el("small", null, `WORK · HOME — ${termsLine(s)}`));
@@ -65,7 +54,6 @@ function careBlock(s, render) {
   return box;
 }
 
-/** The open line to one person: who they are now, the transcript, what you can do. */
 function lineCard(s, render) {
   const c = el("div", "tcard");
   const head = el("div", "head");
@@ -83,7 +71,6 @@ function lineCard(s, render) {
   const body = el("div", "body");
   c.append(body);
 
-  /* 0.3.52: their day — what they are doing now, how they are holding up, and the log */
   body.append(el("p", "warm", `Now: ${lifeLine(s)}`));
   body.append(el("small", null, `${needsLine(s)} · ${s.job ?? "—"} · ${s.shift ?? "day"} shift · ${s.hours ?? "standard"} hours · ${s.housing ?? "bunk"}`));
   const day = dayLogOf(s, 5);
@@ -94,7 +81,6 @@ function lineCard(s, render) {
   }
   if (!s.transit) body.append(careBlock(s, render));
 
-  /* the transcript, oldest at the top so it reads like a call */
   const log = lineLog(s, 6).slice().reverse();
   const tx = el("div", "in-talk-log");
   if (!log.length) tx.append(el("p", null, "Nothing said on the line yet."));
@@ -161,7 +147,6 @@ export function mountTown(root, ctx = {}) {
     if (sum) note(head, `The line: ${sum}. Tap LINE on anybody to call them — from anywhere in this sky.`);
     host.append(head);
 
-    /* ---- THE LINE: they called you ---- */
     const L = lineState();
     if (L.inbox.length) {
       const inb = section(`THE LINE — ${unread()} unread`);

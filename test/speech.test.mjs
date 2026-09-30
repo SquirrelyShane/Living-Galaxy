@@ -9,12 +9,12 @@
  *   node --import ./test/three-register.mjs test/speech.test.mjs
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
 import { traffic, stepTraffic } from "../js/npc/traffic.js";
 import { flow, stepFlow } from "../js/npc/flow.js";
-import { corpById } from "../js/corps.js";
+import { corpById } from "../js/corp/corps.js";
 import { speech, resetSpeech, syncBand, chatter, talkTo, regardOf, speechName, talkChips, noteLost, speechStats, localise, SPEECH_SCALE } from "../js/npc/speech.js";
 import { CALIBRATION, runGrammarSelfTest } from "../js/speech/npc-speech.js";
 import { CallSession, CallState } from "../js/comms/call-session.js";

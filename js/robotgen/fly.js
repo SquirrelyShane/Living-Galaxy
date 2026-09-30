@@ -1,10 +1,3 @@
-// robotgen/src/fly.js — flying chassis: multirotor scouts and small fixed-wing
-// scout planes. Same contract as the ground drives in build.js: return
-// { node, drop } and register animatable parts on the rig.
-//
-// The airframe sits on its gear when parked; altitude is an ANIMATION offset
-// (rig.flight), so a parked scout is still on the ground for framing, bounds
-// and physics, and only leaves it while the drive is running.
 import { put, group } from './parts.js';
 
 const TAU = Math.PI * 2;
@@ -13,7 +6,6 @@ function collide(rig, node, half, offset, name, groupName) {
   rig.colliders.push({ node, half, offset: offset || { x: 0, y: 0, z: 0 }, name, group: groupName });
 }
 
-/* ---------- shared bits ---------- */
 function rotorAssembly(THREE, K, spec, rig, parent, r, name, dir, ducted, guard) {
   const g = group(THREE, parent, name, 0, 0, 0);
   put(THREE, g, K.cyl(r * 0.16, r * 0.2, r * 0.22, 8), K.second, 0, 0, 0, 0, 0, 0, name + '_motor');
@@ -25,7 +17,6 @@ function rotorAssembly(THREE, K, spec, rig, parent, r, name, dir, ducted, guard)
     const b = put(THREE, spin, K.box(r * 1.9, r * 0.03, r * 0.16), K.dark, 0, 0, 0, 0, a, 0.06, name + '_blade' + i);
     b.position.set(Math.cos(a) * r * 0.0, 0, 0);
   }
-  // the disc you actually see once it is turning
   const disc = put(THREE, spin, K.cyl(r, r, r * 0.012, 18), K.mat('rotordisc', spec.palette.accent, {
     emissive: spec.palette.accent, emissiveIntensity: 0.35, transparent: true, opacity: 0.0, roughness: 0.6
   }), 0, r * 0.04, 0, 0, 0, 0, name + '_disc');
@@ -63,21 +54,18 @@ function skidGear(THREE, K, spec, rig, g, w, d, drop, kind) {
     }
     return drop;
   }
-  for (const sx of [-1, 1]) {                                   // skid rails
+  for (const sx of [-1, 1]) {
     put(THREE, g, K.box(w * 0.06, w * 0.05, d * 1.05), K.trim, sx * w * 0.4, -drop, 0, 0, 0, 0, 'skid');
     for (const sz of [-1, 1]) put(THREE, g, K.cyl(w * 0.03, w * 0.03, drop, 6), K.second, sx * w * 0.4, -drop * 0.5, sz * d * 0.34, 0, 0, -sx * 0.16);
   }
   return drop;
 }
 
-/* ---------- multirotor ---------- */
 export function buildRotor(THREE, K, spec, rig) {
   const L = spec.locomotion;
   const g = group(THREE, null, 'drive_rotor');
   const w = spec.torso.width, d = spec.torso.depth;
   const r = L.rotorRadius;
-  // discs must not overlap: for n rotors on a circle of radius R the gap between
-  // neighbours is 2R·sin(π/n), so R has to clear the disc radius by that factor
   const minSep = (r * 1.12) / Math.sin(Math.PI / L.rotors);
   const boom = Math.max(L.boom, w * 0.55 + r * 0.9, minSep);
 
@@ -88,7 +76,6 @@ export function buildRotor(THREE, K, spec, rig) {
     const a = (i / L.rotors) * TAU + Math.PI / L.rotors;
     const px = Math.cos(a) * boom, pz = Math.sin(a) * boom;
     const arm = group(THREE, deck, 'boom' + i, 0, 0, 0);
-    // boom out to the hub, raked up or down so the discs clear the body
     const len = Math.hypot(px, pz);
     const armMesh = put(THREE, arm, K.box(w * 0.07, w * 0.06, len), K.second, px * 0.5, L.boomRake * len * 0.5, pz * 0.5, 0, Math.atan2(px, pz), 0, 'boom_arm' + i);
     armMesh.rotation.x = -Math.atan2(L.boomRake * len, len);
@@ -103,8 +90,6 @@ export function buildRotor(THREE, K, spec, rig) {
     if (L.foldable) put(THREE, arm, K.cyl(w * 0.05, w * 0.05, w * 0.09, 8), K.trim, px * 0.16, L.boomRake * len * 0.16, pz * 0.16, 0, 0, Math.PI / 2, 'fold_hinge' + i);
   }
 
-  // gear hangs off the underside of the pod; everything else is built around the
-  // pod centre, so the drive node can be dropped straight onto the torso origin
   const hy = spec.torso.height * 0.5;
   const gear = group(THREE, g, 'gear', 0, -hy, 0);
   const drop = skidGear(THREE, K, spec, rig, gear, w, d, L.gearDrop, L.gear);
@@ -112,23 +97,19 @@ export function buildRotor(THREE, K, spec, rig) {
   return { node: g, drop: hy + (drop || w * 0.08) };
 }
 
-/* ---------- fixed wing ---------- */
 export function buildPlane(THREE, K, spec, rig) {
   const L = spec.locomotion;
   const g = group(THREE, null, 'drive_wing');
   const w = spec.torso.width, d = spec.torso.depth;
   const half = L.span * 0.5;
-  // a wing has to read as a wing: too thin a chord and the model looks like a rod
   const chord = Math.max(L.chord, w * 0.85);
-  const finH = Math.max(w * 0.55, half * 0.2);        // tail height, not half the span
+  const finH = Math.max(w * 0.55, half * 0.2);
   const wingMat = K.second, skin = K.base;
 
-  /* nose and tail boom grow out of the fuselage the torso already made */
   put(THREE, g, K.cone(w * 0.42, d * 0.28, 10), skin, 0, 0, d * 0.62, Math.PI / 2, 0, 0, 'nose');
   const tailZ = -d * (L.tail === 'twin' ? 0.42 : 0.62);
   if (L.tail !== 'none') put(THREE, g, K.cyl(w * 0.12, w * 0.2, d * 0.5, 8), skin, 0, 0, -d * 0.55, Math.PI / 2, 0, 0, 'tailboom');
 
-  /* wing — one panel per side, swept or angled to taste */
   const sweep = L.wing === 'swept' ? 0.42 : L.wing === 'delta' ? 0.75 : L.wing === 'canard' ? 0.18 : 0.06;
   const rootChord = chord * (L.wing === 'delta' || L.wing === 'blended' ? 1.9 : 1.15);
   if (L.wing === 'blended') put(THREE, g, K.box(w * 1.5, w * 0.34, rootChord * 1.1), skin, 0, -w * 0.05, d * 0.02, 0, 0, 0, 'wing_root_fairing');
@@ -139,7 +120,6 @@ export function buildPlane(THREE, K, spec, rig) {
     const panel = put(THREE, wing, K.box(half, w * 0.09, chord), wingMat, sx * half * 0.5, 0, -sweep * half * 0.22, 0, 0, 0, 'wing_panel');
     if (L.wing === 'delta') panel.scale.set(1, 1, 1.25);
     put(THREE, wing, K.box(half * 0.98, w * 0.03, chord * 0.24), K.trim, sx * half * 0.52, w * 0.03, -sweep * half * 0.22 - chord * 0.42, 0, 0, 0, 'wing_leading');
-    // aileron
     const ail = group(THREE, wing, 'aileron', sx * half * 0.74, 0, -sweep * half * 0.22 + chord * 0.42);
     put(THREE, ail, K.box(half * 0.34, w * 0.05, chord * 0.26), K.trim, 0, 0, chord * 0.12, 0, 0, 0, 'aileron_face');
     rig.surfaces.push({ node: ail, axis: 'x', gain: sx, range: 0.28 });
@@ -154,7 +134,6 @@ export function buildPlane(THREE, K, spec, rig) {
     rig.surfaces.push({ node: c, axis: 'x', gain: 1, range: 0.2 });
   }
 
-  /* tail group */
   if (L.tail === 'v') {
     for (const sx of [-1, 1]) {
       const f = group(THREE, g, 'vtail', sx * w * 0.12, w * 0.05, tailZ);
@@ -185,7 +164,6 @@ export function buildPlane(THREE, K, spec, rig) {
     rig.surfaces.push({ node: rud, axis: 'y', gain: 1, range: 0.22 });
   }
 
-  /* propulsion */
   const propZ = L.pusher ? -d * 0.78 : d * 0.78;
   const rr = Math.min(Math.max(w * 0.55, half * 0.16), w * 0.95);
   if (L.propulsion === 'jet') {
@@ -215,7 +193,6 @@ export function buildPlane(THREE, K, spec, rig) {
     }
   }
 
-  /* VTOL lift rotors on the wing, so it can take off without a runway */
   if (L.vtol) {
     const n = L.liftRotors || 4;
     for (let i = 0; i < n; i++) {
@@ -226,7 +203,6 @@ export function buildPlane(THREE, K, spec, rig) {
     }
   }
 
-  /* chin sensor ball — the thing a scout plane actually looks through */
   if (L.sensorBall) {
     const ball = group(THREE, g, 'sensor_ball', 0, -w * 0.34, d * 0.42);
     put(THREE, ball, K.sph(w * 0.24, 12), K.second, 0, 0, 0, 0, 0, 0, 'ball_shell');
@@ -244,9 +220,6 @@ export function buildPlane(THREE, K, spec, rig) {
   return { node: g, drop: hy + (drop || w * 0.12) };
 }
 
-/* ---------- flight animation ----------
-   Called from animateRobot for rotor and plane drives: spin the discs, ride the
-   air, and deflect the surfaces the way the bank asks them to. */
 export function animateFlight(rig, t, dt, g, prof, L) {
   const idle = 0.12;
   const spool = Math.max(idle, g);

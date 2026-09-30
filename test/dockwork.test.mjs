@@ -9,14 +9,14 @@
  * which is the whole reason it exists.
  */
 
-import { sim, launchSim, tickSim, tradeBuy, tradeSell, toggleDock, sellAllOre } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { good } from "../js/materials.js";
-import { deliver } from "../js/economy.js";
-import { HANDLING, dockwork, bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, handlingSeconds, isBulk } from "../js/dockwork.js";
-import { boardFor, acceptContract, deliverContracts, contracts, resetContracts } from "../js/contracts.js";
+import { sim, launchSim, tickSim, tradeBuy, tradeSell, toggleDock, sellAllOre } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { good } from "../js/economy/materials.js";
+import { deliver } from "../js/economy/economy.js";
+import { HANDLING, dockwork, bookHandling, clearDockwork, handlingLeft, handlingLine, handlingProgress, handlingSeconds, isBulk } from "../js/station/dockwork.js";
+import { boardFor, acceptContract, deliverContracts, contracts, resetContracts } from "../js/economy/contracts.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

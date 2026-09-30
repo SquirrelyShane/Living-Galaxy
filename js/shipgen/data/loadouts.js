@@ -1,6 +1,3 @@
-/* Class doctrine manifests — catalog ids with optional ×count.
- * Weapons are appended from the class arms mix at generate time (see app.js doctrineLoadout).
- * Mirrors PART III of the catalog: what each class kit must have, what it can minimise. */
 import { RNG } from "../core/rng.js";
 import { SHIP_CLASSES } from "./classes.js";
 import { WEAPON_TYPES } from "./weapons.js";
@@ -42,7 +39,6 @@ export const CLASS_LOADOUT = {
   stationcutter: [...CORE, ...CREW_BASIC, "pw.kilo", "ep.battery", "cm.hga", "cm.radome", "cm.omni", "sw.radar", "sw.scanhead×2", "dk.cargo", "dk.hard×2", "dk.fuel", "dk.berth", "cg.gear", "tc.radwing×2", "acs.cmg", "st.whipple×2", "rb.arm", "rb.dronebay", "sf.debrisradar", "rb.tools", "fl.xecopv"]
 };
 
-/* class doctrine + arms mix → manifest for one hull */
 export function doctrineLoadout(clsKey, cfg) {
   const C = SHIP_CLASSES[clsKey];
   const lo = expandLoadout(CLASS_LOADOUT[clsKey] || CORE);

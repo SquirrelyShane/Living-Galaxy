@@ -1,18 +1,8 @@
-/* Module prefabs. Each draws one module into a group whose frame is:
- * origin on the mount surface, +Y out of the hull, +Z along the structure,
- * +X across. `size` is [w, h, d] in metres. `C` is the build context:
- * mats, rng, style, G, add(geo, mat, x,y,z, rx,ry,rz, sx,sy,sz), lamp(), count().
- *
- * Every prefab rolls a body from the shape grammar (forms.js) — the family
- * says which forms make sense, the station's architecture style weights
- * them, the rng sets proportions — then hangs the family's own kit on the
- * envelope and lets the style decorate. No two modules come out the same. */
 import { G, PROFILES, lathe, latheOf } from "../core/geometry.js";
 import { FORMS, body, decorate } from "./forms.js";
 
 const PI = Math.PI, H = PI / 2;
 
-/* ---- helpers --------------------------------------------------------------- */
 function pipeRun(C, y, z0, z1, x, r = 0.6, mat) {
   C.add(G.cyl(8), mat ?? C.mats.metal, x, y, (z0 + z1) / 2, H, 0, 0, r, Math.abs(z1 - z0), r);
   C.count();
@@ -28,7 +18,6 @@ function rack(C, x, y, z, w, h, d, mat) {
   C.add(G.box(), C.mats.dark, x, y + h * 0.45, z, 0, 0, 0, w * 1.02, h * 0.06, d * 1.02);
   C.count(2);
 }
-/** A gimballed turret: barbette, a body of some form, barrels — all in one child group that traverses. */
 function turret(C, x, y, z, r, barrels, len, o = {}) {
   const { mats, rng } = C;
   C.add(G.cyl(12), mats.dark, x, y + 1, z, 0, 0, 0, r * 1.2, 2, r * 1.2);
@@ -48,9 +37,7 @@ function turret(C, x, y, z, r, barrels, len, o = {}) {
   return t;
 }
 
-/* ---- prefabs -------------------------------------------------------------- */
 export const PREFABS = {
-  /* a pressurised plant: a body with tanks along one side, pipes, a service spine */
   plant(g, [w, h, d], C) {
     const e = body(C, ["block", "barrel", "prism", "stack", "keep", "wedge", "faceted", "vault"], w, h * 0.8, d);
     const n = C.rng.int(2, 4);
@@ -61,7 +48,6 @@ export const PREFABS = {
     decorate(C, e, { skip: ["glazing"] });
     C.lamp(e.faces.px, e.top + 1, d * 0.44, "#ff6a4a", "blink"); C.lamp(-e.faces.px, e.top + 1, -d * 0.44, "#ff6a4a", "blink");
   },
-  /* tank farm: spheres and lathes on a frame, sometimes a faceted cryo block */
   tankfarm(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.dark, 0, 1, 0, 0, 0, 0, w, 1.2, d);
@@ -93,7 +79,6 @@ export const PREFABS = {
     decorate(C, { kind: "tankfarm", w, h, d, top: h * 0.6, faces: { px: w / 2, nx: w / 2, pz: d / 2, nz: d / 2 } }, { max: 2, skip: ["bands", "arcade", "glazing", "terrace", "rose"] });
     C.lamp(0, h + 1, 0, "#ffd27a", "pulse");
   },
-  /* a glazed hall: a vault, a dome or a barrel of glass with green inside */
   greenhouse(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.dark, 0, 1.5, 0, 0, 0, 0, w, 3, d);
@@ -115,7 +100,6 @@ export const PREFABS = {
     decorate(C, e, { max: 2, skip: ["plates", "gunport", "patches", "stacks", "hazard", "spire", "rose"] });
     C.lamp(0, e.top + 1, d * 0.5, "#c8ff9a", "pulse");
   },
-  /* lab decks: stacks, facets, lanterns — a lot of windows and a cold mast */
   labstack(g, [w, h, d], C) {
     const e = body(C, ["stack", "faceted", "lantern", "prism", "block", "vault", "dome"], w, h * 0.9, d);
     C.add(G.cyl(8), C.mats.metal, e.w * 0.3, e.top + 4, -e.d * 0.3, 0, 0, 0, 0.5, 8, 0.5);
@@ -128,7 +112,6 @@ export const PREFABS = {
     const { mats, rng } = C;
     const variant = rng.pick(["dome", "dome", "twin", "lattice"]);
     if (variant === "lattice") {
-      /* an open telescope on a yoke */
       C.add(G.cyl(10), mats.dark, 0, h * 0.2, 0, 0, 0, 0, w * 0.2, h * 0.4, w * 0.2);
       const yoke = C.add(G.box(), mats.metal, 0, h * 0.45, 0, 0, 0, 0, w * 0.5, 4, 6);
       yoke.userData.gimbal = { amp: 0.3, speed: 0.06 };
@@ -142,8 +125,8 @@ export const PREFABS = {
         const x = n === 1 ? 0 : (i ? 1 : -1) * w * 0.24, r = n === 1 ? w * 0.45 : w * 0.24;
         C.add(G.cyl(10), mats.dark, x, h * 0.25, 0, 0, 0, 0, r * 0.4, h * 0.5, r * 0.4);
         const dome = C.add(G.dome(24), mats.panel, x, h * 0.5, 0, 0, rng.range(0, PI), 0, r, h * 0.45, r);
-        C.add(G.box(), mats.dark, x, h * 0.72, 0, 0, rng.range(0, PI), 0, r * 0.25, h * 0.4, r * 2);   // slit
-        C.add(G.cyl(12), mats.metal, x, h * 0.75, 0, 0.6, 0, 0, r * 0.2, h * 0.6, r * 0.2);       // scope
+        C.add(G.box(), mats.dark, x, h * 0.72, 0, 0, rng.range(0, PI), 0, r * 0.25, h * 0.4, r * 2);
+        C.add(G.cyl(12), mats.metal, x, h * 0.75, 0, 0.6, 0, 0, r * 0.2, h * 0.6, r * 0.2);
         dome.userData.spin = { axis: "y", speed: rng.range(0.01, 0.04) };
         C.count(4);
       }
@@ -152,7 +135,6 @@ export const PREFABS = {
     C.count();
     C.lamp(0, h * 0.98, 0, "#a8dcff", "pulse");
   },
-  /* the yard: open jigs on a truss frame, cranes, hulls on the jigs */
   shipyard(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.truss, 0, 2, 0, 0, 0, 0, w, 3, d);
@@ -161,7 +143,6 @@ export const PREFABS = {
     const beams = rng.int(1, 3);
     for (let i = 0; i < beams; i++) C.add(G.box(), mats.metal, 0, h * 0.95, -d * 0.3 + (d * 0.6 * i) / Math.max(1, beams - 1), 0, 0, 0, w * 0.86, 3, 3);
     C.count(6 + beams);
-    /* hulls on the jigs: one or two, at different stages */
     const hulls = rng.int(1, 2);
     for (let k = 0; k < hulls; k++) {
       const x = hulls === 1 ? 0 : (k ? 1 : -1) * w * 0.22;
@@ -178,7 +159,6 @@ export const PREFABS = {
     crane.userData.traffic = { axis: "z", amp: d * 0.35, speed: 0.15, phase: rng.range(0, 6) };
     for (let i = 0; i < 6; i++) C.lamp(rng.range(-w * 0.4, w * 0.4), h * 0.98, rng.range(-d * 0.4, d * 0.4), "#ffb070", "steady", 1.6);
   },
-  /* refinery drums, furnace stacks, a lot of pipe */
   works(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["barrel", "cradle", "block", "prism", "cluster", "keep"], w, h * 0.75, d);
@@ -195,7 +175,6 @@ export const PREFABS = {
     decorate(C, e, { force: ["pipes"], skip: ["arcade", "rose", "glazing", "terrace"] });
     C.lamp(e.faces.px * 0.8, h * 1.15, 0, "#ff8a3d", "pulse", 2.5);
   },
-  /* market concourse: a long hall with a glazed roof and a lot of light */
   concourse(g, [w, h, d], C) {
     const { mats } = C;
     const e = body(C, ["vault", "block", "prism", "stack", "keep", "lantern"], w, h * 0.75, d);
@@ -208,7 +187,6 @@ export const PREFABS = {
   warehouse(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["block", "prism", "keep", "wedge", "barrel", "cradle"], w, h * 0.85, d);
-    /* containers stacked outside, in yard colours */
     const n = rng.int(3, 8);
     for (let i = 0; i < n; i++) C.add(G.box(), rng.chance(0.6) ? mats.cargo : rng.chance(0.5) ? mats.panel : mats.accent, rng.sign() * (e.faces.px + 3), 2 + rng.int(0, 2) * 3.2, rng.range(-0.4, 0.4) * d, 0, 0, 0, 4, 3, rng.range(6, 12));
     C.add(G.box(), mats.hazard, 0, 3, e.faces.pz + 0.2, 0, 0, 0, e.w * 0.4, h * 0.4, 0.4);
@@ -216,7 +194,6 @@ export const PREFABS = {
     decorate(C, e, { max: 2, skip: ["arcade", "rose", "glazing", "spire"] });
     C.lamp(-e.faces.px, e.top + 1, 0, "#ff6a4a", "blink");
   },
-  /* command deck: a lens of windows on a neck, in whatever body the style favours */
   command(g, [w, h, d], C) {
     const { mats, rng } = C;
     const variant = rng.pick(["lens", "lens", "lantern", "dome", "faceted", "keep"]);
@@ -253,7 +230,6 @@ export const PREFABS = {
     C.count(4);
     C.lamp(0, h * 1.08, 0, "#ff4a5a", "blink", 3);
   },
-  /* tier I quarters: cabin pods clustered on a frame — rows, a hive or a stack */
   podblock(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.dark, 0, 1.5, 0, 0, 0, 0, w * 0.9, 3, d * 0.9);
@@ -277,7 +253,6 @@ export const PREFABS = {
     }
     C.lamp(w * 0.45, h * 0.9, d * 0.45, "#ffe3b0", "steady");
   },
-  /* tier II quarters: the ring section this sits on gets streets and windows */
   ringsection(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["block", "stack", "prism", "vault"], w, h * 0.5, d);
@@ -288,7 +263,7 @@ export const PREFABS = {
     decorate(C, e, { force: C.style.decor.includes("bands") ? ["bands"] : C.style.decor.includes("arcade") ? ["arcade"] : [], skip: ["stacks", "hazard", "pipes"] });
     C.lamp(0, h * 0.72, d * 0.45, "#ffe3b0", "steady");
   },
-  habdrum() { /* the drum is structure: see builder/hull.js habitatDrum */ },
+  habdrum() {},
   hall(g, [w, h, d], C) {
     const e = body(C, ["vault", "block", "prism", "stack", "keep", "dome", "barrel", "lantern"], w, h * 0.85, d);
     C.add(G.box(), C.mats.window, 0, e.top + 0.2, 0, 0, 0, 0, e.w * 0.5, 0.4, e.d * 0.6);
@@ -308,7 +283,6 @@ export const PREFABS = {
     C.add(G.box(), C.mats.hazard, 0, e.h * 0.5, 0, 0, 0, 0, e.w * 1.05, e.w * 0.3, 1.2);
     C.count();
   },
-  /* solar wings on a tracking yoke — the panel plane faces +Y (the sun side); single, twin, split or twisted */
   solarwing(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.cyl(10), mats.metal, 0, h * 0.5, 0, 0, 0, 0, 2, h, 2);
@@ -330,7 +304,6 @@ export const PREFABS = {
     yoke.userData.gimbal = { amp: 0.12, speed: 0.05 };
     C.lamp(w * 0.5, h + 2, 0, "#ff6a4a", "blink"); C.lamp(-w * 0.5, h + 2, 0, "#33ff66", "blink");
   },
-  /* a radial fan of petals on a hub */
   solarfan(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.cyl(10), mats.metal, 0, h * 0.4, 0, 0, 0, 0, 2.5, h * 0.8, 2.5);
@@ -347,7 +320,6 @@ export const PREFABS = {
     C.count(2 + n * 2);
     C.lamp(0, h + 3, 0, "#ff6a4a", "blink");
   },
-  /* a single thin-film sail on catenary booms */
   solarsail(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.cyl(10), mats.metal, 0, h * 0.5, 0, 0, 0, 0, 2, h, 2);
@@ -363,7 +335,6 @@ export const PREFABS = {
     C.count(10);
     C.lamp(w * 0.48, h + 3.5, d * 0.48, "#ff6a4a", "blink"); C.lamp(-w * 0.48, h + 3.5, -d * 0.48, "#33ff66", "blink");
   },
-  /* dishes that focus the sun on cells */
   concentrators(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.truss, 0, 1.5, 0, 0, 0, 0, w, 3, d);
@@ -381,7 +352,6 @@ export const PREFABS = {
   },
   reactor(g, [w, h, d], C) {
     const { mats, rng } = C;
-    /* shadow shield first, then the vessel, then the turbomachinery */
     const shieldGeo = rng.chance(0.5) ? G.cyl(24) : G.cyl(8);
     C.add(shieldGeo, mats.dark, 0, h * 0.5, -d * 0.45, H, 0, 0, w * 0.55, 3, w * 0.55);
     const vesselGeo = rng.pick([latheOf(rng, "reactor", 24, 0.6), latheOf(rng, "drum", 24), G.sphere(20, 14), G.ico(1)]);
@@ -398,7 +368,6 @@ export const PREFABS = {
     if (rng.chance(0.5)) { for (let i = 0; i < 4; i++) { const a = (i / 4) * PI * 2; C.add(G.box(), mats.radiator, Math.cos(a) * w * 0.5, h * 0.5 + Math.sin(a) * w * 0.5, -d * 0.1, 0, 0, a, w * 0.35, 0.4, d * 0.4).userData.pulse = { speed: 0.4, amp: 0.2, phase: i }; } C.count(4); }
     C.lamp(w * 0.42, h * 0.95, 0, "#ff4a5a", "double", 2.5);
   },
-  /* radiator array: flat fins, a vee, or a radial spray about a spine */
   radiators(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.metal, 0, 1.5, 0, 0, 0, 0, 3, 3, d);
@@ -434,7 +403,6 @@ export const PREFABS = {
     C.add(G.cyl(12), mats.panel, 0, h * 0.8, 0, 0, 0, 0, w * 0.2, h * 0.2, w * 0.2);
     C.count(2);
   },
-  /* comms: a dish mast, a lattice tower with drums, or a phased-array pylon */
   commsmast(g, [w, h, d], C) {
     const { mats, rng } = C;
     const variant = rng.pick(["dishes", "dishes", "lattice", "pylon"]);
@@ -459,7 +427,6 @@ export const PREFABS = {
     C.count(3);
     C.lamp(0, h + 1, 0, "#ff4a5a", "blink", 3);
   },
-  /* a great dish on a yoke */
   bigdish(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.cyl(12), mats.dark, 0, h * 0.15, 0, 0, 0, 0, w * 0.12, h * 0.3, w * 0.12);
@@ -473,7 +440,6 @@ export const PREFABS = {
     C.count(7);
     C.lamp(0, h * 0.8, 0, "#ff4a5a", "blink", 2.5);
   },
-  /* phased-array slabs at angles */
   phasedslab(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.box(), mats.dark, 0, 1, 0, 0, 0, 0, w * 0.9, 2, d * 0.9);
@@ -497,7 +463,6 @@ export const PREFABS = {
     C.count(2 + bars);
     C.lamp(0, h + w * 0.7, 0, "#ff4a5a", "blink", 2.5);
   },
-  /* railgun battery: a barbette, a turret of some form, twin rails */
   battery(g, [w, h, d], C) {
     const { mats } = C;
     C.add(G.cyl(12), mats.dark, 0, 1.5, 0, 0, 0, 0, w * 0.5, 3, w * 0.5);
@@ -507,7 +472,6 @@ export const PREFABS = {
     decorate(C, { kind: "battery", w, h, d, top: h * 0.5, faces: { px: w / 2, nx: w / 2, pz: d / 2, nz: d / 2 } }, { max: 1, skip: ["arcade", "rose", "bands", "glazing", "terrace", "spire", "glassstrip"] });
     C.lamp(0, h * 0.95, 0, "#ff4a5a", "double");
   },
-  /* point-defence cluster: several small mounts on a plinth */
   pdc(g, [w, h, d], C) {
     const { mats, rng } = C;
     const plinthKind = rng.pick(["cyl", "prism", "box"]);
@@ -522,7 +486,6 @@ export const PREFABS = {
     C.count(2);
     C.lamp(0, h + 2.5, 0, "#ff4a5a", "blink", 2);
   },
-  /* laser battery: an armoured lens turret with radiator fins */
   laserturret(g, [w, h, d], C) {
     const { mats, rng } = C;
     C.add(G.cyl(12), mats.dark, 0, 1.5, 0, 0, 0, 0, w * 0.45, 3, w * 0.45);
@@ -535,7 +498,6 @@ export const PREFABS = {
     C.count(4 + fins);
     C.lamp(0, 3 + w * 0.65, 0, "#ff4a5a", "double");
   },
-  /* vertical launch cells: a flat block with a grid of lids, some open and lit */
   vls(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["block", "keep", "wedge"], w, h * 0.7, d);
@@ -551,27 +513,25 @@ export const PREFABS = {
     C.count();
     C.lamp(e.faces.px, e.top + 1, e.faces.pz, "#ff4a5a", "double");
   },
-  /* the spinal mass driver: rails out along +Y (the station axis at an end cap), capacitor rings, a muzzle */
   spinal(g, [w, h, d], C) {
     const { mats, rng } = C;
     const L = h * rng.range(3, 4.2), r = w * 0.18;
-    C.add(G.cyl(rng.pick([8, 12, 16])), mats.armour, 0, h * 0.25, 0, 0, 0, 0, w * 0.5, h * 0.5, w * 0.5);   // breech housing
+    C.add(G.cyl(rng.pick([8, 12, 16])), mats.armour, 0, h * 0.25, 0, 0, 0, 0, w * 0.5, h * 0.5, w * 0.5);
     const rails = rng.pick([2, 3, 4]);
     for (let i = 0; i < rails; i++) { const a = (i / rails) * PI * 2; C.add(G.box(), mats.metal, Math.cos(a) * r, h * 0.5 + L / 2, Math.sin(a) * r, 0, -a, 0, 2.4, L, 1.6); }
-    C.add(G.cyl(12), mats.dark, 0, h * 0.5 + L / 2, 0, 0, 0, 0, r * 0.55, L, r * 0.55);   // bore
+    C.add(G.cyl(12), mats.dark, 0, h * 0.5 + L / 2, 0, 0, 0, 0, r * 0.55, L, r * 0.55);
     const rings = rng.int(5, 9);
     for (let i = 0; i < rings; i++) {
       const y = h * 0.5 + (L * (i + 0.5)) / rings;
       const cap = C.add(G.torus(0.14, 8, 24), i % 3 === 2 ? mats.accent : mats.metal, 0, y, 0, H, 0, 0, r * 1.5, r * 1.5, r * 1.5);
       if (i % 3 === 2) cap.userData.pulse = { speed: 1.6, amp: 0.6, phase: i * 0.4 };
     }
-    C.add(G.taper(1.3, 12), mats.armour, 0, h * 0.5 + L + 3, 0, PI, 0, 0, r * 1.4, 6, r * 1.4);   // muzzle brake
+    C.add(G.taper(1.3, 12), mats.armour, 0, h * 0.5 + L + 3, 0, PI, 0, 0, r * 1.4, 6, r * 1.4);
     C.add(G.cyl(12), mats.glow, 0, h * 0.5 + L + 6.2, 0, 0, 0, 0, r * 0.5, 0.6, r * 0.5).userData.pulse = { speed: 0.7, amp: 0.8, phase: 0 };
     for (let i = 0; i < 4; i++) { const a = (i / 4) * PI * 2 + PI / 4; C.add(G.box(), mats.radiator, Math.cos(a) * w * 0.45, h * 0.6, Math.sin(a) * w * 0.45, 0, -a, 0, w * 0.3, h * 0.5, 0.5).userData.pulse = { speed: 0.4, amp: 0.2, phase: i }; }
     C.count(6 + rails + rings);
     C.lamp(0, h * 0.5 + L + 7, 0, "#ff4a5a", "strobe", 3);
   },
-  /* the siege laser: a driver stack, a yoke, a twelve-metre optic that gimbals */
   siege(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["keep", "block", "prism", "faceted"], w, h * 0.4, d);
@@ -587,7 +547,6 @@ export const PREFABS = {
     C.count(7 + caps);
     C.lamp(0, e.top + 6 + r * 0.9, 0, "#ff4a5a", "double", 3);
   },
-  /* shield emitter array: a generator body, emitter spines with lit tips, a translucent shield petal above */
   shieldnode(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["barrel", "faceted", "prism", "dome", "keep"], w, h * 0.35, d);
@@ -603,7 +562,6 @@ export const PREFABS = {
     C.count(1 + n * 2);
     C.lamp(0, e.top + h * 0.8, 0, "#8fd6ff", "pulse", 2);
   },
-  /* drone bay: launch tubes on the +Z face, drones that fly out and come back */
   dronebay(g, [w, h, d], C) {
     const { mats, rng } = C;
     const e = body(C, ["block", "keep", "prism", "wedge", "barrel"], w, h, d);
@@ -617,10 +575,6 @@ export const PREFABS = {
       tubes.push({ x, y });
     }
     C.count(cols * rows * 2);
-    /* 0.3.15: no scenery sorties. The bay's drones are the port's real ones —
-     * interceptors off the drone-bay mounts (stationworks.js) and corporate
-     * work drones through the hangar (npc/bay.js). The draws stay, so the seed
-     * grows the same module. */
     const flying = rng.int(2, 4);
     for (let i = 0; i < flying; i++) { rng.pick(tubes); rng.range(2.5, 4); rng.range(0.6, 1.2); rng.range(24, 40); rng.range(0, 1); rng.range(-0.6, 0.6); }
     decorate(C, e, { max: 1, skip: ["arcade", "rose", "bands", "glazing", "terrace", "spire", "glassstrip"] });

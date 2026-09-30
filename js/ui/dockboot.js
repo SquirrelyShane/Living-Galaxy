@@ -1,27 +1,7 @@
-/* LIVING GALAXY — the berth, without flying the camera through the station.
- *
- * Port control's tractor pulls a hull gate → door → clamps, and the canopy is
- * bolted to the hull, so the last leg used to put the lens through the
- * station's own walls on the way to the bay (and the push out did it again in
- * reverse). The station meshes are not built to be seen from inside.
- *
- * So the canopy hands over to a transition at the door. On the way in, as the
- * hull reaches the aperture, the view dims into a boot sequence — the port's
- * systems coming up on your hull one line at a time (clamps, seal, umbilicals,
- * power, customs, deck) — while the tractor finishes the pull at five times
- * speed behind it; when the clamps close the sequence completes and fades onto
- * the station deck, whose panels boot in (css `.sd-boot`). On the way out the
- * sequence runs backwards and the canopy comes back once the hull is clear of
- * the door.
- *
- * `localStorage["lgaa.dockcine"] = "off"` turns it off (the docking smoke
- * measures the tractor path in real time).
- */
-
-import { sim } from "../sim.js";
-import { tractor } from "../stationworks.js";
-import { stationById } from "../stations.js";
-import { corpOfStation, standingLabel } from "../corps.js";
+import { sim } from "../sim/sim.js";
+import { tractor } from "../station/stationworks.js";
+import { stationById } from "../station/stations.js";
+import { corpOfStation, standingLabel } from "../corp/corps.js";
 
 const DOC = globalThis.document ?? null;
 export const DOCK_CINE = { rush: 5, fadeIn: 1.1, fadeOut: 0.8, settle: 1.2 };
@@ -48,7 +28,6 @@ function enabled() {
   try { return globalThis.localStorage?.getItem("lgaa.dockcine") !== "off"; } catch { return true; }
 }
 
-/** Seconds into the tractor path at which its last (pull) / first (push) leg starts / ends. */
 function legMark() {
   const p = tractor.path ?? [];
   if (!p.length) return 0;
@@ -67,7 +46,6 @@ export function mountDockBoot() {
   let built = "";
   let lastWall = performance.now();
   let deckWasOpen = false;
-  /* the deck's panels come up one at a time once it opens (css .sd-boot) */
   const bootDeck = () => {
     const deck = DOC.getElementById("station-deck");
     const open = Boolean(deck && !deck.classList.contains("hidden"));
@@ -116,7 +94,6 @@ export function mountDockBoot() {
       dockCine.stId = tractor.stId;
       dockCine.doneAt = -1;
     } else if (dockCine.mode === "in" && ship?.dockedAt) {
-      /* clamps closed: finish the sequence, then let the deck through */
       mode = "in";
       if (dockCine.doneAt < 0) dockCine.doneAt = now;
       const since = (now - dockCine.doneAt) / 1000;

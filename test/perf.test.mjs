@@ -28,7 +28,7 @@
  *      result watched it change underneath them. Cells are cached per sky time
  *      and each query gets its own array out of a ring.
  *
- *   5. `js/aria.js` assigned to `ariaHooks` — an export of a module it is in a
+ *   5. `js/aria/aria.js` assigned to `ariaHooks` — an export of a module it is in a
  *      CYCLE with — at the top level. It worked by accident of load order; one
  *      new import elsewhere and the page dies with a TDZ error on boot.
  *
@@ -42,15 +42,15 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { contacts, contactById, syncContacts } = await import("../js/turrets.js");
+const { contacts, contactById, syncContacts } = await import("../js/flight/turrets.js");
 const { traffic, vesselById, reindexTraffic } = await import("../js/npc/traffic.js");
-const { impactors, threatBoard, emptyThreatBoard } = await import("../js/impactors.js");
-const { nearbyRocks, inBelt, wearRock } = await import("../js/field.js");
-const { launchSim, sim } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
+const { impactors, threatBoard, emptyThreatBoard } = await import("../js/world/events/impactors.js");
+const { nearbyRocks, inBelt, wearRock } = await import("../js/world/field.js");
+const { launchSim, sim } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
 /* the NAMESPACE, not a destructure: `currentSystem` is reassigned by loadSky,
  * and destructuring an export captures the value rather than the binding */
-const bodies = await import("../js/bodies.js");
+const bodies = await import("../js/world/bodies.js");
 
 makePilot("PerfPilot", "terran", "navigation", null);
 launchSim("PerfPilot", "perfsky");
@@ -197,9 +197,9 @@ launchSim("PerfPilot", "perfsky");
 
 /* ---- 5. no top-level read of a binding from a module we cycle with -------- */
 {
-  const aria = readFileSync("js/aria.js", "utf8");
+  const aria = readFileSync("js/aria/aria.js", "utf8");
   const topLevelHook = /^ariaHooks\./m.test(aria);
-  ok(!topLevelHook, "js/aria.js does not touch ariaHooks at the top level (that is a load-order TDZ waiting to happen)");
+  ok(!topLevelHook, "js/aria/aria.js does not touch ariaHooks at the top level (that is a load-order TDZ waiting to happen)");
   ok(/export function wireAriaHooks\(\)/.test(aria), "…it wires the hook from a function instead");
   ok(/wireAriaHooks\(\);/.test(aria), "…which wireAria calls");
 
@@ -209,14 +209,14 @@ launchSim("PerfPilot", "perfsky");
    * by the time they run. That is the property worth asserting: not "nobody
    * assigns at load", but "nobody assigns through a binding they cycle with".
    *
-   *   js/upgrades.js  → shipFx      from js/ship.js       (the designated leaf)
-   *   js/family.js    → crewHooks   from js/crew.js
-   *   js/fleet.js     → trafficHooks from js/npc/traffic.js
+   *   js/economy/upgrades.js  → shipFx      from js/flight/ship.js       (the designated leaf)
+   *   js/crew/family.js    → crewHooks   from js/crew/ledger.js
+   *   js/corp/fleet.js     → trafficHooks from js/npc/traffic.js
    *   js/npc/battles.js → trafficHooks, same
    *
    * If one of those targets ever gains an import that puts it back in its
    * writer's cycle, this check fails and says which pair. */
-  const SAFE = { shipFx: "js/ship.js", crewHooks: "js/crew.js", trafficHooks: "js/npc/traffic.js" };
+  const SAFE = { shipFx: "js/flight/ship.js", crewHooks: "js/crew/ledger.js", trafficHooks: "js/npc/traffic.js" };
   const resolve = (from, spec) => {
     const dir = from.slice(0, from.lastIndexOf("/"));
     const parts = `${dir}/${spec}`.split("/");
@@ -229,7 +229,7 @@ launchSim("PerfPilot", "perfsky");
     return [...src.matchAll(/from\s*"(\.[^"]+)"/g)].map((m) => resolve(f, m[1]));
   };
   const offenders = [];
-  for (const f of ["js/aria.js", "js/upgrades.js", "js/family.js", "js/fleet.js", "js/npc/battles.js"]) {
+  for (const f of ["js/aria/aria.js", "js/economy/upgrades.js", "js/crew/family.js", "js/corp/fleet.js", "js/npc/battles.js"]) {
     const src = readFileSync(f, "utf8");
     const from = new Map();
     for (const m of src.matchAll(/import\s*\{([^}]*)\}\s*from\s*"(\.[^"]+)"/g)) {
@@ -256,13 +256,13 @@ launchSim("PerfPilot", "perfsky");
   /* strip comments first — these files now EXPLAIN the patterns they no longer
    * use, and a naive grep would match the explanation */
   const code = (f) => readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-  const eng = code("js/engine.js");
+  const eng = code("js/render/engine.js");
   ok(!/contacts\.some\(/.test(eng), "the drone-mesh sweep no longer scans the whole board per mesh");
   ok(!/probes\.some\(/.test(eng), "nor does the probe-mesh sweep");
   ok(!/BEACONS\.find\(/.test(eng), "the beacon loop resolves its definition once, not per frame");
   ok(/_seenDrone/.test(eng) && /_seenProbe/.test(eng), "…both use a reused Set instead");
 
-  const tur = code("js/turrets.js");
+  const tur = code("js/flight/turrets.js");
   const sync = tur.slice(tur.indexOf("export function syncContacts"));
   ok(!/contacts\.find\(/.test(sync), "syncContacts resolves by index rather than by scan");
   ok(/byId\.clear\(\);/.test(tur) && /byId\.get\(/.test(tur), "…an index it builds fresh each call, so it cannot go stale");
@@ -273,14 +273,14 @@ launchSim("PerfPilot", "perfsky");
   ok(!/traffic\.find\(/.test(bat), "the battle tick resolves ids through the roster index");
   ok(/wingBuf/.test(bat) && /lawBuf/.test(bat) && /foeBuf/.test(bat), "…into reused buffers, not four fresh arrays a tick");
 
-  const hud = code("js/hud.js");
+  const hud = code("js/ui/hud.js");
   ok(/const elCache = new Map\(\)/.test(hud), "the HUD caches its element lookups");
   ok(/had\.isConnected/.test(hud), "…and re-resolves a detached one, so an innerHTML rewrite cannot leave a stale handle");
 }
 
 /* ---- 7. no fetch in the tree ignores its status --------------------------- */
 {
-  const files = ["js/npc/cradle.js", "js/net.js", "js/comms/call-scripts.js", "js/npc/captain.js"];
+  const files = ["js/npc/cradle.js", "js/net/net.js", "js/comms/call-scripts.js", "js/npc/captain.js"];
   for (const f of files) {
     const src = readFileSync(f, "utf8");
     const hasFetch = /\bfetch\(/.test(src);

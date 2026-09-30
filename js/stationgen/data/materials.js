@@ -1,6 +1,3 @@
-/* Raw stock at the bottom of every bill of materials. `kind` groups them
- * for the summary; `kgm3` lets volume-priced things (tanks, shielding)
- * convert; `cr` is a book price per tonne for the demo's estimate. */
 export const MATERIALS = {
   al_li:     { name: "Al-Li 2195 alloy",           kind: "alloy",     kgm3: 2700, cr: 3200 },
   al6061:    { name: "Al 6061-T6",                 kind: "alloy",     kgm3: 2700, cr: 2100 },
@@ -47,7 +44,6 @@ export const MATERIALS = {
   he3:       { name: "Helium-3 / deuterium",       kind: "nuclear",   kgm3: 125,  cr: 40000000 },
   regolith:  { name: "Processed regolith",         kind: "isru",      kgm3: 1800, cr: 40 },
   pb:        { name: "Lead / bismuth shielding",   kind: "alloy",     kgm3: 11300, cr: 2600 },
-  /* structural metals a yard can skin a hull in — each with its own look */
   al_sc:     { name: "Al-Sc 5028 alloy",           kind: "alloy",     kgm3: 2670, cr: 5400 },
   ti_beta:   { name: "β-titanium (Ti-15-3)",       kind: "alloy",     kgm3: 4760, cr: 12500 },
   hy_steel:  { name: "HY-100 armour steel",        kind: "alloy",     kgm3: 7850, cr: 2400 },
@@ -59,9 +55,6 @@ export const MATERIALS = {
   ta:        { name: "Tantalum",                   kind: "refractory",kgm3: 16650, cr: 260000 },
 };
 
-/* Hull alloys: what the structure is skinned and framed in. The style rolls
- * one per station; it tints the hull material and takes over the primary
- * structural share (al_li) in every structure, docking and armour part. */
 export const ALLOYS = {
   al_li:    { name: "Al-Li",        tint: "#c9d0d8", metalness: 0.62, roughness: 0.38 },
   al6061:   { name: "Al 6061",      tint: "#b8bdc4", metalness: 0.55, roughness: 0.48 },
@@ -78,8 +71,6 @@ export const ALLOYS = {
 };
 export const ALLOY_KEYS = Object.keys(ALLOYS);
 
-/* Fabrication rate over raw stock, by material kind: what the yard adds
- * turning stock into a certified part. */
 export const FAB_RATE = {
   alloy: 2.4, refractory: 3.2, composite: 3.0, polymer: 1.8, insulation: 1.6, ceramic: 2.6, glass: 2.2,
   semiconductor: 4.0, magnet: 2.0, superconductor: 3.5, electrochem: 2.0, sorbent: 1.5, catalyst: 1.3,

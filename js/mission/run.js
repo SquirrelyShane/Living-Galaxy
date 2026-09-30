@@ -1,35 +1,20 @@
-/* LIVING GALAXY — the mission executor: walks a script's steps on the autopilot primitives.
- *
- * One step is live at a time. Its executor is called every autopilot tick and
- * answers "flying" | "done" | "asking" | "fail:<why>"; on "done" the run
- * advances (next tick — so the HUD sees every phase), at the end of the list
- * the loop row decides whether to go round again. Flying steps undock
- * themselves first. A warp policy of "ask" parks the ship aligned and posts
- * the question to the sys channel with JUMP / SUBLIGHT / ABORT links; the
- * NAV and WORK banners call the same `answerAsk`.
- *
- * The run is saved per sky and callsign on every step change and restored
- * paused, so a reload never flies by itself.
- */
-
-import { sim, losBlocker, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, addAnchoredWaypoint, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim.js";
-import * as shipMod from "../ship.js";
-import { holdRoom, BATTERY } from "../ship.js";
-import { BODIES, bodyPosition, dist3 } from "../bodies.js";
-import { stationById } from "../stations.js";
-import { tractor } from "../stationworks.js";
-import { inBelt } from "../field.js";
-import { siteById } from "../sites.js";
+import { sim, losBlocker, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, addAnchoredWaypoint, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim/sim.js";
+import * as shipMod from "../flight/ship.js";
+import { holdRoom, BATTERY } from "../flight/ship.js";
+import { BODIES, bodyPosition, dist3 } from "../world/bodies.js";
+import { stationById } from "../station/stations.js";
+import { tractor } from "../station/stationworks.js";
+import { inBelt } from "../world/field.js";
+import { siteById } from "../economy/sites.js";
 import { captain } from "../npc/captain.js";
-import { post } from "../chat.js";
-import { hasUpgrade } from "../upgrades.js";
+import { post } from "../comms/chat.js";
+import { hasUpgrade } from "../economy/upgrades.js";
 import { makeTradeOps } from "./tradeops.js";
 import { validate, evalCond, snapshot, describeRef, deserialize, serialize, makeStep, missionCore } from "./script.js";
 import {
   autopilot, apLeg, apPark, apDock, apMine, apHold, bestPortFor, nearestSeam, releaseControls, resetProgress, jumpEndedShort, warpReserve, AP_POWER, busIdle,
-} from "../autopilot.js";
+} from "../flight/autopilot.js";
 
-/** state: "idle"|"running"|"paused"|"asking"|"done"|"failed" */
 export const mission = {
   active: null,
   stepIx: 0,
@@ -39,29 +24,23 @@ export const mission = {
   stepStartedAt: 0,
   log: [],
   stats: { earned: 0, loops: 0, startedAt: 0 },
-  noWarpFor: -1,       // step index the pilot answered SUBLIGHT for
-  origin: null,        // where the mission started — the "here" ref
-  run: {},             // the live step's scratch (resolved node, transient mark, retries…)
-  trade: null,         // 0.3.19: the round's trade route { fromId, toId, good, qty, …, bought } — outlives a step, not a round
-  key: "",             // sky:callsign the persisted run was checked for
+  noWarpFor: -1,
+  origin: null,
+  run: {},
+  trade: null,
+  key: "",
 };
 
-/** B/A may subscribe */
 export const missionHooks = { onStep: null, onAsk: null, onEnd: null };
 
 export const RUN_KEY = () => `lgaa.mission.run.v1:${sim.skySeed}:${sim.callsign}`;
-/** package D exports batteryCap(ship) from ship.js; the rated battery until it lands */
 const batteryCap = (ship) => shipMod.batteryCap?.(ship) ?? BATTERY;
 const FLYING = new Set(["GOTO", "APPROACH", "MINE", "SURVEY", "DOCK"]);
 const _p = { x: 0, y: 0, z: 0 };
 const note = (text) => { sim.notice = text; sim.noticeAt = sim.wall; };
-/* 0.3.19: the trade route and the two docked trade ops live in tradeops.js (this file is on the 600-line gate) */
-const T = makeTradeOps({ mission, note, ap: () => autopilot });   // a getter: autopilot.js and this file import each other
+const T = makeTradeOps({ mission, note, ap: () => autopilot });
 const pickRoute = T.pickRoute;
 
-/* ---- start / stop --------------------------------------------------------- */
-
-/** → bool; refuses when the player does not hold the conn; replaces any running mission */
 export function startMission(m) {
   if (!m) return false;
   if (captain.holder !== "player" && captain.holder !== "aria") { note("The conn has the ship — the autopilot stands down."); return false; }
@@ -74,7 +53,6 @@ export function startMission(m) {
   if (mission.active) stopMission("replaced", { quiet: true });
   const copy = deserialize(serialize(m));
   if (!copy) return false;
-  /* a trade run starting at the port its route starts from does not leave it first */
   mission.trade = null;
   const s0 = copy.steps[0];
   const tradeHere = s0?.op === "DOCK" && s0.target?.kind === "trade-source" && pickRoute(true)?.fromId === sim.ship.dockedAt;
@@ -89,7 +67,7 @@ export function startMission(m) {
   mission.log = [];
   mission.stats = { earned: 0, loops: 0, startedAt: sim.time };
   mission.origin = { x: sim.ship.pos.x, y: sim.ship.pos.y, z: sim.ship.pos.z, name: "the start" };
-  autopilot.cutterWas = sim.ship.miningMode; // the pilot's cutter, handed back at stand-down
+  autopilot.cutterWas = sim.ship.miningMode;
   autopilot.on = true;
   autopilot.engagedAt = sim.time;
   autopilot.jumped = false;
@@ -153,7 +131,6 @@ export function resumeMission() {
   return null;
 }
 
-/** answer: "jump" | "sublight" | "abort" */
 export function answerAsk(answer) {
   if (mission.state !== "asking" || !mission.ask) return null;
   const ask = mission.ask;
@@ -167,8 +144,6 @@ export function answerAsk(answer) {
   return null;
 }
 
-/* ---- per-step bookkeeping ------------------------------------------------- */
-
 const step = () => mission.active?.steps[mission.stepIx] ?? null;
 
 function beginStep() {
@@ -180,8 +155,6 @@ function beginStep() {
   autopilot.chargeSince = null;
   autopilot.onLane = false;
   autopilot.unstick = null;
-  /* the progress watchdog measures one step's closure; a new step is a new
-   * target and a stale best distance would read as "stuck" on the first tick */
   resetProgress();
   if (s) missionHooks.onStep?.(s, mission.stepIx);
 }
@@ -233,22 +206,17 @@ function mirror() {
   autopilot.earned = mission.stats.earned;
 }
 
-/** → min(step.thrustCap ?? m.defaults.thrustCap, throttleCap()) */
 export function stepThrustCap(s = step()) {
   const cap = s?.thrustCap ?? mission.active?.defaults?.thrustCap ?? 1;
   return Math.max(0.1, Math.min(cap, 1.4, throttleCap()));
 }
 
-/** → step.warp ?? m.defaults.warp (SUBLIGHT answered for this step → "never") */
 export function stepWarpPolicy(s = step()) {
   if (s && mission.noWarpFor === mission.stepIx && mission.active?.steps[mission.stepIx] === s) return "never";
   return s?.warp ?? mission.active?.defaults?.warp ?? "auto";
 }
 
-/* ---- targets ------------------------------------------------------------------ */
-
 function markAt(name, p, anchor = null) {
-  /* 0.3.67: a seam with a job site behind it is marked ON its rock */
   const wp = anchor ? addAnchoredWaypoint(name, anchor, p, { reuse: false }) : addWaypointAt(name, p.x, p.y, p.z);
   wp.transient = true;
   mission.run.wpId = wp.id;
@@ -267,7 +235,6 @@ function nearestUnsurveyed() {
   return best;
 }
 
-/** Resolve a step's Ref once per step: a warp node (and the station for DOCK). */
 function resolve(s) {
   const r = mission.run;
   if (r.node !== undefined) return r.node;
@@ -288,7 +255,6 @@ function resolve(s) {
       break;
     }
     case "trade-source": {
-      /* the top of a round: a new route from where the hull is now */
       mission.trade = null;
       const t = pickRoute();
       node = t ? warpNodeById(t.fromId) : null;
@@ -309,13 +275,12 @@ function resolve(s) {
   }
   r.node = node;
   r.st = node && node.kind === "station" ? stationById(node.id) : null;
-  autopilot.portId = r.st?.id ?? null; // sim.js flies the last leg in this port's frame
-  if (node && node.id !== sim.selected) selectBody(node.id); // the core jumps to the lock
+  autopilot.portId = r.st?.id ?? null;
+  if (node && node.id !== sim.selected) selectBody(node.id);
   if (node) autopilot.targetId = node.id;
   return node;
 }
 
-/** Docked hulls leave first; port control keeps the helm on the way out. → "flying" | "clear" */
 function ensureUndocked() {
   const ship = sim.ship;
   if (ship.dockedAt) {
@@ -336,8 +301,6 @@ function untilMet(s) {
 
 const legOpts = (s, extra = {}) => ({ cap: stepThrustCap(s), warp: stepWarpPolicy(s), ...extra });
 
-/* ---- executors ------------------------------------------------------------------ */
-
 function legTo(s, node, extra) {
   const r = apLeg(node, legOpts(s, extra));
   if (r === "flying" || r === "near" || r === "asking") return r;
@@ -354,7 +317,6 @@ export const EXEC = {
     const dist = dist3(_p, sim.ship.pos);
     if (s.args?.jumpOnly) {
       if (autopilot.jumped && sim.warp.state !== "run") {
-        /* a dropout is not an arrival — see jumpEndedShort() */
         const drop = jumpEndedShort(node, dist);
         if (!drop) { apHold(); mission.run.why = `jump complete — ${node.name} on the bow, you have the stick`; return "done"; }
         mission.run.drops = (mission.run.drops ?? 0) + 1;
@@ -366,11 +328,6 @@ export const EXEC = {
       if (dist <= Math.max(node.arriveR, 2000) && sim.warp.state === "idle") { apHold(); mission.run.why = `already at ${node.name} — you have the stick`; return "done"; }
       return legTo(s, node, { farLeg: node.arriveR * 1.5, graze: "go" });
     }
-    /* 0.3.52: a dogleg round a world is done the moment the next corridor is
-     * clear (or you are within a well's width of the mark). It used to have to
-     * be parked on exactly, and a mark hung off Jupiter's shoulder is a place
-     * the well will not let a hull hold still — ARIA sat 17 km short of one,
-     * braking, for ten minutes. */
     const via = s.args?.via;
     if (via && sim.warp.state !== "run" && (dist < 40000 || !losBlocker(sim.ship.pos, via, null))) { mission.run.why = `clear of the corridor at ${node.name}`; return "done"; }
     const r = legTo(s, node);
@@ -420,7 +377,6 @@ export const EXEC = {
   MINE(s) {
     const ship = sim.ship;
     if (untilMet(s) || holdRoom(ship) < 1) { apHold(); mission.run.why = "hold full"; return "done"; }
-    /* battery flat outside the belt: nothing to be done here but leave */
     if (ship.charge / batteryCap(ship) <= AP_POWER.floor && !inBelt(ship.pos) && sim.time - mission.stepStartedAt > 5) { apHold(); mission.run.why = "battery flat"; return "done"; }
     const node = resolve(s);
     const seam = mission.run.seam;
@@ -459,12 +415,11 @@ export const EXEC = {
   CHARGE(s) {
     const ship = sim.ship;
     autopilot.phase = "charge";
-    const frac = ship.charge / batteryCap(ship); // live: autopilot.power only refreshes while a leg flies
+    const frac = ship.charge / batteryCap(ship);
     autopilot.task = `charging · ${Math.round(frac * 100)}%`;
     if (!ship.dockedAt) apHold();
     if (untilMet(s) || (!s.until && frac >= 0.85)) { mission.run.why = "charged"; return "done"; }
     if (!ship.dockedAt && sim.time - mission.stepStartedAt > 60 && busIdle(ship).load >= ship.reactor) return "fail:the bus draws more than the core makes — nothing to charge with";
-    /* a port that cannot fill the bank is not worth a night: the old loop left after four minutes */
     if (ship.dockedAt && sim.time - mission.stepStartedAt > 240) { mission.run.why = "charged enough"; return "done"; }
     return "flying";
   },
@@ -502,8 +457,6 @@ export const EXEC = {
   },
 };
 
-/* ---- the tick ------------------------------------------------------------------- */
-
 function beginAsk(node) {
   if (mission.state === "asking") return;
   mission.state = "asking";
@@ -520,7 +473,6 @@ function beginAsk(node) {
   missionHooks.onAsk?.(mission.ask);
 }
 
-/** called by autopilot.tickAutopilot every tick it has the ship */
 export function tickMission(dt) {
   void dt;
   const m = mission.active;
@@ -539,9 +491,6 @@ export function tickMission(dt) {
   return null;
 }
 
-/* ---- status ------------------------------------------------------------------------ */
-
-/** → "MINE LOOP · 2/3 DOCK Foundry Hold · lane · 3 loops · 12,400 cr" */
 export function missionStatusLine() {
   const m = mission.active;
   if (!m) return "";
@@ -556,21 +505,18 @@ export function missionStatusLine() {
   return parts.join(" · ");
 }
 
-/* ---- persistence ------------------------------------------------------------------- */
-
 export function saveRun() {
   try {
     const ls = globalThis.localStorage;
     if (!ls || !mission.active || !sim.skySeed) return;
     ls.setItem(RUN_KEY(), JSON.stringify({ mission: JSON.parse(serialize(mission.active)), stepIx: mission.stepIx, iter: mission.iter, stats: mission.stats, trade: mission.trade }));
-  } catch { /* storage is a convenience */ }
+  } catch {}
 }
 
 export function clearRun() {
-  try { globalThis.localStorage?.removeItem(RUN_KEY()); } catch { /* ignore */ }
+  try { globalThis.localStorage?.removeItem(RUN_KEY()); } catch {}
 }
 
-/** On the first tick in a sky: a saved run comes back paused — a reload never flies by itself. */
 export function restoreRun() {
   const key = `${sim.skySeed}:${sim.callsign}`;
   if (mission.key === key) return false;
@@ -586,7 +532,7 @@ export function restoreRun() {
     mission.stepIx = Math.min(o.stepIx ?? 0, m.steps.length - 1);
     mission.iter = o.iter ?? 0;
     mission.stats = { earned: 0, loops: 0, startedAt: sim.time, ...(o.stats ?? {}) };
-    mission.trade = o.trade ?? null;          // a trade round comes back with the route it bought for
+    mission.trade = o.trade ?? null;
     mission.state = "paused";
     mission.run = {};
     mission.origin = { x: sim.ship.pos.x, y: sim.ship.pos.y, z: sim.ship.pos.z, name: "the start" };

@@ -15,19 +15,19 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, CYCLE_SECONDS } from "../js/crew.js";
-import * as CO from "../js/company.js";
-import * as SL from "../js/stationlife.js";
-import * as LN from "../js/staffline.js";
-import * as LIFE from "../js/stafflife.js";
-import * as CLK from "../js/stationclock.js";
-import { bulkOf, holdForCargoRating, ALL_GOODS } from "../js/materials.js";
-import { roomFor, addCargo, cargoTotal, holdRoom } from "../js/ship.js";
-import { SHIP_DB, hullTuneFor } from "../js/shipdb.js";
-import { econHooks } from "../js/economy.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, CYCLE_SECONDS } from "../js/crew/ledger.js";
+import * as CO from "../js/corp/company.js";
+import * as SL from "../js/station/stationlife.js";
+import * as LN from "../js/station/staffline.js";
+import * as LIFE from "../js/station/stafflife.js";
+import * as CLK from "../js/station/stationclock.js";
+import { bulkOf, holdForCargoRating, ALL_GOODS } from "../js/economy/materials.js";
+import { roomFor, addCargo, cargoTotal, holdRoom } from "../js/flight/ship.js";
+import { SHIP_DB, hullTuneFor } from "../js/ships/shipdb.js";
+import { econHooks } from "../js/economy/economy.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

@@ -1,39 +1,16 @@
-/**
- * Impact Lab rigid-body simulation — pure (no DOM, no GPU), deterministic, fixed step.
- *
- * Every body and fragment is a rigid piece with mass, a collision radius and a
- * principal inertia tensor (from its re-formed shape, or the body's vertex spread).
- *
- *  - Mutual (softened) gravity: slow pieces fall back, graze, and settle on each other.
- *  - Torque-free rotation: angular momentum L is conserved in the world and
- *    ω = R·I⁻¹·Rᵀ·L, so elongated pieces tumble and precess instead of spinning
- *    on one axis.
- *  - Sphere contacts between armed pairs (pairs start armed only once apart, so
- *    neighbours inside the broken body do not explode): normal impulse with
- *    restitution (0 below the stick speed — rubble comes to rest on rubble),
- *    Coulomb friction, and the friction torque on both pieces.
- *  - Hard contacts become events → secondary debris (dust, ice, small rocks)
- *    sprayed around the contact at the pair's local velocity.
- *  - Shedding: while fragments are young they shed dust from their surfaces at
- *    v + ω × r, so the tumbling of each piece draws its own curling swirl lines.
- *
- * Emitted particles are queued in sim.emitted (drained by the renderer). Linear
- * momentum is conserved exactly (pairwise gravity + equal/opposite impulses);
- * angular momentum is conserved up to positional correction.
- */
 import { RNG, hashString, unitVec } from './rng.js';
 
 export const SIM = {
-  G: 0.35, // escape speed ≈ 0.75 u/s from a unit asteroid, ≈ 1.4 from the planet
+  G: 0.35,
   dt: 1 / 60,
-  storeEvery: 2, // 30 Hz track
+  storeEvery: 2,
   restitution: 0.22,
   friction: 0.35,
   stick: 0.14,
   eventSpeed: 0.18,
   shedSeconds: 9,
-  shedRate: 70, // dust per second per unit surface (decays)
-  eventDust: 420, // dust per unit contact energy
+  shedRate: 70,
+  eventDust: 420,
 };
 
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -69,22 +46,12 @@ function integrateQuat(q, w, dt) {
   return [r[0] / l, r[1] / l, r[2] / l, r[3] / l];
 }
 
-/**
- * Principal inertia of an ellipsoid (semi-axes a) of mass m, axes given as unit vectors
- * in the piece's local frame. Returns { moments, basis } with I = B·diag(moments)·Bᵀ.
- */
 export function ellipsoidInertia(m, axes, basis = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
   const [a, b, c] = axes.map((x) => x * x);
   return { moments: [(m * (b + c)) / 5, (m * (a + c)) / 5, (m * (a + b)) / 5], basis };
 }
 
 export class ImpactSim {
-  /**
-   * @param {object} opts
-   *   pieces: [{ kind, body, k, mass, radius, pos, vel, q (world, local→world), spin (world ω),
-   *             inertia: { moments, basis (local unit vectors) }, color, ice, heat, cool, shed }]
-   *   G, collide (false pre-impact), seed, t (start time since impact)
-   */
   constructor({ pieces, G = SIM.G, collide = true, seed = 'sim', t = 0 }) {
     this.G = G;
     this.collide = collide;
@@ -104,22 +71,18 @@ export class ImpactSim {
     for (let i = 0; i < N; i++)
       for (let j = i + 1; j < N; j++) {
         const a = this.pieces[i], b = this.pieces[j];
-        // pieces of the two different bodies collide from the start (no tunnelling through the target);
-        // neighbours within one broken body only once they have separated
         if (a.body !== b.body || Math.hypot(a.pos[0] - b.pos[0], a.pos[1] - b.pos[1], a.pos[2] - b.pos[2]) > a.radius + b.radius) this.armed[i * N + j] = 1;
       }
     this.events = [];
     this.emitted = [];
-    this.frames = []; // Float32Array per stored frame: N × 7 (pos, quat)
+    this.frames = [];
     this.frameT = [];
     this.store();
   }
 
-  /** I·x (world) when inverse = false, I⁻¹·x when true, for the piece's current orientation. */
   inertiaApply(P, x, inverse) {
     const R = quatToRows(P.q);
     const B = P.inertia.basis;
-    // world → local → principal
     const l = [R[0][0] * x[0] + R[1][0] * x[1] + R[2][0] * x[2], R[0][1] * x[0] + R[1][1] * x[1] + R[2][1] * x[2], R[0][2] * x[0] + R[1][2] * x[1] + R[2][2] * x[2]];
     const m = inverse ? P.invMoments : P.inertia.moments;
     const pr = [dot(B[0], l) * m[0], dot(B[1], l) * m[1], dot(B[2], l) * m[2]];
@@ -189,7 +152,6 @@ export class ImpactSim {
         }
         if (!this.armed[key] || dist < 1e-6) continue;
         const n = [dx / dist, dy / dist, dz / dist];
-        // push apart (mass-weighted)
         const im = a.invMass + b.invMass;
         const corr = ((rs - dist) * 0.8) / im;
         for (let k = 0; k < 3; k++) {
@@ -208,7 +170,6 @@ export class ImpactSim {
         const vt = [rv[0] - n[0] * vn, rv[1] - n[1] * vn, rv[2] - n[2] * vn];
         const vtl = Math.hypot(vt[0], vt[1], vt[2]);
         const jt = vtl > 1e-9 ? Math.min(SIM.friction * jn, vtl / im) : 0;
-        // impulse on b (a gets the opposite)
         const J = [n[0] * jn - (vt[0] / (vtl || 1)) * jt, n[1] * jn - (vt[1] / (vtl || 1)) * jt, n[2] * jn - (vt[2] / (vtl || 1)) * jt];
         for (let k = 0; k < 3; k++) {
           a.vel[k] -= J[k] * a.invMass;
@@ -234,7 +195,6 @@ export class ImpactSim {
       }
   }
 
-  /** Secondary debris: dust sheet ⟂ the contact normal + ice + a few rocks, carried at the pair's velocity. */
   secondary(ev, a, b) {
     const rng = this.rng;
     const M = a.mass + b.mass;
@@ -272,7 +232,6 @@ export class ImpactSim {
     spray(rocks, 3);
   }
 
-  /** Young fragments shed surface dust at v + ω × r: each tumbling piece draws its own swirl. */
   shed() {
     const rng = this.rng;
     const dt = SIM.dt;
@@ -294,7 +253,7 @@ export class ImpactSim {
           t0: this.t,
           pos: [P.pos[0] + r[0], P.pos[1] + r[1], P.pos[2] + r[2]],
           vel: [P.vel[0] + rim[0] + u[0] * kick, P.vel[1] + rim[1] + u[1] * kick, P.vel[2] + rim[2] + u[2] * kick],
-          size: isIce ? rng.range(0.04, 0.08) : rng.range(0.05, 0.13), // fine grains: the swirl lines stay readable
+          size: isIce ? rng.range(0.04, 0.08) : rng.range(0.05, 0.13),
           seed: rng.next(),
           heat: (P.heat || 0) * Math.exp(-this.t * (P.cool || 0.4)) * 0.8,
           color: isIce ? [0.82, 0.93, 1.0] : P.color,
@@ -303,7 +262,6 @@ export class ImpactSim {
     }
   }
 
-  /** Step until sim time ≥ t (at most maxSteps per call, so a slow frame never stalls). */
   advance(t, maxSteps = 240) {
     let n = 0;
     while (this.t < t && n < maxSteps) {
@@ -313,7 +271,6 @@ export class ImpactSim {
     return n;
   }
 
-  /** Interpolated { pos, q } for piece i at time t (clamped to the stored track). */
   stateAt(i, t) {
     const T = this.frameT;
     if (!T.length) return { pos: this.pieces[i].pos, q: this.pieces[i].q };
@@ -367,7 +324,6 @@ export class ImpactSim {
     return E;
   }
 
-  /** Centre of mass position / velocity of all pieces. */
   centre() {
     const c = [0, 0, 0], v = [0, 0, 0];
     let M = 0;
@@ -381,7 +337,6 @@ export class ImpactSim {
     return { pos: c.map((x) => x / M), vel: v.map((x) => x / M), mass: M };
   }
 
-  /** escaping: positive energy relative to the rest of the cluster and already well out. */
   fates() {
     const C = this.centre();
     const Rc = Math.max(...this.pieces.filter((p) => p.kind === 'survivor').map((p) => p.radius), 1);
@@ -397,7 +352,6 @@ export class ImpactSim {
     return out;
   }
 
-  /** Groups of ≥ 2 pieces resting on each other (touching, slow relative motion). */
   clumps() {
     const ps = this.pieces;
     const parent = ps.map((_, i) => i);
@@ -419,7 +373,6 @@ export class ImpactSim {
   }
 }
 
-/** Principal inertia axes of a mesh (local frame) from its vertex spread: { axes (semi, local units), basis }. */
 export function meshShape(positions, eigen3) {
   const V = positions.length / 3;
   let cx = 0, cy = 0, cz = 0;
@@ -438,11 +391,6 @@ export function meshShape(positions, eigen3) {
   return { axes: values.map((l) => Math.sqrt(Math.max(1e-6, 3 * l))), basis: vectors };
 }
 
-/**
- * Rigid pieces for the post-impact sim from a plan.
- * @param {object} plan  planImpact() result
- * @param {Array} bodies [{ kind, q (world quat at impact), pos, scale, radius, mass, shape: meshShape(), fracture, ice, pieceColor(k) }]
- */
 export function buildSimPieces(plan, bodies) {
   const pieces = [];
   plan.bodies.forEach((bp, bi) => {
@@ -494,7 +442,6 @@ export function buildSimPieces(plan, bodies) {
   return pieces;
 }
 
-/** Per-chunk principal shapes (for pieces that do not re-form): { axes, basis } by chunk id. */
 export function chunkShapes(geometry, count, eigen3) {
   const pos = geometry.attributes.position.array, ch = geometry.attributes.aChunk.array;
   const buckets = Array.from({ length: count }, () => []);
@@ -505,7 +452,6 @@ export function chunkShapes(geometry, count, eigen3) {
   return buckets.map((b) => (b.length >= 12 ? meshShape(b, eigen3) : null));
 }
 
-/** Fixed-capacity GPU-ready dust / ice sprite buffer (unemitted slots stay hidden: t0 = 1e6). */
 export class DustBuffer {
   constructor(cap) {
     this.cap = cap;
@@ -528,7 +474,6 @@ export class DustBuffer {
     this.dirty = true;
     return true;
   }
-  /** planEjecta() dust block, emitted at t0. */
   pushBlast(D, t0 = 0) {
     const n = D.pos.length / 3;
     for (let i = 0; i < n && this.count < this.cap; i++) {
@@ -543,7 +488,6 @@ export class DustBuffer {
   }
 }
 
-/** Fixed-capacity instanced ejecta-rock buffer, one slot range per rock variant. */
 export class RockBuffer {
   constructor(cap, variants = 4) {
     this.cap = cap;
@@ -581,7 +525,6 @@ export class RockBuffer {
     this.t0[i] = t0;
     this.dirty = true;
   }
-  /** planEjecta() rocks block (t0 = 0). */
   pushBlast(K, t0 = 0) {
     for (let r = 0; r < K.variant.length; r++) {
       const s = this.slot();
@@ -589,7 +532,6 @@ export class RockBuffer {
       this.write(s.i, { matrix: K.matrix.subarray(r * 16, r * 16 + 16), vel: K.vel.subarray(r * 3, r * 3 + 3), spin: K.spin.subarray(r * 4, r * 4 + 4), spin2: K.spin2.subarray(r * 4, r * 4 + 4), heat: K.heat.subarray(r * 2, r * 2 + 2), color: K.color.subarray(r * 3, r * 3 + 3), t0 });
     }
   }
-  /** sim record (kind 3). */
   push(rec) {
     const s = this.slot();
     if (!s) return false;
@@ -611,7 +553,6 @@ function unitVecFrom(x) {
   return [r * Math.cos(t), z, r * Math.sin(t)];
 }
 
-/** Local chunk transform for the fracture shader: centre and orientation in the mesh's frame. */
 export function chunkLocal(meshPos, meshQ, scale, piecePos, pieceQ) {
   const inv = quatConj(meshQ);
   const d = quatRotate(inv, [piecePos[0] - meshPos[0], piecePos[1] - meshPos[1], piecePos[2] - meshPos[2]]);

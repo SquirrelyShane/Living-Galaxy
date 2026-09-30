@@ -1,9 +1,3 @@
-/* The parts catalogue. A station module is assembled from these; each part
- * carries its mass (t), its net power (kW, + generates, − draws), its heat
- * to reject (kW), and a raw-material split (mass shares by material id)
- * that the bill of materials rolls up. Grouped by domain so the parts
- * list reads like a yard manifest. */
-
 const P = (id, name, o) => ({ id, name, mass: 1, pwr: 0, heat: 0, ...o });
 
 export const PART_DOMAINS = {
@@ -26,7 +20,6 @@ export const PART_DOMAINS = {
 export const PARTS = {};
 function add(list) { for (const p of list) { if (PARTS[p.id]) throw new Error(`duplicate part ${p.id}`); p.domain = p.id.split(".")[0]; PARTS[p.id] = p; } }
 
-/* ---- structure ------------------------------------------------------------ */
 add([
   P("st.pressure_section", "Pressure hull section (8 m)",   { mass: 14, bom: { al_li: 0.62, ti64: 0.18, kevlar: 0.08, kapton: 0.04, epoxy: 0.08 } }),
   P("st.ring_segment",     "Rotating ring segment (30°)",   { mass: 220, bom: { al_li: 0.55, ti64: 0.2, cfrp: 0.12, kevlar: 0.08, epoxy: 0.05 } }),
@@ -41,7 +34,6 @@ add([
   P("st.rad_shield",       "Reactor shadow shield",         { mass: 60, bom: { w: 0.35, pb: 0.3, b4c: 0.15, pe: 0.2 } }),
   P("st.storm_shelter",    "Storm shelter lining",          { mass: 22, bom: { pe: 0.6, water: 0.3, al_li: 0.1 } }),
 ]);
-/* ---- power --------------------------------------------------------------- */
 add([
   P("pw.solar_wing",   "Multi-junction solar wing (2 MW)", { mass: 9, pwr: 2000, bom: { gaas: 0.12, cfrp: 0.4, kapton: 0.28, cu: 0.2 } }),
   P("pw.kilo",         "Kilopower fission unit (120 kW)",  { mass: 6, pwr: 120, heat: 380, bom: { hale: 0.1, steel304: 0.35, nak: 0.15, w: 0.1, b4c: 0.1, inconel: 0.2 } }),
@@ -54,7 +46,6 @@ add([
   P("pw.switchgear",   "Switchgear & fault isolation",     { mass: 0.9, pwr: -2, bom: { cu: 0.4, si: 0.05, al6061: 0.35, ptfe: 0.2 } }),
   P("pw.umbilical",    "Umbilical power port",             { mass: 0.5, bom: { cu: 0.5, steel304: 0.3, ptfe: 0.2 } }),
 ]);
-/* ---- thermal ------------------------------------------------------------- */
 add([
   P("tc.radiator_wing", "Deployable radiator wing (1 MW)",  { mass: 7, heat: -1000, bom: { cfrp: 0.4, al6061: 0.3, nh3: 0.15, ti64: 0.15 } }),
   P("tc.body_rad",      "Body-mounted radiator panel",      { mass: 1.5, heat: -150, bom: { al6061: 0.6, cfrp: 0.25, nh3: 0.15 } }),
@@ -63,7 +54,6 @@ add([
   P("tc.cryocooler",    "Cryocooler",                       { mass: 0.8, pwr: -8, bom: { steel304: 0.5, cu: 0.3, inconel: 0.2 } }),
   P("tc.mli",           "MLI blanket (100 m²)",             { mass: 0.15, bom: { kapton: 0.9, pe: 0.1 } }),
 ]);
-/* ---- life support -------------------------------------------------------- */
 add([
   P("ls.electrolysis",  "Water electrolysis O₂ plant",     { mass: 1.4, pwr: -12, heat: 8, bom: { steel304: 0.4, nafion: 0.1, pt: 0.001, ti64: 0.25, water: 0.25 } }),
   P("ls.sabatier",      "Sabatier CO₂ reactor",            { mass: 1.0, pwr: -5, heat: 6, bom: { inconel: 0.4, steel304: 0.4, pt: 0.001, alumina: 0.2 } }),
@@ -78,7 +68,6 @@ add([
   P("ls.o2_store",      "High-pressure O₂ / N₂ store",     { mass: 2.2, bom: { cfrp: 0.5, ti64: 0.3, lox: 0.2 } }),
   P("ls.gas_sensor",    "Cabin gas sensor net",            { mass: 0.1, pwr: -0.5, bom: { si: 0.1, al6061: 0.5, cu: 0.4 } }),
 ]);
-/* ---- water & waste ------------------------------------------------------- */
 add([
   P("wt.multifilt",    "Multifiltration & catalytic reactor", { mass: 2, pwr: -3, bom: { steel304: 0.4, activated_c: 0.2, pt: 0.001, ti64: 0.2, water: 0.2 } }),
   P("wt.urine_proc",   "Urine processor assembly",           { mass: 1, pwr: -3, bom: { steel304: 0.5, ti64: 0.3, ptfe: 0.2 } }),
@@ -90,7 +79,6 @@ add([
   P("wt.pyrolysis",    "Pyrolysis / composting unit",        { mass: 1.4, pwr: -8, heat: 5, bom: { inconel: 0.4, steel304: 0.4, alumina: 0.2 } }),
   P("wt.nutrient_rec", "Nutrient recovery",                  { mass: 0.6, pwr: -2, bom: { steel304: 0.4, nafion: 0.1, pe: 0.5 } }),
 ]);
-/* ---- agriculture --------------------------------------------------------- */
 add([
   P("ag.hydro_rack",   "Hydroponic rack module",          { mass: 1.8, pwr: -7, heat: 5, bom: { al6061: 0.4, pe: 0.25, water: 0.15, nutrient: 0.05, biomass: 0.15 } }),
   P("ag.grow_lamp",    "LED grow-light array",            { mass: 0.3, pwr: -4, heat: 3, bom: { gaas: 0.05, al6061: 0.6, cu: 0.25, fused_si: 0.1 } }),
@@ -101,7 +89,6 @@ add([
   P("ag.livestock",    "Cell-culture protein cell",       { mass: 1.2, pwr: -5, bom: { steel304: 0.5, biomass: 0.2, pharma: 0.05, pe: 0.25 } }),
   P("ag.glazing",      "Greenhouse glazing panel",        { mass: 0.9, bom: { fused_si: 0.6, ti64: 0.25, kevlar: 0.15 } }),
 ]);
-/* ---- habitation ---------------------------------------------------------- */
 add([
   P("hb.cabin_block",  "Cabin block (12 berths)",          { mass: 3, pwr: -3, bom: { al6061: 0.5, pe: 0.25, kevlar: 0.1, cfrp: 0.15 } }),
   P("hb.hygiene",      "Hygiene module",                   { mass: 0.9, pwr: -1, bom: { steel304: 0.4, pe: 0.4, al6061: 0.2 } }),
@@ -115,7 +102,6 @@ add([
   P("hb.airlock",      "Personnel airlock",                { mass: 1.6, pwr: -1, bom: { al_li: 0.5, ti64: 0.3, ptfe: 0.1, steel304: 0.1 } }),
   P("hb.transit_car",  "Spine transit car",                { mass: 2.2, pwr: -4, bom: { al6061: 0.5, cfrp: 0.2, cu: 0.15, ndfeb: 0.05, pe: 0.1 } }),
 ]);
-/* ---- computing, control, comms ------------------------------------------ */
 add([
   P("cd.core",         "Station computing core (TMR)",     { mass: 1.2, pwr: -25, heat: 25, bom: { si: 0.1, al6061: 0.4, cu: 0.3, pe: 0.2 } }),
   P("cd.network",      "Fibre / SpaceWire backbone",       { mass: 0.6, pwr: -3, bom: { fused_si: 0.3, cu: 0.3, pe: 0.4 } }),
@@ -127,7 +113,6 @@ add([
   P("cd.beacon",       "Navigation beacon",                { mass: 0.2, pwr: -0.5, bom: { al6061: 0.6, cu: 0.3, fused_si: 0.1 } }),
   P("cd.relay_mast",   "Relay mast",                       { mass: 0.8, pwr: -2, bom: { cfrp: 0.6, al6061: 0.3, cu: 0.1 } }),
 ]);
-/* ---- sensors ------------------------------------------------------------- */
 add([
   P("sw.radar",        "Approach radar",                   { mass: 0.9, pwr: -10, bom: { al6061: 0.5, cu: 0.3, si: 0.05, gaas: 0.02, pe: 0.13 } }),
   P("sw.lidar",        "Docking lidar",                    { mass: 0.4, pwr: -3, bom: { fused_si: 0.3, al6061: 0.5, si: 0.05, cu: 0.15 } }),
@@ -136,7 +121,6 @@ add([
   P("sw.spectro",      "Imaging spectrometer",             { mass: 0.6, pwr: -3, bom: { fused_si: 0.4, al6061: 0.4, si: 0.05, cu: 0.15 } }),
   P("sw.shm",          "Structural health sensor net",     { mass: 0.2, pwr: -1, bom: { si: 0.05, cu: 0.5, pe: 0.45 } }),
 ]);
-/* ---- docking & hangar ---------------------------------------------------- */
 add([
   P("dk.hangar_frame", "Hangar mouth frame (60 m)",        { mass: 90, bom: { ti64: 0.4, al_li: 0.35, steel304: 0.15, cfrp: 0.1 } }),
   P("dk.bay_door",     "Pressure bay door leaf",           { mass: 24, pwr: -6, bom: { al_li: 0.5, ti64: 0.3, ptfe: 0.1, cu: 0.1 } }),
@@ -149,7 +133,6 @@ add([
   P("dk.crane",        "Bay overhead crane",               { mass: 6, pwr: -8, bom: { steel304: 0.6, ti64: 0.2, cu: 0.2 } }),
   P("dk.field_lamp",   "Bay flood & marker lamp set",      { mass: 0.3, pwr: -3, bom: { al6061: 0.5, fused_si: 0.2, cu: 0.3 } }),
 ]);
-/* ---- manufacturing & industry -------------------------------------------- */
 add([
   P("mf.printer",      "Multi-material printer bay",       { mass: 2.5, pwr: -14, heat: 8, bom: { steel304: 0.4, al6061: 0.3, si: 0.03, cu: 0.17, pe: 0.1 } }),
   P("mf.ebeam",        "E-beam / laser sintering cell",    { mass: 2, pwr: -28, heat: 20, bom: { steel304: 0.5, cu: 0.2, inconel: 0.2, fused_si: 0.1 } }),
@@ -163,7 +146,6 @@ add([
   P("mf.spares",       "Spare-part library rack",          { mass: 1.5, bom: { al6061: 0.5, steel304: 0.3, pe: 0.2 } }),
   P("mf.chem_plant",   "Chemical process skid",            { mass: 3, pwr: -20, heat: 15, bom: { steel304: 0.5, ptfe: 0.15, inconel: 0.2, pt: 0.001, alumina: 0.15 } }),
 ]);
-/* ---- science ------------------------------------------------------------- */
 add([
   P("sc.lab_bench",    "Optical bench lab",                { mass: 2.5, pwr: -8, bom: { al6061: 0.4, fused_si: 0.2, si: 0.03, steel304: 0.2, pe: 0.17 } }),
   P("sc.biolab",       "Biocontainment lab",               { mass: 3, pwr: -10, bom: { steel304: 0.5, hepa: 0.1, fused_si: 0.15, pe: 0.25 } }),
@@ -172,7 +154,6 @@ add([
   P("sc.quantum",      "Quantum computing node",           { mass: 1.2, pwr: -20, heat: 4, bom: { rebco: 0.1, si: 0.1, cu: 0.3, al6061: 0.3, aerogel: 0.2 } }),
   P("sc.centrifuge",   "Variable-g research centrifuge",   { mass: 5, pwr: -6, bom: { al_li: 0.5, ti64: 0.2, cu: 0.15, steel304: 0.15 } }),
 ]);
-/* ---- safety & defence ---------------------------------------------------- */
 add([
   P("sf.pdc",          "Point-defence cannon",             { mass: 1.4, pwr: -8, bom: { steel304: 0.5, ti64: 0.3, cu: 0.1, w: 0.1 } }),
   P("sf.rail",         "Railgun turret",                   { mass: 7, pwr: -140, heat: 40, bom: { cu: 0.3, steel304: 0.3, ti64: 0.2, w: 0.1, rebco: 0.1 } }),
@@ -202,13 +183,11 @@ add([
   P("sf.drone_cell",   "Drone launch cell & catapult",     { mass: 2.2, pwr: -12, bom: { steel304: 0.4, al_li: 0.3, cu: 0.2, ndfeb: 0.1 } }),
   P("sf.drone_ctl",    "Drone control & datalink suite",   { mass: 0.8, pwr: -10, bom: { si: 0.1, al6061: 0.4, cu: 0.35, fused_si: 0.15 } }),
 ]);
-/* ---- in-house munitions & drone fabrication -------------------------------- */
 add([
   P("mf.drone_line",   "Drone fabrication line",           { mass: 6, pwr: -60, heat: 30, bom: { steel304: 0.4, al6061: 0.3, si: 0.05, cu: 0.15, pe: 0.1 } }),
   P("mf.munitions",    "Munitions assembly cell",          { mass: 4, pwr: -25, heat: 10, bom: { steel304: 0.5, al6061: 0.3, cu: 0.1, pe: 0.1 } }),
   P("mf.armour_press", "Armour plate press & furnace",     { mass: 14, pwr: -180, heat: 150, bom: { steel304: 0.5, inconel: 0.2, alumina: 0.15, cu: 0.15 } }),
 ]);
-/* ---- arrays ---------------------------------------------------------------- */
 add([
   P("pw.solar_petal",  "Deployable solar petal (0.5 MW)",  { mass: 2.6, pwr: 500, bom: { gaas: 0.12, cfrp: 0.4, kapton: 0.28, cu: 0.2 } }),
   P("pw.solar_sail",   "Thin-film solar sail (3 MW)",      { mass: 7, pwr: 3000, bom: { gaas: 0.06, kapton: 0.6, cfrp: 0.2, cu: 0.14 } }),
@@ -217,7 +196,6 @@ add([
   P("cd.array_slab",   "Phased-array slab (200 m²)",       { mass: 9, pwr: -110, heat: 40, bom: { si: 0.06, gaas: 0.04, al6061: 0.5, cu: 0.4 } }),
   P("cd.horn",         "Horn feed & waveguide set",        { mass: 0.5, pwr: -1, bom: { cu: 0.6, al6061: 0.4 } }),
 ]);
-/* ---- cargo & stores ------------------------------------------------------ */
 add([
   P("cg.container",    "Standard container stack",         { mass: 3, bom: { al6061: 0.7, steel304: 0.2, pe: 0.1 } }),
   P("cg.bonded_hold",  "Bonded warehouse hold",            { mass: 12, pwr: -3, bom: { al_li: 0.6, steel304: 0.25, pe: 0.15 } }),

@@ -1,11 +1,3 @@
-/* LIVING GALAXY — passive charts.
- *
- * Small inline SVG, no library: a sparkline for anything that moves over
- * time, a pentagon radar for the five temperament axes, a ring for a single
- * fraction. They are readouts, not controls — they never take pointer events
- * and they redraw in place when given new values.
- */
-
 const NS = "http://www.w3.org/2000/svg";
 
 function svg(tag, attrs = {}) {
@@ -14,11 +6,6 @@ function svg(tag, attrs = {}) {
   return e;
 }
 
-/**
- * Sparkline. `values` newest last.
- * @param host element; @param spec { w, h, min, max, tone, fill, label, format }
- * Returns { update(values) }.
- */
 export function sparkline(host, values = [], spec = {}) {
   const w = spec.w ?? 120, h = spec.h ?? 28;
   host.classList.add("spark");
@@ -56,9 +43,6 @@ export function sparkline(host, values = [], spec = {}) {
   return { update, el: host };
 }
 
-/**
- * Pentagon radar. `axes`: [{ label, value 0..1 }] (any count ≥ 3).
- */
 export function radar(host, axes = [], spec = {}) {
   const size = spec.size ?? 84;
   const c = size / 2, R = c - 10;
@@ -94,7 +78,6 @@ export function radar(host, axes = [], spec = {}) {
   return { update, el: host };
 }
 
-/** Ring gauge: a fraction with a label inside. */
 export function ring(host, value = 0, spec = {}) {
   const size = spec.size ?? 44, sw = spec.stroke ?? 3;
   const r = (size - sw) / 2, C = 2 * Math.PI * r;
@@ -113,14 +96,12 @@ export function ring(host, value = 0, spec = {}) {
     const f = Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0));
     arc.setAttribute("stroke-dashoffset", C * (1 - f));
     t.textContent = fmt(f);
-    /* only gauges that are bad when empty (hull, charge) go red at the bottom */
     if (spec.warnLow) host.dataset.level = f < 0.25 ? "low" : f < 0.6 ? "mid" : "high";
   }
   update(value);
   return { update, el: host };
 }
 
-/** Five temperament axes from a CRADLE record, in radar form. */
 export function traitAxes(rec) {
   const t = rec?.traits ?? {};
   return [

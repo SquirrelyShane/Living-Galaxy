@@ -1,17 +1,3 @@
-/* LIVING GALAXY experimental — hull deck plans.
- *
- * Every hull in the registry grows a deterministic interior from its def and
- * the pilot's seed: one to three decks on a central spine, rooms sized to the
- * hull's tier, and the industrial spaces its complex would actually carry.
- * The interior is scaled up from the exterior on purpose — a 24 m skiff has
- * a bridge you can stand in — because the deck plan is a place to be, not a
- * cutaway. `INTERIOR_SCALE` is the one knob.
- *
- * Rooms are laid out in grid cells (1 cell ≈ 3 m). Doors open onto the deck's
- * corridor band (y ∈ [0,1)); a lift shaft at `liftX` joins the decks. The
- * router in interior.js walks room → door → corridor → lift → … → room.
- */
-
 import { COMPLEXES } from "../careers/complexes.js";
 import { RANK_LETTERS } from "../careers/complexes.js";
 
@@ -29,7 +15,6 @@ function mulberry(seedStr) {
   };
 }
 
-/* Industrial spaces per complex: [name, w, h, kind]. Tier decides how many ship. */
 export const COMPLEX_ROOMS = {
   mining:         [["Ore Processing", 3, 2, "works"], ["Refinery", 3, 2, "works"], ["Core Store", 2, 1, "works"]],
   healthcare:     [["Ward", 3, 2, "med"], ["Surgery", 2, 2, "med"], ["Cryo Stack", 2, 1, "med"]],
@@ -47,13 +32,11 @@ export const COMPLEX_ROOMS = {
   terraforming:   [["Atmo Plant", 4, 2, "works"], ["Culture Vats", 3, 2, "agri"], ["Mirror Bay", 2, 1, "works"]],
   salvage:        [["Cutting Bay", 4, 2, "works"], ["Scrap Hold", 3, 2, "cargo"], ["Claims Office", 2, 1, "office"]],
   education:      [["Sim Pit", 3, 2, "lab"], ["Lecture Hall", 3, 1, "office"], ["Library", 2, 1, "office"]],
-  /* open-market hulls: a workshop, nothing more */
   general:        [["Workshop", 2, 2, "works"], ["Stores", 2, 1, "cargo"], ["Passenger Cabin", 2, 1, "office"]],
 };
 
 const DECK_NAMES = ["COMMAND", "HABITAT", "WORKS"];
 
-/** Which deck a room kind lives on when the hull has that many decks. */
 function deckFor(kind, decks) {
   if (decks === 1) return 0;
   const map2 = { bridge: 0, captain: 0, office: 0, sensor: 0, mess: 0, med: 0, brig: 0, quarters: 1, works: 1, eng: 1, cargo: 1, agri: 1, lab: 1, sec: 1, airlock: 1 };
@@ -61,11 +44,6 @@ function deckFor(kind, decks) {
   return (decks === 2 ? map2 : map3)[kind] ?? decks - 1;
 }
 
-/**
- * Grow the deck plan for a hull def.
- * @param def   shipdb def ({ id, tier, complex, dims, stats, grammar })
- * @param seed  string — the pilot's callsign, so your hull is yours
- */
 export function hullPlan(def, seed = "sol") {
   const rnd = mulberry(`${def.id}:${seed}:deck`);
   const tierIdx = Math.max(0, RANK_LETTERS.indexOf(def.tier ?? "B"));
@@ -74,12 +52,10 @@ export function hullPlan(def, seed = "sol") {
   const big = tierIdx >= 4;
   const sz = (w, h) => [Math.max(1, Math.round(w * (0.8 + tierIdx * 0.08) * INTERIOR_SCALE)), Math.max(1, Math.round(h * (0.85 + tierIdx * 0.05) * INTERIOR_SCALE))];
 
-  /* rooms every hull carries */
   const spec = [];
   const add = (name, w, h, kind, extra = {}) => spec.push({ name, w, h, kind, ...extra });
   add("Bridge", ...sz(big ? 4 : 3, 2), "bridge", { fore: true });
   add("Captain's Quarters", ...sz(2, 1), "captain");
-  /* berthing blocks: a G-tier flagship sleeps its hundred in six blocks, not thirty cabins */
   const qn = Math.min(6, Math.max(1, Math.ceil(crewCap / (big ? 8 : 2))));
   for (let i = 0; i < qn; i++) add(qn > 1 ? `Crew Quarters ${String.fromCharCode(65 + i)}` : "Crew Quarters", ...sz(2, big ? 2 : 1), "quarters");
   add(big ? "Dining Hall" : "Mess", ...sz(big ? 3 : 2, big ? 2 : 1), "mess");
@@ -90,7 +66,6 @@ export function hullPlan(def, seed = "sol") {
   if (tierIdx >= 3 || def.complex === "healthcare") add("Medbay", ...sz(2, 1), "med");
   if (tierIdx >= 4) add("Observation Lounge", ...sz(2, 1), "office");
 
-  /* the industry the hull was built for */
   const ind = COMPLEX_ROOMS[def.complex] ?? [];
   const n = Math.min(ind.length, tierIdx <= 1 ? 1 : tierIdx <= 3 ? 2 : 3);
   for (let i = 0; i < n; i++) {
@@ -98,14 +73,12 @@ export function hullPlan(def, seed = "sol") {
     add(name, ...sz(w, h), kind, { industrial: true });
   }
 
-  /* lay each deck out on its own spine */
   const deckRooms = Array.from({ length: decks }, () => []);
   spec.forEach((r) => deckRooms[deckFor(r.kind, decks)].push(r));
   const rooms = [];
   const deckMeta = [];
   let id = 0;
   deckRooms.forEach((list, d) => {
-    /* fore rooms first, aft rooms last, everything else shuffled deterministically */
     const fore = list.filter((r) => r.fore);
     const aft = list.filter((r) => r.aft);
     const mid = list.filter((r) => !r.fore && !r.aft).sort(() => rnd() - 0.5);
@@ -120,7 +93,6 @@ export function hullPlan(def, seed = "sol") {
         id: id++, deck: d, name: r.name, kind: r.kind, x, y, w: r.w, h: r.h,
         industrial: Boolean(r.industrial),
         door: { x: x + r.w / 2, y: 0.5 },
-        /* interior sensor nodes: one per room, two in big rooms */
         sensors: r.w * r.h >= 4 ? 2 : 1,
       });
       if (top) xTop += r.w + (rnd() < 0.35 ? 1 : 0);
@@ -144,21 +116,17 @@ export function hullPlan(def, seed = "sol") {
     U: 60,
     crewCap,
     rnd,
-    /* handy lookups */
     bridge: byKind("bridge")[0],
     captain: byKind("captain")[0],
     mess: byKind("mess")[0],
     quarters: byKind("quarters"),
     brig: byKind("brig")[0] ?? null,
     industrial: rooms.filter((r) => r.industrial),
-    /* maintenance robotics the hull carries: scale with tier */
     robots: 1 + Math.floor(tierIdx / 2),
   };
 }
 
-/** Where a crew member works, from what they trained as. */
 export function stationRoomFor(plan, member) {
-  /* a duty the captain assigned (crew/roster.js setDuty) beats the trade they trained in */
   if (member.duty) {
     const rooms = plan.rooms.filter((x) => x.kind === member.duty);
     if (rooms.length) return rooms[Math.abs(hash(member.id)) % rooms.length];

@@ -1,17 +1,3 @@
-/* LIVING GALAXY — the body grower, off the main thread.
- *
- * Growing a rock at the generator's own resolution costs 40–260 ms in node and
- * several times that on a phone: done in the frame loop, every rock you fly up
- * to is a hitch. So it happens here.
- *
- * The one wrinkle is that the vendored generator imports bare `three`, and a
- * module worker has no import map. Rather than edit the vendored files, this
- * loads the module graph itself: fetch each file, point `three` at the vendored
- * build by absolute URL, rewrite relative imports to blob URLs of their own
- * rewritten sources, and import the result. The graph under body.js is small
- * and acyclic (generator, debris, ores, rng, classes, materials, rockgen, bake).
- */
-
 const THREE_URL = new URL("../../vendor/three.module.min.js", import.meta.url).href;
 const blobs = new Map();
 const FROM = /((?:import|export)\s+[^'";]*?\sfrom\s*)(['"])([^'"]+)\2/g;

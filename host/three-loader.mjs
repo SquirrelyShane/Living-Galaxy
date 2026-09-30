@@ -12,7 +12,7 @@ export async function resolve(specifier, context, next) {
 // The deployment copier may omit package.json. Explicitly mark only this game's
 // .js modules as ESM so the host needs neither a global default-type flag nor
 // Node's version-dependent syntax detection.
-const gameRoot = new URL("../", import.meta.url).href;
+const gameRoot = new URL("..", import.meta.url).href;
 export async function load(url, context, next) {
   if (url.startsWith(gameRoot) && url.endsWith(".js")) {
     return next(url, { ...context, format: "module" });

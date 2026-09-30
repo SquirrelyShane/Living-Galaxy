@@ -1,13 +1,3 @@
-/* LIVING GALAXY — seeded noise for the asteroid generator.
- *
- * Taken verbatim from Shane's asteroid-generator drop-in (js/rng.js): hash,
- * PRNG, 3D value noise, fbm and ridged noise. It has no imports and nothing
- * game-specific in it, so it is carried across unchanged — the parts that
- * needed changing were the ORE CATALOGUE and the class tables, which now read
- * Living Galaxy's own minerals (see js/bodygen/classes.js).
- */
-
-
 export function hashString(str) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {

@@ -34,9 +34,9 @@ async function run(tier) {
 
   const res = await page.evaluate(async () => {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    const { sim } = await import("/js/sim.js");
-    const { currentSystem } = await import("/js/bodies.js");
-    const { nearbyRocks } = await import("/js/field.js");
+    const { sim } = await import("/js/sim/sim.js");
+    const { currentSystem } = await import("/js/world/bodies.js");
+    const { nearbyRocks } = await import("/js/world/field.js");
     const gl = window.__lgGL;
     const belt = currentSystem.belt ?? currentSystem.outerBelt;
     const mid = (belt.inner + belt.outer) / 2;

@@ -1,42 +1,9 @@
-/* LIVING GALAXY — the generator's surface, at the generator's own resolution,
- * on a mesh a phone can carry.
- *
- * Shane's asteroid generator draws its craters, grooves, grit, scarps, frost
- * and vein networks as GEOMETRY and per-vertex colour, for a survey mesh of
- * 56–158 cells a cube face. The game had been asking it for 7–12 cells, where
- * every one of those features falls between vertices: what came back was the
- * right silhouette wearing an averaged colour — a smooth grey potato that only
- * started to look like the rock as you closed to a few hundred metres.
- *
- * So a body is grown ONCE at a real detail (H cells a face) and baked:
- *
- *   - the generator's vertex lattice IS a texture already. Its cube-sphere puts
- *     every face on an (H+1)² grid, so each face's colour, metalness,
- *     roughness, emission and normal go straight into an atlas texel per
- *     vertex — six faces in a 3×2 sheet, no rasteriser, no UV unwrap. At H=48
- *     that sheet is 147×98 texels.
- *   - the mesh actually drawn is the same lattice sampled every H/L vertices
- *     (L cells a face), unwelded per face so each face carries its own atlas
- *     coordinates. Its corners ARE generator vertices, so the silhouette is the
- *     generator's; the shading between them reads the full-resolution normal.
- *
- * Texel centres sit exactly on the low mesh's vertices and a face never
- * samples outside its own block, so there is no seam bleed; a seam vertex has
- * the same data on every face that shares it, so there is no seam line.
- *
- * Pure data, no THREE — it runs in the grower worker (js/bodygen/worker.js) and
- * in node for the tests; js/bodygen/baked.js turns the arrays into a mesh.
- */
-
-/** Vertex id at every (face, i, j) of the generator's cube-sphere, in its own build order. */
 export function faceGrids(n) {
   const N1 = n + 1;
   const keyToId = new Map();
   const grids = new Int32Array(6 * N1 * N1);
   const c = [0, 0, 0];
   let next = 0, f = 0;
-  /* the loop order, key and first-seen numbering of generator.js buildCubeSphere,
-   * exactly: that is what makes a grid cell and a generator vertex the same thing */
   for (let k = 0; k < 3; k++) {
     const u = (k + 1) % 3, v = (k + 2) % 3;
     for (const side of [0, n]) {
@@ -57,14 +24,6 @@ export function faceGrids(n) {
 
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
-/**
- * Bake a grown body. `src` is the generator's vertex arrays (position, normal,
- * color, aMetal, aRough, aEmit) at detail `H`; `L` must divide `H`.
- *
- * Atlas A: rgb = √albedo (so dark carbonaceous rock survives 8 bits), a = metalness.
- * Atlas B: rgb = object-space normal ·½+½, a = roughness.
- * Atlas C: rgb = emission / emitScale — null when nothing on the body glows.
- */
 export function bakeLattice(src, H, L) {
   if (H % L) throw new Error(`bake: L=${L} does not divide H=${H}`);
   const N1 = H + 1, step = H / L, M1 = L + 1;
@@ -100,7 +59,6 @@ export function bakeLattice(src, H, L) {
     }
   }
 
-  /* the drawn mesh: every step-th lattice vertex, one unwelded grid a face */
   const vpf = M1 * M1;
   const positions = new Float32Array(6 * vpf * 3);
   const normals = new Float32Array(6 * vpf * 3);
@@ -125,7 +83,6 @@ export function bakeLattice(src, H, L) {
         uvs[o * 2 + 1] = (oy + hj + 0.5) / Ht;
       }
     }
-    /* the generator's winding: faces on the far side of an axis turn the other way */
     const far = f % 2 === 1;
     for (let j = 0; j < L; j++) {
       for (let i = 0; i < L; i++) {

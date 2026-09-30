@@ -14,7 +14,7 @@ globalThis.window = globalThis;
 const rejections = [];
 process.on("unhandledRejection", (e) => rejections.push(e));
 globalThis.fetch = async () => { throw new TypeError("network down"); };
-const { net, connectNet, disconnectNet, onRoom } = await import("../js/net.js");
+const { net, connectNet, disconnectNet, onRoom } = await import("../js/net/net.js");
 const heard = [];
 onRoom((info) => heard.push(info));
 connectNet("offline-test");

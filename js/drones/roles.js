@@ -1,41 +1,12 @@
-/* LIVING GALAXY — the drone roles.
- *
- * Pure data: what each kind of work drone is, where it can be built, what the
- * robot generator grows for it, and what it asks you once it rolls off the
- * line. The behaviour lives in ops.js; the machine in droneforge.js.
- *
- * One role per industry the careers already name, so a drone is the robot
- * version of a job a captain or a crew hand could hold:
- *
- *   miner      mining            cuts rock at a site, stashes ore at home
- *   hauler     logistics         shuttles for your miners, or runs NPC freight
- *   combat     security          defends home, guards a slot, or patrols a route
- *   salvager   salvage           tractors wreck and debris, stashes the scrap
- *   surveyor   research          sweeps an area, assays, marks the rich veins
- *   harvester  energy            ice off the frost pockets, or gas off a giant
- *   courier    commerce          buys low at one port, sells high at another
- *   relay      communications    parks on a point; an early-warning picket
- *   repair     shipyard          follows a ship, drone or port and patches it
- *
- * Drones are the small end of the board: a third to half the hold of the
- * crewed hull doing the same job, a little faster on the legs and quicker on
- * the clamps, and they never stop to eat. A company fields them — yours or an
- * NPC corporation's — and they share one work board (board.js) with the
- * crewed hulls, so a freight slot a drone takes is a slot a captain does not.
- *
- * Numbers are in world units (1 u = 10 m) and sim seconds.
- */
+export const DRONE_CAP = 10;
+export const LANE_SPEED = 36000;
+export const JUMP_SPEED = 55000;
+export const NEAR_SPEED = 640;
+export const LANE_OVER = 16000;
+export const JUMP_OVER = 800000;
+export const DOCK_SECS = 4;
+export const PRICE_K = 0.1;
 
-export const DRONE_CAP = 10;          // drones a company may field in one sky
-export const LANE_SPEED = 36000;      // u/s: a drone's micro-warp across a belt or between neighbours (a crewed hull warps at 30k)
-export const JUMP_SPEED = 55000;      // u/s: cross-system legs ride the same warp you do
-export const NEAR_SPEED = 640;        // u/s: working pace near a site (crewed hulls close at ~500)
-export const LANE_OVER = 16000;       // legs longer than this take the micro-warp
-export const JUMP_OVER = 800000;      // legs longer than this take the warp
-export const DOCK_SECS = 4;           // clamps, stash, undock — no crew to walk off the ramp
-export const PRICE_K = 0.1;           // robotgen parts cost → credits (a starter miner lands near 3k)
-
-/* who can build what: a port's sector decides its drone lines */
 const IND = ["industrial"];
 const LOG = ["logistic"];
 const MIL = ["military"];
@@ -124,14 +95,12 @@ export const DRONE_ROLES = {
 
 export const ROLE_IDS = Object.keys(DRONE_ROLES);
 
-/** Roles a port's lines can build (a claimed free port builds its sector's too). */
 export function rolesAt(st) {
   if (!st) return [];
   if (st.hostile && !st.claimed) return [];
   return ROLE_IDS.filter((id) => DRONE_ROLES[id].sectors.includes(st.sector));
 }
 
-/** What each setup question is called on the deck. */
 export const ASK_LABEL = {
   home: "Home port",
   site: "Start location",

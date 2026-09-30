@@ -1,7 +1,3 @@
-// robotgen/src/build.js — turns a spec (src/spec.js) into a THREE hierarchy.
-// THREE is injected, so this file runs against real three.js in the browser and
-// against the test stub in Node. No DOM access here (textures come in via opts).
-
 import { LEGGED, FLYING } from './spec.js';
 import { makeKit, put, group } from './parts.js';
 import { buildAttachments, buildLimbEnd, applyFinish } from './attach.js';
@@ -10,13 +6,10 @@ import { computeMassModel, centreOfMass, resolveSeparation, gravityProfile, EART
 
 const D2R = Math.PI / 180;
 
-/* a coarse box per part: used to keep limbs out of each other, and exposed on
-   the rig so a game can reuse the same volumes for hits and spacing */
 function collide(rig, node, half, offset, name, group) {
   rig.colliders.push({ node, half, offset: offset || { x: 0, y: 0, z: 0 }, name, group });
 }
 
-/* ---------- torso ---------- */
 function buildTorso(THREE, K, spec, rig, horizontal) {
   const T = spec.torso;
   const w = T.width, h = horizontal ? T.height * 0.8 : T.height, d = horizontal ? T.width * 1.65 : T.depth;
@@ -27,13 +20,11 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
   else if (T.shape === 'barrel') shell = put(THREE, g, K.cyl(w * 0.5, w * 0.5, h, 14), K.base, 0, 0, 0, 0, 0, 0, 'torso_shell');
   else if (T.shape === 'hexplate') shell = put(THREE, g, K.cyl(w * 0.55, w * 0.55, h, 6), K.base, 0, 0, 0, 0, 0, 0, 'torso_shell');
   else if (T.shape === 'pod') {
-    // an airframe pod: a capsule lying along the direction of travel
     shell = put(THREE, g, K.sph(w * 0.5, 14), K.base, 0, 0, 0, 0, 0, 0, 'torso_shell');
     shell.scale.set(1, h / w, d / w);
     put(THREE, g, K.cyl(w * 0.46, w * 0.46, Math.min(h, d) * 0.5, 12), K.second, 0, 0, 0, Math.PI / 2, 0, 0, 'pod_barrel');
   }
   else if (T.shape === 'capsule') {
-    // caps sit inside the stated torso height, or a wide chassis hangs below the hips
     const cr = Math.min(w * 0.46, h * 0.45);
     const barrel = Math.max(h * 0.1, h - 2 * cr);
     shell = put(THREE, g, K.cyl(cr, cr, barrel, 14), K.base, 0, 0, 0, 0, 0, 0, 'torso_shell');
@@ -53,12 +44,11 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
     put(THREE, g, K.torus(w * 0.46, w * 0.05, 6, 14), K.trim, 0, -h * 0.4, 0, Math.PI / 2, 0, 0);
   } else shell = put(THREE, g, K.cyl(w * 0.38, w * 0.55, h, 10), K.base, 0, 0, 0, 0, 0, 0, 'torso_shell');
   if (T.shape !== 'box' && T.shape !== 'pod' && T.shape !== 'segmented' && horizontal) shell.scale.set(1, 1, d / w);
-  if (T.sealed) {   // dust and pressure seals: gaskets over every torso seam
+  if (T.sealed) {
     put(THREE, g, K.torus(w * 0.52, h * 0.035, 6, 16), K.rubber, 0, h * 0.3, 0, Math.PI / 2, 0, 0, 'seal_top');
     put(THREE, g, K.torus(w * 0.52, h * 0.035, 6, 16), K.rubber, 0, -h * 0.3, 0, Math.PI / 2, 0, 0, 'seal_low');
   }
 
-  // chest plate
   if (T.chestPlate) {
     const pw = w * 0.72, ph = h * 0.55, pd = Math.max(0.015, d * 0.12);
     put(THREE, g, K.box(pw, ph, pd), K.second, 0, h * 0.08, d * 0.5, 0, 0, 0, 'chest_plate');
@@ -68,7 +58,6 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
       put(THREE, g, K.box(w * 0.28, h * 0.7, pd), K.second, w * 0.52, 0, d * 0.18, 0, 0, 0, 'pauldron_r');
     }
   }
-  // core lamp
   if (T.coreLamp) {
     const gm = K.glow(spec.palette.accent, 1.2);
     const cz = d * 0.52 + 0.01;
@@ -80,7 +69,6 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
     }
     g.traverse((o) => { if (o.name && o.name.startsWith('core')) rig.lamps.push(o); });
   }
-  // vents + ribs
   for (let i = 0; i < T.vents; i++) {
     const y = h * (0.32 - i * 0.16);
     put(THREE, g, K.box(w * 0.5, h * 0.035, 0.012), K.trim, 0, y, -d * 0.5 - 0.006, 0, 0, 0, 'vent' + i);
@@ -89,7 +77,6 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
     const y = h * (-0.3 + i * 0.22);
     put(THREE, g, K.box(w * 1.03, h * 0.05, d * 1.03), K.trim, 0, y, 0, 0, 0, 0, 'rib' + i);
   }
-  // backpack
   const bz = -d * 0.5;
   if (T.backpack === 'tank') {
     put(THREE, g, K.cyl(w * 0.16, w * 0.16, h * 0.8, 10), K.second, -w * 0.2, 0, bz - w * 0.16);
@@ -104,7 +91,6 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
   } else if (T.backpack === 'drum') {
     put(THREE, g, K.cyl(w * 0.28, w * 0.28, w * 0.34, 12), K.second, 0, h * 0.05, bz - w * 0.18, Math.PI / 2, 0, 0);
   }
-  // decal
   if (T.decal !== 'none') {
     const dm = K.mat('decal', spec.palette.accent, { emissive: spec.palette.accent, emissiveIntensity: 0.12, roughness: 0.6 });
     if (T.decal === 'stripe') put(THREE, g, K.box(w * 0.1, h * 0.9, 0.008), dm, w * 0.3, 0, d * 0.52 + 0.012);
@@ -114,7 +100,6 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
     } else if (T.decal === 'block') put(THREE, g, K.box(w * 0.3, h * 0.22, 0.008), dm, -w * 0.25, -h * 0.25, d * 0.52 + 0.012);
     else put(THREE, g, K.box(w * 0.2, h * 0.2, 0.008), dm, w * 0.28, -h * 0.22, d * 0.52 + 0.012);
   }
-  // hip skirt
   if (T.hipSkirt) {
     put(THREE, g, K.box(w * 0.42, h * 0.35, d * 0.3), K.second, -w * 0.3, -h * 0.55, d * 0.1);
     put(THREE, g, K.box(w * 0.42, h * 0.35, d * 0.3), K.second, w * 0.3, -h * 0.55, d * 0.1);
@@ -125,7 +110,6 @@ function buildTorso(THREE, K, spec, rig, horizontal) {
   return g;
 }
 
-/* ---------- head ---------- */
 function buildHead(THREE, K, spec, rig) {
   const H = spec.head, s = H.size;
   const head = group(THREE, null, 'head');
@@ -188,19 +172,17 @@ function buildHead(THREE, K, spec, rig) {
     }
     front = s * 0.22; halfH = s * 0.34;
   } else if (H.type === 'ball') {
-    // gimbal ball: a sensor turret that rolls inside its yoke
     put(THREE, head, K.cyl(s * 0.5, s * 0.54, s * 0.22, 12), K.second, 0, s * 0.38, 0, 0, 0, 0, 'ball_yoke');
     for (const sx of [-1, 1]) put(THREE, head, K.box(s * 0.1, s * 0.42, s * 0.18), K.second, sx * s * 0.46, s * 0.14, 0);
     const b = put(THREE, head, K.sph(s * 0.46, 14), K.base, 0, -s * 0.06, 0, 0, 0, 0, 'ball_shell');
     b.scale.set(1, 0.94, 1);
     front = s * 0.46; halfH = s * 0.42;
   } else if (H.type === 'wedge') {
-    // low-profile faceted head — what a stealth airframe carries
     const b = put(THREE, head, K.cyl(s * 0.22, s * 0.62, s * 0.5, 6), K.base, 0, 0, 0, 0, 0, 0, 'wedge_shell');
     b.scale.set(1, 1, 1.35);
     put(THREE, head, K.box(s * 0.9, s * 0.07, s * 0.7), K.trim, 0, s * 0.24, 0, 0, 0, 0, 'wedge_cap');
     front = s * 0.44; halfH = s * 0.28;
-  } else { // periscope
+  } else {
     put(THREE, head, K.box(s * 0.55, s * 0.5, s * 0.5), K.base, 0, 0, 0);
     put(THREE, head, K.box(s * 0.2, s * 0.36, s * 0.1), K.dark, 0, s * 0.08, s * 0.28);
     front = s * 0.26; halfH = s * 0.25;
@@ -213,7 +195,6 @@ function buildHead(THREE, K, spec, rig) {
   }
   if (H.crest) put(THREE, head, K.box(s * 0.07, s * 0.22, s * 0.8), K.second, 0, s * 0.46, -s * 0.05, 0, 0, 0, 'crest');
 
-  /* optics */
   const O = H.optics, r = O.radius, lens = K.glow(O.color, 1.5);
   const socket = K.dark;
   const eyeY = s * 0.06;
@@ -245,7 +226,6 @@ function buildHead(THREE, K, spec, rig) {
     rig.lamps.push(bar);
   }
 
-  /* comm antenna */
   const A = H.antenna, aLen = A.length;
   const mountPos = A.mount === 'top' ? [0, s * 0.5, -s * 0.1]
     : A.mount === 'left' ? [-s * 0.42, s * 0.32, -s * 0.1]
@@ -283,7 +263,7 @@ function buildHead(THREE, K, spec, rig) {
     b.name = 'blade_fin';
     if (A.beacon) rig.beacons.push(put(THREE, sub, K.sph(stalkR * 2, 8), K.glow(A.beaconColor, 1.5), 0, aLen * 0.92, 0));
     rig.antennas.push({ node: sub, len: aLen, phase: 0.9 });
-  } else { // ring
+  } else {
     const sub = group(THREE, ant, 'ringmount', 0, s * 0.1, 0);
     put(THREE, sub, K.cyl(stalkR * 0.7, stalkR, aLen * 0.6, 6), K.trim, 0, aLen * 0.3, 0);
     put(THREE, sub, K.torus(aLen * 0.26, stalkR * 0.8, 6, 14), K.second, 0, aLen * 0.62 + aLen * 0.24, 0, Math.PI / 2, 0, 0);
@@ -295,7 +275,6 @@ function buildHead(THREE, K, spec, rig) {
   return head;
 }
 
-/* ---------- arms ---------- */
 function buildArm(THREE, K, spec, rig, side, mountY, mountX, mountZ, lenScale = 1, limbOverride) {
   const A = spec.arms;
   const th = A.thickness * (0.62 + 0.38 * lenScale), len = A.length * lenScale;
@@ -322,10 +301,9 @@ function buildArm(THREE, K, spec, rig, side, mountY, mountX, mountZ, lenScale = 
     wristParent = w2; wristY = -wristLen;
   }
   const wrist = group(THREE, wristParent, `wrist_${side}`, 0, wristY, 0);
-  // pronation: palms face the body, as on a humanoid arm at rest
   wrist.rotation.y = (side.charAt(0) === 'L' ? 1 : -1) * 0.2;
   shoulder.rotation.x = -0.05;
-  elbow.rotation.x = -0.18;                 // elbows sit slightly flexed, never locked
+  elbow.rotation.x = -0.18;
 
   const limbType = limbOverride || ((spec.attachments && spec.attachments.limbs)
     ? spec.attachments.limbs[side.charAt(0)] : 'stock');
@@ -370,7 +348,6 @@ function buildArm(THREE, K, spec, rig, side, mountY, mountX, mountZ, lenScale = 
     put(THREE, wrist, K.box(th * 0.7, th * 0.25, th * 0.7), K.second, 0, -th * 0.15, 0, 0, 0, 0, 'pad');
   }
 
-  // hardpoint for props / tools (figure-rig style socket)
   const hp = group(THREE, wrist, `hp_hand_${side}`, 0, -th * 0.6, 0);
   rig.hardpoints.push(hp);
 
@@ -383,7 +360,6 @@ function buildArm(THREE, K, spec, rig, side, mountY, mountX, mountZ, lenScale = 
   collide(rig, foreG, [th * 0.48, fore * 0.5, th * 0.48], { x: 0, y: -fore * 0.5, z: 0 }, 'fore_' + side, 'arm');
   collide(rig, wrist, [th * 0.6, th * 0.6, th * 0.6], { x: 0, y: -th * 0.5, z: 0 }, 'hand_' + side, 'arm');
 
-  // underslung weapon
   if (A.weapon && A.weapon.side === side) {
     const W = A.weapon, wl = W.length;
     const wg = group(THREE, foreG, `weapon_${side}`, 0, -fore * 0.55, th * 0.5);
@@ -405,7 +381,6 @@ function buildArm(THREE, K, spec, rig, side, mountY, mountX, mountZ, lenScale = 
   return shoulder;
 }
 
-/* ---------- legs ---------- */
 function buildLeg(THREE, K, spec, rig, name, x, z, yaw) {
   const L = spec.locomotion;
   const th = L.thickness, len = L.legLength;
@@ -417,9 +392,6 @@ function buildLeg(THREE, K, spec, rig, name, x, z, yaw) {
   const hip = group(THREE, null, `hip_${name}`, x, 0, z);
   hip.rotation.y = yaw || 0;
   put(THREE, hip, K.sph(th * 0.8, 10), K.second, 0, 0, 0, 0, 0, 0, 'hip_ball');
-  // +rotation.z swings a hanging leg toward +x, so the LEFT hip needs a negative
-  // angle to splay outward. This was inverted and folded every walker's feet
-  // together under its belly.
   if (L.splay && (L.type !== 'biped')) hip.rotation.z = (x < 0 ? -1 : 1) * L.splay;
 
   const thighG = group(THREE, hip, `thigh_${name}`);
@@ -455,20 +427,15 @@ function buildLeg(THREE, K, spec, rig, name, x, z, yaw) {
     put(THREE, ankle, K.sph(th * 0.75, 10), K.rubber, 0, -footH * 0.5, 0, 0, 0, 0, 'foot');
   }
 
-  // how far the lowest bit of the foot actually hangs below the ankle
   const footDrop = L.footType === 'flat' ? footH * 1.25
     : L.footType === 'hoof' ? footH * 1.6
     : L.footType === 'claw' ? footH * 0.85
     : footH * 0.5;
   const splay = hip.rotation.z || 0;
   const splayCos = Math.cos(splay);
-  // a splayed leg tips the sole, so its outer corner is the real contact point
   const footHalf = L.footType === 'flat' ? th * 0.65 : L.footType === 'claw' ? th * 0.45
     : L.footType === 'hoof' ? th * 0.35 : 0;
-  // round pads keep their radius under the ankle whatever the tilt
-  const footExtra = L.footType === 'pad' ? th * 0.75 : 0;   // a round sole keeps its radius under the ankle
-  // and a sole with LENGTH digs its heel or toe in as the ankle pitches — that
-  // term was missing, which is why a splayed foot could sink into the floor
+  const footExtra = L.footType === 'pad' ? th * 0.75 : 0;
   const footLong = L.footType === 'flat' ? th * 1.25 : L.footType === 'claw' ? th * 0.6
     : L.footType === 'hoof' ? th * 0.4 : 0;
   const lateral = footHalf * Math.abs(Math.sin(splay)) + footExtra;
@@ -478,8 +445,6 @@ function buildLeg(THREE, K, spec, rig, name, x, z, yaw) {
     name, hip, thigh: thighG, knee, shin: shinG, ankle, len,
     seg: { thigh, shin, ankle: ankleLen, foot: footDrop },
     splayCos, lateral, footHalf, footExtra, footLong, radius: th * 0.7, splay0: splay, hipBase: splay,
-    // armour bolted to a limb hangs somewhere the sole is not; each plate records
-    // its own lowest corner so the ground solve can measure it too
     plates: [],
     hipLocalY: 0, phase: 0, kneeSign: 1,
     footY: -stand
@@ -491,9 +456,6 @@ function buildLeg(THREE, K, spec, rig, name, x, z, yaw) {
   return { hip, drop: stand };
 }
 
-/* ---------- tracks / wheels / hover ---------- */
-/* closed track path in the y/z plane: top run, front arc, bottom run, rear arc.
-   s grows in the direction the belt travels when the unit drives forward. */
 export function trackPoint(loop, s) {
   const L = loop.L, r = loop.r, per = loop.perimeter;
   let d = (((s % 1) + 1) % 1) * per;
@@ -535,7 +497,6 @@ function buildTracks(THREE, K, spec, rig, opts) {
     put(THREE, t, K.box(w, r * 2, unitLen), beltMat, 0, 0, 0, 0, 0, 0, 'belt');
     put(THREE, t, K.cyl(r, r, w * 1.02, 12), beltMat, 0, 0, unitLen * 0.5, 0, 0, Math.PI / 2, 'idler_f');
     put(THREE, t, K.cyl(r, r, w * 1.02, 12), beltMat, 0, 0, -unitLen * 0.5, 0, 0, Math.PI / 2, 'idler_r');
-    // sprockets spin
     const sf = put(THREE, t, K.cyl(r * 0.55, r * 0.55, w * 1.1, 8), K.second, 0, 0, unitLen * 0.5, 0, 0, Math.PI / 2, 'sprocket_f');
     const sr = put(THREE, t, K.cyl(r * 0.55, r * 0.55, w * 1.1, 8), K.second, 0, 0, -unitLen * 0.5, 0, 0, Math.PI / 2, 'sprocket_r');
     rig.spinners.push({ node: sf, driven: true, ratio: -1 / 0.55 }, { node: sr, driven: true, ratio: -1 / 0.55 });
@@ -546,8 +507,6 @@ function buildTracks(THREE, K, spec, rig, opts) {
     }
     if (L.skirt) put(THREE, t, K.box(w * 0.35, r * 1.1, unitLen * 0.95), K.second, (x < 0 ? -1 : 1) * w * 0.6, r * 0.35, 0, 0, 0, 0, 'skirt');
 
-    // the belt itself: track links riding a closed stadium path, so the plates
-    // travel around the hull instead of the end sprockets spinning on their own
     const perimeter = 2 * unitLen + Math.PI * 2 * r;
     const count = Math.max(12, Math.min(30, Math.round(perimeter / (r * 0.42))));
     const pitch = perimeter / count;
@@ -578,7 +537,6 @@ function buildWheels(THREE, K, spec, rig) {
   for (let i = 0; i < slots.length; i++) {
     const [x, z] = slots[i];
     const mount = group(THREE, g, 'wheelmount' + i, x, R, z);
-    // suspension
     if (L.suspension === 'strut') put(THREE, mount, K.cyl(R * 0.16, R * 0.16, R * 0.9, 6), K.second, -Math.sign(x || 1) * R * 0.1, R * 0.5, 0, 0.2, 0, 0);
     else if (L.suspension === 'arm') put(THREE, mount, K.box(R * 0.22, R * 0.22, R * 1.2), K.second, -Math.sign(x || 1) * R * 0.15, R * 0.35, -z * 0.25);
     else {
@@ -620,12 +578,6 @@ function buildHover(THREE, K, spec, rig) {
   return { node: g, drop: L.hoverHeight + w * 0.28 };
 }
 
-
-/* ---------- measurement ----------
-   Every geometry the kit makes records its half-extents, so the builder can
-   measure what it just built without a THREE.Box3 and without the DOM — the
-   same numbers in the browser and in the node stub. Used to sit a flyer on its
-   lowest point, because on an airframe the tallest thing is a rotor, not the head. */
 function composeM(p, r, sc) {
   const cx = Math.cos(r.x), sx = Math.sin(r.x);
   const cy = Math.cos(r.y), sy = Math.sin(r.y);
@@ -677,7 +629,6 @@ export function measureNode(node) {
   return out;
 }
 
-/* ---------- assembly ---------- */
 export function buildRobot(THREE, spec, opts = {}) {
   const K = makeKit(THREE, spec, opts);
   const rig = {
@@ -685,9 +636,7 @@ export function buildRobot(THREE, spec, opts = {}) {
     wheels: [], spinners: [], plumes: [], fingers: [], muzzles: [], hardpoints: [],
     trackMaps: [], trackLoops: [], turrets: [], lasers: [], panels: [], shields: [],
     weapons: [], colliders: [],
-    // damage model + deployables
     hovering: [], rams: [], fields: [], destroyed: [], debrisPieces: [], sparkPool: [], sparkSeed: 7919,
-    // flight + career kit
     rotors: [], tilts: [], surfaces: [], wings: [], navLights: [], beams: [], pulses: [],
     hatches: [], screens: [], armsAux: [], pods: [], trays: [],
     lean: { roll: 0, pitch: 0 }, stance: { x: 0, z: 0 }, gaitPhase: 0, walkPhase: 0, gait: 0
@@ -702,11 +651,8 @@ export function buildRobot(THREE, spec, opts = {}) {
   const torso = buildTorso(THREE, K, spec, rig, horizontal);
   const dims = torso.userData.dims;
 
-  /* drive + torso height */
   let drop = 0;
   if (LEGGED.has(L.type)) {
-    // gait phases: biped alternates, quadruped trots on diagonals,
-    // hexapod uses the alternating tripod, tripod steps in thirds
     const PHASES = {
       biped: [0, 0.5],
       quadruped: [0, 0.5, 0.5, 0],
@@ -715,7 +661,7 @@ export function buildRobot(THREE, spec, opts = {}) {
       tripod: [0, 1 / 3, 2 / 3]
     };
     const phases = PHASES[L.type];
-    const hipY = 0; // legs hang from torso bottom
+    const hipY = 0;
     const hipW = L.hipWidth || dims.w * 0.6;
     const zs = L.type === 'biped' ? [0]
       : L.type === 'tripod' ? [dims.d * 0.4, -dims.d * 0.4]
@@ -741,7 +687,6 @@ export function buildRobot(THREE, spec, opts = {}) {
           const rec = rig.legs[rig.legs.length - 1];
           rec.hipLocalY = r.hip.position.y;
           rec.phase = phases[made] || 0;
-          // front limbs of a walker bend the other way — elbow, not knee
           rec.kneeSign = (L.type !== 'biped' && z > 0.001) ? -1 : 1;
           drop = r.drop; made++;
         }
@@ -760,8 +705,6 @@ export function buildRobot(THREE, spec, opts = {}) {
     body.add(torso);
     const lift = L.type === 'hover' ? L.hoverHeight : 0;
     d.node.position.y = lift;
-    // a flyer parks on its gear: the drive node already sits at the gear height,
-    // so the pod goes straight on top of it and altitude is animation only
     const seat = FLYING.has(L.type) ? d.drop
       : lift + d.drop * (L.type === 'wheeled' ? 0.62 : 0.75) + dims.h * 0.5;
     torso.position.y = seat;
@@ -769,7 +712,7 @@ export function buildRobot(THREE, spec, opts = {}) {
     rig.hoverBaseY = lift;
     rig.driveNode = d.node;
     if (FLYING.has(L.type)) {
-      d.node.position.y = d.drop;                  // booms and wings ride with the pod
+      d.node.position.y = d.drop;
       rig.flightHeight = L.flightHeight || spec.height * 0.4;
     }
   }
@@ -779,7 +722,6 @@ export function buildRobot(THREE, spec, opts = {}) {
   rig.hull = { half: [dims.w * 0.5, dims.h * 0.5, dims.d * 0.5], offset: { x: 0, y: 0, z: 0 } };
   collide(rig, torso, rig.hull.half, rig.hull.offset, 'torso', 'torso');
 
-  /* head + neck — the column always spans the gap, so the head can't float */
   const head = buildHead(THREE, K, spec, rig);
   const H = spec.head;
   const neck = group(THREE, torso, 'neck', 0, dims.h * 0.5, horizontal ? dims.d * 0.34 : 0);
@@ -798,7 +740,6 @@ export function buildRobot(THREE, spec, opts = {}) {
   rig.headTop = dims.h * 0.5 + gap + head.userData.halfH * 2;
   collide(rig, head, [H.size * 0.5, head.userData.halfH, H.size * 0.5], null, 'head', 'head');
 
-  /* arms */
   if (spec.arms.count > 0) {
     const mountY = dims.h * (spec.arms.mount === 'high' ? 0.42 : spec.arms.mount === 'side' ? 0.12 : 0.32);
     const mountX = dims.w * 0.5 + spec.arms.thickness * 0.35;
@@ -806,7 +747,6 @@ export function buildRobot(THREE, spec, opts = {}) {
     const pairs = spec.arms.count >= 4 ? [[mountY, 0], [lowY, dims.d * 0.05]] : [[mountY, 0]];
     for (let p = 0; p < pairs.length; p++) {
       const [my, mz] = pairs[p];
-      // keep the hand off the floor: reach is capped by clearance under the mount
       const clearance = torso.position.y + my;
       const mods = spec.attachments && spec.attachments.weaponMods;
       const extra = mods ? spec.arms.thickness * (mods.laser ? 2.6 : 1.2) : 0;
@@ -816,8 +756,6 @@ export function buildRobot(THREE, spec, opts = {}) {
         ? spec.arms.thickness * 4.8 : 0;
       const reach = spec.arms.length + spec.arms.thickness * 3.2 + extra + limb;
       const lenScale = reach > clearance * 0.82 ? Math.max(0.3, (clearance * 0.82) / reach) : 1;
-      // a low mount on a wheeled or tracked chassis has no room for a blade or
-      // a drill, so that pair keeps stock hands rather than digging into the floor
       const roomy = clearance * 0.82 > spec.arms.length * lenScale + spec.arms.thickness * 7;
       const over = roomy ? undefined : 'stock';
       if (spec.arms.count === 1) {
@@ -829,14 +767,9 @@ export function buildRobot(THREE, spec, opts = {}) {
     }
   }
 
-  /* bolt-on hardware: shoulder mounts, armor panels, weapon mods, back units */
   buildAttachments(THREE, K, spec, rig, { torso, dims, head, body });
   applyFinish(THREE, K, spec, rig, { torso, dims, head, body });
 
-  /* normalise. A walker is normalised off its head-top, which is what the gait
-     and framing suites were tuned against. An airframe is normalised off what it
-     MEASURES, because the top of a flyer is a rotor disc or a fin, and the
-     bottom is a belly pod as often as it is the gear. */
   let scale, topY;
   if (FLYING.has(L.type)) {
     const m = measureNode(body);
@@ -858,8 +791,6 @@ export function buildRobot(THREE, spec, opts = {}) {
   rig.scale = scale;
   rig.standY = drop * scale;
 
-  // a reusable pool of spark motes for the damage drills — parented to the root,
-  // hidden until something is hit, and outside the mass model on purpose
   const sparkG = group(THREE, root, 'sparks');
   rig.sparkPool = [];
   const sparkMat = K.glow('#ffd08a', 2.4);
@@ -881,13 +812,6 @@ export function buildRobot(THREE, spec, opts = {}) {
   return { root, rig, dispose: rig.dispose };
 }
 
-/* ---------- animation ---------- */
-/* Gait model: hip is a sinusoid, knee gets a loading-response bump plus a big
-   swing flexion, and the ankle is solved so the foot stays flat through stance
-   and rolls off the toe. Body height is then solved from the legs each frame
-   (lowest foot defines the ground) instead of a canned bob, which is what stops
-   feet skating or sinking. Signs: +rotation.x swings a limb backwards, so hip
-   flexion is negative and knee flexion is positive. */
 const GAIT = {
   biped:     { freq: 0.95, hip: 0.42, knee: 1.10, stance: 0.62, lean: 0.06 },
   quadruped: { freq: 1.30, hip: 0.34, knee: 0.85, stance: 0.58, lean: 0.02 },
@@ -899,8 +823,8 @@ function bump(p, c, w) { let d = p - c; d -= Math.round(d); return Math.exp(-(d 
 export function gaitAngles(p, cfg) {
   p = ((p % 1) + 1) % 1;
   const hip = cfg.hip * (Math.cos(2 * Math.PI * p) - 0.12);
-  const load = cfg.knee * 0.16 * bump(p, 0.13, 0.09);      // knee yields as weight arrives
-  const swing = cfg.knee * bump(p, 0.76, 0.12);            // and folds to clear the ground
+  const load = cfg.knee * 0.16 * bump(p, 0.13, 0.09);
+  const swing = cfg.knee * bump(p, 0.76, 0.12);
   const foot = 0.32 * bump(p, 0.58, 0.07) - (p > cfg.stance ? 0.14 : 0);
   return { hip, knee: load + swing + 0.05, load, swing, foot };
 }
@@ -920,39 +844,26 @@ export function animateRobot(rig, t, dt, opts = {}) {
   rig.walkPhase = rig.gaitPhase * Math.PI * 2;
   const ph = rig.walkPhase;
 
-  /* legs + ground solve */
   if (legged && rig.legs.length) {
     const lean = rig.lean;
     let supX = 0, supZ = 0, stance = 0;
 
-    /* 1. pose the legs */
     for (const leg of rig.legs) {
       const p = ((rig.gaitPhase + leg.phase) % 1 + 1) % 1;
       const a = gaitAngles(rig.gaitPhase + leg.phase, cfg);
-      // gravity: deeper crouch the heavier the pull, floatier swing the lighter
-      // the crouch follows the limb's own bend direction, so a front limb that
-      // hinges the other way still shortens by the same amount
       const a1 = -a.hip * g - leg.kneeSign * prof.crouch * 0.55 - rig.stance.z;
-      // only the swing fold is floatier in low gravity — the stance knee is
-      // carrying weight, so scaling it there would make the robot squat on the Moon
       const a2 = leg.kneeSign * ((a.load + 0.05 + a.swing * prof.swing) * g + prof.crouch);
       const a3 = a.foot * g - a1 - a2;
       leg.thigh.rotation.x = a1;
       leg.knee.rotation.x = a2;
       leg.ankle.rotation.x = a3;
-      // balance moves where the feet are PLANTED — tilting the torso alone can
-      // never bring the centre of mass over the feet, because the legs hang off it
       leg.hipBase = leg.splay0 + rig.stance.x;
       leg.hip.rotation.z = leg.hipBase;
       leg.pose = { a1, a2, a3, stance: p < cfg.stance };
     }
 
-    /* 2. push limbs apart — this can add hip splay, so it runs before the
-          ground solve rather than after it */
     rig.separation = resolveSeparation(rig, dt);
 
-    /* 3. solve body height from the legs as they finally sit. The torso lean is
-          applied first, because tilting the body lifts one hip and drops the other. */
     if (rig.torso) {
       rig.torso.rotation.x = -cfg.lean * g + lean.pitch;
       rig.torso.rotation.z = Math.sin(ph) * 0.02 * g * prof.sway + lean.roll;
@@ -970,8 +881,6 @@ export function animateRobot(rig, t, dt, opts = {}) {
       const pitch = a1 + a2 + a3;
       let drop = chain * Math.cos(hz) + leg.footHalf * Math.abs(Math.sin(hz))
         + leg.footExtra + (leg.footLong || 0) * Math.abs(Math.sin(pitch));
-      // a limb plate can reach below the sole once the segment pitches; measure
-      // each plate's lowest corner and let the deepest thing define the ground
       for (let pi = 0; pi < leg.plates.length; pi++) {
         const pl = leg.plates[pi];
         const A = pl.seg === 'thigh' ? a1 : a1 + a2;
@@ -988,21 +897,18 @@ export function animateRobot(rig, t, dt, opts = {}) {
     }
     if (rig.torso && isFinite(lowest)) rig.torso.position.y = rig.torsoBaseY - lowest;
 
-    /* 4. balance: bring the measured centre of mass over the feet. An off-centre
-          load — a shoulder cannon, a one-sided blade — widens the stance toward
-          the load and tilts the body away from it, like carrying a heavy bag. */
     if (rig.massModel && stance > 0) {
       const com = centreOfMass(rig.massModel, rig.torso);
       rig.com = com;
       const chain = Math.max(0.15, rig.legs[0].len * 0.95);
       const dx = com.x - supX / stance, dz = com.z - supZ / stance;
-      rig.comOffset = { x: dx, z: dz };          // reported whether or not we correct
+      rig.comOffset = { x: dx, z: dz };
       rig.balanceError = Math.hypot(dx, dz);
       if (balance) {
         const k = Math.min(1, dt * prof.settle);
         rig.stance.x = Math.max(-0.4, Math.min(0.4, rig.stance.x + (dx / chain) * k));
         rig.stance.z = Math.max(-0.3, Math.min(0.3, rig.stance.z + (dz / chain) * k));
-        lean.roll = -0.45 * rig.stance.x;    // the body tilts away from the load
+        lean.roll = -0.45 * rig.stance.x;
         lean.pitch = 0.35 * rig.stance.z;
       }
     }
@@ -1022,27 +928,21 @@ export function animateRobot(rig, t, dt, opts = {}) {
     rig.separation = resolveSeparation(rig, dt);
   }
 
-  /* flight: rotors spin up, the airframe climbs off its gear and banks */
   if (FLYING.has(L.type)) animateFlight(rig, t, dt, g, prof, L);
 
-  /* hover float */
   if (L.type === 'hover' && rig.body) {
     if (rig.body.userData.baseY === undefined) rig.body.userData.baseY = rig.body.position.y;
     rig.body.position.y = rig.body.userData.baseY + Math.sin(t * 1.7 * prof.freq) * L.hoverHeight * 0.18 * prof.sway;
     rig.body.rotation.z = Math.sin(t * 1.1) * 0.02;
   }
 
-  /* tracks: the belt travels, the sprockets and road wheels follow it */
   let trackOmega = 0;
   for (const loop of rig.trackLoops) {
-    const laps = dt * g * 0.28;                       // loops per second at full speed
+    const laps = dt * g * 0.28;
     placeTrackLinks(loop, loop.offset + laps);
     trackOmega = (0.28 * loop.perimeter) / loop.radius * g;
   }
 
-  /* arms — a human arm swings opposite the leg on the same side and the elbow
-     folds the hand FORWARD, so shoulder pitch and elbow flexion have opposite
-     signs. Elbow flexion stays negative: it can never hinge backwards. */
   for (let i = 0; i < rig.arms.length; i++) {
     const a = rig.arms[i];
     const sgn = a.side.charAt(0) === 'L' ? 1 : -1;
@@ -1055,20 +955,17 @@ export function animateRobot(rig, t, dt, opts = {}) {
     }
     if (legged) {
       const gaitOf = gaitAngles(rig.gaitPhase + (sgn > 0 ? 0.5 : 0), cfg);
-      swing = gaitOf.hip * 0.62 * g;              // opposite the same-side leg
+      swing = gaitOf.hip * 0.62 * g;
       fold = 0.22 + Math.max(0, gaitOf.hip) * 0.5 * g;
     } else {
       swing = Math.sin(t * 0.9 + i) * 0.05;
       fold = 0.26 + Math.sin(t * 0.7 + i) * 0.04;
     }
     a.upper.rotation.x = swing;
-    // negative for the left arm, positive for the right: elbows out, not into the chest
-    a.upper.rotation.z = -sgn * (0.12 + 0.03 * Math.sin(t * 0.7 + i));  // shoulder.rotation.z is the solver's
+    a.upper.rotation.z = -sgn * (0.12 + 0.03 * Math.sin(t * 0.7 + i));
     a.elbow.rotation.x = -fold;
   }
 
-  /* shoulder mounts scan, laser sights flicker. While aiming, the idle scan is
-     off — whoever is aiming owns those joints. */
   for (let i = 0; i < rig.turrets.length && !opts.aim; i++) {
     const tu = rig.turrets[i];
     if (!tu.tracking) continue;
@@ -1086,14 +983,12 @@ export function animateRobot(rig, t, dt, opts = {}) {
     if (l.dot.material) l.dot.material.emissiveIntensity = 1.6 + Math.sin(t * 9 + i) * 0.5;
   }
 
-  /* wheels and other spinners */
   for (const w of rig.wheels) w.node.rotation.x += dt * g * 1.4 / Math.max(0.05, w.radius);
   for (const s of rig.spinners) {
     const rate = s.driven ? trackOmega * s.ratio : s.rate * (s.rate > 8 ? 1 : g || 0.15);
     s.node.rotation[s.axis || 'y'] += dt * rate;
   }
 
-  /* bay drones bob, hydraulic rams strike, energy fields flicker */
   for (let i = 0; i < rig.hovering.length; i++) {
     const d = rig.hovering[i];
     d.node.position.y = d.baseY + Math.sin(t * 2.2 + d.phase) * d.amp;
@@ -1109,7 +1004,6 @@ export function animateRobot(rig, t, dt, opts = {}) {
     if (m) m.opacity = 0.16 + 0.12 * (0.5 + 0.5 * Math.sin(t * 3.1 + i * 1.3));
   }
 
-  /* career kit: bay doors, emitters, work beams, screens, tool arms, trays */
   for (const h of rig.hatches) {
     const open = 0.5 + 0.5 * Math.sin(t * 0.5 + h.phase);
     h.node.rotation[h.axis === 'z' ? 'x' : 'z'] = -h.range * open * (0.2 + 0.8 * g);
@@ -1132,7 +1026,6 @@ export function animateRobot(rig, t, dt, opts = {}) {
     if (a.fore) a.fore.rotation.x = -1.1 + Math.cos(t * 0.55 + a.phase) * 0.16;
     if (!a.upper && a.base) a.base.rotation.x = 0.6 + sw * 0.1;
   }
-  // a service tray stays level however the body leans — that is the whole point of it
   for (const tray of rig.trays) {
     const roll = (rig.body ? rig.body.rotation.z : 0) + (rig.torso ? rig.torso.rotation.z : 0);
     const pitch = (rig.body ? rig.body.rotation.x : 0) + (rig.torso ? rig.torso.rotation.x : 0);
@@ -1140,7 +1033,6 @@ export function animateRobot(rig, t, dt, opts = {}) {
   }
   for (const m of rig.trackMaps) if (m.offset) m.offset.y = (m.offset.y - dt * g * 0.8) % 1;
 
-  /* head scan, optics, antennas, beacons, plumes */
   if (rig.head && !opts.aim) {
     const sw = rig.spec.head.optics.sweep;
     rig.head.rotation.y = Math.sin(t * 0.6 * sw) * 0.35 * sw;

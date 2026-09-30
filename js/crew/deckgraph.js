@@ -1,30 +1,9 @@
-/* Living Galaxy — the DECK GRAPH: what a hand decides to do with their watch.
- *
- * The genome-agent project's decision graph is a 221-node brain for wolves,
- * fungi and golems. A crew member on a hull needs about a quarter of that and
- * none of the rest, so this is a purpose-built graph for one species in one
- * place: 53 nodes, built with the same engine (js/genome/behavior-graph.js),
- * validated by the same validator, traced the same way.
- *
- * The trace is the point. Every hop leaves a line of plain language behind it,
- * and those lines are what the journal prints as "what made me act this" —
- * so a hand who stops speaking to the cook has a readable reason on file,
- * three cycles before the captain notices.
- *
- * Gating is by capability, not by role: caps come off the genome (spacer.js),
- * so a synthetic hand never reaches the courting branch because `fertile` is
- * false for its entity type, not because a flag said "robot".
- *
- */
-
 import { createGraph } from "../genome/behavior-graph.js";
 import { kindPrior } from "./learn.js";
 
 const act = (id, label, kind, why) => ({ type: "action", act: id, label, kind, why });
 
-/** Every terminal action, with the label and category the journal prints. */
 export const ACTION_META = {
-  /* the watch */
   STAND_WATCH: { label: "stands their watch", kind: "duty" },
   PATCH_HULL: { label: "works the maintenance backlog", kind: "duty" },
   DRILL: { label: "runs a boarding drill", kind: "duty" },
@@ -40,20 +19,17 @@ export const ACTION_META = {
   SLACK_OFF: { label: "finds somewhere to not be", kind: "idle" },
   TINKER: { label: "tinkers with something that was not broken yet", kind: "duty" },
   MENTOR: { label: "teaches a junior hand", kind: "care" },
-  /* the emergency */
   BRACE: { label: "straps in and holds on", kind: "survival" },
   MAN_GUNS: { label: "mans a mount", kind: "combat" },
   REPEL_BOARDERS: { label: "meets boarders at the lock", kind: "combat" },
   EMERGENCY_PATCH: { label: "throws a patch at a live breach", kind: "survival" },
   HELP_OTHER: { label: "goes back for somebody", kind: "care" },
-  /* the body */
   SLEEP: { label: "sleeps", kind: "rest" },
   NAP: { label: "gets their head down for an hour", kind: "rest" },
   EAT_MESS: { label: "eats", kind: "rest" },
   DRINK: { label: "drinks in the mess", kind: "social" },
   EXERCISE: { label: "works out", kind: "rest" },
   GROOM: { label: "cleans up", kind: "rest" },
-  /* the others */
   TALK_TO: { label: "talks to somebody", kind: "social" },
   SHARE_MEAL: { label: "takes the mess shift with someone", kind: "social" },
   PLAY_CARDS: { label: "plays cards", kind: "social" },
@@ -75,14 +51,12 @@ export const ACTION_META = {
   PRIVATE_TIME: { label: "takes the evening off with them", kind: "mate" },
   JEALOUS_WORDS: { label: "has words about somebody else's partner", kind: "social" },
   BREAK_OFF: { label: "ends it", kind: "mate" },
-  /* the self */
   STUDY: { label: "studies", kind: "study" },
   WRITE_HOME: { label: "writes home", kind: "idle" },
   BROOD: { label: "broods", kind: "idle" },
   PLAN_EXIT: { label: "quietly prices a berth elsewhere", kind: "idle" },
 };
 
-/* Small readers over the decision context. `c` is built by deckmind.js. */
 const need = (c, k) => c.needs?.[k] ?? 0;
 const cap = (c, k) => Boolean(c.caps?.[k]);
 const gene = (c, k) => c.pheno?.[k] ?? 0.5;
@@ -91,7 +65,6 @@ const anyone = (c) => (c.others ?? []).length > 0;
 const name = (c) => c.focusName ?? "them";
 
 const nodes = {
-  /* ---- routing ---------------------------------------------------------- */
   root: {
     type: "check",
     test: (c) => Boolean(c.ship?.alarm),
@@ -118,7 +91,6 @@ const nodes = {
     why: (c, k) => `by the rota this is my ${k === "watch" ? "watch" : k === "mess" ? "mess hour" : "own time"}`,
   },
 
-  /* ---- the emergency ---------------------------------------------------- */
   "alarm.entry": {
     type: "switch",
     on: (c) => c.ship.alarm,
@@ -155,7 +127,6 @@ const nodes = {
     default: "act.brace",
   },
 
-  /* ---- crisis ----------------------------------------------------------- */
   "condition.crisis": {
     type: "select",
     options: [
@@ -168,7 +139,6 @@ const nodes = {
     default: "act.brood",
   },
 
-  /* ---- the watch -------------------------------------------------------- */
   "watch.entry": {
     type: "gate",
     test: (c) => c.fitForPost,
@@ -200,7 +170,6 @@ const nodes = {
     why: (c, k) => (k === "none" ? "no post of my own, so I made myself useful" : `my post is ${c.postName ?? k}`),
   },
 
-  /* ---- the mess --------------------------------------------------------- */
   "mess.entry": {
     type: "select",
     options: [
@@ -216,7 +185,6 @@ const nodes = {
     default: "act.eatMess",
   },
 
-  /* ---- own time --------------------------------------------------------- */
   "quarters.entry": {
     type: "select",
     options: [
@@ -232,11 +200,6 @@ const nodes = {
     default: "act.sleep",
   },
 
-  /* ---- a grievance -------------------------------------------------------
-   * Owed wages, a hull nobody is maintaining, a rival on the same watch. It
-   * does not need company in the room to matter, which is why it has its own
-   * way in rather than hanging off social.entry.
-   */
   "grievance.entry": {
     type: "select",
     options: [
@@ -262,7 +225,6 @@ const nodes = {
     default: "act.nap",
   },
 
-  /* ---- other people ----------------------------------------------------- */
   "social.entry": {
     type: "gate",
     test: (c) => anyone(c),
@@ -315,12 +277,6 @@ const nodes = {
     ],
     default: "act.avoid",
   },
-  /* ---- the ladder ---------------------------------------------------------
-   * strangers → noticed → interested → courting → together → bonded. Each rung
-   * is a different thing to do, each needs the one below it, and every one of
-   * them needs the interest to be mutual (crew/romance.js gates that, not a
-   * die roll here).
-   */
   "intimate.entry": {
     type: "gate",
     test: (c) => c.romanceAllowed && Boolean(c.romance?.target),
@@ -386,7 +342,6 @@ const nodes = {
     default: "act.sitWith",
   },
 
-  /* ---- terminals -------------------------------------------------------- */
   "act.standWatch": act("STAND_WATCH", ACTION_META.STAND_WATCH.label, "duty"),
   "act.patchHull": act("PATCH_HULL", ACTION_META.PATCH_HULL.label, "duty"),
   "act.drill": act("DRILL", ACTION_META.DRILL.label, "duty"),
@@ -440,9 +395,6 @@ const nodes = {
   "act.planExit": act("PLAN_EXIT", ACTION_META.PLAN_EXIT.label, "idle"),
 };
 
-/* Router nodes stand for a whole category of thing-to-do; terminals carry
- * their own. The learned prior (learn.js) weighs options by category, so it
- * needs to know what an edge leads toward before the walk gets there. */
 export const NODE_KIND = {
   "duty.post": "duty", "watch.entry": "duty", "watch.duty": "duty",
   "rest.entry": "rest", "mess.entry": "rest", "quarters.entry": "rest",
@@ -454,7 +406,6 @@ export const NODE_KIND = {
   "alarm.breach": "survival", "condition.crisis": "rest",
 };
 
-/** The category an edge leads toward: the node's own, or its action's. */
 export function kindOfNode(id) {
   if (NODE_KIND[id]) return NODE_KIND[id];
   const n = nodes[id];
@@ -462,15 +413,6 @@ export function kindOfNode(id) {
   return null;
 }
 
-/*
- * Every `select` in the graph gets its weights bent by what this particular
- * hand has learned works for them. One wrap, here, rather than forty edits to
- * forty weight functions — and `behavior-graph.js` stays the verbatim port it
- * was, with no idea that any of this is happening.
- *
- * A hand with nothing on file multiplies by exactly one, so a fresh crew
- * behaves the way they did before there was a brain to consult.
- */
 for (const id of Object.keys(nodes)) {
   const n = nodes[id];
   if (n.type !== "select" || !n.options) continue;

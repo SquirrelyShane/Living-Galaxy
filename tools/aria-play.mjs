@@ -63,11 +63,11 @@ globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null)
 globalThis.sessionStorage = globalThis.localStorage;
 
 /* ---- the game --------------------------------------------------------------------- */
-const { sim, launchSim, tickSim, shiftClock, applyWorldSnapshot } = await import("../js/sim.js");
-const { makePilot, pilot } = await import("../js/pilot.js");
-const { shipsForComplex, shipById, DEFAULT_SHIP_ID } = await import("../js/shipdb.js");
-const { speedOf } = await import("../js/ship.js");
-const { beginPlay, stepPlay, endPlay, playReport, brainReport, play, CAREER_DEPT } = await import("../js/ariaplay.js");
+const { sim, launchSim, tickSim, shiftClock, applyWorldSnapshot } = await import("../js/sim/sim.js");
+const { makePilot, pilot } = await import("../js/flight/pilot.js");
+const { shipsForComplex, shipById, DEFAULT_SHIP_ID } = await import("../js/ships/shipdb.js");
+const { speedOf } = await import("../js/flight/ship.js");
+const { beginPlay, stepPlay, endPlay, playReport, brainReport, play, CAREER_DEPT } = await import("../js/aria/play.js");
 const { makeRelay } = await import("./aria-net.mjs");
 const { makeScreen, colourFor, paint, dim, bold, bar, money } = await import("./aria-tty.mjs");
 

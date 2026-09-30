@@ -33,12 +33,12 @@ const ok = (c, m) => { if (c) { pass++; console.log("  ok ", m); } else { fail++
 
 const r = await page.evaluate(async () => {
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { corps } = await import("/js/corps.js");
-  const { boardFor, acceptContract, contracts } = await import("/js/contracts.js");
-  const { siteById } = await import("/js/sites.js");
-  const { nearbyRocks } = await import("/js/field.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { corps } = await import("/js/corp/corps.js");
+  const { boardFor, acceptContract, contracts } = await import("/js/economy/contracts.js");
+  const { siteById } = await import("/js/economy/sites.js");
+  const { nearbyRocks } = await import("/js/world/field.js");
   for (const c of corps) c.standing = 100;
   const out = {};
   let job = null;

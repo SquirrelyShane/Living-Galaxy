@@ -1,38 +1,11 @@
-/* LIVING GALAXY — mission scripts: the schema the autopilot flies.
- *
- * A mission is a list of steps, each one an op the autopilot knows how to fly
- * (go somewhere, dock, mine, sell, wait…), with an optional target, an
- * optional "until" condition, and per-step overrides of the thrust cap and the
- * warp policy. A loop row repeats the list ×N or until a condition holds.
- * This file is the data side only — schema, validation, conditions,
- * descriptions, presets and the per-pilot save list. run.js flies them.
- *
- * Step    { id, op, target?: Ref, args?: {}, until?: Cond, thrustCap?: 0.1..1.4, warp?: "auto"|"ask"|"never", onFail?: "abort"|"skip"|"retry" }
- * Ref     { kind: "body"|"station"|"wp"|"point"|"best-buyer"|"best-smelter"|"nearest-port"|"seam"|"here"|"locked"|"trade-source"|"trade-dest", id?, x?, y?, z?, name? }
- *         (0.3.19: trade-source / trade-dest are the two ends of the run's trade route — traderoutes.js — picked at the source dock each round)
- * Cond    { k: "hold"|"credits"|"charge"|"hull"|"time"|"docked"|"cargoOf"|"loops", op, v, id? } | { all: [] } | { any: [] } | { not: Cond }
- * Mission { id, name, steps: Step[], loop: { mode: "none"|"count"|"until", count?, until?: Cond }, defaults: { thrustCap: 1, warp: "auto" }, createdAt, runs }
- */
-
-import * as simMod from "../sim.js";
-import * as shipMod from "../ship.js";
+import * as simMod from "../sim/sim.js";
+import * as shipMod from "../flight/ship.js";
 
 const sim = () => simMod.sim;
 const BATTERY = () => shipMod.BATTERY ?? 1600;
-/** package D exports batteryCap(ship) from ship.js; until it lands the rated battery is the cap */
 const batteryCap = (ship) => shipMod.batteryCap?.(ship) ?? BATTERY();
 
-/**
- * Does this hull carry a mission computer?
- *
- * Asked as a CAPABILITY, not as an upgrade id. The gate used to read
- * `hasUpgrade("nav_core")`, and the Conn learning core (11,000 cr) declares
- * `fx: { missions: true }` with a blurb that says it "carries a mission
- * computer" — so the dearer of the two cores advertised multi-step missions
- * and then did not unlock them. Anything that grants `missions` opens the
- * editor now, which is what the fx table was for.
- */
-import { hasUpgrade, fx } from "../upgrades.js";
+import { hasUpgrade, fx } from "../economy/upgrades.js";
 
 export const missionCore = () => hasUpgrade("nav_core") || Boolean(fx("missions", false));
 
@@ -43,7 +16,7 @@ export const OPS = {
   UNDOCK:   { label: "Undock" },
   MINE:     { label: "Mine",     target: "seam|point|here", until: { k: "hold", op: ">=", v: 0.9 } },
   SELL:     { label: "Sell",     args: { what: "ore" } },
-  DELIVER:  { label: "Deliver" },   // 0.3.72: close the delivery jobs due at this port
+  DELIVER:  { label: "Deliver" },
   STASH:    { label: "Stash",    args: { what: "all" } },
   SMELT:    { label: "Smelt" },
   BUY:      { label: "Buy",      args: { good: null, qty: 20 } },
@@ -53,13 +26,8 @@ export const OPS = {
   HOLD:     { label: "Hold",     until: null },
   SET:      { label: "Set",      args: {} },
   REPAIR:   { label: "Repair" },
-  /* 0.3.06 — what ARIA spends money on at a port it is already sitting at.
-   * Both are docked-only and both name their subject in args, so a step
-   * serialises and comes back without a target reference to resolve. */
   REFIT:    { label: "Refit",    args: { id: null } },
   BUILD:    { label: "Build",    args: { role: null } },
-  /* 0.3.10 — put a fabrication job on the port's line and fly on; it finishes
-   * on sim time and lands in that port's locker. */
   FAB:      { label: "Fabricate", args: { good: null, qty: 1 } },
 };
 
@@ -68,7 +36,6 @@ export const COND_KEYS = ["hold", "credits", "charge", "hull", "time", "docked",
 export const COND_OPS = [">=", "<=", ">", "<", "==", "!="];
 export const WARP_POLICIES = ["auto", "ask", "never"];
 export const ON_FAIL = ["abort", "skip", "retry"];
-/** which target kinds each op accepts (null = no target) */
 const TARGETS_FOR = {
   GOTO: REF_KINDS, APPROACH: REF_KINDS, SURVEY: ["body", "locked"],
   DOCK: ["station", "best-buyer", "best-smelter", "nearest-port", "locked", "trade-source", "trade-dest"],
@@ -81,7 +48,6 @@ const clone = (o) => (o == null ? o : JSON.parse(JSON.stringify(o, infOut), infI
 const infOut = (k, v) => (v === Infinity ? "Infinity" : v);
 const infIn = (k, v) => (v === "Infinity" ? Infinity : v);
 
-/** ids and defaults filled */
 export function makeMission(partial = {}) {
   const m = {
     id: uid("m"),
@@ -107,13 +73,10 @@ export function makeStep(op, target = null, extra = {}) {
   return { ...s, ...extra };
 }
 
-/** mission with one step, loop none — what HUD/chart buttons build */
 export function oneStep(op, target, defaults = {}) {
   const name = target?.name ? `${OPS[op]?.label ?? op} ${target.name}` : OPS[op]?.label ?? op;
   return makeMission({ name, steps: [makeStep(op, target)], defaults: { thrustCap: 1, warp: "auto", ...defaults }, builtin: true });
 }
-
-/* ---- validation ----------------------------------------------------------- */
 
 function condErrors(c, where, out) {
   if (c == null) return;
@@ -128,7 +91,6 @@ function condErrors(c, where, out) {
   if (c.k === "cargoOf" && !c.id) out.push({ step: where, msg: "cargoOf needs a good id" });
 }
 
-/** → [{ step, msg }] — empty when the mission can fly */
 export function validate(m) {
   const out = [];
   if (!m || !Array.isArray(m.steps)) return [{ step: -1, msg: "not a mission" }];
@@ -162,9 +124,6 @@ export function validate(m) {
   return out;
 }
 
-/* ---- conditions ------------------------------------------------------------ */
-
-/** → { hold, credits, charge, hull, time, docked, cargoOf(id), loops }; run.js passes its clock and loop count */
 export function snapshot({ stepStartedAt = 0, loops = 0 } = {}) {
   const S = sim();
   const ship = S.ship;
@@ -199,8 +158,6 @@ export function evalCond(cond, snap) {
   return cmp(a, cond.v);
 }
 
-/* ---- descriptions ----------------------------------------------------------- */
-
 const OPSYM = { ">=": "≥", "<=": "≤", ">": ">", "<": "<", "==": "=", "!=": "≠" };
 const FRAC = new Set(["hold", "charge"]);
 
@@ -232,7 +189,6 @@ export function describeRef(r) {
   }
 }
 
-/** → "MINE the seam until hold ≥ 90% · ≤75% · warp ask" */
 export function describeStep(step) {
   if (!step) return "";
   const parts = [step.op];
@@ -248,13 +204,10 @@ export function describeStep(step) {
   return parts.join(" · ");
 }
 
-/* ---- serialize --------------------------------------------------------------- */
-
 export function serialize(m) {
   return JSON.stringify(m ?? null, infOut);
 }
 
-/** → Mission (validated, defaults re-applied) or null when it cannot be read */
 export function deserialize(json) {
   try {
     const o = typeof json === "string" ? JSON.parse(json, infIn) : clone(json);
@@ -266,19 +219,8 @@ export function deserialize(json) {
   }
 }
 
-/* ---- presets ------------------------------------------------------------------ */
-
 const C = (k, op, v, id) => (id ? { k, op, v, id } : { k, op, v });
 
-/** MINE LOOP, TRADE RUN, SURVEY SWEEP, PATROL — fresh copies each call.
- *
- * All four are `builtin`, which is the flag `startMission` checks before it
- * asks for a Mission core. They were not, and the effect was that a pilot with
- * no core could not fly ANY multi-step plan — not even the four the game ships
- * and shows at the top of the editor. The core is meant to gate missions you
- * WRITE, not the stock loops; `fresh()` in the editor strips the flag, so the
- * moment a preset is copied out to be edited it becomes yours and is gated
- * like anything else you build. */
 export function presets() {
   return [
     makeMission({
@@ -291,14 +233,6 @@ export function presets() {
       ],
       loop: { mode: "until", until: C("credits", ">=", 50000) },
     }),
-    /* 0.3.19 — TRADE RUN flies a ROUTE (traderoutes.js): at the top of each
-     * round it picks the best buy-here-sell-there run from where the hull is,
-     * with the hold and the purse it has, docks at the source, buys the
-     * route's cargo (all the hold and purse allow), docks at the buyer, sells
-     * exactly that and nothing it was carrying for anyone else. It used to
-     * dock at the nearest port, buy the cheapest thing on the shelf, "fly" to
-     * a best buyer that was almost always the same port, and sell it straight
-     * back below what it paid — a guaranteed loss every round. */
     makeMission({
       id: "preset-trade", name: "TRADE RUN", preset: true, builtin: true,
       steps: [
@@ -329,8 +263,6 @@ export function presets() {
     }),
   ];
 }
-
-/* ---- the per-pilot save list --------------------------------------------------- */
 
 export const MISSIONS_KEY = () => `lgaa.missions.v1:${sim().callsign || "pilot"}`;
 

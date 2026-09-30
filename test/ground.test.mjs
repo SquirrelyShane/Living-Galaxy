@@ -11,14 +11,14 @@
  * was paying. The speech engine's own claim topics are held to the same sky.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stepStations } from "../js/stations.js";
-import { currentSystem } from "../js/bodies.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stepStations } from "../js/station/stations.js";
+import { currentSystem } from "../js/world/bodies.js";
 import { traffic, stepTraffic, HOSTILE_ROLES, trafficHooks } from "../js/npc/traffic.js";
 import { flow, stepFlow } from "../js/npc/flow.js";
 import { armFlight } from "../js/npc/flight.js";
-import { nearbyRocks } from "../js/field.js";
+import { nearbyRocks } from "../js/world/field.js";
 import { speech, resetSpeech, syncBand, chatter, talkTo } from "../js/npc/speech.js";
 import { TOPICS } from "../js/speech/npc-speech.js";
 import { placeOf, portCensus, underFire, threatsNear, claimSurvey, PORT_R, BELT_THREAT_R } from "../js/npc/ground.js";

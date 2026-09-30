@@ -1,35 +1,12 @@
-/* Living Galaxy — DECK ACTIONS: what a decision actually costs and buys.
- *
- * The deck graph (deckgraph.js) decides; this is the one place that says what
- * happens next. Every terminal in the graph has exactly one entry in ACTIONS,
- * and the verification suite fails if a graph action has no implementation or
- * an implementation has no node — the two cannot drift apart.
- *
- *   self     needs moved, 0..1, negative is relief
- *   vitals   morale for a person, condition for a machine
- *   trust    standing with the captain — work earns it, slacking spends it
- *   ship     the hull: wear, hull points, the drill and stow flags
- *   other    the person it was aimed at: rapport, morale
- *   eff(c)   0..1, how well this body does this thing
- *
- * Reductions are scaled by efficacy, costs are not: a tired hand pays the
- * same fatigue for a watch and gets less out of it.
- *
- */
-
-import { firstName, rapportBetween } from "../crew.js";
+import { firstName, rapportBetween } from "./ledger.js";
 import { cradle } from "../npc/cradle.js";
-import { adjustMorale, adjustTrust } from "../family.js";
+import { adjustMorale, adjustTrust } from "./family.js";
 import { adjustRapport, tieBetween, makeRivals } from "./bonds.js";
 import { diffOf } from "./journal.js";
 import { learningBonus, houseSkills } from "./heritage.js";
-import { sim } from "../sim.js";
+import { sim } from "../sim/sim.js";
 import { moment, makePartners, bond, breakOff, privateNight, actOnJealousy, canPropose, canBond } from "./romance.js";
 
-/* An ordinary evening is how most of it actually happens. These are the
- * everyday actions that also move a pair's spark, so a relationship grows out
- * of a shared watch and a game of cards rather than out of a dedicated
- * "romance" mode nobody would ever open. */
 const EVERYDAY_MOMENT = {
   TALK_TO: "talk", SHARE_MEAL: "meal", PLAY_CARDS: "cards", VENT_TO: "vent",
   MEND_FENCES: "mend", HELP_OTHER: "confide", ARGUE: "row", GOSSIP: "talk",
@@ -38,15 +15,8 @@ const EVERYDAY_MOMENT = {
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
-/** The nine needs, in the order the journal prints them. */
 export const NEED_KEYS = ["fatigue", "hunger", "social", "stress", "intimacy", "play", "grievance", "purpose", "upkeep"];
 
-/* ---- what actions actually do --------------------------------------------
- * Every terminal in the graph has exactly one entry here. `self` moves needs,
- * `vitals` moves morale or condition, `ship` moves the hull, `other` moves the
- * person it was aimed at. Efficacy scales the lot: a tired hand with the wrong
- * genes for the job still does the job, just not well.
- */
 const A = (spec) => spec;
 export const ACTIONS = {
   STAND_WATCH: A({ self: { fatigue: +0.12, purpose: -0.35 }, vitals: +0.5, eff: (c) => 0.4 + c.pheno.intellect * 0.3 + c.pheno.endurance * 0.3, ship: { wear: -0.01 } , trust: 0.25 }),
@@ -90,8 +60,6 @@ export const ACTIONS = {
   ASK_CAPTAIN: A({ self: { social: -0.35, purpose: -0.2 }, vitals: +0.5, eff: (c) => 0.3 + c.pheno.sociability * 0.7, trust: +2, ask: "word", note: (c) => `${firstName(c.m)} wants a word with the captain.` }),
   SIT_WITH: A({ self: { intimacy: -0.7, social: -0.4, stress: -0.3 }, vitals: +2.4, eff: () => 0.8, other: { rapport: +10, morale: +4 } }),
 
-  /* the ladder. Each of these moves crew/romance.js's spark for the pair as
-   * well as the numbers here; applyAction routes them through `romance`. */
   NOTICE_THEM: A({ self: { intimacy: -0.1, social: -0.15 }, vitals: +0.8, eff: (c) => 0.4 + c.pheno.perception * 0.6, romance: "notice", other: { rapport: +4 } }),
   FLIRT: A({ self: { intimacy: -0.25, social: -0.3, play: -0.2 }, vitals: +1.4, eff: (c) => 0.3 + c.pheno.sociability * 0.7, romance: "flirt", other: { rapport: +7, morale: +2 } }),
   GIVE_GIFT: A({ self: { intimacy: -0.3, social: -0.2 }, vitals: +1.2, eff: (c) => 0.4 + c.pheno.sociability * 0.6, romance: "gift", other: { rapport: +9, morale: +3 }, cost: 40 }),
@@ -109,14 +77,6 @@ export const ACTIONS = {
   PLAN_EXIT: A({ self: { grievance: -0.1, stress: -0.1 }, vitals: -0.5, eff: (c) => 0.3 + c.traits.greed * 0.7, exit: true, note: (c) => `${firstName(c.m)} has been asking after berths on other hulls.` , trust: -0.3 }),
 };
 
-/* ---- consequences -------------------------------------------------------- */
-
-/**
- * The ladder rungs. Each one moves the pair's spark (crew/romance.js) and, for
- * the three that are decisions rather than gestures, actually changes what the
- * two of them are to each other. `private` is a fade to black: it moves the
- * numbers and may start a pregnancy; it depicts nothing.
- */
 function applyRomance(ctx, kind, efficacy, rng, out) {
   const m = ctx.m;
   const other = ctx.romance?.target ?? ctx.focus?.m ?? null;
@@ -158,10 +118,6 @@ function applyRomance(ctx, kind, efficacy, rng, out) {
   }
 }
 
-/**
- * Apply one decision. Mutates the member, the people in the room and the
- * hull, and reports exactly what moved so the record can be written from it.
- */
 export function applyAction(ctx, id, spec, efficacy, rng, cycle = 0) {
   const { m, needs } = ctx;
   const out = { others: [], blocked: false, blockedReason: null, note: null, mark: null, targetName: null };
@@ -185,8 +141,6 @@ export function applyAction(ctx, id, spec, efficacy, rng, cycle = 0) {
   }
   if (spec.mark) out.mark = spec.mark;
 
-  /* a rung of the ladder is always aimed at the person it is about, whatever
-   * else was on this hand's mind when the watch started */
   const rt = ctx.romance?.target;
   const focus = spec.romance && rt
     ? { m: rt, id: rt.id, name: rt.name, tie: tieBetween(ctx.m, rt) }
@@ -236,7 +190,6 @@ export function applyAction(ctx, id, spec, efficacy, rng, cycle = 0) {
       const best = Object.entries(m.skills ?? {}).sort((a, b) => b[1] - a[1])[0];
       if (best) {
         const b = pupil.skills[best[0]] ?? 0;
-        /* a pupil raised to this trade picks it up faster from anybody */
         pupil.skills[best[0]] = Math.min(100, b + Math.round((2 * efficacy + 1) * learningBonus(pupil, best[0])));
         const changes = diffOf({ [best[0]]: b }, { [best[0]]: pupil.skills[best[0]] }, 0.5);
         if (changes) out.others.push({ id: pupil.id, name: pupil.name, species: pupil.raceId ?? "terran", relation: "junior", changes, killed: false });
@@ -246,14 +199,10 @@ export function applyAction(ctx, id, spec, efficacy, rng, cycle = 0) {
   }
   if (spec.learn) {
     m.skills ??= {};
-    /* A person studies what their body is best at — weighted toward what their
-     * house does, because that is the shelf the manuals are already on. */
     const house = new Set(houseSkills(m).slice(0, 4));
     const apt = Object.entries(ctx.body.apt)
       .map(([k, v]) => [k, v * (house.has(k) ? 1.5 : 1)])
       .sort((a, b) => b[1] - a[1]);
-    /* 0.3.53: a hand the captain set to TRAIN studies that — and only as far
-     * as their body lets them (js/crew/orders.js) */
     const focus = m.trainFocus && ctx.body.apt[m.trainFocus] != null ? m.trainFocus : null;
     const pick = focus ?? apt[Math.floor(rng() * Math.min(4, apt.length))]?.[0];
     if (pick) {
@@ -307,4 +256,3 @@ export function applyAction(ctx, id, spec, efficacy, rng, cycle = 0) {
   if (!out.note && spec.note) out.note = spec.note(ctx);
   return out;
 }
-

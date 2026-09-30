@@ -29,9 +29,9 @@ await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await page.waitForTimeout(1500);
 
 const res = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { currentSystem } = await import("/js/bodies.js");
-  const { nearbyRocks } = await import("/js/field.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { currentSystem } = await import("/js/world/bodies.js");
+  const { nearbyRocks } = await import("/js/world/field.js");
   const belt = currentSystem.belt ?? currentSystem.outerBelt;
   const mid = (belt.inner + belt.outer) / 2;
   const out = {};

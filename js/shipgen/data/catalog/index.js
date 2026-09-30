@@ -1,5 +1,3 @@
-/* Catalog assembly. One file per master-tree domain; add a domain by dropping
- * a file in this folder and listing it below. PARTS is the flat id → part index. */
 import d00 from "./00-identity.js";
 import d01 from "./01-propulsion.js";
 import d02 from "./02-fluids.js";
@@ -31,6 +29,5 @@ for (const c of CATALOG) for (const g of c.groups) for (const p of g.parts) {
   PARTS[p.id] = p;
 }
 
-/* weapon-family → catalog id, used by class doctrine */
 export const WEAPON_PART = { railgun: "wp.rail", beam: "wp.beam", missile: "wp.vls", plasma: "wp.plasma", pdc: "wp.pdc", torpedo: "wp.torp",
   coil: "wp.coil", auto: "wp.auto", flak: "wp.flak", lance: "wp.lance", particle: "wp.particle", ciws: "wp.ciws", kkv: "wp.kkv", nuke: "wp.nuke", emp: "wp.emp", cluster: "wp.cluster" };

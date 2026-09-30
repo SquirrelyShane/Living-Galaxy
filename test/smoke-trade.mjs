@@ -33,10 +33,10 @@ const ok = (c, m) => { if (c) { pass++; console.log("  ok ", m); } else { fail++
 
 const r = await page.evaluate(async () => {
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   const { openConsole, closeConsole } = await import("/js/console/console.js");
   const { mission } = await import("/js/mission/run.js");
-  const { bestRoute } = await import("/js/traderoutes.js");
+  const { bestRoute } = await import("/js/economy/traderoutes.js");
   sim.ship.credits = 20000;
   const out = { best: bestRoute()?.name ?? null };
   /* MARKET › ROUTES */

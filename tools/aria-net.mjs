@@ -1,6 +1,6 @@
 /* LIVING GALAXY — a headless hull in a shared room.
  *
- * 0.3.22. The relay the browser uses (js/net.js → server.py /net/*) is plain
+ * 0.3.22. The relay the browser uses (js/net/net.js → server.py /net/*) is plain
  * HTTP and JSON, so a node process can stand in a room exactly as a tab does:
  * push a `t:"ship"` state a few times a second, poll for everybody else's. No
  * DOM, no three.js, no renderer — just a hull that is really there, so ARIA's

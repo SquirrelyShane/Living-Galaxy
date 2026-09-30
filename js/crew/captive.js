@@ -1,38 +1,13 @@
-/* Living Galaxy — the brig, and the person in it.
- *
- * Somebody you took on a ticket is not a number waiting to be cashed. They
- * have a name on the ledger, an outfit that wants them back, a body with its
- * own grit in it, and two numbers that move with what you actually do:
- *
- *   resistance  how far they are from giving you anything. Starts high, and
- *               high is where it stays if you leave them in a cell.
- *   regard      what they make of YOU, separately. You can wear somebody down
- *               without them thinking any better of you, and that is exactly
- *               the captive who signs on and walks at the first port.
- *
- * Both have to move for a recruitment to hold. Feeding somebody, getting them
- * out of the cell, letting them work off a day on the treadmill, sitting down
- * and talking — those lower resistance AND raise regard, slowly. Threats,
- * short rations and isolation lower resistance faster and destroy regard, so
- * they get you a ransom or a delivery and never a crew member.
- *
- * Neglect is its own choice. A captive nobody visits gets harder, not softer,
- * and eventually tries the door.
- *
- */
-
-import { sim, logEvent } from "../sim.js";
-import { crew, crewHooks, crewNote, wageFor } from "../crew.js";
+import { sim, logEvent } from "../sim/sim.js";
+import { crew, crewHooks, crewNote, wageFor } from "./ledger.js";
 import { cradle } from "../npc/cradle.js";
 import { boarding } from "../interior/boarding.js";
-import { corpById, adjustStanding } from "../corps.js";
+import { corpById, adjustStanding } from "../corp/corps.js";
 import { bodyOf } from "./deckmind.js";
 import { GENE } from "../genome/spacer.js";
 
-/** Resistance at or below this, and regard at or above it, before anyone will hear an offer. */
 export const RECRUIT_RESISTANCE = 28;
 export const RECRUIT_REGARD = 55;
-/** A captive nobody attends to hardens by this much a cycle. */
 export const NEGLECT_DRIFT = 2.5;
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -44,9 +19,6 @@ function rollFrom(seed) {
   return ((h >>> 0) % 10000) / 10000;
 }
 
-/* ---- the state ------------------------------------------------------------ */
-
-/** The two numbers, plus the conditions they are being held in. */
 export function captiveState(p) {
   if (!p) return null;
   if (p.state) return p.state;
@@ -57,18 +29,16 @@ export function captiveState(p) {
   const loyal = body?.traits?.loyalty ?? 0.5;
   const pain = g ? (g[GENE.PAIN_THRESHOLD] ?? 0.5) : 0.5;
   p.state = {
-    /* somebody stubborn, loyal to whoever they flew for, and hard to shift
-     * starts a long way from telling you anything */
     resistance: clamp(Math.round(52 + grit * 26 + loyal * 18 + pain * 10), 30, 100),
     regard: clamp(Math.round(22 + (1 - grit) * 14), 5, 45),
     health: 100,
-    fed: 0,           // cycles since a decent meal
+    fed: 0,
     clothed: false,
-    outOfCell: false, // moved to quarters under watch
+    outOfCell: false,
     cycles: 0,
-    attempts: 0,      // recruitment offers made
+    attempts: 0,
     escapes: 0,
-    done: {},         // action id → cycle it was last used
+    done: {},
     log: [],
   };
   return p.state;
@@ -80,7 +50,6 @@ function note(p, line) {
   st.log.length = Math.min(st.log.length, 14);
 }
 
-/** Everyone in the brig, with their numbers. */
 export function captives() {
   return boarding.brig.map((p) => ({ p, st: captiveState(p) }));
 }
@@ -89,11 +58,6 @@ export function captiveById(id) {
   return boarding.brig.find((p) => p.id === id) ?? null;
 }
 
-/* ---- what you can do ------------------------------------------------------
- * `resist` and `regard` are the two numbers. `cost` is credits; `needs` is a
- * precondition checked against the ship. Everything humane moves both numbers
- * the right way and slowly; everything coercive buys resistance with regard.
- */
 export const INTERACTIONS = [
   {
     id: "feed", label: "Bring them a meal", kind: "care", cooldown: 1, cost: 12,
@@ -170,7 +134,6 @@ export const INTERACTIONS = [
 
 export const INTERACTION_BY_ID = Object.fromEntries(INTERACTIONS.map((a) => [a.id, a]));
 
-/** Whether this can be done to this captive right now. { ok, why } */
 export function canInteract(p, actionId) {
   const a = INTERACTION_BY_ID[actionId];
   if (!a) return { ok: false, why: "no such thing" };
@@ -186,7 +149,6 @@ export function canInteract(p, actionId) {
   return { ok: true };
 }
 
-/** Do it. Returns { ok, line, resistance, regard, escaped }. */
 export function interact(p, actionId, rng = Math.random) {
   const can = canInteract(p, actionId);
   if (!can.ok) return { ok: false, why: can.why };
@@ -194,10 +156,6 @@ export function interact(p, actionId, rng = Math.random) {
   const st = captiveState(p);
 
   if (a.cost && sim.ship) sim.ship.credits -= a.cost;
-  /* Resistance is easier to move when somebody already thinks well of you —
-   * that is the whole shape of it, and it is why the coercive route gets you a
-   * delivery and never a crew member. Regard itself tapers: the first meal
-   * matters far more than the ninth. */
   const warmth = 0.7 + (st.regard / 100) * 0.8;
   const d = a.resist ?? 0;
   st.resistance = clamp(st.resistance + (d < 0 ? d * (a.kind === "hard" ? 1 : warmth) : d), 0, 100);
@@ -211,15 +169,11 @@ export function interact(p, actionId, rng = Math.random) {
   const line = a.line(p.name.split(" ")[0], corp);
   note(p, line);
 
-  /* the ones that open a door sometimes open a door */
   let escaped = false;
   if (a.risk && rng() < a.risk * (st.resistance / 100)) escaped = tryEscape(p, rng, "during " + a.label.toLowerCase());
   return { ok: true, line, resistance: r1(st.resistance), regard: r1(st.regard), escaped };
 }
 
-/* ---- the offer ------------------------------------------------------------ */
-
-/** Would they even listen? { ok, why, chance } */
 export function canRecruit(p) {
   const st = captiveState(p);
   if (!st) return { ok: false, why: "nobody there" };
@@ -229,7 +183,6 @@ export function canRecruit(p) {
   const rec = cradle.get(p.id);
   const body = rec ? bodyOf({ id: rec.id, raceId: rec.raceId, seed: rec.seed }) : null;
   const loyal = body?.traits?.loyalty ?? 0.5;
-  /* somebody loyal is harder to turn, and their old outfit still matters */
   const corp = p.ownerCorp ? corpById(p.ownerCorp) : null;
   const theirSide = corp ? clamp((corp.standing ?? 0) / 100, -1, 1) : 0;
   const chance = clamp(
@@ -240,10 +193,6 @@ export function canRecruit(p) {
   return { ok: true, chance: Math.round(chance * 100) / 100 };
 }
 
-/**
- * Ask. A refusal costs regard and makes the next one harder, so this is not a
- * button to hammer — it is a judgement about whether you have done enough.
- */
 export function recruit(p, rng = Math.random) {
   const can = canRecruit(p);
   if (!can.ok) return { ok: false, why: can.why };
@@ -277,7 +226,6 @@ export function recruit(p, rng = Math.random) {
     cradle.note(rec.id, `Signed on with ${crew.employer ?? "a pilot"} out of their brig`);
     cradle.put(rec);
   }
-  /* their old outfit takes it very personally, and the ticket is gone */
   if (p.ownerCorp) adjustStanding(p.ownerCorp, -14, `turned ${p.name}`);
   if (p.issuerCorp && p.fromTicket) adjustStanding(p.issuerCorp, -10, `never delivered ${p.name}`);
   crewNote(`${p.name} has signed on. They came aboard in cuffs.`);
@@ -285,9 +233,6 @@ export function recruit(p, rng = Math.random) {
   return { ok: true, signed: true, chance: can.chance, member };
 }
 
-/* ---- the door -------------------------------------------------------------- */
-
-/** How hard it is to walk off this hull. Crew on watch, robots, and a real cell. */
 export function guardStrength() {
   let g = 0.4;
   for (const m of crew.aboard) {
@@ -321,23 +266,19 @@ function tryEscape(p, rng, when = "") {
   return true;
 }
 
-/** Per pay cycle: conditions tell, neglect hardens, and doors get tried. */
 export function tickCaptives() {
   for (const p of [...boarding.brig]) {
     const st = captiveState(p);
     st.cycles++;
     st.fed++;
 
-    /* hunger, and the cell itself */
     if (st.fed > 2) { st.health = clamp(st.health - 3, 1, 100); st.regard = clamp(st.regard - 3, 0, 100); }
     if (!st.clothed) st.regard = clamp(st.regard - 0.6, 0, 100);
     if (!st.outOfCell) st.health = clamp(st.health - 0.6, 1, 100);
 
-    /* a captive nobody visits gets harder, not softer */
     const touched = Object.values(st.done).some((c) => st.cycles - c <= 1);
     st.resistance = clamp(st.resistance + (touched ? -0.4 : NEGLECT_DRIFT), 0, 100);
 
-    /* a broken one is not a recruit, whatever the numbers say */
     if (st.health < 25) st.regard = clamp(st.regard - 2, 0, 100);
 
     if (rollFrom(`${p.id}:esc:${st.cycles}`) < 0.1) tryEscape(p, () => rollFrom(`${p.id}:roll:${st.cycles}`), "on the night watch");
@@ -345,12 +286,9 @@ export function tickCaptives() {
   return boarding.brig.length;
 }
 
-/* ---- reading it back ------------------------------------------------------- */
-
 const RESIST_WORD = (v) => (v > 80 ? "stone" : v > 60 ? "hard" : v > 40 ? "wearing" : v > RECRUIT_RESISTANCE ? "close" : "would listen");
 const REGARD_WORD = (v) => (v < 20 ? "hates you" : v < 40 ? "wary" : v < RECRUIT_REGARD ? "civil" : v < 75 ? "warm" : "owes you one");
 
-/** One line on where a captive stands. */
 export function captiveLine(p) {
   const st = captiveState(p);
   return `${p.name} — ${RESIST_WORD(st.resistance)} (${Math.round(st.resistance)}), ${REGARD_WORD(st.regard)} (${Math.round(st.regard)}), health ${Math.round(st.health)}%${st.outOfCell ? ", out of the cell" : ""}`;

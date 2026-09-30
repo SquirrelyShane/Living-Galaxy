@@ -198,7 +198,7 @@ await page.waitForTimeout(1800);
 
 /* ---- the tape ---------------------------------------------------------------- */
 {
-  const before = await page.evaluate(async () => (await import("/js/recorder.js")).recorderReport());
+  const before = await page.evaluate(async () => (await import("/js/flight/recorder.js")).recorderReport());
   ok(before.total > 0, `the tape is already recording (${before.total} records from getting this far)`);
 
   /* a tap the pilot can name */
@@ -207,7 +207,7 @@ await page.waitForTimeout(1800);
   await page.click("#btn-cam");
   await page.waitForTimeout(250);
   const taps = await page.evaluate(async () => {
-    const { tape } = await import("/js/recorder.js");
+    const { tape } = await import("/js/flight/recorder.js");
     return tape({ kind: "tap" }).slice(-4).map((r) => ({ act: r.act, arg: r.arg, keys: Object.keys(r.s).length, t: r.s.t, by: r.by }));
   });
   ok(taps.some((t) => t.act === "btn-cam"), `a tap is filed by the control's id (${taps.map((t) => t.act).join(", ")})`);
@@ -216,9 +216,9 @@ await page.waitForTimeout(1800);
 
   /* an order, not a tap */
   const order = await page.evaluate(async () => {
-    const { setMiningMode } = await import("/js/sim.js");
+    const { setMiningMode } = await import("/js/sim/sim.js");
     setMiningMode("closest");
-    const { tape } = await import("/js/recorder.js");
+    const { tape } = await import("/js/flight/recorder.js");
     const r = tape({ kind: "order" }).at(-1);
     return r ? { act: r.act, arg: r.arg } : null;
   });
@@ -226,12 +226,12 @@ await page.waitForTimeout(1800);
 
   /* ARIA's records are kept apart from the pilot's */
   const split = await page.evaluate(async () => {
-    const { ariaTakeConn, ariaRelease } = await import("/js/aria.js");
+    const { ariaTakeConn, ariaRelease } = await import("/js/aria/aria.js");
     const r = ariaTakeConn();
     if (!r.ok) return { error: r.error };
-    const { setMiningMode } = await import("/js/sim.js");
+    const { setMiningMode } = await import("/js/sim/sim.js");
     setMiningMode("off");
-    const { recorderReport } = await import("/js/recorder.js");
+    const { recorderReport } = await import("/js/flight/recorder.js");
     const rep = recorderReport();
     ariaRelease();
     return rep;
@@ -242,8 +242,8 @@ await page.waitForTimeout(1800);
 
   /* outcomes settle */
   const settled = await page.evaluate(async () => {
-    const { record, settle, tape } = await import("/js/recorder.js");
-    const { sim } = await import("/js/sim.js");
+    const { record, settle, tape } = await import("/js/flight/recorder.js");
+    const { sim } = await import("/js/sim/sim.js");
     const r = record("order", "smoketest", "x");
     const cr0 = sim.ship.credits;
     sim.ship.credits += 5000;
@@ -259,7 +259,7 @@ await page.waitForTimeout(1800);
 
   /* JSONL */
   const jsonl = await page.evaluate(async () => {
-    const { tapeJSONL } = await import("/js/recorder.js");
+    const { tapeJSONL } = await import("/js/flight/recorder.js");
     const lines = tapeJSONL().split("\n");
     let bad = 0;
     for (const l of lines) { try { JSON.parse(l); } catch { bad++; } }
@@ -316,7 +316,7 @@ await page.waitForTimeout(1800);
     const clicks = [];
     const realClick = HTMLAnchorElement.prototype.click;
     HTMLAnchorElement.prototype.click = function () { clicks.push(this.download); };
-    const { downloadTape } = await import("/js/recorder.js");
+    const { downloadTape } = await import("/js/flight/recorder.js");
     const okk = downloadTape();
     HTMLAnchorElement.prototype.click = realClick;
     URL.createObjectURL = real;
@@ -328,15 +328,15 @@ await page.waitForTimeout(1800);
   /* The console is a full-screen overlay, so its own body sits over the CON
    * chip — close it through the toggle rather than a synthetic click that the
    * panel would intercept. */
-  await page.evaluate(async () => (await import("/js/sim.js")).setTerminal(false));
+  await page.evaluate(async () => (await import("/js/sim/sim.js")).setTerminal(false));
   await page.waitForTimeout(300);
 }
 
 /* ---- ARIA's new jobs are reachable from a real sky --------------------------- */
 {
   const plan = await page.evaluate(async () => {
-    const { sim } = await import("/js/sim.js");
-    const { refitPlan, buildPlan, ariaPilot } = await import("/js/aria-pilot.js");
+    const { sim } = await import("/js/sim/sim.js");
+    const { refitPlan, buildPlan, ariaPilot } = await import("/js/aria/pilot.js");
     sim.ship.hull = 100;
     sim.ship.credits = 500000;
     ariaPilot.investAt = 0;

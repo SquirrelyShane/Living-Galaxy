@@ -1,5 +1,3 @@
-/** Seeded PRNG, hashing, and 3D gradient / fractal noise. */
-
 export function hashString(str) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -47,7 +45,6 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-/** Gradient dot product for one lattice corner — allocation-free (hot path). */
 function gdot(ix, iy, iz, seed, dx, dy, dz) {
   let n = Math.imul(ix, 374761393) ^ Math.imul(iy, 668265263) ^ Math.imul(iz, 1274126177) ^ seed;
   n = Math.imul(n ^ (n >>> 13), 1274126177);
@@ -129,7 +126,6 @@ export function randomSeedString(rng = Math.random) {
   return `${a}-${b}-${n}`;
 }
 
-/** Power-law sample for N(>D) ∝ D^-alpha between dMin and dMax. */
 export function powerLaw(rng, dMin, dMax, alpha = 2.3) {
   const u = rng.next();
   const a = Math.pow(dMin, -alpha);
@@ -137,14 +133,12 @@ export function powerLaw(rng, dMin, dMax, alpha = 2.3) {
   return Math.pow(a - u * (a - b), -1 / alpha);
 }
 
-/** Box–Muller gaussian (one sample). */
 export function gauss(rng) {
   const u = Math.max(1e-9, rng.next());
   const v = rng.next();
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
-/** Uniform unit vector as [x, y, z]. */
 export function unitVec(rng) {
   const z = rng.next() * 2 - 1;
   const t = rng.next() * Math.PI * 2;

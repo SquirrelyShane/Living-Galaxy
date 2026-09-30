@@ -93,7 +93,7 @@ if (portPx) {
 const cold = await page.evaluate(async () => {
   const { traffic } = await import("/js/npc/traffic.js");
   const { flow } = await import("/js/npc/flow.js");
-  const { knownContacts } = await import("/js/contacts.js");
+  const { knownContacts } = await import("/js/flight/contacts.js");
   const known = knownContacts();
   const hulls = [...traffic, ...flow];
   /* Every true hull name in the sky, and the ones the register has actually
@@ -198,9 +198,9 @@ await page.waitForTimeout(400);
  * ceiling far above what it needs and the actual cost reported either way.
  * A slow machine now takes longer; it does not fail. */
 const resolved = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   const { traffic } = await import("/js/npc/traffic.js");
-  const { levelFor, knownContacts } = await import("/js/contacts.js");
+  const { levelFor, knownContacts } = await import("/js/flight/contacts.js");
   const n = traffic.find((v) => v.visible !== false);
   if (!n) return null;
   const hold = setInterval(() => {
@@ -270,9 +270,9 @@ ok(warm > 0, `${warm} contacts drawn once something is resolved`);
 
   /* the busiest the panel ever gets */
   await page.evaluate(async () => {
-    const m = await import("/js/map.js");
-    const { useGameStore } = await import("/js/store.js");
-    const { BODIES } = await import("/js/bodies.js");
+    const m = await import("/js/ui/map.js");
+    const { useGameStore } = await import("/js/core/store.js");
+    const { BODIES } = await import("/js/world/bodies.js");
     m.openMapDirectory("ports");
     /* a world in the sheet, so the stats grid and the action row are drawn */
     const w = BODIES.find((x) => x.kind !== "star");

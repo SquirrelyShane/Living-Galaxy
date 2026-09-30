@@ -1,13 +1,6 @@
-/**
- * Shared skill taxonomy for the space-age career system.
- * Skills are 0–100 by default. Ranks gate on minimums; specializations
- * demand higher peaks. Characters can multi-class across complexes
- * because several skills appear in more than one track.
- */
 export const SKILL_CAP = 100;
 
 export const SKILLS = {
-  // Extraction & field
   geology: {
     id: "geology",
     name: "Geology & Assay",
@@ -33,7 +26,6 @@ export const SKILLS = {
     description: "Cutting, identifying, and recovering wreckage without destroying value.",
   },
 
-  // Medical
   firstAid: {
     id: "firstAid",
     name: "Emergency Medicine",
@@ -71,7 +63,6 @@ export const SKILLS = {
     description: "Long-haul isolation, cabin fever, and post-trauma support.",
   },
 
-  // Industrial / yard
   hullcraft: {
     id: "hullcraft",
     name: "Hullcraft",
@@ -109,7 +100,6 @@ export const SKILLS = {
     description: "Assembler programming, feedstock purity, and runaway containment.",
   },
 
-  // Logistics & command
   supplyChain: {
     id: "supplyChain",
     name: "Supply Chain",
@@ -135,7 +125,6 @@ export const SKILLS = {
     description: "Contracts, tariffs, futures, and station market sense.",
   },
 
-  // Infrastructure
   energySystems: {
     id: "energySystems",
     name: "Energy Systems",
@@ -167,7 +156,6 @@ export const SKILLS = {
     description: "Atmosphere, hydrology, insolation, and multi-decade works.",
   },
 
-  // Knowledge & security
   research: {
     id: "research",
     name: "Research Method",

@@ -1,24 +1,3 @@
-/**
- * Progression engine. Pure functions — drop into a browser RPG or Node.
- *
- * Character shape expected:
- * {
- *   id, name,
- *   cycles: number,                 // time served in current complex (or total; see options)
- *   skills: { [skillId]: 0-100 },
- *   certs: string[],
- *   careers: {
- *     [complexId]: {
- *       rank: "A"|"B"|...|"G",
- *       specialization: string|null,
- *       cyclesInComplex: number,
- *       history: Array<{ rank, atCycle, note }>
- *     }
- *   },
- *   activeComplex: string|null
- * }
- */
-
 import { SKILLS, SKILL_CAP, createEmptySkills } from "./skills.js";
 import {
   COMPLEXES,
@@ -106,10 +85,6 @@ export function evaluateRequirements(character, complexId, rank) {
     }
   }
 
-  /* Certificates are awarded by the rung itself on promotion (see promote()),
-   * so they are a record of the climb, not a gate — gating on them here
-   * deadlocked every ladder at rank A because nothing else ever grants one.
-   * A cert that some *earlier* rung should have awarded still blocks. */
   return missing;
 }
 
@@ -152,7 +127,6 @@ export function promote(character, complexId) {
     atCycle: next.cycles,
     note: "promoted",
   });
-  // Award the rank's certs so later ranks can require them.
   for (const cert of check.next.req.certs || []) {
     if (!next.certs.includes(cert)) next.certs.push(cert);
   }
@@ -208,10 +182,6 @@ export function specialize(character, complexId, specId) {
   return { ok: true, character: next, spec: check.spec };
 }
 
-/**
- * Lateral transfer: keep cycles, start the new ladder at A (or B if skills
- * already smash the A/B gates — useful for Surveyor → other survey roles).
- */
 export function transferEligibility(character, fromId, toId) {
   const from = getComplex(fromId);
   const to = getComplex(toId);
@@ -248,11 +218,6 @@ export function grantCert(character, cert) {
   return { ok: true, character: next };
 }
 
-/**
- * Skills the character is currently studying toward: the next rung's
- * requirements plus those of any specialisation open at the current rank,
- * minus the complex's primaries (which drip on their own).
- */
 export function studySkills(character, complexId) {
   const career = character.careers[complexId];
   const complex = getComplex(complexId);
@@ -280,7 +245,6 @@ export function tickCycle(character, opts = {}) {
     next.careers[active].cyclesInComplex += 1;
     const rank = getRank(active, next.careers[active].rank);
     if (rank) next.scrip += rank.pay;
-    // Gentle on-the-job skill drip for primary skills.
     const complex = getComplex(active);
     if (complex && opts.train !== false) {
       const chance = opts.trainChance ?? 0.45;
@@ -291,10 +255,6 @@ export function tickCycle(character, opts = {}) {
           next.skills[skill] = Math.min(SKILL_CAP, (next.skills[skill] ?? 0) + amount);
         }
       }
-      // The job trains for the job above it: whatever the next rung (and any
-      // specialisation already open to this rank) asks for that is not a
-      // primary drips at half rate, so no ladder can dead-end on a skill
-      // nothing in the sky feeds.
       for (const skill of studySkills(next, active)) {
         if (rnd() < chance * 0.5) {
           next.skills[skill] = Math.min(SKILL_CAP, (next.skills[skill] ?? 0) + amount);

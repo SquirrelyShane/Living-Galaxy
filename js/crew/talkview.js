@@ -1,19 +1,7 @@
-/* LIVING GALAXY — the talk view.
- *
- * One DOM for talking to a hand, mounted by CONSOLE › CREW › TALK and by the
- * interior deck (interior.js paintDialogue). Portrait line, trust tier +
- * morale, greeting, topic buttons (locked ones greyed with the unlock hint),
- * choice buttons after a line, a free-text line answered by talk.answerFreeText,
- * and the last six exchanges from memory. Contract: PLAN.md §4.2, §3 CREW › TALK.
- *
- * Uses the interior's `.in-talk-*` classes (interior.css) so it reads the same
- * on the deck and in the console; button classes are the caller's.
- */
-
-import { crew, bondLine } from "../crew.js";
-import { familyOf, trustOf } from "../family.js";
+import { crew, bondLine } from "./ledger.js";
+import { familyOf, trustOf } from "./family.js";
 import { cradle, traitLine } from "../npc/cradle.js";
-import { RACES } from "../races.js";
+import { RACES } from "./races.js";
 import { topicsFor, lockedTopicsFor, open, choose, answerFreeText, greet, talkLog, tierOf, TIER_NAMES } from "./talk.js";
 import { beatsFor, playBeat, isRunning, advanceBeat } from "./beats.js";
 
@@ -39,12 +27,6 @@ function subLine(m) {
   return bits.filter(Boolean).join(" · ");
 }
 
-/**
- * mountTalk(host, memberId, { onChange, extra, btnClass }) → refresher.
- * `extra` = [{ label, cls?, run() → string? }] appended after the topics (conn,
- * dismiss, close…); a returned string becomes the spoken line. `onChange()` fires after every exchange so the caller can
- * repaint whatever else it shows. The refresher re-paints the status line.
- */
 export function mountTalk(host, memberId, { onChange = null, extra = [], btnClass = "tbtn" } = {}) {
   if (!host || !DOC) return () => {};
   const m = crew.aboard.find((x) => x.id === memberId);
@@ -98,13 +80,11 @@ export function mountTalk(host, memberId, { onChange = null, extra = [], btnClas
     opts.innerHTML = "";
     if (gone()) { for (const x of extra) if (/close/i.test(x.label)) opts.append(btn(x.label, x.run, x.cls ?? "")); return; }
     if (isRunning(m.id) || view.beating) {
-      /* 0.3.17: a scene waits on you — its answers, and a way out */
       for (const ch of view.beatChoices ?? []) opts.append(btn(ch.label, () => { advanceBeat(m.id, ch.id); }, "accent"));
       opts.append(btn("Let it drop", () => { view.stopBeat?.(); view.beating = false; view.stopBeat = null; view.beatChoices = null; barWrap.hidden = true; after(); }, "danger"));
       return;
     }
     if (view.choices?.length) {
-      /* a line is waiting on an answer */
       for (const ch of view.choices) opts.append(btn(ch.label, () => {
         const r = choose(m, view.topic, ch.id);
         view.line = r.text;
@@ -116,7 +96,6 @@ export function mountTalk(host, memberId, { onChange = null, extra = [], btnClas
       return;
     }
     for (const beat of beatsFor(m)) {
-      /* ▶ marks a scene (several answers, a bar that moves as you answer) apart from a one-line topic */
       opts.append(btn(`▶ ${beat.label}`, () => {
         view.beating = true;
         barWrap.hidden = false;
@@ -133,7 +112,6 @@ export function mountTalk(host, memberId, { onChange = null, extra = [], btnClas
             barTag.textContent = n && i < n ? `${tag ?? beat.label} · ${i + 1}/${n}` : (tag ?? beat.label);
             view.beatChoices = choices ?? null;
             line.textContent = view.line;
-            /* the answers are buttons: repaint them for the new stage */
             if (view.beating && choices?.length) paintOpts();
           },
           onDone: (res) => {
@@ -151,13 +129,11 @@ export function mountTalk(host, memberId, { onChange = null, extra = [], btnClas
         after();
       }, beat.kind === "romance" ? "accent" : ""));
     }
-    /* a beat that stages the same subject replaces the one-tap topic, so the
-     * list does not carry two identical labels doing different things */
     const staged = new Set(beatsFor(m).map((b) => b.replaces).filter(Boolean));
     for (const tp of topicsFor(m)) {
       if (staged.has(tp.id)) continue;
       opts.append(btn(tp.label, () => {
-        barWrap.hidden = true;                     // the last scene's bar is not this conversation's
+        barWrap.hidden = true;
         const r = open(m, tp.id);
         view.line = r.text || view.line;
         view.choices = r.choices.length ? r.choices : null;
@@ -169,7 +145,6 @@ export function mountTalk(host, memberId, { onChange = null, extra = [], btnClas
     for (const x of extra) opts.append(btn(x.label, () => { const r = x.run(); if (typeof r === "string" && r) view.line = r; if (!gone() || r) after(); }, x.cls ?? ""));
   };
 
-  /* free text */
   const input = mk("input", "tinput");
   input.type = "text";
   input.placeholder = m.robot ? "Query…" : `Say something to ${m.name.split(" ")[0]}…`;
@@ -188,9 +163,6 @@ export function mountTalk(host, memberId, { onChange = null, extra = [], btnClas
 
   paintOpts();
   paintLog();
-  /* The refresher the console ticks, with a teardown hung off it: switching
-   * hands or closing the sheet used to leave a beat running against a panel
-   * that was no longer on screen. */
   const refresh = () => {
     if (gone()) { if (!/left the ship/.test(sub.textContent)) after(); return; }
     sub.textContent = subLine(m);

@@ -1,17 +1,8 @@
-/* Bills of materials.
- *
- * partBom(part)  → { componentId: count }   functional components by rule, then structural fill
- *                                            (plates / frames / fasteners / harness) so Σ mass == part.mass
- * expandBom(bom) → { materialId: kg }        recursive roll-up to raw stock, plus fastener piece count
- * hullBom(dims)  → hull structure from surface area: skin plates, frames, Whipple layers, MLI, welds, bolts
- *
- * Rules are additive: every matching rule contributes. Counts may be numbers or fn(massKg). */
 import { MATERIALS, COMPONENTS } from "./materials.js";
 
 const kg = (p) => p.mass * 1000;
-const per = (c, k) => (m) => Math.max(1, Math.round(m * k / COMPONENTS[c].kg));   // fraction k of mass in component c
+const per = (c, k) => (m) => Math.max(1, Math.round(m * k / COMPONENTS[c].kg));
 
-/* ---- functional rules: [predicate, { component: count|fn }] --------------------------------- */
 const R = [];
 const rule = (pred, comps) => R.push([pred, comps]);
 const id = (prefix) => (p) => p.id.startsWith(prefix);
@@ -19,7 +10,6 @@ const tag = (t) => (p) => p.tags.includes(t);
 const pf = (k) => (p) => p.prefab === k;
 const any = (...fs) => (p) => fs.some(f => f(p));
 
-// every powered part has electronics + connectors; every exterior part has thermal hardware
 rule((p) => p.pwr !== 0, { "c.pcb": (m) => 1 + Math.round(m / 400), "c.connector": (m) => 2 + Math.round(m / 300), "c.heater": 1 });
 rule((p) => p.prefab && p.prefab !== "hatch", { "c.mli": (m) => Math.max(1, Math.round(m / 500)), "c.standoff": 1 });
 rule(pf("hatch"), { "c.seal_oring": 1, "c.hinge": 1 });
@@ -29,7 +19,6 @@ rule((p) => p.lamp || p.window, { "c.lamp": 1 });
 rule((p) => p.cold, { "c.cryocooler": 1, "c.mli": 2 });
 rule((p) => p.hot || p.heat > 100, { "c.heatpipe": (m) => Math.max(2, Math.round(m / 250)), "c.coldplate": 1 });
 
-// 01 propulsion
 rule(id("prop.gridion"), { "c.cathode": 2, "c.grid_cc": 1, "c.cusp_magnet": 6, "c.anode": 1, "c.ppu": 1, "c.mfc": 2, "c.valve_latch": 4, "c.gimbal": 1 });
 rule(id("prop.ion.cathode"), { "c.cathode": 2, "c.heater": 2 });
 rule(id("prop.ion.anode"), { "c.anode": 1, "c.mfc": 1 });
@@ -61,7 +50,6 @@ rule(id("prop.magsail"), { "c.sc_coil": 6, "c.cryocooler": 1 });
 rule(id("acs.cmg"), { "c.cmg_rotor": 1, "c.pcb": 2 });
 rule(id("acs.wheel"), { "c.wheel_rotor": 1 });
 rule(id("acs.torquer"), { "c.torquer_rod": 1 });
-// 02 fluids
 rule(any(id("fl.lh2"), id("fl.lox"), id("fl.lch4"), id("fl.lxe")), { "c.dewar": per("c.dewar", 0.55), "c.pmd": 1, "c.valve_latch": 4, "c.valve_relief": 2, "c.mli": 6 });
 rule(id("fl.lh2"), { "c.cryocooler": 1 });
 rule(any(id("fl.xecopv"), id("fl.krcopv"), id("fl.he"), id("fl.gn2")), { "c.copv": per("c.copv", 0.7), "c.regulator": 1, "c.valve_latch": 2, "c.valve_relief": 1 });
@@ -72,7 +60,6 @@ rule(id("fl.pmd"), { "c.pmd": 1 });
 rule(id("fl.autogen"), { "c.valve_latch": 2, "c.regulator": 1, "c.tube_steel": 2 });
 rule(any(id("fl.umbilical"), id("fl.qd"), id("sd.qdfamily"), id("dk.umbilical"), id("rb.depotport")), { "c.qd": 6, "c.flex_hose": 4, "c.connector_hv": 2, "c.connector": 4 });
 rule(id("fl.chill"), { "c.pump": 1, "c.heatpipe": 4, "c.valve_latch": 3 });
-// 03 power
 rule(id("pw.solar"), { "c.pv_blanket": per("c.pv_blanket", 0.5), "c.hinge": 4, "c.slip_ring": 1, "c.motor": 1 });
 rule(id("pw.solar.conc"), { "c.pv_concentrator": 2 });
 rule(id("pw.suntrack"), { "c.motor": 2, "c.slip_ring": 1, "c.gearbox": 1 });
@@ -91,7 +78,6 @@ rule(id("pw.stirling"), { "c.stirling": 2 });
 rule(id("pw.brayton"), { "c.brayton": 1 });
 rule(id("pw.thermo"), { "c.thermoelectric": 6 });
 rule(id("pw.mhd"), { "c.sc_coil": 6, "c.busbar": 8, "c.plate_steel": 4 });
-// 04 epds
 rule(id("ep.battery"), { "c.battery_cell": per("c.battery_cell", 0.7), "c.pcb": 4, "c.busbar": 2 });
 rule(id("ep.supercap"), { "c.supercap": per("c.supercap", 0.7), "c.busbar": 2 });
 rule(id("ep.flywheel"), { "c.wheel_rotor": 2, "c.motor": 2, "c.vac_chamber": 1 });
@@ -104,7 +90,6 @@ rule(id("ep.ground"), { "c.busbar": 1, "c.connector": 6 });
 rule(id("ep.umbport"), { "c.connector_hv": 4, "c.latch": 2 });
 rule(id("ep.wireless"), { "c.transformer": 2, "c.converter": 1 });
 rule(any(id("ep.fault"), id("ep.arcfault"), id("ep.loadshed")), { "c.power_switch": 2, "c.pcb": 2 });
-// 05 structure
 rule(id("st.cnt"), { "c.truss_cnt": per("c.truss_cnt", 0.8), "c.metglass_joint": 4 });
 rule(any(id("st.tiav"), id("id.keelseg"), id("prop.cluster"), id("cg.unpress"), id("rb.rail")), { "c.frame_ti": per("c.frame_ti", 0.6), "c.bracket": 4 });
 rule(id("st.isogrid"), { "c.plate_al": per("c.plate_al", 0.8) });
@@ -119,7 +104,6 @@ rule(any(id("st.sepbolt"), id("id.sepplane"), id("id.jettison")), { "c.sep_bolt"
 rule(id("st.rack"), { "c.rack_frame": 1, "c.insert": 4 });
 rule(id("st.tray"), { "c.frame_al": 2, "c.harness": 3, "c.connector": 6, "c.standoff": 4 });
 rule(id("st.standoff"), { "c.standoff": 8, "c.frame_al": 1 });
-// 06 materials
 rule(id("mt.polyshield"), { "c.pe_shield": per("c.pe_shield", 0.85) });
 rule(any(id("mt.waterwall"), id("hull.waterwall")), { "c.copv": 4, "c.pump": 1, "c.plate_al": 6 });
 rule(any(id("mt.boron"), id("hull.b4c")), { "c.b4c_tile": per("c.b4c_tile", 0.8) });
@@ -135,7 +119,6 @@ rule(id("mt.crusher"), { "c.crusher_jaw": 2, "c.motor": 4, "c.conveyor": 3 });
 rule(id("mt.mre"), { "c.mre_cell": per("c.mre_cell", 0.6), "c.busbar": 6, "c.heatpipe": 8 });
 rule(id("mt.caster"), { "c.crucible": 1, "c.spindle": 1, "c.vac_chamber": 1 });
 rule(id("mt.blender"), { "c.crucible": 1, "c.motor": 2 });
-// 07 thermal
 rule(any(id("tc.radwing"), id("tc.bodyrad"), id("tc.varem")), { "c.radiator_panel": per("c.radiator_panel", 0.75), "c.pump": 1, "c.heatpipe": 4 });
 rule(id("tc.louver"), { "c.radiator_panel": per("c.radiator_panel", 0.5), "c.louver": 14 });
 rule(id("tc.heatpipe"), { "c.heatpipe": per("c.heatpipe", 0.8) });
@@ -145,13 +128,11 @@ rule(any(id("tc.cryo"), id("tc.zbo")), { "c.cryocooler": (m) => Math.max(1, Math
 rule(any(id("tc.vcs"), id("tc.mli")), { "c.mli": per("c.mli", 0.85) });
 rule(id("tc.aerogel"), { "c.aerogel_panel": per("c.aerogel_panel", 0.8) });
 rule(id("tc.pcm"), { "c.coldplate": 4, "c.plate_al": 2 });
-// 08 computing
 rule(any(id("cd.fc"), id("cd.rtos"), id("cd.autonomy"), id("cd.hm"), id("cd.predict"), id("cd.swarm")), { "c.cpu_tmr": 1, "c.memory": 1, "c.pcb": 2 });
 rule(any(id("cd.fpga"), id("cd.spacewire"), id("cd.tte"), id("cd.riu")), { "c.fpga": 2, "c.pcb": 1, "c.connector": 8 });
 rule(any(id("cd.neuro"), id("cd.quantum"), id("exp.upload")), { "c.fpga": 4, "c.cpu_tmr": 1, "c.cryocooler": 1 });
 rule(id("cd.memory"), { "c.memory": 6 });
 rule(id("cd.secure"), { "c.crypto": 2 });
-// 09 gnc
 rule(any(id("gn.fog"), id("gn.rlg")), { "c.fog": 1, "c.accel": 1 });
 rule(id("gn.coldatom"), { "c.atom_cell": 1, "c.fog": 1 });
 rule(any(id("gn.startrack"), id("gn.navcam"), id("sw.debriscam")), { "c.optics": 1, "c.ccd": 1, "c.window_sapphire": 1 });
@@ -162,7 +143,6 @@ rule(id("gn.atomclock"), { "c.atom_cell": 1 });
 rule(id("gn.gnss"), { "c.antenna_whip": 1, "c.pcb": 1 });
 rule(id("gn.altimeter"), { "c.lidar_head": 1 });
 rule(id("gn.formation"), { "c.antenna_whip": 2, "c.lamp": 2 });
-// 10 comms
 rule(id("cm.hga"), { "c.dish_cfrp": per("c.dish_cfrp", 0.4), "c.feedhorn": 1, "c.twta": 1, "c.motor": 2, "c.gearbox": 2, "c.slip_ring": 1 });
 rule(any(id("cm.phased"), id("sw.sar"), id("nav.sar")), { "c.tr_module": per("c.tr_module", 0.5), "c.cfrp_panel": 1 });
 rule(any(id("cm.omni"), id("cm.uhf")), { "c.antenna_whip": 1, "c.rf_switch": 1 });
@@ -173,7 +153,6 @@ rule(id("cm.mesh"), { "c.rf_switch": 2, "c.harness": 2 });
 rule(id("cm.quantum"), { "c.laser_terminal": 1, "c.atom_cell": 1, "c.cryocooler": 1 });
 rule(any(id("cm.relaybay"), id("rb.dronebay")), { "c.drone": 2, "c.actuator": 2, "c.latch": 4, "c.hinge": 4 });
 rule(any(id("cm.beacon"), id("cm.blackbox")), { "c.antenna_whip": 1, "c.battery_cell": 1, "c.memory": 2, "c.sep_bolt": 1 });
-// 11 sensors
 rule(any(id("sw.lidar"), id("sf.debrisradar"), id("nav.lidar")), { "c.lidar_head": 1, "c.motor": 1 });
 rule(any(id("sw.radar"), id("nav.radar")), { "c.radar_tile": 2, "c.motor": 1, "c.twta": 1 });
 rule(any(id("sw.scanhead"), id("wp.tracker")), { "c.radar_tile": 1, "c.lidar_head": 1, "c.motor": 2, "c.bearing": 2 });
@@ -183,7 +162,6 @@ rule(any(id("sw.plasma"), id("sw.ism"), id("nav.ism")), { "c.dosimeter": 2, "c.a
 rule(id("sw.cabinair"), { "c.gas_sensor": 6 });
 rule(id("sw.acoustic"), { "c.mic_array": 8 });
 rule(id("sw.shm"), { "c.strain_net": 6 });
-// 12 atmosphere
 rule(id("at.electrolysis"), { "c.electrolysis_stack": 1, "c.pump": 2, "c.valve_latch": 6, "c.membrane": 1 });
 rule(id("at.soxe"), { "c.sox_stack": 1, "c.heater": 6, "c.pump": 1 });
 rule(id("at.emergo2"), { "c.copv": 2, "c.regulator": 4, "c.hepa": 4 });
@@ -194,7 +172,6 @@ rule(id("at.tcc"), { "c.catalyst_reactor": 1, "c.hepa": 2, "c.fan": 1 });
 rule(id("at.hepa"), { "c.hepa": 6 });
 rule(id("at.fans"), { "c.fan": 4 });
 rule(any(id("at.pressure"), id("at.n2makeup"), id("at.relief")), { "c.regulator": 2, "c.valve_relief": 3, "c.gas_sensor": 2 });
-// 13 water / waste / food
 rule(any(id("wf.urine"), id("wf.multifilt"), id("wf.condensate"), id("wf.brine")), { "c.membrane": 3, "c.pump": 2, "c.uv_reactor": 1, "c.valve_latch": 4 });
 rule(id("wf.polish"), { "c.uv_reactor": 1, "c.membrane": 1 });
 rule(any(id("wf.solids"), id("wf.pyro")), { "c.heater": 8, "c.fan": 2, "c.vac_chamber": 1 });
@@ -203,7 +180,6 @@ rule(any(id("wf.algae"), id("cg.seedbank"), id("exp.seed")), { "c.bio_vessel": (
 rule(any(id("wf.cellag"), id("fab.bio"), id("mf.biofab"), id("cg.livestock")), { "c.bio_vessel": 1, "c.bioprinter": 1, "c.cryocooler": 1 });
 rule(any(id("wf.galley"), id("hb.wardroom")), { "c.galley": 1, "c.bunk": 1 });
 rule(id("wf.nutrient"), { "c.membrane": 2, "c.pump": 1 });
-// 14 habitation
 rule(id("hb.cabins"), { "c.bunk": 4, "c.lamp": 6, "c.fan": 2 });
 rule(id("hb.hygiene"), { "c.membrane": 1, "c.pump": 1, "c.fan": 1 });
 rule(any(id("hb.medbay"), id("crew.medbay")), { "c.medical_kit": 1, "c.bioprinter": 1, "c.lamp": 4 });
@@ -214,7 +190,6 @@ rule(any(id("hb.gravring"), id("cg.genship")), { "c.bunk": 12, "c.slip_ring": 2,
 rule(id("hb.gravbearing"), { "c.bearing": 16, "c.slip_ring": 2, "c.motor": 2 });
 rule(any(id("hb.shelter"), id("sf.safehaven")), { "c.pe_shield": (m) => Math.max(2, Math.round(m * 0.5 / 95)), "c.hatch": 1, "c.copv": 2 });
 rule(any(id("hb.rec"), id("hb.culture")), { "c.lamp": 8, "c.memory": 4, "c.fpga": 2, "c.bunk": 2 });
-// 15 eva / docking
 rule(any(id("ev.airlock"), id("dk.tunnel")), { "c.hatch": 2, "c.pump": 1, "c.valve_latch": 4, "c.handrail": 4, "c.lamp": 2 });
 rule(id("ev.suitport"), { "c.hatch": 2, "c.seal_oring": 8 });
 rule(id("ev.pumpdown"), { "c.pump": 2, "c.copv": 1, "c.valve_latch": 4 });
@@ -223,14 +198,12 @@ rule(id("ev.plss"), { "c.copv": 2, "c.battery_cell": 1, "c.regulator": 2 });
 rule(any(id("dk.crew"), id("dk.cargo"), id("dk.hard"), id("st.capture")), { "c.dock_ring": 1, "c.latch": 4, "c.qd": 4, "c.connector_hv": 2, "c.lamp": 4 });
 rule(id("dk.fuel"), { "c.dock_ring": 1, "c.qd": 8, "c.flex_hose": 6, "c.valve_latch": 6 });
 rule(any(id("dk.berth"), id("rb.arm"), id("mine.grapple")), { "c.robot_joint": 6, "c.gripper": 1, "c.turret_ring": 1 });
-// 16 robotics
 rule(any(id("rb.freeflyer"), id("cg.invbot")), { "c.drone": 1, "c.latch": 2 });
 rule(id("rb.nde"), { "c.ccd": 2, "c.strain_net": 2 });
 rule(id("rb.crawler"), { "c.robot_joint": 4, "c.ccd": 2, "c.battery_cell": 0.5, "c.rail": 2 });
 rule(any(id("rb.tools"), id("mf.spares")), { "c.rack_frame": 1, "c.gripper": 2 });
 rule(any(id("rb.mru"), id("sd.mrucab"), id("sd.mru1u")), { "c.rack_frame": 1, "c.connector": 12, "c.latch": 4 });
 rule(id("rb.blindmate"), { "c.connector": 20, "c.connector_hv": 4 });
-// 17 cargo / mining
 rule(any(id("cg.rack"), id("cg.printers")), { "c.rack_frame": 2, "c.latch": 4 });
 rule(id("cg.container"), { "c.container_shell": (m) => Math.max(1, Math.round(m / 700)), "c.latch": 4 });
 rule(id("cg.softstow"), { "c.rack_frame": 1, "c.hinge": 2, "c.actuator": 1 });
@@ -242,7 +215,6 @@ rule(any(id("cg.refinery"), id("ind.refinery")), { "c.crucible": 2, "c.mre_cell"
 rule(any(id("cg.scilab"), id("sci.samplelab")), { "c.optics": 2, "c.ccd": 4, "c.vac_chamber": 1, "c.window_sapphire": 3 });
 rule(id("cg.samplevault"), { "c.vac_chamber": 1, "c.cryocooler": 1, "c.seal_oring": 12 });
 rule(any(id("cg.lander"), id("cg.gear")), { "c.actuator": 4, "c.latch": 4, "c.hinge": 4, "c.frame_ti": 6 });
-// 18 safety / defense
 rule(any(id("sf.smoke"), id("sf.avoid"), id("sf.watchdog")), { "c.gas_sensor": 4, "c.pcb": 2 });
 rule(id("sf.suppress"), { "c.copv": 2, "c.valve_latch": 6, "c.tube_steel": 8 });
 rule(id("sf.extinguish"), { "c.copv": 4 });
@@ -266,7 +238,6 @@ rule(any(id("wp.mag"), id("wp.ammo")), { "c.magazine": 1, "c.ammo_feed": 1 });
 rule(id("wp.cap"), { "c.capacitor": per("c.capacitor", 0.6), "c.power_switch": 4, "c.busbar": 2 });
 rule(id("wp.coolant"), { "c.pump": 2, "c.heatpipe": 6, "c.cryocooler": 1 });
 rule(id("wp.fcs"), { "c.fire_control": 1, "c.cpu_tmr": 1 });
-// 19 manufacturing
 rule(any(id("mf.printer"), id("mf.wirearc")), { "c.print_head": 3, "c.spindle": 1, "c.vac_chamber": 1, "c.motor": 4 });
 rule(id("mf.ebeam"), { "c.ebeam_gun": 1, "c.vac_chamber": 1, "c.connector_hv": 4, "c.motor": 3 });
 rule(id("mf.vacnode"), { "c.print_head": 2, "c.robot_joint": 4, "c.truss_cfrp": 8 });
@@ -279,11 +250,9 @@ rule(any(id("mf.pickplace"), id("mf.mems"), id("fab.mems")), { "c.spindle": 1, "
 rule(any(id("mf.scwire"), id("fab.scwire")), { "c.spindle": 1, "c.crucible": 1, "c.cryocooler": 1 });
 rule(id("mf.cmm"), { "c.cmm_head": 1, "c.spindle": 1 });
 rule(id("mf.qualstand"), { "c.vac_chamber": 1, "c.motor": 4, "c.strain_net": 4, "c.pump": 2 });
-// 20 standards & 00 identity
 rule(any(id("sd."), id("id.blockport")), { "c.connector": 4, "c.qd": 1, "c.insert": 2 });
 rule(any(id("id.keelseg"), id("id.tankskirt")), { "c.frame_ti": 4, "c.metglass_joint": 2 });
 
-/* ---- structural fill per prefab: how the remaining mass is spent ---------------------------- */
 const FILL = {
   hatch:      { "c.plate_al": 0.55, "c.frame_al": 0.25, "c.bracket": 0.20 },
   module:     { "c.honeycomb": 0.45, "c.frame_al": 0.35, "c.bracket": 0.20 },
@@ -338,11 +307,9 @@ export function partBom(p) {
   const bom = {};
   const add = (c, q) => { if (!COMPONENTS[c]) throw new Error(`unknown component ${c} on ${p.id}`); bom[c] = (bom[c] || 0) + q; };
   for (const [pred, comps] of R) if (pred(p)) for (const [c, q] of Object.entries(comps)) add(c, typeof q === "function" ? q(massKg) : q);
-  // if the functional set alone outweighs the part, scale it down proportionally (keep ≥1 of each)
   let functional = Object.entries(bom).reduce((s, [c, q]) => s + q * COMPONENTS[c].kg, 0);
   const cap = massKg * 0.82;
   if (functional > cap) { const k = cap / functional; for (const c of Object.keys(bom)) bom[c] = Math.max(1, Math.round(bom[c] * k)); functional = Object.entries(bom).reduce((s, [c, q]) => s + q * COMPONENTS[c].kg, 0); }
-  // fasteners and wiring scale with the part, then structure takes the remainder
   const fast = Math.max(massKg * 0.03, 0.6);
   const fasteners = massKg > 2000 ? "c.bolt_m12" : massKg > 150 ? "c.bolt_m6" : "c.bolt_m4";
   add(fasteners, Math.max(2, Math.round(fast * 0.7 / COMPONENTS[fasteners].kg)));
@@ -353,7 +320,6 @@ export function partBom(p) {
   const remain = Math.max(0, massKg - used);
   const fill = FILL[p.drive ? "_drive" : p.prefab] || FILL.module;
   for (const [c, share] of Object.entries(fill)) { const q = Math.round(remain * share / COMPONENTS[c].kg); if (q > 0) add(c, q); }
-  // final trim: nudge the largest structural line so Σ lands within 2% of the declared mass
   used = Object.entries(bom).reduce((s, [c, q]) => s + q * COMPONENTS[c].kg, 0);
   const big = Object.keys(fill).sort((a, b) => COMPONENTS[b].kg - COMPONENTS[a].kg).find(c => bom[c]);
   if (big) { const diff = massKg - used; const step = COMPONENTS[big].kg; const n = Math.round(diff / step); if (n) bom[big] = Math.max(1, bom[big] + n); }
@@ -362,7 +328,6 @@ export function partBom(p) {
 
 export function bomMass(bom) { return Object.entries(bom).reduce((s, [c, q]) => s + q * COMPONENTS[c].kg, 0); }
 
-/* recursive roll-up to raw materials; also counts fastener pieces */
 export function expandBom(bom, out = { materials: {}, fasteners: 0, components: {} }, mult = 1) {
   for (const [c, q] of Object.entries(bom)) {
     const comp = COMPONENTS[c];
@@ -379,21 +344,20 @@ export function expandBom(bom, out = { materials: {}, fasteners: 0, components: 
   return out;
 }
 
-/* hull structure from the tracked volumes: skin area → plates, frames, bumper, MLI, welds, bolts */
 export function hullBom(builder) {
   const bom = {};
   const add = (c, q) => { bom[c] = (bom[c] || 0) + Math.max(1, Math.round(q)); };
   let area = 0, length = 0;
   for (const v of builder.hullVols) { area += 2 * (v.w * v.h + v.w * v.d + v.h * v.d); length += v.d; }
-  add("c.plate_al", area * 1.0);            // pressure skin
-  add("c.whipple_layer", area * 0.6);       // outer bumper over 60% of the skin
-  add("c.honeycomb", area * 0.3);           // internal decks
-  add("c.frame_al", length * 6);            // longerons + frames
-  add("c.frame_ti", length * 1.5);          // primary load path
+  add("c.plate_al", area * 1.0);
+  add("c.whipple_layer", area * 0.6);
+  add("c.honeycomb", area * 0.3);
+  add("c.frame_al", length * 6);
+  add("c.frame_ti", length * 1.5);
   add("c.metglass_joint", length * 0.8);
   add("c.mli", area * 0.9);
   add("c.weld_wire", area * 0.35);
-  add("c.bolt_m6", area * 0.6);             // ~30 bolts per m² of skin
+  add("c.bolt_m6", area * 0.6);
   add("c.rivet", area * 0.25);
   add("c.insert", area * 0.15);
   add("c.seal_oring", area * 0.05);
@@ -408,7 +372,6 @@ export function hullBom(builder) {
   return { bom, area, length };
 }
 
-/* whole-ship roll-up: hull + every mounted part + the drive */
 export function shipBom(builder, parts, drivePart) {
   const total = { materials: {}, fasteners: 0, components: {} };
   const hull = hullBom(builder);

@@ -1,15 +1,6 @@
-/* Bills of materials.
- *
- *   partBom(part)         → { materialId: kg }
- *   moduleParts(module)   → [{ part, count }]
- *   moduleBom(module)     → { kg, materials, cr }
- *   stationBom(manifest)  → the whole station rolled up: parts by domain,
- *                           materials by kind, mass, power, heat, crew, cost
- */
 import { PARTS, PART_DOMAINS } from "./parts.js";
 import { MATERIALS, FAB_RATE } from "./materials.js";
 
-/* Domains whose primary structural alloy (al_li) is swapped for the hull alloy the style rolled. */
 const SKINNED = new Set(["st", "dk"]);
 const SKINNED_PARTS = new Set(["sf.armour", "sf.sloped_plate", "sf.blast_door", "sf.barbette", "cg.bonded_hold", "cg.container"]);
 export function partBom(p, alloy = null) {
@@ -27,7 +18,6 @@ export function partCost(p, alloy = null) {
     if (!mat) throw new Error(`unknown material ${m} on ${p.id}`);
     cr += (kg / 1000) * mat.cr * (FAB_RATE[mat.kind] ?? 2);
   }
-  /* control, wiring and certification scale with the part's power handling */
   cr += Math.abs(p.pwr) * 120 + Math.abs(p.heat) * 40;
   return Math.round(cr);
 }
@@ -52,12 +42,11 @@ export function moduleBom(mod, alloy = null) {
   return { kg, materials, cr, pwr, heat };
 }
 
-/** Whole-station roll-up over a manifest: [{ module, count }]. `alloy` is the hull alloy the structure is skinned in. */
 export function stationBom(manifest, alloy = null) {
-  const parts = {};          // partId → count
-  const materials = {};      // materialId → kg
-  const byDomain = {};       // domain → { label, parts: [{ id, name, count, mass, each }], mass, cr }
-  const byKind = {};         // material kind → kg
+  const parts = {};
+  const materials = {};
+  const byDomain = {};
+  const byKind = {};
   let kg = 0, cr = 0, pwr = 0, heat = 0, crew = 0, pop = 0, labour = 0;
   for (const { module: mod, count: n } of manifest) {
     const mb = moduleBom(mod, alloy);
@@ -75,7 +64,6 @@ export function stationBom(manifest, alloy = null) {
   for (const d of Object.values(byDomain)) d.parts.sort((a, b) => b.each * b.count - a.each * a.count);
   for (const [m, g] of Object.entries(materials)) { const k = MATERIALS[m].kind; byKind[k] = (byKind[k] ?? 0) + g; }
   labour = Math.round(cr * 0.22);
-  /* what the station makes for itself from traded stock: drones, missiles, slugs, plate */
   const inhouse = {};
   for (const [id, count] of Object.entries(parts)) if (/\(in-house\)/.test(PARTS[id].name)) inhouse[id] = { name: PARTS[id].name.replace(" (in-house)", ""), count, mass: PARTS[id].mass * count, materials: partBom(PARTS[id], alloy) };
   const defence = manifest.filter((m) => m.module.tags.includes("defence")).map((m) => ({ id: m.module.id, name: m.module.name, count: m.count }));

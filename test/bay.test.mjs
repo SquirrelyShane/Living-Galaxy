@@ -8,15 +8,15 @@
  * either end.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stepStations } from "../js/stations.js";
-import { currentSystem } from "../js/bodies.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stepStations } from "../js/station/stations.js";
+import { currentSystem } from "../js/world/bodies.js";
 import { traffic, stepTraffic } from "../js/npc/traffic.js";
 import { flow, populateFlow, flowPose } from "../js/npc/flow.js";
 import { lanePoint } from "../js/npc/lanes.js";
 import { hasBay, bayPose, insideBay, BAY_IN_S, BAY_OUT_S } from "../js/npc/bay.js";
-import { ensureBuilt } from "../js/stationyard.js";
+import { ensureBuilt } from "../js/station/stationyard.js";
 import { npcDrones, stepNpcDrones } from "../js/drones/npcdrones.js";
 
 let pass = 0, fail = 0;

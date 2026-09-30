@@ -1,15 +1,5 @@
-/* LIVING GALAXY — the robot yard, a station-deck fragment.
- *
- * robotsPanel(body, st) → void. Catalogue cards for the port's ROBOTGEN
- * designs (designation, career and chassis, mass, kW, price, BUY), the
- * robots you own with condition bars, SERVICE ALL and SCRAP. The station
- * deck mounts it as PANELS.robots; CONSOLE › CREW may mount it too. Built
- * on the console kit (js/console/kit.js) so the rows share the glass look
- * and the ≥44 px tap targets. Contract: PLAN.md §4.7, §6 contract 2.
- */
-
-import { sim } from "../sim.js";
-import { crew } from "../crew.js";
+import { sim } from "../sim/sim.js";
+import { crew } from "./ledger.js";
 import { el, row, button, group, setBar, note, section } from "../console/kit.js";
 import {
   ROBOT_SECTORS, robotCatalogue, buyRobot, scrapRobot, robotsAboard, serviceAll, servicePrice, robotsSummary,
@@ -34,7 +24,6 @@ function build(body, st, paint) {
   const yard = Boolean(st && ROBOT_SECTORS.includes(st.sector));
   const ship = sim.ship;
 
-  /* ---- the catalogue ---- */
   const cat = section(yard ? `ROBOT YARD · ${st.name}` : "ROBOT YARD");
   if (!yard) {
     note(cat, `No robot line at a ${st?.sector ?? "—"} port. Industrial, civilian and military yards print crew frames.`);
@@ -57,7 +46,6 @@ function build(body, st, paint) {
   }
   body.append(cat);
 
-  /* ---- the robots you own ---- */
   const bots = robotsAboard();
   const own = section(`ROBOT CREW · ${bots.length}`);
   if (!bots.length) note(own, "No robots aboard.");

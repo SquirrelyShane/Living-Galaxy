@@ -1,33 +1,22 @@
-/* LIVING GALAXY — CONSOLE › WORK › DRONES: the company's drones as cards.
- *
- * A straight port of the old command-deck DRONES tree (deck.js droneNode /
- * dronesBranch) into cards: one per drone with its status line, hold and hull,
- * the setup asks as chip rows (home / site / mode / work slots / routes /
- * guard / patrol through the ops.js setters), BEGIN · RECALL · RESUME · MARK ·
- * SCRAP; a build section when docked at a port with a line; the queue; and
- * the work board. Cards rebuild on any order (cheap), status text every frame.
- */
-
 import { el, section, note, row, button, group, chips, card, pct, setBar } from "../kit.js";
-import { addAnchoredWaypoint, sim } from "../../sim.js";
-import { stationById } from "../../stations.js";
+import { addAnchoredWaypoint, sim } from "../../sim/sim.js";
+import { stationById } from "../../station/stations.js";
 import { DRONE_ROLES, ASK_LABEL } from "../../drones/roles.js";
 import {
   droneOps, buildOptions, orderBuild, queueAt, setHome, setSite, setMode, setGuard, addPatrol, clearPatrol, assignSlot, setRoute, beginWork, recall,
   scrapDrone, homeOptions, siteOptions, haulSlots, guardSlots, tradeRoutes, patrolOptions, statusLine, pendingAsks, holdOf,
 } from "../../drones/ops.js";
-import { company, hasCompany } from "../../company.js";
+import { company, hasCompany } from "../../corp/company.js";
 import { boardReport } from "../../drones/board.js";
 import { npcDroneReport } from "../../drones/npcdrones.js";
-import { TIERS, TIER_BY_ID, premiumFor } from "../../insurance.js";
+import { TIERS, TIER_BY_ID, premiumFor } from "../../economy/insurance.js";
 
 const DOC = globalThis.document ?? null;
 void DOC;
 
 const tell = (msg) => { if (msg) { sim.notice = msg; sim.noticeAt = sim.wall; } };
-const opened = new Set(); // drone ids whose setup rows are unfolded
+const opened = new Set();
 
-/** One chip row for an ask: label, current pick, the options, the setter. */
 function askRow(body, label, hint, opts, current, pick) {
   const r = row(body, label, { hint });
   r.value.textContent = current ?? "—";
@@ -57,7 +46,6 @@ function droneCard(u, render, ctx) {
   b.append(group(...acts));
   if (asks.length) note(b, `Still to confirm: ${asks.map((a) => ASK_LABEL[a].toLowerCase()).join(", ")} — or BEGIN with the defaults.`);
   if (!opened.has(u.id) && !(u.state === "setup" && asks.length)) return c.card;
-  /* the asks, as chip rows */
   const home = stationById(u.home)?.name ?? "—";
   askRow(b, ASK_LABEL.home, u.answered.home ? "" : "defaulted to where it was built — keep or change",
     [{ id: u.home, label: `Keep ${home}` }, ...homeOptions(u).filter((h) => h.id !== u.home).slice(0, 12).map((h) => ({ id: h.id, label: h.label, hint: `${h.sector} · ${h.km.toLocaleString()} km` }))],
@@ -103,10 +91,6 @@ function buildSection(render) {
   const opts = buildOptions(st);
   if (!opts.length) note(s, "No drone lines here — industrial ports build miners, logistics haulers, military combat frames.");
   else {
-    /* 0.3.33 — cover is chosen once and applies to the next commission, so a
-     * phone is not asked for a tier on every build row. A drone is the one
-     * hull in this game that has always been able to die for good, which is
-     * why it is the one that most wanted insuring. */
     const cover = droneOps.cover ?? null;
     const t = TIER_BY_ID[cover];
     const cr = row(s, "Cover on new drones", {

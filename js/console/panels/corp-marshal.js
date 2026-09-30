@@ -1,16 +1,7 @@
-/* Living Galaxy — CONSOLE › CORP › MARSHAL: the bounty board.
- *
- * Every mark here is wanted alive and belongs to somebody. The board shows
- * both halves of the arithmetic before you sign anything: what the ticket pays,
- * and whose standing it costs. Taking one is a job; taking four off the same
- * desk is picking a side.
- *
- */
-
 import { el, section, note, row, button, group, chips, setBar, card } from "../kit.js";
-import { sim } from "../../sim.js";
-import { stationById } from "../../stations.js";
-import { corpById, standingLabel } from "../../corps.js";
+import { sim } from "../../sim/sim.js";
+import { stationById } from "../../station/stations.js";
+import { corpById, standingLabel } from "../../corp/corps.js";
 import { bounty, boardAt, takeTicket, abandonTicket, ticketsHeld, attemptCapture, canAttempt, captureStrength, markStrength, brigBerths, tickPlayerPrice, LIFT_COST } from "../../npc/bounty.js";
 import { boarding } from "../../interior/boarding.js";
 

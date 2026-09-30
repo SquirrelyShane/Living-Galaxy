@@ -10,12 +10,12 @@
  * it costs a leg in seconds that match how long the leg really takes.
  */
 
-import { sim, launchSim, tickSim, losBlocker, selectBody } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { BODIES, bodyPosition, dist3 } from "../js/bodies.js";
-import { corps } from "../js/corps.js";
-import { ledgerOf, lift } from "../js/economy.js";
+import { sim, launchSim, tickSim, losBlocker, selectBody } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { BODIES, bodyPosition, dist3 } from "../js/world/bodies.js";
+import { corps } from "../js/corp/corps.js";
+import { ledgerOf, lift } from "../js/economy/economy.js";
 import {
   SENSE, sense, senseHull, senseSpace, sensePorts, senseBoard, senseRoutes,
   senseLine, forgetSenses, unpostedWork, nearestReachablePort,
@@ -24,9 +24,9 @@ import {
   NAV, planRoute, legSeconds, tripSeconds, corridorBlocker, doglegAround,
   climbOut, lockOn, markPlace, aimAt, placeOf, routeLine,
 } from "../js/aria/nav.js";
-import { jobSeconds, jobsFor, jobPlan } from "../js/ariaplay.js";
+import { jobSeconds, jobsFor, jobPlan } from "../js/aria/play.js";
 import { validate } from "../js/mission/script.js";
-import { boardFor, resetContracts } from "../js/contracts.js";
+import { boardFor, resetContracts } from "../js/economy/contracts.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

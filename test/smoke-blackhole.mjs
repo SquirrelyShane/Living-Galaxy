@@ -50,8 +50,8 @@ await page.waitForTimeout(1500);
 
 /* ---- the lens ---- */
 await page.evaluate(async () => {
-  const { sim, summonHole } = await import("/js/sim.js");
-  const { lockPerfTier } = await import("/js/perf.js");
+  const { sim, summonHole } = await import("/js/sim/sim.js");
+  const { lockPerfTier } = await import("/js/core/perf.js");
   lockPerfTier(3);
   const s = sim.ship;
   s.engines = false; s.throttle = 0; s.vel.x = s.vel.y = s.vel.z = 0;
@@ -65,7 +65,7 @@ await page.evaluate(async () => {
 await page.waitForTimeout(6000);
 const lens = await page.evaluate(async () => {
   const THREE = await import("/vendor/three.module.min.js");
-  const { holes } = await import("/js/holes.js");
+  const { holes } = await import("/js/world/events/holes.js");
   const gl = window.__lgGL;
   const h = holes.find((x) => x.id === window.__smokeHole);
   const t = gl.bloom.targets;
@@ -112,7 +112,7 @@ ok(lens.standins === 0, "the stand-in is not drawn under a live lens");
 await page.screenshot({ path: "_scratch/blackhole-lens.png" });
 
 /* ---- the stand-in ---- */
-await page.evaluate(async () => { const { lockPerfTier } = await import("/js/perf.js"); lockPerfTier(0); });
+await page.evaluate(async () => { const { lockPerfTier } = await import("/js/core/perf.js"); lockPerfTier(0); });
 await page.waitForTimeout(2500);
 const standin = await page.evaluate(() => ({ lens: Boolean(window.__lgGL.holeFx.lens()), standins: window.__lgGL.holeFx.standinsShown }));
 console.log("stand-in:", JSON.stringify(standin));
@@ -121,7 +121,7 @@ await page.screenshot({ path: "_scratch/blackhole-standin.png" });
 
 /* ---- the chart and the dash ---- */
 const dash = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   return { watch: sim.holeWatch?.id === window.__smokeHole, label: [...document.querySelectorAll("*")].some((e) => e.childElementCount === 0 && /◉ Collapsar/.test(e.textContent ?? "")) };
 });
 ok(dash.watch, "the dash is watching the hole");
@@ -129,11 +129,11 @@ ok(dash.label, "and the canopy labels it");
 
 /* ---- the belt, a rogue ---- */
 const eat = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { holes } = await import("/js/holes.js");
-  const { currentSystem } = await import("/js/bodies.js");
-  const { depleted } = await import("/js/field.js");
-  const { impactors } = await import("/js/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { holes } = await import("/js/world/events/holes.js");
+  const { currentSystem } = await import("/js/world/bodies.js");
+  const { depleted } = await import("/js/world/field.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
   const belt = currentSystem.belt ?? currentSystem.outerBelt;
   const mid = (belt.inner + belt.outer) / 2;
   const h = holes.find((x) => x.id === window.__smokeHole);
@@ -151,7 +151,7 @@ ok(eat.infall, "and the ones near the hull are drawn falling in");
 ok(!eat.rogue && eat.tidal >= 1, "a rogue inside the tidal radius is removed and torn apart on screen");
 
 /* chart */
-await page.evaluate(async () => { const { useGameStore } = await import("/js/store.js"); useGameStore.getState().setMapOpen(true); });
+await page.evaluate(async () => { const { useGameStore } = await import("/js/core/store.js"); useGameStore.getState().setMapOpen(true); });
 await page.waitForTimeout(2500);
 const chart = await page.evaluate(() => [...document.querySelectorAll("svg text")].some((t) => /Collapsar/.test(t.textContent ?? "")));
 ok(chart, "the chart draws the hole by name");

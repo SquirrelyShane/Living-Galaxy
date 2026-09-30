@@ -1,27 +1,5 @@
-/**
- * Kerr (spinning) black hole null geodesics — the DNGR prescription of
- * James, von Tunzelmann, Franklin & Thorne, "Gravitational lensing by spinning
- * black holes in astrophysics, and in the movie Interstellar",
- * Class. Quantum Grav. 32 (2015) 065001, appendix A.1. Units: G = c = M = 1.
- *
- *   Boyer–Lindquist metric functions        (A.2)
- *   FIDO orthonormal frame                  (A.3)
- *   P, R, Θ                                 (A.4)
- *   trapped photon orbits b_o(r_o), q_o     (A.5, A.6)
- *   camera direction → canonical momenta    (A.9–A.12), camera at rest in the FIDO frame (β = 0)
- *   super-Hamiltonian ray equations         (A.15), integrated backward in ζ with RK2
- *
- * Pure JS; blackhole.js carries a line-by-line GLSL copy (verified against this file).
- *
- * Mapping to the scene: the hole's spin axis is world −Y, so the prograde disk turns
- * +X → +Z like every other orbit in the app. BL Cartesian (x, y, z) = world (X, Z, −Y),
- * with the oblate embedding x = √(r²+a²) sinθ cosφ, y = √(r²+a²) sinθ sinφ, z = r cosθ.
- */
-
 export const KERR_LOOKS = {
-  // what Nolan & Franklin chose for Interstellar: a/M = 0.6, no Doppler or gravitational colour / brightness shifts
   interstellar: { spin: 0.6, shifts: 0, label: 'Interstellar (a = 0.6, no shifts)' },
-  // what the hole would really look like spinning fast: lopsided, flattened shadow edge, beamed disk
   kerr: { spin: 0.999, shifts: 1, label: 'Kerr a = 0.999 (physical)' },
   schwarzschild: { spin: 0, shifts: 1, label: 'Schwarzschild a = 0 (physical)' },
 };
@@ -32,14 +10,12 @@ export function horizon(a) {
   return 1 + Math.sqrt(Math.max(0, 1 - a * a));
 }
 
-/** Prograde innermost stable circular orbit (Bardeen, Press & Teukolsky 1972). */
 export function isco(a) {
   const z1 = 1 + Math.cbrt(1 - a * a) * (Math.cbrt(1 + a) + Math.cbrt(1 - a));
   const z2 = Math.sqrt(3 * a * a + z1 * z1);
   return 3 + z2 - Math.sqrt((3 - z1) * (3 + z1 + 2 * z2));
 }
 
-/** (A.5, A.6): constants of unstably trapped photon orbits, r_o ∈ [r1, r2]. */
 export function trappedOrbit(ro, a) {
   const b = -(ro ** 3 - 3 * ro * ro + a * a * ro + a * a) / (a * (ro - 1));
   const q = -(ro ** 3 * (ro ** 3 - 6 * ro * ro + 9 * ro - 4 * a * a)) / (a * a * (ro - 1) ** 2);
@@ -61,7 +37,6 @@ export function metric(r, th, a) {
 export const worldToBL = (v) => [v[0], v[2], -v[1]];
 export const blToWorld = (v) => [v[0], -v[2], v[1]];
 
-/** BL Cartesian point → { r, th, ph } (oblate embedding). */
 export function cartToBL([x, y, z], a) {
   const R2 = x * x + y * y + z * z;
   const w = R2 - a * a;
@@ -73,7 +48,6 @@ export function blToCart(r, th, ph, a) {
   return [e * Math.cos(ph), e * Math.sin(ph), r * Math.cos(th)];
 }
 
-/** Orthonormalised FIDO directions e_r̂, e_θ̂, e_φ̂ in BL Cartesian (exact in the far field). */
 export function fidoBasis(r, th, ph, a) {
   const s = Math.sin(th), c = Math.cos(th), cp = Math.cos(ph), sp = Math.sin(ph);
   const q = Math.sqrt(r * r + a * a);
@@ -84,17 +58,11 @@ export function fidoBasis(r, th, ph, a) {
   const ephi = [-sp, cp, 0];
   let er = norm([(r / q) * s * cp, (r / q) * s * sp, c]);
   let et = norm([q * c * cp, q * c * sp, -r * s]);
-  // Gram–Schmidt (the embedding is not exactly orthogonal near the hole)
   const d = et[0] * er[0] + et[1] * er[1] + et[2] * er[2];
   et = norm([et[0] - d * er[0], et[1] - d * er[1], et[2] - d * er[2]]);
   return { er, et, ephi };
 }
 
-/**
- * (A.9–A.12) with β = 0: a ray leaving the camera along `dir` (BL Cartesian, outward) is the
- * time reverse of a photon arriving with propagation direction n = −dir.
- * Returns the state [r, θ, φ, p_r, p_θ] and constants { b, q }.
- */
 export function initRay(posBL, dir, a) {
   const { r, th, ph } = cartToBL(posBL, a);
   const { er, et, ephi } = fidoBasis(r, th, ph, a);
@@ -114,7 +82,6 @@ export function initRay(posBL, dir, a) {
   return { s: [r, th, ph, pr, pth], b, q };
 }
 
-/** (A.15): d/dζ of [r, θ, φ, p_r, p_θ]. */
 export function derivs(s, a, b, q) {
   const [r, th, , pr, pth] = s;
   const sn = Math.sin(th), cs = Math.cos(th);
@@ -139,7 +106,6 @@ export function derivs(s, a, b, q) {
   return [dr, dth, dph, dpr, dpth];
 }
 
-/** Super-Hamiltonian (zero on a null ray) — for accuracy checks. */
 export function hamiltonian(s, a, b, q) {
   const [r, th, , pr, pth] = s;
   const cs = Math.cos(th), sn2 = Math.max(Math.sin(th) ** 2, 1e-8);
@@ -155,38 +121,26 @@ export function stepSize(r, a) {
   return Math.max(KERR.stepMin, Math.min(KERR.stepMax, KERR.stepK * (r - horizon(a) * 0.98)));
 }
 
-/**
- * One backward RK2 (midpoint) step. The step also caps the change in θ and φ, so rays that skim a
- * pole (where b/sin²θ and Θ'∝1/sin³θ get large) are resolved instead of blowing up.
- */
 export function rk2(s, a, b, q) {
   const k1 = derivs(s, a, b, q);
-  // θ may not close more than axisK of its remaining gap to the axis in one step (resolves the approach to a pole hop)
   const h = -Math.min(stepSize(s[0], a), KERR.maxDTheta / (Math.abs(k1[1]) + 1e-9), KERR.maxDPhi / (Math.abs(k1[2]) + 1e-9), (KERR.axisK * Math.abs(Math.sin(s[1]))) / (Math.abs(k1[1]) + 1e-9));
   const m = s.map((x, i) => x + k1[i] * h * 0.5);
   const k2 = derivs(m, a, b, q);
   return s.map((x, i) => x + k2[i] * h);
 }
 
-/**
- * Boyer–Lindquist coordinates are singular on the spin axis (b/sin²θ, Θ' ∝ 1/sin³θ). A ray that comes within
- * sinθ < poleSin of the axis hops straight across it in Cartesian space (a few percent of r, where the path is
- * locally straight) and is re-initialised from its position and direction on the far side.
- * Returns null when no hop is needed.
- */
 export function poleHop(s, a, b) {
   if (Math.abs(Math.sin(s[1])) >= KERR.poleSin) return null;
   const P = blToCart(s[0], s[1], s[2], a);
-  const d = exitDirection(s, a, b); // direction the traced ray is travelling
+  const d = exitDirection(s, a, b);
   const dxy = d[0] * d[0] + d[1] * d[1];
   const tStar = dxy > 1e-12 ? -(P[0] * d[0] + P[1] * d[1]) / dxy : 0;
-  if (tStar <= 0) return null; // already moving away from the axis
+  if (tStar <= 0) return null;
   const L = 2 * tStar + 0.002 * s[0];
   const Q = [P[0] + d[0] * L, P[1] + d[1] * L, P[2] + d[2] * L];
   return initRay(Q, d, a);
 }
 
-/** Outgoing sky direction (BL Cartesian) of a ray that has left the march sphere. */
 export function exitDirection(s, a, b) {
   const [r, th, ph, pr, pth] = s;
   const m = metric(r, th, a);
@@ -197,7 +151,6 @@ export function exitDirection(s, a, b) {
   return [-n[0] / l, -n[1] / l, -n[2] / l];
 }
 
-/** Redshift g = ν_camera / ν_emitted for a prograde circular equatorial emitter at r (camera far away). */
 export function diskRedshift(r, b, a) {
   const r15 = Math.pow(r, 1.5);
   const ut = (r15 + a) / (Math.pow(r, 0.75) * Math.sqrt(Math.max(1e-6, r15 - 3 * Math.sqrt(r) + 2 * a)));
@@ -205,10 +158,6 @@ export function diskRedshift(r, b, a) {
   return 1 / (ut * (1 - Om * b));
 }
 
-/**
- * Trace one camera ray (BL Cartesian position / direction, M units) to capture, escape or step limit.
- * Returns { fate: 'captured' | 'escaped' | 'steps', steps, exitDir, disk: [{ r, ph, g }], hmax, state }.
- */
 export function traceRay(posBL, dir, a, { steps = 400, march = KERR.march } = {}) {
   const ray = initRay(posBL, dir, a);
   let s = ray.s;
@@ -238,7 +187,6 @@ export function traceRay(posBL, dir, a, { steps = 400, march = KERR.march } = {}
   return { fate: 'steps', steps, disk, hmax, b: ray.b, q: ray.q, state: s };
 }
 
-/** Planck radiance ratios at the film's R, G, B wavelengths for temperature T relative to T0. */
 export function blackbodyRGB(T, T0 = KERR.T0) {
   const lam = [610e-9, 550e-9, 465e-9];
   const B = (l, t) => 1 / (Math.pow(l, 5) * (Math.exp(1.4388e-2 / (l * t)) - 1));

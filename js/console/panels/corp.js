@@ -1,37 +1,27 @@
-/* LIVING GALAXY — CONSOLE › CORP: COMPANY · BOARD · PILOT · STANDING · GNN
- *
- * The company (treasury, book, people, the register desk when docked), the
- * contract desk (in hand always, offers when docked), the pilot's record
- * (rank, specialisations, transfer, skills, live modifiers), standing with
- * every corporation, and the GNN desks with their bulletins' actions.
- */
-
 import { button, el, group, note, row, section, setBar } from "../kit.js";
 import { mountMarshal } from "./corp-marshal.js";
 import { mountAccount } from "./corp-account.js";
-import { account, accountLine } from "../../account.js";
+import { account, accountLine } from "../../net/account.js";
 import { ticketsHeld } from "../../npc/bounty.js";
-import { certSheet, corp, pilot, rankStatus, skillSheet, specEffectLines, specOptions, standingSheet, title, transferOptions, tryPromote, trySpecialize, tryTransfer } from "../../pilot.js";
+import { certSheet, corp, pilot, rankStatus, skillSheet, specEffectLines, specOptions, standingSheet, title, transferOptions, tryPromote, trySpecialize, tryTransfer } from "../../flight/pilot.js";
 import { MOD_LABELS } from "../../careers/effects.js";
 import { SKILLS, studySkills } from "../../careers/index.js";
-import { raceById, traitLines } from "../../races.js";
-import { standingLabel, corpOfStation } from "../../corps.js";
+import { raceById, traitLines } from "../../crew/races.js";
+import { standingLabel, corpOfStation } from "../../corp/corps.js";
 import { sigil } from "../../ui/glyphs.js";
-import { sim } from "../../sim.js";
-import { stationById } from "../../stations.js";
-import { CHARTERS, CHARTER_KEYS, COMPANY, boardBrief, company, contacts, foundCompany, hasCompany, staffAt, suggestName, transfer } from "../../company.js";
-import { boardFor, contracts, timeLeft, BOARD } from "../../contracts.js";
-import { renderDesk, renderHeld } from "../../boardview.js";
-import { DESKS, gnn, gnnStation, runAction } from "../../gnn.js";
-import { addAnchoredWaypoint } from "../../sim.js";
+import { sim } from "../../sim/sim.js";
+import { stationById } from "../../station/stations.js";
+import { CHARTERS, CHARTER_KEYS, COMPANY, boardBrief, company, contacts, foundCompany, hasCompany, staffAt, suggestName, transfer } from "../../corp/company.js";
+import { boardFor, contracts, timeLeft, BOARD } from "../../economy/contracts.js";
+import { renderDesk, renderHeld } from "../../ui/boardview.js";
+import { DESKS, gnn, gnnStation, runAction } from "../../comms/gnn.js";
+import { addAnchoredWaypoint } from "../../sim/sim.js";
 import { mountTown } from "./corp-town.js";
-import { lineSummary, unread } from "../../staffline.js";
+import { lineSummary, unread } from "../../station/staffline.js";
 
 const DOC = globalThis.document ?? null;
 const docked = () => (sim.ship?.dockedAt ? stationById(sim.ship.dockedAt) : null);
 const fmtAgo = (at) => { const s = Math.max(0, Math.round(sim.time - at)); return s < 90 ? `${s}s ago` : `${Math.round(s / 60)}m ago`; };
-
-/* ---- COMPANY --------------------------------------------------------------- */
 
 function mountCompany(root, push, ctx = null) {
   const host = el("div");
@@ -43,7 +33,7 @@ function mountCompany(root, push, ctx = null) {
     const b = hasCompany() ? boardBrief() : null;
     const k = hasCompany()
       ? `co:${company.name}:${Math.round(company.treasury)}:${company.staff.length}:${company.book.length}:${st?.id ?? ""}:${b.seats.map((x) => x.verdict).join("")}`
-      : `none:${st?.id ?? ""}:${sim.ship.credits >= COMPANY.registration}`;   // 0.3.49: not the live purse — a rebuild mid-typing wiped the name field
+      : `none:${st?.id ?? ""}:${sim.ship.credits >= COMPANY.registration}`;
     if (k === key) return;
     key = k;
     host.innerHTML = "";
@@ -54,7 +44,6 @@ function mountCompany(root, push, ctx = null) {
         const v = row(sec, "Register a company", { hint: `${COMPANY.registration} cr at ${st.name}` });
         const sel = el("select", "tinput");
         for (const c of CHARTER_KEYS) { const o = el("option", null, CHARTERS[c].name); o.value = c; if (c === (st.sector === "pirate" ? "civilian" : st.sector) || (c === "industrial" && !CHARTERS[st.sector])) o.selected = true; sel.append(o); }
-        /* 0.3.49: a name you type — it was always the suggested one */
         const nm = el("input", "tinput");
         nm.type = "text"; nm.maxLength = 28; nm.placeholder = suggestName(); nm.autocomplete = "off"; nm.setAttribute("aria-label", "Company name");
         v.value.replaceChildren(group(nm, sel, button("REGISTER", () => { const e = foundCompany(nm.value.trim(), sel.value); if (e) sim.notice = e; rebuild(); }, "on")));
@@ -91,14 +80,11 @@ function mountCompany(root, push, ctx = null) {
   });
 }
 
-/* ---- BOARD ----------------------------------------------------------------- */
-
 function mountBoard(root, push) {
   const host = el("div");
   root.append(host);
   let key = "";
   const rebuild = () => { key = ""; };
-  /* 0.3.18: the desk is drawn by js/boardview.js — departments → issuers → offers, as drop-downs */
   const cbtn = (label, fn, on = false, danger = false) => button(label, fn, `tiny${on ? " on" : ""}${danger ? " danger" : ""}`);
   push(() => {
     const st = docked();
@@ -121,9 +107,6 @@ function mountBoard(root, push) {
   });
 }
 
-/* ---- PILOT ----------------------------------------------------------------- */
-
-/** "tug_lease" → "Tug Lease" */
 const humanId = (id) => String(id).split("_").map((w) => (w.length <= 2 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1))).join(" ");
 const skillName = (id) => SKILLS[id]?.name ?? humanId(id);
 
@@ -167,7 +150,6 @@ function mountPilot(root, push) {
   skillSec.append(skillBody);
   root.append(skillSec);
 
-  /* Everything the race and the specialisation are doing to the hull right now — the composed truth, not the brochure. */
   const modSec = section("Live modifiers");
   const modBody = el("div");
   modSec.append(modBody);
@@ -259,7 +241,6 @@ function mountPilot(root, push) {
         const d = Math.round((v - 1) * 100);
         row(modBody, L.label, { value: `${d >= 0 ? "+" : ""}${d}%` }).value.className = `v ${(L.up ? d > 0 : d < 0) ? "good" : "hot"}`;
       }
-      /* the race's own lines fold in here rather than as a brochure of their own */
       for (const line of traitLines(pilot.raceId)) row(modBody, line.label, { hint: raceById(pilot.raceId).name, value: line.value }).value.className = `v ${line.good ? "good" : "hot"}`;
       if (held.length) modBody.append(el("div", "tempty", `Specialisation: ${held.map((e) => `${e.label} ${e.value}`).join(", ")}`));
     }
@@ -274,8 +255,6 @@ function mountPilot(root, push) {
     }
   });
 }
-
-/* ---- STANDING -------------------------------------------------------------- */
 
 function mountStanding(root, push) {
   const sec = section("Corporate standing");
@@ -296,8 +275,6 @@ function mountStanding(root, push) {
     }
   });
 }
-
-/* ---- GNN ------------------------------------------------------------------- */
 
 function mountGnn(root, push) {
   const host = el("div");
@@ -332,17 +309,6 @@ function mountGnn(root, push) {
   });
 }
 
-/* ---- the panel ------------------------------------------------------------- */
-
-/* the panels here take (root, push, ctx); crew-side panels take (root, ctx) */
-/* ---- TOWN ------------------------------------------------------------------
- *
- * What the people you settled are doing now. They used to be a row that made
- * a number; they work, climb, marry, have children who grow up onto the rolls,
- * fall out, walk off and occasionally do not come home — and all of it moves
- * the treasury, the standing or the board. The point of the desk is that you
- * can see the ones who are about to leave before they do.
- */
 const SUBS = {
   company: (root, push, ctx) => mountCompany(root, push, ctx), town: (root, push, ctx) => mountTown(root, ctx ?? { push }), board: mountBoard, pilot: mountPilot, standing: mountStanding, gnn: mountGnn,
   marshal: (root, push, ctx) => mountMarshal(root, ctx ?? { push }),

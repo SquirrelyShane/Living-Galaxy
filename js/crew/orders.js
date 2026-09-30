@@ -1,42 +1,11 @@
-/* Living Galaxy — ORDERS: doing something about what a hand is carrying (0.3.53).
- *
- * CON › CREW › GENOME showed nine needs, five traits, what a body was built
- * for and what a person had learned — and there was nothing to press. The
- * numbers only moved when the hand's own watch happened to choose something.
- *
- * This is the captain's side of it. Each need has an ORDER, and an order is a
- * real watch: it goes through deckmind.stepHand exactly the way their own
- * choice would — the same effect table, the same efficacy off their genes and
- * how tired they are, a record filed in the LOG, and a step of learning. The
- * graph just is not asked. One order per hand per watch.
- *
- *   Tiredness         STAND DOWN        → SLEEP
- *   Hunger            MESS CALL         → EAT_MESS
- *   Company           SHARE A MEAL      → SHARE_MEAL with whoever they get on with best
- *   Strain            EASE OFF          → EXERCISE   (docked: SHORE LEAVE, 60 cr, the real thing)
- *   Closeness         TIME WITH <them>  → SIT_WITH their partner, if aboard; WRITE HOME if not
- *   Something to do   REC TIME          → PLAY_CARDS
- *   Grievance         HEAR THEM OUT     — not a watch: you sit down with them. The cause is still
- *                                         there, but for five watches it weighs 0.35 less
- *   Purpose           GIVE A GOAL       → STUDY, in the skill you set them to TRAIN
- *   Work outstanding  CLEAR THE BACKLOG → PATCH_HULL
- *
- * TRAIN sets a skill a hand studies toward — up to the ceiling their body sets
- * and no further — and having a goal slows how fast purpose runs out.
- * ENCOURAGE / CURB on a LEARNED habit is a word from the captain: one step of
- * the same learning their own watches do, in the situation they are in now.
- * Temperament is genes. There is nothing to press on it, and the sheet says
- * what each one does instead.
- */
-
-import { crew, firstName, rapportBetween } from "../crew.js";
-import { sim } from "../sim.js";
+import { crew, firstName, rapportBetween } from "./ledger.js";
+import { sim } from "../sim/sim.js";
 import { deckmind, buildContext, stepHand, bodyOf } from "./deckmind.js";
 import { NEED_KEYS } from "./deckacts.js";
 import { tieBetween } from "./bonds.js";
 import { ACTION_META } from "./deckgraph.js";
 import { playerHull } from "./hull.js";
-import { adjustMorale, adjustTrust } from "../family.js";
+import { adjustMorale, adjustTrust } from "./family.js";
 import { coach, DECK_KINDS } from "./learn.js";
 import { SKILLS } from "../careers/skills.js";
 
@@ -46,13 +15,12 @@ const NEED_WORD = {
 };
 
 export const ORDER = {
-  shoreLeave: 60,      // cr, docked
-  hearTrust: [1, 3],   // trust a hearing earns, by loyalty
+  shoreLeave: 60,
+  hearTrust: [1, 3],
 };
 
 const aboard = (id) => crew.aboard.find((x) => x.id === id) ?? null;
 
-/** Who they get on with best aboard — the company for a meal or a hand of cards. */
 function bestMate(m) {
   let best = null, v = -1e9;
   for (const o of crew.aboard) {
@@ -63,7 +31,6 @@ function bestMate(m) {
   return best;
 }
 
-/** What is behind a grievance, in plain words. */
 export function grievanceCauses(m) {
   const st = playerHull().state();
   const out = [];
@@ -76,10 +43,6 @@ export function grievanceCauses(m) {
   return out;
 }
 
-/**
- * The order for one need, for one hand, right now.
- * → { need, id, label, hint, action?, focus?, custom?, why } — `why` is set when it cannot be given.
- */
 export function orderFor(m, need) {
   const docked = Boolean(sim.ship?.dockedAt);
   const partner = m.partner ? aboard(m.partner) : null;
@@ -111,19 +74,12 @@ export function orderFor(m, need) {
   return { need, ...base, why };
 }
 
-/** Every order for this hand, in the sheet's order. */
 export function ordersFor(m) { return NEED_KEYS.map((k) => orderFor(m, k)).filter(Boolean); }
-
-/* ---- giving one ------------------------------------------------------------ */
 
 function focusEntry(m, o) {
   return { id: o.id, name: o.name, m: o, tie: tieBetween(m, o), rapport: rapportBetween(m, o), samePost: false, junior: (o.cyclesAboard ?? 0) < 3, drawn: false };
 }
 
-/**
- * Give the order for `need`. → { ok, why?, line, rec? }
- * A watch order is filed in their LOG like any other watch.
- */
 export function giveOrder(m, need) {
   if (!m || !crew.aboard.includes(m)) return { ok: false, why: "not aboard" };
   const o = orderFor(m, need);
@@ -137,7 +93,7 @@ export function giveOrder(m, need) {
     const loyal = m.traits?.loyalty ?? 0.5;
     adjustTrust(m, ORDER.hearTrust[0] + (ORDER.hearTrust[1] - ORDER.hearTrust[0]) * loyal);
     adjustMorale(m, 2);
-    buildContext(m, { peek: true });     // refresh the computed grievance now
+    buildContext(m, { peek: true });
     const line = causes.length
       ? `${first} tells you: ${causes[0]}${causes.length > 1 ? `, and ${causes.slice(1).join(", ")}` : ""}. It helps that you asked.`
       : `${first} shrugs. Nothing specific — it helps that you asked.`;
@@ -169,27 +125,17 @@ export function giveOrder(m, need) {
   return { ok: true, rec, line };
 }
 
-/* ---- aptitude --------------------------------------------------------------- */
-
-/** The ceiling their body sets on a skill, 0..100. */
 export function ceilingOf(m, skill) {
   const b = bodyOf(m);
   return Math.round((b?.apt?.[skill] ?? 0) * 100);
 }
 
-/** Set (or clear, with null / the same skill again) what they study toward. */
 export function setTraining(m, skill) {
   if (!m) return null;
   m.trainFocus = skill && m.trainFocus !== skill && (SKILLS[skill] || bodyOf(m)?.apt?.[skill] != null) ? skill : null;
   return m.trainFocus;
 }
 
-/* ---- learned habits ---------------------------------------------------------- */
-
-/**
- * ENCOURAGE (+1) or CURB (−1) a habit: one step of their own learning, in the
- * situation they are in now. Once per habit per watch. → { ok, why?, line }
- */
 export function coachHabit(m, kind, sign) {
   if (!m || !DECK_KINDS.includes(kind)) return { ok: false, why: "no such habit" };
   m.coached ??= {};
@@ -199,12 +145,10 @@ export function coachHabit(m, kind, sign) {
   m.coached[kind] = deckmind.cycle;
   const first = firstName(m);
   if (sign > 0) { adjustTrust(m, 0.5); return { ok: true, line: `${first} takes it in. More of that, then.` }; }
-  /* a loyal hand takes a correction; anybody else takes it personally */
   if ((m.traits?.loyalty ?? 0.5) < 0.6) adjustMorale(m, -1);
   return { ok: true, line: `${first} hears it. Whether they like it is another thing.` };
 }
 
-/** What each temperament axis does aboard — genes, so the sheet explains instead. */
 export const TRAIT_MEANS = {
   grit: "holds a post when it goes bad; fights before it runs; rests less",
   caution: "braces early; keeps clear of risk; slower to act",

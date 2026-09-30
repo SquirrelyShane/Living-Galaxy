@@ -1,5 +1,3 @@
-/* Transient effects: beams, tracers, missiles, sparks, ore chunks, scan rings, RCS puffs.
- * fxAdd() registers a mesh with a tick(o, k, done, dt); fxUpdate() runs them each frame. */
 import * as THREE from "three";
 import { fxScene } from "./host.js";
 import { rig } from "./rig.js";
@@ -46,7 +44,6 @@ export function fxTracer(a, b, color, speed, size, onHit) {
   const life = dist / speed;
   return fxAdd(m, life, (o, k, done) => { o.position.copy(a).addScaledVector(dir, k * dist); if (done && onHit) onHit(b); });
 }
-/* ammunition variants ------------------------------------------------------------------ */
 export function fxCasing(p, dir) {
   const m = new THREE.Mesh(FXG.box, new THREE.MeshStandardMaterial({ color: "#d9b26a", metalness: 0.9, roughness: 0.3 }));
   const s = rig.U * 0.05; m.scale.set(s, s * 2.5, s); m.position.copy(p);
@@ -69,7 +66,6 @@ export function fxNuke(p) {
 export function fxEmp(p) {
   fxFlash(p, "#7de9ff", rig.U * 2.2, 0.5);
   for (let i = 0; i < 3; i++) { const r = fxRing(p, rig.U * (8 + i * 4), "#5fd0ff", 1.2 + i * 0.3); r.rotation.set(Math.random() * 3, Math.random() * 3, 0); }
-  // crackling arcs around the point of detonation
   const arcs = fxAdd(new THREE.Group(), 0.9, (o, k, done, dt) => {
     if (Math.random() < 0.5) { const a = p.clone().add(new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5)).multiplyScalar(rig.U * 3));
       const b = p.clone().add(new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5)).multiplyScalar(rig.U * 3));
@@ -159,5 +155,3 @@ export function fxUpdate(dt) {
     if (done) { fxScene().remove(o); if (o.material?.dispose) o.material.dispose(); fx.splice(i, 1); }
   }
 }
-
-/* ---- bind a freshly built ship to the rig ------------------------- */

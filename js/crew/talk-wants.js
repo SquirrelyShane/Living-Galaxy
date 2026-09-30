@@ -1,20 +1,4 @@
-/* Living Galaxy — the topics a hand brings to YOU.
- *
- * Every other topic in the tree is the captain opening a subject. These three
- * come the other way: a hand decided something on their own watch (deckmind),
- * and now it is on the board to be dealt with.
- *
- *   wants — they asked for a word. Either a grievance (wages, or the state of
- *           the hull) or something they will not put in the log. Hearing them
- *           out costs a minute and buys trust; brushing it off does the
- *           opposite, and the grievance does not go away.
- *   watch — "how has your watch been?" reads their last filed decision back
- *           in their own words, including the reason they gave for it.
- *   blood — if the ledger says somebody aboard is family, they know.
- *
- */
-
-import { crew, firstName, relatedTo } from "../crew.js";
+import { crew, firstName, relatedTo } from "./ledger.js";
 import { wearLine } from "./duties.js";
 import { journal } from "./journal.js";
 import { kinLabel } from "../genome/spacer.js";
@@ -63,8 +47,6 @@ export const WANT_TOPICS = [
     say(m, c) {
       const r = journal.last(m.id);
       if (!r) return `"Quiet enough."`;
-      /* the last line of a trace is the commitment ("committed to EXERCISE");
-       * the one before it is the reason a person would actually give */
       const chain = r.whatMadeMeActThis.reasoning;
       const why = chain[chain.length - 2] ?? chain[chain.length - 1] ?? "";
       const drive = r.observedSelf.dominantDrive;

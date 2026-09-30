@@ -131,7 +131,7 @@ await game.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await game.waitForTimeout(4000);
 
 const live = await game.evaluate(async () => {
-  const a = await import("/js/audio.js");
+  const a = await import("/js/audio/index.js");
   return a.audioState();
 });
 console.log("in play:", JSON.stringify(live));

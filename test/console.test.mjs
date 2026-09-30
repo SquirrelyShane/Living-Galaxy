@@ -1,6 +1,6 @@
 // node --import ./test/three-register.mjs test/console.test.mjs — the CONSOLE shell without a document
 //
-// Every module under js/console, js/crew, js/mission and js/upgrades.js must
+// Every module under js/console, js/crew, js/mission and js/economy/upgrades.js must
 // import in node with no `document`; the registry registers the six panels in
 // order; jumpTo parses paths; query() finds a registered jump; and no file in
 // the console/crew/mission tree is over 600 lines.
@@ -14,9 +14,9 @@ const t = async (name, fn) => {
   catch (e) { console.log(`FAIL  ${name}\n      ${e.stack ?? e.message}`); fail++; }
 };
 
-const ROOT = new URL("../", import.meta.url).pathname;
+const ROOT = new URL("..", import.meta.url).pathname;
 const walk = (dir) => readdirSync(dir).flatMap((f) => { const p = join(dir, f); return statSync(p).isDirectory() ? walk(p) : p.endsWith(".js") ? [p] : []; });
-const MODULES = [...walk(join(ROOT, "js/console")), ...walk(join(ROOT, "js/crew")), ...walk(join(ROOT, "js/mission")), join(ROOT, "js/upgrades.js"), join(ROOT, "js/refityard.js")];
+const MODULES = [...walk(join(ROOT, "js/console")), ...walk(join(ROOT, "js/crew")), ...walk(join(ROOT, "js/mission")), join(ROOT, "js/economy/upgrades.js"), join(ROOT, "js/station/refityard.js")];
 
 await t("no document at import", () => assert.equal(globalThis.document, undefined));
 
@@ -105,7 +105,7 @@ await t("runHit runs a run() leaf, else jumps, and remembers it", () => {
 const GENERATED = /^\/\*[\s\S]{0,400}?\bGenerated\b/;
 
 await t("files stay under 600 lines", () => {
-  const over = [...MODULES, join(ROOT, "js/stationdeck.js"), join(ROOT, "js/tutorial.js")]
+  const over = [...MODULES, join(ROOT, "js/station/stationdeck.js"), join(ROOT, "js/ui/tutorial.js")]
     .map((m) => [m.replace(ROOT, ""), readFileSync(m, "utf8")])
     .filter(([, src]) => !GENERATED.test(src))
     .map(([name, src]) => [name, src.split("\n").length])

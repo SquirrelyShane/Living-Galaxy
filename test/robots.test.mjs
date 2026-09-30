@@ -6,17 +6,17 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, crewWageTotal, tickCrew, CYCLE_SECONDS, stationRoster, hireCrew } from "../js/crew.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, crewWageTotal, tickCrew, CYCLE_SECONDS, stationRoster, hireCrew } from "../js/crew/ledger.js";
 import { transferCommand, captain } from "../js/npc/captain.js";
 import { duties } from "../js/crew/duties.js";
 import {
   ROBOT_KINDS, ROBOT_SECTORS, ROBOT_IDLE_AT, robotCatalogue, buyRobot, scrapRobot, tickRobots, robotsSummary, robotsAboard,
   serviceAll, servicePrice, saveRobots, loadRobots, ROBOTS_KEY, robots,
 } from "../js/crew/robots.js";
-import { buyUpgrade, upgrades } from "../js/upgrades.js";
+import { buyUpgrade, upgrades } from "../js/economy/upgrades.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

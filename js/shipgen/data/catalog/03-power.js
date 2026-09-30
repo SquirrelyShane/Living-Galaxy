@@ -1,5 +1,4 @@
 import { P } from "./_part.js";
-/* 03 — POWER GENERATION */
 export default {
   id: "d03", name: "03 Power Generation",
   sheet: {

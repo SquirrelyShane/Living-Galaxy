@@ -20,12 +20,12 @@ async function api(path, body) {
 const saved=await api('/net/sol-host'); // Do not start a new world while the relay is unreachable.
 const storage=new Map(Object.entries(saved.hostState?.storage || {}));
 globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k),get length(){return storage.size},key:i=>[...storage.keys()][i]??null};
-const {sim, launchSim, tickSolHost, worldSnapshot, applyWorldSnapshot}=await import('../js/sim.js');
-const {gnn,gnnPost,gnnBroadcastWire}=await import('../js/gnn.js');
-const {stations}=await import('../js/stations.js');
+const {sim, launchSim, tickSolHost, worldSnapshot, applyWorldSnapshot}=await import('../js/sim/sim.js');
+const {gnn,gnnPost,gnnBroadcastWire}=await import('../js/comms/gnn.js');
+const {stations}=await import('../js/station/stations.js');
 const {traffic,trafficDown,markVesselDown}=await import('../js/npc/traffic.js');
-const {hullWire,adoptHulls}=await import('../js/worldsync.js');
-const {net}=await import('../js/net.js');
+const {hullWire,adoptHulls}=await import('../js/net/worldsync.js');
+const {net}=await import('../js/net/net.js');
 net.selfId=hostId;net.host=true;net.hostId=hostId;net.room='sol';net.online=true;
 launchSim('Sol Observatory','sol');
 sim.selfId=hostId;

@@ -16,15 +16,15 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, dismissCrew } from "../js/crew.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, dismissCrew } from "../js/crew/ledger.js";
 import { traffic } from "../js/npc/traffic.js";
 import { crewOf } from "../js/npc/npccrew.js";
 import { cradle, generateNPC } from "../js/npc/cradle.js";
-import { personName, nameRng } from "../js/names.js";
-import * as G from "../js/gdb.js";
+import { personName, nameRng } from "../js/world/names.js";
+import * as G from "../js/corp/gdb.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

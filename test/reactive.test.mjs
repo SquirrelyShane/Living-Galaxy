@@ -10,11 +10,11 @@
  * the clock the player was shown.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stepStations } from "../js/stations.js";
-import { currentSystem } from "../js/bodies.js";
-import { corps } from "../js/corps.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stepStations } from "../js/station/stations.js";
+import { currentSystem } from "../js/world/bodies.js";
+import { corps } from "../js/corp/corps.js";
 import {
   traffic, stepTraffic, trafficCensus, vesselById, markVesselDown, trafficDown,
   LANE_OVERHEAD, MIN_TRAVEL_S, HOSTILE_ROLES, LAW_ROLES, ROLES, seatHull,
@@ -26,9 +26,9 @@ import {
 } from "../js/npc/security.js";
 import { stepNpcCombat, hostileTo, acquire, setHunt, damageHull, combatLog, combatReport, HUNT_R } from "../js/npc/combat.js";
 import { nests, waves, launchWave, stepRogues, rogueReport, nestById, WAVE_SLOT } from "../js/npc/rogues.js";
-import { perf, notePerf, resetPerf, lockPerfTier, farBudget, waveCap, perfReport } from "../js/perf.js";
-import { contacts, syncContacts, shots, stepShots, CONTACT_R } from "../js/turrets.js";
-import { relationOf } from "../js/sim.js";
+import { perf, notePerf, resetPerf, lockPerfTier, farBudget, waveCap, perfReport } from "../js/core/perf.js";
+import { contacts, syncContacts, shots, stepShots, CONTACT_R } from "../js/flight/turrets.js";
+import { relationOf } from "../js/sim/sim.js";
 
 /* A SEEDED SKY.
  *

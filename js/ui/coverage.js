@@ -1,24 +1,5 @@
-/* LIVING GALAXY — the underwriter's desk, at a yard.
- *
- * One panel, rendered into the station deck's yard page under the hull you
- * are looking at. It is its own module for a boring reason — js/stationdeck.js
- * is held under 600 lines by test/console.test.mjs and had sixty to spare —
- * and for a better one: what a policy costs is arithmetic over a hull value,
- * and arithmetic that renders itself is easier to be sure of than arithmetic
- * buried in a five-hundred-line panel.
- *
- * It takes the DOM helpers it needs rather than importing the deck's private
- * ones, so it can be dropped into any panel that has a hull and a purse.
- */
+import { quoteAll, policyFor, insure, playerKey, TIER_BY_ID } from "../economy/insurance.js";
 
-import { quoteAll, policyFor, insure, playerKey, TIER_BY_ID } from "../insurance.js";
-
-/**
- * Render the cover block for one hull.
- *
- * @param host    element to append into
- * @param opts    { hullId, hullName, value, credits, docked, onBuy(tierId, premium), ui: { el, row, btn } }
- */
 export function renderCoverage(host, opts) {
   const { hullId, hullName, value, credits = 0, docked = true, onBuy, ui } = opts;
   const { el, row, btn } = ui;
@@ -54,14 +35,6 @@ export function renderCoverage(host, opts) {
   host.append(sec);
 }
 
-/**
- * Buy cover on the player's hull, taking the premium out of their purse.
- * Returns the policy, or null if they could not pay.
- *
- * Replacing cover on a hull that already has some charges the new premium in
- * full and refunds nothing — you are not trading a policy in, you are buying
- * a different one, and the one you had has been running since you bought it.
- */
 export function buyCoverage(ship, hullId, tierId, value) {
   const t = TIER_BY_ID[tierId];
   if (!t || !ship || !hullId || !(value > 0)) return null;

@@ -1,16 +1,5 @@
-/* LIVING GALAXY — console global jump index.
- *
- * The survivor of the CMD deck's search + flatten: a flat list of the leaves
- * that never belonged to a panel (registered by console.js at mount) plus
- * whatever every panel's `search()` returns right now, so crew names, drone
- * names, bodies, missions and upgrades are all one keystroke away.
- *
- *   registerJump(spec), buildIndex(), query(q, limit) → hits, runHit(hit)
- */
-
 import { closeConsole, console as con, jumpTo, noteRecent } from "./console.js";
 
-/** Static jumps registered by console.js at mount. */
 export const jumps = new Map();
 
 export function registerJump({ id, label, hint = "", keywords = "", panel = null, sub = null, focus = null, run = null, status = null, close = false }) {
@@ -26,7 +15,6 @@ const label = (p, subId) => {
   return s ? `${p.title} › ${s.label}` : p.title;
 };
 
-/** Rebuilds the searchable index: static jumps ∪ every panel's sub-tabs ∪ every panel's live search(). */
 export function buildIndex() {
   const out = [...jumps.values()];
   for (const p of con.panels.values()) {
@@ -45,7 +33,6 @@ export function buildIndex() {
   return out;
 }
 
-/** query(q, limit = 30) → [{ id, label, hint, path, run, status, close }]; label hits rank above keyword-only hits. */
 export function query(q, limit = 30) {
   const needle = String(q ?? "").trim().toLowerCase();
   if (!needle) return [];
@@ -67,7 +54,6 @@ export function query(q, limit = 30) {
   return scored.slice(0, limit).map((x) => x.h);
 }
 
-/** run() if present else jumpTo(path); closes the console when the leaf opens another surface. */
 export function runHit(hit) {
   if (!hit) return false;
   if (typeof hit.run === "function") {

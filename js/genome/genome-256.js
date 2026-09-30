@@ -1,18 +1,3 @@
-/* Living Galaxy — GENOME ENGINE (256-gene core), ported verbatim from the
- * genome-agent project (v2.2) and rewrapped as an ES module. No behavioural
- * change: the same seed produces the same genome here as it does there, so a
- * genome written by either project decodes in the other.
- *
- * Living Galaxy registers its own `spacer` entity type on top of this — see
- * js/genome/spacer.js. Nothing in this file knows about the game.
- */
-
-
-// ================================================================
-// 0. SEEDED RNG — deterministic, portable, no dependencies
-// ================================================================
-
-/** FNV-ish string -> 32-bit seed. hashSeed('orc-chief-01') -> 2748103521 */
 function hashSeed(str) {
   let h = 2166136261 >>> 0;
   const s = String(str);
@@ -23,11 +8,6 @@ function hashSeed(str) {
   return h >>> 0;
 }
 
-/**
- * mulberry32 — 32-bit PRNG. Fast, good distribution, 2^32 period.
- * @param {number|string} seed
- * @returns {function(): number} rng() -> [0,1)
- */
 function makeRNG(seed) {
   let a = (typeof seed === 'number' ? seed : hashSeed(seed)) >>> 0;
   return function rng() {
@@ -39,26 +19,12 @@ function makeRNG(seed) {
   };
 }
 
-/**
- * Bounded quasi-normal draw. Mean-centred, never clamps (no pile-up at 0/1).
- * spread 0 -> exactly mean; spread 1 -> near-uniform.
- * @param {function} rng
- * @param {number} mean 0..1
- * @param {number} spread 0..1
- */
 function drawTrait(rng, mean = 0.5, spread = 1) {
-  // average of 3 uniforms ~= bell curve on [0,1], mean 0.5
   const bell = (rng() + rng() + rng()) / 3;
   const v = mean + (bell - 0.5) * spread * 2;
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
-// ================================================================
-// 1. ENTITY TYPE FLAGS — Which gene ranges each entity uses
-//    NOTE: geneCount is computed at load time from activeRanges.
-//    v2.0 had 9 of 10 hand-typed counts wrong (e.g. monster said 224,
-//    its ranges actually cover all 256).
-// ================================================================
 const ENTITY_TYPES_RAW = {
   HUMANOID: {
     id: 'humanoid',
@@ -79,9 +45,6 @@ const ENTITY_TYPES_RAW = {
   MONSTER: {
     id: 'monster',
     label: 'Monster / Mythic Beast',
-    // v2.0 claimed 224 but listed every range. Trimmed the genuinely
-    // non-monster slots (microbiome, some reproductive strategy) so the
-    // type is actually distinct from HUMANOID.
     activeRanges: [
       [0, 63], [64, 79], [88, 95], [96, 119], [120, 127],
       [128, 199], [200, 215], [216, 231], [232, 247], [248, 255],
@@ -157,145 +120,108 @@ const ENTITY_TYPES_RAW = {
   },
 };
 
-// ================================================================
-// 2. GENE INDEX ENUM — 256 GENES
-// ================================================================
 const GENES = Object.freeze({
-  // ── 1. CORE PHYSICAL PERFORMANCE (0–11) ─────────────────────────
   ENDURANCE_A: 0, ENDURANCE_B: 1, ENDURANCE_C: 2,
   STRENGTH_A: 3, STRENGTH_B: 4, STRENGTH_C: 5,
   AGILITY_A: 6, AGILITY_B: 7, AGILITY_C: 8,
   INTEL_A: 9, INTEL_B: 10, INTEL_C: 11,
 
-  // ── 2. IMMUNE & METABOLIC HEALTH (12–17) ────────────────────────
   IMMUNITY_A: 12, IMMUNITY_B: 13, IMMUNITY_C: 14,
   METAB_A: 15, METAB_B: 16, METAB_C: 17,
 
-  // ── 3. PERSONALITY & BEHAVIORAL (18–22) ─────────────────────────
   RISK: 18, CURIOSITY: 19, SOCIAL: 20, AGGRESSION: 21, DISCIPLINE: 22,
 
-  // ── 4. BRAIN / LEARNING MODIFIERS (23–25) ───────────────────────
   LEARNING_RATE: 23, MEMORY_CAP: 24, PATTERN_RECOG: 25,
 
-  // ── 5. PHYSICAL PHENOTYPE & MORPHOLOGY (26–29) ──────────────────
   HEIGHT_A: 26, HEIGHT_B: 27, FRAME: 28, BMI: 29,
 
-  // ── 6. APPEARANCE & SIGNALING (30–32) ───────────────────────────
   SKIN: 30, HAIR: 31, EYES: 32,
 
-  // ── 7. EVOLUTIONARY & REPRODUCTIVE (33–35) ──────────────────────
   FERTILITY: 33, LONGEVITY: 34, MUTATION_RATE: 35,
 
-  // ── 8. HIDDEN / RECESSIVE / CARRIER (36–38) ─────────────────────
   RECESSIVE_0: 36, RECESSIVE_1: 37, RECESSIVE_2: 38,
 
-  // ── 9. EPIGENETIC & REGULATORY (39–41) ──────────────────────────
   STRESS_RESPONSE: 39, ADAPTABILITY: 40, INSTABILITY: 41,
 
-  // ── 10. SENSORY INTERFACE (42–50) ───────────────────────────────
   SENSORY_VISION: 42, SENSORY_HEARING: 43, SENSORY_OLFACTION: 44,
   SENSORY_TACTILE: 45, NIGHT_VISION: 46, THERMAL_SENSE: 47,
   ELECTRO_SENSE: 48, MAGNETO_SENSE: 49, TOXIN_DETECT: 50,
 
-  // ── 11. ADVANCED COGNITION & CREATIVITY (51–55) ─────────────────
   CREATIVITY: 51, EMPATHY: 52, FOCUS: 53, STRATEGY: 54, INTUITION: 55,
 
-  // ── 12. SOCIAL & REPRODUCTIVE BEHAVIOR (56–59) ──────────────────
   MATING_PREFERENCE: 56, PARENTAL_CARE: 57, TERRITORIALITY: 58, COOPERATION: 59,
 
-  // ── 13. REGULATORY & META-GENES (60–63) ─────────────────────────
   PLASTICITY_GLOBAL: 60, EPIGENETIC_MEMORY: 61, DOMINANCE_MOD: 62, EXPRESSION_RATE: 63,
 
-  // ── 14. HORMONAL & ENDOCRINE (64–71) ────────────────────────────
   TESTOSTERONE: 64, ESTROGEN: 65, CORTISOL: 66, INSULIN: 67,
   THYROID: 68, GROWTH_HORMONE: 69, OXYTOCIN: 70, ADRENALINE: 71,
 
-  // ── 15. DEVELOPMENTAL & ONTOGENY (72–79) ────────────────────────
   EMBRYONIC_GROWTH: 72, PUBERTY_TIMING: 73, AGING_RATE: 74, REGENERATION: 75,
   NEURAL_PRUNING: 76, MYELINATION: 77, STEM_CELL: 78, EPIGENETIC_RESET: 79,
 
-  // ── 16. MICROBIOME & SYMBIONT (80–87) ───────────────────────────
   GUT_MICROBIOME: 80, IMMUNE_MODULATION: 81, TOXIN_BREAKDOWN: 82, VITAMIN_SYNTHESIS: 83,
   MOOD_INFLUENCE: 84, PATHOGEN_RESIST: 85, ENERGY_HARVEST: 86, CHEMICAL_SIGNAL: 87,
 
-  // ── 17. ENVIRONMENTAL ADAPTATION (88–95) ────────────────────────
   THERMAL_TOLERANCE: 88, ALTITUDE_ADAPT: 89, AQUATIC_ADAPT: 90, ARID_ADAPT: 91,
   FOREST_CAMO: 92, CAVE_ADAPT: 93, POLAR_ADAPT: 94, URBAN_ADAPT: 95,
 
-  // ── 18. ADVANCED COGNITION SUB-TYPES (96–103) ───────────────────
   ABSTRACT_THINK: 96, EMOTIONAL_IQ: 97, SPATIAL_IQ: 98, VERBAL_IQ: 99,
   LOGICAL_IQ: 100, CREATIVE_IQ: 101, SOCIAL_IQ: 102, PREDICTIVE_IQ: 103,
 
-  // ── 19. SOCIAL HIERARCHY & GROUP DYNAMICS (104–111) ─────────────
   DOMINANCE: 104, SUBMISSIVENESS: 105, ALTRUISM: 106, KIN_RECOGNITION: 107,
   RECIPROCITY: 108, COALITION_FORM: 109, RITUAL_BEHAVIOR: 110, STATUS_SIGNAL: 111,
 
-  // ── 20. REPRODUCTIVE STRATEGY (112–119) ─────────────────────────
   MONOGAMY_BIAS: 112, POLYGAMY_BIAS: 113, PARENTAL_INVEST: 114, MATE_CHOICE: 115,
   COURTSHIP_DISPLAY: 116, GAMETE_QUALITY: 117, GESTATION_LENGTH: 118, LITTER_SIZE: 119,
 
-  // ── 21. META-REGULATORY (120–127) ───────────────────────────────
   GLOBAL_MUTATION: 120, EPIGENETIC_STABILITY: 121, VERSION_CONTROL: 122,
-  CHECKSUM: 123, // RESERVED — integrity moved to the encode envelope; free slot
+  CHECKSUM: 123,
   EXTINCTION_RISK: 124, SPECIATION_TRIGGER: 125, CULTURAL_MEME: 126, PHYLO_MARKER: 127,
 
-  // ── 22. EXPANDED PHYSICAL PERFORMANCE (128–135) ─────────────────
   ENDURANCE_D: 128, ENDURANCE_E: 129, STRENGTH_D: 130, STRENGTH_E: 131,
   AGILITY_D: 132, AGILITY_E: 133, SPEED_BURST: 134, SPEED_SUSTAIN: 135,
 
-  // ── 23. PAIN, FATIGUE & RECOVERY (136–143) ──────────────────────
   PAIN_THRESHOLD: 136, PAIN_SENSITIVITY: 137, FATIGUE_RESIST: 138, RECOVERY_RATE: 139,
   SLEEP_EFFICIENCY: 140, WOUND_CLOTTING: 141, INFLAMMATION_CTRL: 142, SCAR_TISSUE: 143,
 
-  // ── 24. CIRCADIAN & TEMPORAL BIOLOGY (144–151) ──────────────────
   CIRCADIAN_PHASE: 144, CIRCADIAN_RIGIDITY: 145, SEASONAL_RESPONSE: 146, HIBERNATION_DEPTH: 147,
   MIGRATION_URGE: 148, TIME_PERCEPTION: 149, ULTRADIAN_CYCLE: 150, LUNAR_SENSITIVITY: 151,
 
-  // ── 25. VOCALIZATION & COMMUNICATION (152–159) ──────────────────
   VOCAL_RANGE: 152, VOCAL_POWER: 153, VOCAL_COMPLEXITY: 154, MIMICRY: 155,
   BODY_LANGUAGE: 156, PHEROMONE_OUTPUT: 157, BIOLUMINESCENCE: 158, ECHOLOCATION: 159,
 
-  // ── 26. COMBAT & THREAT RESPONSE (160–167) ──────────────────────
   BITE_FORCE: 160, CLAW_SHARPNESS: 161, VENOM_POTENCY: 162, ARMOR_DENSITY: 163,
   THREAT_DISPLAY: 164, FLEE_SPEED: 165, PACK_TACTICS: 166, AMBUSH_INSTINCT: 167,
 
-  // ── 27. INSTINCT & SURVIVAL DRIVES (168–175) ────────────────────
   HUNGER_DRIVE: 168, THIRST_DRIVE: 169, SHELTER_DRIVE: 170, HOARDING: 171,
   FLEE_THRESHOLD: 172, FREEZE_RESPONSE: 173, PLAY_DRIVE: 174, GROOMING: 175,
 
-  // ── 28. NAVIGATION & SPATIAL MEMORY (176–183) ───────────────────
   HOME_RANGE: 176, PATH_MEMORY: 177, LANDMARK_RECOG: 178, DEAD_RECKONING: 179,
   CELESTIAL_NAV: 180, SCENT_TRAIL: 181, DEPTH_PERCEPTION: 182, SPATIAL_MAPPING: 183,
 
-  // ── 29. SUPERNATURAL & METAPHYSICAL (184–199) ───────────────────
   MANA_POOL: 184, MANA_REGEN: 185, MANA_EFFICIENCY: 186, AURA_STRENGTH: 187,
   SPIRIT_SIGHT: 188, SOUL_RESILIENCE: 189, NECRO_AFFINITY: 190, LIFE_AFFINITY: 191,
   CHAOS_AFFINITY: 192, ORDER_AFFINITY: 193, DIVINATION_SENSE: 194, SUMMONING_BOND: 195,
   ENCHANT_RESIST: 196, CURSE_SUSCEPT: 197, BLESSING_RECEPT: 198, PLANAR_ANCHOR: 199,
 
-  // ── 30. DIETARY & DIGESTIVE SPECIALIZATION (200–215) ────────────
   DIET_BREADTH: 200, CARNIVORE_BIAS: 201, HERBIVORE_BIAS: 202, OMNIVORE_FLEX: 203,
   CELLULOSE_DIGEST: 204, CARRION_TOLERANCE: 205, TOXIN_METABOLIZE: 206, MINERAL_EXTRACT: 207,
   WATER_EXTRACT: 208, FAT_STORAGE: 209, PROTEIN_SYNTH: 210, FERMENTATION: 211,
   COPROPHAGY_TRAIT: 212, PHOTOSYNTHESIS: 213, CHEMOSYNTHESIS: 214, NUTRIENT_SENSE: 215,
 
-  // ── 31. ELEMENTAL & MAGICAL AFFINITY (216–231) ──────────────────
   FIRE_AFFINITY: 216, WATER_AFFINITY: 217, EARTH_AFFINITY: 218, AIR_AFFINITY: 219,
   SHADOW_AFFINITY: 220, LIGHT_AFFINITY: 221, NATURE_AFFINITY: 222, BLOOD_AFFINITY: 223,
   PSYCHIC_AFFINITY: 224, TIME_AFFINITY: 225, GRAVITY_AFFINITY: 226, SOUND_AFFINITY: 227,
   VOID_AFFINITY: 228, DREAM_AFFINITY: 229, RUNE_AFFINITY: 230, ALCHEMY_AFFINITY: 231,
 
-  // ── 32. SKELETAL & STRUCTURAL SPECIALIZATION (232–247) ──────────
   BONE_DENSITY: 232, BONE_HOLLOW: 233, CARTILAGE_RATIO: 234, EXOSKELETON: 235,
   SHELL_THICKNESS: 236, SPINE_FLEXIBILITY: 237, LIMB_COUNT: 238, LIMB_REGEN: 239,
   WING_SPAN: 240, TAIL_LENGTH: 241, HORN_ANTLER: 242, TUSK_FANG: 243,
   CLAW_RETRACT: 244, WEBBED_DIGITS: 245, SUCKER_GRIP: 246, BODY_SYMMETRY: 247,
 
-  // ── 33. CORRUPTION, MUTATION & PLANAR (248–254) ─────────────────
   CORRUPTION_RESIST: 248, CORRUPTION_SPREAD: 249, MUTATION_VOLATIL: 250, CHIMERA_POTENTIAL: 251,
   PLANAR_BLEED: 252, VOID_TAINT: 253, DIVINE_SPARK: 254,
 
-  // ── 34. GENDER / SEX DETERMINATION (255) ────────────────────────
   GENDER: 255,
 });
 
@@ -303,9 +229,6 @@ const GENE_NAMES = Object.freeze(
   Object.keys(GENES).reduce((acc, k) => { acc[GENES[k]] = k; return acc; }, new Array(256))
 );
 
-// ================================================================
-// 3. GENE CATEGORIES — the ONE taxonomy. UI, filtering, stat screens.
-// ================================================================
 const GENE_CATEGORIES = Object.freeze({
   PHYSICAL:       { label: 'Core Physical',              color: '#e74c3c', range: [0, 11] },
   IMMUNE_METAB:   { label: 'Immune & Metabolic',         color: '#2ecc71', range: [12, 17] },
@@ -343,21 +266,16 @@ const GENE_CATEGORIES = Object.freeze({
   GENDER_SLOT:    { label: 'Sex Determination',          color: '#880e4f', range: [255, 255] },
 });
 
-// index -> category key, built once
 const _CAT_OF = new Array(256);
 for (const [key, def] of Object.entries(GENE_CATEGORIES)) {
   for (let i = def.range[0]; i <= def.range[1]; i++) _CAT_OF[i] = key;
 }
 
-/** @returns {{key:string,label:string,color:string}} */
 function categoryOf(index) {
   const key = _CAT_OF[index];
   return key ? { key, label: GENE_CATEGORIES[key].label, color: GENE_CATEGORIES[key].color } : null;
 }
 
-// ================================================================
-// 4. DERIVED TABLES — masks, counts, polygenic families (built once)
-// ================================================================
 const _MASKS = new Map();
 
 function _maskFromRanges(ranges) {
@@ -376,7 +294,6 @@ const ENTITY_TYPES = Object.freeze(
   }))
 );
 
-// mutable: registerEntityType() adds to this at runtime
 const _BY_ID = Object.fromEntries(Object.values(ENTITY_TYPES).map(et => [et.id, et]));
 
 class GenomeError extends Error {
@@ -394,12 +311,6 @@ function getEntityType(entityTypeId) {
   return et;
 }
 
-/**
- * Register a new entity type at runtime (hybrids, mods, campaign-specific races).
- * v2.1 had a closed set of 10 — anything outside it threw. Production needs this open.
- * @param {{id:string,label?:string,activeRanges:Array<[number,number]>,description?:string}} def
- * @param {boolean} [overwrite=false]
- */
 function registerEntityType(def, overwrite = false) {
   if (!def || !def.id) throw new GenomeError('registerEntityType needs an id', 'BAD_TYPE_DEF');
   if (_BY_ID[def.id] && !overwrite) throw new GenomeError(`Entity type already registered: ${def.id}`, 'DUPLICATE_TYPE');
@@ -433,21 +344,15 @@ function unregisterEntityType(id) {
 
 function listEntityTypes() { return Object.keys(_BY_ID); }
 
-/**
- * Shared, frozen-by-convention active mask. DO NOT MUTATE the returned array.
- * Use buildActiveMask() if you need an owned copy.
- */
 function activeMask(entityTypeId) {
   getEntityType(entityTypeId);
   return _MASKS.get(entityTypeId);
 }
 
-/** Owned copy of the active mask (safe to mutate). */
 function buildActiveMask(entityTypeId) {
   return Uint8Array.from(activeMask(entityTypeId));
 }
 
-/** Polygenic families: STRENGTH -> [3,4,5,130,131] etc. Built from _A.._Z suffixes. */
 const GENE_FAMILIES = Object.freeze(
   Object.keys(GENES).reduce((acc, k) => {
     const m = /^(.+)_([A-Z])$/.exec(k);
@@ -457,13 +362,6 @@ const GENE_FAMILIES = Object.freeze(
   }, {})
 );
 
-// ================================================================
-// 5. SPECIES BIAS PROFILES
-//    Uniform random genes make every entity statistically identical
-//    mush. A profile shifts the mean/spread of specific genes so an
-//    avian actually reads avian. Sparse — unlisted genes use default.
-//    { geneIndex: [mean, spread] }
-// ================================================================
 const SPECIES_PROFILES = Object.freeze({
   humanoid: { default: [0.5, 0.7] },
   animal: {
@@ -513,21 +411,9 @@ const SPECIES_PROFILES = Object.freeze({
   },
 });
 
-// ================================================================
-// 6. GENOME CREATION
-// ================================================================
-
 const GENOME_LEN = 256;
-/** Value written into inactive slots. Never use value===0 to test activity — use the mask. */
 const NULL_GENE = 0;
 
-/**
- * Blank genome. Active genes -> 0.5 (neutral), inactive -> NULL_GENE.
- * v2.0 filled all 256 with 0.5, which disagreed with createRandomGenome's
- * "inactive = 0" convention and made blank genomes non-round-trippable.
- * @param {string} [entityTypeId] - omit for an all-0.5 scratch buffer
- * @returns {Float32Array}
- */
 function createBlankGenome(entityTypeId) {
   const g = new Float32Array(GENOME_LEN);
   if (!entityTypeId) { g.fill(0.5); return g; }
@@ -536,15 +422,6 @@ function createBlankGenome(entityTypeId) {
   return g;
 }
 
-/**
- * Create a genome for an entity type. Deterministic when given a seed.
- * @param {string} entityTypeId
- * @param {number|string} [seed] - omit for Math.random-backed non-determinism
- * @param {Object} [opts]
- * @param {Object} [opts.profile] - override SPECIES_PROFILES entry
- * @param {Object} [opts.overrides] - { [geneIndex]: value } forced post-roll
- * @returns {Float32Array}
- */
 function createGenome(entityTypeId, seed, opts = {}) {
   const mask = activeMask(entityTypeId);
   const rng = seed === undefined ? Math.random : makeRNG(seed);
@@ -568,33 +445,11 @@ function createGenome(entityTypeId, seed, opts = {}) {
   return g;
 }
 
-/** Back-compat alias for v2.0 call sites. Unseeded, uniform-ish. */
 function createRandomGenome(entityTypeId) {
   return createGenome(entityTypeId, undefined, { profile: { default: [0.5, 1] } });
 }
 
-// ================================================================
-// 7. BREEDING — block recombination, dominance, seeded mutation
-// ================================================================
-
-/**
- * Crossover two parents. Deterministic when seeded.
- *
- * v2.0 picked each gene independently 50/50, so lineages never formed
- * stable family resemblance. v2.1 uses contiguous blocks (chromosome
- * segments) with crossover points, and actually consumes DOMINANCE_MOD.
- *
- * @param {Float32Array} parentA
- * @param {Float32Array} parentB
- * @param {string} entityTypeId
- * @param {Object} [opts]
- * @param {number|string} [opts.seed]
- * @param {number} [opts.mutationScale=0.05] - base mutation sigma
- * @param {number} [opts.blockLength=16] - avg genes per inherited block
- * @returns {Float32Array}
- */
 function crossover(parentA, parentB, entityTypeId, opts = {}) {
-  // tolerate v2.0 signature: crossover(a, b, type, 0.05)
   if (typeof opts === 'number') opts = { mutationScale: opts };
   const { seed, mutationScale = 0.05, blockLength = 16 } = opts;
 
@@ -607,8 +462,6 @@ function crossover(parentA, parentB, entityTypeId, opts = {}) {
   const instability = (parentA[GENES.INSTABILITY] + parentB[GENES.INSTABILITY]) / 2;
   const effectiveMut = mutationScale * (0.5 + mutRateGene) * (0.5 + globalMut) * (0.75 + instability * 0.5);
 
-  // DOMINANCE_MOD: 0.5 = pure Mendelian coin-flip. Higher = the stronger
-  // allele wins more often, producing visibly "dominant" bloodlines.
   const dominance = (parentA[GENES.DOMINANCE_MOD] + parentB[GENES.DOMINANCE_MOD]) / 2;
 
   let fromA = rng() < 0.5;
@@ -620,13 +473,11 @@ function crossover(parentA, parentB, entityTypeId, opts = {}) {
 
     const a = parentA[i], b = parentB[i];
     let base = fromA ? a : b;
-    if (rng() < (dominance - 0.5) * 2) base = a > b ? a : b; // dominant allele expresses
+    if (rng() < (dominance - 0.5) * 2) base = a > b ? a : b;
 
-    // Box-Muller gaussian mutation
     const u1 = rng() || 1e-10, u2 = rng();
     const noise = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
     let v = base + noise * effectiveMut;
-    // reflect instead of clamp — avoids probability mass piling at 0 and 1
     if (v < 0) v = -v;
     if (v > 1) v = 2 - v;
     child[i] = v < 0 ? 0 : v > 1 ? 1 : v;
@@ -636,10 +487,6 @@ function crossover(parentA, parentB, entityTypeId, opts = {}) {
   return child;
 }
 
-/**
- * Mutate a genome in place-free fashion (returns a new array).
- * Useful for evolution-strategy loops without a second parent.
- */
 function mutate(genome, entityTypeId, opts = {}) {
   const { seed, scale = 0.05, rate = 1 } = opts;
   const mask = activeMask(entityTypeId);
@@ -656,13 +503,6 @@ function mutate(genome, entityTypeId, opts = {}) {
   }
   return out;
 }
-
-// ================================================================
-// 8. SERIALIZATION — 256 genes -> ~348-char base64 string
-//    Float32Array JSON is ~2.5KB per NPC. Quantized to Uint8 it's
-//    256 bytes -> 348 base64 chars, URL/localStorage/save-file sized.
-//    Quantization error is 1/255 (~0.4%), below perceptual relevance.
-// ================================================================
 
 const GENOME_FORMAT_VERSION = 1;
 const _B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
@@ -688,10 +528,6 @@ function _b64ToBytes(str) {
   return Uint8Array.from(out);
 }
 
-/**
- * Serialize to a compact string: "1:humanoid:<base64>:<chk>"
- * @returns {string}
- */
 function encodeGenome(genome, entityTypeId) {
   getEntityType(entityTypeId);
   const bytes = new Uint8Array(GENOME_LEN);
@@ -701,11 +537,6 @@ function encodeGenome(genome, entityTypeId) {
   return `${GENOME_FORMAT_VERSION}:${entityTypeId}:${_bytesToB64(bytes)}:${chk}`;
 }
 
-/**
- * @param {string} str
- * @param {Object} [opts] { skipChecksum } — set to load deliberately hand-edited genomes
- * @returns {{ genome: Float32Array, entityTypeId: string, version: number }}
- */
 function decodeGenome(str, opts = {}) {
   const parts = String(str).split(':');
   if (parts.length < 3) throw new Error('Malformed genome string');
@@ -725,17 +556,6 @@ function decodeGenome(str, opts = {}) {
   return { genome, entityTypeId, version };
 }
 
-// ================================================================
-// 9. INTEGRITY
-//    NOTE: v2.0 declared a CHECKSUM gene at index 123 but never wrote it.
-//    Writing it there is wrong anyway — 123 sits in the META range, which
-//    8 of the 10 entity types do not activate, and a self-referential gene
-//    would be inherited/mutated like any other trait. The checksum belongs
-//    to the serialization envelope, not the gene data. Gene 123 is now a
-//    RESERVED free slot; repurpose it if you need one.
-// ================================================================
-
-/** 16-bit FNV fingerprint of the quantized genome. Stable across encode/decode. */
 function genomeFingerprint(genome) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < GENOME_LEN; i++) {
@@ -745,10 +565,6 @@ function genomeFingerprint(genome) {
   return h & 0xFFFF;
 }
 
-/**
- * Structural validation. Catches corrupt save data before it reaches the sim.
- * @returns {{ ok: boolean, errors: string[] }}
- */
 function validateGenome(genome, entityTypeId) {
   const errors = [];
   if (!genome || genome.length !== GENOME_LEN) {
@@ -764,19 +580,6 @@ function validateGenome(genome, entityTypeId) {
   return { ok: errors.length === 0, errors };
 }
 
-// ================================================================
-// 10. SCORING & PHENOTYPE
-// ================================================================
-
-/**
- * Average a polygenic family. Mask-aware: inactive slots are excluded
- * rather than counted as 0, which in v2.0 silently halved scores for
- * non-humanoid types (an insect has STRENGTH_A..C but not D/E).
- * @param {Float32Array} genome
- * @param {string} family - e.g. 'ENDURANCE', 'STRENGTH', 'AGILITY', 'INTEL'
- * @param {string} [entityTypeId]
- * @returns {number} 0..1
- */
 function scorePolygenic(genome, family, entityTypeId) {
   const idxs = GENE_FAMILIES[family];
   if (!idxs || idxs.length === 0) return 0;
@@ -789,7 +592,6 @@ function scorePolygenic(genome, family, entityTypeId) {
   return n ? sum / n : 0;
 }
 
-/** Average every active gene in a GENE_CATEGORIES key. */
 function scoreCategory(genome, categoryKey, entityTypeId) {
   const cat = GENE_CATEGORIES[categoryKey];
   if (!cat) return 0;
@@ -802,47 +604,34 @@ function scoreCategory(genome, categoryKey, entityTypeId) {
   return n ? sum / n : 0;
 }
 
-/**
- * Phenotype layer — raw genes -> stats a game can actually consume.
- * Without this every downstream project reimplements the same maths.
- * All outputs 0..1 unless noted.
- * @returns {Object}
- */
 function expressGenome(genome, entityTypeId) {
   const et = getEntityType(entityTypeId);
   const p = (f) => scorePolygenic(genome, f, entityTypeId);
   const g = (i) => genome[i];
-  // EXPRESSION_RATE throttles how far traits deviate from neutral
   const throttle = 0.5 + g(GENES.EXPRESSION_RATE);
   const ex = (v) => Math.max(0, Math.min(1, 0.5 + (v - 0.5) * throttle));
 
   return {
     entityType: et.id,
-    // core
     endurance: ex(p('ENDURANCE')),
     strength:  ex(p('STRENGTH')),
     agility:   ex(p('AGILITY')),
     intellect: ex(p('INTEL')),
     immunity:  ex(p('IMMUNITY')),
     metabolism: ex(p('METAB')),
-    // derived composites
     speed:     ex((g(GENES.SPEED_BURST) * 0.6 + g(GENES.SPEED_SUSTAIN) * 0.4)),
     toughness: ex((g(GENES.ARMOR_DENSITY) + g(GENES.BONE_DENSITY) + g(GENES.PAIN_THRESHOLD)) / 3),
     lethality: ex((g(GENES.BITE_FORCE) + g(GENES.CLAW_SHARPNESS) + g(GENES.VENOM_POTENCY)) / 3),
     stealth:   ex((g(GENES.FOREST_CAMO) + g(GENES.AMBUSH_INSTINCT) + g(GENES.SHADOW_AFFINITY)) / 3),
     perception: ex((g(GENES.SENSORY_VISION) + g(GENES.SENSORY_HEARING) + g(GENES.SENSORY_OLFACTION)) / 3),
-    // mind / social
     temperament: ex(g(GENES.AGGRESSION) - g(GENES.DISCIPLINE) * 0.5 + 0.25),
     sociability: ex((g(GENES.SOCIAL) + g(GENES.COOPERATION) + g(GENES.EMPATHY)) / 3),
     dominanceRank: ex(g(GENES.DOMINANCE) - g(GENES.SUBMISSIVENESS) * 0.5 + 0.25),
-    // magical
     magicCapacity: ex((g(GENES.MANA_POOL) + g(GENES.MANA_REGEN) + g(GENES.MANA_EFFICIENCY)) / 3),
     corruption: ex((g(GENES.VOID_TAINT) + g(GENES.CORRUPTION_SPREAD) + (1 - g(GENES.CORRUPTION_RESIST))) / 3),
-    // life history
     lifespanBias: ex(g(GENES.LONGEVITY) * 0.7 + (1 - g(GENES.AGING_RATE)) * 0.3),
     sex: g(GENES.GENDER) < 0.45 ? 'female' : g(GENES.GENDER) > 0.55 ? 'male' : 'intersex',
     sexValue: g(GENES.GENDER),
-    // strongest elemental affinity, handy for VFX/loot tables
     dominantElement: (() => {
       const el = GENE_CATEGORIES.ELEMENTAL.range;
       let best = -1, bestI = -1;
@@ -852,15 +641,8 @@ function expressGenome(genome, entityTypeId) {
   };
 }
 
-// ================================================================
-// 11. REPORTING / UI HELPERS
-//     TRAIT_DICTIONARY is optional — load genome-traits-256.js to get
-//     names, descriptions and analogies. These degrade to gene keys.
-// ================================================================
-
 let _TRAITS = null;
 
-/** Attach the optional trait dictionary (called by genome-traits-256.js). */
 function attachTraits(dict) { _TRAITS = dict; return dict; }
 
 function traitInfo(index) {
@@ -878,10 +660,6 @@ function traitInfo(index) {
   };
 }
 
-/**
- * Trait report. v2.0 always allocated 256 objects; this filters first.
- * @param {Object} [opts] { activeOnly=false, categoryKey, minValue }
- */
 function traitReport(genome, entityTypeId, opts = {}) {
   const mask = activeMask(entityTypeId);
   const { activeOnly = false, categoryKey, minValue } = opts;
@@ -896,7 +674,6 @@ function traitReport(genome, entityTypeId, opts = {}) {
   return report;
 }
 
-/** Genes grouped by category for UI rendering. */
 function getGenesByCategory(entityTypeId) {
   const mask = entityTypeId ? activeMask(entityTypeId) : null;
   const groups = {};
@@ -911,19 +688,6 @@ function getGenesByCategory(entityTypeId) {
   return groups;
 }
 
-// ================================================================
-// 12. PRODUCTION UTILITIES
-//     Sub-seed derivation, zero-alloc paths, lineage, hybrids,
-//     population spawning, format migration.
-// ================================================================
-
-/**
- * Derive a stable child seed from any number of parts. Lets every
- * subsystem draw from its own stream — adding a new draw in one place
- * no longer shifts every downstream roll, which is what makes a seeded
- * generator actually stable across versions.
- * deriveSeed('world-7', 'npc', 42) -> uint32
- */
 function deriveSeed(...parts) {
   let h = 2166136261 >>> 0;
   for (const part of parts) {
@@ -937,7 +701,6 @@ function deriveSeed(...parts) {
   return h >>> 0;
 }
 
-/** Coerce anything array-like into a validated 256-length Float32Array. */
 function toGenome(src) {
   if (src instanceof Float32Array && src.length === GENOME_LEN) return src;
   if (!src || src.length !== GENOME_LEN) {
@@ -948,7 +711,6 @@ function toGenome(src) {
 
 function cloneGenome(genome) { return Float32Array.from(toGenome(genome)); }
 
-/** Zero-alloc variant for hot loops (population regen, ES training). */
 function createGenomeInto(out, entityTypeId, seed, opts = {}) {
   if (!(out instanceof Float32Array) || out.length !== GENOME_LEN) {
     throw new GenomeError('createGenomeInto needs a 256-length Float32Array', 'BAD_BUFFER');
@@ -971,11 +733,6 @@ function createGenomeInto(out, entityTypeId, seed, opts = {}) {
   return out;
 }
 
-/**
- * Spawn a reproducible population. Each member gets its own derived
- * sub-seed, so inserting or removing one member does not reshuffle the rest.
- * @returns {Float32Array[]}
- */
 function spawnPopulation(entityTypeId, count, seed, opts = {}) {
   const out = new Array(count);
   for (let i = 0; i < count; i++) {
@@ -984,12 +741,6 @@ function spawnPopulation(entityTypeId, count, seed, opts = {}) {
   return out;
 }
 
-// ── Lineage ─────────────────────────────────────────────────────
-
-/**
- * Genetic distance over active genes. 0 = identical, 1 = maximally different.
- * Cheap enough for inbreeding checks inside a breeding loop.
- */
 function geneticDistance(a, b, entityTypeId) {
   const mask = entityTypeId ? activeMask(entityTypeId) : null;
   let sum = 0, n = 0;
@@ -1000,16 +751,10 @@ function geneticDistance(a, b, entityTypeId) {
   return n ? sum / n : 0;
 }
 
-/** 1 - distance, clamped. Use for kin recognition and inbreeding penalties. */
 function relatedness(a, b, entityTypeId) {
   return Math.max(0, 1 - geneticDistance(a, b, entityTypeId) * 2);
 }
 
-/**
- * Blend PHYLO_MARKER so lineages drift measurably over generations
- * instead of being inherited as an untouched coin-flip. v2.1 declared
- * the gene and never used it.
- */
 function stampLineage(child, parentA, parentB, drift = 0.02, rng = Math.random, mask = null) {
   if (mask && !mask[GENES.PHYLO_MARKER]) return child;
   const m = (parentA[GENES.PHYLO_MARKER] + parentB[GENES.PHYLO_MARKER]) / 2;
@@ -1018,24 +763,6 @@ function stampLineage(child, parentA, parentB, drift = 0.02, rng = Math.random, 
   return child;
 }
 
-// ── Hybridisation ───────────────────────────────────────────────
-
-/**
- * Cross two parents of DIFFERENT entity types. v2.1 threw on this even
- * though CHIMERA_POTENTIAL exists as a gene.
- *
- * Genes active in both parents are crossed normally. Genes active in only
- * one parent are inherited from that parent, gated by the pair's average
- * CHIMERA_POTENTIAL — low chimera means the hybrid mostly loses the
- * one-sided genes, high chimera means it keeps them.
- *
- * @param {Float32Array} a
- * @param {string} typeA
- * @param {Float32Array} b
- * @param {string} typeB
- * @param {Object} [opts] { seed, resultType, register=true, mutationScale, blockLength }
- * @returns {{ genome: Float32Array, entityTypeId: string, chimera: number }}
- */
 function hybridize(a, typeA, b, typeB, opts = {}) {
   const { seed, mutationScale = 0.05, blockLength = 16, register = true } = opts;
   const mA = activeMask(typeA), mB = activeMask(typeB);
@@ -1043,8 +770,6 @@ function hybridize(a, typeA, b, typeB, opts = {}) {
 
   const chimera = (a[GENES.CHIMERA_POTENTIAL] + b[GENES.CHIMERA_POTENTIAL]) / 2 || 0.5;
 
-  // Decide the hybrid's own mask first — shared genes always, one-sided
-  // genes by chimera roll. Deterministic given the seed.
   const ranges = [];
   const hybridMask = new Uint8Array(GENOME_LEN);
   for (let i = 0; i < GENOME_LEN; i++) {
@@ -1075,7 +800,6 @@ function hybridize(a, typeA, b, typeB, opts = {}) {
 
   const mutRate = (a[GENES.MUTATION_RATE] + b[GENES.MUTATION_RATE]) / 2;
   const globalMut = (a[GENES.GLOBAL_MUTATION] + b[GENES.GLOBAL_MUTATION]) / 2;
-  // hybrids are genetically noisier — that is the point of them
   const effectiveMut = mutationScale * (0.5 + mutRate) * (0.5 + globalMut) * (1 + chimera);
 
   const child = new Float32Array(GENOME_LEN);
@@ -1098,19 +822,11 @@ function hybridize(a, typeA, b, typeB, opts = {}) {
   return { genome: child, entityTypeId: resultType, chimera };
 }
 
-// ── Format migration ────────────────────────────────────────────
-
 const _MIGRATIONS = {
-  // 0: (payloadBytes) => remappedBytes    // register future upgrades here
 };
 
-/** Register an upgrade path so old save strings keep loading. */
 function registerMigration(fromVersion, fn) { _MIGRATIONS[fromVersion] = fn; }
 
-/**
- * Decode any supported version, upgrading through registered migrations.
- * Use this at save-load boundaries instead of decodeGenome directly.
- */
 function loadGenome(str, opts = {}) {
   const parts = String(str).split(':');
   const v = +parts[0];
@@ -1119,30 +835,19 @@ function loadGenome(str, opts = {}) {
   return decodeGenome(_MIGRATIONS[v](str), opts);
 }
 
-// ================================================================
-// 13. EXPORTS
-// ================================================================
 const GenomeEngine = {
-  // data
   GENES, GENE_NAMES, ENTITY_TYPES, GENE_CATEGORIES, GENE_FAMILIES, SPECIES_PROFILES,
   GENOME_LEN, NULL_GENE, GENOME_FORMAT_VERSION,
   get TRAIT_DICTIONARY() { return _TRAITS; },
-  // rng
   makeRNG, hashSeed, drawTrait,
-  // lifecycle
   createBlankGenome, createGenome, createRandomGenome, crossover, mutate,
-  // masks / lookup / registry
   getEntityType, activeMask, buildActiveMask, categoryOf,
   registerEntityType, unregisterEntityType, listEntityTypes,
-  // production
   GenomeError, deriveSeed, toGenome, cloneGenome, createGenomeInto, spawnPopulation,
   geneticDistance, relatedness, stampLineage, hybridize,
   registerMigration, loadGenome,
-  // io + integrity
   encodeGenome, decodeGenome, genomeFingerprint, validateGenome,
-  // scoring
   scorePolygenic, scoreCategory, expressGenome,
-  // ui
   attachTraits, traitInfo, traitReport, getGenesByCategory,
 };
 

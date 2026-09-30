@@ -1,32 +1,6 @@
-/* LIVING GALAXY — CONSOLE › WORK › TAPE: what the pilot did, and what it paid.
- *
- * The readout for js/recorder.js. Three things, in the order a pilot wants
- * them:
- *
- *   1. What is on the tape right now — how many of the records are the pilot's
- *      own hands versus ARIA's watch, what kinds of action they are, and how
- *      long a stretch of flying that covers. The player/ARIA split is the
- *      number that matters: a tape that is nine-tenths ARIA is ARIA's tape,
- *      not training data for imitating a human, and the panel says so out loud
- *      rather than letting a chart imply otherwise.
- *
- *   2. WHAT WOULD I DO HERE — the nearest states on the tape to the one the
- *      ship is in this second, and what was done from them. This is the tape
- *      being useful without a model attached: it is a k-nearest lookup over
- *      the same feature vector a trained policy would read, so if it returns
- *      nonsense the features are wrong and no amount of training will fix it.
- *      Better to find that out from a panel than from a bad ARIA.
- *
- *   3. EXPORT — the whole thing as JSONL, through a Blob, because the pilot is
- *      on a phone and there is no server to POST to.
- *
- * Nothing here writes to the tape except CLEAR. Opening a panel about the
- * recording must not change the recording, beyond the tap that opened it.
- */
-
 import { el, section, note, row, button, chips } from "../kit.js";
-import { sim } from "../../sim.js";
-import { recorder, recorderReport, neighbours, snapshot, downloadTape, clearTape, saveTape, tape } from "../../recorder.js";
+import { sim } from "../../sim/sim.js";
+import { recorder, recorderReport, neighbours, snapshot, downloadTape, clearTape, saveTape, tape } from "../../flight/recorder.js";
 
 const DOC = globalThis.document ?? null;
 void DOC;
@@ -34,8 +8,6 @@ void DOC;
 const tell = (msg) => { if (msg) { sim.notice = msg; sim.noticeAt = sim.wall; } };
 const pct = (v) => `${Math.round(v * 100)}%`;
 const secs = (n) => (n >= 3600 ? `${(n / 3600).toFixed(1)} h` : n >= 60 ? `${Math.round(n / 60)} min` : `${Math.round(n)} s`);
-
-/* ---- 1. the tape ---------------------------------------------------------- */
 
 function statusSection(render) {
   const r = recorderReport();
@@ -62,8 +34,6 @@ function statusSection(render) {
   return s;
 }
 
-/* ---- 2. what would I do here ---------------------------------------------- */
-
 function neighbourSection() {
   const s = section("WHAT WOULD I DO HERE");
   const now = snapshot(true);
@@ -74,8 +44,6 @@ function neighbourSection() {
     return s;
   }
   note(s, `Now: hull ${pct(now.hull)} · hold ${pct(now.hold)} · ${now.dk ? "docked" : now.seam >= 0 ? `seam ${Math.round(now.seam)} km` : "open space"}${now.hz ? ` · ${now.hz} hostile` : ""}.`);
-  /* Group the near neighbours by what was actually done, so the answer is
-   * "you cut, mostly" rather than eight rows the pilot has to read. */
   const votes = new Map();
   for (const n of near) {
     const k = `${n.r.kind}:${n.r.act}${n.r.arg ? ` ${n.r.arg}` : ""}`;
@@ -90,8 +58,6 @@ function neighbourSection() {
   }
   return s;
 }
-
-/* ---- 3. off the phone ------------------------------------------------------ */
 
 function exportSection(render) {
   const s = section("EXPORT");
@@ -114,8 +80,6 @@ function exportSection(render) {
   return s;
 }
 
-/* ---- the panel -------------------------------------------------------------- */
-
 export default {
   id: "work-tape",
   title: "TAPE",
@@ -125,8 +89,6 @@ export default {
     const host = el("div", "ttape");
     root.append(host);
     let sig = "";
-    /* Repaint when the tape actually moved, not every frame: this panel reads
-     * the whole ring to build its report and the console paints at frame rate. */
     const signature = () => `${recorder.seq}|${recorder.on ? 1 : 0}|${Math.floor((sim.time ?? 0) / 4)}`;
     const render = () => {
       sig = signature();

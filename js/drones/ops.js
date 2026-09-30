@@ -1,68 +1,37 @@
-/* LIVING GALAXY — drone operations.
- *
- * Your work drones: built at a port whose lines make that role (roles.js),
- * set up with a few questions when they roll off the line, then left to work
- * on sim time — so TIME ×8 and ×40 fast-forward them like everything else.
- *
- * Every drone is a small state machine over the same world the ships fly in:
- * real stations (their live positions, stock and lockers), real belt rocks
- * (field.js — the same key a rock wears down under your own cutter), real
- * debris chunks, real pirates on the timetable. Near you the fights are real
- * rounds (turrets.js); out of contact range they resolve on the numbers.
- *
- *   state        what it is doing: setup · outbound · working · returning ·
- *                docked · waiting · holding · patrol · engage · following
- *   home         the port it docks at, stashes into (sim.stash) and repairs at
- *   site         where it works: a mark, a vein, a belt band, a world
- *   mode         the role's orders (passive haul, patrol, gas, route …)
- *   guard        a slot it looks after: your ship, a drone, a port, a mark
- *
- * A drone is company property: you need a charter (company.js) before a port
- * will build you one, the treasury pays for it, and everything it earns —
- * freight, bounties, a courier's margin — lands in the treasury. Freight is
- * taken off the shared work board (board.js), so a slot your hauler holds is
- * one an NPC corporation's drone or a crewed hull cannot.
- *
- * Reports go to the chat bus (channel "drones"); kills and big finds also go
- * to GNN's contractors desk. Saved per sky and callsign in localStorage.
- */
-
-import { sim, logEvent, addWaypointAt, addAnchoredWaypoint, waypointPosition } from "../sim.js";
-import { registerAnchor } from "../anchors.js";
-import { cargoTotal } from "../ship.js";
-import { stations, stationById } from "../stations.js";
-import { nearbyRocks, wearRock, depleted, CELL } from "../field.js";
-import { BODIES, bodyPosition, currentSystem } from "../bodies.js";
-import { chunks, removeChunk, chunkMass, burst } from "../debris.js";
+import { sim, logEvent, addWaypointAt, addAnchoredWaypoint, waypointPosition } from "../sim/sim.js";
+import { registerAnchor } from "../world/anchors.js";
+import { cargoTotal } from "../flight/ship.js";
+import { stations, stationById } from "../station/stations.js";
+import { nearbyRocks, wearRock, depleted, CELL } from "../world/field.js";
+import { BODIES, bodyPosition, currentSystem } from "../world/bodies.js";
+import { chunks, removeChunk, chunkMass, burst } from "../world/debris.js";
 import { traffic, HOSTILE_ROLES, markVesselDown } from "../npc/traffic.js";
 import { pirateKilled } from "../npc/battles.js";
-import { contacts, contactById, fireRound } from "../turrets.js";
-import { stockOf, lift, deliver, askPrice, bidPrice, shortagesOf } from "../economy.js";
-import { goodName } from "../materials.js";
-import { droneSummary } from "../dronespec.js";
-import { assayPoint, fileReport } from "../probes.js";
-import { post } from "../chat.js";
-import { gnnPost } from "../gnn.js";
+import { contacts, contactById, fireRound } from "../flight/turrets.js";
+import { stockOf, lift, deliver, askPrice, bidPrice, shortagesOf } from "../economy/economy.js";
+import { goodName } from "../economy/materials.js";
+import { droneSummary } from "./dronespec.js";
+import { assayPoint, fileReport } from "../flight/probes.js";
+import { post } from "../comms/chat.js";
+import { gnnPost } from "../comms/gnn.js";
 import { droneDoorGoal, startDroneBay, stepDroneBay } from "../npc/bay.js";
 import { DRONE_ROLES, DRONE_CAP, LANE_SPEED, NEAR_SPEED, LANE_OVER, JUMP_SPEED, JUMP_OVER, DOCK_SECS, PRICE_K, rolesAt } from "./roles.js";
-import { company, hasCompany, treasuryPay, treasuryEarn } from "../company.js";
+import { company, hasCompany, treasuryPay, treasuryEarn } from "../corp/company.js";
 import { openFreight, claim, touch, release, releaseAll, freightKey, FREIGHT_RATE as BOARD_RATE } from "./board.js";
-/* `claim` is already the freight board's — the underwriter's is aliased */
-import { claim as settleClaim, insure, droneKey, premiumFor, TIER_BY_ID, release as dropPolicy } from "../insurance.js";
+import { claim as settleClaim, insure, droneKey, premiumFor, TIER_BY_ID, release as dropPolicy } from "../economy/insurance.js";
 
-export const FREIGHT_RATE = BOARD_RATE; // of the buyer's bid, per unit hauled, paid to the company (board.js)
-export const BOUNTY_DRONE = 180;      // what the charters pay when your drone downs a pirate out of your sight
-export const THREAT_R = 1400;         // inside this a raider is shooting at a drone
-const STEP = 0.5;                     // sim-seconds per substep
+export const FREIGHT_RATE = BOARD_RATE;
+export const BOUNTY_DRONE = 180;
+export const THREAT_R = 1400;
+const STEP = 0.5;
 const SAVE_EVERY = 20;
 
 export const droneOps = { units: [], queue: [], seq: 1, sky: null, lastT: null, savedAt: 0, foes: new Map(), alert: null, onBuilt: null, cover: null };
 
-/** How full the ship's hold is, 0…1 — the drones' own limit, not just the cutter's. */
 function holdFrac() {
   const ship = sim.ship;
   const cap = Math.max(1, ship?.cargoCap ?? 1);
-  return ship ? cargoTotal(ship) / cap : 0;   // 0.3.52: by bulk, like the hold
+  return ship ? cargoTotal(ship) / cap : 0;
 }
 
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -70,9 +39,6 @@ const _p = { x: 0, y: 0, z: 0 };
 const roleOf = (u) => DRONE_ROLES[u.role];
 const pad = (n) => String(n).padStart(2, "0");
 
-/* ---- positions ------------------------------------------------------------ */
-
-/** Live position of a reference: station, drone, your ship, a body, a mark, a point. */
 export function posOf(ref, out = { x: 0, y: 0, z: 0 }) {
   if (!ref) return null;
   if (ref.kind === "station") { const st = stationById(ref.id); if (!st) return null; out.x = st.x; out.y = st.y; out.z = st.z; return out; }
@@ -97,14 +63,11 @@ function nearestBeltPoint(p) {
   return best;
 }
 
-/* ---- build ------------------------------------------------------------------ */
-
 export function priceOf(roleId, seed) {
   const s = droneSummary(roleId, seed);
   return Math.max(800, Math.min(14000, Math.round((s.costCr * PRICE_K) / 50) * 50));
 }
 
-/** What this port's lines will build you, with price, time and why not. */
 export function buildOptions(st) {
   if (!st) return [];
   const seed = `${sim.callsign || "pilot"}:${droneOps.seq}`;
@@ -126,10 +89,6 @@ export function orderBuild(roleId, st, tier = null) {
   if (!opt) return { ok: false, why: "This port has no line for that drone" };
   if (opt.blocker) return { ok: false, why: opt.blocker };
   const seed = `${sim.callsign || "pilot"}:${droneOps.seq}:${roleId}`;
-  /* 0.3.33 — cover is bought with the hull, not after it. The premium comes
-   * out of the treasury with the build price, in one transaction, because a
-   * drone that rolls off uninsured and dies on its first run is exactly the
-   * case the player meant to avoid. */
   const cover = TIER_BY_ID[tier] ? tier : null;
   const premium = cover ? premiumFor(opt.price, cover) : 0;
   const why = treasuryPay(opt.price + premium, `${opt.label} drone commissioned at ${st.name}${cover ? ` · ${TIER_BY_ID[cover].name} cover` : ""}`);
@@ -161,8 +120,6 @@ function rollOff(job) {
     stats: { mined: 0, hauled: 0, earned: 0, kills: 0, trips: 0, marks: 0 }, note: "awaiting orders",
   };
   if (r.id === "repair") u.guard = { kind: "ship", label: "your ship" };
-  /* the cover was paid for at commission; it attaches to the hull that
-   * actually exists, which is only now */
   u.cover = job.cover ?? null;
   u.value = job.price;
   if (u.cover) insure(droneKey(u.id), u.cover, job.price, sim.time);
@@ -180,10 +137,7 @@ function rollOff(job) {
   return u;
 }
 
-/* ---- orders --------------------------------------------------------------- */
-
 export function unitById(id) { return droneOps.units.find((u) => u.id === id) ?? null; }
-/* 0.3.67: a MARK on a drone follows the drone (and turns "last seen" when it is lost or scrapped) */
 registerAnchor("drone", (a, t, out) => { const u = unitById(a.id); if (!u) return null; out.x = u.x; out.y = u.y; out.z = u.z; return out; });
 export function unitsHomedAt(stId) { return droneOps.units.filter((u) => u.home === stId); }
 
@@ -242,7 +196,6 @@ export function addPatrol(u, pt) {
 }
 export function clearPatrol(u) { if (!u) return false; u.patrol.length = 0; u.patrolIx = 0; say(u, "Patrol route cleared."); save(); return true; }
 
-/** A hauler takes a slot: under one of your miners, or an NPC freight lane. */
 export function assignSlot(u, slot) {
   if (!u || u.role !== "hauler" || !slot) return false;
   releaseSlot(u);
@@ -272,7 +225,6 @@ export function setRoute(u, route) {
   return true;
 }
 
-/** Take the defaults for anything not answered and go to work. */
 export function beginWork(u) {
   if (!u) return false;
   const r = roleOf(u);
@@ -315,7 +267,7 @@ export function scrapDrone(u) {
   releaseSlot(u);
   for (const m of droneOps.units) if (m.hauler === u.id) m.hauler = null;
   droneOps.units.splice(ix, 1);
-  dropPolicy(droneKey(u.id));   // sold, not lost: the cover goes with it, unpaid
+  dropPolicy(droneKey(u.id));
   const refund = Math.round(priceOf(u.role, u.seed) * 0.3);
   treasuryEarn(refund, `${u.name} decommissioned — parts sold`);
   releaseAll(u.id);
@@ -330,15 +282,12 @@ function replan(u) {
   u.state = "outbound"; u.target = null;
 }
 
-/* ---- slot and option lists (the deck reads these) --------------------------- */
-
 export function homeOptions(u = null) {
   const from = u ?? sim.ship.pos;
   return stations.filter((s) => !s.hostile || s.claimed).map((s) => ({ id: s.id, label: s.name, sector: s.sector, km: Math.round(d3(from, s) / 100) }))
     .sort((a, b) => a.km - b.km);
 }
 
-/** Where a drone could start: your marks, known veins, the belts, the worlds, right here. */
 export function siteOptions(u) {
   const out = [];
   const home = posOf({ kind: "station", id: u?.home }) ?? sim.ship.pos;
@@ -362,7 +311,6 @@ export function siteOptions(u) {
   return out;
 }
 
-/** Open work for a hauler: your miners without one, then NPC freight lanes. */
 export function haulSlots(u) {
   const out = [];
   for (const m of droneOps.units) {
@@ -378,7 +326,6 @@ export function freightSlots(u, n = 8) {
   return openFreight({ home, cap, who: u?.id ?? null, n });
 }
 
-/** Who a combat or repair drone can look after. */
 export function guardSlots(u) {
   const out = [{ kind: "ship", label: "Your ship" }];
   for (const m of droneOps.units) if (m !== u) out.push({ kind: "drone", id: m.id, label: `${m.name} (${roleOf(m).label.toLowerCase()})` });
@@ -387,7 +334,6 @@ export function guardSlots(u) {
   return out;
 }
 
-/** Profitable pairs near home for a courier: buy at A's ask, sell at B's bid. */
 export function tradeRoutes(u, n = 8) {
   const home = posOf({ kind: "station", id: u?.home }) ?? sim.ship.pos;
   const ports = stations.filter((s) => !s.hostile || s.claimed).filter((s) => d3(s, home) < 400000);
@@ -412,8 +358,6 @@ export function patrolOptions() {
   return out;
 }
 
-/* ---- status ------------------------------------------------------------------ */
-
 const holdQty = (u) => Object.values(u.hold).reduce((a, q) => a + q, 0);
 export function holdOf(u) { return holdQty(u); }
 
@@ -428,14 +372,12 @@ export function pendingAsks(u) {
   return roleOf(u).asks.filter((a) => !u.answered[a]);
 }
 
-/* ---- the tick ---------------------------------------------------------------- */
-
 export function stepDroneOps() {
   if (droneOps.lastT == null) { droneOps.lastT = sim.time; return; }
   let dt = sim.time - droneOps.lastT;
   droneOps.lastT = sim.time;
   if (!(dt > 0)) return;
-  dt = Math.min(dt, 30);                      // a long pause resumes, it does not teleport
+  dt = Math.min(dt, 30);
   for (let i = droneOps.queue.length - 1; i >= 0; i--) {
     const q = droneOps.queue[i];
     if (sim.time >= q.done) { droneOps.queue.splice(i, 1); rollOff(q); }
@@ -457,10 +399,10 @@ function say(u, text, links = [], tone = "neutral") {
 const _door = {};
 function stepUnit(u, dt) {
   const r = roleOf(u);
-  if (u.bay && u.state !== "docked") u.bay = null;   // pulled off the clamps mid-run (recall, scrap): the bay run is over
+  if (u.bay && u.state !== "docked") u.bay = null;
   if (!stationById(u.home)) { const h = homeOptions(u)[0]; if (h) { u.home = h.id; say(u, `Home port is gone — rehomed to ${h.label}.`); } }
   if (u.state !== "setup" && u.state !== "docked") danger(u, dt);
-  if (!droneOps.units.includes(u)) return;     // it died of it
+  if (!droneOps.units.includes(u)) return;
   switch (u.state) {
     case "setup": u.note = "awaiting orders"; holdAt(u, u.dockedAt); return;
     case "docked": return stepDocked(u, dt);
@@ -481,7 +423,6 @@ function holdAt(u, stId) {
 }
 
 function stepDocked(u, dt) {
-  /* 0.3.15: the bay run — in through the entry door onto the clamps, or off them and out by the exit door */
   if (u.bay) {
     const leaving = u.bay.which === "out";
     if (stepDroneBay(u, stationById(u.dockedAt), dt)) return;
@@ -489,7 +430,7 @@ function stepDocked(u, dt) {
   }
   holdAt(u, u.dockedAt);
   u.t -= dt;
-  u.hp = Math.min(u.hpMax, u.hp + u.hpMax * 0.05 * dt);  // the yard patches it while it sits
+  u.hp = Math.min(u.hpMax, u.hp + u.hpMax * 0.05 * dt);
   if (u.charge != null && roleOf(u).charge) u.charge = Math.min(roleOf(u).charge, u.charge + 40 * dt);
   if (u.t > 0) return;
   if (u.recalled) { u.note = "held at home"; return; }
@@ -500,9 +441,7 @@ function stepDocked(u, dt) {
   u.stats.trips++;
 }
 
-/** Fly toward a point. Returns true on arrival. */
 function flyTo(u, p, dt, stopR = 40) {
-  /* a port rides its orbit at hundreds of u/s: match its frame first, then close on it */
   if (p.vx || p.vy || p.vz) { u.x += (p.vx ?? 0) * dt; u.y += (p.vy ?? 0) * dt; u.z += (p.vz ?? 0) * dt; }
   const dx = p.x - u.x, dy = p.y - u.y, dz = p.z - u.z;
   const d = Math.hypot(dx, dy, dz);
@@ -526,7 +465,6 @@ function goHome(u, dt) {
 
 function dock(u, st, next = "outbound") {
   u.state = "docked"; u.dockedAt = st.id; u.t = DOCK_SECS; u.next = next; u.lane = false;
-  /* the hold goes to the locker below: a leg that thinks it still carries the goods must not sell them again */
   if (u.leg?.phase === "sell") u.leg = null;
   if (u.fleg === "drop") releaseSlot(u);
   const moved = stash(u, st);
@@ -556,17 +494,6 @@ function load(u, id, q) {
   return add;
 }
 
-/* ---- danger ------------------------------------------------------------------ */
-
-/* This runs for every undocked drone on every substep, and it used to build an
- * array, allocate a wrapper object per hostile in range, and then SORT it — to
- * answer two questions: how many are there (capped at three), and which is the
- * nearest. Twelve drones against a hundred and fifty hulls at timeScale 40 was
- * twenty-four sorts and twelve arrays a frame for two numbers.
- *
- * One pass, one reused result object, no sort. `nearest` is the closest hostile
- * and `count` stops climbing at the cap the caller uses, so the scan can stop
- * caring past three. */
 const _threat = { count: 0, nearest: null, kind: "", d: Infinity };
 
 function hostilesNear(p, R) {
@@ -597,8 +524,6 @@ function danger(u, dt) {
   const k = u.role === "combat" ? 0.5 : 1;
   u.hp -= Math.min(3, near.count) * 2.5 * k * dt;
   u.underFire = sim.time;
-  /* `_threat` is reused, and destroy() only wants the name — read it here, while
-   * it is still this drone's threat and not the next one's */
   if (u.hp <= 0) destroy(u, near.nearest);
 }
 
@@ -609,8 +534,6 @@ function destroy(u, by) {
   droneOps.units.splice(droneOps.units.indexOf(u), 1);
   burst({ x: u.x, y: u.y, z: u.z, count: 6, speed: 20, size: 5, good: "steel", tint: 0.3 });
   const who = by?.name ?? "raiders";
-  /* a drone is the one hull in this game that could always be lost for good,
-   * which is why it is the one that most wanted covering */
   const { paid, tier } = settleClaim(droneKey(u.id), { at: sim.time, what: u.name, by: who });
   if (paid > 0) treasuryEarn(paid, `${TIER_BY_ID[tier]?.name ?? "Policy"} settlement on ${u.name}`, "insurance");
   const settled = paid > 0
@@ -620,8 +543,6 @@ function destroy(u, by) {
   logEvent(`${u.name} destroyed by ${who}.${settled}`, "combat");
   save();
 }
-
-/* ---- roles ----------------------------------------------------------------------- */
 
 const ROLE_STEP = {
   miner(u, dt, r) {
@@ -643,20 +564,12 @@ const ROLE_STEP = {
       if (flyTo(u, site, dt, 600)) { u.state = "working"; u.target = null; }
       return;
     }
-    /* working: find a rock near the site, close to it, cut it (the found rock is kept; rescan when it is gone or every ~2 s) */
     let rock = u.cut && u.cut.key === u.target && (depleted.get(u.target) ?? 0) < 1 && sim.time - (u.scanAt ?? -1e9) < 2 ? u.cut : null;
     if (!rock) {
       u.scanAt = sim.time;
       const all = nearbyRocks(site, sim.time, 1).filter((k) => !k.ice && k.worn < 1);
-      /* 0.3.22: a contract that named an ore is what the crew is out here for.
-       * Miners work that ore while there is any at the site and go back to the
-       * nearest rock when there is not — a free run is unchanged. */
       const want = sim.autoPlan?.seamOre ?? null;
       const onOre = want ? all.filter((k) => k.ore === want) : null;
-      /* 0.3.24: and when there is none of it at their site, they do not go on
-       * packing the hold with something else — the order needs the room. A
-       * contract that cannot be finished because the crew filled the hold with
-       * a better rock is the crew's fault, not the belt's. */
       if (want && !onOre.length && holdFrac() > 0.7) {
         u.note = `holding — the hold is spoken for (${want.replace(/_/g, " ")})`;
         u.cut = null;
@@ -701,9 +614,8 @@ const ROLE_STEP = {
     const anchor = combatAnchor(u, dt);
     if (!anchor) return;
     const found = hostilesNear(anchor, r.range);
-    /* `_threat` is shared scratch — take what this branch needs off it now */
     const foe = found.nearest;
-    const foeKind = found.kind;      // "npc" = a traffic hull, "gun" = a board contact
+    const foeKind = found.kind;
     if (!foe) {
       u.state = u.mode === "patrol" ? "patrol" : "holding";
       if (flyTo(u, { x: anchor.x + 260, y: anchor.y + 60, z: anchor.z }, dt, 120)) u.note = u.mode === "patrol" ? `patrolling — point ${u.patrolIx + 1}/${Math.max(1, u.patrol.length)}` : `holding over ${anchorLabel(u)}`;
@@ -714,7 +626,7 @@ const ROLE_STEP = {
     const tgt = foe;
     u.note = `engaging ${tgt.name}`;
     flyTo(u, { x: tgt.x + 380, y: tgt.y + 90, z: tgt.z + 200 }, dt, 180);
-    if (d3(u, tgt) > 900) return;          // in guns range from the standoff, not from the anchor
+    if (d3(u, tgt) > 900) return;
     u.cool = (u.cool ?? 0) - dt;
     const byBoard = contactById(foe.id);
     const live = byBoard && byBoard.hp > 0 ? byBoard : null;
@@ -725,7 +637,6 @@ const ROLE_STEP = {
       }
       return;
     }
-    /* out of your contact range: the fight resolves on the numbers */
     if (foeKind !== "npc") return;
     const hp = (droneOps.foes.get(foe.id) ?? 120) - r.dps * dt;
     droneOps.foes.set(foe.id, hp);
@@ -779,7 +690,7 @@ const ROLE_STEP = {
       droneOps.veins ??= new Set();
       if (!droneOps.veins.has(cell)) {
         droneOps.veins.add(cell);
-        const wp = addAnchoredWaypoint(`Survey · ${rich.oreName} vein`, { kind: "asteroid", id: rich.key }, rich);   // 0.3.67: on the rock, not where it was
+        const wp = addAnchoredWaypoint(`Survey · ${rich.oreName} vein`, { kind: "asteroid", id: rich.key }, rich);
         u.stats.marks++;
         const a2 = assayPoint(rich.x, rich.y, rich.z);
         fileReport("survey", u.name, a2);
@@ -865,8 +776,6 @@ const ROLE_STEP = {
     u.state = "holding";
     const watch = hostilesNear(u, r.watchR);
     const raiders = watch.count;
-    /* `_threat` is a shared scratch object — read what this branch needs off it
-     * NOW, because the next drone's scan overwrites it */
     const f = watch.nearest;
     const fd = watch.d;
     u.note = raiders ? `watching ${raiders} raider${raiders > 1 ? "s" : ""}` : `on watch at ${u.site?.label ?? "post"}`;
@@ -945,7 +854,7 @@ function runFreight(u, dt) {
   u.stats.hauled += qty; u.stats.earned += pay; u.stats.trips++;
   say(u, `Delivered ${goodName(s.good)} ×${Math.round(qty)} to ${B.name}. Freight paid ${pay} cr to ${company.name}.`, [], "ok");
   u.fleg = null;
-  if (u.mode === "passive") releaseSlot(u);      // passive haulers pick the next best job
+  if (u.mode === "passive") releaseSlot(u);
 }
 
 function combatAnchor(u, dt) {
@@ -981,15 +890,12 @@ function nearestBody(p, pred) {
   return best;
 }
 
-/** turrets → sim onKill: a round from one of your drones made the kill. */
 export function noteDroneKill(owner) {
   const id = String(owner).replace(/^pdrone-/, "");
   const u = unitById(id);
   if (u) { u.stats.kills++; say(u, "Target down.", [], "ok"); }
   return u;
 }
-
-/* ---- persistence --------------------------------------------------------------- */
 
 const KEY = () => `lgaa.drones.v1:${sim.skySeed}:${sim.callsign || "pilot"}`;
 const KEEP = ["id", "role", "seed", "name", "designation", "home", "site", "mode", "guard", "patrol", "patrolIx", "assign", "route", "hauler", "hold", "holdCap", "hp", "hpMax", "charge", "state", "answered", "x", "y", "z", "dockedAt", "stats", "note", "next", "recalled", "leg", "fleg", "cover", "value"];
@@ -1015,7 +921,6 @@ export function resetDroneOps() {
   droneOps.sky = sim.skySeed;
 }
 
-/** Bring back this sky's drones. Queued builds finish on sim time as if you never left. */
 export function loadDroneOps() {
   resetDroneOps();
   try {
@@ -1028,10 +933,7 @@ export function loadDroneOps() {
     for (const s of data.units ?? []) {
       if (!DRONE_ROLES[s.role]) continue;
       droneOps.units.push({ ...s, t: 0, target: null, sweep: 0, lastScan: 0, yaw: 0, pitch: 0, answered: s.answered ?? {}, stats: s.stats ?? { mined: 0, hauled: 0, earned: 0, kills: 0, trips: 0, marks: 0 } });
-      if (s.assign?.kind === "freight") claim(s.assign.key ?? freightKey(s.assign), s.id);   // the slot it held is still its
-      /* Policies live in a Map in js/insurance.js, not in this save file, so
-       * a reload would quietly void cover the treasury has already paid for.
-       * The drone remembers what it carries; write the policy back from it. */
+      if (s.assign?.kind === "freight") claim(s.assign.key ?? freightKey(s.assign), s.id);
       if (s.cover && s.value > 0) insure(droneKey(s.id), s.cover, s.value, sim.time);
     }
     const shift = sim.time - (data.t ?? sim.time);

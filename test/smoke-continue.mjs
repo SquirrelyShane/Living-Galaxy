@@ -38,8 +38,8 @@ await sleep(1000);
 
 /* a session's worth of progress, in one evaluate */
 const s1 = await page.evaluate(async () => {
-  const { pilot, work, rankStatus, skillSheet } = await import("/js/pilot.js");
-  const { SHIP_DB, DEFAULT_SHIP_ID } = await import("/js/shipdb.js");
+  const { pilot, work, rankStatus, skillSheet } = await import("/js/flight/pilot.js");
+  const { SHIP_DB, DEFAULT_SHIP_ID } = await import("/js/ships/shipdb.js");
   const { sim } = window.__lg;
   for (let i = 0; i < 80; i++) work("geology", 0.5);
   const hull = SHIP_DB.find((d) => d.id !== DEFAULT_SHIP_ID);
@@ -74,8 +74,8 @@ await page.click("#btn-continue");
 await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await sleep(1200);
 const s2 = await page.evaluate(async () => {
-  const { pilot, rankStatus, skillSheet } = await import("/js/pilot.js");
-  const { currentShipId } = await import("/js/sim.js");
+  const { pilot, rankStatus, skillSheet } = await import("/js/flight/pilot.js");
+  const { currentShipId } = await import("/js/sim/sim.js");
   const { sim } = window.__lg;
   return { name: pilot.name, restored: pilot.restored, rank: rankStatus().letter, skill: skillSheet()[0], hull: currentShipId(), owned: sim.ownedHulls, credits: sim.ship.credits, room: window.__lg.store?.getState?.().room ?? null };
 });

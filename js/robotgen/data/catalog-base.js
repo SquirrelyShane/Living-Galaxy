@@ -1,11 +1,4 @@
-/* Raw materials and manufactured components — the bottom of every bill of materials.
- *
- * MATERIALS   raw stock, priced by the kilogram.        { name, kind }
- * COMPONENTS  manufactured items with their own BOM.   { name, kg (unit mass), bom }
- *   bom values: kg of a material, or count of a sub-component. Σ must match kg (audited ±15%).
- * Fasteners are real components: a kit is 50 pieces; parts consume kits by the dozen. */
 export const MATERIALS = {
-  // structural alloys
   "m.al_li":     { name: "Al-Li 2195 alloy",            kind: "alloy" },
   "m.ti64":      { name: "Ti-6Al-4V alloy",              kind: "alloy" },
   "m.steel304":  { name: "304L stainless steel",         kind: "alloy" },
@@ -19,7 +12,6 @@ export const MATERIALS = {
   "m.ta":        { name: "Tantalum",                     kind: "refractory" },
   "m.nb":        { name: "Niobium C-103",                kind: "refractory" },
   "m.be":        { name: "Beryllium",                    kind: "light metal" },
-  // composites / polymers
   "m.cfrp":      { name: "Carbon-fibre epoxy laminate",  kind: "composite" },
   "m.cnt":       { name: "CNT / graphene composite",     kind: "composite" },
   "m.cc":        { name: "Carbon-carbon",                kind: "composite" },
@@ -30,7 +22,6 @@ export const MATERIALS = {
   "m.pe":        { name: "High-density polyethylene",    kind: "polymer" },
   "m.epoxy":     { name: "Space-grade epoxy",            kind: "polymer" },
   "m.aerogel":   { name: "Silica aerogel",               kind: "insulation" },
-  // ceramics / glass
   "m.bn":        { name: "Boron nitride ceramic",        kind: "ceramic" },
   "m.alumina":   { name: "Alumina ceramic",              kind: "ceramic" },
   "m.b4c":       { name: "Boron carbide",                kind: "ceramic" },
@@ -38,7 +29,6 @@ export const MATERIALS = {
   "m.zro2":      { name: "Zirconia (TPS tile)",          kind: "ceramic" },
   "m.sapphire":  { name: "Sapphire",                     kind: "glass" },
   "m.fused_si":  { name: "Fused silica",                 kind: "glass" },
-  // electronics / photonics / magnetics
   "m.si":        { name: "Silicon (rad-hard process)",   kind: "semiconductor" },
   "m.gaas":      { name: "GaAs / InGaP multi-junction",  kind: "semiconductor" },
   "m.inp":       { name: "InP photonics",                kind: "semiconductor" },
@@ -49,7 +39,6 @@ export const MATERIALS = {
   "m.rebco":     { name: "REBCO tape",                   kind: "superconductor" },
   "m.solder":    { name: "Solder / brazing alloy",       kind: "alloy" },
   "m.lab6":      { name: "Lanthanum hexaboride",         kind: "emitter" },
-  // chemistry / storage / life
   "m.li":        { name: "Li-metal solid-state cell stock", kind: "electrochem" },
   "m.activated_c":{ name: "Activated carbon / graphene electrode", kind: "electrochem" },
   "m.zeolite":   { name: "Zeolite sorbent",              kind: "sorbent" },
@@ -71,7 +60,6 @@ export const MATERIALS = {
   "m.biomass":   { name: "Algae / plant biomass stock",  kind: "bio" },
   "m.nutrient":  { name: "Nutrient salts",               kind: "bio" },
   "m.pharma":    { name: "Pharmaceutical feedstock",     kind: "bio" },
-  // nuclear
   "m.cermet":    { name: "UO₂-W CERMET fuel",            kind: "nuclear" },
   "m.hale":      { name: "HALEU fuel",                   kind: "nuclear" },
   "m.pu238":     { name: "Pu-238 heat source",           kind: "nuclear" },
@@ -80,10 +68,8 @@ export const MATERIALS = {
   "m.regolith":  { name: "Processed regolith",           kind: "isru" }
 };
 
-/* helper: component record */
 const C = (name, kg, bom) => ({ name, kg, bom });
 export const COMPONENTS = {
-  /* ---- fasteners, joints, hardware (the bolts and screws) ---- */
   "c.bolt_m4":     C("M4 Ti bolt kit (50 + nuts, washers)", 0.12, { "m.ti64": 0.12 }),
   "c.bolt_m6":     C("M6 Ti bolt kit (50)",                 0.30, { "m.ti64": 0.30 }),
   "c.bolt_m12":    C("M12 Inconel bolt kit (50)",           1.40, { "m.inconel": 1.40 }),
@@ -96,7 +82,6 @@ export const COMPONENTS = {
   "c.hinge":       C("Hinge with damper",                   0.80, { "m.ti64": 0.6, "m.fkm": 0.1, "m.steel304": 0.1 }),
   "c.latch":       C("Capture latch",                       1.20, { "m.ti64": 0.9, "m.steel304": 0.3 }),
   "c.sep_bolt":    C("Frangible separation bolt",           0.40, { "m.steel304": 0.3, "m.htpb": 0.1 }),
-  /* ---- structural stock ---- */
   "c.plate_al":    C("Al-Li skin plate 1 m² × 4 mm",        11.0, { "m.al_li": 11.0 }),
   "c.plate_ti":    C("Ti-6Al-4V plate 1 m² × 4 mm",         17.7, { "m.ti64": 17.7 }),
   "c.plate_steel": C("Stainless plate 1 m² × 3 mm",         24.0, { "m.steel304": 24.0 }),
@@ -120,7 +105,6 @@ export const COMPONENTS = {
   "c.pe_shield":   C("HDPE shielding slab 1 m² × 10 cm",    95.0, { "m.pe": 95.0 }),
   "c.b4c_tile":    C("B₄C shielding tile 1 m² × 2 cm",      50.0, { "m.b4c": 50.0 }),
   "c.window_sapphire": C("Sapphire viewport pane",          4.0,  { "m.sapphire": 3.5, "m.ti64": 0.5 }),
-  /* ---- electrical ---- */
   "c.harness":     C("Wiring harness run (10 m)",           2.0,  { "m.cu": 1.4, "m.kapton": 0.4, "m.ptfe": 0.2 }),
   "c.connector":   C("Circular connector set",              0.30, { "m.al6061": 0.15, "m.cu": 0.1, "m.ptfe": 0.05 }),
   "c.connector_hv":C("HV feedthrough / connector",          0.60, { "m.alumina": 0.3, "m.cu": 0.2, "m.steel304": 0.1 }),
@@ -144,7 +128,6 @@ export const COMPONENTS = {
   "c.heater":      C("Kapton heater set",                   0.20, { "m.kapton": 0.15, "m.cu": 0.05 }),
   "c.led_grow":    C("Grow-spectrum LED array",             1.2,  { "m.gan": 0.2, "m.al6061": 0.8, "m.cu": 0.2 }),
   "c.lamp":        C("Cabin lighting module",               0.5,  { "m.gan": 0.05, "m.al6061": 0.3, "c.pcb": 0.3 }),
-  /* ---- fluids ---- */
   "c.valve_latch": C("Latching solenoid valve",             0.45, { "m.steel304": 0.3, "m.cu": 0.1, "m.ptfe": 0.05 }),
   "c.valve_relief":C("Relief / check valve",                0.35, { "m.steel304": 0.3, "m.fkm": 0.05 }),
   "c.regulator":   C("Pressure regulator",                  0.60, { "m.steel304": 0.5, "m.fkm": 0.1 }),
@@ -162,7 +145,6 @@ export const COMPONENTS = {
   "c.radiator_panel": C("Radiator panel 1 m²",              4.5,  { "m.al6061": 3.0, "c.heatpipe": 1, "m.kapton": 0.5 }),
   "c.louver":      C("Louver blade + bimetal actuator",     0.6,  { "m.al6061": 0.4, "m.steel304": 0.2 }),
   "c.cryocooler":  C("Stirling cryocooler",                 8.0,  { "m.ti64": 3.0, "m.cu": 2.0, "c.motor": 2 }),
-  /* ---- propulsion ---- */
   "c.cathode":     C("Hollow cathode assembly",             0.8,  { "m.lab6": 0.1, "m.ta": 0.3, "m.w": 0.2, "m.alumina": 0.2 }),
   "c.grid_cc":     C("C-C accelerator grid pair",           2.5,  { "m.cc": 2.0, "m.mo": 0.5 }),
   "c.cusp_magnet": C("Cusp magnet ring",                    1.2,  { "m.smco": 0.9, "m.steel304": 0.3 }),
@@ -184,7 +166,6 @@ export const COMPONENTS = {
   "c.torquer_rod": C("Magnetorquer rod",                    3.0,  { "m.cu": 1.5, "m.steel304": 1.5 }),
   "c.sail_film":   C("Sail film 100 m²",                    1.0,  { "m.kapton": 1.0 }),
   "c.sail_boom":   C("Deployable sail boom 10 m",           4.0,  { "m.cfrp": 3.5, "m.ti64": 0.5 }),
-  /* ---- nuclear / power ---- */
   "c.fuel_cermet": C("CERMET fuel element",                 8.0,  { "m.cermet": 8.0 }),
   "c.fuel_haleu":  C("HALEU fuel pin bundle",               12.0, { "m.hale": 10.0, "m.steel304": 2.0 }),
   "c.reflector":   C("Be reflector segment",                15.0, { "m.be": 15.0 }),
@@ -202,7 +183,6 @@ export const COMPONENTS = {
   "c.first_wall":  C("Tungsten first-wall tile set",        50.0, { "m.w": 50.0 }),
   "c.blanket_mod": C("Breeder blanket module",              120.0,{ "m.lithium": 60.0, "m.steel304": 60.0 }),
   "c.laser_driver":C("ICF laser driver line",               200.0,{ "m.fused_si": 60.0, "m.inp": 20.0, "c.capacitor": 30, "m.al6061": 30.0 }),
-  /* ---- avionics / sensors / comms ---- */
   "c.fog":         C("Fibre-optic gyro triad",              1.2,  { "m.fused_si": 0.4, "m.inp": 0.1, "c.pcb": 1, "m.al6061": 0.2 }),
   "c.accel":       C("Accelerometer triad",                 0.3,  { "m.si": 0.1, "c.pcb": 0.4 }),
   "c.atom_cell":   C("Cold-atom / ion clock cell",          2.0,  { "m.fused_si": 0.8, "m.inp": 0.3, "m.ti64": 0.5, "c.pcb": 0.8 }),
@@ -223,7 +203,6 @@ export const COMPONENTS = {
   "c.mic_array":   C("Acoustic sensor array",               0.2,  { "c.pcb": 0.4 }),
   "c.crypto":      C("Secure boot / crypto module",         0.2,  { "c.fpga": 1 }),
   "c.rf_switch":   C("RF switch matrix",                    0.5,  { "m.cu": 0.2, "c.pcb": 0.6 }),
-  /* ---- life support / habitat ---- */
   "c.electrolysis_stack": C("PEM electrolysis stack",       12.0, { "m.nafion": 1.0, "m.pt": 0.5, "m.ti64": 6.0, "m.steel304": 4.5 }),
   "c.sox_stack":   C("Solid-oxide electrolyser stack",      15.0, { "m.zro2": 6.0, "m.steel304": 8.0, "m.pt": 1.0 }),
   "c.sorbent_bed": C("Sorbent bed canister",                6.0,  { "m.zeolite": 4.0, "m.steel304": 2.0 }),
@@ -244,7 +223,6 @@ export const COMPONENTS = {
   "c.dock_ring":   C("Androgynous docking ring",            80.0, { "m.al_li": 60.0, "c.latch": 8, "c.seal_oring": 12, "c.actuator": 3 }),
   "c.suit_plss":   C("EVA suit + PLSS",                     120.0,{ "m.kevlar": 40.0, "m.al6061": 30.0, "c.sorbent_bed": 2, "c.battery_cell": 1, "c.pcb": 20, "m.pe": 20.0 }),
   "c.handrail":    C("Handrail / tether point set",         2.0,  { "m.al6061": 2.0 }),
-  /* ---- robotics / manufacturing / mining ---- */
   "c.robot_joint": C("Robot joint (motor + harmonic drive)",4.0,  { "c.motor": 1, "c.gearbox": 1, "c.pcb": 1, "m.ti64": 0.4 }),
   "c.gripper":     C("End effector / tool changer",         3.0,  { "m.ti64": 2.0, "c.actuator": 0.4, "c.pcb": 0.2 }),
   "c.rail":        C("Crawler rail 1 m",                    2.0,  { "m.al6061": 2.0 }),
@@ -262,7 +240,6 @@ export const COMPONENTS = {
   "c.mre_cell":    C("Molten-regolith electrolysis cell",   150.0,{ "m.inconel": 60.0, "m.alumina": 50.0, "m.cu": 25.0, "m.pt": 5.0, "m.regolith": 10.0 }),
   "c.rack_frame":  C("Standard cargo rack frame",           20.0, { "m.al6061": 18.0, "c.insert": 8 }),
   "c.container_shell": C("Cargo container shell",           60.0, { "m.al_li": 45.0, "c.honeycomb": 2, "c.latch": 2 }),
-  /* ---- weapons (catalog level: the effector hardware, not the payload chemistry) ---- */
   "c.rail_barrel": C("Railgun rail pair + sabot guide",     120.0,{ "m.cu": 60.0, "m.w": 30.0, "m.inconel": 30.0 }),
   "c.coil_stack":  C("Coilgun coil stack",                  80.0, { "m.cu": 50.0, "m.steel304": 20.0, "c.power_switch": 14 }),
   "c.laser_cavity":C("High-energy laser gain module",       40.0, { "m.fused_si": 15.0, "m.inp": 5.0, "m.cu": 10.0, "m.al6061": 10.0 }),

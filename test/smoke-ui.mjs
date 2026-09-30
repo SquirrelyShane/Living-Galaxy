@@ -59,7 +59,7 @@ await page.evaluate(() => [...document.querySelectorAll("#con-subtabs .con-sub")
 await page.waitForTimeout(250);
 await page.evaluate(() => [...document.querySelectorAll("#con-body .tmode")].find((b) => /ENEMIES/i.test(b.textContent))?.click());
 await page.waitForTimeout(600);
-const tmode = await page.evaluate(async () => (await import("/js/sim.js")).sim.ship.turretMode);
+const tmode = await page.evaluate(async () => (await import("/js/sim/sim.js")).sim.ship.turretMode);
 const onGrid = await page.evaluate(() => [...document.querySelectorAll("#con-body .tmode.on")].map((b) => b.querySelector("b")?.textContent));
 console.log("turret mode via console:", tmode, "lit:", onGrid.join(" | "));
 await page.screenshot({ path: "/tmp/ui-con-systems.png" });
@@ -80,13 +80,13 @@ const landed = await page.evaluate(() => ({
 console.log("landed:", JSON.stringify(landed));
 await page.click("#con-close");
 await page.waitForTimeout(200);
-const closed = await page.evaluate(async () => ({ hidden: document.querySelector("#console").classList.contains("hidden"), flag: (await import("/js/sim.js")).sim.terminalOpen }));
+const closed = await page.evaluate(async () => ({ hidden: document.querySelector("#console").classList.contains("hidden"), flag: (await import("/js/sim/sim.js")).sim.terminalOpen }));
 console.log("closed:", JSON.stringify(closed));
 
 /* telemetry after a few samples: SHIP › STATUS rings and sparklines */
-await page.evaluate(async () => { const { sim } = await import("/js/sim.js"); sim.timeScale = 40; });
+await page.evaluate(async () => { const { sim } = await import("/js/sim/sim.js"); sim.timeScale = 40; });
 await page.waitForTimeout(2500);
-await page.evaluate(async () => { const { sim, setTerminal } = await import("/js/sim.js"); sim.timeScale = 1; window.__lg.console.openConsole("ship", "status"); setTerminal(true); });
+await page.evaluate(async () => { const { sim, setTerminal } = await import("/js/sim/sim.js"); sim.timeScale = 1; window.__lg.console.openConsole("ship", "status"); setTerminal(true); });
 await page.waitForTimeout(700);
 const tele = await page.evaluate(() => ({
   rings: document.querySelectorAll("#con-body .ring").length,
@@ -97,12 +97,12 @@ const tele = await page.evaluate(() => ({
 }));
 console.log("telemetry:", JSON.stringify(tele));
 await page.screenshot({ path: "/tmp/ui-con-status.png" });
-await page.evaluate(async () => (await import("/js/sim.js")).setTerminal(false));
+await page.evaluate(async () => (await import("/js/sim/sim.js")).setTerminal(false));
 
 /* dock by teleport to the hangar mouth: DOCK hands the helm to the tractor, which lands you; then open the hiring hall */
 const hall = await page.evaluate(async () => {
-  const { sim, toggleDock } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
+  const { sim, toggleDock } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
   const st = stations.find((s) => s.sector === "industrial") ?? stations.find((s) => s.sector !== "pirate");
   const m = st.hangars[0];
   sim.ship.pos.x = st.x + m.x + m.dir.x * 60; sim.ship.pos.y = st.y + m.y + m.dir.y * 60; sim.ship.pos.z = st.z + m.z + m.dir.z * 60;

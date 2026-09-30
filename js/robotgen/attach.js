@@ -1,10 +1,6 @@
-// robotgen/src/attach.js — bolt-on hardware. Kept separate from build.js so the
-// catalogue can grow without touching the frame builder. Everything here is
-// driven by spec.attachments, so it is deterministic per seed.
 import { put, group } from './parts.js';
 import { EXTRA_MOUNTS, buildKit } from './kit.js';
 
-/* ---------- shoulder mounts ---------- */
 function shoulderCannon(THREE, K, spec, rig, g, m, dims) {
   const s = dims.w * 0.34 * m.size;
   put(THREE, g, K.box(s * 0.7, s * 0.6, s * 0.9), K.second, 0, 0, 0, 0, 0, 0, 'cannon_breech');
@@ -136,7 +132,6 @@ function flareRack(THREE, K, spec, rig, g, m, dims) {
   }
 }
 
-
 const MOUNTS = {
   cannon: shoulderCannon, missiles: missilePod, beam: beamProjector, sensor: sensorMast,
   smoke: smokeBank, shield: riotShield, railgun, dronebay: droneBay, winch,
@@ -144,7 +139,6 @@ const MOUNTS = {
   ...EXTRA_MOUNTS
 };
 
-/* ---------- additive armor panels ---------- */
 function panelMat(K, spec, style) {
   if (style === 'ablative') return K.mat('ablative', spec.palette.trim, { metalness: 0.15, roughness: 0.95 });
   if (style === 'composite') return K.mat('composite', spec.palette.secondary, { metalness: 0.3, roughness: 0.6 });
@@ -158,20 +152,14 @@ function panelMat(K, spec, style) {
 }
 function addPanel(THREE, K, spec, rig, parent, w, h, d, x, y, z, style, stripe, name, limb) {
   if (!parent) return;
-  // limb panels stay flush: projected fields would sweep the ground and stacked
-  // reactive bricks would hang past the foot
   if (limb && (style === 'fieldemitter' || style === 'reactive' || style === 'carapace')) style = 'composite';
   const g = group(THREE, parent, name, x, y, z);
   put(THREE, g, K.box(w, h, d), panelMat(K, spec, style), 0, 0, 0, 0, 0, 0, name + '_face');
   put(THREE, g, K.box(w * 1.02, h * 0.12, d * 1.05), K.trim, 0, h * 0.42, 0);
   if (style === 'riot') for (let i = 0; i < 3; i++) put(THREE, g, K.box(w * 0.9, h * 0.05, d * 1.1), K.trim, 0, h * (0.2 - i * 0.2), 0);
-  // overlapping plates, kept inside the panel envelope: a segment that stands
-  // proud of the panel swings below the sole as soon as the limb pitches
   if (style === 'segmented') for (let i = 0; i < 3; i++)
     put(THREE, g, K.box(w * 0.94, h * 0.2, d * 0.6), K.second, 0, h * (0.22 - i * 0.22), d * 0.28, 0, 0, 0, 'seg' + i);
   if (style === 'mesh') for (let i = 0; i < 4; i++) put(THREE, g, K.box(w * 0.08, h * 0.98, d * 1.06), K.second, w * (0.3 - i * 0.2), 0, 0, 0, 0, 0, 'weave' + i);
-  // scorched sacrificial layer — torso panels only: on a shin panel the extra
-  // slab hangs past the sole and the foot reads as sunk into the ground
   if (style === 'reactive') for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++)
     put(THREE, g, K.box(w * 0.26, h * 0.38, d * 0.9), K.trim, (c - 1) * w * 0.3, (r - 0.5) * h * 0.42, d * 0.6, 0, 0, 0, 'brick');
   if (style === 'carapace') {
@@ -205,13 +193,6 @@ function buildArmor(THREE, K, spec, rig, ctx) {
       for (const leg of rig.legs) {
         const node = p.slot === 'thigh' ? leg.thigh : leg.shin;
         const L = p.slot === 'thigh' ? leg.seg.thigh : leg.seg.shin;
-        // a limb plate hugs the limb. Wider than the sole and a splayed leg puts
-        // the plate's outer corner below the foot, which the analytic ground
-        // solve measures at the sole — the robot then reads as sunk into the floor.
-        // ...and it stays inside the limb's swept envelope: standing proud in +z
-        // dips the plate below the sole as soon as the segment pitches forward
-        // panel thickness is drawn off the TORSO, which on a limb produces a slab
-        // thicker than the limb it is bolted to — cap it against the limb itself
         const wide = Math.min(L * 0.42, leg.radius * 1.7);
         const tl = Math.min(t * 1.2, leg.radius * 0.7);
         const ph = L * 0.5, py = -L * 0.42, pz = L * 0.12, pd = tl;
@@ -243,12 +224,11 @@ function buildArmor(THREE, K, spec, rig, ctx) {
   }
 }
 
-/* ---------- weapon attachments ---------- */
 function buildWeaponMods(THREE, K, spec, rig) {
   const W = spec.attachments.weaponMods;
   if (!W) return;
   for (const gun of rig.weapons) {
-    const s = gun.scale, node = gun.node, fwd = -gun.length;   // barrels run down -y from the mount
+    const s = gun.scale, node = gun.node, fwd = -gun.length;
     if (W.sight !== 'none') {
       const rail = group(THREE, node, 'sight', 0, fwd * 0.35, s * 0.55);
       put(THREE, rail, K.box(s * 0.5, s * 0.55, s * 0.5), K.dark, 0, 0, 0, 0, 0, 0, 'sight_body');
@@ -272,7 +252,6 @@ function buildWeaponMods(THREE, K, spec, rig) {
       const em = group(THREE, node, 'laser', s * 0.42, fwd * 0.6, s * 0.1);
       put(THREE, em, K.box(s * 0.3, s * 0.4, s * 0.35), K.dark, 0, 0, 0);
       const dot = put(THREE, em, K.sph(s * 0.11, 8), K.glow(W.laserColor, 2.0), 0, -s * 0.24, 0, 0, 0, 0, 'laser_emitter');
-      // short stub at rest so it never spears the floor; stretched when aiming
       const baseLen = s * 3.5, y0 = -s * 0.24;
       const beam = put(THREE, em, K.cyl(s * 0.028, s * 0.028, baseLen, 6),
         K.mat('beam', W.laserColor, { emissive: W.laserColor, emissiveIntensity: 1.8, transparent: true, opacity: 0.32 }),
@@ -329,8 +308,6 @@ function buildWeaponMods(THREE, K, spec, rig) {
   }
 }
 
-/* ---------- limb replacements ----------
-   Called by build.js instead of the stock hand when the spec asks for one. */
 export function buildLimbEnd(THREE, K, spec, rig, wrist, th, type, side) {
   if (!type || type === 'stock') return false;
   const acc = spec.palette.accent;
@@ -456,7 +433,6 @@ export function buildLimbEnd(THREE, K, spec, rig, wrist, th, type, side) {
   return true;
 }
 
-/* ---------- back mounts ---------- */
 function buildBack(THREE, K, spec, rig, ctx) {
   const kind = spec.attachments.back;
   if (!kind || kind === 'none') return;
@@ -574,9 +550,6 @@ function buildBack(THREE, K, spec, rig, ctx) {
   }
 }
 
-/* ---------- finish ----------
-   Surface treatment: glow seams in the joint gaps, panel lines, a unit insignia,
-   scorch, and an iridescent sheen. Cheap geometry, most of the sci-fi read. */
 export function applyFinish(THREE, K, spec, rig, ctx) {
   const F = spec.finish;
   if (!F) return;
@@ -633,7 +606,6 @@ export function applyFinish(THREE, K, spec, rig, ctx) {
   }
 }
 
-/* ---------- entry point ---------- */
 export function buildAttachments(THREE, K, spec, rig, ctx) {
   const A = spec.attachments;
   if (!A) return;

@@ -1,18 +1,7 @@
-/* LIVING GALAXY — ties between hands: friend, rival, couple.
- *
- * crew.js grows a rapport number per pair every cycle and pairs couples off.
- * This layer reads that number into *ties*: a friend at seventy, a rival when
- * two people who do not fit are stuck low and share a watch. Ties are not
- * cosmetic — bondFactor() scales what a hand's station is worth to the hull
- * (crewfx.js), a rival on the same watch sours both, and the talk trees let
- * the captain take sides. Contract: PLAN.md §4.3.
- */
-
-import { crew, crewHooks, compat, crewNote, rapportBetween, firstName } from "../crew.js";
-import { adjustMorale } from "../family.js";
+import { crew, crewHooks, compat, crewNote, rapportBetween, firstName } from "./ledger.js";
+import { adjustMorale } from "./family.js";
 import { cradle } from "../npc/cradle.js";
 
-/** rapport thresholds; couple = m.partner */
 export const TIE = { friend: 70, rival: 15, rivalHeals: 40 };
 const RIVAL_ROLL = 0.3;
 
@@ -24,7 +13,6 @@ function hashRoll(s) {
 
 const byId = (id) => crew.aboard.find((x) => x.id === id) ?? null;
 
-/** → "couple" | "friend" | "rival" | null between two members (objects or ids). */
 export function tieBetween(a, b) {
   const A = typeof a === "string" ? byId(a) : a, B = typeof b === "string" ? byId(b) : b;
   if (!A || !B || A.id === B.id) return null;
@@ -35,7 +23,6 @@ export function tieBetween(a, b) {
   return null;
 }
 
-/** → [{ with, name, kind, rapport }] — this hand's ties, couples first, then by rapport. */
 export function tiesOf(m) {
   if (!m) return [];
   const out = [];
@@ -48,7 +35,6 @@ export function tiesOf(m) {
   return out.sort((x, y) => order[x.kind] - order[y.kind] || y.rapport - x.rapport);
 }
 
-/** Symmetric rapport write; a rivalry heals itself once the number climbs back. */
 export function adjustRapport(a, b, d) {
   const A = typeof a === "string" ? byId(a) : a, B = typeof b === "string" ? byId(b) : b;
   if (!A || !B || A.id === B.id) return null;
@@ -59,7 +45,6 @@ export function adjustRapport(a, b, d) {
   return r;
 }
 
-/** Declare a rivalry (talk trees use it when the captain takes a side). */
 export function makeRivals(a, b) {
   const A = typeof a === "string" ? byId(a) : a, B = typeof b === "string" ? byId(b) : b;
   if (!A || !B) return;
@@ -67,10 +52,6 @@ export function makeRivals(a, b) {
   A.rivals[B.id] = true; B.rivals[A.id] = true;
 }
 
-/**
- * Per cycle (crewHooks.cycle): derive m.ties, roll new rivalries, write the
- * friend/rival lines into the crew log, and sour a rival pair on the same watch.
- */
 export function tickBonds() {
   const list = crew.aboard;
   for (let i = 0; i < list.length; i++) {
@@ -87,7 +68,6 @@ export function tickBonds() {
       }
       const kind = tieBetween(a, b);
       if (kind === "rival" && sameWatch) { adjustMorale(a, -1); adjustMorale(b, -1); }
-      /* the moment a friendship forms, once */
       const key = `${a.id}:${b.id}`;
       a.tieLog ??= {};
       if (kind === "friend" && !a.tieLog[key]) { a.tieLog[key] = "friend"; crewNote(`${firstName(a)} and ${firstName(b)} are thick as thieves now.`); }
@@ -97,11 +77,6 @@ export function tickBonds() {
   for (const m of list) m.ties = tiesOf(m);
 }
 
-/**
- * 1 ± : +0.06 per friend on the same station this phase, −0.08 per rival there,
- * +0.03 with a partner aboard. `mannedKinds` is kind → [member ids or first names]
- * (crewfx passes ids; the interior rail's map of first names also works).
- */
 export function bondFactor(m, mannedKinds) {
   if (!m || !mannedKinds) return 1;
   let mine = null;
@@ -120,7 +95,6 @@ export function bondFactor(m, mannedKinds) {
   return Math.max(0.5, f);
 }
 
-/** Every pair sorted by rapport, for the BONDS tab. → [{ a, b, rapport, kind }] */
 export function bondsReport() {
   const list = crew.aboard;
   const out = [];

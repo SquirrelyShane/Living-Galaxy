@@ -1,23 +1,13 @@
-/* Living Galaxy — staged social acts.
- *
- * A beat is a short scene: a few stages, each waiting on the captain's answer,
- * a progress bar that moves when you answer, and an ending that is a buff
- * (trust / morale / spark) or a debuff — with the odds moved by what you said
- * on the way (0.3.17; it used to play itself on a timer). Nothing here is
- * explicit; addons may register extra beats through hooks.js.
- */
-
-import { crew, crewHooks, firstName } from "../crew.js";
-import { adjustMorale, adjustTrust, trustOf, social, loadSocial, playerAsPerson, couldCourt, pairWithPlayer } from "../family.js";
+import { crew, crewHooks, firstName } from "./ledger.js";
+import { adjustMorale, adjustTrust, trustOf, social, loadSocial, playerAsPerson, couldCourt, pairWithPlayer } from "./family.js";
 import { adjustRapport } from "./bonds.js";
 import { moment, attraction } from "./romance.js";
 import { runHooks } from "./hooks.js";
-import { sim } from "../sim.js";
+import { sim } from "../sim/sim.js";
 
 const hi = (t, k) => (t?.[k] ?? 0.5) > 0.6;
 const lo = (t, k) => (t?.[k] ?? 0.5) < 0.4;
 const Q = (m, s) => `${firstName(m)}: "${s}"`;
-
 
 function roll(m, id) {
   const s = `${m.id}:${id}:${Math.round(sim.time ?? 0)}`;
@@ -26,14 +16,6 @@ function roll(m, id) {
   return ((h >>> 0) % 1000) / 1000;
 }
 
-/**
- * Apply what a beat resolved to, and report what actually landed.
- *
- * `o.with` is the other party. A captain's beat has none — you are not on the
- * crew's own ladder — so a `spark` with nobody to spark with used to be
- * dropped on the floor while the tag still promised it. It now goes where the
- * player's side of a relationship actually lives: trust.
- */
 function applyOutcome(m, o) {
   const applied = { trust: 0, morale: 0, rapport: 0, spark: 0 };
   const other = o.with && o.with !== "player" ? o.with : null;
@@ -47,7 +29,6 @@ function applyOutcome(m, o) {
   return applied;
 }
 
-/** Chance an act lands, from trust, morale, and whether they are drawn to you. */
 function odds(m, kind) {
   loadSocial();
   const trust = trustOf(m);
@@ -57,33 +38,14 @@ function odds(m, kind) {
     if (social.romance === "off") return 0;
     if (m.partner && m.partner !== "player") p -= 0.25;
     if (m.partner === "player") p += 0.18;
-    /* the ledger's own idea of who the captain is — the hand-built stand-in
-     * had no race and no traits, so half of what attraction() reads was blank */
     p += (attraction(m, playerAsPerson()) || 0) * 0.15;
   }
   if (lo(m.traits, "loyalty") && kind === "friend") p -= 0.06;
   return Math.max(0.08, Math.min(0.92, p));
 }
 
-
-/* 0.3.17 — a beat is a scene the captain plays, not one that plays itself.
- *
- * It used to run on a setInterval: three unconnected lines drawn from three
- * separate bags of the voice bank, a progress bar filling on its own, and an
- * outcome rolled at the end with nothing the captain did in between. Now each
- * core beat is a SCENE: stages written to follow one another, each waiting on
- * the captain's answer, and what the captain says moves the odds the scene
- * lands (`lean`, per choice, and per trait where a hand would care). The bar
- * moves when you answer and not before; "Let it drop" still walks away.
- *
- * A beat that only has `steps()` (an addon's) still works: each line waits on
- * a "Go on".
- *
- *   stage  { line, choices: [{ id, label, lean?, say?(m) → the hand's reply }] }
- */
 const who = (m) => firstName(m);
 const tr = (m) => m.traits ?? {};
-/* a lean that depends on who they are: pickLean(m, { caution: 0.1, grit: -0.05, else: 0 }) */
 function pickLean(m, table) {
   for (const k of Object.keys(table)) if (k !== "else" && hi(tr(m), k)) return table[k];
   return table.else ?? 0;
@@ -222,9 +184,6 @@ export const CORE_BEATS = [
     id: "dinner",
     label: "Ask them to dinner",
     kind: "romance",
-    /* the same gate the TALK topic uses: drawn to each other, not kin, and
-     * enough trust to be asked. Without it the beat could pair you with
-     * somebody who would have refused in conversation. */
     when: (m) => !m.robot && social.romance === "all" && m.partner !== "player"
       && (couldCourt(m).ok || Boolean(m.partner)),
     replaces: "court",
@@ -267,7 +226,6 @@ export const CORE_BEATS = [
       }
       const ok = rng() < odds(m, "romance");
       if (ok) {
-        /* one place does this, and it writes the ledger and the crew log */
         pairWithPlayer(m);
         return { ok, trust: 8, morale: 8, line: Q(m, "…ask me again next port. And the one after that."), tag: "together · +trust +morale" };
       }
@@ -308,9 +266,8 @@ export const CORE_BEATS = [
 
 const running = new Map();
 
-/** Stop whatever is playing. One captain, one conversation at a time. */
 export function stopAllBeats() {
-  for (const stop of [...running.values()]) { try { stop(); } catch { /* already gone */ } }
+  for (const stop of [...running.values()]) { try { stop(); } catch {} }
   running.clear();
 }
 
@@ -326,34 +283,19 @@ export function isRunning(memberId) {
   return running.has(memberId);
 }
 
-/**
- * Play a beat as a scene. `onStep({ i, n, frac, line, choices, tag })` shows a
- * stage and the answers it waits on; `onDone(result)` fires once. Nothing
- * advances by itself — the returned stop() carries `.advance(choiceId)`,
- * which answers the stage on screen (any answer for a "Go on" stage), and
- * `.stage()` which reports it. stop() walks away without applying anything.
- *
- * What the captain answers moves the odds: every choice carries a `lean`,
- * summed and taken off the roll the beat's own resolve() makes (a roll under
- * the odds is a success), so an addon's resolve gets it for free.
- */
 export function playBeat(m, beatId, { onStep, onDone, rng = Math.random } = {}) {
   const beat = beatsFor(m).find((b) => b.id === beatId);
   if (!beat) { onDone?.({ ok: false, line: "That isn't on the board.", tag: "" }); return Object.assign(() => {}, { advance: () => false, stage: () => null }); }
   if (running.has(m.id)) {
-    /* the caller's handlers used to be dropped on the floor here, leaving the
-     * panel waiting on a beat that was never theirs */
     onDone?.({ ok: false, line: "You are already in the middle of that.", tag: "busy", cancelled: true });
     return running.get(m.id);
   }
-  /* one at a time, across the whole crew */
   stopAllBeats();
 
   let stages;
   try {
     if (typeof beat.scene === "function") stages = (beat.scene(m, { social }) ?? []).filter(Boolean);
     else {
-      /* an addon's lines: each one waits on "Go on"; a null closes the list */
       const steps = (beat.steps?.(m, { social }) ?? []).filter((x) => x != null);
       stages = steps.map((line) => ({ line }));
     }
@@ -364,8 +306,8 @@ export function playBeat(m, beatId, { onStep, onDone, rng = Math.random } = {}) 
   let i = 0;
   let lean = 0;
   let stopped = false;
-  let carry = "";           // the captain's answer, said before the next stage's line
-  const said = [];          // what was answered, stage by stage
+  let carry = "";
+  const said = [];
 
   const pub = () => ({ i, n, frac: i / (n + 1), line: (carry ? `${carry} ` : "") + (stages[i]?.line || "…"), choices: stages[i].choices.map((c) => ({ id: c.id, label: c.label })), tag: beat.label, answered: said.slice() });
 
@@ -374,7 +316,6 @@ export function playBeat(m, beatId, { onStep, onDone, rng = Math.random } = {}) 
     stopped = true;
     running.delete(m.id);
     if (!apply) { onDone?.({ ok: false, line: "You let it drop.", tag: "stopped", cancelled: true }); return; }
-    /* somebody who has walked off the ship does not finish the conversation */
     if (!crew.aboard.includes(m)) {
       onDone?.({ ok: false, line: `${firstName(m)} is not aboard any more.`, tag: "gone", cancelled: true });
       return;
@@ -384,8 +325,6 @@ export function playBeat(m, beatId, { onStep, onDone, rng = Math.random } = {}) 
     try { res = beat.resolve(m, leaned); } catch (err) { console.warn("[beats] resolve", beat.id, err); res = null; }
     res = res ?? { ok: false, line: "—", tag: "" };
     const applied = applyOutcome(m, res);
-    /* the tag is what the player reads: build it from what actually landed so
-     * it can never promise something the outcome did not do */
     if (!res.tag) {
       const bits = [];
       if (applied.trust) bits.push(`${applied.trust > 0 ? "+" : "−"}trust`);
@@ -401,7 +340,6 @@ export function playBeat(m, beatId, { onStep, onDone, rng = Math.random } = {}) 
     onDone?.(res);
   };
 
-  /** Answer the stage on screen. Returns false when there is nothing to answer. */
   const advance = (choiceId = null) => {
     if (stopped) return false;
     if (!crew.aboard.includes(m)) { finish(false); return false; }
@@ -427,12 +365,9 @@ export function playBeat(m, beatId, { onStep, onDone, rng = Math.random } = {}) 
   return stop;
 }
 
-/** Answer the stage a hand's beat is waiting on (the talk view's buttons). */
 export function advanceBeat(memberId, choiceId = null) {
   const s = running.get(memberId);
   return s?.advance ? s.advance(choiceId) : false;
 }
 
-/* a new sky is a new crew: a stale entry here would lock somebody out of
- * every beat for the rest of the session */
 if (!crewHooks.reset.includes(stopAllBeats)) crewHooks.reset.push(stopAllBeats);

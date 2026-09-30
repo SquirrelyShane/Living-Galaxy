@@ -1,18 +1,5 @@
-/* Living Galaxy — CONSOLE › CREW › SKY: the other hundred and sixty watches.
- *
- * Every hull on the board has people on it now. This is where you read them:
- * nearest first, what kind of run they are on, how the watch is holding up,
- * how far behind the hull's maintenance is, and — for the ones close enough
- * to overhear — the last thing their deck actually decided and why.
- *
- * It is a listening post, not a control panel. Nothing here gives orders to
- * another ship's crew; the only thing you can do about a sour watch is dock
- * where they are about to walk off and be the better berth.
- *
- */
-
 import { el, section, note, row, button, chips, setBar, card } from "../kit.js";
-import { sim } from "../../sim.js";
+import { sim } from "../../sim/sim.js";
 import { traffic } from "../../npc/traffic.js";
 import { npcCrews, moodOf, vesselJournal, NEAR_U, DESERT_AT, STRIKE_AT, WORK_BUDGET } from "../../npc/npccrew.js";
 import { fmtDist } from "../kit.js";

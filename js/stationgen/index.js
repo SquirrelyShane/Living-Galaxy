@@ -1,4 +1,3 @@
-/* Public surface of the station generator. Import from here. */
 export { buildStation, releaseStation, randomConfig, normalizeConfig, stationBounds, DEFAULT_CFG } from "./generate.js";
 export { StationBuilder } from "./builder/StationBuilder.js";
 export { STYLES } from "./builder/hull.js";

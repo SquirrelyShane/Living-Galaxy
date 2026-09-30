@@ -1,7 +1,3 @@
-/* Sample the voice bank. Trait + seed pick a stable line for a moment,
- * so the same hand doesn't recite a new novel every paint, but a new
- * conversation (new time / topic) draws a different one.
- */
 import { BANK, BANK_SIZE } from "./voice-bank.js";
 
 export { BANK_SIZE };
@@ -24,7 +20,6 @@ export function leanTrait(t = {}) {
   return best;
 }
 
-/** Pick one line from a bag. `bags` may be a key or a list of keys (first hit). */
 export function line(bags, seed, fallback = "") {
   const keys = Array.isArray(bags) ? bags : [bags];
   for (const key of keys) {
@@ -34,7 +29,6 @@ export function line(bags, seed, fallback = "") {
   return fallback;
 }
 
-/** Trait-flavoured pick: tries `${prefix}_${trait}` then `${prefix}_else` then prefix. */
 export function byTrait(prefix, t, seed, fallback = "") {
   const lean = leanTrait(t);
   return line([`${prefix}_${lean}`, `${prefix}_else`, prefix], seed, fallback);

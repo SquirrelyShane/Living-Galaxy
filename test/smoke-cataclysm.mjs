@@ -22,12 +22,12 @@ await page.waitForTimeout(2500);
 
 /* --- a world takes a world-ending hit while you watch --- */
 const cata = await page.evaluate(async () => {
-  const { sim, strikeBody } = await import("/js/sim.js");
-  const { bodyById, surveyIds } = await import("/js/bodies.js");
+  const { sim, strikeBody } = await import("/js/sim/sim.js");
+  const { bodyById, surveyIds } = await import("/js/world/bodies.js");
   const live = () => surveyIds().map(bodyById);
   const world = live().find((b) => b.kind !== "star" && b.kind !== "gas" && !b.shattered && b.radius > 500);
   const p = { x: 0, y: 0, z: 0 };
-  const { bodyPosition } = await import("/js/bodies.js");
+  const { bodyPosition } = await import("/js/world/bodies.js");
   bodyPosition(world.id, sim.time, p);
   /* ringside, looking at it */
   sim.ship.pos.x = p.x; sim.ship.pos.y = p.y; sim.ship.pos.z = p.z + world.radius * 7;
@@ -53,7 +53,7 @@ await page.screenshot({ path: "/tmp/cata-contact.png" });
 
 /* --- and it is still visible behind you --- */
 const behind = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   sim.ship.yaw = sim.ship.aimYaw = Math.PI / 2;   // swing it onto the beam
   await new Promise((r) => setTimeout(r, 500));
   const beam = sim.glare ? { x: +sim.glare.x.toFixed(1), y: +sim.glare.y.toFixed(1), lum: +sim.glare.lum.toFixed(3) } : null;
@@ -76,9 +76,9 @@ await page.screenshot({ path: "/tmp/cata-behind.png" });
 
 /* --- the ring lays down and settles --- */
 const ring = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { chunks } = await import("/js/debris.js");
-  const { bodyById, surveyIds } = await import("/js/bodies.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { chunks } = await import("/js/world/debris.js");
+  const { bodyById, surveyIds } = await import("/js/world/bodies.js");
   const live = () => surveyIds().map(bodyById);
   const ev = sim.events[0];
   const t0 = performance.now();
@@ -100,8 +100,8 @@ await page.screenshot({ path: "/tmp/cata-ring.png" });
 
 /* look back at what is left of it */
 await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { bodyById, bodyPosition } = await import("/js/bodies.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { bodyById, bodyPosition } = await import("/js/world/bodies.js");
   const ev = sim.events[0];
   const b = bodyById(ev.bodyId);
   const p = { x: 0, y: 0, z: 0 };
@@ -116,11 +116,11 @@ await page.screenshot({ path: "/tmp/cata-aftermath.png" });
 
 /* --- the star stops being one --- */
 const nova = await page.evaluate(async () => {
-  const { sim, goSupernova } = await import("/js/sim.js");
-  const { bodyById, surveyIds, starBody } = await import("/js/bodies.js");
+  const { sim, goSupernova } = await import("/js/sim/sim.js");
+  const { bodyById, surveyIds, starBody } = await import("/js/world/bodies.js");
   const star = starBody();
   const p = { x: 0, y: 0, z: 0 };
-  const { bodyPosition } = await import("/js/bodies.js");
+  const { bodyPosition } = await import("/js/world/bodies.js");
   bodyPosition(star.id, sim.time, p);
   sim.ship.pos.x = p.x + star.radius * 26; sim.ship.pos.y = p.y; sim.ship.pos.z = p.z;
   sim.ship.yaw = sim.ship.aimYaw = -Math.PI / 2;

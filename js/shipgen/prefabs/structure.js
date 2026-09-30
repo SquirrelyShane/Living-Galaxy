@@ -1,7 +1,3 @@
-/* Prefabs — Structural, armor and stores.
- * Each prefab: faces (default mount faces), fp(s, part, face) → footprint {w,h,d} in ship units
- * (w along the face u-axis, d along v, h outward), build(g, s, part, S, rng) where g is a group
- * whose +Y points away from the hull and S is the StarshipBuilder (mats, lamp, dockBody…). */
 import * as THREE from "three";
 import { G, addMesh } from "../core/geometry.js";
 import { ALL_FACES } from "./_common.js";

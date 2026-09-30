@@ -1,7 +1,7 @@
 /* LIVING GALAXY — 0.3.42: FLY AS <callsign>. The pilot comes back.
  *
  * Until 0.3.42 nothing about the pilot was written anywhere: every launch was
- * makePilot() from the creation screen, which is a NEW run (js/profile.js
+ * makePilot() from the creation screen, which is a NEW run (js/core/profile.js
  * sweeps the old one). A returning player was a new character in the trainer
  * with the starting purse, whatever the save beside them said — measured in a
  * browser before this was built: purse 99,999 on disk, 3,100 after "Create
@@ -27,15 +27,15 @@ globalThis.localStorage = {
   key: (i) => [...store.keys()][i] ?? null,
 };
 
-const P = await import("../js/profile.js");
-const { pilot, makePilot, work, serializePilot, restorePilot, savePilot, loadPilot, PILOT_KEY, rankStatus, skillSheet, tryPromote } = await import("../js/pilot.js");
-const { loadSave, useGameStore } = await import("../js/store.js");
-const { sim, launchSim, tickSim, persistNow, currentShipId } = await import("../js/sim.js");
-const { corpById, corps, buildCorps } = await import("../js/corps.js");
-const { SHIP_DB, DEFAULT_SHIP_ID } = await import("../js/shipdb.js");
-const { yardQuote } = await import("../js/shipcost.js");
+const P = await import("../js/core/profile.js");
+const { pilot, makePilot, work, serializePilot, restorePilot, savePilot, loadPilot, PILOT_KEY, rankStatus, skillSheet, tryPromote } = await import("../js/flight/pilot.js");
+const { loadSave, useGameStore } = await import("../js/core/store.js");
+const { sim, launchSim, tickSim, persistNow, currentShipId } = await import("../js/sim/sim.js");
+const { corpById, corps, buildCorps } = await import("../js/corp/corps.js");
+const { SHIP_DB, DEFAULT_SHIP_ID } = await import("../js/ships/shipdb.js");
+const { yardQuote } = await import("../js/economy/shipcost.js");
 const { buyCoverage } = await import("../js/ui/coverage.js");
-const { policyFor, playerKey } = await import("../js/insurance.js");
+const { policyFor, playerKey } = await import("../js/economy/insurance.js");
 
 const rec = () => JSON.parse(store.get(PILOT_KEY) ?? "null");
 const topSkill = () => skillSheet()[0];
@@ -135,7 +135,7 @@ const topSkill = () => skillSheet()[0];
 
 /* ---- 6. a lost hull is on the record at once ------------------------------ */
 {
-  const { loseHull } = await import("../js/sim.js");
+  const { loseHull } = await import("../js/sim/sim.js");
   const had = sim.ownedHulls[0];
   loseHull(sim.ship, "test");
   tickSim(0.05);

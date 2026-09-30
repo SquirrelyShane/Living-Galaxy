@@ -65,7 +65,7 @@ const two = await page.evaluate(async () => {
   await new Promise((f) => setTimeout(f, 500));
   const body = document.querySelector("#con-body")?.textContent ?? "";
   const show = [...document.querySelectorAll("#con-body button")].find((b) => /SHOW ME HOW/.test(b.textContent || ""));
-  const { tutorial } = await import("/js/tutorial.js");
+  const { tutorial } = await import("/js/ui/tutorial.js");
   return {
     foundChip: Boolean(chip),
     blocked: /MISSION CORE NEEDED/.test(body),
@@ -86,7 +86,7 @@ const three = await page.evaluate(async () => {
   const show = [...document.querySelectorAll("#con-body button")].find((b) => /SHOW ME HOW/.test(b.textContent || ""));
   show?.click();
   await new Promise((f) => setTimeout(f, 700));
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   const card = document.getElementById("tutor");
   const rect = card?.getBoundingClientRect();
   return {
@@ -112,9 +112,9 @@ check(three.next, "phase one has NEXT — there is nothing to measure yet");
  * — this asks for the phase it expects and gives it up to three seconds to
  * arrive, which is a real assertion rather than a timing hope. */
 const four = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { tutorialEvaluate, tutorial } = await import("/js/tutorial.js");
-  const { coreYard } = await import("/js/tutorial-core.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { tutorialEvaluate, tutorial } = await import("/js/ui/tutorial.js");
+  const { coreYard } = await import("/js/ui/tutorial-core.js");
   const wait = (ms) => new Promise((f) => setTimeout(f, ms));
   const lit = () => [...document.querySelectorAll("[data-tutor-hi]")].map((e) => e.id);
   const step = () => tutorialEvaluate().step;
@@ -160,7 +160,7 @@ const four = await page.evaluate(async () => {
   sim.ship.dockedAt = coreYard(sim.ship.pos).st.id;
   out.seen.refit = await until("core-fit");
 
-  const { upgrades } = await import("/js/upgrades.js");
+  const { upgrades } = await import("/js/economy/upgrades.js");
   upgrades.owned.push("nav_core");
   for (let t = 0; t < 3000 && tutorial.active; t += 100) await wait(100);
   out.ended = { active: tutorial.active, track: tutorial.track, lit: lit() };

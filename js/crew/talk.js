@@ -1,18 +1,7 @@
-/* LIVING GALAXY — talking to the crew.
- *
- * family.crewTopics() is the base list (praise, bonus, court, settle…) and
- * stays as it was. Above it sits a tree of topic nodes (talk-trees.js) with
- * trust tiers, `when` gates, once/cooldown, and choices that carry
- * consequences — trust, morale, credits, rapport with a crewmate, a duty, a
- * flag the roster and later talks read back. Everything said is remembered
- * on the member (`m.memory`) and mirrored to the CRADLE record, so a hand who
- * walks and signs on again still knows what you promised. Contract: §4.2.
- */
-
-import { crew, crewHooks, firstName, rapportBetween } from "../crew.js";
-import { crewTopics, greetLine, adjustTrust, adjustMorale, familyOf } from "../family.js";
+import { crew, crewHooks, firstName, rapportBetween } from "./ledger.js";
+import { crewTopics, greetLine, adjustTrust, adjustMorale, familyOf } from "./family.js";
 import { cradle, PRONOUNS } from "../npc/cradle.js";
-import { sim, logEvent } from "../sim.js";
+import { sim, logEvent } from "../sim/sim.js";
 import { mission } from "../mission/run.js";
 import { adjustRapport, makeRivals, tiesOf } from "./bonds.js";
 import { setDuty, dutyOf, postKind } from "./roster.js";
@@ -26,21 +15,11 @@ import { FRIEND_TIERS, FRIEND_INDEX, MORALE_INDEX, friendTier, tierGate, tiersOf
 
 export { TREE, ROBOT_TOPICS, WANT_TOPICS, THREADS };
 
-/**
- * The tree's four gates, read off the six-rung friendship ladder.
- *
- * There were two vocabularies for the same number: this file's
- * stranger/hand/confidant/friend at 0/25/50/75, and nothing at all for morale.
- * js/crew/tiers.js is the one ladder now — wary → civil → shipmate → friend →
- * confidant → sworn — and a node's `tier: 0..3` names a rung on it, so the
- * gate the tree applies and the tier the crew sheet prints are the same thing.
- */
 const TIER_RUNG = ["wary", "shipmate", "friend", "confidant"];
 export const TIERS = TIER_RUNG.map((id) => FRIEND_TIERS[FRIEND_INDEX(id)].at);
 export const TIER_NAMES = TIER_RUNG.map((id) => FRIEND_TIERS[FRIEND_INDEX(id)].label.toLowerCase());
 const LOG_MAX = 12;
 
-/** 0..3 from where they stand on the friendship ladder */
 export function tierOf(m) {
   const at = FRIEND_INDEX(friendTier(m).id);
   let tier = 0;
@@ -48,7 +27,6 @@ export function tierOf(m) {
   return tier;
 }
 
-/** → { topics: {id: n}, flags: {}, lastTalk, log: [{ t, topic, choice?, line }], used: {id: cycle} } */
 export function memoryOf(m) {
   if (!m) return { topics: {}, flags: {}, lastTalk: -1, log: [], used: {} };
   if (!m.memory) {
@@ -59,7 +37,6 @@ export function memoryOf(m) {
   return m.memory;
 }
 
-/** Wipe what a hand remembers (tests, a fresh sky). */
 export function forgetTalk(m) {
   if (!m) return;
   m.memory = null;
@@ -72,7 +49,6 @@ function mirror(m) {
   if (rec) { rec.memory = m.memory; cradle.put(rec); }
 }
 
-/** Everything a node needs to speak: the hand, their people, the ship's day. */
 export function talkContext(m, ctx = {}) {
   const t = m.traits ?? {};
   const partner = m.partner === "player" ? { id: "player", name: "the captain" } : m.partner ? crew.aboard.find((x) => x.id === m.partner) ?? null : null;
@@ -89,8 +65,6 @@ function gate(node, m, c) {
   if (c.force) return { ok: true };
   const mem = memoryOf(m);
   if ((node.tier ?? 0) > tierOf(m)) return { ok: false, why: `needs ${TIER_NAMES[node.tier]} · trust ${TIERS[node.tier]}` };
-  /* the richer gate: a topic can also want a mood, or a rung on the romantic
-   * ladder. A sullen hand has an answer, it is just not that answer. */
   if (node.need && !tierGate(m, node.need)) {
     const t = tiersOf(m);
     const want = node.need.morale && MORALE_INDEX(t.morale.id) < MORALE_INDEX(node.need.morale) ? `not while they are ${t.morale.label.toLowerCase()}`
@@ -106,23 +80,11 @@ function gate(node, m, c) {
   return { ok: true };
 }
 
-/** The base list from family.js, each a tier-0 node whose say() is its run(). */
 function baseNodes(m, c) {
   if (m.robot) return [];
   return crewTopics(m, c).map((tp) => ({ id: tp.id, label: tp.label, cls: tp.cls, tier: 0, base: true, say: () => tp.run() }));
 }
 
-/* What the hand brought to the captain comes first — a flagged grievance
- * should not be three taps down a list of small talk. */
-/* 0.3.17: a conversation that is picking up where the last one left off
- * (talk-threads.js) comes right after anything they flagged themselves.
- *
- * And one id, one topic. family.js's "How's the watch?" and the WANT list's
- * "How's your watch been?" were both `watch`; the lookup found the WANT one
- * first, so tapping the family one ran the other — and when that one was
- * hidden or cooling down the tap answered with nothing. The base topic now
- * stands aside while the richer one is on the board, and comes back when it
- * is not. */
 function allNodes(m, c) {
   if (m.robot) return ROBOT_TOPICS;
   const extra = runHooks("talkTopics", m, c).flat().filter(Boolean);
@@ -137,14 +99,12 @@ function allNodes(m, c) {
 const labelOf = (n, m, c) => (typeof n.label === "function" ? n.label(m, c) : n.label);
 const pub = (n, m, c) => ({ id: n.id, label: labelOf(n, m, c), cls: n.cls ?? "", tier: n.tier ?? 0, base: Boolean(n.base) });
 
-/** Topics this hand will talk about right now (tier/when/once/cooldown applied). */
 export function topicsFor(m, ctx = {}) {
   if (!m) return [];
   const c = talkContext(m, ctx);
   return allNodes(m, c).filter((n) => gate(n, m, c).ok).map((n) => pub(n, m, c));
 }
 
-/** Topics that exist but are shut for now, with the reason: [{ id, label, tier, why }]. */
 export function lockedTopicsFor(m, ctx = {}) {
   if (!m) return [];
   const c = talkContext(m, ctx);
@@ -174,7 +134,6 @@ function remember(m, entry) {
   mirror(m);
 }
 
-/** Open a topic → { text, choices: [{ id, label, cls }] }. Records the topic in memory. */
 export function open(m, topicId, ctx = {}) {
   if (!m) return { text: "", choices: [] };
   const c = talkContext(m, ctx);
@@ -190,12 +149,10 @@ export function open(m, topicId, ctx = {}) {
   if (topicId === "chew") mem.flags.settledChew = false;
   mem.pending = res.choices.length ? { topic: topicId, choices: res.choices } : null;
   remember(m, { topic: topicId, label: labelOf(node, m, c), line: res.text });
-  /* a settle or a dismissal took them off the deck: nothing more to say */
   if (!crew.aboard.includes(m)) mem.pending = null;
   return { text: res.text, choices: res.choices.map((ch) => ({ id: ch.id, label: ch.label, cls: ch.cls ?? "" })) };
 }
 
-/** Apply a choice's consequences. Returns null, or a line that refuses it. */
 function applyFx(m, fx, c) {
   if (!fx) return null;
   if (fx.credits && fx.credits < 0 && (sim.ship?.credits ?? 0) < -fx.credits) return `${c.f}: "…with what, captain?"`;
@@ -216,7 +173,6 @@ function applyFx(m, fx, c) {
   return null;
 }
 
-/** Pick a choice on an open topic → { text }. Applies its fx and records it. */
 export function choose(m, topicId, choiceId, ctx = {}) {
   if (!m) return { text: "" };
   const c = talkContext(m, ctx);
@@ -247,8 +203,6 @@ export function choose(m, topicId, choiceId, ctx = {}) {
   };
 }
 
-/* ---- free text ------------------------------------------------------------ */
-
 const FREE = [
   { re: /\b(pay|wage|credits?|money|bonus|cut|cr)\b/i, key: "pay" },
   { re: /\b(home|family|kids?|child|children|parents?|mother|father)\b/i, key: "home" },
@@ -267,7 +221,6 @@ function hashN(s, n) {
   return (h >>> 0) % n;
 }
 
-/** A reply to anything typed, flavoured by trait and tier. Always a string. */
 export function answerFreeText(m, text) {
   if (!m) return "";
   const c = talkContext(m);
@@ -301,7 +254,6 @@ export function answerFreeText(m, text) {
   return `${f}: "${line}"`;
 }
 
-/** A greeting that remembers the last thing you talked about. */
 export function greet(m) {
   if (!m) return "";
   const base = greetLine(m);
@@ -311,19 +263,16 @@ export function greet(m) {
   if (last && (sim.time ?? 0) - (last.t ?? 0) > 60) bits.push(`Last time: "${last.label}".`);
   if (mem.flags.promised) bits.push(`${firstName(m)} said ${(m.pronouns ?? PRONOUNS.nonbinary).subj}'d stay on.`);
   if (mem.flags.adviceHeard) bits.push("You took their advice on the run.");
-  /* 0.3.17: a thread waiting to be picked up is the first thing they'd raise */
   const c = talkContext(m);
   const waiting = THREADS.find((n) => gate(n, m, c).ok);
   if (waiting) bits.push(`${firstName(m)} has something to pick up from last time.`);
   return bits.length ? `${base} (${bits.join(" ")})` : base;
 }
 
-/** Last exchanges, newest last: [{ t, topic, label, choice?, line }]. */
 export function talkLog(m, n = 6) {
   return memoryOf(m).log.slice(-n);
 }
 
-/* a promise kept keeps a floor under morale */
 function tickTalkCycle() {
   for (const m of crew.aboard) {
     if (m.robot) continue;

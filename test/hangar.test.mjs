@@ -2,7 +2,7 @@
  *
  *   node --import ./test/three-register.mjs test/hangar.test.mjs [path/to/lgsite.py]
  *
- * Runs js/account.js against the REAL lgsite.py when one is found (an argument,
+ * Runs js/net/account.js against the REAL lgsite.py when one is found (an argument,
  * $LGSITE_PY, or ../site/lgsite.py) and against a small fake otherwise.
  *
  * Reported: signing in reloaded the page three times, recalling a pilot took an
@@ -25,10 +25,10 @@ function device() {
 globalThis.localStorage = device();
 globalThis.document = undefined;
 
-const A = await import("../js/account.js");
+const A = await import("../js/net/account.js");
 const { account, probe, push, listPilots, flyPilot, newPilotSlot, deletePilot, eraseGuest, MAX_PILOTS } = A;
-const { pilotsBySky, skyOf } = await import("../js/hangar.js");
-const { useGameStore } = await import("../js/store.js");
+const { pilotsBySky, skyOf } = await import("../js/ui/hangar.js");
+const { useGameStore } = await import("../js/core/store.js");
 
 const pilotOn = (ls, callsign) => {
   ls.setItem("lgaa-save-v1", JSON.stringify({ version: 2, callsign, skies: {} }));

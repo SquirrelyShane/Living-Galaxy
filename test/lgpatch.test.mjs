@@ -212,6 +212,22 @@ try {
     writeFileSync(conf, "");
   }
 
+  /* 0.3.78 — tools/prune/TO.txt: a zip cannot delete, so apply removes what the list names */
+  {
+    put(work, "js/old.js", "export {};\n"); put(work, "js/kept.js", "export {};\n");
+    git(work, "add", "-A"); git(work, "commit", "-q", "-m", "old"); git(work, "push", "-q", "origin", "main");
+    mkzip("LivingGalaxy-0.9.10-patch.zip", { "js/version.js": V("0.9.10"), "js/moved/old.js": "export {};\n", "tools/prune/0.9.10.txt": "# moved\njs/old.js\r\n\njs/never-was.js\n", "test/h.test.mjs": "import { existsSync } from 'node:fs'; process.exit(existsSync('js/old.js') ? 1 : 0);\n" });
+    r = run("apply", "0.9.9", "0.9.10");
+    ok(r.code === 0 && /pruned 1 file/.test(r.out) && !existsSync(join(work, "js/old.js")) && existsSync(join(work, "js/kept.js")) && existsSync(join(work, "js/moved/old.js")), `apply prunes the listed file before the tests run, and nothing else${r.code ? "\n" + r.out : ""}`);
+    r = run("ship", "0.9.10");
+    ok(r.code === 0 && !/js\/old\.js/.test(git(work, "--git-dir", origin, "ls-tree", "-r", "--name-only", "main")) && /js\/moved\/old\.js/.test(git(work, "--git-dir", origin, "ls-tree", "-r", "--name-only", "main")), "ship records the deletion on origin");
+    mkzip("LivingGalaxy-0.9.11-patch.zip", { "js/version.js": V("0.9.11"), "tools/prune/0.9.11.txt": "../outside.txt\n" });
+    r = run("apply", "0.9.10", "0.9.11");
+    ok(r.code !== 0 && /refusing/.test(r.out), "a prune list reaching outside the repo is refused");
+    run("abort", "0.9.11");
+    ok(branch() === "main" && ver() === "0.9.10", "…and abort puts main back");
+  }
+
   /* site */
   mkzip("LivingGalaxy-Site-0.2.6.zip", { "lgsite.py": 'VERSION = "0.2.6"\n', "test/s.test.mjs": passing });
   r = run("site", "0.2.6");

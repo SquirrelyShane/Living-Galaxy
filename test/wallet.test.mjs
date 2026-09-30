@@ -23,10 +23,10 @@ globalThis.localStorage = {
   key: (i) => [...store.keys()][i] ?? null,
 };
 
-const { loadSave, useGameStore } = await import("../js/store.js");
-const { sim, launchSim, tickSim, persistNow } = await import("../js/sim.js");
-const { makePilot, pilot, raceTraits } = await import("../js/pilot.js");
-const { traitsOf } = await import("../js/races.js").catch(() => ({ traitsOf: null }));
+const { loadSave, useGameStore } = await import("../js/core/store.js");
+const { sim, launchSim, tickSim, persistNow } = await import("../js/sim/sim.js");
+const { makePilot, pilot, raceTraits } = await import("../js/flight/pilot.js");
+const { traitsOf } = await import("../js/crew/races.js").catch(() => ({ traitsOf: null }));
 
 const saved = () => JSON.parse(store.get("lgaa-save-v1") ?? "null");
 
@@ -96,7 +96,7 @@ const saved = () => JSON.parse(store.get("lgaa-save-v1") ?? "null");
 
 /* ---- 6. a new run does not inherit the old pilot's purse ----------------- */
 {
-  const { startRun } = await import("../js/profile.js");
+  const { startRun } = await import("../js/core/profile.js");
   sim.ship.credits = 55555;
   persistNow();
   ok(saved().credits === 55555, "the old pilot is rich");

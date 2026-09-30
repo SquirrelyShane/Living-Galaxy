@@ -1,10 +1,3 @@
-// robotgen/src/drills.js — a training sequence: put a machine through its paces
-// so you can see the frame work. Movement, appendage range, attachment deploy,
-// weapon tracking and firing, then progressive damage — parts destroyed, parts
-// blown off and falling under the world's own gravity.
-//
-// Pure transform maths on top of animateRobot, so the whole sequence runs in the
-// browser and headless in `node test/drills.js`.
 import { animateRobot } from './build.js';
 import { computeMassModel, matrixIn, EARTH_G } from './physics.js';
 
@@ -30,16 +23,11 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const ease = (u) => u * u * (3 - 2 * u);
 const wrapPi = (a) => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
 
-/* ---------- damage ---------- */
 function worldOf(node, root) {
   const m = matrixIn(node, root, new Map());
   return { x: m[3], y: m[7], z: m[11] };
 }
 
-/**
- * Knock a part out: its lights die and it stops tracking, aiming or spinning,
- * but the hull stays on the frame. Detach it separately if it should fall off.
- */
 export function destroyPart(rig, node, opts = {}) {
   if (!node || node.userData.destroyed) return false;
   node.userData.destroyed = true;
@@ -51,7 +39,6 @@ export function destroyPart(rig, node, opts = {}) {
       if (isUnder(n, node)) list.splice(i, 1);
     }
   };
-  // anything emissive in there goes dark
   for (const list of [rig.lamps, rig.beacons, rig.muzzles]) {
     for (let i = list.length - 1; i >= 0; i--) {
       if (isUnder(list[i], node)) { list[i].visible = false; list.splice(i, 1); }
@@ -68,8 +55,6 @@ export function destroyPart(rig, node, opts = {}) {
   dead(rig.hovering, x => x.node);
   dead(rig.rams, x => x.node);
   dead(rig.weapons, x => x.node);
-  // flight and career kit stop working when the thing that carried them is gone:
-  // a shot-out rotor stops turning, a severed pod stops pulsing
   dead(rig.rotors, x => x.node);
   dead(rig.tilts, x => x.node);
   dead(rig.surfaces, x => x.node);
@@ -90,7 +75,6 @@ export function destroyPart(rig, node, opts = {}) {
   return true;
 }
 
-/** Cut a subtree loose. It keeps its world pose, then falls under gravity. */
 export function detachPart(rig, node, opts = {}) {
   if (!node || !node.parent || node.userData.detached) return null;
   const root = rig.root;
@@ -127,7 +111,6 @@ function isUnder(node, frame) {
   return false;
 }
 function refreshMass(rig) {
-  // debris lives outside the frame, so the model drops the mass it lost
   rig.massModel = computeMassModel(rig.body);
   rig.massKg = Math.round(rig.massModel.totalKg * Math.pow(rig.scale || 1, 3) * 1000) / 1000;
 }
@@ -151,7 +134,6 @@ function addSparks(rig, host, at) {
   }
 }
 
-/* ---------- the runner ---------- */
 export function createDrillRunner(rig, opts = {}) {
   const gravity = opts.gravity === undefined ? EARTH_G : opts.gravity;
   const target = { x: 0, y: rig.spec.height * 0.75, z: 3, phase: 0 };
@@ -160,12 +142,8 @@ export function createDrillRunner(rig, opts = {}) {
     target, gravity, fired: 0, events: []
   };
 
-  // a small pool of spark motes, parented to the root and reused
   rig.debris = rig.debris || makeGroup(rig, 'debris');
 
-  // what this frame has to lose. An airframe carries no shoulder mount and often
-  // no arm, so the drills take a rotor and a payload pod instead — the sequence
-  // is about watching THIS machine come apart, not a generic one.
   const flying = rig.rotors && rig.rotors.length > 0;
   const picks = {
     panel: rig.panels[0] || (rig.pods && rig.pods[0] ? rig.pods[0].node : null),
@@ -176,7 +154,7 @@ export function createDrillRunner(rig, opts = {}) {
 
   function reset() {
     state.loops++; state.fired = 0; state.events.length = 0;
-    rig.root.rotation.y = 0;              // the turn drill left it facing somewhere else
+    rig.root.rotation.y = 0;
     for (const n of rig.destroyed) { n.visible = true; n.userData.destroyed = false; }
     rig.destroyed.length = 0;
     for (const p of rig.debrisPieces) if (p.node.parent) p.node.parent.remove(p.node);
@@ -199,7 +177,6 @@ export function createDrillRunner(rig, opts = {}) {
     state.label = d.label;
     const u = clamp(state.elapsed / d.seconds, 0, 1);
 
-    // what the base animation should be doing during this drill
     const anim = { moving: false, speed: 1, gravity, aim: false };
     if (d.id === 'walk') { anim.moving = true; anim.speed = ease(clamp(u * 2, 0, 1)); }
     else if (d.id === 'gaitload') { anim.moving = true; anim.speed = 1; anim.gravity = gravity * (0.2 + u * 2.6); }
@@ -209,7 +186,6 @@ export function createDrillRunner(rig, opts = {}) {
     else if (d.id === 'limbloss' || d.id === 'mountloss' || d.id === 'shed') { anim.moving = u > 0.5; anim.speed = 0.5; }
     animateRobot(rig, t, dt, anim);
 
-    // then the drill's own overrides, applied on top of the pose
     if (d.id === 'wake') wake(rig, u);
     if (d.id === 'turn') rig.root.rotation.y += dt * 0.9;
     if (d.id === 'reach') reach(rig, u);
@@ -227,8 +203,6 @@ export function createDrillRunner(rig, opts = {}) {
       if (detachPart(rig, picks.panel, { kick: 0.8 })) state.events.push('panel-off');
       picks.panel = null;
     }
-    // two beats: the mount is knocked out (lights die, it stops tracking), then
-    // the wreck falls off the shoulder
     if (d.id === 'mountloss' && u > 0.3 && picks.mount && !picks.mount.node.userData.destroyed) {
       destroyPart(rig, picks.mount.node);
       state.events.push('mount-dead');
@@ -237,7 +211,6 @@ export function createDrillRunner(rig, opts = {}) {
       if (detachPart(rig, picks.mount.node, { kick: 1.2 })) state.events.push('mount-off');
       picks.mount = null;
     }
-    // no arm to sever: an airframe loses a rotor and has to fly on what is left
     if (d.id === 'limbloss' && u > 0.35 && !picks.arm && picks.rotor) {
       const host = picks.rotor.node.parent || picks.rotor.node;
       destroyPart(rig, host);
@@ -262,7 +235,6 @@ export function createDrillRunner(rig, opts = {}) {
 
 function makeGroup(rig, name) {
   const g = Object.create(Object.getPrototypeOf(rig.root));
-  // build a real node of the same class as the root, whatever THREE build made it
   const G = rig.root.constructor;
   const node = new G();
   node.name = name;
@@ -278,7 +250,6 @@ function findMount(rig) {
   return found;
 }
 
-/* ---------- drill bodies ---------- */
 function wake(rig, u) {
   const k = ease(u);
   for (const o of rig.optics) if (o.lens.material) o.lens.material.emissiveIntensity = k * 1.5;
@@ -286,7 +257,6 @@ function wake(rig, u) {
   if (rig.head) rig.head.rotation.x = (1 - k) * 0.35;
 }
 function reach(rig, u) {
-  // sweep every arm joint through its usable range, one axis at a time
   const seg = u * 4;
   for (let i = 0; i < rig.arms.length; i++) {
     const a = rig.arms[i];
@@ -317,7 +287,6 @@ function deploy(rig, u, t) {
   for (const f of rig.fields) if (f.material) f.material.opacity = 0.1 + k * 0.3;
 }
 
-/** Point every turret, weapon arm and laser at a world-space target. */
 export function aimAt(rig, target, dt) {
   const root = rig.root;
   for (let i = 0; i < rig.turrets.length; i++) {
@@ -352,16 +321,13 @@ export function aimAt(rig, target, dt) {
   }
 }
 function approach(v, want, k) { return v + (want - v) * clamp(k, 0, 1); }
-/* a node's yaw in root space, so a local rotation can be aimed at a world point
-   even when the whole robot has turned around */
 function parentYaw(node, root) {
   if (!node.parent || node.parent === root) return 0;
   const m = matrixIn(node.parent, root, new Map());
-  return Math.atan2(m[2], m[10]);      // uniform scale cancels in the ratio
+  return Math.atan2(m[2], m[10]);
 }
 
 function fire(rig, u, t, dt) {
-  // 4 Hz burst: muzzles flash, weapons recoil, fields flare
   const beat = (t * 4) % 1;
   const wrapped = rig.lastBeat !== undefined && beat < rig.lastBeat;
   rig.lastBeat = beat;
@@ -375,12 +341,11 @@ function fire(rig, u, t, dt) {
     if (w.recoil0 === undefined) w.recoil0 = w.node.position.y;
     w.node.position.y = w.recoil0 + flash * w.length * 0.12;
   }
-  if (wrapped) shots = 1;                 // count the burst, not the frame it landed on
+  if (wrapped) shots = 1;
   for (const f of rig.fields) if (f.material) f.material.opacity = 0.16 + flash * 0.3;
   return shots;
 }
 
-/* ---------- debris and sparks ---------- */
 export function stepDebris(rig, dt, gravity) {
   for (const p of rig.debrisPieces) {
     if (p.settled) continue;
@@ -398,7 +363,7 @@ export function stepDebris(rig, dt, gravity) {
         p.spin.x = p.spin.y = p.spin.z = 0;
         p.settled = true;
       } else {
-        p.vel.y = -p.vel.y * 0.34;      // bounce
+        p.vel.y = -p.vel.y * 0.34;
         p.vel.x *= 0.6; p.vel.z *= 0.6;
         p.spin.x *= 0.5; p.spin.y *= 0.5; p.spin.z *= 0.5;
       }

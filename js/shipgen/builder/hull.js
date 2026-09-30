@@ -1,5 +1,3 @@
-/* StarshipBuilder mixin — Hull silhouette — body, nose, superstructure, wings.
- * Methods are installed onto StarshipBuilder.prototype by src/builder/StarshipBuilder.js. */
 import * as THREE from "three";
 import { RNG } from "../core/rng.js";
 import { G, makeMat, addMesh, wingShape } from "../core/geometry.js";
@@ -10,7 +8,6 @@ import { PARTS } from "../data/catalog/index.js";
 import { PREFABS, ALL_FACES, fpArea } from "../prefabs/index.js";
 
 export default {
-  /* ---- HULL -------------------------------------------------------- */
   addHull(root) {
     const { L, B, H, rng, cls, mats } = this;
     const body = new THREE.Group();
@@ -43,9 +40,8 @@ export default {
         addMesh(body, G.cyl(16), mats.hull, 0, 0, z, Math.PI / 2, 0, 0, B * 0.38, L * 0.14, H * 0.42);
         addMesh(body, G.torus(0.09), mats.metal, 0, 0, z + L * 0.07, 0, 0, 0, B * 0.385, H * 0.425, B * 0.05);
         addMesh(body, G.cyl(16), mats.stripe, 0, 0, z + L * 0.01, Math.PI / 2, 0, 0, B * 0.383, L * 0.02, H * 0.423);
-        this.hullVols.push({ x: 0, y: 0, z, w: B * 0.76, h: H * 0.84, d: L * 0.14, shape: "cyl" });   // curved: mounts stay on the tangent band
+        this.hullVols.push({ x: 0, y: 0, z, w: B * 0.76, h: H * 0.84, d: L * 0.14, shape: "cyl" });
       }
-      // spine
       this.vol(body, mats.metal, 0, -H * 0.3, 0, B * 0.12, H * 0.12, L * 0.8);
     } else if (style === "deck") {
       this.vol(body, mats.hull, 0, -H * 0.15, 0, B * 0.95, H * 0.55, L * 0.82);
@@ -54,7 +50,6 @@ export default {
       for (let i = 0; i < 8; i++) {
         addMesh(body, G.box(), mats.stripe, 0, H * 0.243, -L * 0.34 + i * L * 0.09, 0, 0, 0, B * 0.3, H * 0.015, L * 0.014);
       }
-      // hangar mouth
       addMesh(body, G.box(), mats.metal, 0, -H * 0.1, -L * 0.41, 0, 0, 0, B * 0.5, H * 0.3, L * 0.02);
     } else if (style === "war" || style === "capital" || style === "layered") {
       this.vol(body, mats.hull, 0, -H * 0.08, 0, B * 0.70, H * 0.62, L * 0.78);
@@ -71,12 +66,11 @@ export default {
         for (const s of [-1, 1]) this.vol(body, mats.panel, s * B * 0.42, -H * 0.05, L * 0.02, B * 0.16, H * 0.34, L * 0.5);
       }
     } else if (style === "needle") {
-      // reconnaissance hull: one long pressure tube, two sensor pods, everything else is skin
       const r = Math.min(B, H) * 0.34;
       addMesh(body, G.cyl(18), mats.hull, 0, 0, L * 0.02, Math.PI / 2, 0, 0, r, L * 0.86, r);
       this.hullVols.push({ x: 0, y: 0, z: L * 0.02, w: 2 * r, h: 2 * r, d: L * 0.86, shape: "cyl" });
-      addMesh(body, G.taper(0.55, 18), mats.light, 0, 0, -L * 0.5, -Math.PI / 2, 0, 0, r, L * 0.2, r);        // forward taper
-      addMesh(body, G.taper(1.25, 18), mats.dark, 0, 0, L * 0.5, -Math.PI / 2, 0, 0, r, L * 0.1, r);          // engine flare
+      addMesh(body, G.taper(0.55, 18), mats.light, 0, 0, -L * 0.5, -Math.PI / 2, 0, 0, r, L * 0.2, r);
+      addMesh(body, G.taper(1.25, 18), mats.dark, 0, 0, L * 0.5, -Math.PI / 2, 0, 0, r, L * 0.1, r);
       for (let i = 0; i < 5; i++) addMesh(body, G.torus(0.06), mats.metal, 0, 0, -L * 0.3 + i * L * 0.16, 0, 0, 0, r * 1.02, r * 1.02, r * 0.5);
       for (const s of [-1, 1]) {
         const pr = r * 0.48, px = s * (r + pr * 1.1);
@@ -85,9 +79,8 @@ export default {
         addMesh(body, G.box(), mats.metal, s * (r + pr * 0.4), -r * 0.2, L * 0.08, 0, 0, 0, pr * 1.4, pr * 0.3, L * 0.3);
         this.hullVols.push({ x: px, y: -r * 0.2, z: L * 0.08, w: 2 * pr, h: 2 * pr, d: L * 0.46, shape: "cyl" });
       }
-      addMesh(body, G.box(), mats.glassDark, 0, r * 0.75, -L * 0.22, -0.3, 0, 0, r * 0.9, r * 0.35, L * 0.08);    // canopy strip
+      addMesh(body, G.box(), mats.glassDark, 0, r * 0.75, -L * 0.22, -0.3, 0, 0, r * 0.9, r * 0.35, L * 0.08);
     } else if (style === "wedge") {
-      // arrowhead lifting body: extruded triangle, chined, with slice volumes that follow the taper
       const half = B * 0.5, nose = -L * 0.48, tail = L * 0.36, thick = H * 0.55;
       const sh = new THREE.Shape(); sh.moveTo(0, nose); sh.lineTo(half, tail); sh.lineTo(half * 0.7, tail + L * 0.06); sh.lineTo(-half * 0.7, tail + L * 0.06); sh.lineTo(-half, tail); sh.closePath();
       const geo = new THREE.ExtrudeGeometry(sh, { depth: thick, bevelEnabled: true, bevelThickness: thick * 0.25, bevelSize: B * 0.05, bevelSegments: 2 });
@@ -100,7 +93,6 @@ export default {
       this.hullVols.push({ x: 0, y: thick * 0.45, z: L * 0.05, w: B * 0.3, h: thick * 0.35, d: L * 0.45 });
       addMesh(body, G.box(), mats.glassDark, 0, thick * 0.55, -L * 0.2, -0.35, 0, 0, B * 0.16, thick * 0.2, L * 0.1);
     } else if (style === "curved") {
-      // sculpted yacht hull: stretched ellipsoid with a flat spine deck and chined belly
       addMesh(body, G.sphere(), mats.hull, 0, 0, 0, 0, 0, 0, B * 0.5, H * 0.5, L * 0.5);
       this.hullVols.push({ x: 0, y: 0, z: 0, w: B, h: H, d: L, shape: "cyl" });
       addMesh(body, G.box(), mats.light, 0, H * 0.42, L * 0.02, 0, 0, 0, B * 0.34, H * 0.16, L * 0.5);
@@ -108,12 +100,10 @@ export default {
       addMesh(body, G.sphere(), mats.glassDark, 0, H * 0.3, -L * 0.3, 0, 0, 0, B * 0.26, H * 0.24, L * 0.14);
       for (const s of [-1, 1]) addMesh(body, G.box(), mats.accent, s * B * 0.46, -H * 0.05, L * 0.02, 0, 0, s * 0.35, B * 0.02, H * 0.06, L * 0.6);
     } else if (style === "sphere") {
-      // sphere core with an equatorial service band and a spine aft
       const r = Math.min(B, H) * 0.48;
       addMesh(body, G.sphere(), mats.hull, 0, 0, -L * 0.1, 0, 0, 0, r, r, r);
       this.hullVols.push({ x: 0, y: 0, z: -L * 0.1, w: 2 * r, h: 2 * r, d: 2 * r, shape: "sphere" });
       addMesh(body, G.torus(0.12), mats.dark, 0, 0, -L * 0.1, Math.PI / 2, 0, 0, r * 1.02, r * 1.02, r * 0.6);
-      // four flat service pads on the equator give the sphere real mounting surface
       for (const [px, py, rz] of [[0, r * 0.92, 0], [0, -r * 0.92, 0], [r * 0.92, 0, Math.PI / 2], [-r * 0.92, 0, Math.PI / 2]]) {
         addMesh(body, G.box(), mats.light, px, py, -L * 0.1, 0, 0, rz, r * 0.9, r * 0.16, r * 1.1);
         this.hullVols.push(rz ? { x: px, y: py, z: -L * 0.1, w: r * 0.16, h: r * 0.9, d: r * 1.1 } : { x: px, y: py, z: -L * 0.1, w: r * 0.9, h: r * 0.16, d: r * 1.1 });
@@ -123,7 +113,6 @@ export default {
       addMesh(body, G.box(), mats.light, 0, 0, L * 0.25, 0, 0, 0, r * 0.7, r * 0.7, L * 0.2);
       this.hullVols.push({ x: 0, y: 0, z: L * 0.25, w: r * 0.7, h: r * 0.7, d: L * 0.2 });
     } else if (style === "ring") {
-      // liner: rotating habitat torus around a central hub, spokes, aft service block
       const R = B * 0.42, tube = Math.min(H * 0.5, B * 0.12) * 0.9;
       const ring = addMesh(body, G.torus(tube / R), mats.hull, 0, 0, -L * 0.05, 0, 0, 0, R, R, R);
       ring.userData.spin = { axis: "z", speed: 0.12 };
@@ -135,7 +124,6 @@ export default {
       addMesh(body, G.box(), mats.light, 0, 0, L * 0.3, 0, 0, 0, B * 0.4, H * 0.4, L * 0.24);
       this.hullVols.push({ x: 0, y: 0, z: L * 0.3, w: B * 0.4, h: H * 0.4, d: L * 0.24 });
     } else if (style === "jagged") {
-      // raider: asymmetric angular armour slabs over a core box
       this.vol(body, mats.dark, 0, 0, 0, B * 0.5, H * 0.6, L * 0.7);
       const armor = new THREE.Group(); armor.name = "armor";
       for (let i = 0; i < 7; i++) {
@@ -143,11 +131,10 @@ export default {
         addMesh(armor, G.box(), i % 2 ? mats.hull : mats.panel, s * B * rng.range(0.2, 0.34), rng.range(-H * 0.1, H * 0.25), z,
           rng.range(-0.3, 0.3), rng.range(-0.25, 0.25), s * rng.range(0.15, 0.5), B * rng.range(0.25, 0.4), H * rng.range(0.06, 0.12), L * rng.range(0.15, 0.3));
       }
-      for (const s of [-1, 1]) addMesh(armor, G.box(), mats.hull, s * B * 0.34, -H * 0.15, -L * 0.15, 0, 0, s * 0.7, B * 0.3, H * 0.08, L * 0.35);   // chines
+      for (const s of [-1, 1]) addMesh(armor, G.box(), mats.hull, s * B * 0.34, -H * 0.15, -L * 0.15, 0, 0, s * 0.7, B * 0.3, H * 0.08, L * 0.35);
       root.add(armor);
       this.count(9);
     } else if (style === "drum") {
-      // worldship: one huge cylinder with end caps and a spine of windows
       const r = Math.min(B, H) * 0.5;
       addMesh(body, G.cyl(24), mats.hull, 0, 0, 0, Math.PI / 2, 0, 0, r, L * 0.8, r);
       this.hullVols.push({ x: 0, y: 0, z: 0, w: 2 * r, h: 2 * r, d: L * 0.8, shape: "cyl" });
@@ -163,12 +150,10 @@ export default {
       addMesh(body, G.cyl(12), mats.metal, 0, H * 0.02, -L * 0.05, Math.PI / 2, 0, 0, B * 0.12, L * 0.2, B * 0.12);
     }
 
-    // ventral keel + belly plating
     this.vol(body, mats.dark, 0, -H * 0.44, L * 0.02, B * 0.18, H * 0.16, L * 0.55);
     root.add(body);
   },
 
-  /* ---- NOSE -------------------------------------------------------- */
   addNose(root) {
     const { L, B, H, rng, cls, mats } = this;
     const nose = new THREE.Group();
@@ -177,7 +162,6 @@ export default {
     const kind = this.noseKind || cls.nose;
 
     if (kind === "ogive") {
-      // power-series ogive lathe: the low-drag continuum nose the design regime asked for
       const pts = []; const n = 14, len = L * 0.34, rx = B * 0.24;
       for (let i = 0; i <= n; i++) { const t = i / n; pts.push(new THREE.Vector2(rx * Math.pow(t, 0.62) + 0.001, len * (1 - t))); }
       const geo = new THREE.LatheGeometry(pts, 20);
@@ -224,7 +208,6 @@ export default {
     root.add(nose);
   },
 
-  /* ---- SUPERSTRUCTURE ---------------------------------------------- */
   addSuperstructure(root) {
     const { L, B, H, rng, cls, mats, complexity } = this;
     const towers = Math.round(cls.towers * (0.5 + complexity));
@@ -259,7 +242,6 @@ export default {
     }
   },
 
-  /* ---- WINGS ------------------------------------------------------- */
   addWings(root) {
     const { L, B, H, rng, cls, mats } = this;
     const kind = cls.wings;
@@ -284,7 +266,6 @@ export default {
       right.position.x *= -1;
       wings.add(left, right);
       for (const s of [-1, 1]) {
-        // leading-edge accent
         addMesh(wings, G.box(), mats.accent, s * (B * 0.22 + span * 0.55), y + thick * 0.55, z - sweep * 0.5, 0, 0, 0, span * 0.5, thick * 0.12, L * 0.02);
         if (rng.chance(0.7)) {
           addMesh(wings, G.box(), mats.dark, s * (B * 0.22 + span), y + H * 0.12, z - sweep * 0.5, 0, 0, s * 0.15, H * 0.05, H * 0.35, L * 0.08);
@@ -315,22 +296,18 @@ export default {
     root.add(wings);
   },
 
-  /* ---- FAIRINGS: wedge every superstructure block into the flow (atmospheric regimes) --------- */
   addFairings(root) {
     const { mats } = this;
     const blocks = root.children.filter(c => c.isMesh && c.geometry === G.box() && c.scale.y > this.H * 0.2 && c.scale.x > this.B * 0.1);
     for (const m of blocks) {
       const w = m.scale.x, h = m.scale.y, d = m.scale.z;
       const len = Math.max(d * 1.4, h * 1.6);
-      // square pyramid (4-seg taper) spun 45° so its base matches the block, apex into the wind
       addMesh(root, G.taper(0.04, 4), m.material, m.position.x, m.position.y, m.position.z - d / 2 - len / 2, -Math.PI / 2, Math.PI / 4, 0, w / Math.SQRT2 * 1.02, len, h / Math.SQRT2 * 1.02);
-      // gentle aft boat-tail
       addMesh(root, G.taper(0.35, 4), mats.dark, m.position.x, m.position.y, m.position.z + d / 2 + len * 0.3, Math.PI / 2, Math.PI / 4, 0, w / Math.SQRT2, len * 0.6, h / Math.SQRT2);
       this.count(2);
     }
   },
 
-  /* ---- HEAT SHIELD: ventral ablator across the main body with a rounded leading edge ---------- */
   addHeatShield(root) {
     const { L, B, H, mats } = this;
     const pool = this.hullVols.filter(v => v.w > B * 0.3).sort((a, b) => (b.w * b.d) - (a.w * a.d));
@@ -339,10 +316,8 @@ export default {
     const y = V.y - V.h * 0.5 - H * 0.03, w = V.w * 1.12, d = V.d * 1.06;
     addMesh(g, G.box(), mats.rubber, V.x, y, V.z, 0, 0, 0, w, H * 0.06, d);
     addMesh(g, G.box(), mats.dark, V.x, y - H * 0.03, V.z, 0, 0, 0, w * 0.98, H * 0.012, d * 0.98);
-    // tile grid
     for (let i = -3; i <= 3; i++) addMesh(g, G.box(), mats.hazard, V.x + i * w / 7, y - H * 0.032, V.z, 0, 0, 0, w * 0.006, H * 0.004, d * 0.96);
     for (let j = -4; j <= 4; j++) addMesh(g, G.box(), mats.hazard, V.x, y - H * 0.032, V.z + j * d / 9, 0, 0, 0, w * 0.96, H * 0.004, d * 0.006);
-    // rounded leading edge wraps up over the nose
     addMesh(g, G.cyl(16), mats.rubber, V.x, y + H * 0.06, V.z - d / 2, 0, 0, Math.PI / 2, H * 0.12, w, H * 0.12);
     root.add(g);
     this.hullVols.push({ x: V.x, y: y, z: V.z, w, h: H * 0.06, d, shield: true });

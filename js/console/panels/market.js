@@ -1,30 +1,19 @@
-/* LIVING GALAXY — CONSOLE › MARKET: PORT · HOLD · REFIT
- *
- * The nearest port and, docked, the one market implementation (`marketBlock`,
- * shared with the station deck); the hold with jettison and the ice bench;
- * the refit yard fragment from package D, or the owned-upgrade list; and
- * (0.3.19) ROUTES — where the money is in moving goods from here, with FLY IT.
- */
-
 import { button, el, group, note, row, section, setBar, fmtDist } from "../kit.js";
-import { good, goodName } from "../../materials.js";
-import { MODES as ICE_MODES, cycleIceworkMode, icework, iceworkFit } from "../../icework.js";
-import { cargoTotal } from "../../ship.js";
-import { buyPriceAt, canSmeltAt, claimPort, jettison, portLedger, portWants as simPortWants, sellAllOre, sellPriceAt, sim, smeltAll, stashAt, stashDeposit, stashWithdraw, stationStatus, toggleDock, tradeBuy, tradeSell } from "../../sim.js";
-import { stationById } from "../../stations.js";
-import { refitPanel } from "../../refityard.js";
-import { upgradeLines } from "../../upgrades.js";
-import { tradeRoutes, routeLine } from "../../traderoutes.js";
+import { good, goodName } from "../../economy/materials.js";
+import { MODES as ICE_MODES, cycleIceworkMode, icework, iceworkFit } from "../../economy/icework.js";
+import { cargoTotal } from "../../flight/ship.js";
+import { buyPriceAt, canSmeltAt, claimPort, jettison, portLedger, portWants as simPortWants, sellAllOre, sellPriceAt, sim, smeltAll, stashAt, stashDeposit, stashWithdraw, stationStatus, toggleDock, tradeBuy, tradeSell } from "../../sim/sim.js";
+import { stationById } from "../../station/stations.js";
+import { refitPanel } from "../../station/refityard.js";
+import { upgradeLines } from "../../economy/upgrades.js";
+import { tradeRoutes, routeLine } from "../../economy/traderoutes.js";
 import { makeMission, makeStep, presets } from "../../mission/script.js";
 import { startMission } from "../../mission/run.js";
-import { addAnchoredWaypoint } from "../../sim.js";
+import { addAnchoredWaypoint } from "../../sim/sim.js";
 
 const DOC = globalThis.document ?? null;
 const YARD_SECTORS = ["industrial", "military"];
 
-/* ---- the one market ------------------------------------------------------- */
-
-/* Station-deck builders: the defaults, so the deck's look is unchanged. */
 const SD = {
   sec(title) { const s = el("div", "sd-sec"); s.append(el("h4", null, title)); return s; },
   row(parent, label, hint) {
@@ -43,7 +32,6 @@ const SD = {
   cr(text) { return el("span", "sd-cr", text); },
   tag(text, ok) { return el("span", ok ? "sd-cr" : "sd-subtl", text); },
 };
-/* Console builders: the same block in the glass kit. */
 const CON = {
   sec: (title) => section(title),
   row(parent, label, hint) { const r = row(parent, label, { hint }); const g = group(); r.value.replaceChildren(g); return g; },
@@ -54,16 +42,10 @@ const CON = {
   tag: (text, ok) => el("span", `v ${ok ? "good" : "warn"}`, text),
 };
 
-/**
- * marketBlock(body, st, { repaint, ui }) — PORT LEDGER / THEY SELL / THEY BUY / LOCKER & WORKS.
- * `body` is the host element, `st` the docked station, `repaint()` is called after every trade;
- * `ui` picks the builders (station deck by default, `"console"` for the glass kit).
- */
 export function marketBlock(body, st, { repaint = () => {}, ui = "deck" } = {}) {
   const U = ui === "console" ? CON : SD;
   const L = portLedger(st);
   const byId = new Map(L.stock.map((x) => [x.id, x]));
-  /* a shelf meter: five cells against the port's target, an arrow for the last pass, a word for the extremes */
   const shelf = (x) => {
     if (!x) return "";
     const cells = Math.max(0, Math.min(5, Math.round(x.fill * 2.5)));
@@ -72,7 +54,6 @@ export function marketBlock(body, st, { repaint = () => {}, ui = "deck" } = {}) 
     const tag = x.fill < 0.25 ? " SHORT" : x.fill > 2.2 ? " GLUT" : "";
     return `${meter}${arrow}${tag}`;
   };
-  /* the ledger: what the port is short of (and pays for), what its lines are doing */
   const led = U.sec("PORT LEDGER");
   const running = L.lines.filter((l) => l.running).length;
   U.note(led, `${running}/${L.lines.length} lines running · treasury ${L.credits.toLocaleString()} cr · ${L.moved.toLocaleString()} u moved through the doors`);
@@ -102,7 +83,6 @@ export function marketBlock(body, st, { repaint = () => {}, ui = "deck" } = {}) 
       U.btn("×10", () => { tradeSell(id, 10); repaint(); }),
       U.btn("ALL", () => { tradeSell(id, Infinity); repaint(); }));
   }
-  /* the locker and the works: where a full hold goes when it is not for sale */
   const hold = U.sec("LOCKER & WORKS");
   const locker = stashAt(st.id);
   const lockerLine = locker.length ? locker.map((x) => `${Math.round(x.qty)} ${x.name}`).join(", ") : "empty";
@@ -112,7 +92,6 @@ export function marketBlock(body, st, { repaint = () => {}, ui = "deck" } = {}) 
   const w = U.row(hold, "Smelter", canSmeltAt(st) ? `runs every ore aboard through the works — refine ratios, ${Math.round(6)}% of the value kept` : "no works here — an industrial, military or logistic port smelts");
   if (canSmeltAt(st)) w.append(U.btn("SMELT ALL", () => { const e = smeltAll(); if (e) sim.notice = e; repaint(); }));
   w.append(U.btn("SELL ALL ORE", () => { const got = sellAllOre(); const kept = Object.entries(sim.oreKept ?? {}).map(([k, q]) => `${Math.round(q)} ${k.replace(/_/g, " ")}`).join(", "); sim.notice = (got > 0 ? `Sold ore and minerals for ${Math.round(got)} cr.` : "Nothing the port buys.") + (kept ? ` Kept ${kept} for your jobs.` : ""); repaint(); }));
-  /* 0.3.19: where this shelf sells for more — the trader's first question at any desk */
   const out = U.sec("ROUTES FROM HERE");
   const rs = tradeRoutes({ only: { from: st.id }, pos: st, n: 3 });
   if (!rs.length) U.empty(out, "Nothing on this shelf sells for more anywhere else right now, with your hold and purse.");
@@ -123,7 +102,6 @@ export function marketBlock(body, st, { repaint = () => {}, ui = "deck" } = {}) 
   body.append(led, buy, sell, hold, out);
 }
 
-/** A one-off run of a route on the autopilot: dock at the source, buy, dock at the buyer, sell that. */
 export function flyRoute(r) {
   const m = makeMission({
     name: `TRADE · ${r.name}`, builtin: true,
@@ -137,8 +115,6 @@ export function flyRoute(r) {
   if (startMission(m)) sim.notice = `Flying ${routeLine(r)}.`;
   return m;
 }
-
-/* ---- ROUTES ---------------------------------------------------------------- */
 
 function mountRoutes(root, push) {
   const host = el("div");
@@ -168,13 +144,10 @@ function mountRoutes(root, push) {
   });
 }
 
-/** portWants(st) → [{ good, label, short, pays, mult }] — "what they are short of". */
 export function portWants(st) {
   if (!st) return [];
   return (simPortWants(st, 4) ?? []).map((x) => ({ good: x.id, label: x.name, short: x.over > 1.05, pays: x.pays, mult: x.mult }));
 }
-
-/* ---- PORT ------------------------------------------------------------------ */
 
 function mountPort(root, push) {
   const head = section("Nearest port");
@@ -252,8 +225,6 @@ function mountPort(root, push) {
   });
 }
 
-/* ---- HOLD ------------------------------------------------------------------ */
-
 function mountHold(root, push) {
   const ship = sim.ship;
 
@@ -262,7 +233,6 @@ function mountHold(root, push) {
   const creditRow = row(hold, "Credits");
   root.append(hold);
 
-  /* the drill bench: ice → water / gas, run from here or the AUX page */
   const works = section("Ice works");
   works.dataset.focus = "ice-works";
   const fitRow = row(works, "Bench");
@@ -314,8 +284,6 @@ function mountHold(root, push) {
   });
 }
 
-/* ---- REFIT ----------------------------------------------------------------- */
-
 function mountRefit(root, push) {
   const host = el("div");
   root.append(host);
@@ -344,8 +312,6 @@ function mountRefit(root, push) {
     host.append(own);
   });
 }
-
-/* ---- the panel ------------------------------------------------------------- */
 
 const SUBS = { port: mountPort, hold: mountHold, routes: mountRoutes, refit: mountRefit };
 

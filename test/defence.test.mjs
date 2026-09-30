@@ -24,10 +24,10 @@
 import {
   KINDS, POOL, RESIST_CAP, SHIELD_RESIST,
   hullPoolFor, shieldPoolFor, resistsFor, defenceReport, throughShield, throughArmour,
-} from "../js/defence.js";
-import { SHIP_DB, shipById, DEFAULT_SHIP_ID } from "../js/shipdb.js";
-import { makeShip, applyDamage } from "../js/ship.js";
-import { UPGRADES } from "../js/upgrades.js";
+} from "../js/flight/defence.js";
+import { SHIP_DB, shipById, DEFAULT_SHIP_ID } from "../js/ships/shipdb.js";
+import { makeShip, applyDamage } from "../js/flight/ship.js";
+import { UPGRADES } from "../js/economy/upgrades.js";
 import { readFileSync } from "node:fs";
 
 let pass = 0, fail = 0;
@@ -150,7 +150,7 @@ const byTier = (t) => SHIP_DB.filter((d) => d.tier === t);
 /* ---- 6. where the numbers actually land ---------------------------------- */
 {
   /* the whole reason for the patch. A drone round is 4 kinetic on a 1.5–2.9 s
-   * cycle (js/turrets.js); this is that, against the real damage model. */
+   * cycle (js/flight/turrets.js); this is that, against the real damage model. */
   const DRONE_DMG = 4;
   function ttk(def, n, seedOffset = 0) {
     const s = makeShip();

@@ -1,28 +1,11 @@
-/* Living Galaxy — DECKMIND: the loop that runs a hand's own life.
- *
- * Once a pay cycle, every person aboard observes the hull, weighs what they
- * need against what they are for, walks the deck graph to a decision, and
- * lives with the result. Nothing here is narrated after the fact: the record
- * is written FROM the decision — the trace the graph left, the deltas that
- * were actually applied, the diff of the hull before and after — so the
- * journal cannot drift from what happened.
- *
- * What the crew system already had stays exactly where it was. duties.js
- * still moves wear every two seconds, crew.js still steps rapport and pays
- * wages, bonds.js still rolls rivalries. Deckmind sits on the same cycle hook
- * and adds the part that was missing: a person choosing, for reasons, and
- * that choice mattering to the hull and to the people in the room.
- *
- */
-
 import { decide, explainTrace } from "../genome/behavior-graph.js";
 import { deckGraph, ACTION_META } from "./deckgraph.js";
 import { SPACER, SYNTH, createSpacer, packGenome, unpackGenome, fingerprint, capabilities, phenotype, createContext, genomeTraits, skillAptitude, expectedLifespan } from "../genome/spacer.js";
-import { crew, crewHooks, rapportBetween } from "../crew.js";
+import { crew, crewHooks, rapportBetween } from "./ledger.js";
 import { cradle, drawnTo } from "../npc/cradle.js";
-import { adjustMorale, trustOf, social, loadSocial, household } from "../family.js";
+import { adjustMorale, trustOf, social, loadSocial, household } from "./family.js";
 import { tieBetween } from "./bonds.js";
-import { sim } from "../sim.js";
+import { sim } from "../sim/sim.js";
 import { captain } from "../npc/captain.js";
 import { playerHull } from "./hull.js";
 import { fileRecord, diffOf, r3, writeSummary } from "./journal.js";
@@ -40,16 +23,9 @@ export const deckmind = {
   lastRecords: [],
 };
 
-/* ---- genomes ------------------------------------------------------------- */
-
-/* ledger id → { genome, typeId, caps, apt }. A decoded body is about a
- * kilobyte; with a crew on every hull in the sky that is worth a ceiling.
- * Insertion order is eviction order — the crews that were stepped most
- * recently are the ones at the end of the map. */
 const cache = new Map();
 const BODY_CACHE_MAX = 320;
 
-/** Everything about a person's body, built once and kept. */
 export function bodyOf(who) {
   const id = who?.id;
   if (!id) return null;
@@ -79,15 +55,9 @@ export function bodyOf(who) {
   return body;
 }
 
-/** Forget a cached body — call after a genome is replaced (breeding, import). */
 export function forgetBody(id) { cache.delete(id); forgetBrain(id); forgetRomanceGenome(id); }
 export function clearBodies() { cache.clear(); forgetBrain(); forgetRomanceGenome(); }
 
-/* ---- needs ---------------------------------------------------------------
- * Nine numbers, 0..1, high = pressing. They rise on their own and come down
- * when something is done about them. They live on the member so the roster
- * and the talk trees can read them without going through here.
- */
 const RISE = {
   fatigue: 0.16, hunger: 0.2, social: 0.13, stress: 0.07,
   intimacy: 0.09, play: 0.1, grievance: 0, purpose: 0.08, upkeep: 0,
@@ -103,16 +73,11 @@ export function needsOf(m) {
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
-/* 0.3.53: a captain who sat down and HEARD a grievance buys this many watches
- * of it counting for less — the cause is still there, and it comes back. */
 export const HEARD = { cycles: 5, relief: 0.35 };
 
-/** The two needs that are read off the world, not drifted: grievance and upkeep. */
 export function computedNeeds(m, st) {
-  /* a grievance is not a mood — it is owed wages, a rival on the same watch,
-   * or a hull nobody is maintaining. It is computed, not drifted. */
   let grief = 0;
-  if (st?.shortfall) grief += 0.6;   /* unpaid wages are a grievance on their own */
+  if (st?.shortfall) grief += 0.6;
   if ((m.morale ?? 70) < 35) grief += 0.2;
   if ((st?.wear ?? 0) > 0.6) grief += 0.15;
   if ((m.ties ?? []).some((t) => t.kind === "rival")) grief += 0.2;
@@ -120,55 +85,35 @@ export function computedNeeds(m, st) {
   return { grievance: clamp01(grief), upkeep: clamp01(st?.wear ?? 0) };
 }
 
-/** Needs drift up before the decision; genes set how fast for each person. */
 function driftNeeds(m, body, st) {
   const n = needsOf(m);
   const g = body.genome;
   const rate = {
-    fatigue: RISE.fatigue * (1.35 - (g[138] ?? 0.5) * 0.7),        // FATIGUE_RESIST
-    hunger: RISE.hunger * (0.7 + (g[15] ?? 0.5) * 0.6),            // METAB_A
-    social: RISE.social * (0.5 + (g[20] ?? 0.5) * 1.1),            // SOCIAL
-    stress: RISE.stress * (0.6 + (g[66] ?? 0.5) * 0.9),            // CORTISOL
-    intimacy: RISE.intimacy * (0.4 + (g[70] ?? 0.5) * 1.2),        // OXYTOCIN
-    play: RISE.play * (0.5 + (g[174] ?? 0.5) * 1.1),               // PLAY_DRIVE
-    purpose: RISE.purpose * (0.5 + (g[19] ?? 0.5) * 1.1) * (m.trainFocus ? 0.7 : 1),   // CURIOSITY; a goal slows it (0.3.53)
+    fatigue: RISE.fatigue * (1.35 - (g[138] ?? 0.5) * 0.7),
+    hunger: RISE.hunger * (0.7 + (g[15] ?? 0.5) * 0.6),
+    social: RISE.social * (0.5 + (g[20] ?? 0.5) * 1.1),
+    stress: RISE.stress * (0.6 + (g[66] ?? 0.5) * 0.9),
+    intimacy: RISE.intimacy * (0.4 + (g[70] ?? 0.5) * 1.2),
+    play: RISE.play * (0.5 + (g[174] ?? 0.5) * 1.1),
+    purpose: RISE.purpose * (0.5 + (g[19] ?? 0.5) * 1.1) * (m.trainFocus ? 0.7 : 1),
   };
-  /* Saturating rise. A need that nothing is being done about climbs toward 1
-   * and never quite reaches it, which keeps a gradient for the graph to weigh
-   * — a pinned need is a need that can no longer lose an argument. */
   for (const k of NEED_KEYS) {
     const r = rate[k] ?? 0;
     if (r) n[k] = clamp01((n[k] ?? 0.25) + r * (1 - (n[k] ?? 0.25)));
   }
   Object.assign(n, computedNeeds(m, st));
   if (m.robot) { n.hunger = 0; n.intimacy = 0; n.fatigue = clamp01(1 - (m.condition ?? 100) / 100); }
-  /* A need nobody can meet is not free. Someone with no one to be close to,
-   * or nothing worth doing, comes off the watch a little worse each cycle —
-   * this is what makes a full berth list and a dull run show up in morale
-   * before it shows up in a walkout. */
   let starved = 0;
   for (const k of ["intimacy", "social", "purpose", "play"]) if (n[k] > 0.85) starved++;
   if (starved && !m.robot) adjustMorale(m, -0.5 * starved);
   return n;
 }
 
-/* ---- the decision context ------------------------------------------------ */
-
-/**
- * The context the graph reads. One object, built fresh, never mutated by a
- * node. `hull` is whatever the watch is being stood on — the player's ship by
- * default, or an NPC vessel's (js/crew/hull.js), which is what lets the same
- * 63 nodes run for every crew in the sky.
- */
 export function buildContext(m, opts = {}) {
   const hull = opts.hull ?? playerHull();
   const time = opts.time ?? sim.time ?? 0;
   const ship = opts.ship ?? hull.state();
   const body = bodyOf(m);
-  /* 0.3.53: `peek` reads a hand without living a watch. Building a context
-   * used to drift every need a step, and the GENOME sheet built one on every
-   * repaint — keyed on tiredness, so an open sheet tired a seasoned hand out
-   * in a handful of frames. A peek only refreshes the two computed needs. */
   const needs = opts.peek ? Object.assign(needsOf(m), m.robot ? {} : computedNeeds(m, ship)) : driftNeeds(m, body, ship);
   const phase = hull.phaseOf(m, time);
   const post = hull.postOf(m);
@@ -176,8 +121,6 @@ export function buildContext(m, opts = {}) {
   const rec = cradle.get(m.id);
   const roster = hull.roster;
 
-  /* age and wear feed the contextual expression: the same genome reads
-   * differently at fifty, tired, on the wrong end of the rota. */
   const gctx = createContext({
     ageTicks: (rec?.ageCycles ?? m.ageCycles ?? 320) + (rec?.cyclesServed ?? 0) + (m.cyclesAboard ?? 0),
     lifespanTicks: expectedLifespan(body.genome, 900),
@@ -192,7 +135,6 @@ export function buildContext(m, opts = {}) {
   });
   const pheno = phenotype(body.genome, body.typeId, gctx);
 
-  /* who else is in earshot: on the same post this watch, or in the mess */
   const others = [];
   for (const o of roster) {
     if (o.id === m.id) continue;
@@ -214,10 +156,6 @@ export function buildContext(m, opts = {}) {
   const romanceAllowed = hull.romance && !m.robot;
   const partnerAboard = Boolean(m.partner && others.some((o) => o.id === m.partner));
 
-  /* Where this hand stands with whoever is actually in the room. The ladder
-   * lives in crew/romance.js; this is the rung the graph reads. Only people
-   * who are present count — you cannot walk out at a port with somebody who
-   * is asleep two decks up. */
   const present = others.map((o) => o.m);
   const prospect = romanceAllowed ? courtingTarget(m, present) : null;
   const target = prospect?.m ?? null;
@@ -260,13 +198,9 @@ export function buildContext(m, opts = {}) {
     juniorAboard: others.some((o) => o.junior),
     shortHanded,
     fitForPost: m.robot ? (m.condition ?? 100) >= 30 && !m.idle : (m.morale ?? 70) >= 40 && needs.fatigue < 0.9,
-    /* only the player's crew can bring something to the player — and only
-     * while the player still has the conn (captain.holder is "player" by
-     * default, and a crew id once command has been handed over) */
     captainIsPlayer: isPlayerHull && (!captain.holder || captain.holder === "player"),
   };
 
-  /* who is on this person's mind, and what the graph should do about it */
   const pull = socialPull(ctx);
   ctx.socialPull = pull.kind;
   ctx.focus = pull.who;
@@ -276,9 +210,6 @@ export function buildContext(m, opts = {}) {
 
 function socialPull(ctx) {
   const { m, others, needs } = ctx;
-  /* A grievance goes to whoever can do anything about it. On the player's
-   * hull that is the captain, and CONFRONT is what raises the flag the TALK
-   * tree reads; on an NPC hull it is said to whoever is in the room. */
   if (needs.grievance > 0.55) {
     return ctx.captainIsPlayer || !others.length ? { kind: "grievance", who: null } : { kind: "grievance", who: others[0] };
   }
@@ -291,8 +222,6 @@ function socialPull(ctx) {
   if (others.length) return { kind: "stranger", who: others[0] };
   return { kind: "idle", who: null };
 }
-
-/* ---- one decision -------------------------------------------------------- */
 
 function seededRng(seedStr) {
   let n = 0;
@@ -308,16 +237,11 @@ function seededRng(seedStr) {
 
 const PHASE_ROOM = ["the deck", "the mess", "their quarters"];
 
-/**
- * Observe, decide, live with it. Returns the journal record, already filed.
- * `stepHand` is deterministic for a given (hand, cycle, hull state).
- */
 export function stepHand(m, opts = {}) {
   const ctx = opts.ctx ?? buildContext(m, opts);
   const hull = ctx.hull;
   const rng = opts.rng ?? seededRng(`${m.id}:${deckmind.cycle}:${sim.skySeed ?? ""}`);
 
-  /* ── observe ── */
   const before = {
     needs: { ...ctx.needs },
     vitals: { ...ctx.vitals },
@@ -325,11 +249,8 @@ export function stepHand(m, opts = {}) {
     ship: { hull: ctx.ship.hull, wear: ctx.ship.wear },
   };
 
-  /* ── decide ── */
   let out;
   try {
-    /* 0.3.53: an order from the captain (js/crew/orders.js) is the decision —
-     * the graph is not asked, but everything after this is the same watch */
     out = opts.order
       ? { action: opts.order.action, node: "order", trace: [{ node: "root", reason: opts.order.why ?? "the captain's orders" }], path: ["root", "order"], depth: 1 }
       : decide(deckGraph, ctx, { rng });
@@ -340,10 +261,8 @@ export function stepHand(m, opts = {}) {
   const meta = ACTION_META[out.action] ?? { label: out.action.toLowerCase(), kind: "idle" };
   const efficacy = clamp01((spec.eff?.(ctx) ?? 0.5) * (0.55 + ctx.vitals.energy * 0.45));
 
-  /* ── apply ── */
   const applied = applyAction(ctx, out.action, spec, efficacy, rng, deckmind.cycle);
 
-  /* ── record ── */
   const nowState = hull.state();
   const after = {
     needs: { ...ctx.needs },
@@ -370,7 +289,6 @@ export function stepHand(m, opts = {}) {
     agent: { id: m.id, name: m.name, species: m.raceId ?? "terran", stage: ctx.pheno.stage, genome: ctx.rec?.fingerprint ?? fingerprint(ctx.body.genome, ctx.body.typeId) },
 
     observedSurroundings: {
-      /* on watch they are at their post; off it they are where the rota puts them */
       room: ctx.phase === 0 ? (ctx.postName ?? PHASE_ROOM[0]) : PHASE_ROOM[ctx.phase],
       roomKind: ctx.postKind ?? null,
       docked: ctx.ship.docked,
@@ -440,8 +358,6 @@ export function stepHand(m, opts = {}) {
 
   if (applied.note) hull.note(applied.note);
   fileRecord(rec);
-  /* the record is the training pair: what was observed, what was done, and
-   * the deltas that were actually applied. Learn from it while it is warm. */
   rec.reward = learnFromRecord(ctx, rec);
   return rec;
 }
@@ -483,9 +399,6 @@ function dominantLimit(pheno) {
   return list[0].severity > 0.25 ? list[0] : null;
 }
 
-/* ---- the cycle ----------------------------------------------------------- */
-
-/** Every hand takes their turn. Hooked onto crewHooks.cycle. */
 export function runDeckCycle() {
   if (!deckmind.enabled || !crew.aboard.length) return [];
   deckmind.cycle++;
@@ -495,11 +408,6 @@ export function runDeckCycle() {
   return out;
 }
 
-/**
- * One watch on one hull. Shared by the player's pay cycle and the NPC crew
- * budget (js/npc/npccrew.js), so a hand on a hauler two systems out decides
- * exactly the way a hand in your engine room does.
- */
 export function stepWatch(roster, hull, opts = {}) {
   if (!roster?.length) return [];
   const ship = hull.state();
@@ -508,11 +416,6 @@ export function stepWatch(roster, hull, opts = {}) {
     try { out.push(stepHand(m, { ...opts, hull, ship })); }
     catch (e) { globalThis.console?.warn?.("deckmind", m.name, e); }
   }
-  /* Keeping the same hours is the commonest way two people end up anywhere
-   * near each other, and a hull is small. Two hands on the same watch see
-   * each other all shift; two on the same watch at different posts still pass
-   * in the passage. Once per cycle per pair, not once per hand, so it counts
-   * the watch and not the paperwork. */
   const time = opts.time ?? sim.time ?? 0;
   for (let i = 0; i < roster.length; i++) {
     const a = roster[i];
@@ -522,13 +425,12 @@ export function stepWatch(roster, hull, opts = {}) {
       const b = roster[j];
       if (b.robot || hull.phaseOf(b, time) !== pa) continue;
       const together = pa !== 0 || hull.postOf(b)?.id === ra?.id;
-      try { moment(a, b, "watch", together ? 1 : 0.45); } catch { /* a pair that cannot be read is not a pair */ }
+      try { moment(a, b, "watch", together ? 1 : 0.45); } catch {}
     }
   }
   return out;
 }
 
-/** What the whole deck did this cycle, as counts by action kind. */
 export function deckReport(records = deckmind.lastRecords) {
   const kinds = new Map();
   for (const r of records) kinds.set(r.action.kind, (kinds.get(r.action.kind) ?? 0) + 1);

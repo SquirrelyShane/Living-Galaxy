@@ -1,27 +1,13 @@
-/* LIVING GALAXY — asking for a grown body.
- *
- * `grow(key, opts)` returns a promise of a growBaked() result, grown in a
- * worker (js/bodygen/worker.js) — or, where there is no worker (node, a browser
- * that refuses the module worker, or a worker that failed to boot), grown on
- * this thread, one per `pump()` so a burst of requests is still spread across
- * frames. Results are cached by key: rocks are deterministic, so a body grown
- * once is right for the session, and flying back past a rock does not grow it
- * twice.
- *
- * Priority is by request order within a small queue; a request for a key that
- * is already waiting is not queued twice.
- */
-
 import { growBaked } from "./body.js";
 
 const CACHE_CAP = 48;
-const cache = new Map();      // key → result (LRU by re-insertion)
-const pending = new Map();    // key → { promise, resolve, reject, opts }
-const queue = [];             // keys waiting for a worker or the main-thread pump
+const cache = new Map();
+const pending = new Map();
+const queue = [];
 let worker = null;
-let workerState = "none";     // none | booting | ready | dead
+let workerState = "none";
 let busy = 0;
-const inflight = new Map();   // message id → key
+const inflight = new Map();
 let seq = 1;
 
 export const growerStats = { grown: 0, cached: 0, mainThread: 0, worker: 0, failed: 0, get state() { return workerState; }, get queued() { return queue.length; } };
@@ -32,7 +18,6 @@ function boot() {
   try {
     worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
     workerState = "booting";
-    /* a worker that never says ready (a blocked fetch, a CSP) must not stall growth forever */
     setTimeout(() => { if (workerState === "booting") { console.warn("grower worker did not boot, growing on the main thread"); die(); } }, 10000);
     worker.onmessage = (e) => {
       const m = e.data;
@@ -57,10 +42,9 @@ function boot() {
 
 function die() {
   workerState = "dead";
-  try { worker?.terminate(); } catch { /* already gone */ }
+  try { worker?.terminate(); } catch {}
   worker = null;
   busy = 0;
-  /* anything the worker was holding goes back on the queue for the pump */
   for (const key of inflight.values()) if (pending.has(key) && !queue.includes(key)) queue.unshift(key);
   inflight.clear();
 }
@@ -84,14 +68,12 @@ function drain() {
   }
 }
 
-/** A grown body for `key`, cached, or null while it is still growing (the request is filed). */
 export function peek(key) {
   const d = cache.get(key);
   if (d) { cache.delete(key); cache.set(key, d); growerStats.cached++; }
   return d ?? null;
 }
 
-/** File a request. Resolves to the growBaked() result. */
 export function grow(key, opts) {
   const d = cache.get(key);
   if (d) return Promise.resolve(d);
@@ -111,7 +93,6 @@ export function isPending(key) {
   return pending.has(key);
 }
 
-/** Drop queued requests nobody wants any more (a rock you flew away from before it grew). */
 export function cancel(keep) {
   for (let i = queue.length - 1; i >= 0; i--) {
     const key = queue[i];
@@ -122,10 +103,6 @@ export function cancel(keep) {
   }
 }
 
-/**
- * The main-thread path: grow at most one queued body. Call once a frame. A
- * no-op while a worker is serving (or still booting — give it a moment).
- */
 export function pump(bootGrace = true) {
   if (workerState === "ready" || (workerState === "booting" && bootGrace)) return false;
   const key = queue.shift();
@@ -145,7 +122,6 @@ export function pump(bootGrace = true) {
   return true;
 }
 
-/** For the tests and a relaunch: forget every grown body. */
 export function resetGrower() {
   cache.clear();
   for (const p of pending.values()) p.reject(new Error("reset"));

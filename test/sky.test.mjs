@@ -3,21 +3,21 @@
  *   node --import ./test/three-register.mjs test/sky.test.mjs
  */
 
-import { sim, launchSim, currentShipId, issuedHullId, wellEdge, WARP } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { currentSystem, BODIES, refreshBody } from "../js/bodies.js";
-import { remnantRadius, wellRadius, SHATTERED_MU } from "../js/scale.js";
-import { SHIP_DB, shipById, hullTuneFor, DEFAULT_SHIP_ID } from "../js/shipdb.js";
+import { sim, launchSim, currentShipId, issuedHullId, wellEdge, WARP } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { currentSystem, BODIES, refreshBody } from "../js/world/bodies.js";
+import { remnantRadius, wellRadius, SHATTERED_MU } from "../js/world/scale.js";
+import { SHIP_DB, shipById, hullTuneFor, DEFAULT_SHIP_ID } from "../js/ships/shipdb.js";
 import { traffic, poseAt, routePose, stepTraffic, trafficCensus, ROLES, HOSTILE_ROLES, LAW_ROLES, DEPART_S, ARRIVE_S } from "../js/npc/traffic.js";
 import { stationLane, lanePoint, laneOf, runnerIndex, beadLit, LANE_BEADS, LANE_U } from "../js/npc/lanes.js";
 import { engagementAt, engagements, stepBattles, resetBattles, ENG_SLOT, JOIN_R, pirateKilled } from "../js/npc/battles.js";
-import { contacts, shots, syncContacts, stepShots, npcTracer, CONTACT_R } from "../js/turrets.js";
+import { contacts, shots, syncContacts, stepShots, npcTracer, CONTACT_R } from "../js/flight/turrets.js";
 import { flow, populateFlow, stepFlow, flowPose, portPulse } from "../js/npc/flow.js";
 import { subLaneFor, subLaneOffset, SUBLANES, SUBLANE_GAP, ZONE_HALF_W, laneFlow } from "../js/npc/lanes.js";
 import { insideBay } from "../js/npc/bay.js";
-import { templateFor, warm, instanceOf, releaseInstance, poolStats, drainPool } from "../js/hullpool.js";
-import { bulkOf, holdForCargoRating } from "../js/materials.js";
+import { templateFor, warm, instanceOf, releaseInstance, poolStats, drainPool } from "../js/render/hullpool.js";
+import { bulkOf, holdForCargoRating } from "../js/economy/materials.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -186,7 +186,7 @@ ok(d3(f.farEntry, f.farExit) >= ZONE_HALF_W * 2 + 200, `entry and exit zones do 
   sim.ship.pos.x = q.x; sim.ship.pos.y = q.y; sim.ship.pos.z = q.z;
   sim.ship.vel.x = port.vx - f.dir.x * 20; sim.ship.vel.y = port.vy; sim.ship.vel.z = port.vz - f.dir.z * 20;
   sim.ship.tune.assistGain = 0; // pure momentum for the test
-  const { tickSim } = await import("../js/sim.js");
+  const { tickSim } = await import("../js/sim/sim.js");
   sim.toast = null;
   let warned = false;
   sim.ui.lanesDrawn = true;   // lane discipline only bites while the rigs are on the canopy
@@ -274,9 +274,9 @@ ok(flow.every((n) => shipById(n.ship) && n.way < SUBLANES && n.period > 100 && n
 
 /* ---- the yard: STATIONGEN ports, works, defences, the tractor ----------- */
 {
-  const { tickSim, toggleDock } = await import("../js/sim.js");
-  const { stepStationWorks, stepProduction, stepDefences, stepStationDrones, worksFor, worksReport, tractor, engageTractor, releaseTractor, mouthAround, RECIPES, requestDock, clearDockRequest, dockRequest, unrequestedApproach, holdOff } = await import("../js/stationworks.js");
-  const { mouthCoords, MOUNT_KINDS } = await import("../js/stationyard.js");
+  const { tickSim, toggleDock } = await import("../js/sim/sim.js");
+  const { stepStationWorks, stepProduction, stepDefences, stepStationDrones, worksFor, worksReport, tractor, engageTractor, releaseTractor, mouthAround, RECIPES, requestDock, clearDockRequest, dockRequest, unrequestedApproach, holdOff } = await import("../js/station/stationworks.js");
+  const { mouthCoords, MOUNT_KINDS } = await import("../js/station/stationyard.js");
   ok(stations.every((s) => s.gen && s.gen.stats && s.port && s.hangars?.length >= 1), `every port in the sky is a built hull with a hangar (${stations.length} ports)`);
   ok(stations.every((s) => s.gen.root.scale.x < 1 && s.radius > 10), "hulls are scaled to the sim");
   const archs = new Set(stations.map((s) => s.gen.stats.archetype));
@@ -287,7 +287,7 @@ ok(flow.every((n) => shipById(n.ship) && n.way < SUBLANES && n.period > 100 && n
   /* a tethered port turns its mouth away from its host */
   const teth = stations.find((s) => s.mount === "tethered");
   if (teth) {
-    const { bodyById, bodyPosition } = await import("../js/bodies.js");
+    const { bodyById, bodyPosition } = await import("../js/world/bodies.js");
     const hp = bodyPosition(teth.hostId, sim.time, {});
     const away = { x: teth.x - hp.x, y: 0, z: teth.z - hp.z }; const L = Math.hypot(away.x, away.z) || 1;
     const dot = (teth.port.dir.x * away.x + teth.port.dir.z * away.z) / L / (Math.hypot(teth.port.dir.x, teth.port.dir.z) || 1);
@@ -437,7 +437,7 @@ ok(flow.every((n) => shipById(n.ship) && n.way < SUBLANES && n.period > 100 && n
    * 20 u aperture (seen as smoke-docking's "push by the exit half" and hulls
    * clipping the bay on hitched frames). A docked hull rides the clamps exactly. */
   {
-    const { stepStations } = await import("../js/stations.js");
+    const { stepStations } = await import("../js/station/stations.js");
     const st = stations.find((s) => s.sector !== "pirate");
     const spd = Math.hypot(st.vx, st.vy, st.vz);
     ok(spd * 0.1 > 1, `the station moves enough per hitched frame for the lag to matter (${(spd * 0.1).toFixed(1)} u per 0.1 s)`);
@@ -457,8 +457,8 @@ ok(flow.every((n) => shipById(n.ship) && n.way < SUBLANES && n.period > 100 && n
   /* one aperture, two doors: in by the port half, out by the starboard half; the push lets go up the
    * exit lane outside the tractor's reach, and the port leaves an outbound hull alone */
   {
-    const { inDeparture, departure, PUSH_GRACE } = await import("../js/stationworks.js");
-    const { TRACTOR_R } = await import("../js/stations.js");
+    const { inDeparture, departure, PUSH_GRACE } = await import("../js/station/stationworks.js");
+    const { TRACTOR_R } = await import("../js/station/stations.js");
     const { LANE_U, RELEASE_U, laneDistance, LANE_DRAW_R } = await import("../js/npc/lanes.js");
     const st = stations.find((s) => s.sector !== "pirate");
     const m = st.hangars[0];

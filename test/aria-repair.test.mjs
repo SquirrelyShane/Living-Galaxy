@@ -6,22 +6,22 @@
 const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { sim, launchSim, tickSim } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { touch } = await import("../js/input.js");
-const { stations } = await import("../js/stations.js");
-const { currentSystem } = await import("../js/bodies.js");
-const { upgrades, fx } = await import("../js/upgrades.js");
-const { repairsAt, pricePerPoint, repairQuote, yardRepair, tickPatchDrone, patchDrone, REPAIR } = await import("../js/repair.js");
-const { aria, ariaTakeConn, ariaRelease, ariaHasConn, wireAria } = await import("../js/aria.js");
-const { bulkOf } = await import("../js/materials.js");
-const { ariaPilot, planJob, notePlayerJob, jobHabits } = await import("../js/aria-pilot.js");
+const { sim, launchSim, tickSim } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { touch } = await import("../js/core/input.js");
+const { stations } = await import("../js/station/stations.js");
+const { currentSystem } = await import("../js/world/bodies.js");
+const { upgrades, fx } = await import("../js/economy/upgrades.js");
+const { repairsAt, pricePerPoint, repairQuote, yardRepair, tickPatchDrone, patchDrone, REPAIR } = await import("../js/flight/repair.js");
+const { aria, ariaTakeConn, ariaRelease, ariaHasConn, wireAria } = await import("../js/aria/aria.js");
+const { bulkOf } = await import("../js/economy/materials.js");
+const { ariaPilot, planJob, notePlayerJob, jobHabits } = await import("../js/aria/pilot.js");
 const { mission } = await import("../js/mission/run.js");
 const { validate, makeMission, makeStep } = await import("../js/mission/script.js");
-const { autopilot, busIdle } = await import("../js/autopilot.js");
+const { autopilot, busIdle } = await import("../js/flight/autopilot.js");
 const { captain } = await import("../js/npc/captain.js");
-const { corpOfStation } = await import("../js/corps.js");
-const { tractor, engageTractor, stepTractor } = await import("../js/stationworks.js");
+const { corpOfStation } = await import("../js/corp/corps.js");
+const { tractor, engageTractor, stepTractor } = await import("../js/station/stationworks.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

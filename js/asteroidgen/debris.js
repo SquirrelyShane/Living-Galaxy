@@ -1,18 +1,8 @@
-/**
- * Icy crystalline debris clouds + small meshed rocks.
- *
- * Everything is instanced and animated on the GPU (tumble, Keplerian orbit,
- * drift, glints, gravity-well inspiral, shatter burst), so the CPU cost per
- * frame is one uniform write.
- * Draw calls: ≤10 crystal meshes + ≤6 rock meshes + 2 point sprites.
- */
 import * as THREE from 'three';
 import { RNG, hashString, fbm, powerLaw, gauss, unitVec } from './rng.js';
 import { ORES } from './ores.js';
 
 const TAU = Math.PI * 2;
-
-/* ------------------------------------------------------------------ math */
 
 function smoothstep(e0, e1, x) {
   const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
@@ -24,7 +14,6 @@ function smin(a, b, k) {
   return Math.min(a, b) - h * h * k * 0.25;
 }
 
-/** Random unit quaternion [x, y, z, w] (Shoemake). */
 function randQuat(rng) {
   const u1 = rng.next();
   const u2 = rng.next() * TAU;
@@ -34,7 +23,6 @@ function randQuat(rng) {
   return [a * Math.sin(u2), a * Math.cos(u2), b * Math.sin(u3), b * Math.cos(u3)];
 }
 
-/** Column-major TRS compose (uniform scale) into a Float32Array. */
 function composeInto(te, o, px, py, pz, q, s) {
   const [x, y, z, w] = q;
   const x2 = x + x, y2 = y + y, z2 = z + z;
@@ -47,7 +35,6 @@ function composeInto(te, o, px, py, pz, q, s) {
   te[o + 12] = px; te[o + 13] = py; te[o + 14] = pz; te[o + 15] = 1;
 }
 
-/** Flip triangles whose normal faces the reference centre (convex-ish parts). */
 function fixWinding(pos, idx, start, end, cx, cy, cz) {
   for (let t = start; t < end; t += 3) {
     const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
@@ -65,7 +52,6 @@ function fixWinding(pos, idx, start, end, cx, cy, cz) {
   }
 }
 
-/** Area-weighted vertex normals for an indexed triangle list. */
 export function computeNormals(pos, idx) {
   const nrm = new Float32Array(pos.length);
   for (let t = 0; t < idx.length; t += 3) {
@@ -84,9 +70,6 @@ export function computeNormals(pos, idx) {
   return nrm;
 }
 
-/* ------------------------------------------------------------- geometry */
-
-/** Indexed icosphere on the unit sphere. */
 function icosphere(detail) {
   const t = (1 + Math.sqrt(5)) / 2;
   const verts = [
@@ -126,10 +109,6 @@ function icosphere(detail) {
   return { verts, faces };
 }
 
-/**
- * Small meshed asteroid rock: triaxial body, fbm relief, 1–4 fracture planes.
- * Unit max extent. Attributes: position, normal, aColor (grey shade), aFrost.
- */
 export function makeRockGeometry(rng, opts = {}) {
   const { verts, faces } = icosphere(opts.detail ?? 2);
   const seed = Math.floor(rng.next() * 1e9);
@@ -198,7 +177,6 @@ export function makeRockGeometry(rng, opts = {}) {
   return geo;
 }
 
-/** Irregular bipyramidal column, axis +Y, centred. Pushes into shared arrays. */
 function pushBipyramid(rng, out, p) {
   const base = out.pos.length / 3;
   const sides = p.sides;
@@ -243,7 +221,6 @@ function pushBipyramid(rng, out, p) {
 
 const CRYSTAL_KINDS = ['prism', 'shard', 'needle', 'plate', 'druse'];
 
-/** Ice crystal geometry of a given habit. Unit max extent. Attributes: position, aTip. */
 export function makeCrystalGeometry(kind, rng) {
   const out = { pos: [], tip: [], idx: [] };
   const parts = [];
@@ -258,7 +235,6 @@ export function makeCrystalGeometry(kind, rng) {
   } else if (kind === 'plate') {
     parts.push(pushBipyramid(rng, out, { ...defaults, len: rng.range(0.07, 0.12), rad: rng.range(0.5, 0.62), tipT: 0.015, tipB: 0.015, jitter: 0.07, skew: 0.05 }));
   } else {
-    // druse: a fan of columns rooted near the origin
     const n = rng.int(4, 7);
     for (let k = 0; k < n; k++) {
       const lean = k === 0 ? rng.range(0, 0.15) : rng.range(0.35, 0.95);
@@ -268,7 +244,6 @@ export function makeCrystalGeometry(kind, rng) {
       const lift = len * 0.5 + 0.05;
       const xf = (v) => {
         const y = v[1] + lift;
-        // tilt about Z by lean, then yaw about Y
         const x1 = v[0] * cl - y * sl;
         const y1 = v[0] * sl + y * cl;
         return [x1 * cy + v[2] * sy, y1 - 0.45, -x1 * sy + v[2] * cy];
@@ -292,27 +267,7 @@ export function makeCrystalGeometry(kind, rng) {
   return geo;
 }
 
-/* -------------------------------------------------------------- shaders */
-
-/**
- * Shared animation GLSL. Every pass (colour, shadow depth, sprites) calls the
- * same functions so shadows and sprites stay locked to the visible geometry.
- *
- * Orbit:  near-Keplerian angle ω = K / r^1.5 about the field's local Y.
- * Star:   gravitational inspiral r(τ) = sqrt(R² − 2·rate·τ) with a soft ramp
- *         τ = t − 2(1 − e^(−t/2)). Orbit phase uses the closed-form integral
- *         of K / r^1.5 over that path, so there is no phase jump or spin-up glitch.
- * Black hole (v1.8): loose debris is the first thing the hole eats. The hole may
- *         sit away from (and move relative to) the field (uWellCenter, field-local).
- *         Instances are captured as uCapture rises (fast: seconds), then spiral in
- *         r(τ) = √(r0² − 2·a·τ) (a varies per instance) with the closed-form phase of
- *         K / r^1.5, flattening toward the disk plane. On the way in rocks heat up
- *         (∝ how far they have fallen), spaghettify along the line to the hole and
- *         burn away across the burn band just outside the core. accretion() mirrors
- *         the burn per clump so ring brightness tracks what has fallen in.
- * Burst:  shatter fields expand from 20 % radius with an exponential ease.
- */
-const GLSL_ANIM = /* glsl */ `
+const GLSL_ANIM = `
 uniform float uTime;
 uniform float uOrbitK;
 uniform float uWell;       // 0 none · 1 black hole · 2 star
@@ -429,7 +384,7 @@ vec3 animateInstance(vec3 localPos, mat4 im, vec4 spin, vec4 orbit, float sublim
 }
 `;
 
-const GLSL_LIGHT_UNIFORMS = /* glsl */ `
+const GLSL_LIGHT_UNIFORMS = `
 uniform vec3 uSunDir;
 uniform vec3 uSunColor;
 uniform vec3 uAmbient;
@@ -440,7 +395,7 @@ uniform vec3 uHeatColor;
 
 export const SHADERS = {
   anim: GLSL_ANIM,
-  solidVertex: /* glsl */ `
+  solidVertex: `
 ${GLSL_ANIM}
 attribute vec4 aSpin;
 attribute vec4 aOrbit;
@@ -485,7 +440,7 @@ void main() {
   #endif
 }
 `,
-  iceFragment: /* glsl */ `
+  iceFragment: `
 ${GLSL_LIGHT_UNIFORMS}
 varying vec3 vWorld;
 varying vec3 vCol;
@@ -519,7 +474,7 @@ void main() {
   #include <colorspace_fragment>
 }
 `,
-  rockFragment: /* glsl */ `
+  rockFragment: `
 ${GLSL_LIGHT_UNIFORMS}
 varying vec3 vWorld;
 varying vec3 vCol;
@@ -551,7 +506,7 @@ void main() {
   #include <colorspace_fragment>
 }
 `,
-  pointsVertex: /* glsl */ `
+  pointsVertex: `
 ${GLSL_ANIM}
 uniform float uPx;
 attribute float aSize;
@@ -578,7 +533,7 @@ void main() {
   vC = vec4(mix(aColor.rgb, uHeatColor, gHeat * 0.85), aColor.a * gVis * (1.0 + gHeat * 1.5));
 }
 `,
-  pointsFragment: /* glsl */ `
+  pointsFragment: `
 uniform vec3 uFogColor;
 uniform float uFogDensity;
 varying vec4 vC;
@@ -605,11 +560,6 @@ void main() {
 `,
 };
 
-/**
- * MeshDepthMaterial that runs the same instance animation, so debris rocks cast
- * correct shadows. Uses three's own depth packing (onBeforeCompile) to stay
- * compatible with whatever shadow-map format the renderer uses.
- */
 export function makeDebrisDepthMaterial(uniforms) {
   const mat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
   mat.name = 'debris-rock-depth';
@@ -627,8 +577,6 @@ gl_Position = projectionMatrix * mvPosition;`
   mat.customProgramCacheKey = () => 'debris-rock-depth-v1';
   return mat;
 }
-
-/* --------------------------------------------------------------- field */
 
 const ICE_TINTS = {
   water: [[0.82, 0.93, 1.0], [0.7, 0.88, 1.0], [0.9, 0.97, 1.0], [0.62, 0.82, 0.96]],
@@ -659,31 +607,17 @@ function pickTint(rng, profile) {
   return rng.pick(ICE_TINTS.water);
 }
 
-/**
- * Build an orbiting debris field around a generated asteroid.
- * @param {object} asteroid  result of generateAsteroid
- * @param {object} opts
- *   density 0..1.6, ice 0..1
- *   kind    'clouds' (default) | 'shatter' (dense rocky burst from the body's own colours)
- *   shadows true → debris rocks cast shadows via an animated depth material
- *   burstStart  shader time the shatter expansion starts at
- */
-/** Schwarzschild radius of the fx black hole in world units (shared with blackhole.js). */
 export const BH_RS = 0.22;
 
 export const WELL_PRESETS = {
-  // v1.8 debris goes first: captured within seconds, spirals in r² = r0² − 2aτ (a = rate·(0.7–1.3)),
-  // heats, stretches and burns away across [core, core + fade] — a cloud ~8 u out is mostly eaten within ~25 s
   bh: { mode: 1, rate: 2.2, core: 0.45, fade: 0.9, diskScale: 0.42, diskMin: 0.85, diskMax: 2.5, heat: [0.62, 0.8, 1.0], level: 0.12, captureSeconds: 8 },
   star: { mode: 2, rate: 0.1, core: 0.75, fade: 1.2, heat: [1.0, 0.45, 0.15] },
 };
 
-/** JS mirror of the shader's soft ramp and black-hole dissolve (keep in sync with GLSL_ANIM). */
 export function wellTau(age) {
   const a = Math.max(0, age);
   return a - 2 * (1 - Math.exp(-a * 0.5));
 }
-/** Burned-away share of an instance that started r0 from the hole, after effective infall time tauEff. */
 export function bhDissolve(seed, tauEff, r0, p = WELL_PRESETS.bh) {
   const a = p.rate * (0.7 + 0.6 * seed);
   const r = Math.sqrt(Math.max(r0 * r0 - 2 * a * tauEff, 1e-4));
@@ -695,15 +629,12 @@ export function bhDissolve(seed, tauEff, r0, p = WELL_PRESETS.bh) {
   const fallen = Math.max(0, Math.min(1, 1 - (r - p.core) / Math.max(r0 - p.core, 0.1)));
   return 1 - Math.max(sm(p.core, p.core + p.fade, r), 1 - sm(0.35, 0.7, fallen));
 }
-/** Per-instance capture weight (mirror of the shader smoothstep). */
 export function captureWeight(seed, capture) {
   const x = Math.max(0, Math.min(1, (capture - seed * 0.55) / 0.45));
   return x * x * (3 - 2 * x);
 }
 
-/** World-direction vector → field-local, for a group with Euler XYZ rotation and no scale. */
 export function worldToFieldLocal(v, rot) {
-  // three Euler 'XYZ': world = Rx·Ry·Rz·local  →  local = Rzᵀ·Ryᵀ·Rxᵀ·world
   let [x, y, z] = v;
   let c = Math.cos(-(rot.x || 0)), s = Math.sin(-(rot.x || 0));
   [y, z] = [c * y - s * z, s * y + c * z];
@@ -749,21 +680,15 @@ export function buildDebrisField(asteroid, opts = {}) {
     uWellCenter0: { value: [0, 0, 0] },
     uCapture: { value: 1 },
   };
-  const clouds = []; // accretion bookkeeping: { R, m: [], seed: [] }
+  const clouds = [];
   let levelFrom = null;
   let centreLocked = false;
   const stats = { clouds: 0, crystals: 0, rocks: 0, motes: 0, glints: 0 };
   const api = {
     stats,
     uniforms: shared,
-    /**
-     * @param {number} t shader time
-     * @param {object} [env] black hole only: { bh: [x,y,z] world, origin: [x,y,z] field parent position,
-     *   capture: 0..1 } — capture only ever rises
-     */
     update(t, env) {
       shared.uTime.value = t;
-      // black hole: level the orbital plane into the disk plane (world XZ)
       if (api.well === 'bh' && levelFrom) {
         const f = Math.exp(-Math.max(0, t - shared.uWellStart.value) * WELL_PRESETS.bh.level);
         group.rotation.set(levelFrom.x * f, levelFrom.y, levelFrom.z * f);
@@ -780,10 +705,6 @@ export function buildDebrisField(asteroid, opts = {}) {
         if (env.capture != null) shared.uCapture.value = Math.max(shared.uCapture.value, Math.min(1, env.capture));
       }
     },
-    /**
-     * Mass that has dissolved into the black-hole disk, per clump.
-     * @returns {Array<{ r: number, mass: number, total: number }>} r = world disk radius
-     */
     accretion(t = shared.uTime.value) {
       if (api.well !== 'bh') return [];
       const tau = wellTau(t - shared.uWellStart.value);
@@ -791,7 +712,6 @@ export function buildDebrisField(asteroid, opts = {}) {
       const K = shared.uOrbitK.value, t0 = shared.uWellStart.value, c0 = shared.uWellCenter0.value;
       return clouds.map((c) => {
         let mass = 0, total = 0;
-        // clump-level start distance (instances in a clump sit within a few tenths of it)
         const ang = (t0 * K) / Math.pow(Math.max(c.R, 0.6), 1.5);
         const cs = Math.cos(ang), sn = Math.sin(ang);
         const r0 = Math.max(0.6, Math.hypot(cs * c.c[0] - sn * c.c[2] - c0[0], c.c[1] - c0[1], sn * c.c[0] + cs * c.c[2] - c0[2]));
@@ -814,7 +734,6 @@ export function buildDebrisField(asteroid, opts = {}) {
     setPixelScale(px) {
       shared.uPx.value = px;
     },
-    /** Start (or clear) a gravity well: 'bh' | 'star' | null, at shader time t. */
     setWell(kind, t = shared.uTime.value, opts = {}) {
       const cfg = WELL_PRESETS[kind];
       api.well = cfg ? kind : null;
@@ -828,7 +747,6 @@ export function buildDebrisField(asteroid, opts = {}) {
       shared.uWellCore.value = cfg.core;
       shared.uWellFade.value = cfg.fade;
       shared.uHeatColor.value = cfg.heat;
-      // a hole at the field origin captures immediately (v1.3 behaviour); offset holes pass env.capture
       shared.uCapture.value = opts.capture ?? 1;
       shared.uWellCenter.value = opts.center ?? [0, 0, 0];
       shared.uWellCenter0.value = shared.uWellCenter.value;
@@ -848,7 +766,6 @@ export function buildDebrisField(asteroid, opts = {}) {
   const profile = classIceProfile(asteroid.klass);
   const bodyR = asteroid.maxRadius || asteroid.meshRadius * 1.3 || 2.2;
 
-  // tilted orbital plane
   group.rotation.set(rng.range(-0.42, 0.42), rng.range(0, TAU), rng.range(-0.25, 0.25));
 
   const crystalGeos = [];
@@ -879,7 +796,6 @@ export function buildDebrisField(asteroid, opts = {}) {
   const phiBase = rng.range(0, TAU);
 
   for (let ci = 0; ci < nClouds; ci++) {
-    // shatter: puffy clumps packed around the old body; clouds: thin arcs further out
     const R = bodyR * (shatter ? rng.range(0.45, 1.6) : rng.range(1.35, 2.3));
     const phi = phiBase + (ci / nClouds) * TAU + rng.signed() * 0.6;
     const yc = rng.signed() * (shatter ? bodyR * 0.5 : 0.3);
@@ -889,7 +805,7 @@ export function buildDebrisField(asteroid, opts = {}) {
     const iceFrac = shatter
       ? Math.max(0.02, Math.min(0.7, bodyIce * 0.55 + rng.signed() * 0.1))
       : Math.max(0.05, Math.min(1, iceKnob * 0.8 + profile.ice * 0.3 + rng.signed() * 0.18));
-    rng.next(); // keeps the v1.1.0 cloud layout stream stable
+    rng.next();
     const meta = { R, m: [], seed: [], c: [Math.cos(phi) * R, yc, Math.sin(phi) * R] };
     clouds.push(meta);
     const track = (bucket, mass) => {
@@ -955,7 +871,6 @@ export function buildDebrisField(asteroid, opts = {}) {
       stats.rocks++;
     }
 
-    // icy haze + dust
     const nMote = Math.round((70 + 110 * density) * rng.range(0.8, 1.2));
     const dust = sampleRock();
     for (let k = 0; k < nMote; k++) {
@@ -966,7 +881,6 @@ export function buildDebrisField(asteroid, opts = {}) {
       const a = rng.range(0.03, 0.09) * (icy ? 1 : shatter ? 1.1 : 0.7);
       motes.push({ x: p.x, y: p.y, z: p.z, size: rng.range(0.14, 0.55), c, a, R, seed: rng.next() });
     }
-    // trailing stream behind the clump
     const nStream = Math.round((30 + 60 * density) * rng.range(0.7, 1.2));
     for (let k = 0; k < nStream; k++) {
       const back = -Math.pow(rng.next(), 0.7) * rng.range(0.4, 1.1);
@@ -1088,13 +1002,6 @@ export function buildDebrisField(asteroid, opts = {}) {
   return group;
 }
 
-/**
- * Bake instanced debris / rubble into static meshes for glTF export.
- * Snapshot at t = 0 (no orbit, no tumble), vertex colours carry instance
- * tint and frost. Crystals are split per face for crisp facets; rocks stay
- * indexed with smooth normals to keep GLBs small. Sprites are skipped.
- * @returns {THREE.Group}  { 'debris-rocks', 'debris-ice' } meshes, same rotation as the source
- */
 export function bakeForExport(source, name = source.name) {
   const out = new THREE.Group();
   out.name = name;

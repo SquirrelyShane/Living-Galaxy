@@ -1,20 +1,6 @@
-/* Living Galaxy — CONSOLE › CREW: GENOME and LOG.
- *
- * Two views onto the part of a hand that was always there and never shown.
- *
- *   GENOME — the body on file: the fingerprint that follows them between
- *            skies, what you can see across a mess, what they were built to
- *            be good at, the nine needs they are carrying right now, and who
- *            aboard they are related to.
- *   LOG    — the decision record. Every watch, what they chose, how well they
- *            did it, the chain of reasoning that got them there, what else
- *            they nearly did instead, and what it cost. Exportable whole.
- *
- */
-
 import { el, section, note, row, button, group, chips, setBar, card, pct } from "../kit.js";
-import { crew, firstName, genderMark, relatedTo } from "../../crew.js";
-import { sim } from "../../sim.js";
+import { crew, firstName, genderMark, relatedTo } from "../../crew/ledger.js";
+import { sim } from "../../sim/sim.js";
 import { cradle, looksLine } from "../../npc/cradle.js";
 import { kinLabel, KIN_BLOCK } from "../../genome/spacer.js";
 import { bodyOf, needsOf, buildContext } from "../../crew/deckmind.js";
@@ -45,21 +31,14 @@ function picker(sec, key, onPick) {
 
 const memberOf = (id) => crew.aboard.find((m) => m.id === id) ?? null;
 
-/* The learned prior is situational, so it is read against the situation this
- * hand is actually in. Cheap enough to build on a repaint; guarded because a
- * member who has just left the deck has no context to build. */
 function ctxOf(m) {
-  /* 0.3.53: a PEEK — reading a hand must not live a watch for them */
   try { return buildContext(m, { peek: true }); } catch { return null; }
 }
 
-/* what the last thing you did on the sheet came to, for this hand */
 function said(m, r) {
   view.said = { id: m.id, line: r.ok ? r.line : null, why: r.ok ? null : r.why };
   sim.notice = r.ok ? r.line : r.why;
 }
-
-/* ---- GENOME -------------------------------------------------------------- */
 
 export function mountGenome(root, ctx) {
   const sec = section("GENOME");
@@ -82,7 +61,6 @@ export function mountGenome(root, ctx) {
     body.innerHTML = "";
     if (!b) { body.append(el("div", "tempty", "No genome on file for this hand.")); return; }
 
-    /* — the body — */
     const id = card(m.name, `${`${rec?.complexName ?? m.complexName ?? ""} ${m.letter ?? ""}`.trim()}${genderMark(rec ?? m)}`);
     row(id.body, "Genome", { value: rec?.fingerprint ?? "—", hint: b.typeId === "synth" ? "synthetic frame" : "spacer" });
     row(id.body, "Looks", { value: "", hint: looksLine(rec ?? m) || "—" });
@@ -96,7 +74,6 @@ export function mountGenome(root, ctx) {
     }
     body.append(id.card);
 
-    /* — temperament — */
     const tr = section("TEMPERAMENT");
     note(tr, "Grown from the genes, not rolled — nothing to press here. A child inherits these because they inherit what makes them. What each one does aboard:");
     for (const [axis, label] of Object.entries(TRAIT_LABEL)) {
@@ -106,7 +83,6 @@ export function mountGenome(root, ctx) {
     }
     body.append(tr);
 
-    /* — what they were built for — */
     const ap = section("APTITUDE");
     note(ap, "The ceiling the body sets, and what they have actually learned. TRAIN sets what they study toward — GIVE A GOAL below, or their own study — up to that ceiling and no further.");
     const top = Object.entries(b.apt).sort((a, x) => x[1] - a[1]).slice(0, 8);
@@ -123,7 +99,6 @@ export function mountGenome(root, ctx) {
     }
     body.append(ap);
 
-    /* — what they need — */
     const nd = section("CARRYING");
     note(nd, "Nine needs. They rise on their own and only come down when something is done about them — by them, or by you: one order a watch, and it is a real watch, filed in their LOG.");
     if (view.said?.id === m.id) nd.append(el("p", view.said.why ? "hot" : "warm", view.said.line ?? view.said.why));
@@ -143,7 +118,6 @@ export function mountGenome(root, ctx) {
     }
     body.append(nd);
 
-    /* — what the house gave them — */
     const h = rec?.heritage;
     if (h) {
       const hs = section("THE HOUSE");
@@ -159,7 +133,6 @@ export function mountGenome(root, ctx) {
       body.append(hs);
     }
 
-    /* — what they have worked out for themselves — */
     const lr = section("LEARNED");
     note(lr, "Not designed and not inherited: this is what their own filed watches have taught them pays.");
     const conf = confidenceOf(m);
@@ -167,7 +140,6 @@ export function mountGenome(root, ctx) {
     if (conf >= 0.1) {
       note(lr, learnedLine(m));
     }
-    /* 0.3.53: a word from the captain is one step of the same learning */
     note(lr, "ENCOURAGE or CURB a habit: a word from you, learned the way their own watches are — once a habit a watch.");
     const learned = habitsLearned(m, ctxOf(m)).slice(0, conf >= 0.1 ? 5 : 9);
     for (const h of learned) {
@@ -183,7 +155,6 @@ export function mountGenome(root, ctx) {
     }
     body.append(lr);
 
-    /* — kin — */
     const kin = section("KIN ABOARD");
     let any = false;
     for (const o of crew.aboard) {
@@ -196,7 +167,6 @@ export function mountGenome(root, ctx) {
     if (!any) note(kin, "Nobody aboard is blood.");
     body.append(kin);
 
-    /* — the string itself — */
     const raw = section("ON THE RECORD");
     note(raw, "The packed genome, as CRADLE stores it. Same string on every device, and it decodes the same person.");
     const pre = el("div", "tmono", rec?.genome ?? "—");
@@ -206,8 +176,6 @@ export function mountGenome(root, ctx) {
   };
   ctx.push(paint);
 }
-
-/* ---- LOG ----------------------------------------------------------------- */
 
 function recordCard(r) {
   const c = card(`C${r.cycle} · ${r.action.label}`, `${r.observedSurroundings.room}${r.action.targetName ? ` · ${r.action.targetName}` : ""}`);
@@ -268,7 +236,7 @@ export function mountLog(root, ctx) {
       out.textContent = jsonl;
       out.style.display = "";
       sim.notice = `Training corpus: ${journal.size} decisions, ${Math.round(jsonl.length / 1024)} KB of JSONL.`;
-      try { globalThis.navigator?.clipboard?.writeText?.(jsonl).catch(() => {}); } catch { /* no clipboard here */ }
+      try { globalThis.navigator?.clipboard?.writeText?.(jsonl).catch(() => {}); } catch {}
     }),
     button("EXPORT", () => {
       const json = exportJournals();
@@ -277,7 +245,7 @@ export function mountLog(root, ctx) {
       sim.notice = `Flight recorder: ${Math.round(json.length / 1024)} KB — select and copy.`;
       try {
         globalThis.navigator?.clipboard?.writeText?.(json).then(() => { sim.notice = `Flight recorder copied — ${Math.round(json.length / 1024)} KB.`; }).catch(() => {});
-      } catch { /* no clipboard on this device; the text is on screen */ }
+      } catch {}
     }, "accent"),
     button("HIDE", () => { out.style.display = "none"; out.textContent = ""; }),
   ), out);

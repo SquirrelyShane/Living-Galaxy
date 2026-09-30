@@ -1,40 +1,24 @@
-/* Body forms and decorative kits — the shape grammar every module prefab
- * draws with. A prefab asks for a body of a family-appropriate form; the
- * style weights which forms are likely and the rng rolls the proportions,
- * segment counts, tiers and profiles, so every instance is its own shape.
- *
- * Frame: origin on the mount surface, +Y out of the hull, +Z along the
- * structure, +X across. A form draws inside [−w/2, w/2] × [0, h] × [−d/2, d/2]
- * and returns the envelope it actually used, which the kits and decor hang on:
- *
- *   { kind, w, h, d, top, faces: { px, nx, pz, nz } }   faces = half-extents where a side kit can attach
- */
 import { G, PROFILES, lathe, latheOf, extrude, archOutline } from "../core/geometry.js";
 import { roll } from "../data/styles.js";
 
 const PI = Math.PI, H = PI / 2;
 const env = (kind, w, h, d, extra = {}) => ({ kind, w, h, d, top: h, faces: { px: w / 2, nx: w / 2, pz: d / 2, nz: d / 2 }, ...extra });
 
-/* ---- unit outlines (cached geometry, scaled per mesh) ------------------------ */
 const vaultGeo = (kind) => extrude(`vault:${kind}`, archOutline(kind, 1, 1), 1, [], { curveSegments: 10 });
 const ribGeo = (kind, t = 0.08) => extrude(`rib:${kind}:${t}`, archOutline(kind, 1, 1), 1, [archOutline(kind, 1 - 2 * t, 1 - t).map(([x, y]) => [x, y])], { curveSegments: 10 });
 export { vaultGeo, ribGeo };
 
-/* ---- the forms ---------------------------------------------------------------- */
 export const FORMS = {
-  /* a pressurised block: plinth, main box, chamfer rails, sometimes an ell */
   block(C, w, h, d) {
     const { mats, rng } = C;
     const bw = w * rng.range(0.78, 0.95), bh = h * rng.range(0.7, 0.9), bd = d * rng.range(0.8, 0.96);
     C.add(G.box(), mats.dark, 0, 1, 0, 0, 0, 0, w * 0.95, 2, d * 0.95);
     C.add(G.box(), mats.hull, 0, 2 + bh / 2, 0, 0, 0, 0, bw, bh, bd);
-    /* chamfer rails on the long edges */
     for (const sx of [-1, 1]) C.add(G.box(), mats.dark, sx * bw * 0.5, 2 + bh, 0, 0, 0, 0, 1.4, 1.4, bd * 1.01);
     if (rng.chance(0.45)) { const ew = bw * rng.range(0.35, 0.6), eh = bh * rng.range(0.5, 1.3); C.add(G.box(), mats.panel, rng.sign() * (bw / 2 - ew / 2), 2 + eh / 2, rng.sign() * bd * 0.3, 0, 0, 0, ew * 1.08, eh, bd * 0.45); }
     C.count(4);
     return env("block", bw, 2 + bh, bd, { faces: { px: bw / 2, nx: bw / 2, pz: bd / 2, nz: bd / 2 } });
   },
-  /* one to three lathed vessels along the long axis, on saddles */
   barrel(C, w, h, d, o = {}) {
     const { mats, rng } = C;
     const n = o.n ?? (w > d * 1.2 ? rng.int(1, 3) : rng.int(1, 2));
@@ -48,13 +32,11 @@ export const FORMS = {
       const x = alongX ? 0 : off, z = alongX ? off : 0;
       C.add(geo, i % 2 ? mats.panel : mats.hull, x, r + 1.5, z, alongX ? 0 : H, 0, alongX ? H : 0, r, L, r);
       C.add(G.box(), mats.dark, x, r * 0.5 + 0.75, z, 0, 0, 0, alongX ? L * 0.9 : r * 1.9, r, alongX ? r * 1.9 : L * 0.9);
-      /* end collars */
       for (const s of [-1, 1]) C.add(G.torus(0.06, 6, 24), mats.metal, alongX ? s * L * 0.42 : x, r + 1.5, alongX ? z : s * L * 0.42, alongX ? 0 : 0, alongX ? H : 0, 0, r * 1.02, r * 1.02, r * 1.02);
       C.count(4);
     }
     return env("barrel", alongX ? len : n * r * 2.15, r * 2 + 1.5, alongX ? n * r * 2.15 : len);
   },
-  /* a vertical lathe: tower, silo, bell */
   spindle(C, w, h, d) {
     const { mats, rng } = C;
     const r = Math.min(w, d) * rng.range(0.28, 0.42);
@@ -66,7 +48,6 @@ export const FORMS = {
     C.count(2 + collars);
     return env("spindle", r * 2, h, r * 2);
   },
-  /* an n-gon prism, banded */
   prism(C, w, h, d, o = {}) {
     const { mats, rng } = C;
     const sides = o.sides ?? rng.pick([5, 6, 6, 7, 8, 8]);
@@ -87,19 +68,16 @@ export const FORMS = {
     C.count(2 + bands);
     return env("prism", r * 2, r * 2 + 1, L);
   },
-  /* a faceted armoured pod on a plinth */
   faceted(C, w, h, d) {
     const { mats, rng } = C;
     const geo = rng.pick([G.ico(1), G.ico(1), G.octa(), G.ico(0)]);
     const rx = w * 0.46, ry = h * 0.5, rz = d * rng.range(0.4, 0.5);
     C.add(G.cyl(8), mats.dark, 0, 1.5, 0, 0, 0, 0, Math.min(rx, rz) * 0.8, 3, Math.min(rx, rz) * 0.8);
     C.add(geo, mats.hull, 0, 2 + ry * 0.9, 0, rng.range(0, 0.4), rng.range(0, PI), 0, rx, ry, rz);
-    /* a seam belt */
     C.add(G.torus(0.04, 6, 24), mats.dark, 0, 2 + ry * 0.9, 0, H, 0, 0, Math.max(rx, rz) * 1.02, Math.max(rx, rz) * 1.02, Math.max(rx, rz) * 1.02);
     C.count(3);
     return env("faceted", rx * 2, 2 + ry * 1.8, rz * 2);
   },
-  /* the nave: an arched section extruded along z, with ribs */
   vault(C, w, h, d, o = {}) {
     const { mats, rng } = C;
     const kind = o.kind ?? roll(rng, C.style.mouth) ?? "pointed";
@@ -114,7 +92,6 @@ export const FORMS = {
     C.count(2 + ribs);
     return env("vault", vw, vh + 1, vd, { body, arch: kind, faces: { px: vw / 2, nx: vw / 2, pz: vd / 2, nz: vd / 2 } });
   },
-  /* a dome on a drum or an n-gon */
   dome(C, w, h, d, o = {}) {
     const { mats, rng } = C;
     const r = Math.min(w, d) * rng.range(0.38, 0.48);
@@ -126,7 +103,6 @@ export const FORMS = {
     C.count(3);
     return env("dome", r * 2, baseH + dome.scale.y, r * 2, { dome, faces: { px: r, nx: r, pz: r, nz: r } });
   },
-  /* stacked decks, each smaller, each turned a little */
   stack(C, w, h, d) {
     const { mats, rng } = C;
     const tiers = rng.int(2, 4);
@@ -144,7 +120,6 @@ export const FORMS = {
     }
     return env("stack", maxW, y, maxD, { tiers, faces: { px: maxW / 2, nx: maxW / 2, pz: maxD / 2, nz: maxD / 2 } });
   },
-  /* pods bunched on a frame */
   cluster(C, w, h, d) {
     const { mats, rng } = C;
     const n = rng.int(3, 6);
@@ -161,7 +136,6 @@ export const FORMS = {
     }
     return env("cluster", w * 0.9, r * 2.6 + 2, d * 0.9);
   },
-  /* a tapered block — the frustum */
   wedge(C, w, h, d) {
     const { mats, rng } = C;
     const taper = rng.range(0.45, 0.75);
@@ -172,24 +146,20 @@ export const FORMS = {
     C.count(3);
     return env("wedge", bw, 1 + bh, bd, { taper });
   },
-  /* a keep: sloped walls, a deck, battlements — military spec */
   keep(C, w, h, d) {
     const { mats, rng } = C;
     const bw = w * 0.95, bd = d * 0.95, bh = h * rng.range(0.6, 0.85);
     const taper = rng.range(0.7, 0.86);
     C.add(G.frustum(taper, 4), mats.armour, 0, 1 + bh / 2, 0, 0, PI / 4, 0, bw / 1.414, bh, bd / 1.414);
     C.add(G.box(), mats.dark, 0, 0.5, 0, 0, 0, 0, bw * 1.04, 1, bd * 1.04);
-    /* deck with a parapet and teeth */
     const tw = bw * taper, td = bd * taper;
     C.add(G.box(), mats.hull, 0, 1 + bh + 1, 0, 0, 0, 0, tw, 2, td);
     const teeth = Math.max(3, Math.round(tw / 6));
     for (let i = 0; i < teeth; i++) for (const s of [-1, 1]) C.add(G.box(), mats.dark, -tw / 2 + (tw * (i + 0.5)) / teeth, 1 + bh + 3, s * td * 0.48, 0, 0, 0, tw / teeth * 0.5, 2.4, 1.2);
-    /* an armoured citadel block on the deck */
     if (rng.chance(0.7)) C.add(G.box(), mats.armour, rng.range(-1, 1) * tw * 0.15, 1 + bh + 2 + (h - bh) * 0.35, 0, 0, 0, 0, tw * 0.55, (h - bh) * 0.7, td * 0.55);
     C.count(4 + teeth * 2);
     return env("keep", bw, h, bd, { taper, deck: 1 + bh + 2, faces: { px: bw / 2, nx: bw / 2, pz: bd / 2, nz: bd / 2 } });
   },
-  /* an octagonal glazed tower under a spire */
   lantern(C, w, h, d) {
     const { mats, rng } = C;
     const r = Math.min(w, d) * rng.range(0.3, 0.42);
@@ -202,7 +172,6 @@ export const FORMS = {
     C.count(3 + sides);
     return env("lantern", r * 2.2, h, r * 2.2, { spireTop: h, r });
   },
-  /* an open frame with a body inside — the works look */
   cradle(C, w, h, d, o = {}) {
     const { mats, rng } = C;
     const bw = w * 0.9, bd = d * 0.9, bh = h * 0.9;
@@ -217,7 +186,6 @@ export const FORMS = {
 };
 export const FORM_KEYS = Object.keys(FORMS);
 
-/** Roll a body form for a family: the family's allowed forms weighted by the style. */
 export function pickForm(C, allowed) {
   const table = {};
   for (const k of allowed) table[k] = (C.style.forms[k] ?? 0.5) + 0.05;
@@ -230,7 +198,6 @@ export function body(C, allowed, w, h, d, o = {}) {
   return e;
 }
 
-/* ---- decorative kits ------------------------------------------------------------ */
 export const DECOR = {
   buttress(C, e) {
     const { mats, rng } = C;
@@ -333,7 +300,6 @@ export const DECOR = {
   glazing(C, e) { const { mats } = C; const g = C.add(G.box(), mats.glass, 0, e.top + 0.6, 0, 0, 0, 0, e.w * 0.6, 1.2, e.d * 0.8); g.material.side = 2; C.count(); },
 };
 
-/** Apply 1–3 of the style's decors to an envelope, skipping any the family bars. */
 export function decorate(C, e, { max = 3, skip = [], force = [] } = {}) {
   const { rng } = C;
   const pool = C.style.decor.filter((k) => !skip.includes(k) && DECOR[k]);

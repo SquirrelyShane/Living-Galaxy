@@ -1,10 +1,3 @@
-/* LIVING GALAXY — the two names js/asteroidgen/blackhole.js imports from
- * `three/addons/postprocessing/Pass.js`, and nothing else from three's
- * post-processing examples. The game does not vendor three/addons (its own
- * compact composer is js/postfx.js), so the import map points that one
- * specifier here. Same contract as three's own: a Pass has enabled /
- * needsSwap / clear / renderToScreen and a render(renderer, write, read);
- * a FullScreenQuad draws one material over the whole target. */
 import { OrthographicCamera, Float32BufferAttribute, BufferGeometry, Mesh } from "three";
 
 export class Pass {
@@ -22,7 +15,6 @@ export class Pass {
 
 const _camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-/* one triangle that covers the screen: no diagonal seam, fewer vertices */
 class FullscreenTriangleGeometry extends BufferGeometry {
   constructor() {
     super();

@@ -61,12 +61,12 @@ const store = new Map();
 globalThis.localStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 globalThis.sessionStorage = globalThis.localStorage;
 
-const { sim, launchSim, tickSim } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { shipsForComplex, shipById, DEFAULT_SHIP_ID } = await import("../js/shipdb.js");
-const { beginPlay, stepPlay, endPlay, playReport, brainReport, CAREER_DEPT } = await import("../js/ariaplay.js");
-const { tradeRoutes } = await import("../js/traderoutes.js");
-const { rngFromSeed } = await import("../js/generate.js");
+const { sim, launchSim, tickSim } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { shipsForComplex, shipById, DEFAULT_SHIP_ID } = await import("../js/ships/shipdb.js");
+const { beginPlay, stepPlay, endPlay, playReport, brainReport, CAREER_DEPT } = await import("../js/aria/play.js");
+const { tradeRoutes } = await import("../js/economy/traderoutes.js");
+const { rngFromSeed } = await import("../js/world/generate.js");
 const { colourFor, paint, dim, bold, plain, pad } = await import("./aria-tty.mjs");
 
 const money = (n) => Math.round(n).toLocaleString("en-US");

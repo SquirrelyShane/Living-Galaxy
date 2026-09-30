@@ -34,9 +34,9 @@ await page.waitForTimeout(1500);
 
 /* the sky's gender mix, as the player actually meets it */
 const mix = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { stationRoster } = await import("/js/crew.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { stationRoster } = await import("/js/crew/ledger.js");
   const { traffic } = await import("/js/npc/traffic.js");
   const { cradle } = await import("/js/npc/cradle.js");
   const seen = { woman: 0, man: 0, nonbinary: 0 };
@@ -51,9 +51,9 @@ if (mix.nbPc > 15) fail(`${mix.nbPc}% nonbinary is still the old bell curve`);
 
 /* sign for a mark and take them */
 const took = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
   const { boardAt, takeTicket, attemptCapture } = await import("/js/npc/bounty.js");
   const { boarding } = await import("/js/interior/boarding.js");
   sim.ship.credits = 500000;

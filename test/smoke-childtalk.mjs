@@ -28,10 +28,10 @@ await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await sleep(1200);
 
 const kid = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
-  const { household, conceive } = await import("/js/family.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
+  const { household, conceive } = await import("/js/crew/family.js");
   sim.ship.credits = 200000;
   const st = stations.find((s) => !s.hostile);
   for (const c of stationRoster(st, 1, sim.skySeed).slice(0, 3)) hireCrew(c, sim.ship, 12);

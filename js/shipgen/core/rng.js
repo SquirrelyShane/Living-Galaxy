@@ -1,4 +1,3 @@
-/* Seeded PRNG — every hull is reproducible from its seed string. */
 export class RNG {
   constructor(seed) {
     let n = 0;

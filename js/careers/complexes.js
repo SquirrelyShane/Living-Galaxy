@@ -1,16 +1,3 @@
-/**
- * Industrial complexes and lettered career ladders for a space-age browser RPG.
- *
- * Rank letters follow the requested pattern:
- *   A Survey / Aide  →  B Entry  →  C Journeyman  →  D Proficient  →  E Master
- * then two deep ranks (F Foreman / Director, G Complex authority).
- *
- * After rank D a character may lock a specialization without leaving the main
- * ladder. Specializations add a suffix title and extra unlocks.
- *
- * Pay is in "scrip" (station credits) per cycle. Tune to your economy.
- */
-
 export const RANK_LETTERS = ["A", "B", "C", "D", "E", "F", "G"];
 
 export const COMPLEXES = {

@@ -1,11 +1,3 @@
-// js/comms/call-ui.js — LIVING GALAXY comms overlay (vanilla, no deps)
-// Usage:
-//   import { CallUI } from './comms/call-ui.js';
-//   const ui = new CallUI({ mount: document.getElementById('hud') });
-//   ui.attach(session);                 // session = CallSession
-//   // in your frame loop:  ui.tick(dtMs * timeScale);
-// The director (comms.js) owns sessions; this only paints one at a time plus
-// the open-channel ticker for traffic you are overhearing.
 import { CallState } from './call-session.js';
 
 const SVG = {
@@ -32,7 +24,6 @@ export class CallUI {
     this._wavePhase = 0;
 
     const root = el('div', 'cx');
-    // puck
     const puck = el('button', 'cx-puck',
       `<span class="cx-puck__ring"></span><span class="cx-puck__ring"></span>${SVG.hail}`);
     puck.type = 'button';
@@ -40,7 +31,6 @@ export class CallUI {
     puck.hidden = true;
     puck.addEventListener('click', () => this._onPuck());
 
-    // accept / reject
     const answer = el('div', 'cx-answer',
       `<button class="cx-yes" type="button" aria-label="Accept call">${SVG.yes}</button>` +
       `<button class="cx-no" type="button" aria-label="Reject call">${SVG.no}</button>`);
@@ -48,7 +38,6 @@ export class CallUI {
     answer.querySelector('.cx-yes').addEventListener('click', () => this.accept());
     answer.querySelector('.cx-no').addEventListener('click', () => this.reject());
 
-    // panel
     const panel = el('div', 'cx-panel');
     panel.hidden = true;
     const head = el('div', 'cx-head');
@@ -67,7 +56,6 @@ export class CallUI {
     log.addEventListener('click', () => this.session && this.session.skipReveal());
     const replies = el('div', 'cx-replies');
 
-    // free-form line — live calls to another pilot, or a keyboard hook on NPC calls
     const say = el('form', 'cx-say');
     say.hidden = true;
     const sayIn = document.createElement('input');
@@ -80,7 +68,6 @@ export class CallUI {
       if (this.session && this.session.say(sayIn.value)) sayIn.value = '';
     });
 
-    // open-channel ticker: traffic between other stations and ships, overheard
     const chatter = el('div', 'cx-chatter');
     chatter.hidden = true;
     const chTag = el('span', 'cx-chatter__tag', '');
@@ -96,7 +83,6 @@ export class CallUI {
     this._chatterMs = 0;
   }
 
-  /** Paint one overheard line. Fades on its own after `holdMs` of ticked time. */
   showChatter(tag, text, holdMs = 6500, tone = 'neutral') {
     this.chTag.textContent = tag;
     this.chTxt.textContent = text;
@@ -108,7 +94,6 @@ export class CallUI {
 
   hideChatter() { this.chatter.hidden = true; this._chatterUntil = 0; }
 
-  // --- binding -------------------------------------------------------------
   attach(session) {
     this.detach();
     this.session = session;
@@ -141,13 +126,12 @@ export class CallUI {
     this.say.hidden = true;
   }
 
-  // --- actions -------------------------------------------------------------
   _onPuck() {
     const s = this.session;
     if (!s) return;
     if (s.isRinging) {
       const outgoing = s.state === CallState.RINGING_OUT;
-      this.answer.querySelector('.cx-yes').hidden = outgoing;   // outgoing → cancel only
+      this.answer.querySelector('.cx-yes').hidden = outgoing;
       this.answer.hidden = !this.answer.hidden;
       return;
     }
@@ -161,7 +145,6 @@ export class CallUI {
     this._scroll();
   }
 
-  // --- render --------------------------------------------------------------
   _sync() {
     const s = this.session;
     if (!s) return;
@@ -197,8 +180,6 @@ export class CallUI {
   }
 
   _addRow(line) {
-    // the session only ever reveals its last line: a line still typing out when the next one
-    // lands would freeze half-written, so finish it and paint it whole first
     const s = this.session;
     const i = s ? s.lines.indexOf(line) : -1;
     const prev = i > 0 ? s.lines[i - 1] : null;
@@ -228,7 +209,6 @@ export class CallUI {
     node.textContent = line.visible;
     node.classList.toggle('cx-caret', !line.done);
     this.wave.dataset.src = line.done ? 'idle' : line.speaker;
-    /* reading scrollHeight forces layout: only pin the log once the line has landed whole */
     if (line.done) this._scroll();
   }
 
@@ -246,8 +226,6 @@ export class CallUI {
 
   _scroll() { this.log.scrollTop = this.log.scrollHeight; }
 
-  // --- clock ---------------------------------------------------------------
-  /** Call once per frame with scaled dt (ms). Drives the session and the waveform. */
   tick(dtMs) {
     if (!this.chatter.hidden) {
       this._chatterMs += dtMs;
@@ -257,7 +235,6 @@ export class CallUI {
     if (!s) return;
     s.tick(dtMs);
     if (!this.panel.hidden) {
-      /* the meta line moves at the pace of a clock, not a frame: ~4 Hz is plenty */
       this._metaMs = (this._metaMs || 0) + dtMs;
       if (this._metaMs >= 250) { this._metaMs = 0; this._meta(); }
       this._wave(dtMs);

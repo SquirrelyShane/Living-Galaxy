@@ -1,4 +1,3 @@
-/* Shared unit geometries (cached), material factory and the addMesh placement helper. */
 import * as THREE from "three";
 
 const geoCache = new Map();
@@ -6,7 +5,6 @@ function cached(key, factory) {
   if (!geoCache.has(key)) { const g = factory(); g.userData.shared = true; geoCache.set(key, g); }
   return geoCache.get(key);
 }
-/* free everything a throwaway ship owns: per-build materials and any geometry that is not a shared unit primitive */
 export function disposeDeep(root) {
   const mats = new Set();
   root.traverse((o) => {
@@ -27,12 +25,10 @@ export const G = {
   coneOpen: (seg = 14) => cached("coneO" + seg, () => new THREE.ConeGeometry(1, 1, seg, 1, true)),
   torus: (t = 0.24) => cached("tor" + t, () => new THREE.TorusGeometry(1, t, 10, 28)),
   ring: () => cached("ringf", () => new THREE.RingGeometry(0.55, 1, 24)),
-  // exhaust cone with its base on the origin so it grows out of the nozzle instead of about its centre
   plume: (seg = 16) => cached("plume" + seg, () => new THREE.ConeGeometry(1, 1, seg, 1, true).translate(0, 0.5, 0)),
   disc: () => cached("disc", () => new THREE.CircleGeometry(1, 20))
 };
 
-/* finish presets applied on top of the base material recipe */
 export const FINISHES = {
   brushed: {},
   matte:  { metalness: 0.15, roughness: 0.85 },

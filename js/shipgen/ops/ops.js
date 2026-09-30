@@ -1,5 +1,3 @@
-/* Live systems layer: throttle, fire control, mining, docking, deployables, sensor sweeps, RCS.
- * opsBind() indexes a freshly built ship into `rig`; opsUpdate() runs every frame. */
 import * as THREE from "three";
 import { host, fxScene } from "./host.js";
 import { rig } from "./rig.js";
@@ -11,11 +9,9 @@ export const ops = { throttle: 0.62, firing: false, fireEnd: 0, mining: false, d
               docked: false, dockT: 0, rcs: true, nextPuff: 0, scanUntil: 0, showColliders: false, lastThrottle: 0.62 };
 export let targetDrone = null, rock = null, colliderGroup = null, miningBeams = [];
 
-
 const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3(), _v3 = new THREE.Vector3();
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
-/* ctx lets the part inspector bind a lone module: { size, U, occ, accent } */
 export function opsBind(root, ctx = {}) {
   for (const k of Object.keys(rig)) if (Array.isArray(rig[k])) rig[k].length = 0;
   rig.root = root;
@@ -40,7 +36,6 @@ export function opsBind(root, ctx = {}) {
     if (d.srb) rig.srbPlumes.push(o);
     if (o.isPointLight) { o.userData.baseI = o.intensity; rig.engineLights.push(o); }
   });
-  // target drone off the bow, mining rock at the drill tips
   if (targetDrone) fxScene().remove(targetDrone);
   if (rock) fxScene().remove(rock);
   const size = rig.size;
@@ -51,7 +46,6 @@ export function opsBind(root, ctx = {}) {
   rock = makeRock(Math.max(size.y, size.x) * 0.32);
   placeRock(root);
   rock.visible = false; fxScene().add(rock);
-  // collision boxes
   if (colliderGroup) colliderGroup.parent?.remove(colliderGroup);
   colliderGroup = new THREE.Group(); colliderGroup.name = "colliders";
   for (const o of rig.occ) {
@@ -62,7 +56,6 @@ export function opsBind(root, ctx = {}) {
   }
   colliderGroup.visible = ops.showColliders;
   root.add(colliderGroup);
-  // reset transient state
   for (const b of miningBeams) fxScene().remove(b); miningBeams = [];
   for (const o of rig.turrets) if (o.userData.turret.beam) { fxScene().remove(o.userData.turret.beam); o.userData.turret.beam = null; }
   ops.firing = false;
@@ -89,7 +82,6 @@ export function makeRock(R) {
   geo.computeVertexNormals();
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: "#6e655c", roughness: 0.96, metalness: 0.08, flatShading: true }));
   m.castShadow = true; m.receiveShadow = true; m.userData.R = R;
-  // ore veins
   for (let i = 0; i < 6; i++) {
     const vein = new THREE.Mesh(FXG.chunk, new THREE.MeshStandardMaterial({ color: "#c98a3a", emissive: "#7a4a12", emissiveIntensity: 0.6, roughness: 0.5, metalness: 0.7, flatShading: true }));
     const dir = new THREE.Vector3(rr.range(-1, 1), rr.range(-1, 1), rr.range(-1, 1)).normalize();
@@ -109,7 +101,6 @@ export function placeRock(root) {
     }
     c.divideScalar(rig.drills.length); n.normalize();
     rock.position.copy(c).addScaledVector(n, R * 0.72);
-    // never let the ore body sit inside modules mounted ahead of the drills: clear the hull's forward extent
     const bb = new THREE.Box3().setFromObject(root);
     if (Math.abs(n.z) > 0.6 && !bb.isEmpty()) {
       const front = n.z < 0 ? bb.min.z - R * 0.85 : bb.max.z + R * 0.85;
@@ -119,7 +110,6 @@ export function placeRock(root) {
     rock.position.set(0, -rig.size.y * 0.1, -rig.size.z * 0.55 - R * 1.1);
   }
 }
-/* how far each telescoping boom must extend for its tip to touch the ore body */
 function aimDrills() {
   if (!rock) return;
   const R = rock.userData.R;
@@ -135,7 +125,6 @@ function aimDrills() {
   }
 }
 
-/* ---- world-space helpers ---------------------------------------- */
 export function aimAngles(o, target) {
   const p = o.parent.worldToLocal(_v1.copy(target));
   const d = p.sub(o.position);
@@ -164,7 +153,6 @@ export function fireShot(o, t) {
     case "pdc":
       fxTracer(from, to, "#ffd27a", U * 110, U * 0.045, (p) => { fxFlash(p, "#ffd27a", U * 0.25, 0.15); }); break;
     case "auto": {
-      // three-round burst with brass ejected from the breech
       const side = o.localToWorld(new THREE.Vector3(1, 0, 0)).sub(o.getWorldPosition(new THREE.Vector3())).normalize();
       for (let i = 0; i < 3; i++) setTimeout(() => {
         const tt = to.clone().add(new THREE.Vector3((Math.random() - 0.5) * U, (Math.random() - 0.5) * U, 0));
@@ -174,13 +162,11 @@ export function fireShot(o, t) {
       }, i * 70);
       break; }
     case "flak": {
-      // proximity fuse: shell detonates short of the target in a fragment cloud
       const dist = from.distanceTo(to); const burstAt = from.clone().lerp(to, 0.82 + Math.random() * 0.12);
       fxFlash(from, "#ffe2a8", U * 0.35, 0.12);
       fxTracer(from, burstAt, "#ffb03a", U * 90, U * 0.07, (p) => { fxBurst(p, "#ffb03a", U * 0.9); if (dist > 0) hitDrone(); });
       break; }
     case "lance":
-      // continuous: a persistent beam is kept while firing (see opsUpdate); here only the muzzle bloom
       fxFlash(from, "#cf8bff", U * 0.5, 0.2); break;
     case "particle":
       for (let i = 0; i < 3; i++) { const jit = to.clone().add(new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5)).multiplyScalar(U * 0.35));
@@ -218,7 +204,6 @@ export function fireLauncher(o, t) {
 }
 export function hitDrone() { if (targetDrone) targetDrone.userData.drone.hit = 0.25; }
 
-/* ---- mining ------------------------------------------------------- */
 export function startMining() {
   if (!rock || !rig.root) return;
   rig.root.updateMatrixWorld(true);
@@ -239,12 +224,10 @@ export function stopMining() {
   for (const b of miningBeams) fxScene().remove(b); miningBeams = [];
 }
 
-/* ---- per-frame ops update --------------------------------------- */
 let sparkClock = 0, chunkClock = 0;
 export function opsUpdate(dt, t) {
   if (!rig.root) return;
   const thr = ops.throttle;
-  /* telescoping drill booms ease toward their extension target */
   for (const d of rig.drills) {
     const dd = d.userData.drill;
     if (dd.inner && Math.abs(dd.extTarget - dd.ext) > 1e-4) {
@@ -255,7 +238,6 @@ export function opsUpdate(dt, t) {
       dd.tip[1] = dd.tipBase + dd.ext;
     }
   }
-  /* drive output follows the throttle */
   for (const l of rig.engineLights) l.intensity = l.userData.baseI * (0.12 + 0.88 * thr);
   const bmats = rig.builder && rig.builder.mats;
   if (bmats) {
@@ -264,7 +246,6 @@ export function opsUpdate(dt, t) {
   }
   const boost = Math.max(0, (thr - 0.85) / 0.15);
   for (const o of rig.srbPlumes) { const d = o.userData.srb; o.visible = boost > 0.01; o.scale.y = d.baseY * boost * (1 + Math.sin(t * 15 + o.id) * 0.2); o.material.opacity = d.op * boost; }
-  /* RCS station-keeping puffs — busier while the throttle is being moved */
   if (ops.rcs && rig.rcs.length && t > ops.nextPuff) {
     const moving = Math.abs(thr - ops.lastThrottle) > 0.002;
     ops.nextPuff = t + (moving ? 0.12 : 0.6 + Math.random() * 1.4);
@@ -275,13 +256,11 @@ export function opsUpdate(dt, t) {
     fxPuff(p, dir, rig.U * 0.22, "#eaf4ff", 0.3);
   }
   ops.lastThrottle += (thr - ops.lastThrottle) * Math.min(1, dt * 4);
-  /* deployables ease between stowed and deployed */
   ops.deployT += ((ops.deploy ? 1 : 0) - ops.deployT) * Math.min(1, dt * 1.6);
   for (const o of rig.deployables) {
     const d = o.userData.deploy, v = d.from + (d.to - d.from) * ops.deployT;
     if (d.kind === "pos") o.position[d.axis] = v; else o.rotation[d.axis] = v;
   }
-  /* docking: latches swing out, approach blinkers go steady green */
   ops.dockT += ((ops.docked ? 1 : 0) - ops.dockT) * Math.min(1, dt * 2.2);
   for (const o of rig.docks) {
     const d = o.userData.dock;
@@ -294,7 +273,6 @@ export function opsUpdate(dt, t) {
     for (const b of d.blinkers) b.userData.lamp.mode = ops.dockT > 0.5 ? "steady" : "blink";
     if (d.iris && bmats) d.iris.material = ops.dockT > 0.5 ? bmats.winLit : bmats.glassDark;
   }
-  /* weapons */
   if (ops.firing && t > ops.fireEnd) { ops.firing = false; }
   if (targetDrone) {
     const D = targetDrone.userData.drone;
@@ -315,7 +293,6 @@ export function opsUpdate(dt, t) {
       for (const o of rig.launchers) { const Lc = o.userData.launcher; if (t > Lc.next) { Lc.next = t + Lc.rate; fireLauncher(o, t); } }
     }
   }
-  /* mining */
   if (ops.mining && rock) {
     rock.rotation.y += dt * 0.08; rock.rotation.x += dt * 0.03;
     sparkClock += dt; chunkClock += dt;
@@ -324,7 +301,6 @@ export function opsUpdate(dt, t) {
       const d = b.userData.drill, dd = d.userData.drill, node = dd.node || d;
       const em = node.localToWorld(new THREE.Vector3(...dd.emitter));
       const tip = node.localToWorld(new THREE.Vector3(...dd.tip));
-      // beam runs from the boom emitter to the rock face just past the tip
       const contact = _v1.copy(tip).addScaledVector(_v2.subVectors(rockW, tip).normalize(), rig.U * 0.25);
       const dir = _v3.subVectors(contact, em); const len = dir.length();
       b.position.copy(em).addScaledVector(dir, 0.5);
@@ -345,7 +321,6 @@ export function opsUpdate(dt, t) {
   } else {
     for (const d of rig.drills) d.userData.drill.head.userData.spin.speed = d.userData.drill.baseSpin;
   }
-  /* sensor sweep: dishes and pods spin up while a scan is live */
   const scanning = t < ops.scanUntil;
   for (const o of rig.sensors) if (o.userData.spin) o.userData.spin.boost = scanning ? 4 : 1;
   fxUpdate(dt);

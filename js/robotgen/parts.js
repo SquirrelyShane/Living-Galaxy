@@ -1,8 +1,3 @@
-// robotgen/src/parts.js — shared primitives: material/geometry kit and the two
-// node helpers. Imported by build.js and attach.js so attachments can be added
-// without reaching into the builder.
-
-/* ---------- small helpers ---------- */
 export function makeKit(THREE, spec, opts) {
   const P = spec.palette;
   const cache = new Map();
@@ -26,8 +21,6 @@ export function makeKit(THREE, spec, opts) {
     return m;
   }
   const geos = [];
-  // every geometry carries its volume and half-extents, so the physics layer can
-  // weigh and box parts without knowing which THREE build made them
   const keep = (g, vol, half) => {
     geos.push(g);
     g.userData = g.userData || {};
@@ -72,4 +65,3 @@ export function group(THREE, parent, name, x = 0, y = 0, z = 0) {
   if (parent) parent.add(g);
   return g;
 }
-

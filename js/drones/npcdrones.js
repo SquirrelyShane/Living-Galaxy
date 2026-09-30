@@ -1,41 +1,10 @@
-/* LIVING GALAXY — the corporations' drones.
- *
- * 0.3.59 — a port's drones are its guards and its repair crew. Reported:
- * too many drones making deliveries, and stations should field combat and
- * repair drones instead. A corporation's line is now:
- *
- *   major    a miner (the corporation's own property — it feeds the shelves),
- *            a DELIVERY hauler while the sky has fewer than
- *            DRONE_LINE.deliveryCap of them (else a guard), and a repair drone
- *   alt      a miner and a guard
- *   hostile  a gun drone, as before
- *
- * A guard of an honest port patrols it and puts rounds on anything hostile
- * inside its reach — rogue drones, pirates — and its kills are the port's,
- * not yours. A repair drone patches YOUR hull when you are near its port, out
- * of a fight, and not wanted by it. Your own drones are untouched.
- *
- * Every NPC corporation with a port fields a small drone line of its own:
- * miners on the belt nearest its home, haulers on the shared work board
- * (board.js). They are the same machines you build — the same roles, holds
- * and speeds — so a freight slot one of them holds is a slot your hauler
- * cannot, and their ore lands on their port's shelves (economy.js), which
- * is where the prices you see come from.
- *
- * Deterministic from the sky seed: same corps, same drones, same names. No
- * chat, no memory — they are the traffic's small end. Near you they render
- * as robots (droneforge, kind = role, livery from the port's sector) with
- * labels; hostile corps' drones are hostile contacts and shoot back at the
- * same rate a gun drone does.
- */
-
-import { sim } from "../sim.js";
-import { stationById } from "../stations.js";
-import { corps, corpById } from "../corps.js";
-import { currentSystem } from "../bodies.js";
-import { nearbyRocks, wearRock, depleted } from "../field.js";
-import { deliver, lift } from "../economy.js";
-import { rngFromSeed } from "../generate.js";
+import { sim } from "../sim/sim.js";
+import { stationById } from "../station/stations.js";
+import { corps, corpById } from "../corp/corps.js";
+import { currentSystem } from "../world/bodies.js";
+import { nearbyRocks, wearRock, depleted } from "../world/field.js";
+import { deliver, lift } from "../economy/economy.js";
+import { rngFromSeed } from "../world/generate.js";
 import { droneDoorGoal, startDroneBay, stepDroneBay } from "../npc/bay.js";
 import { DRONE_ROLES, LANE_SPEED, NEAR_SPEED, LANE_OVER, JUMP_SPEED, JUMP_OVER, DOCK_SECS } from "./roles.js";
 import { openFreight, claim, touch, release, releaseAll } from "./board.js";
@@ -45,14 +14,13 @@ export const npcDrones = { units: [], lastT: null };
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 const STEP = 1;
 export const DRONE_LINE = {
-  deliveryCap: 3,                            // delivery haulers in a whole sky, at most
-  major: ["miner", "haul", "repair"],        // "haul": a hauler while under the cap, a guard after
+  deliveryCap: 3,
+  major: ["miner", "haul", "repair"],
   alt: ["miner", "combat"],
   hostile: ["combat"],
   guardReach: 3500, guardRange: 1400, guardRate: 1.3, guardDamage: 6,
   repairReach: 2600, repairRate: 0.8, quietFor: 20,
 };
-/* the sim wires these: rounds, and the hull a repair drone may patch */
 export const npcDroneHooks = { fire: null, patchFor: null, hostiles: null };
 
 function beltPointNear(p, rnd) {
@@ -64,7 +32,6 @@ function beltPointNear(p, rnd) {
   return { x: Math.cos(a) * r, y: 0, z: Math.sin(a) * r };
 }
 
-/** Field every corporation's drones for this sky. */
 export function populateNpcDrones(seed) {
   npcDrones.units.length = 0;
   npcDrones.lastT = null;
@@ -96,7 +63,6 @@ export function populateNpcDrones(seed) {
 export function resetNpcDrones() { npcDrones.units.length = 0; npcDrones.lastT = null; }
 
 function flyTo(u, p, dt, stopR = 40) {
-  /* a port rides its orbit at hundreds of u/s: match its frame first, then close on it */
   if (p.vx || p.vy || p.vz) { u.x += (p.vx ?? 0) * dt; u.y += (p.vy ?? 0) * dt; u.z += (p.vz ?? 0) * dt; }
   const dx = p.x - u.x, dy = p.y - u.y, dz = p.z - u.z;
   const d = Math.hypot(dx, dy, dz);
@@ -126,7 +92,6 @@ function stepUnit(u, dt) {
   const home = stationById(u.home);
   if (!home) { u.state = "lost"; u.note = "home port gone"; return; }
   if (u.state === "docked") {
-    /* 0.3.15: in by the entry door, out by the exit door (npc/bay.js) */
     const at = stationById(u.dockedAt) ?? home;
     if (u.bay) {
       const leaving = u.bay.which === "out";
@@ -145,7 +110,7 @@ function stepUnit(u, dt) {
   }
   if (u.hp <= 0) {
     u.state = "docked"; u.dockedAt = home.id; u.t = 240; u.hp = 1; u.note = "limped home for repairs"; releaseAll(u.id); u.assign = null;
-    if (u.hold > 0 && u.good) deliver(home, u.good, u.hold);   // whatever it carried lands on its own shelf, not in the void
+    if (u.hold > 0 && u.good) deliver(home, u.good, u.hold);
     u.hold = 0; u.good = null;
     return;
   }
@@ -183,7 +148,7 @@ function stepMiner(u, dt, home) {
   u.cut = rock;
   if (!flyTo(u, rock, dt, rock.r + 40)) { u.note = `closing on ${rock.oreName}`; return; }
   const got = Math.min(u.holdCap - u.hold, r.rate * (rock.rich ? 1.6 : 1) * dt);
-  if (u.good && u.good !== rock.ore && u.hold > 0) { u.state = "returning"; return; }  // one ore a trip: the shelf wants a bill it can read
+  if (u.good && u.good !== rock.ore && u.hold > 0) { u.state = "returning"; return; }
   u.good = rock.ore;
   u.hold += got;
   wearRock(rock.key, (r.rate * dt) / Math.max(30, rock.r * 0.8));
@@ -196,8 +161,6 @@ function stepHauler(u, dt, home) {
     u.lookAt ??= -1e9;
     if (sim.time - u.lookAt < 20) { u.note = "waiting on the board"; return; }
     u.lookAt = sim.time;
-    /* 0.3.59: three delivery haulers in a whole sky are a freight line, not a port's
-     * shuttle — local work first, then the best-paying run anywhere on the board */
     const slot = openFreight({ home, cap: u.holdCap, who: u.id, n: 1, maxKm: 60000 })[0]
       ?? openFreight({ home, cap: u.holdCap, who: u.id, n: 1 })[0];
     if (!slot || !claim(slot.key, u.id)) { u.note = "no work on the board"; return; }
@@ -237,9 +200,7 @@ function patrol(u, dt, home, what) {
 }
 
 function stepCombat(u, dt, home) {
-  /* a hold's gun drone: circles its port; the turret board (turrets.js) makes it a hostile contact */
   if (u.hostile) return patrol(u, dt, home, "patrolling");
-  /* 0.3.59: an honest port's guard — anything hostile inside its reach gets rounds */
   const foes = npcDroneHooks.hostiles?.() ?? [];
   let best = null, bd = DRONE_LINE.guardReach;
   for (const c of foes) {
@@ -259,7 +220,6 @@ function stepCombat(u, dt, home) {
   }
 }
 
-/* 0.3.59: a port's repair drone patches a hull near its port that is out of a fight */
 function stepRepair(u, dt, home) {
   const job = npcDroneHooks.patchFor?.(u, home) ?? null;
   if (!job) return patrol(u, dt, home, "standing by off");
@@ -270,7 +230,6 @@ function stepRepair(u, dt, home) {
   u.patched = (u.patched ?? 0) + DRONE_LINE.repairRate * dt;
 }
 
-/** Drones inside `range` of a point, for the engine's labels and meshes. */
 export function npcDronesNear(p, range) {
   const out = [];
   for (const u of npcDrones.units) if (!u.dockedAt && d3(u, p) < range) out.push(u);

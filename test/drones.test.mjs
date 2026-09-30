@@ -9,8 +9,8 @@
  */
 
 import * as THREE from "../vendor/three.module.min.js";
-import { DRONE_KINDS, droneSpec, droneSummary } from "../js/dronespec.js";
-import { forgeDrone, droneFor, droneBudget, droneTemplateCount, releaseDrones } from "../js/droneforge.js";
+import { DRONE_KINDS, droneSpec, droneSummary } from "../js/drones/dronespec.js";
+import { forgeDrone, droneFor, droneBudget, droneTemplateCount, releaseDrones } from "../js/drones/droneforge.js";
 import { SPEC_VERSION } from "../js/robotgen/spec.js";
 
 let pass = 0, fail = 0;

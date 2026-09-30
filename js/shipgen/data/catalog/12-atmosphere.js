@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 12 — LIFE SUPPORT: ATMOSPHERE */
 export default {
   id: "d12", name: "12 Life Support — Atmosphere",
   sheet: {

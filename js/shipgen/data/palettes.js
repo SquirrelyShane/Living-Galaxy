@@ -1,4 +1,3 @@
-/* Livery presets for the "New livery" button. */
 export const FACTION_PALETTES = [
   { name: "Ash Navy",        primary: "#93a4bd", secondary: "#3b465a", accent: "#9ceeff", engine: "#7df0ff" },
   { name: "Ember Pact",      primary: "#b87b64", secondary: "#402a22", accent: "#ffc061", engine: "#ff7f4d" },

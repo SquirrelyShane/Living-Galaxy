@@ -1,19 +1,3 @@
-/* The module catalogue: what a station is made of.
- *
- * A module is the unit the placement solver works in. Each one has a
- * footprint in metres [w, h, d] — w across the mount, h out from the hull,
- * d along the spine — a prefab that draws it, a mount kind it can sit on,
- * a zone it wants along the station's axis (0 = command end, 1 = power
- * end), a sun preference, the crew it needs, what it does for the
- * station's balance sheet, and the parts it is assembled from.
- *
- * Zones are the realism: command and traffic control at the quiet end
- * with the windows; quarters, mess and kitchens together on the ring or
- * the habitat drum; life support and water in the middle next to the
- * people who breathe it; agriculture where the light is; industry, yards
- * and hangars at the working end; reactors last, behind a shadow shield,
- * with the radiators edge-on to the sun. */
-
 export const ZONE = { command: 0.06, habitat: 0.3, services: 0.5, science: 0.42, industry: 0.74, docking: 0.66, power: 0.96 };
 
 const M = (id, name, o) => ({
@@ -24,7 +8,6 @@ const M = (id, name, o) => ({
 export const MODULES = {};
 function add(list) { for (const m of list) { if (MODULES[m.id]) throw new Error(`duplicate module ${m.id}`); MODULES[m.id] = m; } }
 
-/* ---- life support ---------------------------------------------------------- */
 add([
   M("ls.core", "Life Support Core", {
     role: "atmosphere revitalisation for the whole station", prefab: "plant", size: [34, 18, 40], mount: ["spine", "ring", "arm"], zone: ZONE.services,
@@ -48,7 +31,6 @@ add([
   }),
 ]);
 
-/* ---- agriculture --------------------------------------------------------- */
 add([
   M("ag.farm", "Agriculture Deck", {
     role: "food, oxygen and green space under glass", prefab: "greenhouse", size: [48, 20, 60], mount: ["ring", "spine", "arm"], zone: ZONE.habitat, sun: "face",
@@ -62,7 +44,6 @@ add([
   }),
 ]);
 
-/* ---- science ------------------------------------------------------------- */
 add([
   M("sc.rnd", "R&D Laboratory", {
     role: "research and development wing", prefab: "labstack", size: [30, 24, 34], mount: ["spine", "arm", "ring"], zone: ZONE.science,
@@ -76,7 +57,6 @@ add([
   }),
 ]);
 
-/* ---- industry ------------------------------------------------------------ */
 add([
   M("mf.shipyard", "Ship Manufacturing Yard", {
     role: "hull assembly on open jigs beside the hangar", prefab: "shipyard", size: [110, 60, 140], mount: ["truss", "end", "spine"], zone: ZONE.industry,
@@ -95,7 +75,6 @@ add([
   }),
 ]);
 
-/* ---- trade & cargo ------------------------------------------------------- */
 add([
   M("cg.trading", "Trading Concourse", {
     role: "market hall, exchange floor and customs", prefab: "concourse", size: [50, 22, 50], mount: ["ring", "spine", "arm"], zone: ZONE.docking,
@@ -114,7 +93,6 @@ add([
   }),
 ]);
 
-/* ---- command ------------------------------------------------------------- */
 add([
   M("cmd.deck", "Command Deck", {
     role: "station command, with the view", prefab: "command", size: [36, 24, 30], mount: ["end", "spine"], zone: ZONE.command,
@@ -128,7 +106,6 @@ add([
   }),
 ]);
 
-/* ---- habitation ---------------------------------------------------------- */
 add([
   M("hb.quarters_1", "Living Quarters — Tier I", {
     role: "cabin pods for a working crew", prefab: "podblock", size: [40, 22, 48], mount: ["spine", "arm", "ring"], zone: ZONE.habitat,
@@ -177,7 +154,6 @@ add([
   }),
 ]);
 
-/* ---- power & thermal ----------------------------------------------------- */
 add([
   M("pw.solar", "Solar Wing Array", {
     role: "photovoltaic wings tracking the sun", prefab: "solarwing", size: [120, 6, 60], mount: ["truss", "spine", "end"], zone: ZONE.power, sun: "face",
@@ -211,7 +187,6 @@ add([
   }),
 ]);
 
-/* ---- docking ------------------------------------------------------------- */
 add([
   M("dk.hangar", "Hangar Bay", {
     role: "a lit mouth a hundred and ten metres across — three ways in, three ways out", prefab: "hangar", size: [110, 50, 140], mount: ["spine", "surface", "end", "truss"], zone: ZONE.docking,
@@ -225,7 +200,6 @@ add([
   }),
 ]);
 
-/* ---- comms, sensors, defence --------------------------------------------- */
 add([
   M("cd.comms", "Comms Array", {
     role: "dishes and phased arrays on a mast", prefab: "commsmast", size: [16, 40, 16], mount: ["end", "surface", "truss"], zone: ZONE.command,
@@ -289,7 +263,6 @@ add([
   }),
 ]);
 
-/* ---- array variants ---------------------------------------------------------- */
 add([
   M("pw.solar_fan", "Solar Petal Fan", {
     role: "a radial fan of deployable petals on a tracking hub", prefab: "solarfan", size: [90, 8, 90], mount: ["truss", "spine", "end", "surface"], zone: ZONE.power, sun: "face",

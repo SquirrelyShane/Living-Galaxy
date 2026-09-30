@@ -15,7 +15,7 @@ import assert from "node:assert/strict";
 import {
   nameRng, forgeWord, personName, givenName, familyName, familyOf, childFamily,
   worldName, moonName, rockName, beaconName, skyNaming, skyTongue, surveyYear, offensive,
-} from "../js/names.js";
+} from "../js/world/names.js";
 import { LEXICONS, TONGUES } from "../js/data/lexicons.js";
 
 let pass = 0, fail = 0;
@@ -390,7 +390,7 @@ await t("half a million names come out clean", () => {
 console.log("\n-- integration --");
 
 await t("generateSystem names a whole sky without a collision", async () => {
-  const { generateSystem } = await import("../js/generate.js");
+  const { generateSystem } = await import("../js/world/generate.js");
   for (const seed of ["orion", "kesune", "drift-7", "vega", "a", "zzz"]) {
     const sys = generateSystem(seed);
     const names = sys.bodies.map((b) => b.name).concat(sys.beacons.map((b) => b.name));
@@ -402,14 +402,14 @@ await t("generateSystem names a whole sky without a collision", async () => {
 });
 
 await t("the same seed gives the same sky twice", async () => {
-  const { generateSystem } = await import("../js/generate.js");
+  const { generateSystem } = await import("../js/world/generate.js");
   const a = generateSystem("repeatable").bodies.map((b) => b.name);
   const b = generateSystem("repeatable").bodies.map((b) => b.name);
   assert.deepEqual(a, b);
 });
 
 await t("Sol is untouched", async () => {
-  const { generateSystem } = await import("../js/generate.js");
+  const { generateSystem } = await import("../js/world/generate.js");
   const sol = generateSystem("");
   assert.equal(sol.name, "Sol");
   assert.ok(sol.bodies.some((b) => b.name === "Earth"), "Sol lost its worlds");

@@ -1,14 +1,3 @@
-/* robotgen/src/data/bom.js — spec → parts manifest → bill of materials.
- *
- *   robotParts(spec)  → [{ part, count, why }]      what the yard would pick
- *   partBom(part)     → { componentId: count }
- *   expandBom(bom)    → { materials: {id: kg}, components: {id: count}, fasteners }
- *   robotBom(spec)    → the whole unit rolled up: parts by domain, components,
- *                       materials by kind, mass, power, heat, cost
- *
- * Same algorithm as NEWSHIPGEN's expandBom (components recurse to raw stock and
- * mass is conserved) and the same two-step costing as STATIONGEN. Nothing here
- * touches THREE — it runs in node, a worker or the page. */
 import { MATERIALS, COMPONENTS, materialCost } from './catalog.js';
 import { PARTS, PART_DOMAINS } from './parts.js';
 
@@ -21,7 +10,6 @@ export function bomMass(bom) {
   return kg;
 }
 
-/* recursive roll-up to raw stock; fastener kits also report piece counts */
 export function expandBom(bom, out = { materials: {}, components: {}, fasteners: 0 }, mult = 1) {
   for (const [c, q] of Object.entries(bom)) {
     const comp = COMPONENTS[c];
@@ -38,7 +26,6 @@ export function expandBom(bom, out = { materials: {}, components: {}, fasteners:
   return out;
 }
 
-/* ---------- spec → parts ---------------------------------------------------- */
 export const HAND_PART = { gripper: 'r.ee.gripper', claw: 'r.ee.claw', tool: 'r.ee.gripper', manipulator: 'r.ee.hand', weapon: 'r.wp.smallarm', pad: 'r.ee.tray' };
 export const LIMB_PART = { heavy: 'r.ee.clamp', industrial: 'r.ee.clamp', blade: 'r.ee.blade', drill: 'r.ee.drill', beamfist: 'r.ee.beamfist', welder: 'r.ee.welder', saw: 'r.ee.saw', spray: 'r.ee.spray', vac: 'r.ee.vac', sampler: 'r.ee.sampler', auger: 'r.ee.auger', medkit: 'r.ee.medkit', tray: 'r.ee.tray', disruptor: 'r.ee.disruptor', winch: 'r.ee.winch',
   harpoon: 'r.ee.harpoon', multitool: 'r.ee.multitool', ram: 'r.ee.ram', shieldemitter: 'r.ar.shield_emitter' };
@@ -76,9 +63,6 @@ export const KIT_PART = {
   sensor: 'r.sn.mast', ammo: 'r.wp.magazine', hose: 'r.kt.hose_reel',
 };
 
-
-/* A 0.5 m inspection flyer is not a small starship: below a metre the yard
-   builds from the micro tier, so the manifest weighs what the airframe weighs. */
 export const MICRO_SWAP = {
   'r.fr.spine_light': 'r.fr.spine_micro', 'r.fr.spine_std': 'r.fr.spine_micro',
   'r.fr.shell_panel': 'r.fr.shell_micro', 'r.fr.hardpoint': 'r.fr.hardpoint_mi',
@@ -119,9 +103,6 @@ export const MICRO_SWAP = {
   'r.ee.claw': 'r.ee.gripper_micro', 'r.kt.camera_ball': 'r.kt.camera_micro',
   'r.sn.optic_thermal': 'r.kt.thermal_micro', 'r.kt.spot_micro': 'r.kt.spot_micro',
 };
-/* The micro tier is for airframes that fit in a backpack and for the smallest
-   ground units. A metre-tall tracked frame is small, not micro — it still wants
-   real wheels, real armour and a real battery. */
 export function isMicro(spec) {
   return spec.flying ? spec.height <= 1.05 : spec.height <= 0.6;
 }
@@ -132,26 +113,20 @@ export function robotParts(spec) {
   const list = [];
   const micro = isMicro(spec);
   const frameKg = Math.max(1, spec.stats.frameEstimateKg || spec.stats.massKg);
-  const microCap = spec.flying ? 6 : 12;      // kg of optional kit a micro unit will carry
+  const microCap = spec.flying ? 6 : 12;
   const add = (rawId, count = 1, why = '') => {
     if (!count) return;
     const id = (micro && MICRO_SWAP[rawId] && PARTS[MICRO_SWAP[rawId]]) ? MICRO_SWAP[rawId] : rawId;
     const part = PARTS[id];
-    // a sub-metre airframe cannot be handed a shield generator or a pallet fork
-    // just because its career rolled one: optional kit heavier than a chunk of
-    // the whole unit is left off the manifest rather than bolted on
     if (micro && part && OPTIONAL.has(part.domain) && part.mass > microCap) return;
     if (!part) throw new Error('unknown part ' + id);
     const found = list.find(e => e.part.id === id && e.why === why);
     if (found) found.count += count; else list.push({ part, count, why });
   };
   const L = spec.locomotion, A = spec.attachments || {};
-  // sizing runs off the FRAME estimate, never off the mass the manifest itself
-  // produced — otherwise re-quoting a unit would keep changing what it is made of
   const mass = spec.stats.frameEstimateKg || spec.stats.massKg;
   const flying = L.type === 'rotor' || L.type === 'plane';
 
-  /* frame */
   add(mass > 400 ? 'r.fr.spine_heavy' : mass > 90 ? 'r.fr.spine_std' : 'r.fr.spine_light', 1, 'chassis');
   const surface = 2 * (spec.torso.width * spec.torso.height + spec.torso.width * spec.torso.depth + spec.torso.height * spec.torso.depth);
   add('r.fr.shell_panel', Math.max(1, Math.round(surface / 0.3)), 'body shell');
@@ -162,7 +137,6 @@ export function robotParts(spec) {
   if (spec.role === 'service' || spec.role === 'courier' || spec.role === 'medic' || spec.role === 'companion') add('r.fr.bumper_ring', 1, 'people-safe bumper');
   add('r.fr.hardpoint', 2 + (A.shoulder ? (A.shoulder.L ? 1 : 0) + (A.shoulder.R ? 1 : 0) : 0), 'hardpoints');
 
-  /* drive */
   if (L.legs) {
     const legPart = mass > 400 ? 'r.dr.leg_heavy' : mass > 110 ? 'r.dr.leg_std' : 'r.dr.leg_light';
     add(legPart, L.legs, `${L.legs}× ${L.style} leg`);
@@ -197,7 +171,6 @@ export function robotParts(spec) {
     if (L.chute) add('r.fl.chute', 1, 'recovery chute');
   }
 
-  /* arms */
   if (spec.arms.count > 0) {
     const jointsPerArm = spec.arms.segments + 2;
     const joint = mass > 400 ? 'r.ac.joint_heavy' : mass > 110 ? 'r.ac.joint_std' : spec.height < 1.2 ? 'r.ac.joint_light' : 'r.ac.joint_std';
@@ -214,7 +187,6 @@ export function robotParts(spec) {
     if (spec.arms.count >= 4) add(HAND_PART[spec.arms.hand] || 'r.ee.gripper', 2, 'lower pair');
   }
 
-  /* head + sensors */
   const O = spec.head.optics;
   add('r.sn.optic_stereo', O.count >= 2 ? 1 : 0, 'stereo pair');
   add('r.sn.optic_mono', Math.max(0, O.count - (O.count >= 2 ? 2 : 0)), 'optics');
@@ -225,21 +197,18 @@ export function robotParts(spec) {
   if (spec.head.earPods) add('r.sn.mic_array', 1, 'acoustic');
   if (spec.head.antenna.type === 'dish') add('r.cd.dish', 1, 'dish');
 
-  /* compute + comms */
   add('r.cd.cpu_core', 1, 'controller');
   add('r.cd.autonomy', spec.behavior.curiosity > 0.5 || flying ? 1 : 1, 'autonomy');
   add('r.cd.safety', 1, 'safety chain');
   add('r.cd.radio', 1, 'radio');
   add('r.cd.harness', Math.max(1, Math.round(spec.height)), 'harness');
 
-  /* armour */
   const panels = (A.armor || []).length;
   const style = panels ? A.armor[0].style : 'plate';
   const armPart = { plate: 'r.ar.plate', composite: 'r.ar.composite', ablative: 'r.ar.ablative', riot: 'r.ar.riot' }[style] || 'r.ar.plate';
   if (panels) add(armPart, panels, `${style} panels`);
   if (spec.stats.armor >= 2) add('r.ar.plate', spec.stats.armor, 'base armour');
 
-  /* shoulder mounts + weapon mods */
   for (const side of ['L', 'R']) {
     const m = A.shoulder && A.shoulder[side];
     if (!m) continue;
@@ -256,31 +225,26 @@ export function robotParts(spec) {
     if (W.underbarrel !== 'none') add('r.wp.underbarrel', 1, W.underbarrel);
   }
 
-  /* back unit + career kit */
   if (A.back && A.back !== 'none' && BACK_PART[A.back]) add(BACK_PART[A.back], 1, 'back unit');
   for (const k of (spec.kit || [])) if (KIT_PART[k]) add(KIT_PART[k], 1, 'career kit');
   for (const p of (A.payload || [])) if (KIT_PART[p.type]) add(KIT_PART[p.type], 1, 'payload');
 
-  /* power — sized off the draw the manifest already committed to, not guessed:
-     enough pack for a useful shift, capped so a scout does not fly a brick */
   let draw = 0;
   for (const { part, count } of list) draw += Math.min(0, part.pwr) * count;
   const drawKw = Math.abs(draw) / 1000;
   const packId = micro ? 'r.pw.pack_micro' : mass > 400 ? 'r.pw.pack_large' : mass > 90 ? 'r.pw.pack_std' : 'r.pw.pack_small';
   const packKwh = PARTS[packId].kwh || 0.5;
-  const hours = flying ? 0.42 : 2.2;                       // the shift the yard sizes for
+  const hours = flying ? 0.42 : 2.2;
   const maxPacks = flying ? (micro ? 2 : 3) : 4;
   add(packId, Math.max(1, Math.min(maxPacks, Math.round(drawKw * hours / packKwh))), 'battery');
   add('r.pw.bus', 1, 'power bus');
   add('r.pw.charge_port', 1, 'charge port');
-  if (spec.kit && spec.kit.includes('solar')) { /* handled by kit */ }
+  if (spec.kit && spec.kit.includes('solar')) {}
 
-  /* thermal sized off the draw */
   add(draw < -2500 ? 'r.th.liquid_loop' : 'r.th.fan_loop', 1, 'cooling');
   if (draw < -6000) add('r.th.radiator', 2, 'radiators');
   if (spec.palette.name === 'hazard' || spec.role === 'hazmat' || spec.role === 'diver') add('r.th.dust_seal', 1, 'sealing');
 
-  /* service + identity */
   if (A.hazardLights) add('r.sv.beacon', 1, 'hazard beacons');
   if (spec.attachments && spec.attachments.worklamps) add('r.sv.worklamp', 1, 'work lamps');
   add('r.sv.service_panel', 1, 'service access');
@@ -289,7 +253,6 @@ export function robotParts(spec) {
   return list;
 }
 
-/* ---------- roll-up ---------------------------------------------------------- */
 export function robotBom(spec) {
   const manifest = robotParts(spec);
   const total = { materials: {}, components: {}, fasteners: 0 };
@@ -342,7 +305,6 @@ export function partCost(part) {
   return Math.round(cr);
 }
 
-/* readable manifest, the same shape describe() gives for the spec sheet */
 export function describeBom(spec, bom = robotBom(spec)) {
   const lines = [
     `${spec.designation} "${spec.nickname}" — ${spec.roleLabel} · parts manifest`,

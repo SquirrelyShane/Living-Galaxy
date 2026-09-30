@@ -2,14 +2,14 @@
  *
  *   node --import ./test/three-register.mjs test/economy.test.mjs
  */
-import { sim, launchSim, sellPriceAt, buyPriceAt, tradeSell, portLedger } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { currentSystem } from "../js/bodies.js";
-import { LINES, ECON_TICK, PRICE_FLOOR, PRICE_CEIL, stockMult, stockOf, runLines, stepEconomy, deliver, lift, shortagesOf, wantsOf, targetFor, econReport, ledgerOf } from "../js/economy.js";
+import { sim, launchSim, sellPriceAt, buyPriceAt, tradeSell, portLedger } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { currentSystem } from "../js/world/bodies.js";
+import { LINES, ECON_TICK, PRICE_FLOOR, PRICE_CEIL, stockMult, stockOf, runLines, stepEconomy, deliver, lift, shortagesOf, wantsOf, targetFor, econReport, ledgerOf } from "../js/economy/economy.js";
 import { flow, populateFlow, stepFlow, flowPose, boatName } from "../js/npc/flow.js";
 import { traffic, populateTraffic, stepTraffic, trafficCensus } from "../js/npc/traffic.js";
-import { rngFromSeed } from "../js/generate.js";
+import { rngFromSeed } from "../js/world/generate.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

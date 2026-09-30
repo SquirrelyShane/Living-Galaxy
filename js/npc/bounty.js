@@ -1,46 +1,23 @@
-/* Living Galaxy — the Marshal's board: marks, capture, and what it costs you.
- *
- * A bounty is not a kill order. Every mark on this board is wanted ALIVE and
- * held somewhere, and the whole point of the system is what happens after you
- * have them: a person in your brig is a person (crew/captive.js), with a name
- * on the ledger, a corp who wants them back, and an opinion of you that moves.
- *
- * The cost is the interesting part. A mark belongs to somebody. Lifting them
- * off a station is theft as far as their outfit is concerned, and the standing
- * you lose with them — and with everyone who flies under the same flag — does
- * not come back when you cash the ticket. Taking one bounty is a job. Taking
- * eight from the same issuer is picking a side in somebody else's war.
- *
- * Marks are drawn from CRADLE first, so the hand who walked off a hauler two
- * skies ago, or the one you paid off at Foundry Hold, is who you find with a
- * price on them. Only somebody who is actually wanted gets filed.
- *
- */
-
-import { sim, logEvent } from "../sim.js";
-import { stations, stationById } from "../stations.js";
+import { sim, logEvent } from "../sim/sim.js";
+import { stations, stationById } from "../station/stations.js";
 import { cradle, generateNPC, ensureIdentity } from "./cradle.js";
-import { catalogue } from "../gdb.js";
-import { corps, corpById, corpOfStation, corpRelation, adjustStanding } from "../corps.js";
-import { crew, crewHooks } from "../crew.js";
+import { catalogue } from "../corp/gdb.js";
+import { corps, corpById, corpOfStation, corpRelation, adjustStanding } from "../corp/corps.js";
+import { crew, crewHooks } from "../crew/ledger.js";
 import { boarding } from "../interior/boarding.js";
 import { bodyOf } from "../crew/deckmind.js";
 
-/** Marks on a port's board at once, and how long a ticket stands. */
 export const BOARD_SIZE = 4;
 export const TICKET_CYCLES = 40;
-/** Standing lost with the mark's own outfit for lifting one of theirs. */
 export const LIFT_COST = 9;
-/** …and gained with the outfit that wrote the ticket, on delivery. */
 export const DELIVER_GAIN = 7;
-/** Below this standing with a hostile outfit, somebody starts looking for you. */
 export const HUNTED_AT = -55;
 
 export const bounty = {
-  boards: new Map(),     // stationId → { restock, marks: [] }
-  taken: [],             // tickets you are holding
+  boards: new Map(),
+  taken: [],
   log: [],
-  playerPrice: 0,        // what you are worth to somebody else
+  playerPrice: 0,
 };
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -63,8 +40,6 @@ function rng(seedStr) {
   };
 }
 
-/* ---- what somebody is wanted for ------------------------------------------ */
-
 export const CHARGES = [
   { id: "manifest", label: "falsifying a manifest", tier: "petty", pay: [900, 2200], heat: 0.5 },
   { id: "desertion", label: "walking off a contracted berth", tier: "petty", pay: [700, 1800], heat: 0.4 },
@@ -78,18 +53,10 @@ export const CHARGES = [
 
 const TIER_GUARDS = { petty: [0, 1], standing: [1, 3], sealed: [2, 5] };
 
-/* ---- the board ------------------------------------------------------------ */
-
-/** How many restocks deep this port's board is. */
 function restockOf(st) {
   return Math.floor((sim.time ?? 0) / (TICKET_CYCLES * 90));
 }
 
-/**
- * The marks on offer at a port. Deterministic per port, per restock, per sky —
- * so the same board is the same board until it turns over, and the same on
- * every device in the room.
- */
 export function boardAt(st) {
   if (!st?.id || st.sector === "pirate") return [];
   const restock = restockOf(st);
@@ -101,8 +68,6 @@ export function boardAt(st) {
   const ports = stations.filter((s) => s.id && s.sector !== "pirate");
   const marks = [];
 
-  /* people already on the ledger who have somewhere to be: the hands who
-   * walked off, the ones you dismissed, the mutineers */
   const pool = cradle.pool((rec) => rec.status !== "child" && !rec.wanted).sort((a, b) => (a.id < b.id ? -1 : 1));
 
   for (let i = 0; i < BOARD_SIZE; i++) {
@@ -115,13 +80,11 @@ export function boardAt(st) {
     if (!rec) {
       rec = generateNPC(`${sim.skySeed || "sol"}:mark:${st.id}:${restock}:${i}`, { sky: sim.skySeed });
       const held = cradle.get(rec.id);
-      rec = held ?? catalogue(rec, { kind: "mark", place: st.id, sky: sim.skySeed ?? null, group: marks });   // 0.3.54: a wanted name is still one person's
+      rec = held ?? catalogue(rec, { kind: "mark", place: st.id, sky: sim.skySeed ?? null, group: marks });
     }
     if (marks.some((m) => m.id === rec.id)) continue;
     ensureIdentity(rec);
 
-    /* whose hand they are: never the issuer's own, and never a flag you
-     * cannot lose anything with */
     const candidates = corps.filter((c) => c !== issuer && (!issuer || corpRelation(c, issuer) < 0.5));
     const owner = candidates.length ? candidates[Math.floor(r() * candidates.length)] : corps[Math.floor(r() * corps.length)];
     const holed = ports[Math.floor(r() * ports.length)] ?? st;
@@ -147,7 +110,6 @@ export function boardAt(st) {
       restock,
       gone: false,
     });
-    /* file it: this person is now somebody the sky knows about */
     rec.wanted = { charge: charge.id, pay: marks[marks.length - 1].pay, by: issuer?.id ?? null, since: Math.round(sim.time ?? 0) };
     if (rec.status === "pool" || rec.status === "dismissed") cradle.put(rec);
   }
@@ -156,12 +118,10 @@ export function boardAt(st) {
   return marks;
 }
 
-/** Every ticket you are holding, live ones first. */
 export function ticketsHeld() {
   return bounty.taken.filter((t) => !t.done);
 }
 
-/** Take a ticket. It is a promise to the issuer, not a purchase. */
 export function takeTicket(mark) {
   if (!mark || mark.gone) return "That one is already gone";
   if (bounty.taken.some((t) => t.id === mark.id && !t.done)) return "You are already carrying that ticket";
@@ -172,7 +132,6 @@ export function takeTicket(mark) {
   return null;
 }
 
-/** Give one back. It costs a little face and nothing else. */
 export function abandonTicket(id) {
   const t = bounty.taken.find((x) => x.id === id && !x.done);
   if (!t) return "No such ticket";
@@ -183,9 +142,6 @@ export function abandonTicket(id) {
   return null;
 }
 
-/* ---- taking somebody ------------------------------------------------------ */
-
-/** What your hull can bring to a lock-up. Crew, robots and whoever is in the chair. */
 export function captureStrength() {
   let s = 1;
   for (const m of crew.aboard) {
@@ -198,7 +154,6 @@ export function captureStrength() {
   return Math.round(s * 100) / 100;
 }
 
-/** What is standing between you and them. */
 export function markStrength(mark) {
   const rec = cradle.get(mark.recId);
   const g = rec ? bodyOf({ id: rec.id, raceId: rec.raceId, seed: rec.seed }) : null;
@@ -206,7 +161,6 @@ export function markStrength(mark) {
   return Math.round((own + (mark.guards ?? 0) * 1.1) * 100) / 100;
 }
 
-/** Can this even be attempted from where you are? { ok, why } */
 export function canAttempt(mark, stId = sim.ship?.dockedAt) {
   if (!mark) return { ok: false, why: "no mark" };
   if (mark.gone) return { ok: false, why: "somebody else got to them" };
@@ -218,16 +172,10 @@ export function canAttempt(mark, stId = sim.ship?.dockedAt) {
 }
 
 export function hasBrig() { return brigBerths() > 0; }
-/** Cells. Every hull has one; the refit adds more. */
 export function brigBerths() {
   return 1 + Math.max(0, Math.round((sim.ship?.mods?.brig ?? 0)));
 }
 
-/**
- * Go and get them. One attempt per ticket per restock, resolved against what
- * you brought. Nobody dies here: the worst outcome is that they are gone and
- * their outfit knows exactly who came looking.
- */
 export function attemptCapture(mark, opts = {}) {
   const can = canAttempt(mark, opts.stId ?? sim.ship?.dockedAt);
   if (!can.ok) return { ok: false, why: can.why };
@@ -241,7 +189,6 @@ export function attemptCapture(mark, opts = {}) {
   const odds = clamp(mine / (mine + theirs), 0.08, 0.94);
   const roll = r();
 
-  /* the outfit whose hand this is hears about it either way */
   if (mark.ownerCorp) {
     adjustStanding(mark.ownerCorp, -LIFT_COST * (mark.heat ?? 1), `came for ${mark.name}`);
     for (const c of corps) {
@@ -275,9 +222,6 @@ export function attemptCapture(mark, opts = {}) {
   return { ok: true, taken: false, odds, gone: mark.gone, mark };
 }
 
-/* ---- what you do with them ------------------------------------------------ */
-
-/** Hand somebody over. The ticket pays and the issuer remembers it. */
 export function deliver(captiveId, stId = sim.ship?.dockedAt) {
   const st = stationById(stId);
   if (!st) return { ok: false, why: "you are not docked" };
@@ -285,8 +229,6 @@ export function deliver(captiveId, stId = sim.ship?.dockedAt) {
   const i = boarding.brig.findIndex((p) => p.id === captiveId);
   if (i < 0) return { ok: false, why: "not in the brig" };
   const p = boarding.brig[i];
-  /* A Marshal's office looks at what you hand them. Somebody who has been
-   * starved and left in the dark is not a delivery, it is a complaint. */
   const health = p.state?.health ?? 100;
   if (health < 35) return { ok: false, why: `they will not take ${p.name} in that state — feed them and get the medic in first` };
   boarding.brig.splice(i, 1);
@@ -313,7 +255,6 @@ export function deliver(captiveId, stId = sim.ship?.dockedAt) {
   return { ok: true, pay, docked: health < 60 };
 }
 
-/** Let them go. Their outfit notices; the issuer notices harder. */
 export function release(captiveId, why = "") {
   const i = boarding.brig.findIndex((p) => p.id === captiveId);
   if (i < 0) return { ok: false, why: "not in the brig" };
@@ -334,7 +275,6 @@ export function release(captiveId, why = "") {
   return { ok: true };
 }
 
-/** Their outfit buys them back. Standing recovers; the ticket does not. */
 export function ransom(captiveId) {
   const i = boarding.brig.findIndex((p) => p.id === captiveId);
   if (i < 0) return { ok: false, why: "not in the brig" };
@@ -355,12 +295,6 @@ export function ransom(captiveId) {
   return { ok: true, pay };
 }
 
-/* ---- the other direction -------------------------------------------------- */
-
-/**
- * What you are worth to somebody. Standing far enough under with any outfit
- * and there is paper out on you — which is a thing pirates and hunters read.
- */
 export function tickPlayerPrice() {
   let worst = 0;
   for (const c of corps) worst = Math.min(worst, c.standing ?? 0);
@@ -368,17 +302,11 @@ export function tickPlayerPrice() {
   return bounty.playerPrice;
 }
 
-/** One line for the HUD and the desk. */
 export function priceLine() {
   if (!bounty.playerPrice) return "";
   return `There is ${bounty.playerPrice} cr on this hull.`;
 }
 
-/**
- * You are not the only hull reading these boards. A mark you have signed for
- * and left alone can be lifted by somebody else — which is what makes a ticket
- * a thing with a clock on it rather than a thing on a list.
- */
 export function tickHunters(seconds) {
   hunterPool += Math.max(0, Math.min(600, Number(seconds) || 0));
   if (hunterPool < 90) return;
@@ -394,7 +322,6 @@ export function tickHunters(seconds) {
       note(`The ticket on ${t.name} has run out.`);
       continue;
     }
-    /* somebody else is looking too, and they are not waiting for you */
     const held = Math.max(0, now - t.takenAt) / 90;
     if (!t.gone && held > 6 && rngRoll(`${t.id}:hunter:${Math.floor(held / 6)}`) < 0.07) {
       t.gone = true;

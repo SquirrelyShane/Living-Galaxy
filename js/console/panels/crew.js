@@ -1,22 +1,14 @@
-/* LIVING GALAXY — CONSOLE › CREW: ROSTER · TALK · BONDS · HOUSE.
- *
- * The one place to manage everyone aboard: who is posted where and how well
- * it is going (roster.js + duties.js), talking to them (talkview.js), who
- * gets on with whom (bonds.js + family.household), and the house rules
- * (family.social). Built on the console kit; contract PLAN.md §3 CREW, §2.3.
- */
-
 import { el, section, note, row, button, group, chips, setBar, card } from "../kit.js";
-import { crew, crewWageTotal, firstName, genderMark } from "../../crew.js";
+import { crew, crewWageTotal, firstName, genderMark } from "../../crew/ledger.js";
 import { childrenAboard, CHILD_ACTS, raise } from "../../crew/children.js";
 import { CHILD_TOPICS, talkToChild, openChildAsk, answerChild, childTalkLog, stageOf } from "../../crew/childtalk.js";
 import { tiersOf } from "../../crew/tiers.js";
-import { sim } from "../../sim.js";
-import { social, setSocial, loadSocial, household, settleFamily, berthsUsed, trustOf } from "../../family.js";
+import { sim } from "../../sim/sim.js";
+import { social, setSocial, loadSocial, household, settleFamily, berthsUsed, trustOf } from "../../crew/family.js";
 import { ladderReport, STAGE_LABEL, stageIndex, conceptionOdds, fertilityOf, privacyAboard, kinBetween } from "../../crew/romance.js";
 import { GENDERS } from "../../npc/cradle.js";
 import { captain, transferCommand, retakeCommand } from "../../npc/captain.js";
-import { hasCompany, company } from "../../company.js";
+import { hasCompany, company } from "../../corp/company.js";
 import { roster, ROSTER_SORTS, ROSTER_FILTERS, dutyOptions, setDuty, PHASE_LABEL, KIND_LABEL } from "../../crew/roster.js";
 import { bondsReport } from "../../crew/bonds.js";
 import { duties, dutyReport } from "../../crew/duties.js";
@@ -43,8 +35,6 @@ function logList(parent, entries, empty) {
   for (const e of entries.slice(0, 20)) { const li = el("li"); li.append(el("i", null, fmtTime(e.t)), el("span", null, e.msg)); ul.append(li); }
   parent.append(ul);
 }
-
-/* ---- ROSTER ------------------------------------------------------------- */
 
 function mountRoster(root, ctx) {
   const head = section("ABOARD");
@@ -90,7 +80,6 @@ function rosterCard(r, docked, ctx, rebuild, live) {
   const m = r.m;
   const ties = r.ties.map((t) => `${TIE_GLYPH[t.kind]} ${firstName({ name: t.name })}`).join("  ");
   const c = card(`${captain.holder === m.id ? "★ " : ""}${m.name}`, `${m.title}${m.robot ? " · robot" : ` · ${m.complexName} ${m.letter}`}${genderMark(m)}${ties ? ` · ${ties}` : ""}`);
-  /* three tracks, named. A number is a readout of a relationship, not one. */
   if (!m.robot) {
     const tr = tiersOf(m);
     row(c.body, "Standing", { value: tr.friend.label, hint: tr.friend.note });
@@ -113,11 +102,9 @@ function rosterCard(r, docked, ctx, rebuild, live) {
     if (!m.robot) wage.value.textContent = `${m.wage} cr/cycle${m.firstHand ? " · first hand" : ""}`;
     const last = journal.last(m.id);
     wants.value.textContent = m.wants ? (m.wants.kind === "grievance" ? "wants a word — grievance" : "wants a word") : (last ? last.action.label : "—");
-    /* the last line of a trace is the commitment; the one before it is the reason */
     const chain = last?.whatMadeMeActThis.reasoning ?? [];
     if (wantsHint) wantsHint.textContent = chain.length ? (chain[chain.length - 2] ?? chain[chain.length - 1]) : "nothing filed yet";
   });
-  /* actions */
   const acts = [button("TALK", () => { view.talkId = m.id; ctx.setSub("talk"); }, "accent")];
   acts.push(button(view.dutyOpen === m.id ? "DUTY ▾" : "DUTY", () => { view.dutyOpen = view.dutyOpen === m.id ? null : m.id; rebuild(); }));
   if (!m.robot) {
@@ -136,8 +123,6 @@ function rosterCard(r, docked, ctx, rebuild, live) {
   return c.card;
 }
 
-/* ---- TALK --------------------------------------------------------------- */
-
 function mountTalkSub(root, ctx) {
   const sec = section("TALK");
   if (!crew.aboard.length) { sec.append(el("div", "tempty", "No hands aboard to talk to.")); root.append(sec); return; }
@@ -153,20 +138,12 @@ function mountTalkSub(root, ctx) {
   ctx.push(() => { if (!crew.aboard.some((m) => m.id === view.talkId)) { if (crew.aboard.length) { view.talkId = crew.aboard[0].id; picker.set(view.talkId); remount(); } } else refresh(); });
 }
 
-/**
- * One child, and what to do about them.
- *
- * The genome was always there — an earlier build crossed both parents properly — it was just
- * never shown, and there was nothing to do with a child for the forty-eight
- * cycles before they walked off to a hiring hall. What they got from whom, what
- * it cost them, and four things a captain on a working ship can actually do.
- */
 function childCard(root, k, rebuild) {
   const { c, bond, parents, inherit } = k;
   const cd = card(c.name, `${c.age} cycles${parents.length ? ` · ${parents.join(" & ")}` : ""}${c.pronouns ? ` · ${c.pronouns.subj}/${c.pronouns.obj}` : ""}`);
   cd.card.dataset.id = c.id;
   const bondRow = row(cd.body, "Bond", { value: `${bond}`, bar: true, hint: bond >= 55 ? "would sign on here the day they can" : bond >= 25 ? "knows you" : "you are the person who signs the wages" });
-  setBar(bondRow.bar, bond / 100, bond >= 55 ? "ok" : bond >= 25 ? "warn" : "hot");   // 0.3.57: the bar was always drawn full
+  setBar(bondRow.bar, bond / 100, bond >= 55 ? "ok" : bond >= 25 ? "warn" : "hot");
   if (inherit.complex) row(cd.body, "House", { value: inherit.complex.name, hint: `generation ${inherit.complex.generation} · learns this trade ×${inherit.complex.learn.toFixed(2)}` });
   for (const sh of inherit.shares) if (sh.share != null) row(cd.body, `From ${firstName(sh)}`, { value: `${sh.share}%`, hint: "measured, not assumed" });
   for (const b of inherit.boons) row(cd.body, `▲ ${b.label}`, { value: b.kind === "apt" ? `+${Math.round(b.delta * 100)}` : "", hint: b.note });
@@ -174,7 +151,6 @@ function childCard(root, k, rebuild) {
   if (!inherit.boons.length && !inherit.flaws.length) note(cd.body, "Nothing yet that either parent would not recognise.");
   if (inherit.kin.length) row(cd.body, "Kin aboard", { value: "", hint: inherit.kin.map((x) => `${firstName(x)} ${x.r.toFixed(2)}`).join(" · ") });
 
-  /* 0.3.57 — talk WITH them: what you ask, what they ask you, and the transcript */
   const stage = stageOf(c);
   row(cd.body, "Talk", { value: stage === "little" ? "little one" : stage === "teen" ? "teenager" : "child", hint: "they answer as who they are — age, temperament, what they have been taught, the bond" });
   const ask = openChildAsk(c);
@@ -217,10 +193,7 @@ function childCard(root, k, rebuild) {
   root.append(cd.card);
 }
 
-/* ---- BONDS -------------------------------------------------------------- */
-
 function mountBonds(root, ctx) {
-  /* the ladder first: it is the part that moves, and the part people look for */
   const lad = section("THE LADDER");
   note(lad, "Strangers, noticed, interested, courting, together, bonded. Every rung needs both of them to want it.");
   const ladBody = el("div");
@@ -299,8 +272,6 @@ function mountBonds(root, ctx) {
   });
 }
 
-/* ---- HOUSE -------------------------------------------------------------- */
-
 function mountHouse(root) {
   loadSocial();
   const sec = section("YOU");
@@ -348,12 +319,8 @@ function mountHouse(root) {
   };
   repaintRules();
 
-  /* the kit as hooks.js documents it, so an addon can build a row that looks
-   * like every other row instead of hand-rolling its own markup */
   runHooks("houseRules", rules, { el, section, note, row, button, group, chips, setBar, social, setSocial, loadSocial, repaint: repaintRules });
 }
-
-/* ---- panel -------------------------------------------------------------- */
 
 export default {
   id: "crew",
@@ -374,9 +341,8 @@ export default {
     else mountRoster(root, ctx);
     if (ctx.focus && sub === "roster") root.querySelector(`[data-id="${ctx.focus}"]`)?.scrollIntoView?.({ block: "center" });
   },
-  paint() { /* refreshers pushed via ctx.push do the work */ },
+  paint() {},
   unmount() { view.dutyOpen = null; stopAllBeats(); },
-  /** one hit per hand */
   search() {
     return crew.aboard.map((m) => ({
       id: `crew:${m.id}`, label: m.name, hint: `${m.title} · ${m.robot ? "robot" : `morale ${Math.round(m.morale ?? 70)}`}`,

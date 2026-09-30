@@ -1,19 +1,3 @@
-/**
- * Impact physics for the collision demo — pure functions (no DOM, no GPU).
- *
- * Disruption uses a specific-energy criterion: Q = ½·μ·v² / m_body against a
- * size-dependent strength Q* = Q0 · m^0.4 (bigger bodies are gravity-bound and
- * harder to disperse). The destroyed fraction f = clamp(Q / Q*) decides how
- * many Voronoi chunks, nearest the contact point first, break away.
- *
- * v1.8: no rails. Each fragment leaves with its parent's velocity, the parent's
- * spin (ω × r — bodies tumble on arbitrary axes) and an ejection kick away from
- * the contact whose speed falls with fragment mass (∝ m^-1/6: big pieces are
- * slow). Survivors take whatever momentum is left, so total momentum is exactly
- * conserved. From there impact-sim.js integrates everything (mutual gravity,
- * piece-on-piece collisions, torque-free tumbling). Ejecta here is only the
- * instantaneous blast; shedding and secondary-impact debris come from the sim.
- */
 import { RNG, hashString, powerLaw, gauss, unitVec } from './rng.js';
 
 export const IMPACT = { Q0: 0.9, drag: 0.25, massExp: -0.25, eject: [0.05, 0.32], jitter: 0.05 };
@@ -26,7 +10,6 @@ const len = (a) => Math.sqrt(dot(a, a));
 const norm = (a) => mul(a, 1 / (len(a) || 1));
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
-/** Earliest t ≥ 0 at which two spheres moving linearly touch (null if never). */
 export function contactTime(pA, vA, pB, vB, R) {
   const d = sub(pB, pA);
   const w = sub(vB, vA);
@@ -40,14 +23,9 @@ export function contactTime(pA, vA, pB, vB, R) {
   return t >= 0 ? t : null;
 }
 
-/**
- * Initial states so two bodies meet at `impactAt` seconds.
- * drift: common velocity of the pair (the whole encounter moves; nothing is parked at the origin).
- * @param {object} p { speed, angleDeg, rA, rB, mA, mB, impactAt, drift }
- */
 export function setupApproach({ speed = 1.6, angleDeg = 20, rA = 1.9, rB = 1.9, mA = 1, mB = 1, impactAt = 3, drift = [0, 0, 0] }) {
   const R = rA + rB;
-  const b = R * Math.sin((Math.max(0, Math.min(75, angleDeg)) * Math.PI) / 180) * 0.92; // impact parameter
+  const b = R * Math.sin((Math.max(0, Math.min(75, angleDeg)) * Math.PI) / 180) * 0.92;
   const M = mA + mB;
   const vA = add([speed * (mB / M), 0, 0], drift);
   const vB = add([-speed * (mA / M), 0, 0], drift);
@@ -64,12 +42,6 @@ export function rotateT(R, v) {
   return [R[0][0] * v[0] + R[1][0] * v[1] + R[2][0] * v[2], R[0][1] * v[0] + R[1][1] * v[1] + R[2][1] * v[2], R[0][2] * v[0] + R[1][2] * v[1] + R[2][2] * v[2]];
 }
 
-/**
- * Plan the break-up at the moment of contact.
- * @param {object} A,B { pos, vel, spin (world ω), mass, radius, scale, rot (3×3 rows, world = rot·local),
- *                       fracture: { centroids, counts, morph? }, strength? (Q* multiplier), reform? [min,max] s }
- * @returns {{ contact, normal, energy, relativeSpeed, cm, momentum, bodies: [{ fraction, detached, velPost, spinPost, massPost, totalChunks }] }}
- */
 export function planImpact(A, B, { speed = 1.6, seed = 'impact' } = {}) {
   const rng = new RNG(hashString(String(seed) + ':impact'));
   const n = norm(sub(B.pos, A.pos));
@@ -101,14 +73,12 @@ export function planImpact(A, B, { speed = 1.6, seed = 'impact' } = {}) {
       const mass = (body.mass * counts[k]) / V;
       const closeness = 1 - i / Math.max(1, live.length);
       let dir = norm(sub(w, contact));
-      dir = norm(add(dir, mul(n, -sign * 0.35))); // away from the other body, no tunnelling
-      // bigger pieces leave slower
+      dir = norm(add(dir, mul(n, -sign * 0.35)));
       const sp = vrel * (IMPACT.eject[0] + IMPACT.eject[1] * closeness) * rng.range(0.6, 1.3) * Math.pow(mass / meanMass, IMPACT.massExp);
       const jitter = mul(unitVec(rng), vrel * IMPACT.jitter);
-      const rim = cross(spin, sub(w, body.pos)); // the parent's tumble flings its surface
+      const rim = cross(spin, sub(w, body.pos));
       const velWorld = add(add(add(body.vel, rim), mul(dir, sp)), jitter);
       const size = body.fracture.morph?.[k] ? body.scale * Math.cbrt((3 * body.fracture.morph[k].volume) / (4 * Math.PI)) : 0.8 * body.radius * Math.cbrt(counts[k] / V);
-      // the kick also spins the piece up: multi-axis, faster for small pieces
       const kick = mul(unitVec(rng), (sp / Math.max(0.15, size)) * rng.range(0.15, 0.45));
       detached.push({
         k,
@@ -124,13 +94,11 @@ export function planImpact(A, B, { speed = 1.6, seed = 'impact' } = {}) {
         reform: body.reform ? rng.range(body.reform[0], body.reform[1]) : 0,
       });
     }
-    // survivors keep the rest of the parent's momentum exactly
     const massPost = body.mass - detached.reduce((s, p) => s + p.mass, 0);
     let pLeft = mul(body.vel, body.mass);
     for (const p of detached) pLeft = sub(pLeft, mul(p.velWorld, p.mass));
     const velPost = massPost > 1e-6 ? mul(pLeft, 1 / massPost) : body.vel.slice();
     if (massPost <= 1e-6) {
-      // nothing left to absorb the balance: share it out so momentum still closes
       const tot = detached.reduce((s, p) => s + p.mass, 0);
       for (const p of detached) p.velWorld = add(p.velWorld, mul(pLeft, 1 / tot));
     }
@@ -143,7 +111,6 @@ export function planImpact(A, B, { speed = 1.6, seed = 'impact' } = {}) {
   return { contact, normal: n, energy, relativeSpeed: vrel, cm, momentum, bodies };
 }
 
-/** Total linear momentum of a plan's pieces + survivors. */
 export function planMomentum(plan) {
   let P = [0, 0, 0];
   for (const bp of plan.bodies) {
@@ -153,12 +120,6 @@ export function planMomentum(plan) {
   return P;
 }
 
-/**
- * Instantaneous blast: dust sheet (mostly ⟂ impact normal), sparks, meshed rocks.
- * base velocity = the pair's centre-of-mass velocity plus the local surface motion,
- * so the sheet is carried along and skewed by the bodies' tumble.
- * Every particle carries t0 = 0 (emitted at impact); impact-sim adds later waves.
- */
 export function planEjecta({ contact, normal, relativeSpeed, cm = [0, 0, 0] }, paletteA, paletteB, { dust = 1600, sparks = 900, rocks = 260, seed = 'ejecta', surfaceVel = [0, 0, 0], ice = 0 } = {}) {
   const rng = new RNG(hashString(String(seed) + ':ejecta'));
   const up = Math.abs(normal[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
@@ -200,13 +161,13 @@ export function planEjecta({ contact, normal, relativeSpeed, cm = [0, 0, 0] }, p
   for (let i = 0; i < rocks; i++) {
     const dir = sheetDir(0.6);
     const s = powerLaw(rng, 0.03, 0.22, 2.0);
-    const sp = v * powerLaw(rng, 0.3, 2.4, 1.4) * Math.pow(s / 0.06, -0.5); // bigger rocks slower
+    const sp = v * powerLaw(rng, 0.3, 2.4, 1.4) * Math.pow(s / 0.06, -0.5);
     const p = add(contact, mul(unitVec(rng), 0.35));
     composeAxisAngle(K.matrix, i * 16, p, unitVec(rng), rng.range(0, Math.PI * 2), s);
     K.vel.set(add(base, mul(dir, sp)), i * 3);
     const ax = unitVec(rng), ax2 = unitVec(rng);
     K.spin.set([ax[0], ax[1], ax[2], rng.range(0.5, 4)], i * 4);
-    K.spin2.set([ax2[0], ax2[1], ax2[2], rng.range(0.1, 1.2)], i * 4); // precession: tumble axis wanders
+    K.spin2.set([ax2[0], ax2[1], ax2[2], rng.range(0.1, 1.2)], i * 4);
     K.heat.set([Math.max(0.05, 1.1 - sp / (v * 2)) * Math.min(1.2, v / 1.3), rng.next()], i * 2);
     const c = pick();
     K.color.set([Math.min(1, c[0] * 1.3), Math.min(1, c[1] * 1.3), Math.min(1, c[2] * 1.3)], i * 3);
@@ -224,12 +185,7 @@ export function composeAxisAngle(te, o, p, axis, ang, s) {
   te[o + 12] = p[0]; te[o + 13] = p[1]; te[o + 14] = p[2]; te[o + 15] = 1;
 }
 
-/**
- * The biggest escaping piece leaves for the survey deck as a new asteroid —
- * its own seed (parent seed + chunk), the parent's class, a size from its volume share.
- * @param {Array<{ body, k, size, speed }>} escaping  from ImpactSim.fates()
- */
-export function rogueHandoff(escaping, bodyInfo /* [{ seed, classId, radiusM, kind, fracture }] */) {
+export function rogueHandoff(escaping, bodyInfo) {
   let best = null;
   for (const e of escaping) if (!best || e.size > best.size) best = e;
   if (!best) return null;
@@ -248,7 +204,6 @@ export function rogueHandoff(escaping, bodyInfo /* [{ seed, classId, radiusM, ki
   };
 }
 
-/** Sample a small palette from a vertex-colour attribute array. */
 export function samplePalette(colorArray, n = 24, seed = 'pal') {
   const rng = new RNG(hashString(String(seed)));
   const V = colorArray.length / 3;

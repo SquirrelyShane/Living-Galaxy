@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 09 — GUIDANCE, NAVIGATION & TIMING */
 export default {
   id: "d09", name: "09 Guidance, Navigation & Timing",
   sheet: {

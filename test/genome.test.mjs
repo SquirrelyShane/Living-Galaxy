@@ -3,9 +3,9 @@
  *   node --import ./test/three-register.mjs test/genome.test.mjs
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
 import * as G from "../js/genome/genome-256.js";
 import {
   SPACER, SYNTH, SPACER_RANGES, createSpacer, packGenome, unpackGenome, fingerprint,
@@ -14,11 +14,11 @@ import {
 } from "../js/genome/spacer.js";
 import { deckGraph, ACTION_META } from "../js/crew/deckgraph.js";
 import { decide } from "../js/genome/behavior-graph.js";
-import { crew, hireCrew, stationRoster, tickCrew, compat, relatedTo, CYCLE_SECONDS } from "../js/crew.js";
+import { crew, hireCrew, stationRoster, tickCrew, compat, relatedTo, CYCLE_SECONDS } from "../js/crew/ledger.js";
 import { cradle, generateNPC, ensureGenome, genomeOf, looksLine, CRADLE_VERSION } from "../js/npc/cradle.js";
 import { deckmind, runDeckCycle, stepHand, buildContext, bodyOf, ACTIONS, NEED_KEYS, deckReport } from "../js/crew/deckmind.js";
 import { journal, exportJournals, importJournals, habitsOf, JOURNAL_KEEP } from "../js/crew/journal.js";
-import { setSocial, household, tickHousehold, conceive, adjustTrust } from "../js/family.js";
+import { setSocial, household, tickHousehold, conceive, adjustTrust } from "../js/crew/family.js";
 import { topicsFor, open, choose } from "../js/crew/talk.js";
 import { duties } from "../js/crew/duties.js";
 

@@ -1,7 +1,7 @@
 /* LIVING GALAXY experimental — deck plans, CRADLE, neural core.
  *   node test/experimental.test.mjs
  */
-import { SHIP_DB } from "../js/shipdb.js";
+import { SHIP_DB } from "../js/ships/shipdb.js";
 import { hullPlan, stationRoomFor, quartersFor } from "../js/interior/deckplan.js";
 import { generateNPC, cradle, exportLedger, importLedger, TRAIT_AXES } from "../js/npc/cradle.js";
 import { ACTIONS, createBrain, features, think, learnImitation, learnOutcome, labelFromPlay } from "../js/npc/brain.js";
@@ -71,9 +71,9 @@ console.log(`experimental §1: ${pass} passed so far`);
 
 /* §2 — crew station effects and boarding (appended; node-safe sim imports) */
 const { shiftPhase, crewEffects } = await import("../js/npc/crewfx.js");
-const { crew } = await import("../js/crew.js");
-const { sim } = await import("../js/sim.js");
-const { buildDemand } = await import("../js/ship.js");
+const { crew } = await import("../js/crew/ledger.js");
+const { sim } = await import("../js/sim/sim.js");
+const { buildDemand } = await import("../js/flight/ship.js");
 const { boarding, startBoarding, tickBoarding, defensePower, resetBoarding } = await import("../js/interior/boarding.js");
 const { forecast } = await import("../js/npc/captain.js");
 
@@ -143,8 +143,8 @@ ok(boarding.brig.length === 2, "both captured — the hull has a brig");
 console.log(`experimental §2: ${pass} passed so far`);
 
 /* §3 — icy belts and the ice works */
-const { ICE_ORES, pickOre } = await import("../js/field.js");
-const { icework, iceworkFit, stepIcework, cycleIceworkMode, resetIcework } = await import("../js/icework.js");
+const { ICE_ORES, pickOre } = await import("../js/world/field.js");
+const { icework, iceworkFit, stepIcework, cycleIceworkMode, resetIcework } = await import("../js/economy/icework.js");
 
 ok(ICE_ORES.length >= 4 && ICE_ORES.some((o) => o.id === "water_ice"), "ice ore table exists");
 ok(pickOre(ICE_ORES, 0.01).id === pickOre(ICE_ORES, 0.01).id, "ore pick deterministic");
@@ -211,11 +211,11 @@ sim.ship.powered.mining = true;
 console.log(`experimental §3: ${pass} passed so far`);
 
 /* §4 — belt bands, veins, drought, melted-value forecasting */
-const { BAND_METAL, BAND_STONE, BAND_CARBON, VEIN_ORES, bandAt, veinAt, nearbyRocks } = await import("../js/field.js");
-const { currentSystem } = await import("../js/bodies.js");
-const { baseValue } = await import("../js/materials.js");
-const { benchValue } = await import("../js/icework.js");
-const { sellPriceAt, marketMult } = await import("../js/sim.js");
+const { BAND_METAL, BAND_STONE, BAND_CARBON, VEIN_ORES, bandAt, veinAt, nearbyRocks } = await import("../js/world/field.js");
+const { currentSystem } = await import("../js/world/bodies.js");
+const { baseValue } = await import("../js/economy/materials.js");
+const { benchValue } = await import("../js/economy/icework.js");
+const { sellPriceAt, marketMult } = await import("../js/sim/sim.js");
 
 const avg = (t) => t.reduce((a, o) => a + o.value * o.yield, 0) / t.reduce((a, o) => a + o.yield, 0);
 ok(BAND_METAL.length >= 7 && BAND_STONE.length >= 6 && BAND_CARBON.length >= 4, "three bands with real tables");
@@ -270,9 +270,9 @@ sim.market.drought = null;
 console.log(`experimental §4: ${pass} passed so far`);
 
 /* §5 — thermal events and route plotting */
-const { BODIES, bodyPosition, heatBody, coolBodies, bodyTempK, tempLabel, TEMP_K } = await import("../js/bodies.js");
-const { plotRoute, alignmentTo, ALIGN_DEG, warpDestination, tickSim } = await import("../js/sim.js");
-const { forwardOf } = await import("../js/ship.js");
+const { BODIES, bodyPosition, heatBody, coolBodies, bodyTempK, tempLabel, TEMP_K } = await import("../js/world/bodies.js");
+const { plotRoute, alignmentTo, ALIGN_DEG, warpDestination, tickSim } = await import("../js/sim/sim.js");
+const { forwardOf } = await import("../js/flight/ship.js");
 
 /* thermal: heat lands, reads, radiates away */
 {
@@ -328,9 +328,9 @@ const { forwardOf } = await import("../js/ship.js");
 console.log(`experimental §5: ${pass} passed so far`);
 
 /* §6 — warp dropout and the atmo works */
-const { DROPOUT_ODDS, toggleWarp, selectBody, stepWarp } = await import("../js/sim.js");
-const { atmoworks, atmoFit, stepAtmoWorks, applyTerraformSnapshot, terraformSnapshot, ATMO_RATE, ATMO_LIMIT, cycleAtmoMode } = await import("../js/atmoworks.js");
-const { bandFromK } = await import("../js/bodies.js");
+const { DROPOUT_ODDS, toggleWarp, selectBody, stepWarp } = await import("../js/sim/sim.js");
+const { atmoworks, atmoFit, stepAtmoWorks, applyTerraformSnapshot, terraformSnapshot, ATMO_RATE, ATMO_LIMIT, cycleAtmoMode } = await import("../js/world/events/atmoworks.js");
+const { bandFromK } = await import("../js/world/bodies.js");
 
 ok(DROPOUT_ODDS.graze > DROPOUT_ODDS.rock && DROPOUT_ODDS.rock > DROPOUT_ODDS.belt && DROPOUT_ODDS.traffic === 0, "dropout odds ordered; traffic never drops you");
 
@@ -426,7 +426,7 @@ ok(DROPOUT_ODDS.graze > DROPOUT_ODDS.rock && DROPOUT_ODDS.rock > DROPOUT_ODDS.be
 console.log(`experimental §6: ${pass} passed so far`);
 
 /* §7 — impact destruction FX */
-const { impactTier, strikeBody } = await import("../js/sim.js");
+const { impactTier, strikeBody } = await import("../js/sim/sim.js");
 
 ok(impactTier(0.01) === "minor" && impactTier(0.1) === "major" && impactTier(0.5) === "cataclysm", "tiers ordered");
 {
@@ -463,9 +463,9 @@ ok(impactTier(0.01) === "minor" && impactTier(0.1) === "major" && impactTier(0.5
 console.log(`experimental §7: ${pass} passed so far`);
 
 /* §8 — warp to ports, GNN bulletins */
-const { warpNodeById, warpBlock } = await import("../js/sim.js");
-const { stations, buildStations, stepStations } = await import("../js/stations.js");
-const { rngFromSeed } = await import("../js/generate.js");
+const { warpNodeById, warpBlock } = await import("../js/sim/sim.js");
+const { stations, buildStations, stepStations } = await import("../js/station/stations.js");
+const { rngFromSeed } = await import("../js/world/generate.js");
 if (!stations.length) {
   buildStations(currentSystem, rngFromSeed("test:stations"));
   stepStations(sim.time);
@@ -519,9 +519,9 @@ const { newsScript } = await import("../js/comms/call-scripts.js");
 console.log(`experimental §8: ${pass} passed so far`);
 
 /* §9 — scale, assays, blast splash, notice subjects, unmark */
-const { WORLD_SCALE, EARTH_R } = await import("../js/scale.js");
-const { bodyVelocity } = await import("../js/bodies.js");
-const { setNoticeAbout, removeWaypoint, addBodyWaypoint, toggleDock } = await import("../js/sim.js");
+const { WORLD_SCALE, EARTH_R } = await import("../js/world/scale.js");
+const { bodyVelocity } = await import("../js/world/bodies.js");
+const { setNoticeAbout, removeWaypoint, addBodyWaypoint, toggleDock } = await import("../js/sim/sim.js");
 
 /* scale: big worlds, same felt gravity, climbable wells, long runs */
 {
@@ -585,12 +585,12 @@ const { setNoticeAbout, removeWaypoint, addBodyWaypoint, toggleDock } = await im
 console.log(`experimental §9: ${pass} passed so far`);
 
 /* §10 — autopilot, body count, contracts, market reads */
-const { autopilot, engageAutopilot, disengageAutopilot, tickAutopilot } = await import("../js/autopilot.js");
-const { takeSalvageContract, stepContract } = await import("../js/sim.js");
+const { autopilot, engageAutopilot, disengageAutopilot, tickAutopilot } = await import("../js/flight/autopilot.js");
+const { takeSalvageContract, stepContract } = await import("../js/sim/sim.js");
 sim.phase = "play"; // the autopilot and the contract clock only run in flight
 const { marketScript } = await import("../js/comms/call-scripts.js");
 const { newsScript: news2 } = await import("../js/comms/call-scripts.js");
-const { touch } = await import("../js/input.js");
+const { touch } = await import("../js/core/input.js");
 
 /* autopilot: engages on a target, flies the fall, parks, releases to the stick */
 {
@@ -674,7 +674,7 @@ const { touch } = await import("../js/input.js");
 
 /* §11 — grounded droughts, named buyers, market read actions */
 const { marketScript: mk2 } = await import("../js/comms/call-scripts.js");
-const { addWaypointAt } = await import("../js/sim.js");
+const { addWaypointAt } = await import("../js/sim/sim.js");
 {
   /* a drought never fires without thirsty ports: simulate the gate */
   const thirsty = stations.filter((st) => st.sector === "agricultural" || st.sector === "civilian");
@@ -715,11 +715,11 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §13 — miners can mine: locks on rocks and debris, the cutter eats debris */
 {
-  const { lockCandidates, togglePointerLock, targetPosition, clearLock } = await import("../js/sim.js");
-  const { burst, chunks, resetDebris } = await import("../js/debris.js");
-  const { mining, stepMining } = await import("../js/turrets.js");
-  const { cargoTotal } = await import("../js/ship.js");
-  const { currentSystem } = await import("../js/bodies.js");
+  const { lockCandidates, togglePointerLock, targetPosition, clearLock } = await import("../js/sim/sim.js");
+  const { burst, chunks, resetDebris } = await import("../js/world/debris.js");
+  const { mining, stepMining } = await import("../js/flight/turrets.js");
+  const { cargoTotal } = await import("../js/flight/ship.js");
+  const { currentSystem } = await import("../js/world/bodies.js");
   sim.phase = "play";
   const ship = sim.ship;
   /* park in the main belt where rocks are dense, and look at one */
@@ -741,7 +741,7 @@ const { addWaypointAt } = await import("../js/sim.js");
    * lock, so drop whatever an earlier section selected first — otherwise the
    * first P-LOCK is a release, not an acquire.) */
   ship.yaw = -Math.PI / 2; ship.pitch = 0; // forward = (-sin(yaw),0,-cos(yaw)) = (+1,0,0)
-  const { clearLock: dropLock } = await import("../js/sim.js");
+  const { clearLock: dropLock } = await import("../js/sim/sim.js");
   dropLock();
   const got = togglePointerLock();
   ok(got && (got.kind === "debris" || got.kind === "asteroid"), `P-LOCK grabs the small stuff (${got?.kind}: ${got?.name})`);
@@ -767,8 +767,8 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §13 — career hulls fit for purpose, priced like entry hulls */
 {
-  const { SHIP_DB } = await import("../js/shipdb.js");
-  const { yardQuote, componentBill, ISSUE_RATE } = await import("../js/shipcost.js");
+  const { SHIP_DB } = await import("../js/ships/shipdb.js");
+  const { yardQuote, componentBill, ISSUE_RATE } = await import("../js/economy/shipcost.js");
   const skiff = SHIP_DB.find((d) => d.id === "mining_a");
   ok(skiff.grammar.modules.includes("drill"), "the Assay Skiff carries a cutter — a miner can bench-mine from day one");
   const sled = SHIP_DB.find((d) => d.id === "mining_b");
@@ -780,8 +780,8 @@ const { addWaypointAt } = await import("../js/sim.js");
   ok(mine.inLine && mine.total === Math.round(list.total * ISSUE_RATE), `a miner buys their own line at the issue rate (${mine.total} cr)`);
   ok(!yardQuote(sled, { complexId: "mining", letter: "A" }).inLine, "issue rate stops at your rank");
   ok(!yardQuote(sled, { complexId: "salvage", letter: "G" }).inLine, "and at your complex");
-  const { applyCareerDefaults } = await import("../js/sim.js");
-  const { pilot } = await import("../js/pilot.js");
+  const { applyCareerDefaults } = await import("../js/sim/sim.js");
+  const { pilot } = await import("../js/flight/pilot.js");
   const was = pilot.complexId;
   pilot.complexId = "mining";
   const fake = { miningMode: "off", salvage: false, turretMode: "castle" };
@@ -794,7 +794,7 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §13 — every sky has both belts */
 {
-  const { generateSystem } = await import("../js/generate.js");
+  const { generateSystem } = await import("../js/world/generate.js");
   let all = true;
   for (const seed of ["alpha", "kestrel-9", "quiet", "zz", "belt-less", "sol", "orion7", "x"]) {
     const sys = generateSystem(seed);
@@ -806,7 +806,7 @@ const { addWaypointAt } = await import("../js/sim.js");
 /* §13 — identity and life aboard */
 {
   const { generateNPC, ensureIdentity, drawnTo, GENDERS } = await import("../js/npc/cradle.js");
-  const { hireCrew, crew: crewLedger, tickCrew, resetCrew, bondLine, rapportBetween, CYCLE_SECONDS } = await import("../js/crew.js");
+  const { hireCrew, crew: crewLedger, tickCrew, resetCrew, bondLine, rapportBetween, CYCLE_SECONDS } = await import("../js/crew/ledger.js");
   const a = generateNPC("id-a"), b = generateNPC("id-b");
   ok(GENDERS.includes(a.gender) && a.pronouns?.subj && Array.isArray(a.attractedTo), "every new person has a gender, pronouns and an attraction set");
   ok(generateNPC("id-a").gender === a.gender && generateNPC("id-a").attractedTo.join() === a.attractedTo.join(), "identity is deterministic per seed");
@@ -852,8 +852,8 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §13 — the tutorial reads the sky */
 {
-  const { tutorial, startTutorial, tutorialEvaluate, tutorialContext, tutorialSteps, skipTutorial } = await import("../js/tutorial.js");
-  const { pilot } = await import("../js/pilot.js");
+  const { tutorial, startTutorial, tutorialEvaluate, tutorialContext, tutorialSteps, skipTutorial } = await import("../js/ui/tutorial.js");
+  const { pilot } = await import("../js/flight/pilot.js");
   sim.phase = "play";
   const ctx = tutorialContext();
   ok(ctx.belt && ctx.port && ctx.home, "context finds the belt, a port and the nearest world");
@@ -919,7 +919,7 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §14 — the first hand is cheap */
 {
-  const { hireCrew, hireTerms, crew: cl, resetCrew } = await import("../js/crew.js");
+  const { hireCrew, hireTerms, crew: cl, resetCrew } = await import("../js/crew/ledger.js");
   const { generateNPC } = await import("../js/npc/cradle.js");
   resetCrew();
   cl.employer = "Terms";
@@ -939,11 +939,11 @@ const { addWaypointAt } = await import("../js/sim.js");
 /* §14 — traffic on a timetable: lanes, docks, the board, shoot-downs */
 {
   const { traffic, populateTraffic, stepTraffic, poseAt, markVesselDown, trafficDown, visibleVessels, vesselStatus, trafficCensus } = await import("../js/npc/traffic.js");
-  const { contacts, syncContacts } = await import("../js/turrets.js");
-  const { launchSim, relationOf } = await import("../js/sim.js");
-  const { makePilot } = await import("../js/pilot.js");
-  const { stations } = await import("../js/stations.js");
-  const { currentSystem } = await import("../js/bodies.js");
+  const { contacts, syncContacts } = await import("../js/flight/turrets.js");
+  const { launchSim, relationOf } = await import("../js/sim/sim.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
+  const { stations } = await import("../js/station/stations.js");
+  const { currentSystem } = await import("../js/world/bodies.js");
   makePilot("Tr", "terran", "mining", null);
   launchSim("TrafficTest", "sol");
   sim.phase = "play";
@@ -985,10 +985,10 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §14 — one sky for the room: snapshots, remote strikes, mirrors */
 {
-  const { launchSim, worldSnapshot, applyWorldSnapshot, applyRemoteStrike, cycleTimeScale, strikeBody } = await import("../js/sim.js");
-  const { impactors, setImpactorAuthority, adoptImpactors, stepImpactors, impactorAuthority } = await import("../js/impactors.js");
-  const { BODIES, bodyById, bodyPosition } = await import("../js/bodies.js");
-  const { makePilot } = await import("../js/pilot.js");
+  const { launchSim, worldSnapshot, applyWorldSnapshot, applyRemoteStrike, cycleTimeScale, strikeBody } = await import("../js/sim/sim.js");
+  const { impactors, setImpactorAuthority, adoptImpactors, stepImpactors, impactorAuthority } = await import("../js/world/events/impactors.js");
+  const { BODIES, bodyById, bodyPosition } = await import("../js/world/bodies.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
   makePilot("Ws", "terran", "mining", null);
   launchSim("WorldSync", "sol");
   sim.phase = "play";
@@ -1040,8 +1040,8 @@ const { addWaypointAt } = await import("../js/sim.js");
   const r1 = mulberry("x")(), r2 = mulberry("x")();
   ok(r1 === r2 && r1 >= 0 && r1 < 1, "seeded generator");
   /* telemetry samples every three sky-seconds while playing */
-  const { launchSim, tickSim, resetTelemetry } = await import("../js/sim.js");
-  const { makePilot } = await import("../js/pilot.js");
+  const { launchSim, tickSim, resetTelemetry } = await import("../js/sim/sim.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
   makePilot("Te", "terran", "mining", null);
   launchSim("Telemetry", "sol");
   sim.phase = "play";
@@ -1057,14 +1057,14 @@ const { addWaypointAt } = await import("../js/sim.js");
 
 /* §16 — the target funnel, staged cataclysms, rings, and the lit sky */
 {
-  const cx = await import("../js/cataclysm.js");
+  const cx = await import("../js/world/events/cataclysm.js");
   const {
     acquireLock, clearLock, setNavTarget, togglePointerLock, goSupernova,
     startCataclysm, launchSim, tickSim, warpBlock, selectBody, toggleWarp,
-  } = await import("../js/sim.js");
-  const { chunks, resetDebris } = await import("../js/debris.js");
-  const { makePilot } = await import("../js/pilot.js");
-  const { bodyById: liveBody, surveyIds: liveIds } = await import("../js/bodies.js");
+  } = await import("../js/sim/sim.js");
+  const { chunks, resetDebris } = await import("../js/world/debris.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
+  const { bodyById: liveBody, surveyIds: liveIds } = await import("../js/world/bodies.js");
   /* launchSim rebinds the module's BODIES, and the destructure at the top of
    * this file is a snapshot — so anything after a launch has to go through
    * the live lookups or it will be editing a discarded sky. */

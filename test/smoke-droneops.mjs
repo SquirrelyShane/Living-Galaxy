@@ -20,8 +20,8 @@ await page.click("#btn-sol");
 await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 }); await sleep(1200);
 
 const g = await page.evaluate(async () => {
-  const { gnnStation, gnnPost } = await import("/js/gnn.js");
-  const { recent } = await import("/js/chat.js");
+  const { gnnStation, gnnPost } = await import("/js/comms/gnn.js");
+  const { recent } = await import("/js/comms/chat.js");
   const { comms } = window.__lg.comms;
   const st = gnnStation();
   /* A bulletin must land as a CHAT LINE and must not open a call — that is
@@ -63,7 +63,7 @@ const dock = await page.evaluate(async () => {
   sim.ship.vel.x = st.vx; sim.ship.vel.y = st.vy; sim.ship.vel.z = st.vz;
   sim.ship.dockedAt = st.id;
   sim.ship.credits = 50000;
-  const { foundCompany, transfer, company } = await import("/js/company.js");
+  const { foundCompany, transfer, company } = await import("/js/corp/company.js");
   const gate = (await import("/js/drones/ops.js")).buildOptions(st).map((o) => o.blocker);
   foundCompany("Smoke Co", "industrial");
   transfer(20000);
@@ -78,7 +78,7 @@ console.log("deck:", JSON.stringify(deck));
 ok(deck.open && deck.build >= 1 && deck.lines.some((l) => /Miner/.test(l)), `Drones tab lists the port's lines (${deck.lines.length})`);
 await page.evaluate(() => [...document.querySelectorAll("#sd-body .sd-row")].find((r) => /Miner/.test(r.textContent))?.querySelector("button")?.click());
 await sleep(300);
-const q = await page.evaluate(async () => { const { droneOps } = await import("/js/drones/ops.js"); const { company } = await import("/js/company.js"); return { queue: droneOps.queue.length, treasury: company.treasury, credits: window.__lg.sim.ship.credits }; });
+const q = await page.evaluate(async () => { const { droneOps } = await import("/js/drones/ops.js"); const { company } = await import("/js/corp/company.js"); return { queue: droneOps.queue.length, treasury: company.treasury, credits: window.__lg.sim.ship.credits }; });
 ok(q.queue === 1 && q.treasury < 20000 && q.treasury > 0, `miner on the line, treasury billed (${q.treasury} cr left)`);
 /* the chatbox: the band, GNN and drone lines with links; a typed line goes out and gets an answer */
 const cb = await page.evaluate(async () => {
@@ -107,7 +107,7 @@ await page.evaluate(async () => { const { droneOps } = await import("/js/drones/
 await sleep(700);
 const built = await page.evaluate(async () => {
   const { droneOps } = await import("/js/drones/ops.js");
-  const { recent } = await import("/js/chat.js");
+  const { recent } = await import("/js/comms/chat.js");
   const con = document.getElementById("console");
   const open = con && !con.classList.contains("hidden");
   const tab = document.querySelector("#con-tabs .on")?.textContent ?? "";

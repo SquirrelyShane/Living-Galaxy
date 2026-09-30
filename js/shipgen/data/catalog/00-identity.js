@@ -1,7 +1,4 @@
 import { P } from "./_part.js";
-/* 00 — SHIP IDENTITY & ARCHITECTURE
- * Hull-level decisions. Most rows are informational (they map to the Drydock
- * class/proportion controls); the mountable ones are spine and interface hardware. */
 export default {
   id: "d00", name: "00 Ship Identity & Architecture",
   sheet: {

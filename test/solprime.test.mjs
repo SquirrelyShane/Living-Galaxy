@@ -7,11 +7,11 @@
  * "seems to disconnect from the system server", closing it rerenders and
  * reconnects. */
 
-import { sim, launchSim, tickSim, setTerminal, worldSnapshot } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { BODIES, bodyPosition, PUBLIC_ROOM } from "../js/bodies.js";
-import { primeSol } from "../js/net.js";
-import { applySolPrime, resetWorldSync, worldsync } from "../js/worldsync.js";
+import { sim, launchSim, tickSim, setTerminal, worldSnapshot } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { BODIES, bodyPosition, PUBLIC_ROOM } from "../js/world/bodies.js";
+import { primeSol } from "../js/net/net.js";
+import { applySolPrime, resetWorldSync, worldsync } from "../js/net/worldsync.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

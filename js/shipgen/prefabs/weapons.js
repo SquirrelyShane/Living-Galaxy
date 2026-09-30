@@ -1,7 +1,3 @@
-/* Prefabs — Weapon mounts — thin wrappers over the builder's wpn_* family builders.
- * Each prefab: faces (default mount faces), fp(s, part, face) → footprint {w,h,d} in ship units
- * (w along the face u-axis, d along v, h outward), build(g, s, part, S, rng) where g is a group
- * whose +Y points away from the hull and S is the StarshipBuilder (mats, lamp, dockBody…). */
 import { ALL_FACES } from "./_common.js";
 
 export default {

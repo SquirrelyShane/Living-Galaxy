@@ -1,7 +1,3 @@
-/* Main-drive families. plume/flare/light scale the exhaust visuals; hot = core colour.
- * Add a family here AND a drive_<key>() builder in src/builder/drives.js. */
-/* isp: specific impulse (s) · kNm2: thrust per m² of nozzle exit area at full throttle · halfAngle: plume cone (deg)
- * · atmo: may light inside an atmosphere. Figures are engineering order-of-magnitude for a mature industrial base. */
 export const DRIVE_TYPES = {
   fusion:     { label: "Fusion Torch",     plume: 1.0,  flare: 1.0,  light: 2.4, hot: "#ffffff", isp: 100000, kNm2: 900,  halfAngle: 10, atmo: false },
   ion:        { label: "Ion Grid",         plume: 1.5,  flare: 0.35, light: 1.1, hot: "#cfe8ff", isp: 5000,   kNm2: 0.4,  halfAngle: 25, atmo: false },

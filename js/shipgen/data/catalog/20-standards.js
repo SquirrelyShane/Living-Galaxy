@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 20 — STANDARDS & CROSS-CUTTING INTERFACES */
 export default {
   id: "d20", name: "20 Standards & Cross-Cutting Interfaces",
   sheet: {

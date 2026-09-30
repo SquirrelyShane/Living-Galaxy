@@ -1,16 +1,7 @@
-// robotgen/src/spec.js — deterministic robotic NPC spec generator.
-// Pure data: no THREE, no DOM. Safe to run in Node, a worker, or the page.
-//
-// Mass and cost are NOT guessed: once the spec is drawn, `data/bom.js` picks the
-// unit out of the shared parts catalogue (the same one NEWSHIPGEN and STATIONGEN
-// quote from) and the manifest's own mass becomes `spec.stats.massKg`. The old
-// volume estimate survives as `stats.frameEstimateKg` — it is what sizes the
-// parts (a heavy frame gets heavy legs), and the parts then weigh themselves.
 import { robotBom } from './data/bom.js';
 
 export const SPEC_VERSION = '1.7.0';
 
-/* ---------- rng ---------- */
 function xmur3(str) {
   let h = 1779033703 ^ str.length;
   for (let i = 0; i < str.length; i++) {
@@ -49,7 +40,7 @@ export function makeRng(seed) {
       for (const k of keys) { x -= table[k]; if (x <= 0) return k; }
       return keys[keys.length - 1];
     },
-    some: (arr, n) => {                       // n distinct picks, order-stable
+    some: (arr, n) => {
       const pool = arr.slice(), out = [];
       for (let i = 0; i < n && pool.length; i++) out.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
       return out;
@@ -64,7 +55,6 @@ export function makeRng(seed) {
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const r3 = (v) => Math.round(v * 1000) / 1000;
 
-/* ---------- taxonomy ---------- */
 export const LOCOMOTION = ['biped', 'quadruped', 'hexapod', 'octoped', 'tripod', 'tracked', 'wheeled', 'hover', 'rotor', 'plane'];
 export const LEGGED = new Set(['biped', 'quadruped', 'hexapod', 'octoped', 'tripod']);
 export const FLYING = new Set(['rotor', 'plane']);
@@ -76,7 +66,6 @@ export const OPTIC_LAYOUTS = ['cyclops', 'stereo', 'triad', 'band', 'cluster'];
 export const ANTENNA_TYPES = ['whip', 'twin', 'dish', 'blade', 'ring', 'stub'];
 export const HANDS = ['gripper', 'claw', 'tool', 'manipulator', 'weapon', 'pad'];
 
-/* --- attachments --- */
 export const SHOULDER_MOUNTS = ['none', 'cannon', 'gatling', 'missiles', 'beam', 'mortar', 'grenade', 'smoke',
   'sensor', 'radar', 'shield', 'spotlight', 'dronebay', 'jammer', 'netgun', 'taser', 'grapple', 'toolarm', 'ammo', 'relay', 'hailer',
   'railgun', 'winch', 'floodlight', 'repairarm', 'flare'];
@@ -120,11 +109,6 @@ export const PALETTES = {
   ferrite:    { base: '#6d6f74', secondary: '#494b50', trim: '#1d1e21', accent: '#ff6a2b', wear: 0.60 },
 };
 
-/* ---------- careers ----------
-   Each role is a career path: what the unit is built for, what it is allowed to
-   carry, and which chassis families the yard puts it on. `kit` is the career
-   equipment pool the generator draws from — that is what makes a firefighter
-   read as a firefighter rather than a repainted labourer. */
 export const ROLES = {
   labor:       { label: 'Labor',        cls: 'ground', duty: 'lift and carry',            loco: { tracked: 4, biped: 3, wheeled: 3, quadruped: 1 , octoped: 0.5},                 size: [1.7, 2.9], arms: [2, 2], armor: [0, 1], weapon: 0.03, pal: ['industrial', 'hazard', 'rust', 'ferrite'],  kit: ['cargo', 'toolboard', 'winch'], kitN: [1, 2] },
   industrial:  { label: 'Industrial',   cls: 'heavy',  duty: 'shop floor and foundry',    loco: { tracked: 6, wheeled: 3, quadruped: 2, biped: 1 , octoped: 1.5},                 size: [2.1, 3.4], arms: [2, 4], armor: [1, 2], weapon: 0.05, pal: ['industrial', 'hazard', 'rust', 'ferrite'],  kit: ['toolboard', 'welder', 'drill', 'cargo'], kitN: [1, 3] },
@@ -166,8 +150,6 @@ const PREFIX = ['KV', 'MX', 'TR', 'AD', 'ZN', 'HB', 'QL', 'SV', 'NR', 'DX', 'PB'
 const NICK_A = ['Rust', 'Cinder', 'Bolt', 'Grim', 'Hollow', 'Pale', 'Iron', 'Quiet', 'Long', 'Half', 'Dead', 'Old', 'Blue', 'Slack', 'Broad', 'Thin', 'Bright', 'Low'];
 const NICK_B = ['jack', 'hand', 'wire', 'foot', 'eye', 'gear', 'shard', 'step', 'ratchet', 'spool', 'lamp', 'pin', 'clamp', 'drum', 'vane', 'kite', 'wing', 'lark'];
 
-/* blend a weight table with a bias map — the draw COUNT never changes, so a
-   world only shifts the odds, it does not desynchronise a seed */
 export function bias(table, mults) {
   if (!mults) return table;
   const out = {};
@@ -177,10 +159,9 @@ export function bias(table, mults) {
   return any ? out : table;
 }
 
-/* ---------- generation ---------- */
 export function generateRobot(seed, opts = {}) {
   const rng = makeRng(seed);
-  const W = opts.world || null;          // see src/world.js
+  const W = opts.world || null;
 
   const role = opts.role && ROLES[opts.role] ? opts.role : rng.weighted(
     ROLE_KEYS.reduce((o, k) => (o[k] = 1, o), {})
@@ -189,13 +170,9 @@ export function generateRobot(seed, opts = {}) {
 
   let loco = opts.locomotion && LOCOMOTION.includes(opts.locomotion)
     ? opts.locomotion : rng.weighted(bias(R.loco, W && W.loco));
-  // a rotor or a wing needs air. On a vacuum world the bias zeroes both, and an
-  // air career whose whole table zeroed out would otherwise fall back to it —
-  // so the frame is rebuilt on the world's own substitute drive instead.
   if (W && W.loco && FLYING.has(loco) && !W.loco[loco]) loco = W.noAirDrive || 'hover';
   const flying = FLYING.has(loco);
 
-  // an airframe is small even when the career normally is not
   const sizeK = W && W.sizeScale ? W.sizeScale : 1;
   const sizeLo = (flying ? Math.min(R.size[0], 1.0) : R.size[0]) * sizeK;
   const sizeHi = (flying ? Math.min(R.size[1], 1.8) : R.size[1]) * sizeK;
@@ -208,7 +185,6 @@ export function generateRobot(seed, opts = {}) {
   const wheeledFamily = (loco === 'tracked' || loco === 'wheeled' || loco === 'hover');
   const bulk = flying ? rng.range(0.7, 0.95) : wheeledFamily ? rng.range(1.15, 1.55) : rng.range(0.85, 1.1);
 
-  /* torso — on a flyer this is the fuselage / airframe pod */
   const torsoShape = opts.torso && TORSO_SHAPES.includes(opts.torso) ? opts.torso : rng.weighted(bias(
     flying ? { pod: 4, tapered: 3, box: 2, barrel: 2, hexplate: 1, capsule: 2 }
       : wheeledFamily ? { barrel: 3, hexplate: 3, box: 3, tapered: 1, segmented: 2, capsule: 2, cage: 1 }
@@ -235,7 +211,6 @@ export function generateRobot(seed, opts = {}) {
     decal: rng.chance(0.55) ? rng.pick(['stripe', 'chevron', 'block', 'number', 'roundel']) : 'none'
   };
 
-  /* head */
   const headType = opts.head && HEAD_TYPES.includes(opts.head) ? opts.head : rng.weighted(bias(
     flying
       ? { ball: 4, wedge: 3, dome: 2, cluster: 2, box: 1, turret: 1, visor: 1, insect: 1, periscope: 0.5, array: 2 }
@@ -284,7 +259,6 @@ export function generateRobot(seed, opts = {}) {
     }
   };
 
-  /* arms */
   let armCount = flying ? (rng.chance(0.15) ? 1 : 0) : rng.int(R.arms[0], R.arms[1]);
   if (armCount === 3) armCount = 2;
   const armLen = r3(height * rng.range(0.28, 0.42));
@@ -309,7 +283,6 @@ export function generateRobot(seed, opts = {}) {
     length: r3(armLen * rng.range(0.4, 0.8))
   } : null;
 
-  /* locomotion */
   const L = { type: loco };
   if (LEGGED.has(loco)) {
     L.legs = loco === 'biped' ? 2 : loco === 'tripod' ? 3 : loco === 'quadruped' ? 4
@@ -346,7 +319,6 @@ export function generateRobot(seed, opts = {}) {
     L.plumeColor = rng.weighted({ '#4d8cff': 4, '#a0ffe0': 2, '#ffb200': 2, '#c46bff': 1 });
     L.fins = rng.chance(0.5);
   } else if (loco === 'rotor') {
-    /* multirotor scout: booms out of the pod, rotors on top of them */
     L.rotors = rng.weighted({ 3: 1, 4: 6, 6: 2, 8: 1 }) | 0;
     L.ducted = rng.chance(0.4);
     L.coaxial = L.rotors <= 4 && rng.chance(0.25);
@@ -362,7 +334,6 @@ export function generateRobot(seed, opts = {}) {
     L.foldable = rng.chance(0.35);
     L.guard = L.ducted ? false : rng.chance(0.3);
   } else if (loco === 'plane') {
-    /* small fixed-wing scout: a fuselage, a wing, a tail and one or two motors */
     L.wing = rng.weighted({ straight: 3, swept: 3, delta: 2, blended: 2, canard: 1 });
     L.span = r3(height * rng.range(1.7, 3.2));
     L.chord = r3(torsoD * rng.range(0.28, 0.48));
@@ -385,11 +356,9 @@ export function generateRobot(seed, opts = {}) {
     L.sensorBall = rng.chance(0.6);
   }
 
-  /* career kit — drawn before the derived stats so mass can include it */
   const kitN = R.kitN ? rng.int(R.kitN[0], Math.min(R.kitN[1], R.kit.length)) : 1;
   const kit = rng.some(R.kit, kitN);
 
-  /* derived stats (no rng past this point except designation) */
   const volume = torsoW * torsoD * torsoH * (1 + armorTier * 0.18);
   const legMass = LEGGED.has(loco) ? L.legs * L.legLength * L.thickness * 900 : 0;
   const driveMass = loco === 'tracked' ? L.length * L.height * L.width * 2400
@@ -429,7 +398,6 @@ export function generateRobot(seed, opts = {}) {
       durability: Math.round(60 + armorTier * 45 + massKg * 0.02),
       enduranceMin: Math.round(flying ? 18 + massKg * 0.6 : 90 + massKg * 0.4)
     },
-    // hooks for NPC_Avatar / dialogue layers
     behavior: {
       aggression: r3(clamp((R.weapon * 0.6) + rng.range(-0.15, 0.35), 0, 1)),
       curiosity: r3(rng.range(0.05, 0.95)),
@@ -445,8 +413,6 @@ export function generateRobot(seed, opts = {}) {
   return spec;
 }
 
-/* Re-weigh the unit from the parts manifest. No rng here: same spec in, same
-   numbers out, and the sheet, the physics and the yard all agree. */
 export function applyPartsMass(spec) {
   let bom;
   try { bom = robotBom(spec); } catch (e) { spec.stats.bomError = e.message; return spec; }
@@ -460,20 +426,14 @@ export function applyPartsMass(spec) {
   S.heatKw = r3(Math.max(0, bom.heatW) / 1000);
   S.powerKw = r3(Math.max(S.drawKw, S.massKg * 0.012 + spec.head.optics.count * 0.4 + spec.arms.count * 1.2));
   S.durability = Math.round(60 + S.armor * 45 + S.massKg * 0.02);
-  // endurance is the pack the manifest actually carries divided by the draw the
-  // manifest actually pulls, at 85% usable — not a number picked to sound right
   S.energyKwh = bom.energyKwh;
-  const gen = Math.max(0, bom.pwrW) / 1000;                    // fuel cell / solar / isotope
-  // a wing or an isotope trickle can stretch a shift, but nothing on a flyer
-  // pays for its own rotors: the net draw never falls below a third of the load
+  const gen = Math.max(0, bom.pwrW) / 1000;
   const floor = Math.max(0.02, spec.flying ? S.drawKw * 0.35 : 0);
   const net = Math.max(floor, S.drawKw - gen);
   S.enduranceMin = Math.max(4, Math.round((bom.energyKwh * 0.85 / net) * 60 * (spec.flying ? 1 : 1.6)));
   return spec;
 }
 
-/* ---------- attachments ----------
-   Drawn after the base spec so an existing seed keeps the robot it had. */
 function biasTable(table, mults) {
   if (!mults) return table;
   const out = {};
@@ -488,7 +448,6 @@ function genAttachments(rng, spec, W) {
   const responder = role === 'firefighter' || role === 'rescue' || role === 'medic' || role === 'hazmat' || role === 'eod';
   const accent = spec.palette.accent;
 
-  /* --- flying units carry pods, not shoulder cannon --- */
   if (spec.flying) {
     const pool = {
       camera: role === 'recon' || role === 'inspector' ? 5 : 2,
@@ -524,7 +483,6 @@ function genAttachments(rng, spec, W) {
       });
       pool[t] = 0;
     }
-    // wing stores come in pairs on a plane that has wings to hang them from
     if (spec.locomotion.type === 'plane') {
       for (const p of chosen.slice()) {
         if (p.station === 'wingL' && rng.chance(0.7)) chosen.push({ ...p, station: 'wingR' });
@@ -554,7 +512,6 @@ function genAttachments(rng, spec, W) {
     };
   }
 
-  /* --- ground / heavy frames --- */
   const survey = role === 'survey' || role === 'scout' || role === 'recon' || role === 'inspector' || role === 'drone';
   const pickShoulder = () => rng.weighted(biasTable({
     none: combat ? 2 : 6,
@@ -592,9 +549,8 @@ function genAttachments(rng, spec, W) {
     tracking: rng.chance(0.7)
   };
   const shoulder = { L: mount(pickShoulder()), R: mount(pickShoulder()) };
-  if (shoulder.L && shoulder.R && rng.chance(0.45)) shoulder.R = null;   // asymmetry reads better
+  if (shoulder.L && shoulder.R && rng.chance(0.45)) shoulder.R = null;
 
-  // additive armor: more panels the higher the tier, plus a wildcard or two
   const panels = [];
   const wanted = Math.min(9, tier * 2 + rng.int(0, 3) + (W && W.extraArmor ? W.extraArmor : 0));
   const pool = ARMOR_SLOTS.slice();
@@ -619,7 +575,6 @@ function genAttachments(rng, spec, W) {
     underbarrel: rng.weighted({ none: 4, grenade: combat ? 2 : 0.4, grip: 2, lamp: 1.5, bayonet: combat ? 2 : 0.4, shieldrail: combat ? 1.5 : 0.5 })
   };
 
-  // limb replacements now include the career tools, so a welder reads as a welder
   const limbPick = () => rng.weighted(biasTable({
     stock: 6,
     heavy: combat ? 3 : 1,
@@ -691,8 +646,6 @@ function genAttachments(rng, spec, W) {
   };
 }
 
-/* ---------- finish ----------
-   Surface treatment, drawn last so it never disturbs anything above it. */
 function genFinish(rng, spec) {
   const P = spec.palette;
   return {
@@ -708,7 +661,6 @@ function genFinish(rng, spec) {
   };
 }
 
-/* ---------- readable sheet ---------- */
 export function describe(spec) {
   const L = spec.locomotion;
   const drive = LEGGED.has(L.type) ? `${L.legs}× ${L.style} legs (${L.footType})`

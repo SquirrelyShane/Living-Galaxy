@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 08 — COMPUTING, AVIONICS & AUTONOMY (mostly internal → flush service hatches) */
 export default {
   id: "d08", name: "08 Computing, Avionics & Autonomy",
   sheet: {

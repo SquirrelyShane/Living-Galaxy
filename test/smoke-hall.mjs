@@ -47,9 +47,9 @@ for (const [w, h] of [[384, 832], [360, 740]]) {
 
   /* a ship message is the ship's, and the response clock is never under it */
   await page.evaluate(async () => {
-    const { sim } = await import("/js/sim.js");
+    const { sim } = await import("/js/sim/sim.js");
     sim.notice = "Turrets armed. Anything hostile inside 1.5 km gets rounds."; sim.noticeAt = sim.wall;
-    const S = await import("/js/seclevel.js");
+    const S = await import("/js/corp/seclevel.js");
     sim.ship.dockedAt = null; sim.ship.lastHitBy = null;
     S.callSOS(sim.ship, sim.time);
   });
@@ -62,7 +62,7 @@ for (const [w, h] of [[384, 832], [360, 740]]) {
   ok(!over(card, s), `${tag}: the message card stops short of the systems strip`);
 
   /* a call: the puck hangs under the strip, not over the gauges */
-  await page.evaluate(async () => { const { sim } = await import("/js/sim.js"); const { stations } = await import("/js/stations.js"); const st = stations.filter((x) => !x.hostile)[0]; sim.lock.id = st.id; sim.lock.kind = "station"; (await import("/js/comms/comms.js")).hail(); });
+  await page.evaluate(async () => { const { sim } = await import("/js/sim/sim.js"); const { stations } = await import("/js/station/stations.js"); const st = stations.filter((x) => !x.hostile)[0]; sim.lock.id = st.id; sim.lock.kind = "station"; (await import("/js/comms/comms.js")).hail(); });
   await sleep(1800);
   const puck = await rect(page, ".cx-puck");
   ok(puck && s && puck[1] >= s[1] + s[3] - 1 && !over(puck, g), `${tag}: the call puck is under the systems strip, not in the top-right corner (${puck?.map(Math.round)})`);
@@ -72,9 +72,9 @@ for (const [w, h] of [[384, 832], [360, 740]]) {
   if (w === 384) {
     /* dock and use the HALL */
     const docked = await page.evaluate(async () => {
-      const { sim, toggleDock } = await import("/js/sim.js");
-      const { stations } = await import("/js/stations.js");
-      const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
+      const { sim, toggleDock } = await import("/js/sim/sim.js");
+      const { stations } = await import("/js/station/stations.js");
+      const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
       sim.ship.credits = 50000;
       const st = stations.find((x) => x.sector === "industrial") ?? stations.find((x) => !x.hostile);
       const m = st.hangars[0];
@@ -96,7 +96,7 @@ for (const [w, h] of [[384, 832], [360, 740]]) {
       talk?.click();
       await new Promise((r) => setTimeout(r, 500));
       const C = await import("/js/console/console.js");
-      const { sim } = await import("/js/sim.js");
+      const { sim } = await import("/js/sim/sim.js");
       const inline = document.querySelector("#sd-body .sd-talk .in-talk-nm");
       const settle = [...document.querySelectorAll("#sd-body [data-crew] .sd-btn")].find((b) => /SETTLE/.test(b.textContent));
       return { inline: Boolean(inline), name: inline?.textContent, console: C.console.open || sim.terminalOpen, deck: !document.getElementById("station-deck").classList.contains("hidden"), settleOff: settle?.disabled, topics: document.querySelectorAll("#sd-body .sd-talk .sd-btn").length };
@@ -109,7 +109,7 @@ for (const [w, h] of [[384, 832], [360, 740]]) {
     await page.fill("#sd-body .sd-input", "Squirrel Works");
     await page.evaluate(() => [...document.querySelectorAll("#sd-body .sd-btn")].find((b) => b.textContent === "REGISTER")?.click());
     await sleep(500);
-    const co = await page.evaluate(async () => { const CO = await import("/js/company.js"); return { name: CO.company.name, founded: CO.company.founded, floor: [...document.querySelectorAll("#sd-body h4")].map((h) => h.textContent) }; });
+    const co = await page.evaluate(async () => { const CO = await import("/js/corp/company.js"); return { name: CO.company.name, founded: CO.company.founded, floor: [...document.querySelectorAll("#sd-body h4")].map((h) => h.textContent) }; });
     ok(co.founded && co.name === "Squirrel Works", `the registrar takes a typed name (${co.name})`);
     ok(co.floor.some((t) => /SQUIRREL WORKS — ON THIS FLOOR/.test(t)), "and the hall turns into the company's floor");
     const settle2 = await page.evaluate(() => [...document.querySelectorAll("#sd-body [data-crew] .sd-btn")].find((b) => /SETTLE/.test(b.textContent))?.disabled);

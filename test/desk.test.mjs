@@ -8,17 +8,17 @@
  * every new kind of job completes end to end.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { bulkOf } from "../js/materials.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { corps, corpOfStation } from "../js/corps.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { bulkOf } from "../js/economy/materials.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { corps, corpOfStation } from "../js/corp/corps.js";
 import { COMPLEXES } from "../js/careers/complexes.js";
-import { BODIES } from "../js/bodies.js";
+import { BODIES } from "../js/world/bodies.js";
 import {
   boardFor, boardByCategory, acceptBlocker, acceptContract, abandonContract, deliverableAt, deliverContracts, tickContracts,
   noteDestroyed, targetPos, contracts, CATEGORIES, CATEGORY_ORDER, issuersAt, hullFit, BOARD, jobStatus, resetContracts,
-} from "../js/contracts.js";
+} from "../js/economy/contracts.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

@@ -8,16 +8,16 @@
  * rating is allowed, and never in a way that can silence a hull.
  */
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
 import { traffic } from "../js/npc/traffic.js";
 import { chatter, talkTo, syncBand, speech, resetSpeech, talkChips, unitOf } from "../js/npc/speech.js";
 import {
   npcChat, RATINGS, CHANNELS, registerVoice, unregisterVoice, clearVoices, voicesFor,
   dressLine, dressReply, extraChips, setChatRating, chatRating, chatReport, loadChatRating,
 } from "../js/npc/chat.js";
-import { rngFromSeed } from "../js/generate.js";
+import { rngFromSeed } from "../js/world/generate.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

@@ -10,17 +10,17 @@
 const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { sim, launchSim, tickSim, addWaypointAt } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const AP = await import("../js/autopilot.js");
-const { touch } = await import("../js/input.js");
-const { BATTERY, DRAW, buildDemand, stepPower, makeShip, batteryCap } = await import("../js/ship.js");
-const { stations } = await import("../js/stations.js");
+const { sim, launchSim, tickSim, addWaypointAt } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const AP = await import("../js/flight/autopilot.js");
+const { touch } = await import("../js/core/input.js");
+const { BATTERY, DRAW, buildDemand, stepPower, makeShip, batteryCap } = await import("../js/flight/ship.js");
+const { stations } = await import("../js/station/stations.js");
 const { startMission, mission } = await import("../js/mission/run.js");
 const { oneStep } = await import("../js/mission/script.js");
-const { hullTuneFor, shipById } = await import("../js/shipdb.js");
+const { hullTuneFor, shipById } = await import("../js/ships/shipdb.js");
 const { captain, retakeCommand } = await import("../js/npc/captain.js");
-const { currentSystem } = await import("../js/bodies.js");
+const { currentSystem } = await import("../js/world/bodies.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

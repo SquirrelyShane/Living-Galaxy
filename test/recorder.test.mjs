@@ -1,4 +1,4 @@
-// node --import ./test/three-register.mjs test/recorder.test.mjs — the tape (js/recorder.js)
+// node --import ./test/three-register.mjs test/recorder.test.mjs — the tape (js/flight/recorder.js)
 //
 // The recorder is a LEAF: no game imports, the world read is handed in. So the
 // whole thing drives here with a fake ship and no browser, which is the point
@@ -15,7 +15,7 @@ const t = async (name, fn) => {
 const {
   recorder, record, settle, snapshot, tape, tapeJSONL, recorderReport, neighbours,
   wireRecorder, resetRecorder, flushPending, describeTarget, STATE_KEYS, clearTape,
-} = await import("../js/recorder.js");
+} = await import("../js/flight/recorder.js");
 
 /* a world we drive by hand */
 const W = { t: 0, hull: 1, hold: 0, cr: 1000, spd: 0, chg: 1, dk: 0, ap: 0, ms: 0, hz: 0, tm: 0, mm: 0, ph: 1, seam: 120, port: 40, bus: 0.3 };

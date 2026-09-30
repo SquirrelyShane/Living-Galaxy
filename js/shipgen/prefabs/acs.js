@@ -1,7 +1,3 @@
-/* Prefabs — Attitude control and boosters.
- * Each prefab: faces (default mount faces), fp(s, part, face) → footprint {w,h,d} in ship units
- * (w along the face u-axis, d along v, h outward), build(g, s, part, S, rng) where g is a group
- * whose +Y points away from the hull and S is the StarshipBuilder (mats, lamp, dockBody…). */
 import * as THREE from "three";
 import { G, addMesh } from "../core/geometry.js";
 import { ALL_FACES } from "./_common.js";
@@ -54,7 +50,6 @@ export default {
       addMesh(g, G.cone(16), m.light, 0, s * 0.95, -s * 2.4, -Math.PI / 2, 0, 0, s * 0.62, s * 1.0, s * 0.62);
       for (let i = -1; i <= 1; i++) addMesh(g, G.torus(0.06), m.hazard, 0, s * 0.95, i * s * 1.2, 0, 0, 0, s * 0.63, s * 0.63, s * 0.3);
       addMesh(g, G.taper(1.9, 14), m.engine, 0, s * 0.95, s * 2.2, Math.PI / 2, 0, 0, s * 0.35, s * 0.6, s * 0.35);
-      // booster plume — only lit above 85% throttle
       const pm = m.glow.clone(); pm.transparent = true; pm.opacity = 0.42; pm.depthWrite = false; pm.emissiveIntensity = 2.6; pm.userData.cloned = true;
       const pl = addMesh(g, G.coneOpen(14), pm, 0, s * 0.95, s * 2.5 + s * 1.6, Math.PI / 2, 0, 0, s * 0.6, s * 3.2, s * 0.6);
       pl.castShadow = false; pl.userData.srb = { baseY: s * 3.2, op: 0.42 };

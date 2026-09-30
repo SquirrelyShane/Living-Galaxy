@@ -1,12 +1,6 @@
-/**
- * GLSL for the collision demo: fractured bodies (chunks driven by impact-sim.js),
- * GPU dust / ice / spark sprites and instanced meshed ejecta rocks. Particles are
- * emitted over time (blast, surface shedding, secondary impacts) with an emission
- * time aT0 and then move analytically: a drag-damped burst plus a slow outward drift.
- */
 import { FRACTURE_GLSL } from './fracture.js';
 
-const HEAT_RAMP = /* glsl */ `
+const HEAT_RAMP = `
 vec3 heatRamp(float h) {
   vec3 c = mix(vec3(0.0), vec3(0.45, 0.03, 0.0), smoothstep(0.0, 0.25, h));
   c = mix(c, vec3(1.0, 0.32, 0.04), smoothstep(0.2, 0.5, h));
@@ -16,14 +10,14 @@ vec3 heatRamp(float h) {
 }
 `;
 
-const LIGHT = /* glsl */ `
+const LIGHT = `
 uniform vec3 uSunDir;
 uniform vec3 uSunColor;
 uniform vec3 uAmbient;
 `;
 
 export const IMPACT_SHADERS = {
-  bodyVertex: /* glsl */ `
+  bodyVertex: `
 ${FRACTURE_GLSL.vertexPars}
 attribute vec3 color;
 varying vec3 vCol;
@@ -42,7 +36,7 @@ void main() {
   gl_Position = projectionMatrix * viewMatrix * w;
 }
 `,
-  bodyFragment: /* glsl */ `
+  bodyFragment: `
 ${FRACTURE_GLSL.fragmentPars}
 ${LIGHT}
 varying vec3 vCol;
@@ -66,7 +60,7 @@ void main() {
   #include <colorspace_fragment>
 }
 `,
-  spriteVertex: /* glsl */ `
+  spriteVertex: `
 ${HEAT_RAMP}
 uniform float uTime;
 uniform float uImpact;
@@ -119,7 +113,7 @@ void main() {
   vC = vec4(col, a);
 }
 `,
-  spriteFragment: /* glsl */ `
+  spriteFragment: `
 varying vec4 vC;
 void main() {
   vec2 c = gl_PointCoord - 0.5;
@@ -137,7 +131,7 @@ void main() {
   #include <colorspace_fragment>
 }
 `,
-  rockVertex: /* glsl */ `
+  rockVertex: `
 uniform float uTime;
 uniform float uImpact;
 uniform float uDrag;
@@ -178,7 +172,7 @@ void main() {
   vH = aHeat.x * exp(-tau * (0.45 + aHeat.y * 0.6));
 }
 `,
-  rockFragment: /* glsl */ `
+  rockFragment: `
 ${HEAT_RAMP}
 ${LIGHT}
 varying vec3 vW;

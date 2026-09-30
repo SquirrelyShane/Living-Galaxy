@@ -72,7 +72,7 @@ The other way to play is `https://living-galaxy.com/play/`, where the site
 read-only and adds what a file server cannot: an **account**. Sign in at
 CON › CORP › ACCOUNT (or on the site first — a signed-in browser that opens
 `/play/` with nothing on the device loads your pilot before the start card
-comes up) and everything `js/profile.js` files as the pilot's — callsign, corp,
+comes up) and everything `js/core/profile.js` files as the pilot's — callsign, corp,
 fleet, refits, robots, missions, drones, ARIA's flying — syncs as one
 versioned blob. Two devices that both changed get asked which copy wins;
 nothing is ever overwritten silently. The site's news posts land on the GNN
@@ -93,6 +93,7 @@ tools/lg-patch.sh deploy 0.3.69         # ssh mpcbb lg-deploy, check origin and 
 tools/lg-patch.sh all 0.3.68 0.3.69     # apply, ask y/N, then ship and deploy
 
 tools/lg-patch.sh abort 0.3.69          # a failed apply: drop the branch and its files, back to main
+tools/lg-patch.sh prune 0.3.78          # git rm what tools/prune/0.3.78.txt lists (apply does it itself from 0.3.78 on)
 tools/lg-patch.sh rollback 0.3.69       # revert main's last patch, push, redeploy
 tools/lg-patch.sh site 0.2.5            # site zip → mpcbb:~/Desktop/lgsite-deploy, its test, install, restart, /health
 ```
@@ -109,6 +110,13 @@ a git clone is pulled. A zip
 can carry a new copy of the script itself — it runs from a private copy so
 that is safe. `test/lgpatch.test.mjs` runs every command against a
 throwaway repo with the host stubbed.
+
+A zip cannot delete, so a patch that removes or moves files ships
+`tools/prune/<version>.txt` (one repo path a line). `apply` removes the listed
+files before running the tests and `deploy` removes them from a plain-folder
+desktop copy (0.3.78). The script that runs `apply` is the copy you had
+*before* unzipping, so on the one patch that introduces this (0.3.78) run
+`tools/lg-patch.sh prune 0.3.78` between `apply` and `ship`.
 
 ### What server.py is, besides a file server
 
@@ -129,7 +137,7 @@ Every client runs sim time as `now - born`, so the ports, the traffic and the
 markets line up for everybody by construction. What is *rolled* rather than
 computed — rogue rocks, and what they did to worlds and ports — is not
 line-uppable that way, so the longest-present live pilot in a room is its
-**host**: they run the rocks and everyone else mirrors them (`js/worldsync.js`),
+**host**: they run the rocks and everyone else mirrors them (`js/net/worldsync.js`),
 and `/net/world` is the snapshot a late joiner inherits so they arrive into the
 same scarred system.
 
@@ -203,84 +211,98 @@ known path list first.
 Everything you are likely to want to change, and where it lives. After a save,
 refresh the browser — there is no build step.
 
+Since 0.3.77 code files carry code only: every explanation lives in
+[`docs/`](docs/README.md), one doc per code file at `docs/files/<path>.md`
+(about, imports, importers, exports, effects, every symbol with what it calls
+and what calls it, and its notes), plus project-wide traces in `docs/trace/`.
+Write notes in the doc's `<!-- note:… -->` slots, or write a comment in code
+and run `node tools/codedocs/build.mjs --migrate`. `test/codedocs.test.mjs`
+fails if comments are left in `js/` or the docs are stale.
+
+Since 0.3.78 `js/` is grouped by domain — `core/ net/ sim/ world/ world/events/
+flight/ aria/ render/ ui/ station/ economy/ corp/ ships/ drones/ crew/ comms/
+audio/` beside the vendored generators; only `main.js` (the entry) and
+`version.js` (read by `tools/lg-patch.sh`) stay at the top. The move table is
+`tools/codedocs/moves-0.3.78.json`.
+
 ### The sim
 
 | File | What to change |
 | --- | --- |
-| `js/sim.js` | Spawn, survey, the warp core and its gating, collisions, crew/robot capacity, system toggles |
-| `js/ship.js` | Thruster authority, reactor budget, load shedding, turret and mining modes, the trim sliders |
-| `js/scale.js` | Radius and orbit curves, density, gravity constant, resource tiers, `remnantRadius` |
-| `js/bodies.js` | Handmade Sol catalog, scaling and sphere-of-influence pass |
-| `js/generate.js` | How private systems are grown |
-| `js/archetypes.js` | The body database — palettes, surfaces, temperatures, ores |
-| `js/materials.js` | Ores, minerals, tier-0 components, sector price tables; bulk per good and the hold curve (0.3.52) |
-| `js/field.js` | Asteroid field density, rock size distribution, band names, taxonomic class per rock |
-| `js/aria-pilot.js` | ARIA at the conn: plans your jobs (repair, sell, mine, survey, and — 0.3.06 — refit and build) off your own habits and hands them to the mission runner |
-| `js/fabricate.js` | The fabrication solver and job queue: resolves a part down the whole recipe tree to raw ore, runs it on sim time at a port, delivers to the locker (leaf — no game imports) |
-| `js/fabyard.js` | The deck's fabrication desk: the menu with margins, the bill before you commit, the one tap-through quantity button |
-| `js/deckworks.js` | The whole DECK › WORKS tab — your fabrication desk, then the port's own defences, magazines and lines |
-| `js/recorder.js` | The tape: every tap, order and mission step with the state it was taken in and what it earned, exportable as JSONL (leaf — no game imports) |
+| `js/sim/sim.js` | Spawn, survey, the warp core and its gating, collisions, crew/robot capacity, system toggles |
+| `js/flight/ship.js` | Thruster authority, reactor budget, load shedding, turret and mining modes, the trim sliders |
+| `js/world/scale.js` | Radius and orbit curves, density, gravity constant, resource tiers, `remnantRadius` |
+| `js/world/bodies.js` | Handmade Sol catalog, scaling and sphere-of-influence pass |
+| `js/world/generate.js` | How private systems are grown |
+| `js/world/archetypes.js` | The body database — palettes, surfaces, temperatures, ores |
+| `js/economy/materials.js` | Ores, minerals, tier-0 components, sector price tables; bulk per good and the hold curve (0.3.52) |
+| `js/world/field.js` | Asteroid field density, rock size distribution, band names, taxonomic class per rock |
+| `js/aria/pilot.js` | ARIA at the conn: plans your jobs (repair, sell, mine, survey, and — 0.3.06 — refit and build) off your own habits and hands them to the mission runner |
+| `js/economy/fabricate.js` | The fabrication solver and job queue: resolves a part down the whole recipe tree to raw ore, runs it on sim time at a port, delivers to the locker (leaf — no game imports) |
+| `js/station/fabyard.js` | The deck's fabrication desk: the menu with margins, the bill before you commit, the one tap-through quantity button |
+| `js/station/deckworks.js` | The whole DECK › WORKS tab — your fabrication desk, then the port's own defences, magazines and lines |
+| `js/flight/recorder.js` | The tape: every tap, order and mission step with the state it was taken in and what it earned, exportable as JSONL (leaf — no game imports) |
 | `js/ui/fullscreen.js` | The canopy edge to edge: the fullscreen request, the portrait and wake locks, and the re-measure when the phone's bars move |
-| `js/repair.js` | Yard repairs by the point and the hull-patch drone |
+| `js/flight/repair.js` | Yard repairs by the point and the hull-patch drone |
 | `js/ui/dockboot.js` | The berth boot sequence over the canopy while the tractor finishes |
 | `js/console/panels/work-tape.js` | CONSOLE › WORK › TAPE: what is on the tape, what you tend to do in a state like this one, and EXPORT |
-| `js/rockgen.js` | Ore palettes and `oreLook()` (its hand-built hulls and crater canvases are no longer drawn) |
+| `js/world/rockgen.js` | Ore palettes and `oreLook()` (its hand-built hulls and crater canvases are no longer drawn) |
 | `js/bodygen/bake.js`, `baked.js`, `grower.js`, `worker.js` | Generator bodies baked to atlases, their material, and growth off the main thread |
-| `js/impactors.js` | Super asteroids: spawning, trajectories, strikes, rock-on-rock, fragment rogues |
-| `js/impacts.js` | What happens after a rock connects: the rigid-body break-up run, its pieces as debris, the fragment hand-off |
-| `js/holes.js` | Collapsed stars: transits and remnants, Kerr radii, gravity, what they eat, rarity, the wire |
-| `js/debris.js` | Chunks, bursts, rubble rings, salvage (a chunk an impact run holds is `driven`) |
-| `js/cataclysm.js` | What a world does when something big enough hits it, and what a star does when it stops being one — pure maths, headless-testable |
-| `js/turrets.js` | Engagement rules, drones, ordnance, mining yield |
-| `js/avoid.js` | The collision solver both the autopilot and the flight assist fly through |
-| `js/autopilot.js` | The autopilot primitives, the belt clear, the watchdog |
-| `js/contacts.js` | The contact register — what is on the chart and how it got there |
-| `js/probes.js` | Probes and remote assay |
+| `js/world/events/impactors.js` | Super asteroids: spawning, trajectories, strikes, rock-on-rock, fragment rogues |
+| `js/world/events/impacts.js` | What happens after a rock connects: the rigid-body break-up run, its pieces as debris, the fragment hand-off |
+| `js/world/events/holes.js` | Collapsed stars: transits and remnants, Kerr radii, gravity, what they eat, rarity, the wire |
+| `js/world/debris.js` | Chunks, bursts, rubble rings, salvage (a chunk an impact run holds is `driven`) |
+| `js/world/events/cataclysm.js` | What a world does when something big enough hits it, and what a star does when it stops being one — pure maths, headless-testable |
+| `js/flight/turrets.js` | Engagement rules, drones, ordnance, mining yield |
+| `js/flight/avoid.js` | The collision solver both the autopilot and the flight assist fly through |
+| `js/flight/autopilot.js` | The autopilot primitives, the belt clear, the watchdog |
+| `js/flight/contacts.js` | The contact register — what is on the chart and how it got there |
+| `js/flight/probes.js` | Probes and remote assay |
 
 ### The world around you
 
 | File | What to change |
 | --- | --- |
-| `js/stations.js` | Port placement, mounts, docking, stock |
-| `js/stationyard.js` | The glue to STATIONGEN: config, scale, port frame, doors, weapon mounts, works |
-| `js/stationworks.js` | A port's fabrication lines |
-| `js/stationdeck.js` | The docked deck — only what a port has: market, shipyard, desk, hall, works, drone and robot yards, refit, GNN, blueprint (the company books, fleet and logs are the console's, 0.3.45) |
-| `js/deckhall.js` | The deck's HALL (0.3.49): your crew with TALK/SETTLE/PAY OFF inline, the hiring hall, the company's people on this floor with the LINE inline, and the registrar with a typed name — all in station style, never the console |
-| `js/stationlife.js` | Settled staff: work, roles, life events, station births |
-| `js/stationclock.js` | Port standard time (0.3.52): hours, days, weeks, shifts, day parts — the one clock everything asks |
-| `js/stafflife.js` | A settled hand's working day (0.3.52): job, shift, hours, housing, needs, hour-by-hour plan, pay by hours worked, labour on the port's lines, the day log |
-| `js/staffcare.js` | A settled hand's menu (0.3.53): WORK (job, shift, hours), HOME (housing), CARE (day off, a meal, a night out, a course) — drawn by the HALL and CORP › TOWN |
-| `js/gdb.js` | The Galactic Database (0.3.54): every person the galaxy produces, catalogued once — unique names, look-alike checks per room, stable GDB numbers, census, search, the chronicle; relay-synced via `/gdb` |
-| `js/staffline.js` | The company line: call a settled hand from anywhere, their calls and asks, regard, passage between ports |
-| `js/economy.js` | Production lines, stock, the price curve |
-| `js/blueprint.js` | Deterministic station deck plans, drawn blueprint-style |
+| `js/station/stations.js` | Port placement, mounts, docking, stock |
+| `js/station/stationyard.js` | The glue to STATIONGEN: config, scale, port frame, doors, weapon mounts, works |
+| `js/station/stationworks.js` | A port's fabrication lines |
+| `js/station/stationdeck.js` | The docked deck — only what a port has: market, shipyard, desk, hall, works, drone and robot yards, refit, GNN, blueprint (the company books, fleet and logs are the console's, 0.3.45) |
+| `js/station/deckhall.js` | The deck's HALL (0.3.49): your crew with TALK/SETTLE/PAY OFF inline, the hiring hall, the company's people on this floor with the LINE inline, and the registrar with a typed name — all in station style, never the console |
+| `js/station/stationlife.js` | Settled staff: work, roles, life events, station births |
+| `js/station/stationclock.js` | Port standard time (0.3.52): hours, days, weeks, shifts, day parts — the one clock everything asks |
+| `js/station/stafflife.js` | A settled hand's working day (0.3.52): job, shift, hours, housing, needs, hour-by-hour plan, pay by hours worked, labour on the port's lines, the day log |
+| `js/station/staffcare.js` | A settled hand's menu (0.3.53): WORK (job, shift, hours), HOME (housing), CARE (day off, a meal, a night out, a course) — drawn by the HALL and CORP › TOWN |
+| `js/corp/gdb.js` | The Galactic Database (0.3.54): every person the galaxy produces, catalogued once — unique names, look-alike checks per room, stable GDB numbers, census, search, the chronicle; relay-synced via `/gdb` |
+| `js/station/staffline.js` | The company line: call a settled hand from anywhere, their calls and asks, regard, passage between ports |
+| `js/economy/economy.js` | Production lines, stock, the price curve |
+| `js/station/blueprint.js` | Deterministic station deck plans, drawn blueprint-style |
 | `js/npc/traffic.js` | The captains: roles, timetable, jobs, flags — and the flown state machine |
 | `js/npc/flight.js` | How a hull actually flies: thrust, arrival braking, the lane drive, hull characteristics |
 | `js/npc/combat.js` | NPC-vs-NPC combat: acquisition, hunts, gunnery, and the out-of-sight resolution |
 | `js/npc/security.js` | The distress bus, the Security Directorate, and the response clock |
-| `js/seclevel.js`, `js/secbadge.js` | The security ◆: green/yellow/red, heat, the player's SOS, the fine — and the diamond on the HUD and the deck |
+| `js/corp/seclevel.js`, `js/ui/secbadge.js` | The security ◆: green/yellow/red, heat, the player's SOS, the fine — and the diamond on the HUD and the deck |
 | `js/npc/rogues.js` | Drone nests and the waves they send at ports, traffic and each other |
 | `js/npc/flow.js` | Flow boats — the heartbeat |
 | `js/npc/lanes.js` | Traffic corridors and lane-ways |
 | `js/npc/battles.js` | Seeded ambush scheduling |
-| `js/perf.js` | The frame budget: measures the frame, hands out a detail tier |
-| `js/warpfx.js` | Warp streaks: the stretched star shell, the near tunnel, NPC drive wakes |
-| `js/postfx.js` | Bloom and the black-hole lens pass — a compact composer, gated and latched by the frame budget |
-| `js/rockfx.js` | Rubble on the rock you work, icy debris clouds on frosty rocks, shatter fields when a rock is cut out |
-| `js/impactfx.js` | Draws an impact run: the fractured rock, blast sprites, ejecta rocks, flash and shock rings |
-| `js/holefx.js` | Draws a hole: the Kerr lens (or its stand-in), rocks falling in, rogues torn apart by tides |
+| `js/core/perf.js` | The frame budget: measures the frame, hands out a detail tier |
+| `js/render/warpfx.js` | Warp streaks: the stretched star shell, the near tunnel, NPC drive wakes |
+| `js/render/postfx.js` | Bloom and the black-hole lens pass — a compact composer, gated and latched by the frame budget |
+| `js/render/rockfx.js` | Rubble on the rock you work, icy debris clouds on frosty rocks, shatter fields when a rock is cut out |
+| `js/render/impactfx.js` | Draws an impact run: the fractured rock, blast sprites, ejecta rocks, flash and shock rings |
+| `js/render/holefx.js` | Draws a hole: the Kerr lens (or its stand-in), rocks falling in, rogues torn apart by tides |
 | `js/npc/brain.js` | The neural core an NPC captain flies with |
 | `js/npc/captain.js` | Who holds the conn |
-| `js/aria.js` | The house core that learns how *you* fly, and will fly for you |
+| `js/aria/aria.js` | The house core that learns how *you* fly, and will fly for you |
 
 ### The cockpit
 
 | File | What to change |
 | --- | --- |
-| `js/engine.js` | Cockpit camera, floating origin, meshes, lighting, rock buckets, LOD |
-| `js/hud.js` | Dashboard, throttle slider, switchboard, map |
-| `js/input.js` | Keyboard, gamepad, touch |
-| `js/map.js` | The system chart: projection, pan/zoom, picking, warp lane, SHIPS directory |
+| `js/render/engine.js` | Cockpit camera, floating origin, meshes, lighting, rock buckets, LOD |
+| `js/ui/hud.js` | Dashboard, throttle slider, switchboard, map |
+| `js/core/input.js` | Keyboard, gamepad, touch |
+| `js/ui/map.js` | The system chart: projection, pan/zoom, picking, warp lane, SHIPS directory |
 | `js/console/` | The console: shell (`console.js`), jump index (`search.js`), DOM kit (`kit.js`), one panel per tab under `panels/` |
 | `js/ui/chatbox.js` | The chatbox where the thumbstick used to be |
 | `js/ui/charts.js` | Telemetry rings and sparklines |
@@ -294,37 +316,37 @@ refresh the browser — there is no build step.
 
 | File | What to change |
 | --- | --- |
-| `js/names.js`, `js/data/lexicons.js` | The name forge |
-| `js/naming.js`, `js/vendor/stellar-names/` | Port names, and the wide human pools behind the forge's hand-picked ones |
-| `js/insurance.js`, `js/ui/coverage.js` | Hull cover: tiers, premiums, claims, and who in the sky carries it |
-| `js/defence.js` | Hull and shield pools off the frame, and what armour turns away |
+| `js/world/names.js`, `js/data/lexicons.js` | The name forge |
+| `js/world/naming.js`, `js/vendor/stellar-names/` | Port names, and the wide human pools behind the forge's hand-picked ones |
+| `js/economy/insurance.js`, `js/ui/coverage.js` | Hull cover: tiers, premiums, claims, and who in the sky carries it |
+| `js/flight/defence.js` | Hull and shield pools off the frame, and what armour turns away |
 | `server.py` | The local server, the relay, the ledger — and the console that watches all three |
-| `js/races.js`, `js/careers/` | The fifteen races, the sixteen complexes and their ladders |
-| `js/corps.js`, `js/data/factions.js` | The local outfits and the powers behind them |
+| `js/crew/races.js`, `js/careers/` | The fifteen races, the sixteen complexes and their ladders |
+| `js/corp/corps.js`, `js/data/factions.js` | The local outfits and the powers behind them |
 | `js/genome/` | The 256-gene core, contextual expression, the decision-graph engine, and `spacer.js` — Living Galaxy's own entity types |
 | `js/npc/cradle.js` | CRADLE: the record of every person |
-| `js/crew.js`, `js/crew/` | The watch: roster, duties, talk, bonds, tiers, the deck graph, journals, romance, heritage, children, the brig, robots |
-| `js/family.js` | Households, conception, heredity, pairing |
-| `js/company.js`, `js/fleet.js`, `js/contracts.js` | The company, its hulls, the contract board |
+| `js/crew/ledger.js`, `js/crew/` | The watch: roster, duties, talk, bonds, tiers, the deck graph, journals, romance, heritage, children, the brig, robots |
+| `js/crew/family.js` | Households, conception, heredity, pairing |
+| `js/corp/company.js`, `js/corp/fleet.js`, `js/economy/contracts.js` | The company, its hulls, the contract board |
 | `js/npc/bounty.js` | The Marshal's board |
 | `js/drones/` | Work drones: roles, behaviour, the shared work board, the corporations' drones |
-| `js/gnn.js`, `js/chat.js` | The news desks and the chat bus |
+| `js/comms/gnn.js`, `js/comms/chat.js` | The news desks and the chat bus |
 | `js/npc/speech.js`, `js/speech/` | The open channel |
-| `js/upgrades.js`, `js/refityard.js` | Refits and where they are fitted |
-| `js/profile.js` | The run profile: what belongs to a pilot and what outlives them |
-| `js/account.js`, `js/console/panels/corp-account.js` | The account: the pilot's storage namespace synced to living-galaxy.com, and the CON › CORP › ACCOUNT card |
+| `js/economy/upgrades.js`, `js/station/refityard.js` | Refits and where they are fitted |
+| `js/core/profile.js` | The run profile: what belongs to a pilot and what outlives them |
+| `js/net/account.js`, `js/console/panels/corp-account.js` | The account: the pilot's storage namespace synced to living-galaxy.com, and the CON › CORP › ACCOUNT card |
 
 ### Experimental
 
-`js/atmoworks.js` (terraforming that actually moves a world's temperature and
-its climate band, saved with the sky), `js/icework.js` (the drill bench that
+`js/world/events/atmoworks.js` (terraforming that actually moves a world's temperature and
+its climate band, saved with the sky), `js/economy/icework.js` (the drill bench that
 turns ice in the hold into water, breathing gas and clathrate volatiles),
-`js/tutorial.js` (not a script — a set of checks against the live sky, so it
-works in Sol and in a rolled sky alike) and `js/worldsync.js` are covered
+`js/ui/tutorial.js` (not a script — a set of checks against the live sky, so it
+works in Sol and in a rolled sky alike) and `js/net/worldsync.js` are covered
 together by `test/experimental.test.mjs`.
 
-`js/tutorial.js` runs TRACKS, not one list. `intro` is the one that shows
-itself on a fresh device. `js/tutorial-core.js` holds `core`, the MISSION CORE
+`js/ui/tutorial.js` runs TRACKS, not one list. `intro` is the one that shows
+itself on a fresh device. `js/ui/tutorial-core.js` holds `core`, the MISSION CORE
 walkthrough, which is started by the WORK editor the first time it refuses a
 loop or a second step: it finds the nearest yard whose lines fit a core, pins
 it, and walks the warp, the approach, the berth and the refit desk, lighting
@@ -517,7 +539,7 @@ Gravity is patched-conic: you are always inside exactly one sphere of
 influence — the deepest one containing you — and crossing a boundary
 cross-fades to the parent. Orbits hold. Jupiter can capture you.
 
-**Room between things** (0.3.60, `SPACING` in `js/bodies.js`). After scaling,
+**Room between things** (0.3.60, `SPACING` in `js/world/bodies.js`). After scaling,
 each planet's periapsis clears the apoapsis of the one inside it by 1.25 of
 their two spheres summed (each capped at 12% of its orbit — this sky's giants
 carry spheres a fifth to half their orbit wide, and spacing against those ran
@@ -596,7 +618,7 @@ pills top-left, gauges card top-right, status/lock/notice/toast as one-line
 glass strips under the pills, throttle and warp down the right edge, DOCK/HAIL
 side keys (proxies to the retired dash-page buttons), the RCS cluster and a
 vertical dock of tool chips bottom-right, and the **chatbox**
-(`js/ui/chatbox.js` over `js/chat.js`) where the thumbstick was. The stick stays
+(`js/ui/chatbox.js` over `js/comms/chat.js`) where the thumbstick was. The stick stays
 in the DOM, hidden — dragging the sky already steers the nose. The dash's switch
 pages are hidden; everything on them is in the console.
 
@@ -608,7 +630,7 @@ upward, and the RCS pad and the dash are stacked on top of it. That offset used
 to be arithmetic over a hand-kept count of the chips, and it went stale twice —
 once when the fullscreen chip landed, once when HOLD did — each time growing the
 column past its own box so that ARIA was painted over AFT, DN and SCAN. The keys
-laid out correctly, looked right, and could not be tapped. `js/hud.js` measures
+laid out correctly, looked right, and could not be tapped. `js/ui/hud.js` measures
 the column now and publishes `--g-dock` in pixels, through a `ResizeObserver` so
 a chip that merely unhides is caught too; the CSS arithmetic survives only as
 the pre-JS fallback, and `test/hudlayout.test.mjs` fails if it drifts from the
@@ -917,7 +939,7 @@ cell, reactor rod, thruster bell, gyroscope, air scrubber, hydroponic rack,
 ration pack, armour plate, shield coil.
 
 **What a thing is worth is its inputs and the work** (0.3.47, `VALUE_RULE` in
-`js/materials.js`). A refined mineral is its ore ÷ the refine yield × 1.3; a
+`js/economy/materials.js`). A refined mineral is its ore ÷ the refine yield × 1.3; a
 made thing is the sum of its inputs × 1.18 — each stage of work adds the same
 18%, so a part is worth more over its rock the deeper it sits, and a new
 recipe prices itself. Ores are the unit and are not touched. Before, the table
@@ -948,7 +970,7 @@ in units of the good it wants.
 
 ### Rocks that mean something
 
-**A belt is mostly empty, and mostly rock** (`BELT` in `js/field.js`, 0.3.58).
+**A belt is mostly empty, and mostly rock** (`BELT` in `js/world/field.js`, 0.3.58).
 22% of a belt's cells hold nothing; the rest hold one to eight rocks (2.7 a
 cell on average, down from 6.3). Of the rocks, most are the belt's MATRIX —
 silicates and regolith in the broad middle, iron-stone at the sunward rim,
@@ -969,12 +991,12 @@ and a carbon drift and not tell them apart.
 Two layers fixed that, and both are still there because they answer different
 questions.
 
-**The field** (`js/engine.js`) is what makes a belt a belt on a phone, and since
+**The field** (`js/render/engine.js`) is what makes a belt a belt on a phone, and since
 0.3.02 every rock in it is the asteroid generator's. Each taxonomic class has two
 **prototypes** grown at 32 cells a face and baked (see *Baked bodies* under *The
 generators*), drawn as instances at three lattices by angular size — 768
 triangles close, 192 at about eighty pixels, 48 at about twenty-five — eighteen
-prototypes, a draw call per lattice. `LOOK` in `js/rockgen.js` still maps every
+prototypes, a draw call per lattice. `LOOK` in `js/world/rockgen.js` still maps every
 ore to a surface class and a tint that is a shift on grey; the instance leans
 toward its rock's ore (harder on a rich one) with a lightness jitter off its seed,
 so the rock you can see is the rock you are about to cut. A soft parallax dust
@@ -994,7 +1016,7 @@ from the device: `off` / `low` 4 / `full` 10 / `high` 18 bodies, off
 with `localStorage["lgaa.rocks"]`.
 
 **A rock sitting still wears nothing.** No crystals, rubble or ice clouds
-(`js/rockfx.js` keeps them off on every tier; the seams are in the surface).
+(`js/render/rockfx.js` keeps them off on every tier; the seams are in the surface).
 **When a rock is cut out it does not blink off** — the field's `brokenRocks`
 queue tells the renderer, and the grown body goes up as a shatter field in its
 own colours and ice budget, bursting out from where the rock was and let go over
@@ -1046,9 +1068,9 @@ and drums spin inside it; a tethered port turns with its tether so the mouth
 faces open sky) and every lane grows out of a real hangar mouth: one aperture,
 two doors — the three entry ways come in by the port half, the three exit ways
 leave by the starboard half — and they **funnel** out to the wide highway over
-the first couple of kilometres. `js/stationyard.js` is the glue: config, scale
+the first couple of kilometres. `js/station/stationyard.js` is the glue: config, scale
 (1 u = 10 m), the port frame, the doors, the weapon mounts, the works.
-`js/blueprint.js` grows the deck plan you walk around inside, deterministically
+`js/station/blueprint.js` grows the deck plan you walk around inside, deterministically
 from the station id.
 
 **Docking is by tractor, on request.** Ask for a berth — DOCK, or REQUEST DOCK
@@ -1075,7 +1097,7 @@ DOCK from anywhere files a berth and engages the approach autopilot, which files
 berths through `requestDock` — not `toggleDock`, which reads a flying approach
 as a wave-off.
 
-**Every port is a going concern** (`js/economy.js`). Each sector runs
+**Every port is a going concern** (`js/economy/economy.js`). Each sector runs
 production lines every twenty seconds — a foundry's smelter, alloy works,
 rolling mill, motor shop, kiln and titanium cell; a grow ring's vats and
 packing line; a habitat's draw on rations and water, which makes credits and
@@ -1124,9 +1146,9 @@ claim it.
 Every hull in the sky — yours, the traffic, the peers on the same server — is
 grown by the ship generator in `js/shipgen/` (19 hull doctrines, 11 drive
 families, a 346-part catalogue with a bill of materials behind every part). The
-fleet registry in `js/shipdb.js` is still the source of truth for what a hull
+fleet registry in `js/ships/shipdb.js` is still the source of truth for what a hull
 *is* — its silhouette grammar, its size, its dry mass, cargo, reactor, handling,
-turrets and berths. `js/hullspec.js` is the bridge: it registers every registry
+turrets and berths. `js/ships/hullspec.js` is the bridge: it registers every registry
 hull as a generator class (`lg:<id>`) carrying the def's own body, nose,
 wings, engine count and weapon weight, picks a drive family for the complex and
 tier, and fits a **buildable parts list** — the base doctrine for the hull's
@@ -1136,7 +1158,7 @@ Boom, a `ring` is a Rotating Gravity Section, `radiators` are Deployable
 Radiator Wings). The list is a property of the hull, not of the seed: every Ore
 Sled carries the same manifest.
 
-`js/shipforge.js` builds it. Same def + same seed is the same ship on every
+`js/ships/shipforge.js` builds it. Same def + same seed is the same ship on every
 client, so peers agree on what a hull looks like without shipping meshes.
 Your own hull is built in **full** detail (lamps blink, sensors sweep,
 turrets patrol, plumes follow the throttle); traffic and peers are built
@@ -1146,7 +1168,7 @@ ships on screen cost a few dozen draws instead of thousands. Unit primitives
 are swapped for coarser ones on the way in (a lamp bead does not need 500
 triangles). The sky fills one hull per frame rather than all at once.
 
-The yard prices what it fits. `js/shipcost.js` itemizes every catalogue part
+The yard prices what it fits. `js/economy/shipcost.js` itemizes every catalogue part
 from its bill of materials, with each raw stock the generator knows mapped
 onto a mineral the refineries sell — a Claim Warden costs what its drill
 booms, hopper, kilopower plant and pulse core cost in titanium, aluminium,
@@ -1209,7 +1231,7 @@ decides whether the cavalry comes for *you*, and a call from the belt fringe
 with every picket committed goes unanswered — which is what makes the patrolled
 lanes worth something.
 
-**The security ◆** (`js/seclevel.js`, `js/secbadge.js`, 0.3.48). A small
+**The security ◆** (`js/corp/seclevel.js`, `js/ui/secbadge.js`, 0.3.48). A small
 diamond in the HUD's brand pill — and in the station deck's header, because
 docked the deck covers the HUD — says where you stand with the Directorate:
 
@@ -1413,7 +1435,7 @@ and fly the same gravity you do, which means passing a world bends them. A
 shallow pass turns one onto a new heading and sends it somewhere else; a deep
 one drops it into the surface.
 
-They are an event, not the weather (0.3.60, `ROGUE` in `js/impactors.js`):
+They are an event, not the weather (0.3.60, `ROGUE` in `js/world/events/impactors.js`):
 none in a sky's first five minutes, then one every seven minutes or so, two at
 most. Most sail past you or past a world at 4.5–7 radii; one in about sixteen
 is thrown to hit. Every rock is **flown before it is thrown** — the same
@@ -1439,7 +1461,7 @@ end a moon — and drives everything downstream:
   are re-read from what is left
 
 Its moons keep orbiting whatever remains. And what is left is what everything
-downstream measures against: `remnantRadius(b)` in `js/scale.js` is one
+downstream measures against: `remnantRadius(b)` in `js/world/scale.js` is one
 definition of a shattered world — the 0.4 radii the canopy has always *drawn* it
 at — used by the renderer, the impactor skin test, the sphere of influence, the
 solver's well cutoff and the warp block alike. `refreshBody` cuts the mass index
@@ -1467,7 +1489,7 @@ its **own** body off the same generator the belt uses (`js/bodygen/`): a
 taxonomic class drawn on its own seed, real craters, a per-vertex mineral assay,
 metal standing proud of the matrix, outcrops where a seam breaks the surface.
 
-There are never more than two alive (`ROGUE.maxLive` in `js/impactors.js`). Each
+There are never more than two alive (`ROGUE.maxLive` in `js/world/events/impactors.js`). Each
 rogue's body is requested from the grower the moment the rock exists, tens of
 kilometres out, grown at the finest tier (H48 / 64 / 72 by device — the
 generator's own survey detail on a full device) and baked; cached by id and
@@ -1475,7 +1497,7 @@ radius, so growth is paid once per rock per session. A rogue born from a
 collision is a faceted fragment. A rock that strikes or
 drifts past the despawn rim takes its body with it.
 
-**What happens after a rock connects** (`js/impacts.js`, `js/impactfx.js`).
+**What happens after a rock connects** (`js/world/events/impacts.js`, `js/render/impactfx.js`).
 A strike used to throw a random burst. Now, if it lands within 320 km of the
 ship, it runs the generator's Impact Lab physics at game scale: the rogue's own
 body is grown and cut into sixteen solid Voronoi chunks; the break-up is planned
@@ -1490,7 +1512,7 @@ frame (the world's centre, co-moving with its rail, in units of `L` world units
 chosen so the rock's generated body sits at its own unit radius).
 
 **The pieces are the salvage.** Every fragment and every crust piece is a chunk
-in `js/debris.js` from the first tick — the tractor reels it, the cutter eats
+in `js/world/debris.js` from the first tick — the tractor reels it, the cutter eats
 it, a hole swallows it — but while the run holds it (`chunk.driven`) its
 position is the run's. When the run ends the chunks are let go with the run's
 velocities, and whatever came to rest on the world rained back down. The
@@ -1513,8 +1535,8 @@ the host's rock list carries that.
 
 ### Collapsed stars
 
-The rarest cataclysm, and the only one that moves (`js/holes.js`,
-`js/holefx.js`).
+The rarest cataclysm, and the only one that moves (`js/world/events/holes.js`,
+`js/render/holefx.js`).
 
 **Transit.** A neighbouring star collapses and its remnant is kicked through
 this system on a straight line at 2,200–3,200 u/s. It is rolled once every ten
@@ -1537,7 +1559,7 @@ horizon 0.9 rs (crossing it ends the hull), ISCO 1.9 rs (the burn radius), tidal
 **What it does.** It pulls on everything that flies — a third of Sol's
 parameter: 30 u/s² at 60 km, more than any engine inside 20 km. Warp geometry
 will not hold inside 60 rs. Every quarter second it eats belt rocks inside its
-tidal radius (a tunnel through the belt; `eatRocks` in `js/field.js`), shreds
+tidal radius (a tunnel through the belt; `eatRocks` in `js/world/field.js`), shreds
 any rogue that strays inside it, burns loose debris inside the ISCO (and makes
 it glow inside the tidal radius), kills hulls under the ISCO and wears them
 inside the tidal radius, loses ports inside 1.6 × ISCO and rakes guns and stock
@@ -1559,7 +1581,7 @@ snapshot, and a mirror dead-reckons the straight line.
 **The lens** is the generator's Kerr lens: every pixel's ray traced through a
 spinning hole's spacetime with the DNGR equations *Interstellar* was rendered
 with — shadow, photon ring, the thin disk lensed over and under, stars and
-worlds behind it bent into arcs — as a pass in `js/postfx.js` over the scene
+worlds behind it bent into arcs — as a pass in `js/render/postfx.js` over the scene
 and its depth texture, so a hull in front stays a hull. 80 steps a pixel on a
 touch device (traced at half resolution and merged over the full-resolution
 scene by the lens's own mask), 170 on a desktop; a ray further out than a
@@ -1586,7 +1608,7 @@ the nose 125–138° off the flight path, and every jump crabbed up to 24°.
 
 ### The contact register
 
-`js/contacts.js` exists because `map.js` used to say so in its own comment:
+`js/flight/contacts.js` exists because `map.js` used to say so in its own comment:
 *"every hull on the board, wherever it is — the chart always has the squawk"*.
 224 hulls, named, at true position, forever. That is not a sensor picture, it is
 omniscience, and it makes the scanner, the probes and the whole idea of a sensor
@@ -1622,7 +1644,7 @@ an unresolved return is listed as `unknown return · resolving 38%`.
 ### Avoidance
 
 Neither the autopilot nor the flight assist ever looked at what was in front of
-it. `js/avoid.js` is one solver with two customers: `apSteer()` is the single
+it. `js/flight/avoid.js` is one solver with two customers: `apSteer()` is the single
 funnel every autopilot mode flies through, so the avoidance lives there rather
 than in each mode, and the flight assist gets it as a plain vector on
 `ship.avoid` set by `sim.js` — the flight model does not learn what a station is.
@@ -1674,7 +1696,7 @@ worse than nothing:
   outright, which is the worst possible moment to stop looking. It reports
   whatever the hull is overlapping.
 
-Two matching rules live in `js/autopilot.js`: `apSteer` no longer zeroes the
+Two matching rules live in `js/flight/autopilot.js`: `apSteer` no longer zeroes the
 stick while braking (a hull that braked stopped turning, stopped in front of the
 same hazard, and braked at it again), and when avoiding, the throttle has a
 floor — the old shaping gave 5% throttle whenever the nose was more than 72° off
@@ -1701,7 +1723,7 @@ charge ≥ 85%, time ≥ 60 s, credits, hull, docked, cargo of a good, loops;
 `all` / `any` / `not` combine them), and per-step overrides of the thrust cap
 and the warp policy; a loop row repeats the list ×N or until a condition
 holds. `js/mission/run.js` walks the steps on the autopilot primitives
-(`apLeg`, `apPark`, `apDock`, `apMine`, `apHold` in `js/autopilot.js`); the
+(`apLeg`, `apPark`, `apDock`, `apMine`, `apHold` in `js/flight/autopilot.js`); the
 executor lets go the moment you touch the stick and never flies while an NPC
 holds the conn. The run is saved per sky and callsign on every step change and
 comes back **paused** after a reload — nothing flies by itself.
@@ -1718,7 +1740,7 @@ thrust-cap and warp chips the one-step buttons use. Loops and multi-step mission
 need the **Mission core** refit (logistic or military yard); HUD one-steps and
 the chart's loop always work.
 
-**TRADE RUN flies a route** (0.3.19, `js/traderoutes.js`, `js/mission/tradeops.js`).
+**TRADE RUN flies a route** (0.3.19, `js/economy/traderoutes.js`, `js/mission/tradeops.js`).
 At the top of each round it picks the best buy-here-sell-there run from where
 the hull is — every honest port's shelf against every other port's till, at the
 exact prices the desks transact at, sized to the hold, the purse, the shelf and
@@ -1778,7 +1800,7 @@ watches how you fly whenever nobody else holds the conn — one imitation label
 every five seconds. It only ever seeded NPC captains. It never flew your ship
 and never touched your autopilot, so what it learned went nowhere you could see.
 
-`js/aria.js` is three things, all fed by what you **do**:
+`js/aria/aria.js` is three things, all fed by what you **do**:
 
 1. **Preferences.** Every time you sell at one port over two that were closer,
    or cut the chromite and leave the silicate next to it, that is a labelled
@@ -1792,7 +1814,7 @@ and never touched your autopilot, so what it learned went nowhere you could see.
    times running and it stops raising it; act on it once and it comes back,
    because people change what they care about.
 3. **The conn** (the **ARIA** button on the flight HUD, 0.3.03). ARIA does not
-   steer the stick; it plans jobs for the autopilot (`js/aria-pilot.js`) —
+   steer the stick; it plans jobs for the autopilot (`js/aria/pilot.js`) —
    repair when the hull is under 45%, the desk when the hold is 85% full, and
    otherwise the job *you* spend your time on (mine, sell, survey), counted off
    your own flying under `aria.prefs.job` — and the mission runner flies each
@@ -1812,7 +1834,7 @@ button. What ARIA has learned is filed against the **human**, not the character
 
 ### The name forge
 
-`js/names.js` + `js/data/lexicons.js`. One seeded assembler, many tongues.
+`js/world/names.js` + `js/data/lexicons.js`. One seeded assembler, many tongues.
 
 **Two corners of the naming system were never forged at all**, and by 0.3.32
 they had run out. Ports came from five sector prefixes times seven suffixes —
@@ -1822,7 +1844,7 @@ name another port also had. Terran people drew a surname from a flat list of
 the contact board with them, because a vessel's callsign is built off its
 captain's surname.
 
-`js/naming.js` is the seam that fixed it, over pools vendored from **Stellar
+`js/world/naming.js` is the seam that fixed it, over pools vendored from **Stellar
 Names 1.2** (`js/vendor/stellar-names/`, licences and changes in its
 `NOTICE.md`). Ports keep the sector word as their anchor — Bastion, Smelt,
 Hookfall tell you what you are docking at before the market screen does — and
@@ -1912,7 +1934,7 @@ that exists only because two names sit next to each other ("Sera Petrosyan") is
 not something anybody sees. `test/names.test.mjs` scans half a million names for
 it on every run.
 
-**One name, one person — the Galactic Database** (`js/gdb.js`, 0.3.54). The
+**One name, one person — the Galactic Database** (`js/corp/gdb.js`, 0.3.54). The
 forge makes names; the GDB decides which ones a person may have. Everybody the
 galaxy produces is filed there — hiring halls, traffic captains, NPC hull
 crews, flow-boat pilots, boarders, bounty marks, children born aboard and
@@ -1946,7 +1968,7 @@ gender their body is, a few are not, and about one in twenty is neither.
 a person, exactly *two* showed a pronoun. Everywhere else a person was a name in
 an invented tongue with nothing beside it, and a reader with no ear for the
 tongue fills that blank in with the default. `genderMark()` / `pronounOf()` in
-`js/crew.js` are wired into the crew roster, the genome sheet, the brig, the
+`js/crew/ledger.js` are wired into the crew roster, the genome sheet, the brig, the
 port deck's people list, the fleet rows, the yard chair, `describeNPC` and the
 SHIPS directory — which had been throwing the captain away entirely
 (`vesselStatus(n).split(" — ")[0]` kept the job and discarded the person).
@@ -1966,7 +1988,7 @@ temper, and a dated history from which every relationship is *derived* —
 `relationOf(a, b)` sums the shifts the timeline records, so the fiction and
 the mechanics cannot drift apart. `activeWars()` lists who is at war today.
 
-Astra's fifteen local outfits (`js/corps.js`) are chartered under those powers:
+Astra's fifteen local outfits (`js/corp/corps.js`) are chartered under those powers:
 majors fly Coalition paper, alternates signed nothing, hostiles are Outer.
 `corpRelation(a, b)` is the powers' relationship plus the sky's own feuds
 (two or three seeded quarrels and one old alliance per sky), and `corpWars()`
@@ -2069,8 +2091,8 @@ cares about; the treasury takes FUND / DRAW at the desk.
 
 ### The contract board
 
-The BOARD tab at any port and CONSOLE › CORP › BOARD (`js/contracts.js`, drawn
-by `js/boardview.js` so the two cannot drift). Since 0.3.18 a desk is a port's
+The BOARD tab at any port and CONSOLE › CORP › BOARD (`js/economy/contracts.js`, drawn
+by `js/ui/boardview.js` so the two cannot drift). Since 0.3.18 a desk is a port's
 whole payroll: **thirty offers** re-posted every eight minutes, expiring whether
 or not you look, posted by the port's charter holder **and the two or three
 tenant outfits with offices on its ring** (a free port's tenants are the hostile
@@ -2100,7 +2122,7 @@ marked *needs an armed hull* until you fly one — and a delivery pays the port'
 bid **plus** a premium and a fee, because a desk that pays under the market is a
 desk nobody uses.
 
-**A job with rock in it names a place** (0.3.20, `js/sites.js`). The desk picks
+**A job with rock in it names a place** (0.3.20, `js/economy/sites.js`). The desk picks
 a stretch of belt when it posts the job — *the Kestrel Drift — 412 km out from
 Smelt Station, bearing 214* — and accepting it opens a **site** there: four to
 sixteen seeded rocks carrying the ore the job wants, laid into the field the
@@ -2114,7 +2136,7 @@ expire closes the seam. Ice runs look past the frost line, vein strikes lay a
 tight rich pocket, assay jobs a small one; wreck and pod recoveries name a
 drift the same way.
 
-**Chain contracts** (0.3.21, `js/chains.js`, `js/data/chains.js`). Twenty-one
+**Chain contracts** (0.3.21, `js/economy/chains.js`, `js/data/chains.js`). Twenty-one
 multi-stage jobs, four or five stages each, spread across every department —
 mining 2, logistics 2, trade 2, security 2, salvage 2, industry 3, energy 2,
 science 3, civic 3. A chain is posted one stage at a time: finish one and the
@@ -2138,8 +2160,8 @@ desk says what you are running and where the next stage waits.
 
 ### ARIA plays it herself
 
-**Headless playthroughs** (0.3.22, `js/ariaplay.js`, `tools/aria-play.mjs`). The
-preference core (`js/aria.js`) learns from watching you fly. The other half is
+**Headless playthroughs** (0.3.22, `js/aria/play.js`, `tools/aria-play.mjs`). The
+preference core (`js/aria/aria.js`) learns from watching you fly. The other half is
 ARIA flying a hull of her own. One terminal runs the world, `python3 server.py
 8080`; a terminal per pilot runs a career in that same sky and the same relay
 room:
@@ -2153,7 +2175,7 @@ node tools/aria-play.mjs --career security --minutes 20 --hull general_c
 Flags: `--career --hull --minutes --speed --room --server --credits --name
 --quiet --no-net`. Generation is deterministic, so every instance and every
 browser tab builds the same sky; the runner pushes the same `t:"ship"` packet
-`js/net.js` sends, so a player in a browser sees the bots working.
+`js/net/net.js` sends, so a player in a browser sees the bots working.
 
 A MOVE is a kind of work with a target (`board:mining:vein`, `chain:trade`,
 `route`, `mine`, `sell`), scored by credits per minute of sky over every run of
@@ -2225,7 +2247,7 @@ flown: the climb out of the well, the spool, the run at the sim's own
 
 ### The hold is a bag
 
-**HOLD** (0.3.29, `js/holdview.js`) sits in the HUD tools row with the fill
+**HOLD** (0.3.29, `js/ui/holdview.js`) sits in the HUD tools row with the fill
 percentage on it, and opens a slot grid: one slot per good, its quantity, the
 tonnage it costs you, and what a unit is worth where you are standing — the
 port's price when docked, book value when not, and the panel says which. Empty
@@ -2238,7 +2260,7 @@ portrait, which is how the game is actually held.
 
 ### Why the belt does not rebuild itself
 
-**The cell cache is not keyed on the clock** (0.3.28, `js/field.js`). A rock's
+**The cell cache is not keyed on the clock** (0.3.28, `js/world/field.js`). A rock's
 identity — its cell position, its radius, its class, its ore — does not depend
 on the sky time at all. Only a ±60 u wobble and how worn it is do. The cache
 used to be keyed on time anyway, so the whole 27-cell neighbourhood was thrown
@@ -2254,7 +2276,7 @@ every frame it burns — so mining invalidated the entire belt sixty times a
 second. It flushes only when a rock is finished and has to stop existing; wear
 rides the refresh.
 
-**One rock, one shape** (0.3.62, `js/engine.js`). A rock's prototype IS its
+**One rock, one shape** (0.3.62, `js/render/engine.js`). A rock's prototype IS its
 shape at every range: close aboard it is the same seed and rolls grown at the
 device's finer lattice (on `low` the identical mesh), grown once per prototype
 per session and shared — a close-aboard rock is a mesh on shared geometry with
@@ -2266,7 +2288,7 @@ instance lattices change only after clearing a threshold by a fifth either way
 (`LOD_HYST`). A rock changes only when something happens to it: worn, shattered,
 struck. The notes below predate it and describe the swap it removed.
 
-**A rock keeps its own shape** (0.3.28, `js/engine.js`). A grown body is that
+**A rock keeps its own shape** (0.3.28, `js/render/engine.js`). A grown body is that
 rock's real geometry and everything else draws as a class prototype, so a rock
 crossing the body budget changes shape rather than fading — and on a phone the
 budget is four. The grown set now has hysteresis: an incumbent ranks nearer
@@ -2277,7 +2299,7 @@ lock or your cutter.
 
 ### When it will not start
 
-**The boot guard** (0.3.27, `js/boot.js`). ES modules resolve named imports at
+**The boot guard** (0.3.27, `js/core/boot.js`). ES modules resolve named imports at
 link time, so one file left a version behind its neighbours does not throw
 where you can see it — the whole graph refuses to evaluate, nothing mounts, and
 the static shell in `index.html` sits on screen over a canvas nothing drew to.
@@ -2319,7 +2341,7 @@ learnt, correctly and uselessly, that docking makes you poorer.
 
 ### The crane is not the till
 
-**Cargo handling** (0.3.25, `js/dockwork.js`) — a game rule, the same for a
+**Cargo handling** (0.3.25, `js/station/dockwork.js`) — a game rule, the same for a
 player and a bot. You agree a price and the money moves at once; the crane
 books time at the berth. It scales with **tonnage**, not units, so eight shield
 coils are quick and eight hundred rations are not; it is cumulative across one
@@ -2331,13 +2353,13 @@ counted the flying and not the loading.
 
 ### Why a consignment is priced as a consignment
 
-**Lot pricing** (0.3.24, `js/economy.js` `lotMult`). Every trade used to move
+**Lot pricing** (0.3.24, `js/economy/economy.js` `lotMult`). Every trade used to move
 the whole lot at the MARGINAL price — what one unit was worth — applied once per
 unit. A hold of girders emptied into a port that wanted forty still fetched
 bare-shelf money on the hundred and sixtieth. A lot now walks the port's own
 stock curve as it lands, integrated over the fill, and `askPrice`, `bidPrice`,
 `sellPriceAt`, `buyPriceAt`, `tradeBuy` and `tradeSell` all take the quantity.
-`js/traderoutes.js` sizes a run and then prices both ends at that size, so the
+`js/economy/traderoutes.js` sizes a run and then prices both ends at that size, so the
 route board's estimate is still exactly what the till will do.
 
 The stock band narrowed with it: `PRICE_FLOOR` 0.6 → **0.72** and `PRICE_CEIL`
@@ -2347,7 +2369,7 @@ trip double your money.
 
 Those two took 46% out of route profit, and the bench showed they took the
 careers down with them — a delivery's pay is built on the port's bid, and the
-bid moved too. So the third lever: **`BOARD.pay`** in `js/contracts.js`, one
+bid moved too. So the third lever: **`BOARD.pay`** in `js/economy/contracts.js`, one
 named constant on the posted pay of every job, at 1.7. It moves every department
 at once, which is what parity wants and flavour does not; it is the number to
 reach for when a career feels thin. Measured over nine careers × three seeds ×
@@ -2806,7 +2828,7 @@ and the house rules — ROMANCE (off / crew only / all, meaning you too) and
 FAMILIES. Outcomes are gender-specific by design: *ask them to dinner* only
 works when the interest is mutual on paper, trust is there, and neither of you is
 with someone; otherwise they decline in their own words. There is one door for
-pairing with the player — `pairWithPlayer(m)` in `js/family.js` — which honours
+pairing with the player — `pairWithPlayer(m)` in `js/crew/family.js` — which honours
 `couldCourt` (mutual attraction, not kin, trust ≥ 55) and writes the ledger and
 the log; both the TALK topic and the dinner beat go through it.
 
@@ -2834,7 +2856,7 @@ it off the crew still pair off, still bond, and still have children through the
 ordinary household path.
 
 All 18+ lines and bed/try-for-child acts live in **`addon/adult/`**, separately.
-`js/addon-loader.js` imports it if the file exists; a missing folder is not an
+`js/core/addon-loader.js` imports it if the file exists; a missing folder is not an
 error. Delete `addon/adult/` to strip the pack — HOUSE grows an **18+ scenes**
 chip only when the pack loaded. The core has been probed in a real browser both
 ways.
@@ -2846,7 +2868,7 @@ when FAMILIES is on and both are settled in: one carries, one sires (nonbinary
 hands roll which from their seed; synthetics never). A pregnancy runs six cycles;
 the child is a CRADLE record with both parents, a race from one, a berth (two
 children share one) — and a **real crossover genome**: `conceive()` in
-`js/family.js` does block recombination, dominance where the parents' genes say
+`js/crew/family.js` does block recombination, dominance where the parents' genes say
 so, gaussian mutation scaled by their own mutation genes, and a lineage stamp.
 The five axes, the pulse, the identity and the tells are read off the result
 rather than blended by hand — a child's caution is inherited because the genes
@@ -2916,7 +2938,7 @@ number — so buying berths changed nothing in the hall but still fitted a frame
 
 ### Station life
 
-`js/stationlife.js`. A settled hand used to be a row in a ledger that produced a
+`js/station/stationlife.js`. A settled hand used to be a row in a ledger that produced a
 number every cycle and never did anything else.
 
 Every cycle, each settled member has a weighted chance of something happening,
@@ -2941,7 +2963,7 @@ mood and whether they are about to walk, and the town log. Measured, 6 hands
 settled at an industrial port over 200 cycles: marriages, births, seven children
 come of age onto the rolls, promotions, feuds — **6 on the rolls → 14**.
 
-**The company line** (`js/staffline.js`, 0.3.46). Settling somebody is not the
+**The company line** (`js/station/staffline.js`, 0.3.46). Settling somebody is not the
 last time you speak to them. Every member of staff in this sky is on the line
 from anywhere — CORP › TOWN, LINE on their row (or LINE beside them in a port's
 HALL). A call reads their actual life back to you — role, cycles, mood,
@@ -2967,8 +2989,8 @@ answers on the row. Three cycles unanswered costs 5 mood and 6 regard. The
 towns (households, children, the town log) and the inbox ride in the
 `lgaa-company` save — before 0.3.46 a reload lost every marriage and child.
 
-**Port standard time and a working day** (`js/stationclock.js`,
-`js/stafflife.js`, 0.3.52). Every port keeps the same clock: an hour is 30 s of
+**Port standard time and a working day** (`js/station/stationclock.js`,
+`js/station/stafflife.js`, 0.3.52). Every port keeps the same clock: an hour is 30 s of
 sky time, a day 24 hours (12 minutes at ×1), a pay cycle three hours, a week
 seven days, day 1 opening at 06:00. It is on the title bar and in the station
 deck's header. Each settled hand has a **job** at their port (by sector — the
@@ -2987,7 +3009,7 @@ person is doing now and their day log; calling someone at 02:00 wakes them.
 
 **What you can do about it** (0.3.53). A settled hand's card — HALL › LINE on
 the deck, or CORP › TOWN › LINE from anywhere — carries WORK · HOME · CARE
-(`js/staffcare.js`): change their job, shift (nights +15% an hour, swing +5%)
+(`js/station/staffcare.js`): change their job, shift (nights +15% an hour, swing +5%)
 or hours; move them out of the bunk room (cabin 12 cr/cycle, family quarters
 30); give them a DAY OFF (their next shift, unpaid, once a day), STAND THEM A
 MEAL (8 cr), A NIGHT OUT (30 cr), or SEND THEM ON A COURSE (4 cycles of their
@@ -3010,7 +3032,7 @@ on a yard's deck. No wage, no morale, no romance, cannot hold the conn; they dra
 kW on the bus, wear with the backlog, idle under 30% condition, and are serviced
 by an engineer or SERVICE ALL at a yard. They persist per sky.
 
-**Refits** (`js/upgrades.js`, MARKET › REFIT or the port deck's Refit tab) are
+**Refits** (`js/economy/upgrades.js`, MARKET › REFIT or the port deck's Refit tab) are
 **39** purchasable upgrades with sector gating and 50% sell-back. All **16** hull
 mod keys are on the table — `lock`, `gTol`, `heat`, `standing`, `blame` and
 `menace` had never been purchasable at all — plus **23** distinct non-mod
@@ -3096,7 +3118,7 @@ sleep or be paid — but one raider inside 1.4 km and they are gone.
 
 ### GNN and the chat bus
 
-**GNN** (`js/gnn.js`, `js/stations.js`) is one `GNN <Word> Station|Relay` per
+**GNN** (`js/comms/gnn.js`, `js/station/stations.js`) is one `GNN <Word> Station|Relay` per
 sky, civilian berths, relay archetype, on its own seeded draw (`<sky>:gnn`) so
 the other ports keep their seeds. `gnnPost({ desk, title, body, actions })`
 archives on the desk and posts to chat channel `gnn` with links — `GNN desk ·
@@ -3105,7 +3127,7 @@ there — plus up to two actions. Bulletins are auto-accepted: they never ring t
 comms puck. Desks: news (impacts), markets (droughts, bonds, shortages), security
 (engagements, outcomes), contractors (your drones' kills and strikes).
 
-**The chat bus** (`js/chat.js`) is `post({ channel, from, text, links, tone })` →
+**The chat bus** (`js/comms/chat.js`) is `post({ channel, from, text, links, tone })` →
 `onChat(fn)` / `recent(n, channel)` / `follow(msg, i)`. Channels: local (the
 speech band), gnn, drones, you, sys. The chatbox in the glass HUD is the surface;
 the console's channel log lists the last 30 with their links.
@@ -3120,11 +3142,11 @@ newer tree over its folder.
 
 | Generator | Vendored at | Adapter | What it drives |
 | --- | --- | --- | --- |
-| NEWSHIPGEN | `js/shipgen/` (verbatim) | `js/shipforge.js`, `js/hullspec.js`, `js/shipcost.js`, `js/hullpool.js` | every hull: yours, traffic, flow boats, peers, the shipyard |
-| STATIONGEN | `js/stationgen/` (verbatim + perf patches) | `js/stationyard.js`, `js/stationworks.js` | every port: hull, hangar mouths, lanes, mounts, works |
-| ROBOTGEN v1.7 | `js/robotgen/` (verbatim) | `js/dronespec.js` (data), `js/droneforge.js` (meshes) | remote drones: port interceptors, free-port gun drones, your probes, crew robots |
+| NEWSHIPGEN | `js/shipgen/` (verbatim) | `js/ships/shipforge.js`, `js/ships/hullspec.js`, `js/economy/shipcost.js`, `js/render/hullpool.js` | every hull: yours, traffic, flow boats, peers, the shipyard |
+| STATIONGEN | `js/stationgen/` (verbatim + perf patches) | `js/station/stationyard.js`, `js/station/stationworks.js` | every port: hull, hangar mouths, lanes, mounts, works |
+| ROBOTGEN v1.7 | `js/robotgen/` (verbatim) | `js/drones/dronespec.js` (data), `js/drones/droneforge.js` (meshes) | remote drones: port interceptors, free-port gun drones, your probes, crew robots |
 | NPCSPEECHGEN | `js/speech/npc-speech.js` (one-phrase fix) | `js/npc/speech.js` | the open channel and TALK on hailed hulls and ports |
-| asteroid-generator v1.01 | `js/asteroidgen/` (verbatim + `ores.js`, two generator parameters) | `js/bodygen/`, `js/rockfx.js`, `js/impacts.js`, `js/impactfx.js`, `js/holefx.js` | grown rocks and rogues, rubble, ice clouds, shatter, impact break-ups, the black-hole lens and tidal disruption, the survey card |
+| asteroid-generator v1.01 | `js/asteroidgen/` (verbatim + `ores.js`, two generator parameters) | `js/bodygen/`, `js/render/rockfx.js`, `js/world/events/impacts.js`, `js/render/impactfx.js`, `js/render/holefx.js` | grown rocks and rogues, rubble, ice clouds, shatter, impact break-ups, the black-hole lens and tidal disruption, the survey card |
 
 ### The ship generator
 
@@ -3322,8 +3344,8 @@ Shane's asteroid generator (the drop-in labelled v1.01; its own README calls it
 not. What changed, and nothing else:
 
 - **`ores.js` is the game's.** The forty-species catalogue and the v1.01
-  re-mapping table are both gone; `ORES` is built from `js/materials.js` plus
-  `oreLook()` in `js/rockgen.js` (which gained an absolute `albedo` and a mineral
+  re-mapping table are both gone; `ORES` is built from `js/economy/materials.js` plus
+  `oreLook()` in `js/world/rockgen.js` (which gained an absolute `albedo` and a mineral
   `category` per ore — the generator's own v1.01 colours), and
   `ASTEROID_CLASSES` is `js/bodygen/classes.js` by reference. One mineral list.
 - **`generator.js` takes three extra params**, each defaulting to exactly what it
@@ -3334,7 +3356,7 @@ not. What changed, and nothing else:
   rock assays as bare. The game runs 4 and 4: about 12% of a body's vertices
   show ore, and the rolls are unchanged, so a seed is still a seed.
 - **The shaders are patched, not edited** (`js/bodygen/gl.js`,
-  `js/holefx.js`): logarithmic-depth chunks added to every hand-written
+  `js/render/holefx.js`): logarithmic-depth chunks added to every hand-written
   ShaderMaterial (this renderer uses a log depth buffer; without them a debris
   cloud sorts through the hull), a `uFade` master on the debris fields, and the
   lens's depth maths, far-plane unprojection and absolute distances made to
@@ -3385,7 +3407,7 @@ covered in *The sky*.
 
 ## Audio
 
-`js/audio/` + a façade at `js/audio.js`. Nothing is loaded: every sound is
+`js/audio/` + a façade at `js/audio/index.js`. Nothing is loaded: every sound is
 synthesised at the moment it plays, the same way every hull and every world is.
 No wav files ship with the game.
 
@@ -3507,7 +3529,7 @@ palette still dark, and the voice cap holding.
 
 ## Menu art
 
-`js/attract.js` + a seam in `js/engine.js`. Roughly 330 lines, no new assets,
+`js/render/attract.js` + a seam in `js/render/engine.js`. Roughly 330 lines, no new assets,
 nothing downloaded, nothing painted by hand.
 
 **What was actually wrong.** The title screen was not missing a backdrop. It was
@@ -3616,7 +3638,7 @@ the same sky without shipping any of it:
 | Engagements | the sky seed, so every pilot in the room sees the same ambush with the same ending |
 | A flow boat's pilot | the boat's own id |
 
-`js/field.js` is the clearest case: the belt is 50,000 units wide, so it is never
+`js/world/field.js` is the clearest case: the belt is 50,000 units wide, so it is never
 built. It dices space into cells and hashes each cell's rocks deterministically;
 fly away and back and the same rocks are in the same places.
 
@@ -3628,7 +3650,7 @@ still on the books when you made a new one, the old callsign was still on the
 save, and the old hands were still filed as "aboard". You cannot start over in a
 game that will not let you.
 
-`js/profile.js` fixes that by saying out loud which of three things each key is.
+`js/core/profile.js` fixes that by saying out loud which of three things each key is.
 It is a **leaf**: it touches storage and nothing else, so it can be imported from
 anywhere without dragging the sim in behind it.
 
@@ -3642,7 +3664,7 @@ And the half that made the bug hard to see: five subsystems write a key **keyed
 by the sky and the callsign**, `lgaa.<thing>.v1:<skySeed>:<callsign>` —
 
 ```
-lgaa.upgrades.v1:     refits fitted           js/upgrades.js
+lgaa.upgrades.v1:     refits fitted           js/economy/upgrades.js
 lgaa.robots.v1:       the robot roster        js/crew/robots.js
 lgaa.missions.v1:     mission board state     js/mission/script.js
 lgaa.mission.run.v1:  a mission part-flown    js/mission/run.js

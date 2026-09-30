@@ -3,11 +3,11 @@
  * the hull at the mouth; UNDOCK pushes it out and releases it clear; DOCK on the way in waves
  * port control off and leaves the berth standing; a hostile hold refuses.
  *   node --import ./test/three-register.mjs test/portcontrol.test.mjs */
-import { sim, launchSim, tickSim, toggleDock } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, TRACTOR_V } from "../js/stations.js";
-import { tractor, dockRequest } from "../js/stationworks.js";
-import { autopilot } from "../js/autopilot.js";
+import { sim, launchSim, tickSim, toggleDock } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, TRACTOR_V } from "../js/station/stations.js";
+import { tractor, dockRequest } from "../js/station/stationworks.js";
+import { autopilot } from "../js/flight/autopilot.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

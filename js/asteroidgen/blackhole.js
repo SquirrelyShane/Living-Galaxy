@@ -1,39 +1,3 @@
-/**
- * Kerr (spinning) black hole as a post-process lens.
- *
- * v1.9: rays follow the super-Hamiltonian Kerr null-geodesic equations of the DNGR
- * code used for Interstellar (James, von Tunzelmann, Franklin & Thorne 2015,
- * appendix A.1): camera direction → FIDO-frame canonical momenta (p_r, p_θ, b, q),
- * integrated backward in ζ with RK2, thin disk in the equatorial plane at the
- * spin-dependent ISCO, optional Doppler + gravitational colour/brightness shift
- * (blackbody at T0 shifted to g·T0, Planck radiance sampled at film R/G/B).
- * kerr.js holds the JS reference this GLSL is checked against. Units inside the
- * march sphere are M (= world Rs / 2). The v1.3 Schwarzschild description follows.
- *
- * Per pixel, a camera ray is traced in units of the Schwarzschild radius (Rs = 1)
- * with the photon-orbit equation used by Marinozzi's raytracer:
- *
- *     v += -1.5 · h² · p / r⁵ · dt ,   p += v · dt ,   h = |p × v|
- *
- * inside a march sphere (MARCH_R). Outside it, the weak-field deflection
- * α = 2 / b is applied analytically, and the residual bend for the part of the
- * path outside the sphere is added on exit, so the lens is continuous across
- * the boundary. Escaped rays re-project onto the frame rendered so far (stars,
- * debris, fragments); captured rays are black.
- *
- * v1.8 finite-distance lensing: a lensed ray is marched from its bend point
- * through the depth buffer and takes the first surface it passes behind, so
- * bodies just behind the hole shift and wrap a little instead of being
- * magnified into a screen-filling Einstein ring as if they sat at infinity.
- * Rays whose source is hidden behind a foreground body fall back to the
- * pixel's own unlensed background — never a mirrored copy of the body.
- * Crossings of the disk plane (world XZ) add emission from the accretion disk,
- * so the lensed far side of the disk arcs over and under the shadow.
- *
- * The disk has no emission of its own until matter arrives: ring radii and
- * brightness come from the debris that has actually dissolved into it
- * (debris.accretion()) plus what the fx particles delivered.
- */
 import * as THREE from 'three';
 import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { BH_RS } from './debris.js';
@@ -43,14 +7,14 @@ export const RING_MAX = 24;
 export const BH_DISK = { isco: 3.0, out: 12.5, march: 14.0 };
 
 export const BLACKHOLE_SHADER = {
-  vertexShader: /* glsl */ `
+  vertexShader: `
 varying vec2 vUv;
 void main() {
   vUv = uv;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `,
-  fragmentShader: /* glsl */ `
+  fragmentShader: `
 uniform sampler2D tDiffuse;
 uniform sampler2D tDepth;
 uniform float uHasDepth;
@@ -402,12 +366,6 @@ void main() {
 `,
 };
 
-/**
- * Turn per-clump accretion into lens ring uniforms.
- * @param {Array<{r:number, mass:number}>} entries  r in world units
- * @param {number} extraMass  mass delivered by fx particles / chunks (feeds the inner disk)
- * @returns {{ r: Float32Array, w: Float32Array, i: Float32Array, count: number, base: number, total: number }}
- */
 export function buildRings(entries, extraMass = 0) {
   let total = extraMass;
   let rings = [];
@@ -484,7 +442,6 @@ export class BlackHolePass extends Pass {
     this.rings = null;
   }
 
-  /** rs: world Schwarzschild radius (0 disables), rings: buildRings() output, spin a/M, shifts 0|1. */
   setState({ rs = 0, rings = null, time = 0, position = null, background = null, spin = null, shifts = null } = {}) {
     const u = this.material.uniforms;
     if (spin != null) {
@@ -533,7 +490,6 @@ export class BlackHolePass extends Pass {
   }
 }
 
-/** Give both composer targets depth textures so the lens can keep foreground objects unwarped. */
 export function attachComposerDepth(composer) {
   for (const rt of [composer.renderTarget1, composer.renderTarget2]) {
     if (rt.depthTexture) rt.depthTexture.dispose();

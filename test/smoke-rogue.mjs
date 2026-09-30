@@ -2,7 +2,7 @@
  *
  * The symptom, seen on a named rogue at 288 km: rogue asteroids rendered no
  * better than before the rock rebuild. They were not in it — that work went
- * into the belt (js/rockgen.js, js/bodygen/) and the super asteroids were still
+ * into the belt (js/world/rockgen.js, js/bodygen/) and the super asteroids were still
  * an IcosahedronGeometry(1, 1) in flat brown, eight to an InstancedMesh.
  *
  * What this measures, rather than that it ran:
@@ -33,8 +33,8 @@ await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await page.waitForTimeout(1500);
 
 const res = await page.evaluate(async () => {
-  const { impactors } = await import("/js/impactors.js");
-  const { sim } = await import("/js/sim.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
   const { BAKE } = await import("/js/bodygen/body.js");
   const out = {};
   const gl = window.__lgGL;

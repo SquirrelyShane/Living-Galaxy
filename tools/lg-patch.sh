@@ -6,12 +6,15 @@
 #   tools/lg-patch.sh deploy   TO [ZIP|-] [FROM]          lg-deploy on the host, check origin + public, update the desktop copy
 #   tools/lg-patch.sh all      FROM TO [ZIP|-] [TEST...]  apply → (you say y) → ship → deploy
 #   tools/lg-patch.sh abort    TO                         throw away update/TO and go back to main
+#   tools/lg-patch.sh prune    TO                         git rm what tools/prune/TO.txt lists (apply does this itself)
 #   tools/lg-patch.sh rollback [VERSION]                  revert main's last commit, push, redeploy
 #   tools/lg-patch.sh site     TO [ZIP|-] [TEST]          site zip → host, test, install, restart, check /health
 #   tools/lg-patch.sh config   [set KEY VALUE | unset KEY] show the settings and where each came from; change the file
 #
 # ZIP "-" or left out: $LG_DOWNLOADS/LivingGalaxy-TO-patch.zip (game) or LivingGalaxy-Site-TO.zip (site).
 # TEST left out on apply: every test/*.test.mjs the zip carries.
+# A zip cannot delete: files a patch removes are listed in tools/prune/TO.txt
+# (one repo path a line, # comments) and apply/deploy remove them (0.3.78).
 #
 # Settings — the environment wins, then the settings file
 # ($LG_CONFIG, default ~/.config/lg-patch.env: KEY=value lines, read not run),
@@ -113,6 +116,28 @@ listzip() {  # names in a zip, one a line
   if command -v unzip >/dev/null 2>&1; then unzip -Z1 "$1"
   else python3 -c 'import sys,zipfile; print("\n".join(zipfile.ZipFile(sys.argv[1]).namelist()))' "$1"; fi
 }
+prunelist() {  # prunelist DIR TO → the safe paths tools/prune/TO.txt names, one a line
+  local f="$1/tools/prune/$2.txt" p
+  [ -f "$f" ] || return 0
+  while IFS= read -r p || [ -n "$p" ]; do
+    p="${p%$'\r'}"; p="${p#"${p%%[![:space:]]*}"}"; p="${p%"${p##*[![:space:]]}"}"
+    [[ -z "$p" || "$p" == \#* ]] && continue
+    [[ "$p" == /* || "$p" == *..* ]] && stop "tools/prune/$2.txt: refusing \"$p\" — repo-relative paths only"
+    printf '%s\n' "$p"
+  done < "$f"
+}
+doprune() {   # doprune TO — git rm every listed file still in the tree
+  local p n=0 list
+  list="$(prunelist "$REPO" "$1")" || exit 1
+  while IFS= read -r p; do
+    [ -n "$p" ] || continue
+    [ -e "$REPO/$p" ] || continue
+    git -C "$REPO" rm -q --cached --ignore-unmatch -- "$p" >/dev/null
+    rm -f "$REPO/$p"; n=$((n + 1))
+  done <<< "$list"
+  [ "$n" -gt 0 ] && say "pruned $n file(s) listed in tools/prune/$1.txt"
+  return 0
+}
 clean() {
   local dirty; dirty="$(git -C "$REPO" status --porcelain)"
   [ -z "$dirty" ] || { git -C "$REPO" status --short >&2; stop "the repo has uncommitted changes — commit or review them first"; }
@@ -154,6 +179,7 @@ cmd_apply() {
   say "unzipping $(basename "$zip")"
   unpack "$zip" .
   at "$to" || stop "after unzipping, js/version.js says $(now), not $to — wrong zip? (tools/lg-patch.sh abort $to)"
+  doprune "$to"
   git diff --check || stop "whitespace errors in the patch (tools/lg-patch.sh abort $to)"
   local tests=("$@")
   if [ ${#tests[@]} -eq 0 ]; then
@@ -241,6 +267,12 @@ elif [ -z "$from" ] || [ "$was" != "$from" ]; then
   exit 1
 elif [ -f "$rz" ]; then
   python3 -m zipfile -e "$rz" "$d"
+  if [ -f "$d/tools/prune/$to.txt" ]; then
+    while IFS= read -r p || [ -n "$p" ]; do
+      p="${p%$'\r'}"; case "$p" in ""|"#"*|/*|*..*) continue ;; esac
+      rm -f "$d/$p"
+    done < "$d/tools/prune/$to.txt"
+  fi
 else
   done_; echo "STOP: $d is a plain folder at $was and there is no zip to apply"; exit 1
 fi
@@ -308,6 +340,14 @@ cmd_all() {
 }
 
 # ---- abort ---------------------------------------------------------------------
+cmd_prune() {
+  need "${1:-}" "prune TO"; local to="$1"; vers "$to"
+  cd "$REPO"
+  at "$to" || stop "js/version.js says $(now), not $to"
+  [ -f "tools/prune/$to.txt" ] || stop "no tools/prune/$to.txt — nothing to prune"
+  doprune "$to"
+  good "prune $to done — review git status, then: tools/lg-patch.sh ship $to"
+}
 cmd_abort() {
   need "${1:-}" "abort TO"; local to="$1"; vers "$to"
   cd "$REPO"
@@ -370,8 +410,9 @@ case "${1:-}" in
   deploy) shift; cmd_deploy "$@" ;;
   all) shift; cmd_all "$@" ;;
   abort) shift; cmd_abort "$@" ;;
+  prune) shift; cmd_prune "$@" ;;
   rollback) shift; cmd_rollback "$@" ;;
   site) shift; cmd_site "$@" ;;
   config) shift; cmd_config "$@" ;;
-  *) sed -n '2,28p' "$LG_PATCH_SELF" | sed 's/^# \{0,1\}//'; [ -n "${1:-}" ] && exit 2 || exit 0 ;;
+  *) sed -n '2,31p' "$LG_PATCH_SELF" | sed 's/^# \{0,1\}//'; [ -n "${1:-}" ] && exit 2 || exit 0 ;;
 esac

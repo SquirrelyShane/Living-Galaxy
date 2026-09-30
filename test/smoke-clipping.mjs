@@ -120,7 +120,7 @@ const panels = await page.evaluate(async () => {
   return [...con.panels.values()].map((p) => ({ id: p.id, subs: (p.subtabs ?? []).map((s) => s.id) }));
 });
 ok(panels.length === 6, `six console panels to walk (${panels.map((p) => p.id).join(", ")})`);
-await page.evaluate(async () => (await import("/js/sim.js")).setTerminal(true));
+await page.evaluate(async () => (await import("/js/sim/sim.js")).setTerminal(true));
 for (const p of panels) {
   for (const sub of p.subs.length ? p.subs : [null]) {
     await sweep(`CON › ${p.id}${sub ? ` › ${sub}` : ""}`, () =>
@@ -145,14 +145,14 @@ const offscreen = await page.evaluate(async () => {
   return bad;
 });
 ok(offscreen.length === 0, `every console sub-tab is on screen at 412px (${offscreen.length ? offscreen.join(", ") : "all of them"})`);
-await page.evaluate(async () => (await import("/js/sim.js")).setTerminal(false));
+await page.evaluate(async () => (await import("/js/sim/sim.js")).setTerminal(false));
 
 console.log("\n-- the chart --");
 await sweep("MAP", () => page.evaluate(() => document.getElementById("btn-map").click()));
 await sweep("MAP + directory + sheet", () => page.evaluate(async () => {
-  const m = await import("/js/map.js");
-  const { useGameStore } = await import("/js/store.js");
-  const { BODIES } = await import("/js/bodies.js");
+  const m = await import("/js/ui/map.js");
+  const { useGameStore } = await import("/js/core/store.js");
+  const { BODIES } = await import("/js/world/bodies.js");
   m.openMapDirectory("ports");
   const w = BODIES.find((x) => x.kind !== "star");
   if (w) useGameStore.getState().setSelected?.(w.id);
@@ -162,8 +162,8 @@ await page.waitForTimeout(400);
 
 console.log("\n-- the station deck --");
 const docked = await page.evaluate(async () => {
-  const { sim, toggleDock } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
+  const { sim, toggleDock } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
   const st = stations.find((s) => s.sector === "industrial") ?? stations.find((s) => s.sector !== "pirate");
   const m = st.hangars[0];
   sim.ship.pos.x = st.x + m.x + m.dir.x * 60; sim.ship.pos.y = st.y + m.y + m.dir.y * 60; sim.ship.pos.z = st.z + m.z + m.dir.z * 60;

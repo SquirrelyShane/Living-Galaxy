@@ -1,18 +1,3 @@
-/* StationBuilder — the pipeline.
- *
- *   1. resolve the manifest (archetype doctrine × population tier), the
- *      architecture style and the hull alloy
- *   2. grow the hull grammar: spine / nave / core / arms / booms → slots + occupancy
- *      (spines only *plan* themselves here; they draw after placement)
- *   3. place every module on the best slot its zone, sun and neighbours allow —
- *      hangars are planned per slot: bay, blister, cut into the spine, bored into an end
- *   4. draw each placed module with its prefab in the slot's frame, from the
- *      shape grammar the style speaks
- *   5. draw the spines round the notches and trims the hangars left, then
- *      details: instanced greebles, running lamps, antennae, the shield shell
- *   6. bake statics per material, collect the animation registry, report
- *
- * Everything reads off one seeded RNG, so a (seed, config) is one station. */
 import * as THREE from "three";
 import { RNG } from "../core/rng.js";
 import { G, makeMat, addMesh, instanced, mergeStatic, FINISHES } from "../core/geometry.js";
@@ -47,7 +32,6 @@ export class StationBuilder {
     this.deferred = [];
     this.drumSlot = null;
 
-    /* scale: the tier sets the spine; the archetype and the seed nudge it */
     const T = this.tier;
     this.L = T.spineM * cfg.scale * this.rng.range(0.9, 1.12);
     this.R = Math.max(14, this.L / 9) * cfg.girth * this.rng.range(0.92, 1.1);
@@ -59,12 +43,10 @@ export class StationBuilder {
     const root = new THREE.Group();
     root.name = "station";
 
-    /* 1. manifest */
     this.doctrine = cfg.manifest ? { ...cfg.manifest } : doctrineFor(cfg.archetype, cfg.tier, { hangars: cfg.hangars });
     this.manifest = manifestOf(this.doctrine);
     const needs = { ring: Boolean(this.doctrine["hb.quarters_2"]), drum: Boolean(this.doctrine["hb.quarters_3"]) };
 
-    /* 2. hull — a drum swallows a third of any spine, so a Tier III hull grows to carry it */
     if (needs.drum && this.style !== "drum") this.L *= 1.45;
     STYLES[this.style](this, root, needs);
     if (needs.drum && this.drumSlot) { const d = habitatDrum(this, root, this.drumSlot.z, this.drumSlot.R); this.drum = d; }
@@ -73,13 +55,12 @@ export class StationBuilder {
     this.zMin = hullBox.min.z; this.zMax = hullBox.max.z;
     for (const s of this.slots) s.zone = this.zoneOf(s.pos.z);
 
-    /* 3 + 4. place and draw */
     this.modulesRoot = new THREE.Group(); this.modulesRoot.name = "modules"; root.add(this.modulesRoot);
     let hangarIx = 0;
     const later = [];
     for (const { module: mod, count } of this.manifest) {
       for (let i = 0; i < count; i++) {
-        if (mod.id === "hb.quarters_3") { this.placed.push({ module: mod, structural: true, pos: new THREE.Vector3(0, 0, this.drumSlot?.z ?? 0) }); continue; } // the drum is the hull
+        if (mod.id === "hb.quarters_3") { this.placed.push({ module: mod, structural: true, pos: new THREE.Vector3(0, 0, this.drumSlot?.z ?? 0) }); continue; }
         const p = place(this, mod);
         if (!p) { later.push(mod); continue; }
         this.draw(p, mod.tags.includes("hangar") ? hangarIx++ : 0);
@@ -91,7 +72,6 @@ export class StationBuilder {
       this.draw(p, mod.tags.includes("hangar") ? hangarIx++ : 0);
     }
 
-    /* 5. the structure that waited for the hangars, then details */
     for (const fn of this.deferred) fn();
     this.deferred.length = 0;
     this.greebles(root);
@@ -99,7 +79,6 @@ export class StationBuilder {
     this.shieldShell(root);
     this.bakeLamps(root);
 
-    /* 6. bake */
     this.folded = cfg.merge === false ? 0 : mergeStatic(root);
     const box = new THREE.Box3().setFromObject(root);
     this.size = box.getSize(new THREE.Vector3());
@@ -114,7 +93,6 @@ export class StationBuilder {
     const F = FINISHES[cfg.finish ?? this.arch.palette.finish] ?? {};
     const pal = { ...this.arch.palette, ...(cfg.palette ?? {}) };
     const alloy = ALLOYS[this.alloy];
-    /* the hull is the livery tinted by the metal it is skinned in */
     const hullCol = new THREE.Color(pal.hull).lerp(new THREE.Color(alloy.tint), 0.55);
     const skin = (c, o = {}) => makeMat(c, { ...o, ...F });
     return {
@@ -137,14 +115,13 @@ export class StationBuilder {
       interior: makeMat("#3a4454", { metalness: 0.2, roughness: 0.9, emissive: "#55698a", emissiveIntensity: 1.1 }),
       laneIn: makeMat("#4fd8b8", { metalness: 0, roughness: 0.5, emissive: "#4fd8b8", emissiveIntensity: 1.8 }),
       laneOut: makeMat("#ffa040", { metalness: 0, roughness: 0.5, emissive: "#ffa040", emissiveIntensity: 1.8 }),
-      bead: new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),   // unlit: the instance colour is the light
+      bead: new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),
       shuttle: makeMat("#c9d2dc", { metalness: 0.6, roughness: 0.4 }),
       plume: makeMat("#9fd4ff", { metalness: 0, roughness: 0.3, emissive: "#7df0ff", emissiveIntensity: 2.4, transparent: true, opacity: 0.7 }),
       shield: makeMat("#8fd6ff", { metalness: 0, roughness: 0.2, emissive: "#6fb8ff", emissiveIntensity: 1.2, transparent: true, opacity: 0.28, side: THREE.DoubleSide, depthWrite: false }),
     };
   }
 
-  /* one module, drawn by its prefab in the slot frame and parented to the ring if it lives on one */
   draw(p, ix = 0) {
     const g = new THREE.Group();
     g.name = `module:${p.module.id}`;
@@ -168,7 +145,6 @@ export class StationBuilder {
     return g;
   }
 
-  /* a recessed hangar notches its spine; a throat trims the end it bores into */
   reserveHangar(p) {
     const s = p.slot, plan = p.plan, sp = s.spine;
     if (!sp) return;
@@ -196,8 +172,6 @@ export class StationBuilder {
     };
   }
 
-  /* lamps are recorded now and baked into one instanced batch per spinning group at the end: a
-   * Tier III city has hundreds of them, and one draw call each was most of the station's cost */
   lamp(parent, x, y, z, color, mode, base) {
     const spec = { parent, x, y, z, color, mode, period: mode === "strobe" ? 2.4 : 1.8 + this.rng.range(0, 1.2), phase: this.rng.range(0, 3), base };
     this.lampSpecs.push(spec);
@@ -207,12 +181,12 @@ export class StationBuilder {
 
   bakeLamps(root) {
     root.updateMatrixWorld(true);
-    const batches = new Map();   // spinning ancestor (or root) → items
+    const batches = new Map();
     const p = new THREE.Vector3(), inv = new THREE.Matrix4();
     for (const sp of this.lampSpecs) {
       let host = sp.parent, anc = root;
       while (host && host !== root) { if (host.userData?.spin) { anc = host; break; } host = host.parent; }
-      if (!sp.parent.parent && sp.parent !== root) continue;   // orphaned group: skip
+      if (!sp.parent.parent && sp.parent !== root) continue;
       p.set(sp.x, sp.y, sp.z).applyMatrix4(sp.parent.matrixWorld);
       inv.copy(anc.matrixWorld).invert();
       p.applyMatrix4(inv);
@@ -227,7 +201,6 @@ export class StationBuilder {
     this.lampSpecs.length = 0;
   }
 
-  /* instanced greebles over the hull skin: vents, hatches, pipe stubs, plates — coarse or fine by style */
   greebles(root) {
     const items = [];
     const coarse = this.styleArch.greeble === "coarse", plates = this.styleArch.greeble === "plates";
@@ -253,7 +226,6 @@ export class StationBuilder {
     this.count(items.length);
   }
 
-  /* running lights: red port, green starboard, white on the extremities */
   runningLights(root) {
     const b = new THREE.Box3();
     for (const o of this.occ) b.union(o);
@@ -265,7 +237,6 @@ export class StationBuilder {
     for (const [x, y, z, col] of pts) this.lamp(root, x, y, z, col, col === "#ffffff" ? "strobe" : "blink", 3);
   }
 
-  /* the shield: when emitters are fitted, a faint faceted shell breathes round the whole structure */
   shieldShell(root) {
     const emitters = this.placed.filter((p) => p.module.tags.includes("shield")).length;
     this.shielded = emitters > 0;

@@ -1,6 +1,3 @@
-/* Animation registry shared by the yard and the traffic demo.
- * collectInto(reg, root) indexes everything a built ship animates; tick(reg, dt, t, ctx) drives it.
- * ctx: { throttle 0–1, aim: world Vector3 | null (turrets slew onto it), aimAngles(o, target) } */
 export function newRegistry() { return { plumes: [], spins: [], pulses: [], gimbals: [], coils: [], lamps: [], scans: [], patrols: [] }; }
 
 export function collectInto(reg, root) {
@@ -62,7 +59,6 @@ export function tick(reg, dt, t, ctx = {}) {
     o.material.emissiveIntensity = (p.baseEmissive || 1) * (1.4 + Math.sin(t * p.speed + (p.phase || 0)) * 0.9);
   }
   for (const o of reg.gimbals) { o.rotation.x = Math.sin(t * 0.7) * o.userData.gimbal.amp; o.rotation.y = Math.cos(t * 0.5) * o.userData.gimbal.amp; }
-  /* turret + sensor sweep: idle patrol arc, or slew onto the aim point */
   for (const o of reg.scans) {
     const d = o.userData.scan;
     let ty, tx, k;
@@ -75,7 +71,6 @@ export function tick(reg, dt, t, ctx = {}) {
     o.rotation.y += wrapAngle(ty - o.rotation.y) * k;
     o.rotation.x += wrapAngle(tx - o.rotation.x) * k;
   }
-  /* cosmetic lamps — steady, breathing, blinking, strobing, chasing */
   for (const o of reg.lamps) {
     const d = o.userData.lamp;
     const tt = ((t / d.period) + d.phase) % 1;

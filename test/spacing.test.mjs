@@ -10,12 +10,12 @@
  *
  *   node --import ./test/three-register.mjs test/spacing.test.mjs
  */
-import { generateSystem, spawnBodyId, rngFromSeed } from "../js/generate.js";
-import { scaleSystem, applySystem, bodyPosition, bodyVelocity, SOL_SYSTEM, SPACING } from "../js/bodies.js";
-import * as bodiesMod from "../js/bodies.js";
-import { scaleOrbit, PERIOD_K } from "../js/scale.js";
-import { gravityAt } from "../js/ship.js";
-import { ROGUE, rogueHooks, stepImpactors, resetImpactors, impactors } from "../js/impactors.js";
+import { generateSystem, spawnBodyId, rngFromSeed } from "../js/world/generate.js";
+import { scaleSystem, applySystem, bodyPosition, bodyVelocity, SOL_SYSTEM, SPACING } from "../js/world/bodies.js";
+import * as bodiesMod from "../js/world/bodies.js";
+import { scaleOrbit, PERIOD_K } from "../js/world/scale.js";
+import { gravityAt } from "../js/flight/ship.js";
+import { ROGUE, rogueHooks, stepImpactors, resetImpactors, impactors } from "../js/world/events/impactors.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };
@@ -127,9 +127,9 @@ ok(speedOff < 1e-6, `a pushed planet keeps its orbital speed (${(speedOff * 100)
 {
   const store = new Map();
   globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
-  const { sim, launchSim, tickSim } = await import("../js/sim.js");
-  const { makePilot } = await import("../js/pilot.js");
-  const { stations } = await import("../js/stations.js");
+  const { sim, launchSim, tickSim } = await import("../js/sim/sim.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
+  const { stations } = await import("../js/station/stations.js");
   makePilot("ROCK", "terran", "mining", null);
   launchSim("RockTest", "sol");
   sim.phase = "play";

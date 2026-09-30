@@ -1,14 +1,3 @@
-/* Station archetypes: what the place is for, and therefore what it is
- * built of and shaped like.
- *
- *   hull      the hull grammar the builder grows (see builder/hull.js)
- *   style     the architecture it is built in (see data/styles.js)
- *   tier      default population tier
- *   doctrine  modules the archetype fits beyond the tier's habitation set,
- *             as "id" or "id×n"
- *   hangars   hangar mouths (each is an entry side + an exit side)
- *   palette   livery — hull is tinted further by the alloy the style rolls
- */
 export const ARCHETYPES = {
   tradehub: {
     label: "Trade Hub", hull: "cross", style: "civic", tier: "II", hangars: 2,

@@ -1,13 +1,3 @@
-/* generate.js — one-call entry point.
- *
- *   import { buildStation } from ".../src/generate.js";
- *   const st = buildStation({ seed: "PORT-7", archetype: "tradehub", tier: "II" });
- *   scene.add(st.root);
- *   // per frame: tick(st.anim, dt, t)
- *
- * Returns { root, builder, cfg, anim, stats } — stats carries the manifest,
- * the parts list by domain, the bill of materials, population, crew, power
- * and heat balance, cost, and what the placement solver could not fit. */
 import * as THREE from "three";
 import { StationBuilder } from "./builder/StationBuilder.js";
 import { ARCHETYPES, ARCHETYPE_KEYS } from "./data/archetypes.js";
@@ -23,22 +13,22 @@ import { ALLOYS } from "./data/materials.js";
 
 export const DEFAULT_CFG = {
   seed: "STATION-01",
-  archetype: "tradehub",   // ARCHETYPES key
-  tier: null,              // TIERS key; null = the archetype's default
-  hull: null,              // STYLES key; null = the archetype's own grammar; "auto" = one the style favours
-  style: null,             // STYLES_ARCH key (cathedral | bastion | civic | industrial | frontier | research | agrarian); null = the archetype's
-  alloy: null,             // ALLOYS key the hull is skinned in; null = one the style favours
-  shieldShell: true,       // draw the faint shield shell when emitters are fitted
-  hangars: null,           // hangar mouths; null = archetype default
-  scale: 1,                // spine length multiplier
-  girth: 1,                // spine radius multiplier
-  complexity: 0.6,         // greeble density 0–1
-  finish: null,            // brushed | matte | chrome | ceramic | weathered
-  palette: null,           // { hull, dark, accent, glow } overrides
-  sun: [1, 0.35, 0.2],     // where the light comes from: solar faces it, radiators go edge-on, reactors hide
-  merge: true,             // bake statics per material
-  center: true,            // centre the group on its bounding box
-  manifest: null,          // explicit { moduleId: count } to skip the doctrine
+  archetype: "tradehub",
+  tier: null,
+  hull: null,
+  style: null,
+  alloy: null,
+  shieldShell: true,
+  hangars: null,
+  scale: 1,
+  girth: 1,
+  complexity: 0.6,
+  finish: null,
+  palette: null,
+  sun: [1, 0.35, 0.2],
+  merge: true,
+  center: true,
+  manifest: null,
 };
 
 export function normalizeConfig(opts = {}) {
@@ -57,10 +47,6 @@ export function buildStation(opts = {}) {
   const cfg = normalizeConfig(opts);
   const builder = new StationBuilder();
   const root = builder.build(cfg);
-  /* A station that has never been close enough to animate used to render with
-   * every lamp pinned at full brightness and every chase bead at raw white,
-   * because nothing had written their instance colours yet. Bake the resting
-   * state in at build time so a port is dark until something lights it. */
   const anim = bake(collectInto(newRegistry(), root));
   const bom = stationBom(builder.manifest, builder.alloy);
   const stats = {
@@ -85,7 +71,6 @@ export function releaseStation(st) {
   disposeOwned(st.root);
 }
 
-/** A plausible random station. */
 export function randomConfig(seed = Math.random().toString(36).slice(2), overrides = {}) {
   const rng = new RNG(String(seed));
   const archetype = rng.pick(ARCHETYPE_KEYS);

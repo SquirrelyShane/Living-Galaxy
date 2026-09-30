@@ -13,16 +13,16 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim, relationOf } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stationById, stepStations } from "../js/stations.js";
-import { corps, corpById } from "../js/corps.js";
+import { sim, launchSim, tickSim, relationOf } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stationById, stepStations } from "../js/station/stations.js";
+import { corps, corpById } from "../js/corp/corps.js";
 import { npcDrones, stepNpcDrones, populateNpcDrones, DRONE_LINE, npcDroneHooks } from "../js/drones/npcdrones.js";
 import { DRONE_CAP } from "../js/drones/roles.js";
-import { contacts, shots, stepShots, syncContacts } from "../js/turrets.js";
-import { hullMaxOf } from "../js/repair.js";
-import { SHIP_DB } from "../js/shipdb.js";
-import { yardQuote, TIER_SCALE } from "../js/shipcost.js";
+import { contacts, shots, stepShots, syncContacts } from "../js/flight/turrets.js";
+import { hullMaxOf } from "../js/flight/repair.js";
+import { SHIP_DB } from "../js/ships/shipdb.js";
+import { yardQuote, TIER_SCALE } from "../js/economy/shipcost.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

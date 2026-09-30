@@ -1,6 +1,3 @@
-/* Hull classes — silhouette grammar + doctrine (drive, arms mix, weapon weight).
- * CLASS_EQUIP carries the hull-level glazing doctrine (bridge style, crew viewport density);
- * the equipment manifest itself lives in data/loadouts.js. */
 export const SHIP_CLASSES = {
   interceptor: {
     label: "Recon Interceptor", regime: "atmo", length: [14, 20], beam: [2.6, 3.6], height: [2.2, 3.0],

@@ -7,9 +7,9 @@
 import assert from "node:assert/strict";
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k), get length() { return store.size; }, key: (i) => [...store.keys()][i] ?? null };
-const { sim, launchSim } = await import("../js/sim.js");
+const { sim, launchSim } = await import("../js/sim/sim.js");
 const { traffic, stepTraffic } = await import("../js/npc/traffic.js");
-const { adoptHulls, blendHulls, HULL_DEAD, HULL_SNAP, HULL_HOLD } = await import("../js/worldsync.js");
+const { adoptHulls, blendHulls, HULL_DEAD, HULL_SNAP, HULL_HOLD } = await import("../js/net/worldsync.js");
 launchSim("Hullsync", "sol");
 sim.time = 1000;
 

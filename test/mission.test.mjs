@@ -4,14 +4,14 @@
  *   node --import ./test/three-register.mjs test/mission.test.mjs
  */
 
-import { sim, launchSim, tickSim, addWaypointAt, POINT_ARRIVE_R } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { autopilot, engageMiningLoop, AP_POWER } from "../js/autopilot.js";
-import { touch } from "../js/input.js";
-import { currentSystem, dist3 } from "../js/bodies.js";
-import { BATTERY } from "../js/ship.js";
-import { chat } from "../js/chat.js";
-import { upgrades } from "../js/upgrades.js";
+import { sim, launchSim, tickSim, addWaypointAt, POINT_ARRIVE_R } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { autopilot, engageMiningLoop, AP_POWER } from "../js/flight/autopilot.js";
+import { touch } from "../js/core/input.js";
+import { currentSystem, dist3 } from "../js/world/bodies.js";
+import { BATTERY } from "../js/flight/ship.js";
+import { chat } from "../js/comms/chat.js";
+import { upgrades } from "../js/economy/upgrades.js";
 import {
   OPS, makeMission, makeStep, oneStep, validate, evalCond, describeStep, serialize, deserialize, presets, MISSIONS_KEY, loadMissions, saveMissions,
 } from "../js/mission/script.js";

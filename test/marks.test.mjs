@@ -7,17 +7,17 @@
  * its scatter. Now a mark carries an anchor and asks the thing where it is.
  */
 
-import { sim, launchSim, addWaypointAt, addAnchoredWaypoint, waypointPosition, waypointVelocity, targetPosition, targetVelocity, removeWaypoint } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { rockByKey, siteMarkRock, wearRock, depleted, nearbyRocks } from "../js/field.js";
-import { siteById, siteRocks, clearSites } from "../js/sites.js";
-import { boardFor, acceptContract, abandonContract, contracts, resetContracts, BOARD, markTarget } from "../js/contracts.js";
-import { engageMiningLoop, apMine, autopilot, disengageAutopilot, tickAutopilot } from "../js/autopilot.js";
+import { sim, launchSim, addWaypointAt, addAnchoredWaypoint, waypointPosition, waypointVelocity, targetPosition, targetVelocity, removeWaypoint } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { rockByKey, siteMarkRock, wearRock, depleted, nearbyRocks } from "../js/world/field.js";
+import { siteById, siteRocks, clearSites } from "../js/economy/sites.js";
+import { boardFor, acceptContract, abandonContract, contracts, resetContracts, BOARD, markTarget } from "../js/economy/contracts.js";
+import { engageMiningLoop, apMine, autopilot, disengageAutopilot, tickAutopilot } from "../js/flight/autopilot.js";
 import { mission } from "../js/mission/run.js";
 import { traffic } from "../js/npc/traffic.js";
-import { resolveAnchor, anchorHint } from "../js/anchors.js";
+import { resolveAnchor, anchorHint } from "../js/world/anchors.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

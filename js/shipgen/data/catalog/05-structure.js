@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 05 — STRUCTURE, HULL & MECHANISMS */
 export default {
   id: "d05", name: "05 Structure, Hull & Mechanisms",
   sheet: {

@@ -1,33 +1,7 @@
-/* LIVING GALAXY experimental — the neural core.
- *
- * A very small network that runs live beside the game and learns two ways:
- *
- *   1. Imitation. While you hold the conn, every few seconds the core looks at
- *      the world the way the captain would (`features()`), notes what you are
- *      doing (`labelFromPlay()`), and nudges its weights toward doing that in
- *      that situation. Fly cautious and it learns cautious.
- *   2. Outcome. While an NPC holds the conn, each decision is scored later
- *      by what happened to the ship — hull, credits, cargo, heat — and the
- *      weights move toward choices that paid and away from ones that hurt.
- *
- * It is not the whole captain. `captain.js` pairs it with a deterministic
- * forecaster (roll each candidate goal 60 s forward) and, optionally, a local
- * SLM through `provider` (see Docs/EXPERIMENTAL_NEURAL_CORE.md). The core is
- * the fast reflex; the forecaster is the arithmetic; the SLM is the voice.
- *
- * Plain arrays, no dependencies, serialises to JSON so it rides in the
- * CRADLE record of whoever it belongs to.
- */
-
 export const ACTIONS = ["hold", "dock", "mine", "survey", "evade", "engage"];
 export const N_FEATURES = 16;
 const N_HIDDEN = 12;
 
-/* The net underneath is not specific to flying a ship. an earlier build puts a second one
- * on the deck (js/crew/learn.js) over what a watch decides to do with itself,
- * so the shapes are parameters now rather than constants. A brain written
- * before this change has no `nf`/`nh`/`acts` on it and reads back as the
- * original 16 × 12 × 6 conn core, which is what it is. */
 const shapeOf = (b) => ({ nf: b.nf ?? N_FEATURES, nh: b.nh ?? N_HIDDEN, acts: b.acts ?? ACTIONS });
 
 function mulberry(seedStr) {
@@ -42,10 +16,6 @@ function mulberry(seedStr) {
   };
 }
 
-/**
- * A fresh net of any shape, seeded so the same person starts with the same
- * instincts. `acts` is the label set; `nf`/`nh` the input and hidden widths.
- */
 export function createNet({ acts = ACTIONS, nf = N_FEATURES, nh = N_HIDDEN, seed = "core", lr = 0.02, tag = "brain" } = {}) {
   const rnd = mulberry(`${tag}:${seed}`);
   const w = (n) => Array.from({ length: n }, () => (rnd() - 0.5) * 0.4);
@@ -64,10 +34,8 @@ export function createNet({ acts = ACTIONS, nf = N_FEATURES, nh = N_HIDDEN, seed
   };
 }
 
-/** Fresh weights, seeded so the same person starts with the same instincts. Traits bias the output layer. */
 export function createBrain(seed = "core", traits = {}) {
   const b = createNet({ seed });
-  /* personality as prior: caution → evade/dock, greed → mine/engage, curiosity → survey */
   const t = traits ?? {};
   b.b2[ACTIONS.indexOf("evade")] += ((t.caution ?? 0.5) - 0.5) * 0.8;
   b.b2[ACTIONS.indexOf("dock")] += ((t.caution ?? 0.5) - 0.5) * 0.4;
@@ -97,19 +65,16 @@ function forward(b, x) {
   return { h, p: e.map((v) => v / sum) };
 }
 
-/** Action probabilities for a feature vector, most likely first. */
 export function think(b, x) {
   const { p } = forward(b, x);
   return shapeOf(b).acts.map((a, i) => ({ action: a, p: p[i] })).sort((u, v) => v.p - u.p);
 }
 
-/** One SGD step toward `label` (imitation) or scaled by `reward` (outcome, may be negative). */
 function update(b, x, k, scale) {
-  if (!x.every(Number.isFinite)) return; // a bad snapshot must never poison the weights
+  if (!x.every(Number.isFinite)) return;
   const { nf, nh, acts } = shapeOf(b);
   const { h, p } = forward(b, x);
   const lr = b.lr * scale;
-  /* dL/dz = p - onehot */
   const dz = p.map((v, i) => v - (i === k ? 1 : 0));
   const dh = new Array(nh).fill(0);
   for (let j = 0; j < nh; j++) {
@@ -133,7 +98,6 @@ export function learnImitation(b, x, action) {
   b.steps++;
 }
 
-/** reward in roughly [-1, 1]; positive pulls toward the action taken, negative pushes away. */
 export function learnOutcome(b, x, action, reward) {
   const k = shapeOf(b).acts.indexOf(action);
   if (k < 0 || !reward) return;
@@ -141,14 +105,8 @@ export function learnOutcome(b, x, action, reward) {
   b.outcomes++;
 }
 
-/* ---- the captain's view of the world ------------------------------------ */
-
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
-/**
- * 16 numbers in [0,1] (or [-1,1]) the core reasons over. Built from the
- * snapshot `captain.js` assembles: ship state, nearest port, threats, belt.
- */
 export function features(s) {
   return [
     clamp01(s.hull / 100),
@@ -170,7 +128,6 @@ export function features(s) {
   ];
 }
 
-/** What the player is doing right now, as one of ACTIONS — the imitation label. */
 export function labelFromPlay(s) {
   if (s.docked || (s.port && s.port.dist < 900 && s.throttle > 0.05 && !s.port.hostile)) return "dock";
   if (s.firing && s.hostiles > 0) return "engage";

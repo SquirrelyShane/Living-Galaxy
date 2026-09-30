@@ -12,15 +12,15 @@ globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v
 function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 Math.random = mulberry32(0x5eed);
 
-const { sim, launchSim, tickSim } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { rocksInCell, veinAt, BELT, CELL, BELT_HALF_HEIGHT } = await import("../js/field.js");
-const { currentSystem } = await import("../js/bodies.js");
+const { sim, launchSim, tickSim } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { rocksInCell, veinAt, BELT, CELL, BELT_HALF_HEIGHT } = await import("../js/world/field.js");
+const { currentSystem } = await import("../js/world/bodies.js");
 const { CLASSES } = await import("../js/bodygen/classes.js");
-const { MINE_YIELD } = await import("../js/turrets.js");
+const { MINE_YIELD } = await import("../js/flight/turrets.js");
 const { presets } = await import("../js/mission/script.js");
 const { startMission } = await import("../js/mission/run.js");
-const { corps } = await import("../js/corps.js");
+const { corps } = await import("../js/corp/corps.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

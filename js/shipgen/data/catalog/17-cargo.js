@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 17 — CARGO, LOGISTICS & PAYLOADS (mining rig lives here with ISRU in 06) */
 export default {
   id: "d17", name: "17 Cargo, Logistics & Payloads",
   sheet: {

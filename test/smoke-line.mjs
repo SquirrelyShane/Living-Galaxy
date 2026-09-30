@@ -31,10 +31,10 @@ await sleep(1200);
 
 /* a company with people on the rolls at two ports, set up through the modules */
 const setup = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
-  const CO = await import("/js/company.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
+  const CO = await import("/js/corp/company.js");
   const honest = stations.filter((s) => !s.hostile);
   const a = honest.find((s) => s.sector === "industrial") ?? honest[0];
   const b = honest.find((s) => s.id !== a.id);
@@ -48,7 +48,7 @@ const setup = await page.evaluate(async () => {
   /* one of them unhappy, so they ask */
   const s = CO.company.staff[1];
   s.mood = 30;
-  const LN = await import("/js/staffline.js");
+  const LN = await import("/js/station/staffline.js");
   LN.tickLine();
   sim.ship.dockedAt = null;
   return { a: a.name, b: b.name, settled: settled.length, first: CO.company.staff[0].id, asker: s.id, asks: LN.openAsk(s)?.asks ?? [] };
@@ -80,10 +80,10 @@ ok(call.card, "LINE opens the person's card");
 ok(call.said.some((t) => /^You: How are things/.test(t)) && call.said.length >= 2, `the check-in is in the transcript (${call.said.at(-1)?.slice(0, 70)})`);
 ok(["checkin", "bonus", "raise", "promote", "family", "move", "sendfor", "release"].every((t) => call.topics.includes(t)), "every topic is on the card");
 
-const t0 = await page.evaluate(async () => (await import("/js/company.js")).company.treasury);
+const t0 = await page.evaluate(async () => (await import("/js/corp/company.js")).company.treasury);
 await page.evaluate(() => document.querySelector('#con-body .tcard .tbtn[data-topic="bonus"]')?.click());
 await sleep(400);
-const t1 = await page.evaluate(async () => (await import("/js/company.js")).company.treasury);
+const t1 = await page.evaluate(async () => (await import("/js/corp/company.js")).company.treasury);
 ok(t1 < t0, `SEND A BONUS spends the treasury (${Math.round(t0 - t1)} cr)`);
 
 /* release asks twice */
@@ -96,15 +96,15 @@ await page.screenshot({ path: "/tmp/line-town.png" });
 /* answer the ask from THE LINE */
 await page.evaluate(() => [...document.querySelectorAll("#con-body .term-sec .tbtn.accent")].find((b) => /^SEND A BONUS$/.test(b.textContent))?.click());
 await sleep(400);
-const answered = await page.evaluate(async (id) => { const LN = await import("/js/staffline.js"); const s = LN.staffById(id); return { answered: Boolean(LN.lineState().inbox.find((m) => m.staffId === id && m.asks)?.answered), mood: s.mood }; }, setup.asker);
+const answered = await page.evaluate(async (id) => { const LN = await import("/js/station/staffline.js"); const s = LN.staffById(id); return { answered: Boolean(LN.lineState().inbox.find((m) => m.staffId === id && m.asks)?.answered), mood: s.mood }; }, setup.asker);
 ok(answered.answered, "answering the ask from the inbox settles it");
 
 /* the deck's HALL: dock at the port and LINE jumps to the person */
 await page.evaluate(async () => (await import("/js/console/console.js")).closeConsole());
 const deck = await page.evaluate(async () => {
-  const { sim, toggleDock } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const CO = await import("/js/company.js");
+  const { sim, toggleDock } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const CO = await import("/js/corp/company.js");
   const st = stations.find((s) => s.id === CO.company.hq);
   const m = st.hangars[0];
   sim.ship.pos.x = st.x + m.x + m.dir.x * 60; sim.ship.pos.y = st.y + m.y + m.dir.y * 60; sim.ship.pos.z = st.z + m.z + m.dir.z * 60;

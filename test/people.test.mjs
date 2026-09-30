@@ -3,16 +3,16 @@
  *   node --import ./test/three-register.mjs test/people.test.mjs
  */
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { corps, corpOfVessel, corpRelation, corpWars, blameKill, corpById, standingLabel } from "../js/corps.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { corps, corpOfVessel, corpRelation, corpWars, blameKill, corpById, standingLabel } from "../js/corp/corps.js";
 import { POWERS, activeWars, relationOf } from "../js/data/factions.js";
 import { traffic, vesselStatus } from "../js/npc/traffic.js";
 import { flow } from "../js/npc/flow.js";
-import { company, foundCompany, transfer, tickCompany, contacts, boardBrief, resetCompany, COMPANY } from "../js/company.js";
-import { crew, hireCrew, stationRoster, CYCLE_SECONDS, tickCrew } from "../js/crew.js";
-import { social, setSocial, household, crewTopics, couldCourt, settleFamily, familyOf, tickHousehold, canConceive, berthsUsed, overBerths, playerAsPerson, adjustTrust, adjustMorale, bumpTrust, bumpMorale, greetLine } from "../js/family.js";
+import { company, foundCompany, transfer, tickCompany, contacts, boardBrief, resetCompany, COMPANY } from "../js/corp/company.js";
+import { crew, hireCrew, stationRoster, CYCLE_SECONDS, tickCrew } from "../js/crew/ledger.js";
+import { social, setSocial, household, crewTopics, couldCourt, settleFamily, familyOf, tickHousehold, canConceive, berthsUsed, overBerths, playerAsPerson, adjustTrust, adjustMorale, bumpTrust, bumpMorale, greetLine } from "../js/crew/family.js";
 import { cradle } from "../js/npc/cradle.js";
 
 let pass = 0, fail = 0;

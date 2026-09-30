@@ -11,10 +11,10 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
 import { traffic } from "../js/npc/traffic.js";
-import { register, knownContacts, tickContacts, SCAN } from "../js/contacts.js";
+import { register, knownContacts, tickContacts, SCAN } from "../js/flight/contacts.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (process.env.V) console.log(c ? "  ok  " : "  FAIL", m); if (c) pass++; else { fail++; if (!process.env.V) console.error("  FAIL", m); } };

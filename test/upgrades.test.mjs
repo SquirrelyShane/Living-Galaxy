@@ -6,14 +6,14 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim, crewCapacity, robotCapacity, currentShipId } from "../js/sim.js";
-import { shipById } from "../js/shipdb.js";
-import { makePilot, pilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { BATTERY, batteryCap, buildDemand } from "../js/ship.js";
+import { sim, launchSim, tickSim, crewCapacity, robotCapacity, currentShipId } from "../js/sim/sim.js";
+import { shipById } from "../js/ships/shipdb.js";
+import { makePilot, pilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { BATTERY, batteryCap, buildDemand } from "../js/flight/ship.js";
 import {
   UPGRADES, upgrades, UPGRADES_KEY, hasUpgrade, fx, upgradeOptions, buyUpgrade, sellUpgrade, upgradeMods, upgradeLines, saveUpgrades, loadUpgrades,
-} from "../js/upgrades.js";
+} from "../js/economy/upgrades.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

@@ -1,7 +1,3 @@
-/* Prefabs — Docking, airlocks, bays and surface interfaces.
- * Each prefab: faces (default mount faces), fp(s, part, face) → footprint {w,h,d} in ship units
- * (w along the face u-axis, d along v, h outward), build(g, s, part, S, rng) where g is a group
- * whose +Y points away from the hull and S is the StarshipBuilder (mats, lamp, dockBody…). */
 import * as THREE from "three";
 import { G, addMesh } from "../core/geometry.js";
 import { ALL_FACES } from "./_common.js";
@@ -30,12 +26,10 @@ export default {
       const m = S.mats;
       addMesh(g, G.box(), m.dark, 0, s * 0.08, 0, 0, 0, 0, s * 2.3, s * 0.16, s * 2.3);
       addMesh(g, G.box(), m.rubber, 0, s * 0.17, 0, 0, 0, 0, s * 1.9, s * 0.02, s * 1.9);
-      // payload sitting in the bay
       if (p.drones) for (const sgn of [-1, 1]) { addMesh(g, G.box(), m.metal, sgn * s * 0.5, s * 0.3, 0, 0, 0, 0, s * 0.5, s * 0.22, s * 0.7);
         S.lamp(g, { color: "#ffb03a", x: sgn * s * 0.5, y: s * 0.44, z: -s * 0.3, r: s * 0.05, mode: "blink", period: 1.0, duty: 0.4, phase: sgn * 0.25, base: 6 }); }
       else { addMesh(g, G.sphere(), m.light, 0, s * 0.35, 0, 0, 0, 0, s * 0.3, s * 0.3, s * 0.3);
         S.lamp(g, { color: "#5fd0ff", y: s * 0.68, r: s * 0.06, mode: "pulse", period: 2, base: 5 }); }
-      // sliding door halves
       for (const sgn of [-1, 1]) {
         const door = new THREE.Group(); door.position.set(sgn * s * 0.5, s * 0.5, 0);
         door.userData.deploy = { kind: "pos", axis: "x", from: sgn * s * 0.5, to: sgn * s * 1.45 };

@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 04 — ENERGY STORAGE & DISTRIBUTION */
 export default {
   id: "d04", name: "04 Energy Storage & Distribution",
   sheet: {

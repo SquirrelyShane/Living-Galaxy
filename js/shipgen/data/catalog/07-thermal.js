@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 07 — THERMAL CONTROL */
 export default {
   id: "d07", name: "07 Thermal Control",
   sheet: {

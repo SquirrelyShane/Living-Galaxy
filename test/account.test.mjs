@@ -1,4 +1,4 @@
-/* LIVING GALAXY — js/account.js: the pilot that follows you between devices.
+/* LIVING GALAXY — js/net/account.js: the pilot that follows you between devices.
  *
  * Two halves. The first runs the module against an in-memory stand-in for the
  * site's API (the same status codes and shapes lgsite.py answers with) so
@@ -37,12 +37,12 @@ function device() {
 globalThis.localStorage = device();
 globalThis.document = undefined;
 
-const A = await import("../js/account.js");
+const A = await import("../js/net/account.js");
 const { account, snapshot, hashOf, restore, probe, signIn, signOut, push, resolve, sync, checkRemote, takeNewer, postNews, plainText, SCOPE, STATE_KEY, NEWS_SEEN_KEY, describe } = A;
-const P = await import("../js/profile.js");
-const { chat } = await import("../js/chat.js");
-const { gnn, resetGnn } = await import("../js/gnn.js");
-const { useGameStore } = await import("../js/store.js");
+const P = await import("../js/core/profile.js");
+const { chat } = await import("../js/comms/chat.js");
+const { gnn, resetGnn } = await import("../js/comms/gnn.js");
+const { useGameStore } = await import("../js/core/store.js");
 
 /* ---- the stand-in site ----------------------------------------------------- */
 function fakeSite() {
@@ -371,7 +371,7 @@ const pilotOn = (ls, callsign = "Vex", extra = {}) => {
   ok(byTitle("Unlinked").actions.length === 0, "an item from a 0.1.0 site carries no buttons");
   ok(byTitle("Hostile").actions.length === 0, "a scheme or a //host in the feed is never turned into a button");
   ok(byTitle("Quiet").actions[1].label === "Discuss", "no replies: plain DISCUSS");
-  const { runAction } = await import("../js/gnn.js");
+  const { runAction } = await import("../js/comms/gnn.js");
   ok(runAction(linked, 1) === true && opened.at(-1) === "/forum/t/4", "DISCUSS opens the thread");
   ok(runAction(linked, 1) === true && opened.length === 2, "…and again — a link is not done after one tap");
   ok(runAction(linked, 0) === true && opened.at(-1) === "/news/9", "READ opens the item");
@@ -509,7 +509,7 @@ if (!existsSync(SITE)) {
     ok(labels[0] === "Read" && labels[1] === "Discuss", `the live bulletin carries READ and DISCUSS (${labels})`);
     const opened = [];
     account.open = (u) => opened.push(u);
-    const { runAction } = await import("../js/gnn.js");
+    const { runAction } = await import("../js/comms/gnn.js");
     runAction(gnn.posts[0], 1);
     ok(/^\/forum\/t\/\d+$/.test(opened[0] ?? ""), `DISCUSS opens the site's thread (${opened[0]})`);
     const thread = await (await F(opened[0])).text();

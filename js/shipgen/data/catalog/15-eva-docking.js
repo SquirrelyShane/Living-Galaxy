@@ -1,5 +1,4 @@
 import { P } from "./_part.js";
-/* 15 — EVA, AIRLOCKS & DOCKING.  Collars carry kind: crew | cargo | fuel | hard */
 export default {
   id: "d15", name: "15 EVA, Airlocks & Docking",
   sheet: {

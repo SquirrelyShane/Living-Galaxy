@@ -1,47 +1,22 @@
-/* LIVING GALAXY — engagements: the fights the sky has without you.
- *
- * Pirates lurk on the belt approaches (npc/traffic.js). Every so often a
- * wing of them jumps a working hull — a trader on its burn out, a miner on
- * a claim — and security answers. The whole thing is a timetable, like the
- * traffic it preys on: engagement k of this sky is a pure function of
- * (seed, k), so two clients in the same room see the same ambush at the
- * same place with the same ending, and nothing needs a host.
- *
- * An engagement has a site (where the victim was when the pirates dropped
- * in), a start, a security arrival, and an end with an outcome — the
- * pirates are driven off (one goes down), the victim is lost, or both sides
- * break off. While it runs the participants are pulled off their routes
- * onto battle poses around the site: the victim runs, the pirates circle
- * it, security closes and circles wider. Tracers fly between them (turrets.js
- * shot pool, faction "npc": drawn, never lethal — the outcome is decided by
- * the seed, not by who the client thinks got hit).
- *
- * Fly inside JOIN_R of the site and you are in it: pirates take you as a
- * target, your turrets take them (they are hostile contacts), and a pirate
- * you kill during the fight pays the security bounty and saves the victim
- * regardless of what the seed had planned.
- */
-
-import { corpOfVessel, corpRelation } from "../corps.js";
-import { rngFromSeed } from "../generate.js";
+import { corpOfVessel, corpRelation } from "../corp/corps.js";
+import { rngFromSeed } from "../world/generate.js";
 import { traffic, trafficDown, trafficHooks, routePose, markVesselDown, vesselById, eventAt, HOSTILE_ROLES, LAW_ROLES } from "./traffic.js";
-import { burst } from "../debris.js";
-import { stations as liveStations } from "../stations.js";
-import { currentSystem } from "../bodies.js";
+import { burst } from "../world/debris.js";
+import { stations as liveStations } from "../station/stations.js";
+import { currentSystem } from "../world/bodies.js";
 
-/* reused per-tick scratch: the battle tick used to allocate four arrays a frame */
 const wingBuf = [];
 const lawBuf = [];
 const foeBuf = [];
 
-export const ENG_SLOT = 240;        // seconds of sky time between rolls
-export const ENG_CHANCE = 0.55;     // chance a slot carries a fight
-export const JOIN_R = 1400;         // fly this close and you are a participant
-export const ENGAGE_R = 1600;       // pirates open up on a participant inside this
-export const DISENGAGE_S = 26;      // blend back onto the timetable after the end
+export const ENG_SLOT = 240;
+export const ENG_CHANCE = 0.55;
+export const JOIN_R = 1400;
+export const ENGAGE_R = 1600;
+export const DISENGAGE_S = 26;
 
-export const engagements = [];      // live and recently ended, oldest first
-const known = new Map();            // slot → engagement (or null when the roll was quiet)
+export const engagements = [];
+const known = new Map();
 let skySeed = null;
 export const battleHooks = { onStart: null, onEnd: null, onJoin: null };
 
@@ -50,8 +25,6 @@ export function resetBattles(seed) {
   known.clear();
   engagements.length = 0;
 }
-
-/* ---- the roll ------------------------------------------------------------ */
 
 const _p = { x: 0, y: 0, z: 0 };
 const preyRoles = new Set(["trader", "miner", "hauler"]);
@@ -63,10 +36,8 @@ function engagementFor(slot, stationList, system) {
   const pirates = traffic.filter((n) => n.role === "pirate");
   const law = traffic.filter((n) => n.role === "security" || n.role === "patrol");
   const prey = traffic.filter((n) => preyRoles.has(n.role));
-  /* a PIRATE WATCH bulletin means what it says: more raids, bigger wings */
   const watch = eventAt(skySeed, slot * ENG_SLOT + 1).kind === "pirate_watch";
   if (rng() < (watch ? 0.92 : ENG_CHANCE) && pirates.length && prey.length) {
-    /* prey whose flag is at war with the raiders' flag is the prey they go for */
     const weighted = [];
     for (const v of prey) {
       let w = 1;
@@ -78,7 +49,6 @@ function engagementFor(slot, stationList, system) {
     let roll = rng() * total;
     let victim = weighted[weighted.length - 1].v;
     for (const x of weighted) { roll -= x.w; if (roll <= 0) { victim = x.v; break; } }
-    /* find a moment in the slot when the victim is actually on the board */
     const t0 = slot * ENG_SLOT + 20 + rng() * 60;
     let start = -1;
     for (let dt = 0; dt < ENG_SLOT - 100; dt += 6) {
@@ -109,13 +79,11 @@ function engagementFor(slot, stationList, system) {
     }
   }
   known.set(slot, eng);
-  /* only the current and previous slot are ever asked for again */
   for (const k of known.keys()) if (k < slot - 2) known.delete(k);
   if (eng) { engagements.push(eng); while (engagements.length > 8) engagements.shift(); }
   return eng;
 }
 
-/** Engagement live at sky time t, or null. Rolls the slot on first sight. */
 export function engagementAt(t, stationList = liveStations, system = currentSystem) {
   if (skySeed == null) return null;
   const slot = Math.floor(Math.max(0, t) / ENG_SLOT);
@@ -127,15 +95,12 @@ export function engagementAt(t, stationList = liveStations, system = currentSyst
   return null;
 }
 
-/** The engagement (if any) `n` is part of at time t. */
 export function engagementOf(n, t, stationList, system) {
   const e = engagementAt(t, stationList, system);
   if (!e) return null;
   if (e.victimId === n.id || e.wing.includes(n.id) || e.responders.includes(n.id)) return e;
   return null;
 }
-
-/* ---- poses --------------------------------------------------------------- */
 
 const _route = { x: 0, y: 0, z: 0 };
 
@@ -144,7 +109,6 @@ function battlePoseRaw(n, e, t) {
   const k = t - e.start;
   const h = hash(n.id) * Math.PI * 2;
   if (n.id === e.victimId) {
-    /* run along the old heading, jinking */
     const fx = -Math.sin(e.heading), fz = -Math.cos(e.heading);
     const run = 7.5 * k;
     const jink = Math.sin(k * 0.55 + h) * 90;
@@ -155,7 +119,6 @@ function battlePoseRaw(n, e, t) {
   const wing = e.wing.indexOf(n.id);
   if (wing >= 0) {
     if (e.outcome === "repelled" && e.downId === n.id && t >= e.downAt) return { x: S.x, y: S.y, z: S.z, yaw: 0, pitch: 0, speed: 0, docked: null, job: "down", visible: false, toName: "" };
-    /* circle the victim, each pirate on its own ring */
     const vx = -Math.sin(e.heading) * 7.5 * k, vz = -Math.cos(e.heading) * 7.5 * k;
     const r = 240 + wing * 110;
     const w = (0.32 - wing * 0.05) * (wing % 2 ? -1 : 1);
@@ -166,10 +129,10 @@ function battlePoseRaw(n, e, t) {
   }
   const idx = e.responders.indexOf(n.id);
   if (idx >= 0) {
-    if (t < e.secArrive) return null; // still on its route until the call comes
+    if (t < e.secArrive) return null;
     const k2 = t - e.secArrive;
     const vx = -Math.sin(e.heading) * 7.5 * k, vz = -Math.cos(e.heading) * 7.5 * k;
-    const close = Math.max(0, 1 - k2 / 18); // 18 s to close from 1800 u out
+    const close = Math.max(0, 1 - k2 / 18);
     const r = 480 + idx * 140 + close * 1800;
     const a = h + k2 * 0.22 * (idx % 2 ? -1 : 1);
     const x = S.x + vx + Math.cos(a) * r, z = S.z + vz + Math.sin(a) * r, y = S.y + 60 + Math.sin(k2 * 0.3 + h) * 50;
@@ -179,12 +142,10 @@ function battlePoseRaw(n, e, t) {
   return null;
 }
 
-/** trafficHooks.battlePose: the pose an engagement gives `n`, or null for the timetable. */
 function battlePose(n, t, stationList, system) {
   const e = engagementOf(n, t, stationList, system);
   if (!e) return null;
   if (t < e.end) return battlePoseRaw(n, e, t);
-  /* disengage: slide from the last battle pose back onto the route */
   const u = Math.min(1, (t - e.end) / DISENGAGE_S);
   const from = battlePoseRaw(n, e, e.end);
   if (!from) return null;
@@ -202,8 +163,6 @@ function hash(s) {
   return (n % 100000) / 100000;
 }
 
-/** Where the fight is right now: the victim while it is on the board, else
- * the lead pirate, else the site it started at. */
 const _fc = { x: 0, y: 0, z: 0 };
 export function fightCentre(e, out = _fc) {
   const v = vesselById(e.victimId);
@@ -214,13 +173,6 @@ export function fightCentre(e, out = _fc) {
   return out;
 }
 
-/* ---- the tick ------------------------------------------------------------ */
-
-/**
- * Advance engagements: fire the decided outcome when its time comes, spawn
- * tracers between the fighters, notice the player joining. `shipPos` is the
- * player's position; `fireNpc(from, to)` pushes a cosmetic tracer.
- */
 export function stepBattles(t, dt, shipPos, fireNpc, stationList = liveStations, system = currentSystem) {
   const e = engagementAt(t, stationList, system);
   if (!e) return null;
@@ -233,12 +185,7 @@ export function stepBattles(t, dt, shipPos, fireNpc, stationList = liveStations,
       e.joinedAt = t;
       battleHooks.onJoin?.(e);
     }
-    /* tracers: every fighter shoots its foe on its own cadence */
     if (fireNpc) {
-      /* Four fresh arrays and nine linear scans of `traffic`, every tick, for
-       * the whole length of an engagement. The ids do not change while the
-       * engagement runs — only who is still visible does — so resolve through
-       * the roster's own id index and fill three arrays that are reused. */
       const victim = vesselById(e.victimId);
       wingBuf.length = 0;
       for (const id of e.wing) { const n = vesselById(id); if (n && n.visible) wingBuf.push(n); }
@@ -266,13 +213,11 @@ export function stepBattles(t, dt, shipPos, fireNpc, stationList = liveStations,
       }
       if (victim && victim.visible && wing.length && ((t * 0.7 + hash(victim.id)) % 1) < dt * 0.7) fireNpc(victim, wing[0], "npc-law");
     }
-    /* the seed's verdict, unless the player already settled it */
     if (!e.applied && t >= e.downAt) {
       e.applied = true;
       if (e.downId && !e.playerSaved) {
         const w = vesselById(e.downId);
         markVesselDown(e.downId, t);
-        /* a wreck: hull plate the salvage tractor can take */
         if (w) burst({ x: w.x, y: w.y, z: w.z, vx: (w.vx ?? 0) * 0.3, vy: (w.vy ?? 0) * 0.3, vz: (w.vz ?? 0) * 0.3, count: 16, speed: 22, size: 9, good: "iron_ore", tint: 0.35 });
       }
       battleHooks.onEnd?.(e);
@@ -281,7 +226,6 @@ export function stepBattles(t, dt, shipPos, fireNpc, stationList = liveStations,
   return e;
 }
 
-/** A pirate died to the player during a live engagement: the victim is saved. */
 export function pirateKilled(id, t) {
   const e = engagementAt(t);
   if (!e || !e.wing.includes(id)) return null;

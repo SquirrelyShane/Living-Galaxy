@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 13 — LIFE SUPPORT: WATER, WASTE, FOOD */
 export default {
   id: "d13", name: "13 Life Support — Water, Waste, Food",
   sheet: {

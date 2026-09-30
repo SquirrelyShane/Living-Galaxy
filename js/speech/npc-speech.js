@@ -1,50 +1,3 @@
-// Living Galaxy — npc-speech.js
-//
-// One file: everything an NPC needs to say something and mean it.
-//
-// This is `data/npc-grammar.js` and `data/npc-topics.js` merged, with the two pieces that
-// were always missing bolted on — a director that actually runs conversations over time,
-// and a way for the player to say something back. Nothing was cut in the merge; the two
-// halves are still visibly two halves, because the boundary between them is real and worth
-// keeping: the grammar knows English and nothing about the world, the topics know the world
-// and nothing about English.
-//
-//   1  seeded rng          inlined, so this file has no imports at all
-//   2  morphology          inflection: plurals, tense, aspect, mood, degree, number-words
-//   3  lexicon             synonym sets, with the features the syntax needs
-//   4  register            who speaks how, and the numeric dials behind it
-//   5  choosing            anti-repetition memory, bucketed and serialisable
-//   6  syntax frames       71 clause shapes, scored against the record being said
-//   7  proofing            21 rules that read the finished string and repair or reject it
-//   8  realisation         record -> sentence
-//   9  content helpers     fact -> phrase, the boundary the topics speak across
-//  10  topics              44 reasons two ships open a channel, and what they file after
-//  11  exchange engine     turn-taking, scoring, chaining, memory records
-//  12  the player          parsing what a human types and answering it in character
-//  13  director            a running world: pairs, cooldowns, memory, reputation drift
-//  14  self-test           everything above, headless
-//
-// No build step, no dependencies, no imports. Load it as a module:
-//
-//   <script type="module">
-//     import { createWorld } from './data/npc-speech.js';
-//     const w = createWorld({ seed: 1337 });
-//     setInterval(() => w.tick(1), 1000);
-//   </script>
-//
-// or open `demo.html` next to it — that is what it is for. Note that ES modules need a real
-// origin: `python3 -m http.server` in the project root, not file://.
-
-// ═════════════════════════════════════════════════════════════════════
-//  1. SEEDED RNG
-// ═════════════════════════════════════════════════════════════════════
-//
-// Inlined from core/rng.js so this file stands alone. Identical implementation and
-// identical stream derivation, so a build that imports the shared core and a build that
-// uses this copy produce the same radio chatter from the same seed. If core/rng.js ever
-// changes, this is the copy that has to change with it — the alternative was an import,
-// and an import is the one thing a single-file drop-in cannot have.
-
 function mulberry32(seed) {
   let a = seed >>> 0;
   return function () {
@@ -55,7 +8,6 @@ function mulberry32(seed) {
   };
 }
 
-/** FNV-1a. Stable across runs and platforms — do not swap for anything hash-random. */
 function hashString(str) {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
@@ -72,16 +24,14 @@ const streams = new Map();
 function seedWorld(seed) {
   seedValue = seed >>> 0;
   world = mulberry32(seedValue);
-  streams.clear();          // streams are re-derived lazily from the new seed
+  streams.clear();
 }
 
 const wnext = () => world();
 const wrand = (a, b) => a + world() * (b - a);
 
-/** The seed the world was generated from. */
 const worldSeed = () => seedValue;
 
-/** Independent generator for anything else that needs reproducibility. */
 function makeRng(seed) {
   const r = mulberry32(seed >>> 0);
   return {
@@ -93,11 +43,6 @@ function makeRng(seed) {
   };
 }
 
-/**
- * Named deterministic stream off the world seed. Same seed + same name = same sequence,
- * whatever else the build generates. Cached, so repeated calls continue one sequence
- * rather than restarting it.
- */
 function stream(name) {
   let s = streams.get(name);
   if (!s) {
@@ -107,56 +52,12 @@ function stream(name) {
   return s;
 }
 
-/** Rewind one stream to its start — for reproducing a specific generation pass. */
 function resetStream(name) {
   streams.delete(name);
   return stream(name);
 }
 
 const streamNames = () => [...streams.keys()];
-
-// Living Galaxy — how an NPC says a thing, as opposed to what it says.
-//
-// Until v1.01.91 every line in `data/npc-topics.js` was a template literal with the names
-// substituted in. Nine topics, one or two phrasings each, so a pilot listening to the
-// trade band for ten minutes heard the same eighteen sentences on a loop. Adding a
-// twentieth hand-written line would have bought about forty more seconds before the loop
-// closed again — the problem is not the number of lines, it is that a fixed line has no
-// axis to vary along.
-//
-// So this file does not hold sentences. It holds the pieces a sentence is made of, the
-// rules for putting them together so the result is grammatical, and a chooser that
-// remembers what it has already said. A topic declares *meaning* — an act, and the facts
-// it is about — and the realiser builds an utterance from that. Two ships trading the same
-// tip twice produce two different sentences carrying the same information, because the
-// wording is generated and the content is not.
-//
-// ── the five layers ──────────────────────────────────────────────────
-//
-//   morphology   inflection: plurals, tense, aspect, mood, degree, number-words
-//   lexicon      synonym sets, with the features the syntax needs to use them correctly
-//   syntax       frames — functions of a semantic record that realise into clauses
-//   discourse    register, vocatives, hedges, markers, sign-offs, anti-repetition memory
-//   proofing     a validator that reads the finished string and repairs what it can
-//
-// The proofing layer is new in v1.02.10 and is the reason this file grew. Generation that
-// is *almost* grammatical is worse than a template, because a template is at least wrong
-// in the same way every time and can be fixed by hand. A generator needs to be able to
-// look at its own output and reject "a hour", "there is 3 contacts", "Copy. are you
-// holding?" and "Watch yourself — watch yourself." before they reach the comms log. Every
-// rule in PROOF_RULES below is there because the log produced the bad string at least once.
-//
-// Everything is seeded through `core/rng.js`, so the same world produces the same radio
-// chatter and a replay does not diverge on dialogue.
-
-
-// ═════════════════════════════════════════════════════════════════════
-//  1. MORPHOLOGY
-// ═════════════════════════════════════════════════════════════════════
-//
-// Rule-based rather than a table of every form, with the irregulars that actually occur in
-// working radio traffic listed out. English regular inflection covers most of what a ship
-// says; the exceptions are few enough to enumerate and cheap enough to look up.
 
 const IRREGULAR_PLURAL = {
   cargo: 'cargoes', wharf: 'wharves', shelf: 'shelves', life: 'lives',
@@ -176,17 +77,12 @@ const IRREGULAR_PLURAL = {
   torpedo: 'torpedoes', veto: 'vetoes', embargo: 'embargoes'
 };
 
-// Nouns that do not inflect for number at all. Radio is full of them — "two craft",
-// "three series", "aircraft inbound" — and pluralising them is the sort of error that
-// makes generated speech read as machine output rather than as a tired pilot.
 const INVARIANT_PLURAL = new Set([
   'aircraft', 'spacecraft', 'craft', 'series', 'species', 'means', 'offspring',
   'deer', 'sheep', 'fish', 'salmon', 'trout', 'swine', 'bison', 'moose',
   'headquarters', 'crossroads', 'barracks', 'corps', 'gallows', 'innings'
 ]);
 
-// Mass nouns. These take no plural and no numeral, and the realiser routes them through a
-// partitive ("a load of ore") rather than a count when a quantity is wanted.
 const MASS_NOUNS = new Set([
   'ore', 'rock', 'fuel', 'water', 'ice', 'air', 'oxygen', 'plasma', 'gas',
   'dust', 'debris', 'wreckage', 'scrap', 'metal', 'alloy', 'traffic', 'weather',
@@ -195,10 +91,6 @@ const MASS_NOUNS = new Set([
   'damage', 'trouble', 'company', 'attention', 'progress', 'evidence', 'equipment'
 ]);
 
-/**
- * Regular English pluralisation, with the sibilant, -y, -f/-fe, -o and invariant rules
- * applied properly. `n` is the count the noun is agreeing with: 1 leaves it alone.
- */
 export function plural(noun, n = 2) {
   if (!noun) return '';
   if (n === 1) return noun;
@@ -206,7 +98,6 @@ export function plural(noun, n = 2) {
   if (INVARIANT_PLURAL.has(low)) return noun;
   if (MASS_NOUNS.has(low)) return noun;
   if (IRREGULAR_PLURAL[low]) return matchCase(noun, IRREGULAR_PLURAL[low]);
-  // Compounds pluralise their head, which for hyphenated forms is usually the first word.
   if (/-/.test(noun)) {
     const parts = noun.split('-');
     if (/^(in|out|by|on|off|up|down)$/.test(parts[parts.length - 1])) {
@@ -221,14 +112,12 @@ export function plural(noun, n = 2) {
   return noun + 's';
 }
 
-/** Keep the casing of the source word when swapping in an irregular form. */
 function matchCase(src, out) {
   if (src === src.toUpperCase() && src.length > 1) return out.toUpperCase();
   if (/^[A-Z]/.test(src)) return out.charAt(0).toUpperCase() + out.slice(1);
   return out;
 }
 
-/** Is this noun countable in the sense the realiser cares about? */
 export function isMass(noun) {
   return MASS_NOUNS.has(String(noun || '').toLowerCase());
 }
@@ -356,11 +245,8 @@ const IRREGULAR_VERB = {
   forbid:  { s: 'forbids', past: 'forbade',  part: 'forbidden', ing: 'forbidding' }
 };
 
-// Multi-word verbs. The particle has to survive inflection — "puts across", "picked up",
-// "standing down" — which a single-token conjugator gets wrong by inflecting the particle.
 const PHRASAL = /^([a-z]+)((?:\s+(?:up|down|in|out|off|on|over|across|through|back|away|by|to|about|around|apart|aside|ahead|along))+)$/;
 
-/** -ing with the consonant-doubling and silent-e rules that make it read as English. */
 export function gerund(v) {
   const ph = PHRASAL.exec(v);
   if (ph) return gerund(ph[1]) + ph[2];
@@ -399,17 +285,10 @@ export function pastOf(v) {
   return IRREGULAR_VERB[v] ? IRREGULAR_VERB[v].past : regularPast(v);
 }
 
-// Some "verbs" in the lexicon are really predicates that already carry their own copula or
-// modal — "could use", "am short". Conjugating them again produces "could uses". The
-// realiser detects them and passes them through, rewriting only the copula if it must.
 const PRE_INFLECTED = /^(am|is|are|was|were|can|could|will|would|shall|should|may|might|must|had better|used to)\b/;
 
 const MODALS = new Set(['can', 'could', 'will', 'would', 'shall', 'should', 'may', 'might', 'must']);
 
-/**
- * The copula, agreeing properly. Split out because five different code paths need it and
- * every one of them used to reimplement it slightly differently.
- */
 export function copula(agr = {}, tense = 'pres') {
   const { person = 3, number = 'sg' } = agr;
   if (tense === 'past') return (number === 'sg' && person !== 2) ? 'was' : 'were';
@@ -418,19 +297,6 @@ export function copula(agr = {}, tense = 'pres') {
   return 'is';
 }
 
-/**
- * Conjugate a verb for a semantic record.
- *
- * @param {string} v      base form, possibly phrasal ("stand down")
- * @param {object} agr
- *   person   1 | 2 | 3
- *   number   'sg' | 'pl'
- *   tense    'pres' | 'past' | 'fut'
- *   aspect   null | 'prog' | 'perf' | 'perfprog'
- *   modal    'can' | 'could' | 'will' | 'should' | 'must' | ...
- *   negated  true to insert not / -n't at the right depth
- *   voice    'active' | 'passive'
- */
 export function conjugate(v, agr = {}) {
   if (!v) return '';
   if (PRE_INFLECTED.test(v)) return prefixedForm(v, agr);
@@ -440,7 +306,6 @@ export function conjugate(v, agr = {}) {
     modal = null, negated = false, voice = 'active'
   } = agr;
 
-  // Build the auxiliary chain outside-in: modal > perfect > progressive > passive > verb.
   const chain = [];
   let finiteDone = false;
 
@@ -500,8 +365,6 @@ export function conjugate(v, agr = {}) {
     return chain.join(' ');
   }
 
-  // Simple tenses. Negation needs do-support, which is the one place English makes the
-  // generator work for a living: "does not read", not "reads not".
   if (negated) {
     if (v === 'be') return `${copula({ person, number }, tense)} not`;
     if (v === 'have') return tense === 'past' ? 'did not have'
@@ -515,11 +378,6 @@ export function conjugate(v, agr = {}) {
   return v;
 }
 
-/**
- * Verbs that already carry a modal or copula. "could use" stays "could use" in every
- * person; "am short" has to re-agree, because a topic writes it for a first-person speaker
- * and the realiser may put it in a third-person frame.
- */
 function prefixedForm(v, agr = {}) {
   const m = /^(am|is|are|was|were)\b(.*)$/.exec(v);
   if (m) {
@@ -533,21 +391,17 @@ function prefixedForm(v, agr = {}) {
   return v;
 }
 
-/** The infinitive with "to", handling the pre-inflected forms sensibly. */
 export function infinitive(v) {
   if (!v) return '';
   if (PRE_INFLECTED.test(v)) return v.replace(PRE_INFLECTED, '').trim() || v;
   return `to ${v}`;
 }
 
-/** Imperative — the base form, which is also where negation is simplest. */
 export function imperative(v, negated = false) {
   if (!v) return '';
   const base = PRE_INFLECTED.test(v) ? v.replace(PRE_INFLECTED, '').trim() : v;
   return negated ? `do not ${base}` : base;
 }
-
-// ── degree ───────────────────────────────────────────────────────────
 
 const IRREGULAR_DEGREE = {
   good: ['better', 'best'], bad: ['worse', 'worst'], far: ['further', 'furthest'],
@@ -557,7 +411,6 @@ const IRREGULAR_DEGREE = {
 
 const SYLLABLES = w => (String(w).toLowerCase().match(/[aeiouy]+/g) || []).length;
 
-/** Comparative, choosing between -er and "more" the way a speaker does: by length. */
 export function comparative(adj) {
   if (!adj) return '';
   if (IRREGULAR_DEGREE[adj]) return IRREGULAR_DEGREE[adj][0];
@@ -579,7 +432,6 @@ export function superlative(adj) {
   return `the ${adj}est`;
 }
 
-/** Adverb from adjective, for the frames that want a manner slot. */
 export function adverbise(adj) {
   const IRR = { good: 'well', fast: 'fast', hard: 'hard', late: 'late', early: 'early', straight: 'straight' };
   if (IRR[adj]) return IRR[adj];
@@ -590,19 +442,11 @@ export function adverbise(adj) {
   return adj + 'ly';
 }
 
-// ── number words ─────────────────────────────────────────────────────
-//
-// Radio says "a couple of contacts" far more often than "2 contacts", and the digits are
-// what make generated speech read as a HUD readout rather than a voice. The realiser keeps
-// the exact figure when precision matters (a price, a bearing, a hold count in a deal) and
-// spells or vagues it when it does not.
-
 const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
   'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
   'eighteen', 'nineteen'];
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 
-/** Spell a whole number out to ninety-nine; above that, digits read better anyway. */
 export function numberWord(n) {
   const i = Math.round(Number(n));
   if (!isFinite(i) || i < 0) return String(n);
@@ -632,11 +476,6 @@ export function ordinal(n) {
   }
 }
 
-/**
- * A vague quantity. Speech is imprecise on purpose: a pilot who says "eleven thousand two
- * hundred and forty units" is reading a screen aloud, and a pilot who says "the better part
- * of twelve thousand" is talking.
- */
 export function vagueCount(n, opts = {}) {
   const { bucket = 'vague', rng = null } = opts;
   const i = Math.round(Number(n));
@@ -656,24 +495,14 @@ export function vagueCount(n, opts = {}) {
   ], `${bucket}:thousands`, rng);
 }
 
-/**
- * a / an, decided on the *sound* rather than the letter.
- *
- * "an hour" and "a union" are the cases a letter test gets wrong, and a radio line that
- * says "a hour" is the kind of thing that reads as broken rather than as terse. Acronyms
- * spoken letter-by-letter take the article their letter *name* wants: "an S-class", "an
- * MHD tap", "a UN charter".
- */
 export function article(word) {
   const raw = String(word || '').trim().split(/\s+/)[0].replace(/^[^A-Za-z0-9]+/, '');
   const w = raw.toLowerCase();
   if (!w) return 'a';
   if (/^\d/.test(w)) {
-    // Numerals take the article of the word they are read as: "an 8", "a 1", "an 11".
     if (/^(8|11|18)/.test(w)) return 'an';
     return 'a';
   }
-  // An all-caps token is read out as letters unless it is a pronounceable acronym.
   if (raw.length <= 5 && raw === raw.toUpperCase() && /^[A-Z]+$/.test(raw)) {
     return /^[AEFHILMNORSX]/.test(raw) ? 'an' : 'a';
   }
@@ -681,12 +510,6 @@ export function article(word) {
   if (/^(uni|use|user|usual|euro|one|once|ubiq|utility|eulog)/.test(w)) return 'a';
   return /^[aeiou]/.test(w) ? 'an' : 'a';
 }
-
-// ── pronouns ─────────────────────────────────────────────────────────
-//
-// A frame that wants to refer back to something it already mentioned needs the right case,
-// and the difference between "gave it to I" and "gave it to me" is the difference between
-// generated speech and speech.
 
 const PRONOUN = {
   '1sg': { subj: 'I', obj: 'me', poss: 'my', possN: 'mine', refl: 'myself' },
@@ -699,7 +522,6 @@ const PRONOUN = {
   '3pl': { subj: 'they', obj: 'them', poss: 'their', possN: 'theirs', refl: 'themselves' }
 };
 
-/** Pronoun lookup by agreement record and case. */
 export function pronoun(agr = {}, kase = 'subj') {
   const { person = 3, number = 'sg', gender = null } = agr;
   let key = `${person}${number}`;
@@ -708,7 +530,6 @@ export function pronoun(agr = {}, kase = 'subj') {
   return set[kase] || set.subj;
 }
 
-/** Agreement record for an already-realised subject string. Used by the frames. */
 export function agreeWith(subject, fallback = { person: 3, number: 'sg' }) {
   if (!subject) return fallback;
   const s = String(subject).trim().toLowerCase();
@@ -717,12 +538,10 @@ export function agreeWith(subject, fallback = { person: 3, number: 'sg' }) {
   if (s === 'you') return { person: 2, number: 'sg' };
   if (s === 'they' || s === 'these' || s === 'those') return { person: 3, number: 'pl' };
   if (/^(he|she|it|that|this)$/.test(s)) return { person: 3, number: 'sg' };
-  // "two contacts", "a pair of returns", "three of them" — leading numeral wins.
   if (/^(\d+|two|three|four|five|six|seven|eight|nine|ten|both|several|a few|a couple|a pair)\b/.test(s)) {
     return /^(1|one)\b/.test(s) ? { person: 3, number: 'sg' } : { person: 3, number: 'pl' };
   }
   if (/\b(and)\b/.test(s)) return { person: 3, number: 'pl' };
-  // A bare plural head noun. Crude, but wrong far less often than assuming singular.
   const head = s.split(/\s+/).pop();
   if (/s$/.test(head) && !/(ss|us|is)$/.test(head) && !MASS_NOUNS.has(head)) {
     return { person: 3, number: 'pl' };
@@ -730,11 +549,6 @@ export function agreeWith(subject, fallback = { person: 3, number: 'sg' }) {
   return fallback;
 }
 
-/**
- * Determiner + noun, agreeing in number, with the count/mass distinction respected.
- *
- * det: 'indef' | 'def' | 'none' | 'poss' | 'dem' | 'some' | 'any' | 'no' | 'partitive'
- */
 export function np(noun, opts = {}) {
   const {
     count = 1, det = 'indef', adj = null, owner = 'my',
@@ -742,8 +556,6 @@ export function np(noun, opts = {}) {
   } = opts;
   const mass = opts.mass != null ? opts.mass : isMass(noun);
   const head = mass ? noun : plural(noun, count);
-  // A predicative-only adjective is dropped rather than jammed in front of the head; the
-  // noun on its own is always grammatical, which the alternative is not.
   const withAdj = adj && attributive(adj) ? `${adj} ${head}` : head;
   const tail = ofPhrase ? ` ${ofPhrase}` : '';
 
@@ -775,17 +587,12 @@ export function np(noun, opts = {}) {
   return `${article(adj || head)} ${withAdj}${tail}`;
 }
 
-/** Possessive of a proper name — "Bulk Hauler 02's board", "Atlas's berth". */
 export function possessive(name) {
   const s = String(name || '');
   if (!s) return '';
   return /s$/.test(s) ? `${s}'` : `${s}'s`;
 }
 
-/**
- * Join a list the way a person reads one out. Two items take "and"; more take commas and
- * a final "and"; a long list gets truncated, because nobody reads nine things over comms.
- */
 export function listOf(items, opts = {}) {
   const arr = (items || []).filter(Boolean).map(String);
   const { conj = 'and', max = 3, more = 'a few others' } = opts;
@@ -798,18 +605,6 @@ export function listOf(items, opts = {}) {
   if (arr.length === 2) return `${arr[0]} ${conj} ${arr[1]}`;
   return `${arr.slice(0, -1).join(', ')} ${conj} ${arr[arr.length - 1]}`;
 }
-
-// ═════════════════════════════════════════════════════════════════════
-//  2. THE LEXICON
-// ═════════════════════════════════════════════════════════════════════
-//
-// Synonym sets, not single words. Every entry is a set the realiser draws from, which is
-// where most of the variety comes from: the same frame with a different verb choice reads
-// as a different sentence, and no sentence has to be written twice.
-//
-// The sets are keyed by *sense*, not by word, so a topic asks for `verb.move` and never has
-// to know which of four words it will get. That indirection is what lets the vocabulary
-// grow without touching a single topic.
 
 export const LEX = {
   verb: {
@@ -938,12 +733,6 @@ export const LEX = {
     beyond:   ['past', 'beyond', 'the far side of', 'out past']
   },
 
-  // Discourse markers, split by register. A terse ship does not say "as it happens".
-  // A *marker* leads a clause and the clause continues in lower case: "Look, the face reads
-  // well." `LEX.ack` below is the other thing — whole sentences, used as the body of an
-  // acknowledgement, not as furniture in front of one. Terse register had `Right.` and
-  // `Copy.` filed here as markers, which is what produced "Copy. are you holding?" on the
-  // radio: a full stop followed by a lowercased word, on every terse line, for four slices.
   marker: {
     terse:    ['', '', '', 'Right,', 'Listen,'],
     plain:    ['', 'Look,', 'Listen,', 'For what it is worth,', 'Thing is,'],
@@ -971,7 +760,6 @@ export const LEX = {
     wry:      ['Wonderful.', 'Duly noted.', 'Of course it is.', 'Lovely.'],
     anxious:  ['Okay.', 'Right, okay.', 'Understood.', 'Copy, copy.']
   },
-  // Openers used when a channel is being opened cold, before anything has been said.
   hail: {
     terse:    ['{b}.', '{b}, go.', '{b}, on you.'],
     plain:    ['{b}, this is {a}.', '{b}, {a}.', 'Channel up, {b}.'],
@@ -981,7 +769,6 @@ export const LEX = {
     wry:      ['{b}, your favourite voice.', '{b}, guess who.'],
     anxious:  ['{b}? {a} here.', '{b}, are you reading me?']
   },
-  // Sign-offs, used to close an exchange rather than to answer anything in it.
   signoff: {
     terse:    ['Out.', 'Clear.', '{a} out.'],
     plain:    ['{a} out.', 'Clear on this end.', 'That is all I had.'],
@@ -991,7 +778,6 @@ export const LEX = {
     wry:      ['Try not to explode.', 'Do keep in touch.'],
     anxious:  ['Okay. Out.', 'I will be on this band if you need me.']
   },
-  // Interjections. Used sparingly — one per exchange at most, enforced downstream.
   interject: {
     terse:    [''],
     plain:    ['', 'Well.', 'Right.'],
@@ -1003,20 +789,8 @@ export const LEX = {
   }
 };
 
-// Contractions, applied late so the frames can stay written in full forms and stay legible.
-// Register decides how often they fire — a coalition officer speaks in full forms on an
-// open band, and a belt miner does not.
-// The auxiliary contractions carry a lookahead: a clause-final auxiliary cannot contract,
-// because the contracted form is not a word anybody can end a sentence on. "Right you are."
-// contracted to "Right you're." — a real transmission, and the reason the lookahead exists.
-// Matched case-insensitively and re-cased on the way out: the same clause can appear
-// sentence-initial ("You are burning hot") or mid-clause ("Look, you are burning hot"), and
-// a case-sensitive table silently contracts only half of them.
 const NEXT = String.raw`(?=\s+[A-Za-z0-9])`;
 const recase = (src, out) => (/^[A-Z]/.test(src) ? out.charAt(0).toUpperCase() + out.slice(1) : out);
-// The perfect auxiliary: only ahead of a participle, "got", or "been".
-// Participles only. The first version accepted any word ending in a two-letter cluster that
-// a participle might end in, which made "most" look like one: "I've most of a hold."
 const PERF_NEXT = String.raw`(?=\s+(?:got|been|already|never|not|just)\b|\s+[a-z]+(?:ed|en)\b)`;
 const perf = (phrase, short) => [
   new RegExp(String.raw`\b${phrase}\b` + PERF_NEXT, 'gi'),
@@ -1031,8 +805,6 @@ const CONTRACTIONS = [
   aux('I am', "I'm"), aux('you are', "you're"), aux('we are', "we're"),
   aux('they are', "they're"), aux('it is', "it's"), aux('that is', "that's"),
   aux('there is', "there's"), aux('what is', "what's"), aux('here is', "here's"),
-  // "have" only contracts as an auxiliary. "I've a full hold" is not what a working ship
-  // says — "I have a full hold" is — so the perfect-aspect lookahead is required here.
   perf('I have', "I've"), perf('you have', "you've"), perf('we have', "we've"),
   aux('I will', "I'll"), aux('you will', "you'll"), aux('we will', "we'll"),
   aux('it will', "it'll"), aux('they will', "they'll"),
@@ -1042,13 +814,10 @@ const CONTRACTIONS = [
   [/\bhad not\b/g, "hadn't"], [/\bcannot\b/g, "can't"], [/\bcan not\b/g, "can't"],
   [/\bcould not\b/g, "couldn't"], [/\bwould not\b/g, "wouldn't"],
   [/\bshould not\b/g, "shouldn't"], [/\bwill not\b/g, "won't"],
-  // "I would" only contracts ahead of a verb. In "I would if I could" the auxiliary stands
-  // in for an elided one, and "I'd if I could" is not English.
   [new RegExp(String.raw`\bI would\b(?!\s+(?:if|so|too|rather|not\b))` + NEXT, 'gi'), mm => recase(mm, "I'd")],
   aux('they are not', "they aren't")
 ];
 
-/** Apply contractions at a probability set by register. */
 export function contract(text, rate = 0.5, rng = null) {
   if (!text || rate <= 0) return text;
   let out = text;
@@ -1060,19 +829,6 @@ export function contract(text, rate = 0.5, rng = null) {
   }
   return out;
 }
-
-// ═════════════════════════════════════════════════════════════════════
-//  3. REGISTER
-// ═════════════════════════════════════════════════════════════════════
-//
-// Which register a ship speaks in is a property of the ship, not of the line, so the same
-// character sounds like itself across every topic it ever raises. Derived from role and
-// faction rather than stored, so it needs no migration and cannot drift out of step with
-// the unit it describes.
-//
-// v1.02.10 adds three registers and, more usefully, a *profile* per register: the numeric
-// dials the realiser reads. Two ships in the same register still differ, because the
-// profile is perturbed by a per-ship hash — a stable idiolect that costs no save space.
 
 export const REGISTERS = ['terse', 'plain', 'warm', 'formal', 'gruff', 'wry', 'anxious'];
 
@@ -1086,14 +842,6 @@ export const REGISTER_PROFILE = {
   anxious: { marker: 0.55, hedge: 0.55, contract: 0.65, dropSubject: 0.10, vocative: 0.50, maxWords: 17, signoff: 0.10, interject: 0.22 }
 };
 
-/**
- * Register for a unit, read off what the unit already is.
- *
- * Order matters: the most specific condition wins, and stress is checked before role
- * because a holed miner does not sound like a working one. The `mood` override lets
- * systems/npc-comms.js push a character into a register for one exchange — a taunt from a
- * normally formal patrol, for instance — without mutating the unit.
- */
 export function registerOf(u, mood = null) {
   if (!u) return 'plain';
   if (mood && REGISTER_PROFILE[mood]) return mood;
@@ -1113,19 +861,10 @@ export function registerOf(u, mood = null) {
   return 'plain';
 }
 
-/**
- * The dials for a speaker: the register profile, nudged by a stable per-ship hash so two
- * warm miners are not identical, and by the situation the line is spoken in.
- *
- * @param {object} u      the speaker unit
- * @param {string} reg    resolved register
- * @param {object} ctx    { urgent, hp, familiarity, hostile }
- */
 export function profileFor(u, reg, ctx = {}) {
   const base = REGISTER_PROFILE[reg] || REGISTER_PROFILE.plain;
   const p = Object.assign({}, base);
   const name = String((u && u.name) || 'unknown');
-  // FNV-ish, inline so this file does not need to import the hash from core.
   let h = 0x811c9dc5;
   for (let i = 0; i < name.length; i++) { h ^= name.charCodeAt(i); h = Math.imul(h, 0x01000193); }
   const jitter = (k) => (((h >>> (k * 3)) & 0xff) / 255 - 0.5) * 0.18;
@@ -1136,40 +875,21 @@ export function profileFor(u, reg, ctx = {}) {
   p.dropSubject = clamp01(p.dropSubject + jitter(4));
   p.vocative = clamp01(p.vocative + jitter(5));
 
-  // Urgency strips furniture. Nobody says "for what it is worth" while being shot at.
   if (ctx.urgent) {
     p.marker *= 0.3; p.hedge *= 0.2; p.signoff *= 0.2;
     p.dropSubject = clamp01(p.dropSubject + 0.25);
     p.maxWords = Math.max(6, Math.round(p.maxWords * 0.7));
   }
-  // Familiarity shortens. People who talk daily stop introducing themselves.
   if (ctx.familiarity > 3) { p.vocative *= 0.6; p.maxWords = Math.round(p.maxWords * 0.9); }
   if (ctx.familiarity > 10) { p.marker *= 0.8; p.contract = clamp01(p.contract + 0.1); }
-  // Hostility hardens: fewer hedges, more vocatives (you name someone to needle them).
   if (ctx.hostile) { p.hedge *= 0.3; p.vocative = clamp01(p.vocative + 0.15); }
   return p;
 }
 
 const clamp01 = x => (x < 0 ? 0 : x > 1 ? 1 : x);
 
-// ═════════════════════════════════════════════════════════════════════
-//  4. CHOOSING WITHOUT REPEATING
-// ═════════════════════════════════════════════════════════════════════
-//
-// The anti-repetition memory. Keyed by a caller-supplied bucket — usually speaker + topic —
-// it refuses to hand back anything used recently in that bucket until the pool would be
-// exhausted, at which point it forgets the oldest and carries on. That is what stops the
-// radio being a tape loop without needing an enormous corpus: n frames give n distinct
-// utterances in a row rather than a coin flip that lands on the same one twice.
-//
-// v1.02.10 adds a global recent-string window on top. Bucket memory stops a *speaker*
-// repeating itself; it does nothing about six different ships reaching for the same good
-// phrase inside a minute, which is what the comms log actually looked like. The window is
-// small, cheap, and checked at the end of `realise` rather than inside the chooser, because
-// the thing that repeats audibly is the finished sentence and not the word it was built on.
-
-const recent = new Map();   // bucket -> array of recently used keys, newest last
-const recentLines = [];     // finished utterances, newest last
+const recent = new Map();
+const recentLines = [];
 const RECENT_LINE_CAP = 24;
 
 export function chooseFrom(list, bucket = 'default', rng = null) {
@@ -1181,23 +901,17 @@ export function chooseFrom(list, bucket = 'default', rng = null) {
   const pick = pool[Math.floor(draw * pool.length) % pool.length];
 
   const next = seen.concat([keyOf(pick)]);
-  // Remember at most one short of the pool, so there is always something fresh to pick.
   while (next.length > Math.max(1, list.length - 1)) next.shift();
   recent.set(bucket, next);
   return pick;
 }
 
-/**
- * Weighted variant. Some frames are better than others for a given record — a frame that
- * uses every fact present beats one that throws half of them away — and the realiser wants
- * to prefer without ever becoming deterministic.
- */
 export function chooseWeighted(items, weightOf, bucket = 'default', rng = null) {
   if (!Array.isArray(items) || !items.length) return null;
   const seen = recent.get(bucket) || [];
   const scored = items.map(it => {
     let w = Math.max(0.0001, weightOf(it));
-    if (seen.includes(keyOf(it))) w *= 0.12;        // strongly discouraged, not forbidden
+    if (seen.includes(keyOf(it))) w *= 0.12;
     return { it, w };
   });
   const total = scored.reduce((s, x) => s + x.w, 0);
@@ -1213,7 +927,6 @@ export function chooseWeighted(items, weightOf, bucket = 'default', rng = null) 
 
 const keyOf = x => (typeof x === 'string' ? x : (x && (x.id || x.frame)) || JSON.stringify(x));
 
-/** Has this exact sentence gone out over comms in the last two dozen transmissions? */
 export function saidRecently(line) {
   const norm = normaliseForCompare(line);
   return recentLines.includes(norm);
@@ -1226,17 +939,11 @@ function rememberLine(line) {
 
 const normaliseForCompare = s => String(s || '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
 
-/** Wipe the repetition memory. Called on a new game; also useful in tests. */
 export function resetGrammarMemory() {
   recent.clear();
   recentLines.length = 0;
 }
 
-/**
- * Serialise the repetition memory so a save reloads into the same conversational state.
- * Bounded on purpose: the point is to avoid an immediate repeat after a load, not to
- * reconstruct the whole history of the galaxy's small talk.
- */
 export function serialiseGrammarMemory(maxBuckets = 200) {
   const buckets = {};
   let n = 0;
@@ -1256,7 +963,6 @@ export function restoreGrammarMemory(blob) {
   return true;
 }
 
-/** Diagnostics for the debug overlay: how much variety is the radio actually producing? */
 export function grammarStats() {
   return {
     buckets: recent.size,
@@ -1267,72 +973,13 @@ export function grammarStats() {
   };
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  5. SYNTAX FRAMES
-// ═════════════════════════════════════════════════════════════════════
-//
-// A frame is a function of the semantic record, not a string with holes in it. That is the
-// difference that matters: a frame can decide *not* to mention a fact it was not given,
-// reorder to put the important thing first, or drop the subject entirely the way real radio
-// does — none of which a template can do.
-//
-// Fields:
-//   id        stable, used by the repetition memory and by tests
-//   acts      the speech acts this frame can express
-//   needs     slots that must be present, or the frame is not a candidate at all
-//   wants     slots that are not required but that this frame uses well; each one present
-//             raises the frame's score, so a record carrying a place adverbial prefers a
-//             frame that says where over one that throws it away
-//   avoid     slots this frame cannot express; each one present lowers the score, because
-//             choosing it silently discards information the topic wanted said
-//   regs      registers this frame suits; a match is a bonus, not a filter
-//   weight    baseline preference
-//   build     (m, g) -> string
-//
-// `g` is the realiser's helper bag: cap, pick, lex, num, rng.
-
-// Words that carry no content of their own. A frame that would repeat one back has nothing
-// to say and should stand aside for one that does.
 const DEICTIC = /^(that|this|it|them|those|these|you|one)\.?$/i;
 
-// Verbs that make a complete sentence with no object. "I will hold" is a transmission;
-// "I will mark" is half of one, and the log was full of the second kind.
 const INTRANSITIVE_OK = /^(hold|wait|stand by|stand down|come|come about|look|listen|burn|turn|close|break off|hold station|sit tight|be there|come alongside|take a look|see to it|make station|watch out)$/i;
-
-// ═════════════════════════════════════════════════════════════════════
-//  5b. MOVES
-// ═════════════════════════════════════════════════════════════════════
-//
-// A frame knows what shape a clause has. It does not know what the clause *does*, and that
-// is where the nonsense was coming from: "Where are you seeing word on the far leg?" is a
-// grammatical question wrapped around something that was never a place, and "Nothing moving
-// out here?" is a report that arrived wearing a question mark. Both pass every rule in the
-// proofing layer, because both are well-formed English.
-//
-// So there is a layer above the frames now. Every utterance is one of eight moves, every
-// frame declares which move it makes, and MOVE_RULES check the finished string against the
-// move it claims to be. A question that does not ask, a denial that denies nothing, an
-// accusation that names nobody — each is a fatal fault, and the realiser rebuilds from a
-// different frame rather than transmitting it.
-//
-//   statement    asserts a fact about the world           "The face reads clean ore."
-//   question     asks for one                             "Are you holding at the ring?"
-//   comment      evaluates rather than reports            "That is the job."
-//   accusation   asserts a fault, and names who           "You cut inside my marker."
-//   denial       rejects an assertion or a request        "I did not touch your claim."
-//   directive    tells somebody to do something           "Stand down."
-//   commitment   binds the speaker to something           "I will be alongside within the hour."
-//   expressive   thanks, apology, greeting, farewell      "That one is on me."
-//
-// The distinction that earns its keep is comment vs statement. A statement carries a fact
-// the listener could act on and is worth filing; a comment carries the speaker's view of
-// one. Conflating them is why the log used to answer a hazard warning with a fact nobody
-// had established.
 
 export const MOVES = ['statement', 'question', 'comment', 'accusation', 'denial',
   'directive', 'commitment', 'expressive'];
 
-/** The move an act makes, unless the record or the frame says otherwise. */
 export const ACT_MOVE = {
   inform: 'statement', tip: 'statement', report: 'statement',
   ask: 'question', confirm: 'question',
@@ -1354,19 +1001,9 @@ const IMPERATIVE_LEAD = /^(watch|hold|stand|break|keep|give|get|come|go|take|lea
 const COMMIT_LEAD = /\b(I will|I'll|I can|I am coming|I'm coming|consider it|done|agreed|on my way|I have it|I take it|I'll take|yours if|it is yours|it's yours|come alongside|meet me|take it or leave it|that is my number|that's my number|my number)\b/i;
 const EXPRESSIVE_LEAD = /\b(thanks|thank you|appreciated|cheers|sorry|my mistake|on me|copy|received|acknowledged|understood|noted|logged|heard|out\.|clear\.|safe burns|good to hear|there you are|still out here|back again|guess who|transmitting|calling|go\b|glad|any time|no trouble|fair enough|right you are|good of you|if you say so|duly noted|wonderful|lovely|of course it is)\b/i;
 
-/**
- * Check a realised string against the move it claims to make.
- *
- * Each rule is the minimum test that separates a move from the moves nearest it, and every
- * one of them fired on a real transmission before it was written down. Returns null when
- * the line is a legitimate instance of its move, or a short reason when it is not.
- */
 export function checkMove(text, move, msg = {}) {
   const whole = String(text || '').trim();
   if (!whole) return 'empty';
-  // A transmission may carry several sentences — a report and the order that follows from
-  // it, an acceptance and a sign-off. It performs the move if *any* of its sentences does;
-  // requiring the whole string to satisfy the move failed every line that ended "Safe burns."
   const parts = whole.split(/(?<=[.!?])\s+/).filter(Boolean);
   if (parts.length > 1) {
     let first = null;
@@ -1384,14 +1021,10 @@ export function checkMove(text, move, msg = {}) {
   switch (move) {
     case 'question':
       if (!isQ) return 'a question that does not ask';
-      // A question mark is not a question. It needs a wh-word, a fronted auxiliary, or a
-      // tag — otherwise it is a statement with the wrong punctuation on the end.
       if (!WH.test(first) && !AUX_FRONT.test(first) && !/[—-]\s*[a-z ]+\?$/.test(s) &&
           !/,\s*(is that right|right|yes|no|correct)\?$/i.test(s)) {
         return 'question mark on something that is not interrogative';
       }
-      // A wh-question needs a complement its wh-word can actually take: "Where are you
-      // seeing word on the far leg?" asked for the location of a phrase.
       if (/^where\b/i.test(first) && msg.q && msg.q !== 'wh-where') return 'wh-word does not match the question asked';
       if (/^how many\b/i.test(first) && msg.object && agreeWith(msg.object).number !== 'pl') {
         return 'counting something uncountable';
@@ -1409,13 +1042,10 @@ export function checkMove(text, move, msg = {}) {
 
     case 'accusation':
       if (isQ && !/^(who|why|what)\b/i.test(first)) return 'an accusation phrased as a question';
-      // An accusation has to land on somebody. One that names nobody is just a complaint.
       if (!SECOND_PERSON.test(s) && !(msg.target && s.includes(msg.target))) return 'accuses nobody';
       return null;
 
     case 'denial':
-      // Denial is the move most often realised as something else, because half the refusal
-      // frames read as statements. It must actually reject something.
       if (!NEGATION.test(s) && !/\b(pass|wrong|hardly|I would if I could)\b/i.test(s)) {
         return 'a denial that denies nothing';
       }
@@ -1446,7 +1076,6 @@ export function checkMove(text, move, msg = {}) {
 }
 
 export const FRAMES = [
-  // ── informing ──────────────────────────────────────────────────────
   {
     id: 'inform-svo', acts: ['inform', 'tip', 'report'],
     needs: ['subject', 'verb'], wants: ['object', 'where'], weight: 1.0,
@@ -1466,7 +1095,6 @@ export const FRAMES = [
     id: 'inform-verbless', acts: ['inform', 'tip', 'report'],
     needs: ['object'], wants: ['where'], avoid: ['verb'], weight: 0.8,
     regs: ['terse', 'gruff'],
-    // Radio drops the copula constantly. "Two contacts, bearing on the lane."
     build: (m, g) => `${g.cap(m.object)}${m.where ? ', ' + m.where : ''}.`
   },
   {
@@ -1482,13 +1110,6 @@ export const FRAMES = [
   {
     id: 'inform-cleft', objectNP: true, acts: ['inform', 'tip'],
     needs: ['object', 'subject', 'verb'], weight: 0.5, regs: ['plain', 'wry', 'formal'],
-    // "What I have is a full hold." Puts the new information at the end, where speech
-    // naturally puts it.
-    // Personal subjects only. "What I have is a full hold" is speech; "What the lit up run
-    // reads is eight contacts" is a sentence diagram.
-    // Personal subject *and* a verb of having or perceiving. The cleft foregrounds a thing
-    // possessed or noticed; on an action verb it produces "What I mark is Scrapper Vig on my
-    // board", which is a sentence nobody has ever said out loud.
     build: (m, g) => (/^(i|we|you|they)$/i.test(String(m.subject).trim()) &&
       /^(have|hold|read|see|need|want|get|carry|know)$/.test(String(m.verb).trim())
       ? `What ${m.subject} ${conjugate(m.verb, m.agr)} is ${m.object}.` : '')
@@ -1529,7 +1150,6 @@ export const FRAMES = [
     build: (m, g) => `${g.cap(m.object)}, so ${m.so}.`
   },
 
-  // ── asking ─────────────────────────────────────────────────────────
   {
     id: 'ask-polar', q: 'polar', acts: ['ask'],
     needs: ['verb'], wants: ['object', 'where'], weight: 1.0,
@@ -1537,8 +1157,6 @@ export const FRAMES = [
       const second = m.agr && m.agr.person === 2;
       const subj = second ? 'you' : (m.subject || 'it');
       const be = second ? 'Are' : (agreeWith(subj).number === 'pl' ? 'Are' : 'Is');
-      // "have" and "be" have no progressive worth speaking: "Are you having proof of that?"
-      // is what the gerund path produced. Both take do-support or the copula instead.
       if (m.verb === 'have') {
         const aux = second || agreeWith(subj).number === 'pl' ? 'Do' : 'Does';
         return `${aux} ${subj} have${m.object ? ' ' + m.object : ''}${m.where ? ' ' + m.where : ''}?`;
@@ -1571,22 +1189,15 @@ export const FRAMES = [
   {
     id: 'ask-wh-how-many', q: 'wh-count', objectNP: true, acts: ['ask'],
     needs: ['object'], weight: 0.6,
-    // Only counts what is countable and plural. "How many the width of it are we talking
-    // about?" went out on the trade band because this frame took any object at all.
     build: (m, g) => (agreeWith(m.object).number === 'pl'
       ? `How many ${m.object} are we talking about?` : '')
   },
   {
     id: 'ask-wh-when', q: 'wh-when', acts: ['ask'],
-    // The object is required: "When do you hold?" is not a question anybody asks, while
-    // "When do you lift that load?" is.
     needs: ['verb', 'object'], weight: 0.55,
     build: (m, g) => `When do you ${imperative(m.verb)}${m.object ? ' ' + m.object : ''}?`
   },
   {
-    // Clause-shaped objects. "Who else is working that face" is a question already, and the
-    // tag frame turned it into "Who else is working that face — anything on it?" Embedding
-    // is what English does with a question inside a question.
     id: 'ask-embedded', q: 'embedded', acts: ['ask'], move: 'question',
     needs: ['object'], weight: 1.2,
     build: (m, g) => (looksClausal(m.object) || /^(who|what|where|when|why|how|whether|if)\b/i.test(String(m.object))
@@ -1615,7 +1226,6 @@ export const FRAMES = [
     build: (m, g) => `Could you do something about ${m.object}?`
   },
 
-  // ── offering and requesting ────────────────────────────────────────
   {
     id: 'offer-direct', objectNP: true, acts: ['offer'],
     needs: ['object'], wants: ['where'], weight: 1.0,
@@ -1664,13 +1274,10 @@ export const FRAMES = [
   {
     id: 'request-urgent', acts: ['request'],
     needs: ['object'], weight: 0.75, regs: ['anxious', 'terse'],
-    // "Somebody with guns. Now, if you can." — the tail is doing all the work and the request
-    // itself is a fragment. It needs a clause long enough to carry the urgency.
     build: (m, g) => (String(m.object).split(/\s+/).length < 4 ? '' :
       `${g.cap(m.object)}. Now, if you can.`)
   },
 
-  // ── ordering ───────────────────────────────────────────────────────
   {
     id: 'order-plain', acts: ['order'],
     needs: ['verb'], wants: ['object', 'where'], weight: 1.0,
@@ -1687,7 +1294,6 @@ export const FRAMES = [
     build: (m, g) => `${g.cap(imperative(m.verb, true))}${m.object ? ' ' + m.object : ''}.`
   },
 
-  // ── warning ────────────────────────────────────────────────────────
   {
     id: 'warn-imperative', acts: ['warn'],
     needs: ['object'], wants: ['where'], weight: 1.0,
@@ -1714,7 +1320,6 @@ export const FRAMES = [
     build: (m, g) => `${g.cap(m.object)}.`
   },
 
-  // ── acknowledging ──────────────────────────────────────────────────
   {
     id: 'ack-bare', acts: ['ack'],
     needs: [], weight: 1.0,
@@ -1723,21 +1328,12 @@ export const FRAMES = [
   {
     id: 'ack-echo', acts: ['ack'],
     needs: ['object'], weight: 0.95,
-    // An echo repeats what was heard, so there has to be something worth repeating. Echoing
-    // a bare deictic produces "Copy that. That." — the frame declines and the realiser picks
-    // another rather than shipping it.
     build: (m, g) => (DEICTIC.test(m.object) ? '' :
       `${g.pick(LEX.ack[m.register] || LEX.ack.plain, 'ack')} ${g.cap(m.object)}.`)
   },
   {
     id: 'ack-commit', objectNP: true, acts: ['ack'],
     needs: [], wants: ['verb'], weight: 0.9,
-    // The object slot is gone. Whatever a topic puts in it is written to complement the
-    // topic's own verb, not "I will take a look", and the join produced things like
-    // "I will take a look noted against the survey."
-    // ...and a transitive verb with nothing to act on leaves the sentence hanging: "Noted.
-    // I'll mark." Only verbs that stand alone are allowed to fill the slot; everything else
-    // falls back to the phrase that is always complete.
     build: (m, g) => {
       const v = m.verb ? imperative(m.verb) : null;
       const standsAlone = v && INTRANSITIVE_OK.test(v);
@@ -1751,15 +1347,11 @@ export const FRAMES = [
   },
   {
     id: 'ack-qualified', acts: ['ack'],
-    // `doubtable` is required, and it is the topic that says so. Scepticism about a claim
-    // somebody else made is in character; the same tail on your own commitment produced
-    // "I will send the next one your way, though I will believe it when I see it."
     needs: ['object', 'doubtable'], weight: 0.6, regs: ['wry', 'gruff', 'terse'],
     build: (m, g) => (DEICTIC.test(m.object) ? '' :
       `${g.pick(LEX.ack[m.register] || LEX.ack.plain, 'ack')} ${g.cap(m.object)}, though I will believe it when I see it.`)
   },
 
-  // ── accepting and refusing ─────────────────────────────────────────
   {
     id: 'accept-plain', acts: ['accept'],
     needs: [], wants: ['object'], weight: 1.0,
@@ -1786,7 +1378,6 @@ export const FRAMES = [
     build: (m, g) => `Not at that. ${g.cap(m.counter)} and we can talk.`
   },
 
-  // ── negotiating ────────────────────────────────────────────────────
   {
     id: 'negotiate-open', objectNP: true, acts: ['negotiate'],
     needs: ['object', 'price'], weight: 1.0,
@@ -1800,12 +1391,9 @@ export const FRAMES = [
   {
     id: 'negotiate-walk', acts: ['negotiate'],
     needs: [], wants: ['price'], weight: 0.6,
-    // A walk-away has to name a number to walk away from. "What it is worth or I take it to
-    // the next ring" is a threat with nothing behind it.
     build: (m, g) => (m.price && !/\d/.test(m.price) ? '' : `${m.price ? g.cap(m.price) + ' or ' : ''}I take it to the next ring.`)
   },
 
-  // ── boasting and complaining ───────────────────────────────────────
   {
     id: 'boast-plain', acts: ['boast'],
     needs: ['object'], weight: 1.0,
@@ -1832,7 +1420,6 @@ export const FRAMES = [
     build: (m, g) => `${g.pick(['Long shift.', 'I have been at this since the last cycle.', 'This run is wearing thin.'], 'tired')}${m.object ? ' ' + g.cap(m.object) + '.' : ''}`
   },
 
-  // ── greeting and parting ───────────────────────────────────────────
   {
     id: 'greet-hail', acts: ['greet'],
     needs: ['target'], weight: 1.0,
@@ -1851,7 +1438,6 @@ export const FRAMES = [
       .replace(/\{a\}/g, m.speaker || 'this hull').replace(/\{b\}/g, m.target || 'you')
   },
 
-  // ── speculating ────────────────────────────────────────────────────
   {
     id: 'speculate-guess', acts: ['speculate'],
     needs: ['object'], weight: 1.0,
@@ -1868,7 +1454,6 @@ export const FRAMES = [
     build: (m, g) => `${g.cap(m.object)}? I doubt it.`
   },
 
-  // ── apologising and thanking ───────────────────────────────────────
   {
     id: 'apologise-plain', acts: ['apologise'],
     needs: [], wants: ['object'], weight: 1.0,
@@ -1880,12 +1465,6 @@ export const FRAMES = [
     build: (m, g) => `${g.pick(['Thanks.', 'Appreciated.', 'I owe you.', 'Good of you.'], 'thank')}${m.object ? ' ' + g.cap(m.object) + '.' : ''}`
   },
 
-  // ── accusing, denying, admitting ───────────────────────────────────
-  //
-  // The four moves that make an argument an argument. They were missing entirely, which is
-  // why a claim dispute used to be two warnings in a row: the table had no way to say "you
-  // did this" or "no I did not", so it reached for the nearest shape that existed and the
-  // exchange read as two ships talking past each other.
   {
     id: 'accuse-direct', acts: ['accuse'], move: 'accusation',
     needs: ['object'], wants: ['where', 'when'], weight: 1.0,
@@ -1904,15 +1483,11 @@ export const FRAMES = [
   {
     id: 'accuse-softened', acts: ['accuse'], move: 'accusation', noTrim: true,
     needs: ['object'], weight: 0.7, regs: ['plain', 'warm', 'formal', 'anxious'],
-    // Only over an agentive clause about the listener: "Either the manifest and the mass do
-    // not agree, or somebody flying your registry did" accuses a discrepancy of being a ship.
     build: (m, g) => (/^you\b/i.test(String(m.object || '')) ?
       `Either ${m.object}, or somebody flying your registry did.` : '')
   },
   {
     id: 'deny-flat', acts: ['deny'], move: 'denial',
-    // Weighted down: when the topic supplied the denial's own words, throwing them away for
-    // "I did not do it." loses the whole case the speaker was making.
     needs: [], wants: ['verb'], avoid: ['object'], weight: 0.55,
     build: (m, g) => (m.verb
       ? `I did not ${imperative(m.verb)}${m.object ? ' ' + m.object : ''}.`
@@ -1947,8 +1522,6 @@ export const FRAMES = [
   {
     id: 'answer-yes', acts: ['answer'], move: 'statement',
     needs: [], wants: ['object'], weight: 1.0,
-    // A record carrying `negated` is a no, whatever else is in it. Without this guard the
-    // yes-frame answered "It is. Nothing on my sweep."
     build: (m, g) => (m.negated ? '' :
       `${g.pick(['Yes.', 'That is right.', 'Confirmed.', 'It is.'], 'ansYes')}${m.object ? ' ' + g.cap(m.object) + '.' : ''}`)
   },
@@ -1963,7 +1536,6 @@ export const FRAMES = [
     build: (m, g) => `As far as I can tell, ${m.object}.`
   },
 
-  // ── reporting a state ──────────────────────────────────────────────
   {
     id: 'report-state', acts: ['report'],
     needs: ['quality'], wants: ['subject'], weight: 0.9,
@@ -1981,12 +1553,6 @@ export const FRAMES = [
   }
 ];
 
-/**
- * The move a frame makes. Usually the act decides, but a handful of frames do something
- * other than what their act suggests — a warning built as an imperative is a directive
- * whatever the topic called it, and a refusal that offers a counter-price is a commitment
- * with a denial attached rather than a denial.
- */
 const FRAME_MOVE = {
   'warn-imperative': 'directive', 'warn-advice': 'directive', 'warn-conditional': 'comment',
   'warn-declarative': 'statement', 'warn-flat': 'statement',
@@ -1997,14 +1563,12 @@ const FRAME_MOVE = {
   'speculate-doubt': 'comment', 'ack-commit': 'commitment', 'accept-conditional': 'commitment'
 };
 
-/** The move a record makes: the record's own claim, else the frame's, else the act's. */
 export function moveOf(msg, frame = null) {
   if (msg && msg.move) return msg.move;
   if (frame && (frame.move || FRAME_MOVE[frame.id])) return frame.move || FRAME_MOVE[frame.id];
   return ACT_MOVE[(msg && msg.act) || 'inform'] || 'statement';
 }
 
-/** Frames indexed by act, built once. Selection is hot and runs on every line spoken. */
 const FRAMES_BY_ACT = (() => {
   const idx = new Map();
   for (const f of FRAMES) for (const a of f.acts) {
@@ -2016,18 +1580,6 @@ const FRAMES_BY_ACT = (() => {
 
 export const framesFor = act => FRAMES_BY_ACT.get(act) || [];
 
-// ═════════════════════════════════════════════════════════════════════
-//  6. PROOFING
-// ═════════════════════════════════════════════════════════════════════
-//
-// The layer that reads the finished string and fixes it. Every rule here exists because the
-// comms log produced the bad output at least once; the comment on each says what.
-//
-// A rule is { id, test, fix, fatal }. `fix` repairs in place where a repair is unambiguous.
-// `fatal` marks a fault no rewrite can save — the realiser throws that candidate away and
-// builds the line again from a different frame, which is cheaper and much better than
-// shipping a broken sentence.
-
 export const PROOF_RULES = [
   {
     id: 'double-space',
@@ -2036,20 +1588,16 @@ export const PROOF_RULES = [
   },
   {
     id: 'space-before-punct',
-    // "the lane ." — produced whenever an empty optional slot left its leading space behind.
     test: s => /\s+([.,;:!?])/.test(s),
     fix: s => s.replace(/\s+([.,;:!?])/g, '$1')
   },
   {
     id: 'double-punct',
-    // "Copy that.." and "anything on it?." — a frame that ends in punctuation, plus the
-    // full stop the realiser used to append unconditionally.
     test: s => /([.,!?;:])\1+|[.?!],|,\s*\./.test(s),
     fix: s => s.replace(/([.!?;:])\1+/g, '$1').replace(/([.?!]),/g, '$1').replace(/,\s*\./g, '.')
   },
   {
     id: 'mixed-terminal',
-    // "Is the face reading well?." — question frame plus appended stop.
     test: s => /[?!]\s*\.$/.test(s),
     fix: s => s.replace(/([?!])\s*\.$/, '$1')
   },
@@ -2065,13 +1613,11 @@ export const PROOF_RULES = [
   },
   {
     id: 'bad-article',
-    // "a hour", "an ship" — an article chosen before a synonym swap changed the noun.
     test: s => /\b(a)\s+(hour|honest|heir|honou?r)\b/i.test(s) || /\ban\s+([^aeiouAEIOU\s][a-z]*)\b/.test(s) && !/\ban\s+(hour|honest|heir|honou?r|[A-Z])/.test(s),
     fix: s => s.replace(/\b(a|an)\s+([A-Za-z][\w-]*)/g, (mm, det, w) => `${matchCase(det, article(w))} ${w}`)
   },
   {
     id: 'there-agreement',
-    // "There is 3 contacts" — existential frame with a plural object.
     test: s => /\bthere is\s+(?!one\b|a\b|an\b|the\b)(\d+|two|three|four|five|six|seven|eight|nine|ten|several|a few|a couple)\b/i.test(s),
     fix: s => s.replace(/\bthere is\b/gi, mm => (mm[0] === 'T' ? 'There are' : 'there are'))
   },
@@ -2082,14 +1628,11 @@ export const PROOF_RULES = [
   },
   {
     id: 'repeat-word',
-    // "the the lane", "on on my board" — two slots that both supplied a preposition.
     test: s => /\b(\w+)\s+\1\b/i.test(s),
     fix: s => s.replace(/\b(\w+)\s+\1\b/gi, '$1')
   },
   {
     id: 'stutter-phrase',
-    // "Keep your eyes open. Keep your eyes open." — an opener and a reply reaching for the
-    // same closing phrase in the same exchange. Fatal: repairing it would change meaning.
     test: s => {
       const parts = s.split(/(?<=[.!?])\s+/).map(normaliseForCompare).filter(Boolean);
       return new Set(parts).size !== parts.length;
@@ -2103,18 +1646,12 @@ export const PROOF_RULES = [
   },
   {
     id: 'dangling-conjunction',
-    // "so" and "if" end perfectly good sentences when they are the tail of a fixed phrase —
-    // "If you say so." was being thrown away as a dangling conjunction.
     test: s => /\b(and|but|or|because|so|if|than|with|for|of|to)\s*[.?!]?\s*$/i.test(s) &&
       !/\b(say|or|even|is|just|hardly|do)\s+(so|not)\s*[.?!]?\s*$/i.test(s),
     fatal: true
   },
   {
     id: 'orphan-determiner',
-    // "I have the ." — a frame that built an NP from a slot that turned out empty.
-    // A determiner is only orphaned if it was left dangling after something: "I have the ."
-    // A sentence that *is* the word — "No." — is a complete denial, and the first version of
-    // this rule rejected it, which killed every fallback denial the realiser produced.
     test: s => /\b\w+\s+(the|a|an|some|any|no|my|your|our|their)\s*[.,?!]/i.test(s),
     fatal: true
   },
@@ -2130,8 +1667,6 @@ export const PROOF_RULES = [
   },
   {
     id: 'placeholder-left',
-    // "{b}, this is {a}." with no substitution done. Always a bug upstream; fatal so the
-    // test suite catches it rather than the player.
     test: s => /\{[a-z]\}/i.test(s),
     fatal: true
   },
@@ -2152,16 +1687,9 @@ export const PROOF_RULES = [
   }
 ];
 
-/**
- * Run the proofing pass.
- *
- * @returns {{ text: string, ok: boolean, applied: string[], fatal: string|null }}
- */
 export function proof(text) {
   let out = String(text == null ? '' : text);
   const applied = [];
-  // Two passes: a fix can expose a fault the first pass could not see — removing a doubled
-  // word can leave a doubled space, and repairing an article can leave a lowercase initial.
   for (let pass = 0; pass < 2; pass++) {
     for (const rule of PROOF_RULES) {
       let bad = false;
@@ -2171,47 +1699,25 @@ export function proof(text) {
       try {
         const next = rule.fix(out);
         if (next !== out) { out = next; applied.push(rule.id); }
-      } catch (e) { /* a rule that throws is a bug, not a reason to drop the line */ }
+      } catch (e) {}
     }
   }
   return { text: out.trim(), ok: true, applied, fatal: null };
 }
 
-/** Convenience for tests and for the debug overlay. */
 export function isWellFormed(text) { return proof(text).ok; }
-
-// ═════════════════════════════════════════════════════════════════════
-//  7. REALISATION
-// ═════════════════════════════════════════════════════════════════════
 
 const cap = s => (s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : '');
 
-// "I" is the one English pronoun that is always capitalised wherever it lands.
 const fixI = s => String(s).replace(/(^|[\s,;(])i(?=[\s,.;!?)']|$)/g, '$1I');
 
-/**
- * Does this string behave like a clause rather than a noun phrase?
- *
- * A topic may legitimately hand the realiser either: "a full hold" is a thing, and "settle
- * it at the ring and we are square" is a whole sentence somebody said. Frames that build an
- * NP slot around the object cannot take the second — the trade band carried "There are
- * settle it at the ring and we're square" and "I need buy me something at the next berth"
- * before this check existed. Finite verbs, imperative openers and internal conjunctions are
- * the three tells that survive contact with real content.
- */
 const IMPERATIVE_START = /^(buy|settle|take|come|hold|watch|give|keep|put|stay|fall|match|split|route|file|forget|find|send|run|burn|break|meet|make|leave|get|go|say|call|log|mark|pass|fly|sit|wait|check|clear|cover|carry|consider|name|stop|try)\b/i;
-// Past-tense finite forms count too. Without them "the coffee ran out somewhere around the
-// second leg" looked like a noun phrase, and the existential frame wrapped it: "There's the
-// coffee ran out somewhere around the second leg."
 const FINITE_VERB = /\b(is|are|was|were|am|has|have|had|will|would|can|could|should|must|does|do|did|reads|runs|sits|holds|owes|ran|went|took|came|said|got|made|left|lost|kept|gave|saw|told|paid|signed|delivered|cut|burned|filed|read)\b/i;
 
 export function looksClausal(x) {
   if (typeof x !== 'string') return false;
   const s = x.trim();
   if (!s) return false;
-  // A slot that opens with a subject pronoun is a clause whatever verb follows it. Without
-  // this, "I stopped filing on that a long time back" read as a noun phrase and came back
-  // as "I will take a look I stopped filing on that a long time back."
   if (/^(i|we|you|they|he|she|it|nobody|somebody|everybody|there|that was|this was)\b/i.test(s)) return true;
   if (IMPERATIVE_START.test(s)) return true;
   if (FINITE_VERB.test(s)) return true;
@@ -2219,36 +1725,21 @@ export function looksClausal(x) {
   return false;
 }
 
-/** Slots a frame could conceivably use. Anything outside this list is metadata. */
 const SLOTS = ['subject', 'verb', 'object', 'where', 'when', 'quality', 'number',
   'price', 'condition', 'because', 'but', 'so', 'than', 'counter', 'target',
   'modal', 'negated', 'speaker'];
 
-/**
- * Score a frame against a record. Higher is better.
- *
- * The scoring is what turns a pile of frames into a chooser with taste: a frame that uses
- * the facts present is preferred, a frame that would throw a fact away is penalised, and a
- * frame that suits the speaker's register gets a nudge. Randomness still decides between
- * near-equals, so the same record twice does not always take the same shape.
- */
 function scoreFrame(f, m, lengthPref = 0) {
   let s = (f.weight != null ? f.weight : 1);
   const wants = f.wants || [];
   const avoid = f.avoid || [];
   for (const w of wants) if (m[w] != null && m[w] !== '') s += 0.35;
   for (const a of avoid) if (m[a] != null && m[a] !== '') s -= 0.30;
-  // A slot the record carries that the frame can express neither via needs nor wants is
-  // information about to be dropped on the floor.
   const uses = new Set([...(f.needs || []), ...wants]);
   for (const slot of SLOTS) {
     if (m[slot] == null || m[slot] === '') continue;
     if (!uses.has(slot)) s -= 0.08;
   }
-  // Length preference, learned per listener. Shortening was always possible — the trim does
-  // it — but nothing could make a speaker say *more* to a hull that wants more, because the
-  // frames that use every slot were no likelier to be picked. Preferring a frame that fills
-  // more slots is the only lever for length that does not damage the sentence.
   if (lengthPref) {
     const slots = (f.needs || []).length +
       (f.wants || []).filter(w => m[w] != null && m[w] !== '').length;
@@ -2260,33 +1751,6 @@ function scoreFrame(f, m, lengthPref = 0) {
   return Math.max(0.02, s);
 }
 
-/**
- * Turn a semantic record into a sentence.
- *
- * @param {object} msg
- *   act        'inform' | 'tip' | 'report' | 'ask' | 'offer' | 'request' | 'order' |
- *              'warn' | 'ack' | 'accept' | 'refuse' | 'negotiate' | 'boast' | 'complain' |
- *              'greet' | 'farewell' | 'speculate' | 'apologise' | 'thank' | 'confirm'
- *   subject    already-realised NP, or omitted for a subjectless radio fragment
- *   verb       base form
- *   object     already-realised NP
- *   where      a PP or adverbial
- *   when       a temporal adverbial
- *   agr        agreement for the verb
- *   register   one of REGISTERS
- *   count      for existential agreement
- *   urgent     strips discourse furniture and shortens
- *   ...        the optional slots listed in SLOTS above
- *
- * @param {object} opts
- *   bucket     anti-repetition bucket, usually speaker + topic
- *   rng        seeded generator; falls back to the shared npc-grammar stream
- *   vocative   who is being addressed
- *   marker     false to suppress discourse markers
- *   hedge      true to allow a hedge
- *   profile    dials from profileFor(); defaults to the register profile
- *   attempts   how many times to rebuild on a fatal proofing fault (default 4)
- */
 export function realise(msg, opts = {}) {
   const m = Object.assign({
     act: 'inform', register: 'plain', agr: { person: 3, number: 'sg' }
@@ -2307,22 +1771,14 @@ export function realise(msg, opts = {}) {
     num: n => vagueCount(n, { bucket, rng })
   };
 
-  // Candidate frames: those whose act matches and whose required slots are all present.
-  // A topic may pin the shape it wants with `frames: ['inform-svo']`. Used sparingly — the
-  // whole point of the table is that it declares meaning and not wording — but a few records
-  // only read correctly in one shape, and pinning beats writing the sentence out by hand.
   const pinned = Array.isArray(m.frames) && m.frames.length ? new Set(m.frames) : null;
   const clausal = looksClausal(m.object);
-  // A topic that asks a specific kind of question gets that kind: `q: 'wh-count'` will not
-  // be realised as "Where are you seeing…?" because both happen to be questions.
   const usable = f => (f.needs || []).every(k => m[k] != null && m[k] !== '') &&
     !(clausal && f.objectNP) && (!pinned || pinned.has(f.id)) &&
     (!m.q || !f.q || f.q === m.q) && (!m.q || f.q || ACT_MOVE[m.act] !== 'question') &&
     (!m.move || moveOf(m, f) === m.move);
 
   let fits = framesFor(m.act).filter(usable);
-  // Nothing fits — fall back through act families rather than emitting nothing. An
-  // unanswerable record should still produce a plausible noise on the channel.
   if (!fits.length) fits = framesFor(FALLBACK_ACT[m.act] || 'ack').filter(usable);
   if (!fits.length) fits = framesFor('ack').filter(f => !(clausal && f.objectNP));
   if (!fits.length) fits = framesFor('ack').filter(f => !(f.needs || []).length);
@@ -2330,19 +1786,12 @@ export function realise(msg, opts = {}) {
 
   let last = '';
   for (let attempt = 0; attempt < attempts; attempt++) {
-    // `opts.learn.bias(frameId)` is how a character's own experience gets a vote: a shape
-    // that has worked on this listener before is more likely to be reached for again. It
-    // scales the score rather than replacing it, so a learned preference can never override
-    // whether a frame actually fits the facts.
     const bias = opts.learn && typeof opts.learn.bias === 'function'
       ? f => scoreFrame(f, m, opts.lengthPref || 0) * opts.learn.bias(f.id, m)
       : f => scoreFrame(f, m, opts.lengthPref || 0);
     const frame = chooseWeighted(fits, bias, `${bucket}:frame`, rng);
-    // Hand the learner both the shape taken and the shapes that were on offer. Without the
-    // alternatives there is no way to tell a good choice from a lucky topic: the only honest
-    // measure of a policy is what it picked against what it could have picked.
     if (frame && opts.learn && typeof opts.learn.choice === 'function') {
-      try { opts.learn.choice(frame.id, fits.map(f => f.id)); } catch (e) { /* optional */ }
+      try { opts.learn.choice(frame.id, fits.map(f => f.id)); } catch (e) {}
     }
     if (!frame) break;
 
@@ -2351,53 +1800,33 @@ export function realise(msg, opts = {}) {
     if (!body) continue;
     body = String(body).replace(/\s+/g, ' ').trim();
 
-    // A frame whose sentence is a two-part construction ("Either X, or Y") cannot survive
-    // the length trim, which cuts at the comma and leaves half a thought.
     const feat = { marker: false, hedge: false, vocative: false, words: 0 };
     body = decorate(body, Object.assign({ noTrim: !!frame.noTrim }, m), opts, prof, g, roll, feat);
     const checked = proof(body);
     last = checked.text;
     if (!checked.ok) continue;
 
-    // The move check runs on the finished, decorated string — after the furniture, because
-    // furniture is what turns a question into something else often enough to matter.
     const move = moveOf(m, frame);
     const wrong = checkMove(checked.text, move, m);
     if (wrong) { last = ''; continue; }
-    // A line that just went out over the same channel is not worth sending again, even if
-    // it is perfectly grammatical.
     if (saidRecently(checked.text) && attempt < attempts - 1) continue;
     rememberLine(checked.text);
     if (opts.onFrame) {
       feat.words = checked.text.split(/\s+/).length;
-      // The delivery matters as much as the shape. A bank that records only which frame was
-      // used can never learn that a particular hull has no patience for hedging, because
-      // hedging is not a property of the frame — it is a property of how the line was
-      // dressed on the way out, and that is the part a speaker can actually change.
-      try { opts.onFrame(frame.id, move, checked.text, feat); } catch (e) { /* optional */ }
+      try { opts.onFrame(frame.id, move, checked.text, feat); } catch (e) {}
     }
     return checked.text;
   }
 
-  // Everything we built was faulty. Emit the safest thing in the language rather than a
-  // broken sentence: a bare acknowledgement is always well-formed and always in character.
-  // The last resort has to make the same move the record was trying to make. Falling back to
-  // an acknowledgement turned failed denials into agreement — "Got it." in answer to being
-  // accused of shorting a load, which reads as a confession.
   const wanted = moveOf(m);
   const safe = chooseFrom(MOVE_FALLBACK[wanted] || LEX.ack[m.register] || LEX.ack.plain,
                           `${bucket}:safe:${wanted}`, rng) || 'Copy.';
   if (opts.onFrame) {
-    try { opts.onFrame('fallback-ack', 'expressive', safe); } catch (e) { /* optional */ }
+    try { opts.onFrame('fallback-ack', 'expressive', safe); } catch (e) {}
   }
   return last && isWellFormed(last) && !checkMove(last, moveOf(m), m) ? last : safe;
 }
 
-/**
- * What to say when every frame failed. One per move, because the move is the part that must
- * survive: a question that cannot be built still has to end in a question mark, and a denial
- * that cannot be built still has to deny.
- */
 const MOVE_FALLBACK = {
   statement:  ['Nothing more to add.', 'That is where it stands.', 'That is all I have.'],
   question:   ['Say again?', 'How do you read that?', 'What is your read?'],
@@ -2409,8 +1838,6 @@ const MOVE_FALLBACK = {
   expressive: ['Copy.', 'Understood.', 'Noted.']
 };
 
-// Which act to try when a record's own act has no usable frame. Chosen so the fallback
-// still carries roughly the speaker's intent rather than collapsing everything to an ack.
 const FALLBACK_ACT = {
   tip: 'inform', report: 'inform', confirm: 'ask', order: 'request',
   negotiate: 'offer', boast: 'inform', complain: 'inform', speculate: 'inform',
@@ -2419,37 +1846,12 @@ const FALLBACK_ACT = {
   greet: 'ack', farewell: 'ack', warn: 'inform', offer: 'inform', request: 'ask'
 };
 
-/**
- * Discourse furniture, applied after the clause so it never breaks agreement inside it.
- *
- * Rules learned from reading the comms log rather than the code:
- *
- *   1. An acknowledgement in front of an acknowledgement says nothing twice. "Copy.
- *      acknowledged." and "Right. received." were both real transmissions. A clause that
- *      is *itself* an ack gets no furniture in front of it.
- *   2. A prefix ending in a full stop ends a sentence, so the next word keeps its capital.
- *      Only a clause-leading marker lowercases what follows it.
- *   3. A clause-leading marker takes a declarative. "Look, the face reads well" is speech;
- *      "Note that are you holding?" is not English at all, and formal-register questions
- *      were producing it. Questions get no furniture.
- *   4. Furniture is probabilistic, not constant. A marker on every single line is its own
- *      kind of tape loop — the log had four consecutive "For the record," from the same
- *      patrol. The register profile decides how often, and the anti-repetition memory
- *      decides which.
- */
 function decorate(body, m, opts, prof, g, roll, feat = null) {
   const reg = m.register;
-  // Furniture is for statements. An accusation with a qualifier on the end is not an
-  // accusation — "you knew that lane was closed, near enough" concedes the case in the act of
-  // making it — and a denial that opens with "for what it is worth" is not denying anything.
-  // The moves that carry force get said flat.
   const forceful = m.act === 'accuse' || m.act === 'deny' || m.act === 'order' || m.act === 'warn';
   const bare = forceful ||
     m.act === 'ack' || m.act === 'ask' || m.act === 'greet' || m.act === 'farewell';
 
-  // Proper nouns must survive being moved out of sentence-initial position. A discourse
-  // marker in front of a clause lowercases the first word — correct for "The face reads
-  // well", wrong for "Bulk Hauler 02", and very wrong for "I".
   const propers = [m.subject, m.object, m.target, m.speaker, opts.vocative, m.where]
     .filter(x => typeof x === 'string')
     .filter(x => /[A-Z]/.test(x.slice(1)) || /^[A-Z][a-z]+ [A-Z0-9]/.test(x));
@@ -2463,10 +1865,6 @@ function decorate(body, m, opts, prof, g, roll, feat = null) {
 
   let out = body;
 
-  // Subject dropping. Radio does this constantly — "Holding at the ring", "Reading a fat
-  // seam" — and it is the single cheapest way to make a line sound spoken rather than
-  // written. Only ever drop a first-person subject: dropping "Bulk Hauler 02" loses the
-  // information the sentence was for.
   if (!bare && prof.dropSubject > 0 && roll() < prof.dropSubject) {
     const dropped = out.replace(/^(I|We)\s+(am|are|have|will)\s+/, (mm, s, aux) =>
       aux === 'am' || aux === 'are' ? '' : `${aux === 'have' ? '' : aux + ' '}`);
@@ -2475,16 +1873,6 @@ function decorate(body, m, opts, prof, g, roll, feat = null) {
     }
   }
 
-  // Length control, applied to the clause *before* any furniture goes on it. Trimming last
-  // meant a long marker could survive a trim that removed everything it was attached to:
-  // "I do not want to make a thing of it." went out on the trade band as a complete
-  // transmission, with the offer it was hedging cut off behind it.
-  // Never trim a question. Cutting at the last comma that fits drops the clause carrying the
-  // question mark, and "Could you do something about the truth of it." is a question that has
-  // stopped being one — grammatical, and the wrong move entirely.
-  // The slack above `maxWords` used to be a flat six words, which meant a listener who wants
-  // short lines could never actually be given them: the trim almost never fired. It now
-  // closes up as the speaker learns this listener prefers less.
   const slack = prof.maxWords < 12 ? 2 : 6;
   if (!m.noTrim && !/\?$/.test(out) && prof.maxWords && out.split(/\s+/).length > prof.maxWords + slack) {
     const clause = out.split(/(?<=,)\s+/);
@@ -2499,14 +1887,8 @@ function decorate(body, m, opts, prof, g, roll, feat = null) {
     }
   }
 
-  // A marker introduces a clause, so there has to be a clause worth introducing. Four words
-  // or fewer is a stub, and the log carried "Note that thanks.", "Advising, agreed." and
-  // "Be advised, word on the far leg." — furniture with nothing behind it.
   const stub = out.replace(/[^\w\s]/g, '').split(/\s+/).filter(Boolean).length < 5;
 
-  // A learned or calibrated appetite for fuller lines has to be able to act on something.
-  // Frames set the clause; furniture is the only thing left that lengthens a transmission
-  // without inventing content, so a positive length preference raises its odds.
   const lengthPref = opts.lengthPref || 0;
   const fuller = lengthPref > 0 ? 1 + lengthPref * 0.8 : 1 + lengthPref * 0.5;
 
@@ -2523,18 +1905,10 @@ function decorate(body, m, opts, prof, g, roll, feat = null) {
     if (h && /\.$/.test(out)) { out = out.replace(/\.$/, `, ${h}.`); if (feat) feat.hedge = true; }
   }
 
-  // Do not address someone twice in one sentence. A topic that already names the listener
-  // in the clause ("marking Bulk Hauler 02 on my board") does not also need a vocative.
-  // A greeting or an order carries its addressee in the clause itself, so a vocative on top
-  // of it names the same ship twice in one breath — worse still when the topic passed a
-  // different name for each, which reads as two conversations spliced together.
   const addressed = m.target != null && m.target !== '';
-  // Any hull name already in the clause counts, not only this listener's: "Ketch 02 has
-  // worked the outer belt, Ketch 03." reads as two ships being confused for each other.
   const namesSomebody = /\b[A-Z][a-z]+(?:\s+(?:[A-Z][a-z]+|\d{2}))+\b/.test(out);
   if (opts.vocative && !addressed && !namesSomebody && !out.includes(opts.vocative) &&
       roll() < prof.vocative * fuller) {
-    // Vocative position varies in real speech; front for a call, tail for an aside.
     out = roll() < 0.5
       ? `${opts.vocative}, ${softLower(out)}`
       : out.replace(/\.$/, `, ${opts.vocative}.`);
@@ -2543,12 +1917,8 @@ function decorate(body, m, opts, prof, g, roll, feat = null) {
 
   out = contract(out, prof.contract, g.rng);
 
-  // A sign-off closes a channel; only ever on a line that already ends a thought.
   if (opts.signoff && roll() < prof.signoff) {
     const so = g.pick(LEX.signoff[reg] || LEX.signoff.plain, 'signoff');
-    // It follows a full stop, so it starts a new sentence and takes a capital. Substituting
-    // the speaker into a template that begins "{a} out." and appending it raw produced
-    // "Received. this hull out." on the local band for a slice.
     if (so) {
       const filled = so.replace(/\{a\}/g, m.speaker || 'this hull')
                        .replace(/\{b\}/g, opts.vocative || 'you');
@@ -2559,19 +1929,6 @@ function decorate(body, m, opts, prof, g, roll, feat = null) {
   return fixI(cap(out));
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  8. CONTENT HELPERS
-// ═════════════════════════════════════════════════════════════════════
-//
-// The functions a topic calls to turn a *fact* into an already-realised phrase. They are
-// the boundary between the two files: `npc-topics.js` knows what is true, this file knows
-// how to say it, and neither has to know the other's business.
-
-/**
- * Build the object NP for a quantity of something, choosing a synonym and inflecting it.
- * This is where "information constructing" happens: the number is real, and the words
- * around it are chosen fresh each time.
- */
 export function quantity(kind, n, opts = {}) {
   const words = LEX.noun[kind] || [kind];
   const word = chooseFrom(words, `${opts.bucket || 'q'}:${kind}`, opts.rng) || kind;
@@ -2587,20 +1944,12 @@ export function quantity(kind, n, opts = {}) {
   return `${rounded.toLocaleString('en-US')} ${plural(word, rounded)}`;
 }
 
-/**
- * Adjectives that only work after a copula. English will not let most of them sit in front
- * of a noun: "the seam is worth the burn" is fine and "the worth the burn seam" is not, and
- * the trade band carried "the clean claim reads worth the burn material" for a slice
- * because `described()` drew from the whole set without asking.
- */
 const PREDICATIVE_ONLY = /^(worth\b|better\b|not\b|about done|no place|a long way|from last|in a bad way|good for it|light on|right on top|inside the|over the|below the|held together|one more|held\b|due\b|off the)/i;
 
-/** Is this adjective usable in front of the noun it modifies? */
 export function attributive(adj) {
   return !!adj && !PREDICATIVE_ONLY.test(String(adj).trim());
 }
 
-/** A descriptive NP — "a fat seam", "picked-over rock". */
 export function described(kind, quality, opts = {}) {
   const noun = chooseFrom(LEX.noun[kind] || [kind], `${opts.bucket || 'd'}:${kind}`, opts.rng) || kind;
   const adjPool = (LEX.adj[quality] || [quality]).filter(attributive);
@@ -2613,7 +1962,6 @@ export function described(kind, quality, opts = {}) {
   });
 }
 
-/** A place adverbial, varied. */
 export function place(name, opts = {}) {
   const forms = name
     ? [`at ${name}`, `off ${name}`, `out by ${name}`, `${name} side`, `close in on ${name}`]
@@ -2621,10 +1969,6 @@ export function place(name, opts = {}) {
   return chooseFrom(forms, `${opts.bucket || 'p'}:place`, opts.rng) || forms[0];
 }
 
-/**
- * A temporal adverbial from seconds. Speech does not say "in 214 seconds"; it says "in
- * about four minutes", and past a certain distance it stops counting at all.
- */
 export function timeRef(seconds, opts = {}) {
   const s = Number(seconds);
   const b = `${opts.bucket || 't'}:time`;
@@ -2644,7 +1988,6 @@ export function timeRef(seconds, opts = {}) {
   return chooseFrom(dressed, b, opts.rng) || core;
 }
 
-/** A bearing, spoken. "Two seven zero" reads as radio; "270°" reads as a HUD. */
 export function bearing(deg, opts = {}) {
   const d = ((Math.round(Number(deg)) % 360) + 360) % 360;
   const digits = String(d).padStart(3, '0').split('')
@@ -2664,10 +2007,6 @@ const PHONETIC = {
   V: 'Victor', W: 'Whiskey', X: 'X-ray', Y: 'Yankee', Z: 'Zulu'
 };
 
-/**
- * Spell a hull code phonetically. Used when a channel is noisy or a name has to be read
- * back exactly — a repair, a docking clearance, a contract number.
- */
 export function phonetic(code) {
   return String(code || '').toUpperCase().split('').map(c => {
     if (PHONETIC[c]) return PHONETIC[c];
@@ -2676,40 +2015,24 @@ export function phonetic(code) {
   }).filter(Boolean).join(' ');
 }
 
-/**
- * Shorten a hull name the way a familiar voice does. "Bulk Hauler 02" becomes "Hauler 02"
- * to somebody who talks to it every shift, and "02" to somebody who flies with it.
- */
 export function shortName(name, familiarity = 0) {
   const s = String(name || '').trim();
   if (!s) return s;
   if (familiarity <= 1) return s;
   const parts = s.split(/\s+/);
 
-  // A hull name shortens to the part that still identifies it, which is not simply its last
-  // word. "Standing Order" became "Order", "Gallows Humour" became "Humour" and "Bad
-  // Arithmetic" became "Arithmetic" — three ships addressed by a word that means something
-  // else entirely. Only a *type* prefix can be dropped: the words a whole class of hull
-  // shares. Anything else is a name, and names are kept whole.
   const TYPE_PREFIX = /^(nexis|bulk|coalition|tessera|charter|free|long|old|halcyon|meridian|kestrel|pale|deep|ostrava|harrow|cinder|writ|standing)$/i;
   const NUMBERED = /^\d+$/.test(parts[parts.length - 1]);
 
   if (familiarity >= 3 && parts.length > 2 && TYPE_PREFIX.test(parts[0])) {
-    // "Coalition Patrol 03" -> "Patrol 03". The prefix is the fleet, not the ship.
     return parts.slice(1).join(' ');
   }
   if (familiarity >= 8 && NUMBERED && parts.length > 2) {
-    // Very familiar, and the hull carries a number: the number is the shortest thing that
-    // still picks it out of its class. "Nexis Drone 08" -> "Drone 08".
     return parts.slice(-2).join(' ');
   }
   return s;
 }
 
-/**
- * Join two realised clauses into one sentence. Speech coordinates constantly, and a
- * conversation made only of single-clause utterances sounds like a menu.
- */
 export function combine(a, b, opts = {}) {
   const { relation = 'and', bucket = 'c', rng = null } = opts;
   const left = String(a || '').trim().replace(/[.]$/, '');
@@ -2729,19 +2052,10 @@ export function combine(a, b, opts = {}) {
   return `${left} ${j} ${lower}`;
 }
 
-/**
- * Realise several records as one turn of speech. A character who has three things to say
- * says them in one transmission, not three; the sentences are proofed together so a
- * repeated phrase across them is caught.
- */
 export function realiseAll(records, opts = {}) {
   const out = [];
   for (const r of (records || [])) {
     if (!r) continue;
-    // One transmission, so the furniture belongs to the transmission and not to each
-    // sentence in it. Addressing the listener once per record produced "Keep your eyes open,
-    // Drone 01. Hold your board, Drone 01." on a contact call, and a hedge in the middle of
-    // a warning undercuts the sentence in front of it.
     const first = out.length === 0;
     const sub = Object.assign({}, opts, {
       bucket: `${opts.bucket || 'multi'}:${out.length}`,
@@ -2755,15 +2069,9 @@ export function realiseAll(records, opts = {}) {
   }
   const joined = out.join(' ');
   const checked = proof(joined);
-  // A fatal fault across the join is almost always the stutter rule: two records reached
-  // for the same phrase. Drop the later one rather than the whole turn.
   return checked.ok ? checked.text : (out[0] || '');
 }
 
-/**
- * The one-call convenience the topics table uses most: build a record, realise it, and
- * carry the speaker's profile through in one step.
- */
 export function speak(unit, msg, opts = {}) {
   const reg = msg.register || registerOf(unit, opts.mood);
   const prof = profileFor(unit, reg, {
@@ -2775,17 +2083,7 @@ export function speak(unit, msg, opts = {}) {
     Object.assign({ profile: prof }, opts));
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  9. SELF-TEST
-// ═════════════════════════════════════════════════════════════════════
-//
-// Runnable headless (`node --input-type=module`) or from the in-game debug console. A
-// generator that cannot check its own output is a generator nobody can safely extend: the
-// point of these cases is that adding a frame or a lexicon entry next month either keeps
-// them passing or tells you exactly what it broke.
-
 const CASES = [
-  // morphology
   () => [plural('cargo', 2), 'cargoes'],
   () => [plural('analysis', 3), 'analyses'],
   () => [plural('craft', 4), 'craft'],
@@ -2832,7 +2130,6 @@ const CASES = [
   () => [agreeWith('I').person, 1],
   () => [pronoun({ person: 1, number: 'sg' }, 'obj'), 'me'],
 
-  // proofing
   () => [proof('the lane .').text, 'The lane.'],
   () => [proof('Copy that..').text, 'Copy that.'],
   () => [proof('anything on it?.').text, 'Anything on it?'],
@@ -2848,11 +2145,6 @@ const CASES = [
   () => [proof('').ok, false]
 ];
 
-/**
- * Property test: hammer the realiser with every act and register and assert that nothing
- * it emits fails proofing. This is the check that actually protects the comms log, because
- * it exercises combinations no hand-written case would think to try.
- */
 function fuzz(iterations = 600) {
   const acts = [...new Set(FRAMES.flatMap(f => f.acts))];
   const subjects = ['I', 'we', 'the face', 'Bulk Hauler 02', 'two contacts', 'the lane', null];
@@ -2901,7 +2193,6 @@ function fuzz(iterations = 600) {
   return bad;
 }
 
-/** Variety check: how many distinct sentences does one record produce over N draws? */
 export function varietyOf(msg, n = 40, opts = {}) {
   const seen = new Set();
   for (let i = 0; i < n; i++) {
@@ -2910,10 +2201,6 @@ export function varietyOf(msg, n = 40, opts = {}) {
   return { distinct: seen.size, of: n, ratio: seen.size / n, samples: [...seen].slice(0, 8) };
 }
 
-/**
- * Run everything. Returns { pass, fail, failures } and logs a readable report.
- * `resetGrammarMemory()` first so a test run is reproducible whatever the game did before.
- */
 export function runGrammarSelfTest(opts = {}) {
   const { verbose = true, iterations = 600 } = opts;
   resetGrammarMemory();
@@ -2932,8 +2219,6 @@ export function runGrammarSelfTest(opts = {}) {
     for (const b of fuzzBad) failures.push(`fuzz ${b.i} [${b.act}/${b.register}] ${b.fatal || 'unstable'}: ${JSON.stringify(b.line)}`);
   } else pass++;
 
-  // Variety floor. One record must not collapse to one sentence — that is the whole reason
-  // this file exists, so it is a test and not a hope.
   resetGrammarMemory();
   const v = varietyOf({
     act: 'tip', register: 'plain', subject: 'the face', verb: 'read',
@@ -2951,92 +2236,9 @@ export function runGrammarSelfTest(opts = {}) {
   return report;
 }
 
-
-
-// Living Galaxy — what NPCs talk to each other about.
-//
-// A topic is not a line of dialogue. It is a *reason two characters would open a channel*,
-// the conditions under which that reason exists, and — the part that matters — what each of
-// them still knows afterwards.
-//
-// That last clause is the whole design constraint. It would be easy to build NPC chat as a
-// presentation feature: pick two ships in range, print a plausible line, done. That is a
-// screensaver. A topic earns its place here only if the exchange leaves state behind that
-// outlives it, so every entry declares `filesFrom` and `filesTo`: the memory each side
-// carries away, with the *other character* as the subject.
-//
-// Declared as data for the same reason the ammunition feeds are: a table with a `when`
-// clause beats a switch statement that has to be edited to add a kind of conversation.
-//
-// ── fields ───────────────────────────────────────────────────────────
-//   channel    which comms band it goes out on — the player can overhear it there
-//   weight     relative likelihood when several topics are available
-//   cooldown   seconds before the same pair may raise the same topic again
-//   when       (a, b, ctx) => bool — both sides' userData; true if this makes sense now
-//   say        [turnFn, ...] — each gets { a, b, rel, bucket, ctx } and returns a semantic
-//              record, or an array of records for a two-sentence transmission
-//   filesFrom  memory the *speaker* keeps, subject = the other character
-//   filesTo    memory the *listener* keeps, subject = the speaker
-//   offers     an obligation this topic can put on the ledger if the listener accepts
-//   chains     topic keys this exchange makes newly plausible, raised next time the pair
-//              talk — how a conversation becomes a thread rather than a series of unrelated
-//              transmissions
-//   urgent     strips discourse furniture and shortens; read by the grammar's profile
-//   mood       forces a register for this exchange without mutating the unit
-//   hearsay    the listener files second-hand knowledge, weighted below an eyewitness
-//   priority   scheduling hint for systems/npc-comms.js: a distress call outranks small talk
-//
-// `rel` is the relationship record from systems/npc-comms.js: how many times these two have
-// spoken and what they think of each other. It is passed to the turn functions so a
-// hundredth exchange between two familiar ships does not read like a first contact — which
-// is the difference between a radio and a tape loop.
-//
-// ── v1.02.10: turns, not pairs ───────────────────────────────────────
-//
-// `say` was a two-element array — an opener and a reply — because that is the shortest
-// exchange that is still a conversation. It is also the shortest exchange that never
-// becomes one: nobody negotiates in two lines, nobody talks a frightened hauler through a
-// burn in two lines, and a deal that closes in two lines is not a deal, it is a vending
-// machine. `say` is now any length, and the engine walks it with the speakers alternating,
-// stopping early if either side loses line of sight or the channel is pre-empted by
-// something with a higher `priority`.
-//
-// A turn may also return an *array* of records. The grammar realises them as one
-// transmission — "Face is thin this side. I am moving up the belt." — which is how people
-// actually talk when they have two things to say and one channel to say them on.
-
-
-// ═════════════════════════════════════════════════════════════════════
-//  1. BUCKETS
-// ═════════════════════════════════════════════════════════════════════
-//
-// A stable bucket for the anti-repetition memory: this speaker, on this topic.
-//
-// Speaker-scoped so a character does not repeat *itself*, which is the common case. It is
-// not enough on its own: the opener and the reply of one exchange are spoken by different
-// characters, so they draw from different buckets and can land on the same phrase back to
-// back. That produced this, verbatim, on the local channel:
-//
-//   NEXIS DRONE 08      ... that is a lot of hull for one gun. Keep your eyes open.
-//   COALITION PATROL 03  Still talking. Keep your eyes open.
-//
-// `pairBucket` is the fix — see `utter`, which shares one bucket across every turn of an
-// exchange for the phrase pools where an echo is audible, and keeps frame and furniture
-// choice speaker-scoped, because two people using the same sentence *shape* is how
-// conversation sounds and two people using the same *words* is how a tape loop sounds.
-
 const bucketFor = (a, topicKey) => `${a && a.name}:${topicKey}`;
 const pairBucket = (a, b, topicKey) =>
   `pair:${[a && a.name, b && b.name].sort().join('~')}:${topicKey}`;
-
-// ═════════════════════════════════════════════════════════════════════
-//  2. PREDICATES
-// ═════════════════════════════════════════════════════════════════════
-//
-// The vocabulary the `when` clauses are written in. Each one is a question about the world
-// that a character could plausibly answer by looking out of the window, which is the test
-// for whether it belongs here: a condition an NPC could not perceive is a condition the
-// player will eventually notice it reacting to impossibly.
 
 const same = (a, b) => a.faction === b.faction;
 const role = (u, r) => u.role === r;
@@ -3047,16 +2249,13 @@ const healthy = u => u.hp >= u.maxHp * 0.9;
 const armed = u => u.role === 'combat' || u.role === 'merc' || u.role === 'patrol';
 const civilian = u => !armed(u) && u.role !== 'fort';
 
-/** Cargo state. `cargo` and `cargoMax` are optional — absent means "unknown", not "empty". */
 const laden = u => u.cargo != null && u.cargoMax > 0 && u.cargo >= u.cargoMax * 0.8;
 const empty = u => u.cargo != null && u.cargoMax > 0 && u.cargo <= u.cargoMax * 0.15;
 const partLaden = u => u.cargo != null && !laden(u) && !empty(u);
 
-/** Fuel and endurance. A ship low on reaction mass talks about it, and asks for help. */
 const lowFuel = u => u.fuel != null && u.fuelMax > 0 && u.fuel < u.fuelMax * 0.25;
 const fatFuel = u => u.fuel != null && u.fuelMax > 0 && u.fuel > u.fuelMax * 0.7;
 
-/** Where a unit is in its own job. Set by the AI systems; absent means "no idea". */
 const working = u => u.task === 'work' || u.task === 'mine' || u.task === 'haul';
 const idle = u => u.task === 'idle' || u.task == null;
 const docked = u => !!u.docked;
@@ -3064,7 +2263,6 @@ const transiting = u => u.task === 'transit' || u.task === 'travel';
 const fleeing = u => u.task === 'flee' || u.task === 'evade';
 const engaged = u => u.task === 'attack' || u.task === 'engage' || !!u.inCombat;
 
-/** Distance, in whatever unit the sim uses. Absent positions mean "close enough to talk". */
 function dist(a, b) {
   if (!a || !b || !a.position || !b.position) return 0;
   const dx = a.position.x - b.position.x;
@@ -3075,7 +2273,6 @@ function dist(a, b) {
 const near = (a, b, d = 400) => dist(a, b) <= d;
 const far = (a, b, d = 1200) => dist(a, b) > d;
 
-/** Short-hand for "these two have talked before" — the gate most familiarity reads on. */
 const known = rel => (rel && rel.exchanges > 0);
 const familiar = rel => (rel && rel.exchanges >= 4);
 const oldFriends = rel => (rel && rel.exchanges >= 12 && (rel.regard || 0) > 0.3);
@@ -3085,36 +2282,18 @@ const cold = rel => (rel && (rel.regard || 0) < -0.25);
 const owes = (rel) => !!(rel && rel.owes);
 const owed = (rel) => !!(rel && rel.owed);
 
-/** How familiar, as a number the grammar's profile reads directly. */
 const familiarity = rel => (rel ? (rel.exchanges || 0) : 0);
 
-/**
- * Name as this speaker would say it. Two ships that have talked forty times do not use each
- * other's full registry names, and hearing the full name every single time is one of the
- * clearest tells that a conversation is generated.
- */
 const nameFor = (u, rel) => shortName(u && u.name, familiarity(rel));
 
-/** Does the context expose the callback a `when` clause wants? Guards optional hooks. */
 const has = (ctx, fn) => !!(ctx && typeof ctx[fn] === 'function');
 
-// ═════════════════════════════════════════════════════════════════════
-//  3. FACT BUILDERS
-// ═════════════════════════════════════════════════════════════════════
-//
-// A topic's job is to decide *what is true and worth saying*. These turn that into the
-// already-realised phrases the grammar's semantic records take as slots — which is the
-// boundary between the two files: this one knows the world, `npc-grammar.js` knows English,
-// and neither has to learn the other's job.
-
-/** The ore grade at a unit's current claim, said the way a miner says it. */
 function gradeFact(u, bucket) {
   const q = u.oreGrade != null ? u.oreGrade : 0.5;
   const quality = q > 0.7 ? 'good' : q < 0.35 ? 'bad' : 'quiet';
   return { quality, phrase: described('face', quality, { bucket, det: 'def' }) };
 }
 
-/** How full a hold is, in words rather than in a percentage. */
 function holdFact(u, bucket) {
   if (u.cargo == null || !u.cargoMax) return quantity('hold', null, { bucket, det: 'indef' });
   const frac = u.cargo / u.cargoMax;
@@ -3124,7 +2303,6 @@ function holdFact(u, bucket) {
   return chooseFrom(['an empty hold', 'nothing in the can', 'clean bins'], `${bucket}:holdEmpty`);
 }
 
-/** A price, said as a number a trader would actually quote. */
 function priceFact(n, bucket) {
   if (n == null) return chooseFrom(['the posted rate', 'what it is worth', 'the going number'], `${bucket}:priceVague`);
   const r = Math.round(n);
@@ -3135,27 +2313,19 @@ function priceFact(n, bucket) {
   ], `${bucket}:price`);
 }
 
-/** Where the speaker is, as a place adverbial the listener could act on. */
 function whereFact(u, bucket) {
   const anchor = u.nearestName || u.sectorName || u.claimName || null;
   return place(anchor, { bucket });
 }
 
-/** A threat, described rather than enumerated. */
 function threatFact(n, bucket) {
   if (!n) return chooseFrom(['nothing on the board', 'a clear sweep', 'no returns'], `${bucket}:noThreat`);
   if (n === 1) return chooseFrom(['one contact', 'a single return', 'one hull I do not like'], `${bucket}:oneThreat`);
-  // vagueCount hands back partitives as well as numerals, and "a handful contacts" is not a
-  // phrase. The partitive forms take "of"; the numeral and quantifier forms do not.
   const q = vagueCount(n, { bucket });
-  // Only the bare partitives need it: "a dozen or two contacts" and "half a dozen or so
-  // contacts" already read correctly, and adding "of" to them produced "half a dozen or so
-  // of contacts" on the trade band.
   const partitive = /^(a pair|a couple|a handful)$/.test(q);
   return `${q}${partitive ? ' of' : ''} contacts`;
 }
 
-/** Damage, in the terms a pilot uses about their own ship. */
 function damageFact(u, bucket) {
   const frac = u.maxHp ? u.hp / u.maxHp : 1;
   if (frac > 0.85) return chooseFrom(['a few scratches', 'nothing that matters', 'paint damage'], `${bucket}:dmgLight`);
@@ -3164,21 +2334,14 @@ function damageFact(u, bucket) {
   return chooseFrom(['about done', 'held together with hope', 'one more hit from scrap'], `${bucket}:dmgCritical`);
 }
 
-/** Time until something, or since it, in speech rather than in seconds. */
 function whenFact(seconds, bucket) {
   return timeRef(seconds, { bucket });
 }
 
-/** A heading, spoken. Used when one ship is telling another where to look. */
 function headingFact(deg, bucket) {
   return deg == null ? place(null, { bucket }) : bearing(deg, { bucket });
 }
 
-/**
- * A reason. Every refusal, every warning and every request reads better with one, and a
- * reason drawn from the speaker's actual state is the cheapest way to make an NPC look like
- * it has an inner life: it is not inventing an excuse, it is telling you what it is doing.
- */
 function reasonFact(u, bucket) {
   const reasons = [];
   if (laden(u)) reasons.push('I am loaded out');
@@ -3193,7 +2356,6 @@ function reasonFact(u, bucket) {
   return chooseFrom(reasons, `${bucket}:reason`);
 }
 
-/** What this speaker wants, from its own state. Drives offers and requests. */
 function needFact(u, bucket) {
   if (lowFuel(u)) return chooseFrom(['reaction mass', 'a fuel top-off', 'anything I can burn'], `${bucket}:needFuel`);
   if (hurt(u)) return chooseFrom(['a patch', 'yard time', 'somebody with a welder'], `${bucket}:needRepair`);
@@ -3203,18 +2365,7 @@ function needFact(u, bucket) {
   return chooseFrom(['a berth', 'a clear lane', 'a straight answer'], `${bucket}:needGeneric`);
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  4. THE TOPIC TABLE
-// ═════════════════════════════════════════════════════════════════════
-//
-// Ordered loosely by how often they fire, which is also roughly how boring they are. The
-// dull ones matter most: a channel that only ever carries distress calls and threats is
-// not a populated system, it is a set piece. The routine traffic is what makes the rare
-// traffic land.
-
 export const TOPICS = {
-
-  // ── routine ────────────────────────────────────────────────────────
 
   checkIn: {
     channel: 'local', weight: 10, cooldown: 90, priority: 1,
@@ -3230,8 +2381,6 @@ export const TOPICS = {
         where: known(rel) ? whereFact(a, bucket) : null,
         vocative: nameFor(b, rel)
       }),
-      // After the swap in exchange(), `a` is the responder and `b` is the original speaker.
-      // Acknowledge the other party, not ourselves.
       ({ a, b, rel, bucket }) => ({
         act: 'ack',
         register: registerOf(a),
@@ -3247,9 +2396,6 @@ export const TOPICS = {
     chains: ['smallTalk', 'shiftComplaint']
   },
 
-  // The topic with the least content and the most work to do. Two ships that only ever
-  // exchange business are two vending machines on the same frequency; the small talk is
-  // what makes the business read as being between people.
   smallTalk: {
     channel: 'local', weight: 7, cooldown: 300, priority: 0,
     when: (a, b, ctx) => same(a, b) && known(ctx.rel) && !engaged(a) && !engaged(b) && !hurt(a),
@@ -3276,9 +2422,6 @@ export const TOPICS = {
           'better quiet than the other thing'
         ], `${bucket}:smallReply`)
       }),
-      // A third turn, taken only sometimes — see `exchange()`. Conversations that always
-      // run to the same length are as obviously mechanical as ones that always use the
-      // same words.
       ({ a, b, rel, bucket }) => ({
         act: familiar(rel) ? 'inform' : 'farewell',
         register: registerOf(a),
@@ -3334,9 +2477,6 @@ export const TOPICS = {
         {
           act: 'report',
           register: registerOf(a),
-          // First person. A ship on an open channel with one other ship says "I am running
-          // Ostrava side", not "Nexis Drone 01 is running Ostrava side" — the third person
-          // is for a mayday, where the point is to broadcast which hull is in trouble.
           subject: 'I',
           verb: transiting(a) ? 'run' : 'work',
           agr: { person: 1, number: 'sg', aspect: 'prog' },
@@ -3360,8 +2500,6 @@ export const TOPICS = {
     filesFrom: { type: 'reported-position', weight: 0.3 },
     filesTo:   { type: 'knows-position', weight: 0.5 }
   },
-
-  // ── work: mining ───────────────────────────────────────────────────
 
   oreTip: {
     channel: 'trade', weight: 14, cooldown: 240, priority: 3,
@@ -3387,17 +2525,11 @@ export const TOPICS = {
         verb: 'look'
       })
     ],
-    // A tip is the smallest unit of the thing slice 11 turns into a tradeable good:
-    // knowledge with a source attached. Filing who told you is what later lets a
-    // character work out whose tips are worth anything.
     filesFrom: { type: 'gave-tip', weight: 0.8 },
     filesTo:   { type: 'got-tip', weight: 1.0 },
     chains: ['tipFollowUp', 'haulOffer']
   },
 
-  // The other half of a tip, and the reason filing one is worth the save space. A character
-  // that acted on a tip comes back and says whether it was any good, and *that* is what
-  // turns `gave-tip` into a reputation rather than a counter.
   tipFollowUp: {
     channel: 'trade', weight: 11, cooldown: 300, priority: 3,
     when: (a, b, ctx) => has(ctx, 'recallBetween') && ctx.recallBetween(a, b, 'got-tip'),
@@ -3428,8 +2560,6 @@ export const TOPICS = {
         };
       }
     ],
-    // The payload: a judgement about the *source*, not about the rock. Slice 11 reads this
-    // to decide whether a character believes the next thing this speaker says.
     filesFrom: { type: 'rated-source', weight: 1.4 },
     filesTo:   { type: 'was-rated', weight: 1.0 },
     chains: ['oreTip']
@@ -3504,12 +2634,6 @@ export const TOPICS = {
     filesTo:   { type: 'got-survey', weight: 0.7 }
   },
 
-  // ── work: hauling and trade ────────────────────────────────────────
-
-  // The first topic that produces an *obligation* rather than only a memory. `offers` is
-  // read by systems/npc-comms.js: if the topic fires and the listener accepts, a deal goes
-  // on the ledger and the hauler flies it. That is the whole difference between a social
-  // layer that is state and one that acts.
   haulOffer: {
     channel: 'trade', weight: 12, cooldown: 200, priority: 4,
     when: (a, b) => role(a, 'mine') && role(b, 'haul') && !laden(b),
@@ -3605,8 +2729,6 @@ export const TOPICS = {
                            `${bucket}:deliveredAck`)
       })
     ],
-    // A completed obligation, filed on both sides. This is what a reputation is made of:
-    // not that you were asked, but that you did it.
     filesFrom: { type: 'completed-work', weight: 1.6 },
     filesTo:   { type: 'work-done-for-me', weight: 1.6 },
     chains: ['recommend', 'haulOffer']
@@ -3675,13 +2797,6 @@ export const TOPICS = {
   }
 };
 
-// The table is assembled in sections rather than written as one enormous literal. Each
-// section is a family of topics that share a channel and a set of preconditions, and
-// keeping them apart means a change to how combat chatter works cannot accidentally edit
-// how trade chatter works — which is exactly what happened when they lived in one object.
-
-// ── trouble: distress and rescue ─────────────────────────────────────
-
 Object.assign(TOPICS, {
 
   askHelp: {
@@ -3693,17 +2808,10 @@ Object.assign(TOPICS, {
         act: 'inform',
         register: registerOf(a),
         subject: a.name,
-        // Progressive: a distress call is about something happening right now, and the
-        // simple present ("takes fire") reads as a habit rather than an emergency.
         agr: { person: 3, number: 'sg', aspect: 'prog' },
         verb: 'take',
-        // No first person in the object: this clause is in the third person so the band
-        // hears which hull is in trouble, and "Deepcut 02 has taken more than I can hold"
-        // is two speakers in one sentence.
         object: chooseFrom(['fire', 'hits', 'a working over', 'rounds through the hull'],
                            `${bucket}:distress`),
-        // Pinned to the shapes that keep it in the present: the perfect turns a mayday into
-        // a report of something already over.
         frames: ['inform-progressive', 'inform-svo', 'inform-fronted'],
         where: whereFact(a, bucket),
         urgent: true
@@ -3731,10 +2839,6 @@ Object.assign(TOPICS, {
     chains: ['thanks', 'rescueReport', 'owesFavour']
   },
 
-  // The call nobody answers. A distress channel where help always arrives is a channel with
-  // no stakes; this fires when the only ships in range cannot or will not come, and it is
-  // the single most effective thing in the table at making a system feel inhabited by
-  // people with their own problems rather than by a support crew.
   refuseHelp: {
     channel: 'distress', weight: 9, cooldown: 240, priority: 8,
     when: (a, b) => hurt(a) && (civilian(b) || hurt(b) || lowFuel(b) || far(a, b, 1500)),
@@ -3766,8 +2870,6 @@ Object.assign(TOPICS, {
       })
     ],
     filesFrom: { type: 'asked-help', weight: 1.0 },
-    // Being turned down is filed, and it is filed *negatively*. A character remembers who
-    // did not come, and slice 10 reads it when deciding whose contract to take.
     filesTo:   { type: 'refused-help', weight: -1.2 },
     chains: ['grudge', 'apology']
   },
@@ -3926,8 +3028,6 @@ Object.assign(TOPICS, {
         verb: 'owe',
         object: chooseFrom(['you for that one', 'you a favour', 'you one'],
                            `${bucket}:thanks`),
-        // Pinned: the perfect ("I have owed you a favour") is grammatical and is not a
-        // thing a person says while thanking somebody.
         frames: ['inform-svo'],
         vocative: nameFor(b, rel)
       }),
@@ -3938,22 +3038,14 @@ Object.assign(TOPICS, {
                             'settle it at the ring and we are square',
                             'you would have done the same'],
                            `${bucket}:thanksReply`),
-        // These are whole clauses, so only the frames that pass an object through as a
-        // sentence can take them. The existential frame turned the first into "There are
-        // buy me something at the next berth."
         frames: ['inform-verbless', 'inform-contrast']
       })
     ],
-    // A favour owed, on both sides of the pair. Slice 10 reads exactly this to decide
-    // whether a character will take a contract from somebody.
     filesFrom: { type: 'owes-favour', weight: 1.5 },
     filesTo:   { type: 'owed-favour', weight: 1.5 },
     chains: ['owesFavour', 'recommend']
   },
 
-  // Calling in a debt. The other side of `thanks`, and the point at which the social layer
-  // stops being flavour: a character with a marker on somebody spends it, and the ledger
-  // entry is consumed whether or not the answer is yes.
   owesFavour: {
     channel: 'local', weight: 9, cooldown: 500, priority: 5,
     when: (a, b, ctx) => has(ctx, 'recallBetween') && ctx.recallBetween(a, b, 'owed-favour'),
@@ -4001,14 +3093,11 @@ Object.assign(TOPICS, {
           : chooseFrom(['forget it', 'it is done', 'we are square'], `${bucket}:sorryWarm`)
       })
     ],
-    // An apology moves regard, which is the only thing in the table that repairs it.
     filesFrom: { type: 'apologised', weight: 0.8 },
     filesTo:   { type: 'was-apologised-to', weight: 1.0 },
     chains: ['smallTalk']
   }
 });
-
-// ── the other side: combat, threats, grudges ─────────────────────────
 
 Object.assign(TOPICS, {
 
@@ -4039,9 +3128,6 @@ Object.assign(TOPICS, {
     chains: ['grudge', 'standoff']
   },
 
-  // Two armed hulls that have not decided yet. The interesting case, because it can end
-  // either way and the ending is filed: a standoff that breaks peacefully is a relationship,
-  // and one that does not is a grudge with a date on it.
   standoff: {
     channel: 'local', weight: 8, cooldown: 220, priority: 7,
     when: (a, b) => !same(a, b) && armed(a) && armed(b) && near(a, b, 500) && !engaged(a),
@@ -4156,7 +3242,6 @@ Object.assign(TOPICS, {
             act: 'order',
             register: registerOf(a),
             verb: chooseFrom(['watch', 'hold', 'stand by'], `${bucket}:contactOrder`),
-            // A bare "Watch." is an order with no object, which reads as a stage direction.
             object: chooseFrom(['your board', 'that side of the lane', 'the corridor'],
                                `${bucket}:contactWhat`),
             urgent: true
@@ -4225,27 +3310,12 @@ Object.assign(TOPICS, {
                             'I will hold you to it'], `${bucket}:covenantYes`)
       })
     ],
-    // A standing obligation rather than a one-off. `offers: 'pact'` is read by
-    // systems/npc-comms.js and raises the priority of any future distress call between
-    // these two, which is how a friendship becomes something the sim can act on.
     offers: 'pact',
     filesFrom: { type: 'made-pact', weight: 1.7 },
     filesTo:   { type: 'made-pact', weight: 1.7 },
     chains: ['askHelp', 'smallTalk']
   }
 });
-
-// ── the player ───────────────────────────────────────────────────────
-//
-// The topics that make reputation travel at the speed of conversation instead of
-// teleporting into a global number. A character who has watched you kill its own passes
-// that on, and the listener files it as though they had seen it — which is how a belt gets
-// cold two stations away from anything you did.
-//
-// All of them are gated on `ctx.warinessOf`, so they only fire once the player has actually
-// done something. A galaxy where NPCs discuss a pilot who has done nothing yet is a galaxy
-// that has told the player they are the protagonist, which is precisely the thing this
-// whole system exists to avoid.
 
 Object.assign(TOPICS, {
 
@@ -4274,9 +3344,6 @@ Object.assign(TOPICS, {
       })
     ],
     filesFrom: { type: 'warned-about-player', weight: 0.6 },
-    // Second-hand, and weighted lighter than witnessing it: hearing about something is not
-    // seeing it, and a rumour that carried the same weight as an eyewitness account would
-    // make the whole faction hostile from one kill.
     filesTo:   { type: 'saw-kill-ours', subject: 'player', weight: 0.7 },
     hearsay: true,
     chains: ['playerSighting', 'shareRumour']
@@ -4316,9 +3383,6 @@ Object.assign(TOPICS, {
     chains: ['warnAboutPlayer', 'playerPraise']
   },
 
-  // The mirror. A player who has helped somebody gets talked about in exactly the same
-  // machinery, and the good word travels at the same speed as the bad one — which is the
-  // only thing that makes the bad one feel like a consequence rather than a punishment.
   playerPraise: {
     channel: 'local', weight: 10, cooldown: 200, priority: 4,
     when: (a, b, ctx) => same(a, b) && has(ctx, 'regardForPlayer') && ctx.regardForPlayer(a) > 0.4,
@@ -4369,12 +3433,6 @@ Object.assign(TOPICS, {
     filesTo:   { type: 'spoke-with', weight: 0.3 }
   }
 });
-
-// ── station, navigation and the world itself ─────────────────────────
-//
-// Traffic that exists because the *place* exists rather than because the two speakers do.
-// A ring with docking chatter on its band is a working installation; the same ring with a
-// silent band is scenery with a collision box.
 
 Object.assign(TOPICS, {
 
@@ -4465,9 +3523,6 @@ Object.assign(TOPICS, {
         urgent: true,
         vocative: nameFor(b, rel)
       }),
-      // A request rather than a question: the record carries the *thing wanted* as an NP, and
-      // the question frames wrap an NP in the wrong wh-word — "Where are you seeing word on
-      // the far leg?" was the trade band asking for the location of a phrase.
       ({ a, bucket }) => ({
         act: 'request',
         register: registerOf(a),
@@ -4574,12 +3629,6 @@ Object.assign(TOPICS, {
     chains: ['grudge', 'priceHaggle']
   },
 
-  // ── the social layer proper ────────────────────────────────────────
-
-  // Gossip about a *third party*. The topic that makes the relationship graph do work
-  // beyond the pair holding the channel: what A thinks of C reaches B without C ever being
-  // present, and B files it as hearsay. It is also the cheapest way for the player to learn
-  // that the world has opinions it did not have to be told directly.
   shareRumour: {
     channel: 'local', weight: 8, cooldown: 380, priority: 2,
     when: (a, b, ctx) => same(a, b) && known(ctx.rel) && has(ctx, 'thirdParty') && !!ctx.thirdParty(a, b),
@@ -4608,8 +3657,6 @@ Object.assign(TOPICS, {
                            `${bucket}:rumourAck`)
       })
     ],
-    // Filed against the third party, not the speaker — the one place in the table where the
-    // subject of the memory is somebody who was not on the channel.
     filesFrom: { type: 'passed-rumour', weight: 0.5 },
     filesTo:   { type: 'heard-rumour', weight: 0.6, aboutThirdParty: true },
     hearsay: true,
@@ -4698,19 +3745,6 @@ Object.assign(TOPICS, {
     chains: ['haulOffer', 'shareRumour']
   }
 });
-
-// ── deeper water: arguments, debts, and the long social arcs ─────────
-//
-// Everything above this point is a transaction: somebody wants something, somebody answers,
-// it is filed. These are the exchanges that need the accusation and denial moves to exist
-// at all, and they are the reason those moves were built — a claim dispute where neither
-// side can say "you did this" and "no I did not" is two ships issuing warnings at each
-// other until one of them stops.
-//
-// They run three to five turns, they can end badly, and several of them can only happen
-// because of something that happened earlier: an accusation needs a grievance on file, an
-// arbitration needs a dispute, a second chance needs a grudge to repair. That dependency is
-// what makes them read as a history rather than as a random draw from a bigger table.
 
 Object.assign(TOPICS, {
 
@@ -5028,8 +4062,6 @@ Object.assign(TOPICS, {
       anyRole(a, 'mine', 'haul', 'patrol') && anyRole(b, 'mine', 'haul') && healthy(a),
     say: [
       ({ a, b, rel, bucket }) => ({
-        // An observation rather than a question: every polar frame turned "have you been out
-        // here long" into "Are you running this belt long?", which nobody says.
         act: 'inform',
         object: chooseFrom(['you have the look of a first season out here',
                             'you fly like the yard checked you out last cycle',
@@ -5267,26 +4299,8 @@ Object.assign(TOPICS, {
   }
 });
 
-
-// ── conversations with a past ────────────────────────────────────────
-//
-// The topics above are all about the present: what is on the board, what is in the hold,
-// what somebody just did. That is most of radio traffic and it is also the ceiling on how
-// deep any of it can go, because a conversation that can only refer to now has no way to
-// become a relationship.
-//
-// These five read the memory store. `rememberWhen` cites an exchange that actually happened
-// between these two; `shortWeight` runs a full accusation through denial, evidence and
-// settlement across five turns; `bandDiscipline` is somebody being told off for how they
-// used the channel, which is the only topic in the table *about talking*; `routeHandover`
-// passes a responsibility from one ship to another, and `shoreLeave` is two people who have
-// talked two dozen times finally saying something that is not business.
-
 Object.assign(TOPICS, {
 
-  // The topic that could not exist before the memory store did. It names a specific filed
-  // exchange — its kind, and how long ago — so two ships who have a history talk like they
-  // have one instead of meeting fresh every time.
   rememberWhen: {
     channel: 'local', weight: 6, cooldown: 900, priority: 2,
     when: (a, b, ctx) => familiar(ctx.rel) && has(ctx, 'recallDetail') && !!ctx.recallDetail(a, b),
@@ -5329,9 +4343,6 @@ Object.assign(TOPICS, {
     chains: ['smallTalk', 'covenant', 'apology']
   },
 
-  // Five turns, and every one of them a different move: accusation, denial, evidence,
-  // concession, settlement. The arc is the point — an accusation that resolves in two lines
-  // is not an argument, it is an exchange of labels.
   shortWeight: {
     channel: 'trade', weight: 8, cooldown: 700, priority: 5,
     when: (a, b, ctx) => anyRole(a, 'trade', 'build') && anyRole(b, 'haul', 'mine') &&
@@ -5347,9 +4358,6 @@ Object.assign(TOPICS, {
         vocative: nameFor(b, rel)
       }),
       ({ a, rel, bucket, ctx, memo }) => {
-        // Decided once and remembered for the rest of the exchange: whether this hauler is
-        // actually guilty. Recomputing it per turn is how a topic ends up denying something
-        // in one line and admitting it in the next.
         memo.guilty = memo.guilty != null ? memo.guilty
           : (cold(rel) || (ctx.rng ? ctx.rng.next() : Math.random()) < 0.35);
         return memo.guilty
@@ -5394,8 +4402,6 @@ Object.assign(TOPICS, {
     chains: ['arbitration', 'apology', 'blacklist', 'grudge']
   },
 
-  // The only topic in the table about talking itself, which makes it the only one that can
-  // teach a character something about how it comes across.
   bandDiscipline: {
     channel: 'distress', weight: 7, cooldown: 800, priority: 6,
     when: (a, b, ctx) => (role(a, 'patrol') || role(a, 'fort') || a.isStation) &&
@@ -5427,8 +4433,6 @@ Object.assign(TOPICS, {
       })
     ],
     filesFrom: { type: 'took-report', weight: 0.5 },
-    // Being corrected on the air is filed against the ship that did the correcting: it is
-    // not a favour, and the memory is what makes a later grudge legible.
     filesTo:   { type: 'was-disputed', weight: -0.6 },
     chains: ['apology', 'grudge', 'checkIn']
   },
@@ -5517,7 +4521,6 @@ Object.assign(TOPICS, {
   }
 });
 
-/** How a filed memory sounds when somebody brings it up out loud. */
 const MEMORY_PHRASE = {
   'gave-help': 'the time I came out to you',
   'was-helped': 'the time you came out to me',
@@ -5539,46 +4542,7 @@ const MEMORY_PHRASE = {
 
 export const TOPIC_KEYS = Object.keys(TOPICS);
 
-// ═════════════════════════════════════════════════════════════════════
-//  5. THE EXCHANGE ENGINE
-// ═════════════════════════════════════════════════════════════════════
-//
-// Everything above is data. This is the part that walks it: which topic two ships raise,
-// who speaks when, how long the exchange runs, and what each side files afterwards.
-//
-// It lives here rather than in systems/npc-comms.js because it is all *about* the table —
-// it reads fields the table declares and nothing else. npc-comms.js remains the thing that
-// knows about the world: who is in range, whose channel is busy, and when to call in.
-
-// ═════════════════════════════════════════════════════════════════════
-//  4b. ADJACENCY, AND LEARNING TO TALK
-// ═════════════════════════════════════════════════════════════════════
-//
-// Two things that only exist once conversations run longer than two turns.
-//
-// **Adjacency.** Some moves only make sense after some other moves. A question wants an
-// answer; an accusation wants a denial or an admission; an offer wants an acceptance or a
-// refusal. A reply that ignores what it is replying to is the most common kind of nonsense
-// left in the log, and it is nonsense that no amount of grammar checking can catch, because
-// each line on its own is fine. RESPONSE_OK is the table of what may follow what, and the
-// engine coerces a reply that breaks it rather than transmitting it.
-//
-// **Learning.** A character keeps a bank of how it said things and how that landed: which
-// shape it used, on whom, about what, and what came back. Acceptance and thanks score
-// positively; being asked to repeat, being refused, or being accused in return scores
-// negatively. Next time it reaches for a shape, what worked before gets a heavier vote.
-//
-// This is deliberately narrow. It does not invent phrasings and it cannot learn to say
-// anything the table could not already say — it learns *which of the things it can say
-// works on this listener*, which is the part of talking better that a generator can honestly
-// claim. A blunt hull that keeps getting refused drifts toward asking; one whose terse
-// reports keep getting queried drifts toward saying more.
-
-/** Which moves may legitimately follow which. Anything not listed is a non sequitur. */
 export const RESPONSE_OK = {
-  // A question is answered with information, a refusal of it, or a promise to get it. It is
-  // not answered with "Lovely." — an expressive after a question is a listener who did not
-  // hear it, which is exactly how the log read.
   question:   ['statement', 'denial', 'commitment', 'question'],
   statement:  ['expressive', 'comment', 'question', 'statement', 'denial', 'commitment', 'directive', 'accusation'],
   comment:    ['comment', 'expressive', 'statement', 'question', 'denial', 'directive', 'accusation', 'commitment'],
@@ -5589,7 +4553,6 @@ export const RESPONSE_OK = {
   expressive: ['expressive', 'statement', 'comment', 'question', 'commitment', 'directive']
 };
 
-/** The act a mismatched reply is rewritten to, given what it is replying to. */
 const COERCE_TO = {
   question:   { act: 'answer' },
   accusation: { act: 'deny' },
@@ -5601,33 +4564,24 @@ const COERCE_TO = {
   expressive: { act: 'ack' }
 };
 
-/**
- * Force a reply to be a legal response to what came before it.
- *
- * Coercion changes the act, not the content: the facts the topic put in the record survive,
- * they are simply said as the kind of thing the previous turn was owed. A topic that answers
- * its own question with another statement gets that statement realised as an answer.
- */
 export function coerceResponse(prevMove, msg) {
   if (!prevMove || !msg) return msg;
   const move = ACT_MOVE[msg.act] || 'statement';
   if ((RESPONSE_OK[prevMove] || []).includes(move)) return msg;
   const fix = COERCE_TO[prevMove] || { act: 'ack' };
   const out = Object.assign({}, msg, fix);
-  // The pinned frames belonged to the old act and will not exist under the new one.
   delete out.frames;
   delete out.move;
   delete out.q;
   return out;
 }
 
-/** What a reaction is worth to the speaker who provoked it. */
 const REACTION_VALUE = {
-  commitment: 1.0,      // they agreed, or offered something back
-  expressive: 0.6,      // thanks, or a clean acknowledgement
-  statement: 0.3,       // they answered with something real
+  commitment: 1.0,
+  expressive: 0.6,
+  statement: 0.3,
   comment: 0.0,
-  question: -0.3,       // they had to ask, so the first line did not land
+  question: -0.3,
   directive: -0.1,
   denial: -0.8,
   accusation: -1.1
@@ -5635,22 +4589,6 @@ const REACTION_VALUE = {
 
 const CONFUSION = /\b(say again|breaking up|did not (follow|catch)|what|repeat)\b/i;
 
-/**
- * The bank. One per world; the director owns it and passes it into every exchange.
- *
- * Rows are keyed speaker → listener → topic → frame, because all four matter: a shape that
- * works on a familiar hauler in a trade negotiation is not the shape that works on a patrol
- * during a contact call.
- */
-
-/**
- * Append to a curve buffer that has to cover the *whole* run rather than the recent part of
- * it. Dropping the oldest sample on overflow is the obvious thing and it is wrong here: a
- * training run of eighty thousand lines against a twenty thousand sample buffer means every
- * bucket of the curve is late-stage, so the curve is flat by construction and says nothing
- * about whether anything improved. Halving instead keeps the span and loses resolution,
- * which is the right trade for a scoreboard.
- */
 function pushCurve(arr, v, cap) {
   arr.push(v);
   if (arr.length > cap) {
@@ -5661,21 +4599,8 @@ function pushCurve(arr, v, cap) {
 
 export function createSpeechMemory(opts = {}) {
   const rows = new Map();
-  // Priors, keyed by speaker and shape without the listener. A row for one listener is thin
-  // evidence — a hauler might have used one phrasing on one patrol twice — and with a crew
-  // of thirty the specific rows stay thin for a very long time. The prior is what a ship has
-  // learned about a shape *in general*, and a thin specific row leans on it until it has
-  // enough of its own evidence to stand up. This is why a bigger population makes the
-  // learning better rather than merely slower: every exchange feeds a prior that every other
-  // listener benefits from.
   const priors = new Map();
-  // Per-pair totals, kept in step with the rows so `styleFor` never has to scan.
   const pairs = new Map();
-  // Delivery dials, per pair. Three switchable things a speaker can do to a line — hedge it,
-  // dress it with a marker, make it longer or shorter — each scored on and off, so the bank
-  // can say not just "this shape works on that hull" but "that hull does not want to be
-  // hedged at". This is the part that makes training change how a ship talks rather than
-  // only which sentence it picks.
   const dials = new Map();
   const dialsOf = k => {
     let d = dials.get(k);
@@ -5683,10 +4608,6 @@ export function createSpeechMemory(opts = {}) {
       d = { hedgeOn: { n: 0, s: 0 }, hedgeOff: { n: 0, s: 0 },
             markerOn: { n: 0, s: 0 }, markerOff: { n: 0, s: 0 },
             nameOn: { n: 0, s: 0 }, nameOff: { n: 0, s: 0 },
-            // Three length buckets rather than two. Long-versus-short can only ever say
-            // "more" or "less", so a speaker talking to a hull that wants *middling* lines
-            // oscillates between the extremes and never lands. Three buckets let the bank
-            // name a target instead of a direction.
             short: { n: 0, s: 0 }, mid: { n: 0, s: 0 }, long: { n: 0, s: 0 }, pending: null };
       dials.set(k, d);
     }
@@ -5702,7 +4623,7 @@ export function createSpeechMemory(opts = {}) {
     return p;
   };
   const cap = opts.cap || 20000;
-  const priorWeight = opts.priorWeight || 4;   // how many observations the prior is worth
+  const priorWeight = opts.priorWeight || 4;
   const key = (sp, li, topic, frame) => `${sp}|${li}|${topic}|${frame}`;
   const priorKey = (sp, frame) => `${sp}||${frame}`;
 
@@ -5711,13 +4632,7 @@ export function createSpeechMemory(opts = {}) {
     return priors.get(k);
   };
 
-  // Every reaction, in order, so the demo and the tests can show whether the bank is
-  // actually getting better rather than merely getting bigger.
   const history = [];
-  // How lines *landed*, separately from what came back. The reply's move is dictated by the
-  // topic script and swamps everything else in the raw reaction curve; the reception figure
-  // is the part the speaker's own delivery controls, so it is the honest scoreboard for
-  // whether training is teaching anybody to talk better.
   const felt = [];
   const choices = [];
   const advantages = [];
@@ -5725,9 +4640,6 @@ export function createSpeechMemory(opts = {}) {
 
   const row = k => {
     if (rows.has(k)) return rows.get(k);
-    // Evict before inserting, and never consider the row being created — the first version
-    // evicted the least-tried row *after* adding the new one, which is always the new one,
-    // so every write past the cap threw the row away and handed back undefined.
     if (rows.size >= cap) {
       let worstK = null, worst = Infinity;
       for (const [rk, rv] of rows) if (rv.tries < worst) { worst = rv.tries; worstK = rk; }
@@ -5738,37 +4650,24 @@ export function createSpeechMemory(opts = {}) {
     return fresh;
   };
 
-  /**
-   * How much a speaker favours a shape, as a multiplier on its score.
-   *
-   * Untried shapes sit slightly above neutral, so a character keeps experimenting instead of
-   * settling on the first thing that worked — the failure mode of every bandit that starts
-   * greedy is a character with one sentence.
-   */
   function bias(sp, li, topic, frame) {
     const r = rows.get(key(sp, li, topic, frame));
     const p = priors.get(priorKey(sp, frame));
     const pMean = p && p.tries ? p.score / p.tries : null;
 
-    // Nothing anywhere: sit slightly above neutral so the ship keeps experimenting. The
-    // failure mode of a greedy bandit is a character with one sentence.
     if ((!r || !r.tries) && pMean == null) return 1.08;
 
-    // Shrinkage. The specific row is believed in proportion to how much of it there is;
-    // what it lacks is made up from what this speaker knows about the shape generally.
     const n = r ? r.tries : 0;
     const sum = r ? r.score : 0;
     const mean = (sum + priorWeight * (pMean == null ? 0 : pMean)) / (n + priorWeight);
     return Math.max(0.25, Math.min(2.6, 1 + mean * (opts.biasGain || 1.1)));
   }
 
-  /** What this speaker has learned about a shape irrespective of who it was talking to. */
   function priorOf(sp, frame) {
     const p = priors.get(priorKey(sp, frame));
     return p && p.tries ? { tries: p.tries, mean: p.score / p.tries } : null;
   }
 
-  /** Record that a shape was used. Returns a handle to credit when the reaction arrives. */
   function note(sp, li, topic, frame, move, at, feat = null) {
     const k = key(sp, li, topic, frame);
     const r = row(k);
@@ -5776,10 +4675,6 @@ export function createSpeechMemory(opts = {}) {
     r.last = at || 0;
     pairOf(`${sp}|${li}`).tries++;
     const p = prior(priorKey(sp, frame));
-    // Record how good this shape looked *before* it was used. Averaged over time this is the
-    // honest measure of whether the bank is steering anything: the raw reaction curve moves
-    // with whatever topics happened to come up, but the quality of the shapes a speaker
-    // reaches for is a property of the policy alone.
     if (p.tries >= 3) pushCurve(choices, p.score / p.tries, historyCap);
     p.tries++;
     if (feat) {
@@ -5789,14 +4684,8 @@ export function createSpeechMemory(opts = {}) {
     return { k, pk: priorKey(sp, frame), sp, li, topic, frame, move, at, feat };
   }
 
-  /** Credit a handle with what came back. */
   function react(handle, reactionMove, reactionText, extra = 0) {
     if (!handle) return 0;
-    // Two sources of credit. The move that came back says whether the line got what it
-    // wanted; `extra` is the world's account of how it landed on *this* listener — a long
-    // hedged sentence to a ship with no patience for them, an order to somebody who does not
-    // take orders. Without the second, the bank could only learn which topics go well, which
-    // is a fact about the table and not about how the speaker talks.
     let v = REACTION_VALUE[reactionMove] != null ? REACTION_VALUE[reactionMove] : 0;
     if (reactionText && CONFUSION.test(reactionText)) v -= 0.8;
     v += extra || 0;
@@ -5808,10 +4697,6 @@ export function createSpeechMemory(opts = {}) {
       pairOf(`${handle.sp}|${handle.li}`).score += v;
       const f = handle.feat;
       if (f && extra) {
-        // Dials are credited with the reception figure alone, never with the combined score.
-        // The move that came back is dictated by the topic — a haggle answers a price with a
-        // refusal whatever you do — so folding it in buries a ±0.3 signal about delivery
-        // under ±1.1 of noise about what the conversation was, and the dials never converge.
         const d = dialsOf(`${handle.sp}|${handle.li}`);
         (f.hedge ? d.hedgeOn : d.hedgeOff).n++;
         (f.hedge ? d.hedgeOn : d.hedgeOff).s += extra;
@@ -5823,8 +4708,6 @@ export function createSpeechMemory(opts = {}) {
         band.n++; band.s += extra;
       }
     }
-    // The prior is credited even when the specific row has been evicted: what a ship has
-    // learned about its own habits should outlive its memory of one particular listener.
     if (handle.pk) prior(handle.pk).score += v;
 
     history.push(v);
@@ -5832,11 +4715,6 @@ export function createSpeechMemory(opts = {}) {
     return v;
   }
 
-  /**
-   * The learning curve: mean reaction value over successive windows of reactions. Rising
-   * means the bank is steering the choice of shape toward the ones that land. Flat means it
-   * is only getting bigger, which is the thing worth being able to tell apart.
-   */
   const bucketMeans = (arr, buckets) => {
     if (arr.length < buckets * 4) return [];
     const size = Math.floor(arr.length / buckets);
@@ -5848,22 +4726,8 @@ export function createSpeechMemory(opts = {}) {
     return out;
   };
 
-  /**
-   * Score a choice against the alternatives it was made among.
-   *
-   * The advantage is the chosen shape's standing minus the average standing of everything
-   * that was available. Positive means the speaker reached past the worse options; zero
-   * means it might as well have picked at random. This is the number that says whether the
-   * bank is doing anything, and it is immune to the topic mix, which the raw outcome curve
-   * is not.
-   */
   function choice(sp, chosen, candidates, li = null, topic = null) {
     if (!candidates || candidates.length < 2) return 0;
-    // Measured against what the *policy* actually optimises: the pair-specific row where
-    // there is one, and the speaker-level prior where there is not. Scoring on priors alone
-    // averaged every listener together, which is precisely where the learnable signal lives
-    // — a shape that suits one hull and annoys another has a prior of nothing, so the curve
-    // came out flat no matter how well the bank was doing its job.
     const meanOf = f => {
       if (li && topic) {
         const r = rows.get(key(sp, li, topic, f));
@@ -5883,37 +4747,18 @@ export function createSpeechMemory(opts = {}) {
     return adv;
   }
 
-  /** Raw outcomes over time. Moves with the topic mix as much as with the policy. */
   function curve(buckets = 8) { return bucketMeans(history, buckets); }
 
-  /**
-   * Choice quality over time: how well-regarded, on this speaker's own evidence, were the
-   * shapes it reached for. Rising means the bank is being used and not merely filled.
-   */
   function choiceCurve(buckets = 8) { return bucketMeans(choices, buckets); }
 
-  /** How well delivered lines landed, over time. The training scoreboard. */
   function feltCurve(buckets = 8) { return bucketMeans(felt, buckets); }
   const feltMean = () => (felt.length ? felt.reduce((a, b) => a + b, 0) / felt.length : 0);
 
-  /** Advantage over the alternatives, bucketed over time. The policy's own scoreboard. */
   function advantageCurve(buckets = 8) { return bucketMeans(advantages, buckets); }
   const advantageMean = () => (advantages.length
     ? advantages.reduce((a, b) => a + b, 0) / advantages.length : 0);
 
-  /**
-   * Style drift: what this speaker has learned about talking to this listener in general,
-   * as multipliers the realiser's profile can take directly. Being asked to repeat pushes a
-   * character toward saying more and hedging less; being refused pushes it toward asking
-   * rather than telling.
-   */
   function styleFor(sp, li) {
-    // Read from a running aggregate rather than by scanning the bank. This function is
-    // called once per turn and the first version walked every row in it with a string
-    // prefix test — at forty ships and thirty thousand rows it was, on its own, two thirds
-    // of the entire cost of running the world, and the reason a long training run was not
-    // practical. The aggregate is maintained in note() and react(), which already know the
-    // pair they are writing about.
     const agg = pairs.get(`${sp}|${li}`);
     const tries = agg ? agg.tries : 0;
     const score = agg ? agg.score : 0;
@@ -5922,17 +4767,8 @@ export function createSpeechMemory(opts = {}) {
                          targetWords: 0, lengthPref: 0, tries: 0, mean: 0 };
     const mean = score / tries;
 
-    // Each dial is the difference between how lines landed with the feature and without it,
-    // on this listener. A clear negative difference turns the feature down; a clear positive
-    // one turns it up. Differences below the noise floor leave the dial alone, so a speaker
-    // does not rebuild its manner on three data points.
     const dial = (on, off) => (d ? dialMean(d[on], d[off]) : 0);
 
-    /**
-     * Which length band this listener actually rewards. Reported as a word target and as a
-     * direction, because the realiser uses both: the target sets the trim, and the direction
-     * biases frame choice toward shapes that fill more or fewer slots.
-     */
     const bandMean = k => (d && d[k].n >= 4 ? d[k].s / d[k].n : null);
     let best = { words: 0, pref: 0 };
     if (d) {
@@ -5944,15 +4780,9 @@ export function createSpeechMemory(opts = {}) {
       if (bands.length >= 2) {
         const top = bands.reduce((a, b) => (b.mean > a.mean ? b : a));
         const spread = Math.max(...bands.map(x => x.mean)) - Math.min(...bands.map(x => x.mean));
-        // Only act on a preference that is worth acting on. Below the noise floor the ship
-        // keeps its own habits, which is also what a person does.
         if (spread > 0.06) best = { words: top.words, pref: top.pref };
       }
     }
-    // Gain. The first version used a gain of 1.4, which moved a strongly disliked habit from
-    // "usual" to "slightly less usual" — enough to see in the dials and not enough to see in
-    // the transmissions. At 3.0 a habit this listener has consistently punished effectively
-    // stops, which is what learning is supposed to look like from the outside.
     const scale = (diff, floor, ceil) =>
       Math.max(floor, Math.min(ceil, 1 + diff * 3.0));
 
@@ -5960,9 +4790,7 @@ export function createSpeechMemory(opts = {}) {
       tries, mean,
       hedgeMul: scale(dial('hedgeOn', 'hedgeOff'), 0.05, 1.8),
       markerMul: scale(dial('markerOn', 'markerOff'), 0.05, 1.7),
-      // Longer lines scoring better means this listener wants more words, so the ceiling on
-      // sentence length goes up rather than down.
-      wordsMul: 1,                    // superseded by targetWords below; kept for callers
+      wordsMul: 1,
       targetWords: best.words,
       lengthPref: best.pref,
       vocativeMul: scale(dial('nameOn', 'nameOff'), 0.05, 1.7),
@@ -5974,7 +4802,6 @@ export function createSpeechMemory(opts = {}) {
     };
   }
 
-  /** What has this character learned? For the debug overlay, and for reading by eye. */
   function report(sp, limit = 8) {
     const out = [];
     for (const [k, r] of rows) {
@@ -5987,9 +4814,6 @@ export function createSpeechMemory(opts = {}) {
     return { best: out.slice(0, limit), worst: out.slice(-limit).reverse(), rows: out.length };
   }
 
-  // The priors are saved too, and they are the half worth saving: they are small, they
-  // generalise, and a reload that keeps them keeps the character's habits even if it has
-  // forgotten which particular hull taught them.
   const serialise = () => ({
     v: 2,
     rows: [...rows].slice(-2000).map(([k, r]) => [k, r.tries, Math.round(r.score * 100) / 100]),
@@ -6027,20 +4851,6 @@ export function createSpeechMemory(opts = {}) {
   };
 }
 
-
-/**
- * Codas — the turns a conversation takes after its business is done.
- *
- * Half of every exchange stopped at two turns, not because two was right but because most
- * topics were written with two entries in `say`. Two turns is a transaction: one ship states,
- * the other acknowledges, channel closed. Real radio does that too, but it also does the
- * thing that comes after — the follow-up question, the promise, the last word — and a band
- * made entirely of transactions is the flatness you can hear.
- *
- * A coda is generated from the *move* the exchange has reached rather than from the topic, so
- * it works for all sixty-odd topics without any of them being rewritten. Each one is a real
- * conversational move with its own intent: press for detail, commit, close, or hand back.
- */
 const CODA = {
   statement: [
     ({ a, b, rel, bucket }) => ({
@@ -6120,12 +4930,6 @@ const CODA = {
   ]
 };
 
-/**
- * Should this exchange keep going past its script, and if so, what with?
- *
- * Codas are for conversations that were going somewhere — familiar pairs, and exchanges that
- * ended on a move that wants an answer. A cold pair that has said its piece stops.
- */
 function codaFor(prevMove, ctx, turn) {
   if (!prevMove || turn > 5) return null;
   const pool = CODA[prevMove];
@@ -6137,11 +4941,10 @@ function codaFor(prevMove, ctx, turn) {
   if (familiar(ctx.rel)) chance += 0.15;
   if (oldFriends(ctx.rel)) chance += 0.1;
   if (cold(ctx.rel)) chance -= 0.15;
-  if (prevMove === 'question' || prevMove === 'accusation') chance = 0.9;  // these are owed a reply
-  chance -= turn * 0.12;                                                    // and everything ends
+  if (prevMove === 'question' || prevMove === 'accusation') chance = 0.9;
+  chance -= turn * 0.12;
   if (draw > chance) return null;
 
-  // When the calibration says the band is short of questions, prefer the coda that asks one.
   const asking = pool.filter(fn => /act: 'ask'/.test(String(fn)));
   const usePool = (asking.length && (CALIBRATION.questionLift || 0) > 0.1 &&
                    (rng ? rng.next() : Math.random()) < CALIBRATION.questionLift * 1.5) ? asking : pool;
@@ -6150,46 +4953,21 @@ function codaFor(prevMove, ctx, turn) {
   catch (e) { return null; }
 }
 
-/**
- * Produce one turn of an exchange.
- *
- * Prefers the generated path (`say`) and falls back to a topic's legacy `lines` if it has
- * not been converted, so a half-converted table still speaks.
- *
- * A turn function may return a single semantic record or an array of them; an array is
- * realised as one transmission with the sentences proofed together, which is how a
- * character says two things on one press of the key.
- *
- * @param {string} key   topic key, used as part of the anti-repetition bucket
- * @param {number} turn  0 = opener, 1 = reply, 2+ = continuation
- * @param {object} ctx   { a, b, rel, rng, ...world callbacks }
- */
 export function utter(key, turn, ctx) {
   const r = utterRecord(key, turn, ctx);
   return r ? r.text : '';
 }
 
-/**
- * The same turn, with everything the engine needs to keep the conversation coherent and to
- * learn from it: the move it made, the frame it used, and the handle to credit when the
- * reply arrives.
- *
- * @param {object} prev  the previous turn's result, for adjacency and crediting
- */
 export function utterRecord(key, turn, ctx, prev = null) {
   const t = TOPICS[key];
   if (!t) return null;
   const bucket = bucketFor(ctx.a, key);
-  // The phrase pools a topic draws from are shared across the exchange, so a reply cannot
-  // echo the line it is answering. Frame and furniture choice stay speaker-scoped: two
-  // people using the same sentence shape is how conversation sounds, and two people using
-  // the same words is how a tape loop sounds.
   const pair = pairBucket(ctx.a, ctx.b, key);
 
   if (Array.isArray(t.say) && t.say[turn]) {
     let msg;
     try { msg = t.say[turn](Object.assign({ bucket: pair, ctx }, ctx)); }
-    catch (e) { return null; }              // a bad turn function is a dropped line, not a crash
+    catch (e) { return null; }
     if (!msg) return null;
     return utterFromRecord(key, msg, ctx, prev, turn);
   }
@@ -6201,14 +4979,6 @@ export function utterRecord(key, turn, ctx, prev = null) {
   return null;
 }
 
-/**
- * Realise an already-built record as a turn: adjacency, register, the learned style, the
- * phrasing bank, and the credit for whatever the previous line drew out.
- *
- * Split out of `utterRecord` so a generated coda goes through exactly the same machinery a
- * scripted turn does. A coda that skipped the learning loop would be a turn nobody could
- * learn from, which is the opposite of the point.
- */
 export function utterFromRecord(key, record, ctx, prev = null, turn = 0) {
   const t = TOPICS[key] || {};
   const bucket = bucketFor(ctx.a, key);
@@ -6216,8 +4986,6 @@ export function utterFromRecord(key, record, ctx, prev = null, turn = 0) {
   {
     let msg = record;
 
-    // Adjacency: a reply that does not answer what it is replying to gets rewritten into
-    // something that does, before a word of it is realised.
     if (prev && prev.move) {
       if (Array.isArray(msg)) msg = msg.map((r, i) => (i === 0 ? coerceResponse(prev.move, r) : r));
       else msg = coerceResponse(prev.move, msg);
@@ -6225,8 +4993,6 @@ export function utterFromRecord(key, record, ctx, prev = null, turn = 0) {
 
     const first = Array.isArray(msg) ? msg[0] : msg;
     const register = (first && first.register) || registerOf(ctx.a, t.mood);
-    // `ctx.learning === false` runs the same world with the bank recording but not steering:
-    // the control arm for measuring whether any of this works.
     const style = (ctx.speech && ctx.learning !== false)
       ? ctx.speech.styleFor(ctx.a.name, ctx.b.name) : null;
     const profile = profileFor(ctx.a, register, {
@@ -6234,22 +5000,11 @@ export function utterFromRecord(key, record, ctx, prev = null, turn = 0) {
       familiarity: familiarity(ctx.rel),
       hostile: !same(ctx.a, ctx.b) || cold(ctx.rel)
     });
-    // What this speaker has learned about this listener, applied as adjustments rather than
-    // as a different register: a hauler who keeps having to repeat itself to one patrol does
-    // not become a different character, it becomes clearer with that patrol.
-    // The learned length preference, expressed as a frame-choice bias as well as a trim
-    // threshold: -1 says this listener wants less, +1 says it wants more.
-    // The learned per-listener preference, plus whatever the corpus calibration says about
-    // the band as a whole. One is about this hull; the other is about the log being measurably
-    // terser than conversation is.
     const lengthPref = Math.max(-1, Math.min(1,
       (style && style.tries ? (style.lengthPref || 0) : 0) + (CALIBRATION.lengthLift || 0)));
     if (style && style.tries) {
       profile.hedge *= style.hedgeMul;
       profile.marker *= style.markerMul;
-      // A learned target replaces the register's default ceiling outright. Multiplying the
-      // register's own number could only nudge; a ship that has worked out this listener
-      // wants eight words should be aiming at eight, not at nineteen scaled down a bit.
       if (style.targetWords) profile.maxWords = style.targetWords;
       profile.vocative = Math.max(0, Math.min(1, profile.vocative * (style.vocativeMul || 1)));
     }
@@ -6274,10 +5029,7 @@ export function utterFromRecord(key, record, ctx, prev = null, turn = 0) {
                         ctx.now ? ctx.now() : 0, usedFeat)
       : null;
 
-    // Credit the line this one answered, now that we know what it drew out.
     if (prev && prev.handle && ctx.speech) {
-      // ctx.a is the one who just heard the previous line, so it is ctx.a's taste that
-      // decides how that line landed.
       const felt = ctx.reception ? ctx.reception(ctx.a, prev.text, prev.move, prev.frame) : 0;
       ctx.speech.react(prev.handle, move, text, felt);
     }
@@ -6286,15 +5038,6 @@ export function utterFromRecord(key, record, ctx, prev = null, turn = 0) {
   }
 }
 
-/**
- * How many turns this exchange should actually run.
- *
- * Not simply `say.length`. A conversation that always runs to its maximum is as obviously
- * mechanical as one that always uses the same words: two ships that know each other well
- * talk longer, an urgent exchange is cut short by the situation it is about, and a cold
- * pair stop as soon as the business is done. The floor is two, because one line is a
- * broadcast rather than an exchange.
- */
 export function turnsFor(key, ctx) {
   const t = TOPICS[key];
   if (!t || !Array.isArray(t.say)) return 2;
@@ -6302,32 +5045,16 @@ export function turnsFor(key, ctx) {
   if (max <= 2) return max;
   const rng = ctx.rng || null;
   const draw = rng ? rng.next() : Math.random();
-  // Two turns is a transaction, not a conversation, and two thirds of all exchanges were
-  // stopping there — which is what a channel of nothing but call-and-response reads like.
-  // The baseline is now better than even, and the modifiers move it from there.
   let chance = 0.62 + (CALIBRATION.codaLift || 0) * 0.25;
   if (familiar(ctx.rel)) chance += 0.2;
   if (oldFriends(ctx.rel)) chance += 0.15;
   if (cold(ctx.rel)) chance -= 0.2;
-  if (t.urgent) chance -= 0.15;             // urgency truncates; the situation interrupts
-  if (t.offers) chance += 0.25;             // a deal needs closing, so it runs to the end
-  // An argument that stops after two lines is two people stating positions. The moves that
-  // open a dispute nearly always run their full arc.
+  if (t.urgent) chance -= 0.15;
+  if (t.offers) chance += 0.25;
   if ((t.say || []).some(fn => /accuse|deny|admit/.test(String(fn)))) chance += 0.3;
   return draw < chance ? max : 2;
 }
 
-/**
- * Run a whole exchange and return it as a transcript.
- *
- * The speakers alternate, so `a` and `b` swap on every turn — which is why the reply
- * functions in the table are written from the responder's point of view. `stopIf` lets
- * npc-comms.js cut an exchange short when the world changes underneath it: a ship that
- * jumps out mid-conversation should leave the sentence unfinished, not finish it politely
- * from somewhere else.
- *
- * @returns {Array<{ speaker, listener, text, turn }>}
- */
 export function exchange(key, ctx, opts = {}) {
   const t = TOPICS[key];
   if (!t) return [];
@@ -6335,10 +5062,6 @@ export function exchange(key, ctx, opts = {}) {
   const out = [];
   let a = ctx.a, b = ctx.b;
   let prev = null;
-  // One scratchpad for the whole exchange. Turn functions that have to decide something —
-  // whether this hauler really did short the load, whether the deal closes — write it here
-  // and every later turn reads the same answer. Deciding per turn is what produced an
-  // exchange that denied something in one line and admitted it in the next.
   const memo = {};
 
   const maxTurns = Math.min(8, turns + 4);
@@ -6346,8 +5069,6 @@ export function exchange(key, ctx, opts = {}) {
     if (opts.stopIf && opts.stopIf(a, b, i)) break;
     const turnCtx = Object.assign({}, ctx, { a, b, memo });
 
-    // Past the end of the topic's own script, the exchange continues on generated codas for
-    // as long as the last move is one that wants answering.
     let res;
     if (i < turns) {
       res = utterRecord(key, i, turnCtx, prev);
@@ -6361,11 +5082,6 @@ export function exchange(key, ctx, opts = {}) {
     const swap = a; a = b; b = swap;
   }
 
-  // The last line of an exchange never gets a reply, so nothing would ever credit it. Close
-  // the loop with the listener's silence, which is worth slightly less than nothing: a line
-  // that ends a conversation is not necessarily a bad line, but it is not a good one either.
-  // `react` takes the handle, not the record. Passing the record meant the closing credit
-  // silently did nothing, so the last line of every exchange was never scored.
   if (prev && prev.handle && ctx.speech) {
     const felt = ctx.reception ? ctx.reception(b, prev.text, prev.move, prev.frame) : 0;
     ctx.speech.react(prev.handle, 'comment', null, felt);
@@ -6373,32 +5089,15 @@ export function exchange(key, ctx, opts = {}) {
   return out;
 }
 
-/**
- * Topics these two could raise right now, with weights.
- * `ctx` carries the callbacks a `when` clause may need — see systems/npc-comms.js.
- */
 export function availableTopics(a, b, ctx) {
   const out = [];
   for (const k of TOPIC_KEYS) {
     const t = TOPICS[k];
-    try { if (t.when(a, b, ctx)) out.push(k); } catch (e) { /* a bad clause is not a crash */ }
+    try { if (t.when(a, b, ctx)) out.push(k); } catch (e) {}
   }
   return out;
 }
 
-/**
- * Score a topic for this pair, right now.
- *
- * The scoring is where the table stops being a lottery. Four things move a weight:
- *
- *   priority     a distress call beats small talk, always and by a lot
- *   recency      a topic raised recently by this pair is heavily discounted, which is what
- *                stops a channel becoming one subject repeated
- *   chaining     a topic named in the `chains` of the pair's last exchange is boosted, so a
- *                conversation develops instead of resetting
- *   relationship familiarity opens some topics up and closes others; strangers do not
- *                gossip about third parties, and old friends rarely re-introduce themselves
- */
 export function scoreTopic(key, a, b, ctx) {
   const t = TOPICS[key];
   if (!t) return 0;
@@ -6430,18 +5129,11 @@ export function scoreTopic(key, a, b, ctx) {
   }
   if (cold(rel) && ['smallTalk', 'covenant', 'recommend'].includes(key)) w *= 0.2;
 
-  // Urgency dominates when the world is urgent. A hazard warning outranks a price haggle
-  // even between two traders who have been arguing about the price all shift.
   if (t.urgent && (hurt(a) || engaged(a) || (has(ctx, 'threatNear') && ctx.threatNear(a)))) w *= 2.5;
 
   return Math.max(0, w);
 }
 
-/**
- * Pick a topic for this pair. Returns null if nothing fits, which is a normal and important
- * outcome: two ships with nothing to say to each other should be silent, not reaching for
- * the least implausible thing in the table.
- */
 export function chooseTopic(a, b, ctx) {
   const options = availableTopics(a, b, ctx);
   if (!options.length) return null;
@@ -6453,13 +5145,6 @@ export function chooseTopic(a, b, ctx) {
   return scored[scored.length - 1].k;
 }
 
-/**
- * The memory records an exchange leaves behind, resolved against the pair.
- *
- * Returned rather than written, so the caller owns persistence and this file stays a pure
- * function of the table. `aboutThirdParty` entries carry the third party as their subject,
- * which is what makes gossip land on the right character.
- */
 export function memoriesFrom(key, ctx) {
   const t = TOPICS[key];
   if (!t) return [];
@@ -6485,7 +5170,6 @@ export function memoriesFrom(key, ctx) {
   return out;
 }
 
-/** The obligation an exchange puts on the ledger, if the listener accepted. */
 export function obligationFrom(key, ctx, accepted = true) {
   const t = TOPICS[key];
   if (!t || !t.offers || !accepted) return null;
@@ -6498,13 +5182,10 @@ export function obligationFrom(key, ctx, accepted = true) {
   };
 }
 
-/** Topics this exchange makes plausible next. Read by scoreTopic via ctx.lastTopic. */
 export const chainsOf = key => ((TOPICS[key] && TOPICS[key].chains) || []).slice();
 
-/** Every channel the table can put traffic on — for the comms UI's band filter. */
 export const CHANNELS = [...new Set(TOPIC_KEYS.map(k => TOPICS[k].channel))].sort();
 
-/** Diagnostics for the debug overlay. */
 export function topicStats() {
   const byChannel = {};
   let withObligations = 0, withChains = 0, multiTurn = 0;
@@ -6518,18 +5199,6 @@ export function topicStats() {
   return { topics: TOPIC_KEYS.length, byChannel, withObligations, withChains, multiTurn, channels: CHANNELS };
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  6. SELF-TEST
-// ═════════════════════════════════════════════════════════════════════
-//
-// Runnable headless or from the in-game debug console. The table is data, and data is
-// exactly the kind of thing that rots quietly: a `when` clause that reads a field the sim
-// stopped setting, a `say` function that assumes a callback the context no longer carries,
-// a memory type nothing consumes. None of those throw at authoring time and all of them
-// show up as a channel that has gone strangely quiet, three slices later, with no obvious
-// cause. These checks are what turn all of that into a failing line of output.
-
-/** A synthetic world: enough units, with enough variety, to exercise every clause. */
 function fixtureUnits() {
   return [
     { name: 'Nexis Drone 08', faction: 'nexis', role: 'mine', hp: 100, maxHp: 100,
@@ -6554,10 +5223,6 @@ function fixtureUnits() {
       position: { x: 150, y: 80, z: 0 }, nearestName: 'the second marker' },
     { name: 'Halcyon Merc 4', faction: 'independent', role: 'merc', hp: 22, maxHp: 100,
       fuel: 15, fuelMax: 100, task: 'idle', position: { x: 40, y: 60, z: 0 } },
-    // Added because five topics never fired against the original fixture: a claim dispute
-    // needs two miners who are not on the same payroll, a covenant needs two armed hulls who
-    // are, and dock gossip needs two ships tied up at once. A fixture that cannot reach a
-    // topic is not a smaller test, it is a topic with no test at all.
     { name: 'Free Cutter Sil', faction: 'independent', role: 'mine', hp: 92, maxHp: 100,
       cargo: 10, cargoMax: 60, fuel: 70, fuelMax: 100, oreGrade: 0.3, task: 'mine',
       position: { x: 60, y: 20, z: 0 }, nearestName: 'Kessel Deep' },
@@ -6570,12 +5235,6 @@ function fixtureUnits() {
   ];
 }
 
-/**
- * A context with every optional callback present. Topics must also survive a context with
- * *none* of them — see `runTopicSelfTest` — because npc-comms.js grows callbacks over time
- * and a topic that assumes one exists is a topic that stops firing on the branch where it
- * does not.
- */
 function fixtureCtx(a, b, over = {}) {
   const units = fixtureUnits();
   return Object.assign({
@@ -6611,7 +5270,6 @@ function fixtureCtx(a, b, over = {}) {
   }, over);
 }
 
-/** Every ordered pair worth testing, from the fixture. */
 function fixturePairs() {
   const u = fixtureUnits();
   const pairs = [];
@@ -6630,15 +5288,6 @@ const RELS = [
   { exchanges: 14, regard: 0.35, owed: true }
 ];
 
-/**
- * Structural check: every topic declares the fields the engine reads, and nothing it
- * declares is a field the engine has never heard of. The second half catches typos —
- * `filesFor` instead of `filesFrom` fails silently forever otherwise.
- */
-/**
- * The last sentence of a transmission. A turn may say two things on one press of the key,
- * and the move it made — the thing the reply has to answer — is the last of them.
- */
 export const lastSentence = text => {
   const parts = String(text || '').split(/(?<=[.!?])\s+/).filter(Boolean);
   return parts.length ? parts[parts.length - 1] : String(text || '');
@@ -6664,7 +5313,6 @@ function checkShape() {
   return bad;
 }
 
-/** Every `when` clause must survive a context with no callbacks and half-built units. */
 function checkWhenRobustness() {
   const bad = [];
   const bare = { a: null, b: null, rel: null, gossipThreshold: 1 };
@@ -6679,11 +5327,6 @@ function checkWhenRobustness() {
   return [...new Set(bad)];
 }
 
-/**
- * The big one: run every topic that can fire, for every pair and every relationship state,
- * and proof every line it produces. This is the check that protects the comms log, because
- * it exercises combinations no hand-written case would think to try.
- */
 function checkExchanges(limitPerTopic = 40) {
   const bad = [];
   const fired = new Set();
@@ -6692,19 +5335,10 @@ function checkExchanges(limitPerTopic = 40) {
 
   for (const k of TOPIC_KEYS) {
     let n = 0;
-    // `att` counts attempts, not firings. Alternating on the firing count meant a topic
-    // that only fires in a quiet world never got a quiet world to fire in.
     let att = 0;
     for (const [a, b] of pairs) {
       for (const rel of RELS) {
         if (n >= limitPerTopic) break;
-        // Half the runs happen in a quiet world. Several topics are gated on the *absence*
-        // of a threat or a hazard, and a fixture where the sky is always falling can never
-        // reach them — which is how allClear sat untested for a slice.
-        // Four worlds, not two. Several topics are gated on the *absence* of something —
-        // a clear board, a tip that turned out bad, an unfinished contract — and a fixture
-        // that always says yes to every callback can no more reach those than one that
-        // always says no.
         const variant = att++ % 4;
         const over = { rel };
         if (variant === 1) Object.assign(over, { threatNear: () => false, hazardNear: () => false, playerNear: () => false });
@@ -6722,9 +5356,6 @@ function checkExchanges(limitPerTopic = 40) {
         fired.add(k);
         const script = exchange(k, ctx);
         if (!script.length) { bad.push(`${k}: fired but produced no lines (${a.name} -> ${b.name})`); continue; }
-        // Adjacency: every reply must be a legal response to the line before it. This is the
-        // check that catches the nonsense proofing cannot see — each line fine on its own,
-        // the pair of them a non sequitur.
         for (let i = 1; i < script.length; i++) {
           const prev = script[i - 1].move, here = script[i].move;
           if (prev && here && !(RESPONSE_OK[prev] || []).includes(here)) {
@@ -6742,8 +5373,6 @@ function checkExchanges(limitPerTopic = 40) {
           else if (checked.text !== line.text) bad.push(`${k} [${line.speaker.name}] unstable: ${JSON.stringify(line.text)}`);
           if (/\bundefined\b|\bNaN\b|\[object/.test(line.text)) bad.push(`${k}: leaked internals — ${line.text}`);
         }
-        // A memory record must resolve for every exchange that runs, or the exchange was
-        // decorative after all.
         const mem = memoriesFrom(k, ctx);
         if (mem.length !== 2) bad.push(`${k}: filed ${mem.length} memories, expected 2`);
         for (const m of mem) {
@@ -6760,7 +5389,6 @@ function checkExchanges(limitPerTopic = 40) {
   return { bad: [...new Set(bad)], lines, fired: fired.size };
 }
 
-/** Variety: the same topic between the same pair must not produce the same transcript. */
 function checkVariety(key = 'oreTip', n = 30) {
   const [a, b] = [fixtureUnits()[0], fixtureUnits()[1]];
   const seen = new Set();
@@ -6771,13 +5399,10 @@ function checkVariety(key = 'oreTip', n = 30) {
   return { distinct: seen.size, of: n, samples: [...seen].slice(0, 4) };
 }
 
-/** Selection: chooseTopic must respect priority when the world turns urgent. */
 function checkSelection() {
   const bad = [];
   const u = fixtureUnits();
   const hurtMiner = Object.assign({}, u[0], { hp: 20 });
-  // Same faction, and armed: askHelp is gated on both, so testing it against a coalition
-  // patrol was testing nothing at all.
   const patrol = u.find(x => x.faction === hurtMiner.faction && (x.role === 'combat' || x.role === 'merc'));
   const ctx = fixtureCtx(hurtMiner, patrol, { rel: { exchanges: 5, regard: 0.4 } });
   const opts = availableTopics(hurtMiner, patrol, ctx);
@@ -6786,19 +5411,14 @@ function checkSelection() {
   if (scores.askHelp != null && scores.smallTalk != null && scores.askHelp <= scores.smallTalk) {
     bad.push('askHelp did not outrank smallTalk while under fire');
   }
-  // Cooldown must actually suppress.
   const cd = fixtureCtx(u[0], u[1], { lastRaised: () => 1 });
   if (scoreTopic('oreTip', u[0], u[1], cd) !== 0) bad.push('cooldown did not suppress a recently raised topic');
-  // Chaining must actually boost.
   const base = scoreTopic('tipFollowUp', u[0], u[1], fixtureCtx(u[0], u[1], { lastTopic: () => null }));
   const chained = scoreTopic('tipFollowUp', u[0], u[1], fixtureCtx(u[0], u[1], { lastTopic: () => 'oreTip' }));
   if (!(chained > base)) bad.push('a chained topic was not boosted after its parent');
   return bad;
 }
 
-/**
- * Run everything. Returns { pass, fail, failures } and logs a readable report.
- */
 export function runTopicSelfTest(opts = {}) {
   const { verbose = true, perTopic = 40 } = opts;
   const failures = [];
@@ -6834,10 +5454,6 @@ export function runTopicSelfTest(opts = {}) {
   return report;
 }
 
-/**
- * Print a sample of the radio, for judging by ear. The only test that catches "grammatical
- * but nobody would say that", which is the failure mode no assertion can express.
- */
 export function sampleTraffic(n = 12, opts = {}) {
   const units = fixtureUnits();
   const out = [];
@@ -6860,32 +5476,6 @@ export function sampleTraffic(n = 12, opts = {}) {
   return out;
 }
 
-
-
-// ═════════════════════════════════════════════════════════════════════
-//  12. THE PLAYER
-// ═════════════════════════════════════════════════════════════════════
-//
-// Everything above this line is NPCs talking to each other, which is the hard half: neither
-// side of that conversation can be surprised. A human on the channel can type anything at
-// all, and the honest answer to most of it is that the ship did not understand.
-//
-// So this layer is deliberately not a chatbot. It is a intent matcher over the same table
-// the NPCs already use: it reads a typed line, decides which of the things this world can
-// talk about the player was most likely reaching for, and answers *from the same frames the
-// NPC would have used to raise that topic itself*. A ship that cannot parse a line says so
-// in character and offers what it does know, which is far better than a fluent answer to a
-// question nobody asked.
-//
-// The consequence worth having: talking to a ship is not a separate system with separate
-// content. Ask a miner about ore and you get the same generated tip it would have passed to
-// a hauler, in its own register, with its own idiolect, and it files the exchange in the
-// same memory store — so being rude to one ship is something the next one can hear about.
-
-/**
- * The intent table. Ordered: the first match wins, so put the specific patterns above the
- * general ones. `act` and `build` say what the ship does about it.
- */
 export const INTENTS = [
   {
     id: 'greet',
@@ -6896,8 +5486,6 @@ export const INTENTS = [
   },
   {
     id: 'farewell',
-    // "out" only closes a channel at the end of a line. As a bare word it matched "anything
-    // on the ore out there?" and the miner said goodbye instead of answering.
     match: /\b(bye|goodbye|see you|signing off|farewell|catch you later)\b|\bout\.?\s*$/i,
     build: (npc, ctx) => ({ act: 'farewell', speaker: npc.name })
   },
@@ -7004,8 +5592,6 @@ export const INTENTS = [
       agr: { person: 1, number: 'sg' },
       verb: 'have',
       object: holdFact(npc, ctx.bucket),
-      // Pinned to the simple present: the progressive turns "I have a part load" into
-      // "I am having a part load", which is a different verb entirely.
       frames: ['inform-svo']
     })
   },
@@ -7079,8 +5665,6 @@ export const INTENTS = [
       const r = ctx.regardForPlayer ? ctx.regardForPlayer(npc) : 0;
       return {
         act: r > 0.3 ? 'inform' : r < -0.3 ? 'warn' : 'speculate',
-        // Pinned: the doubting frame turns a neutral answer into a contradiction of itself —
-        // "you are a hull and a squawk to me so far? I doubt it."
         frames: ['inform-verbless', 'inform-contrast', 'speculate-guess', 'warn-declarative'],
         object: r > 0.3
           ? chooseFrom(['you have a name out here and it is a good one',
@@ -7131,11 +5715,6 @@ export const INTENTS = [
   }
 ];
 
-/**
- * The line a ship gives when it did not understand. Not an error message: a character who
- * missed what you said, which is a thing that happens on a noisy band and costs the player
- * nothing to work around.
- */
 function confused(npc, ctx) {
   return {
     act: chooseFrom(['ask', 'inform'], `${ctx.bucket}:pConfusedAct`),
@@ -7146,24 +5725,14 @@ function confused(npc, ctx) {
   };
 }
 
-/** Match a typed line to an intent. Exported so the demo can show what it matched. */
 export function parsePlayerLine(text) {
   const s = String(text || '').trim();
   if (!s) return null;
   for (const it of INTENTS) if (it.match.test(s)) return it;
-  // A bare question mark still reads as a question, even when nothing else matched.
   if (/\?\s*$/.test(s)) return INTENTS.find(i => i.id === 'status') || null;
   return null;
 }
 
-/**
- * Say something to a ship and get an answer.
- *
- * @param {object} npc  the unit being addressed
- * @param {string} text what the player typed
- * @param {object} ctx  world callbacks — createWorld() below supplies a full set
- * @returns {{ text, intent, understood, regardDelta }}
- */
 export function talkToNpc(npc, text, ctx = {}) {
   const intent = parsePlayerLine(text);
   const bucket = `player:${npc && npc.name}:${intent ? intent.id : 'none'}`;
@@ -7195,7 +5764,6 @@ export function talkToNpc(npc, text, ctx = {}) {
   };
 }
 
-/** Suggestions for the demo's quick-reply chips — one per broad thing a ship can discuss. */
 export const PLAYER_PROMPTS = [
   'Hello — this is the independent hull.',
   'What is your status?',
@@ -7209,58 +5777,12 @@ export const PLAYER_PROMPTS = [
   'Thanks for that.'
 ];
 
-
-// ═════════════════════════════════════════════════════════════════════
-//  15. CORPUS: MEASURING SPEECH AGAINST REAL SPEECH
-// ═════════════════════════════════════════════════════════════════════
-//
-// What can twenty thousand lines of the generator's own output actually teach it?
-//
-// Not new sentences. A generator trained on its own output learns only what it already
-// believes, harder — the failure is well known and it shows up as everything converging on
-// whatever the model already over-produced. So this layer does not learn *language* from the
-// log. It measures the log's *shape* against the shape of real conversation, and corrects
-// the differences that are correctable.
-//
-// The measurements are the ones descriptive linguistics actually uses on conversation, and
-// each is here because it fails in a way you can hear:
-//
-//   utterance length      Conversational English averages around 14 words per turn. Radio
-//                         is terser, but a generator sitting at 7 sounds like a menu system.
-//   turns per exchange    Published dialogue corpora run about 8 turns per conversation.
-//                         Two is a transaction; the difference is audible immediately.
-//   question rate         Roughly a fifth of conversational turns are questions. A band with
-//                         no questions on it is a band of announcements — nobody is asking
-//                         anybody anything, so nothing is ever at stake.
-//   opening variety       Measured as the entropy of first words. Human speakers repeat
-//                         openings; generators repeat them far more, and it is the single
-//                         most recognisable tell of machine-written dialogue.
-//   adjacency             Sacks and Schegloff's pairs: a question takes an answer, an
-//                         accusation takes a denial or an admission. The share of pairs
-//                         completed properly is a direct measure of whether the log is a
-//                         conversation or two monologues interleaved.
-//   lexical variety       Type-token ratio and the share of trigrams that occur once. Both
-//                         collapse when a generator leans on a few phrasings.
-//
-// `TARGET` holds published aggregate figures for these — numbers, not text, so nothing is
-// reproduced from anybody's corpus. Feed a real transcript through `parseTranscript` and
-// `profileOf` and the target is replaced by measurements of that corpus instead, which is
-// the point at which this stops being calibration against my recollection of the literature
-// and becomes calibration against data you chose.
-
-/**
- * Published aggregate statistics for written-style conversational English, used as the
- * default target. The turn and length figures follow the DailyDialog corpus (Li et al.,
- * 2017: 13,118 dialogues, ~7.9 turns per dialogue, ~14.6 tokens per utterance); the rest are
- * conventional descriptive figures for conversational speech. Replace them by profiling a
- * corpus of your own — `fitTarget(profileOf(parseTranscript(text)))`.
- */
 export const TARGET = {
   wordsPerUtterance: 14.6,
   turnsPerDialogue: 7.9,
   questionRate: 0.19,
-  openingEntropy: 4.2,        // bits over first words
-  typeTokenRatio: 0.42,       // over a 20k-token sample
+  openingEntropy: 4.2,
+  typeTokenRatio: 0.42,
   adjacencyCompletion: 0.85,
   source: 'DailyDialog aggregates (Li et al. 2017) plus conventional conversational figures'
 };
@@ -7280,15 +5802,6 @@ export function fitTarget(profile) {
   return currentTarget();
 }
 
-/**
- * Parse a transcript into dialogues of turns.
- *
- * Three formats, because these are the three every dialogue corpus and every chat log
- * arrives in:
- *   "NAME: utterance"          one turn per line, blank line ends a dialogue
- *   "utterance __eou__ ..."    DailyDialog's end-of-utterance marker, one dialogue per line
- *   plain lines                one turn per line, alternating speakers assumed
- */
 export function parseTranscript(text) {
   const raw = String(text || '');
   if (!raw.trim()) return [];
@@ -7319,7 +5832,6 @@ export function parseTranscript(text) {
 const WORDS = s => String(s).toLowerCase().match(/[a-z']+/g) || [];
 const QUESTION = /\?\s*$/;
 
-/** Shannon entropy of a distribution given as counts. */
 function entropy(counts) {
   const total = [...counts.values()].reduce((a, b) => a + b, 0);
   if (!total) return 0;
@@ -7331,11 +5843,6 @@ function entropy(counts) {
   return h;
 }
 
-/**
- * Measure a set of dialogues.
- *
- * @param {Array<Array<{speaker,text,move?}>>} dialogues
- */
 export function profileOf(dialogues, opts = {}) {
   const turns = [];
   for (const d of dialogues || []) for (const t of d) if (t && t.text) turns.push(t);
@@ -7347,14 +5854,6 @@ export function profileOf(dialogues, opts = {}) {
   const trigrams = new Map();
   let tokens = 0;
 
-  // Type-token ratio and entropy both fall and rise with sample size respectively, so they
-  // are only comparable between corpora when measured over the same amount of text. Measured
-  // across everything, a twenty-thousand-utterance log scored a lexical variety of 0.00
-  // against a target of 0.42 — which said nothing about the writing and everything about the
-  // sample. Both are now taken over a fixed window.
-  // The window is counted in *tokens*, not utterances: type-token ratio is only comparable
-  // between texts measured over the same number of words, and two thousand is the
-  // conventional window for it.
   const window = opts.sample || 2000;
   let seen = 0;
 
@@ -7374,8 +5873,6 @@ export function profileOf(dialogues, opts = {}) {
     }
   }
 
-  // Adjacency, where the caller supplied moves: what share of moves that oblige a particular
-  // kind of reply actually got one.
   let owed = 0, met = 0;
   for (const d of dialogues || []) {
     for (let i = 1; i < d.length; i++) {
@@ -7407,13 +5904,8 @@ export function profileOf(dialogues, opts = {}) {
   };
 }
 
-/** Side-by-side, with a verdict per metric. Ordered worst gap first. */
 export function compareProfiles(mine, against = target) {
   if (!mine) return [];
-  // Two of these are one-sided. More varied openings than a human corpus is not a fault, and
-  // completing more adjacency pairs than people bother to is not a fault either — people are
-  // interrupted and distracted and this crew is not. Flagging them as "too much" was the
-  // measurement telling the generator to get worse.
   const rows = [
     ['words per utterance', mine.wordsPerUtterance, against.wordsPerUtterance, 0.25, 'both'],
     ['turns per exchange', mine.turnsPerDialogue, against.turnsPerDialogue, 0.35, 'both'],
@@ -7435,25 +5927,13 @@ export function compareProfiles(mine, against = target) {
                     (Math.abs(a.gap) * (a.verdict === 'close enough' ? 0 : 1)));
 }
 
-// ── calibration ──────────────────────────────────────────────────────
-//
-// Three global dials the generator reads. They are deliberately few: these are the only
-// distributional faults a generator of this kind can correct without being rewritten, and a
-// dial that cannot be justified by a measurement is a knob, not a calibration.
-
 export const CALIBRATION = {
-  lengthLift: 0,      // -1..1, pushes frame choice toward fuller or sparser shapes
-  codaLift: 0,        // -1..1, how much longer exchanges run
-  questionLift: 0,    // -1..1, how hard question codas are preferred
+  lengthLift: 0,
+  codaLift: 0,
+  questionLift: 0,
   fittedFrom: null
 };
 
-/**
- * Fit the dials from a comparison. Deliberately gentle — a third of the measured gap, capped
- * — because these measurements are noisy at any sample size a browser will produce, and a
- * controller that chases noise oscillates. Run it twice and it converges; run it once and it
- * moves in the right direction.
- */
 export function calibrate(profile, against = target) {
   if (!profile) return CALIBRATION;
   const rel = (got, want) => (want ? (got - want) / want : 0);
@@ -7479,27 +5959,6 @@ export function resetCalibration() {
   return CALIBRATION;
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  13. DIRECTOR
-// ═════════════════════════════════════════════════════════════════════
-//
-// A running world. Everything above is a library; this is the thing that uses it, and it is
-// the piece both the demo page and systems/npc-comms.js were missing.
-//
-// It owns four stores, all of them small on purpose:
-//
-//   units      the ships, with the state the `when` clauses read
-//   rels       pairwise: how often two have spoken, and what they think of each other
-//   memories   what each character has filed, with a holder, a subject and a weight
-//   log        what actually went out, per channel — the thing the player overhears
-//
-// The reputation model is the whole point. Regard is not a number the sim writes directly;
-// it is the sum of what got filed, which means it can always be explained — `whyRegard()`
-// returns the exact memories behind any figure. A galaxy whose opinions can be audited is
-// one whose opinions can be debugged, and the alternative is a hidden float that drifts and
-// nobody can say why.
-
-/** Roles, weighted the way a working system is actually populated: mostly people working. */
 const CREW_ROLES = [
   { role: 'mine', faction: 'nexis', w: 4 },
   { role: 'haul', faction: 'nexis', w: 3 },
@@ -7512,11 +5971,6 @@ const CREW_ROLES = [
   { role: 'combat', faction: 'pirate', w: 1 }
 ];
 
-// Name stock, widened because the population is now measured in dozens rather than in
-// handfuls. With five nexis prefixes a crew of forty was mostly "Deepcut 07" talking to
-// "Deepcut 11", which is bad in two separate ways: it reads as a clone army, and the
-// learning bank keys on names, so near-identical hulls made the *evidence* look repetitive
-// even when the conversations were not.
 const HULL_NAMES = {
   nexis: ['Nexis Drone', 'Bulk Hauler', 'Tessera Yard', 'Nexis Escort', 'Deepcut',
     'Sokolov', 'Meridian Lift', 'Anvil', 'Pale Vector', 'Groundswell', 'Kestrel Works',
@@ -7534,10 +5988,6 @@ const PLACES = ['Kessel Deep', 'Ostrava Ring', 'the Boneyard', 'the second marke
   'Tessera Shallows', 'the outer belt', 'Cinder Reach', 'the Fallow Drift',
   'Vachell Gap', 'the inner shoals', 'Harrow Point', 'the slow lane'];
 
-// Where ships cluster. Traffic in a real system is not uniform — it pools around the places
-// worth being — and a uniform scatter means every pair is equally likely, which flattens the
-// relationship graph into noise. Anchors give the same two hulls repeated chances to talk,
-// which is the precondition for either of them learning anything about the other.
 const ANCHORS = [
   { name: 'Ostrava Ring', x: 700, y: 450, pull: 0.45 },
   { name: 'Kessel Deep', x: 240, y: 220, pull: 0.30 },
@@ -7546,13 +5996,8 @@ const ANCHORS = [
   { name: 'Cinder Reach', x: 1240, y: 180, pull: 0.25 }
 ];
 
-/** Push a 0..1 draw toward its ends, leaving some in the middle. */
 const polarise = x => (x < 0.4 ? x * 0.5 : x > 0.6 ? 1 - (1 - x) * 0.5 : x);
 
-/**
- * Build a population. Deterministic from the seed, so a bug in a conversation twenty
- * minutes into a session can be reproduced by writing down one number.
- */
 export function makeCrew(n = 24, rng = null) {
   const r = rng || stream('npc-speech-crew');
   const pool = CREW_ROLES.flatMap(c => Array(c.w).fill(c));
@@ -7567,33 +6012,16 @@ export function makeCrew(n = 24, rng = null) {
     const name = count > 1 || /Drone|Hauler|Patrol|Escort|Yard|Cutter|Lift|Works/.test(base)
       ? `${base} ${String(count).padStart(2, '0')}` : base;
     const station = spec.role === 'build' && r.next() < 0.5;
-    // Sit the ship near somewhere worth being, with scatter around it, rather than anywhere
-    // at all. `home` is kept on the unit so drift pulls it back instead of letting the whole
-    // population diffuse into an even smear over a few thousand ticks.
     const anchor = ANCHORS[Math.floor(r.next() * ANCHORS.length)];
     const spread = 120 + r.next() * 260;
     out.push({
       home: anchor.name,
-      // What this hull is like to talk to. Not a personality in any deep sense — four dials
-      // that decide how a given phrasing lands on it, which is what gives the phrasing bank
-      // something real to learn. Two ships in the same register can still want to be
-      // addressed completely differently.
       taste: {
-        // Pushed toward the ends of each range rather than scattered through the middle. A
-        // crew whose preferences all sit near neutral is a crew with nothing to learn about:
-        // every delivery is about as good as every other, and the bank spends its life
-        // measuring noise. Real crews contain a few ships that genuinely cannot stand being
-        // hedged at, and those are the ones worth learning.
-        // Seven, twelve or seventeen — the range the generator can actually hit. A listener
-        // who wants a twenty-word transmission is a listener nobody can satisfy, because
-        // almost nothing in the frame table runs that long; all such a taste does is put a
-        // permanent penalty on every hull that talks to it, which the bank then spends its
-        // life failing to learn away. A world may only reward what it is possible to say.
         words: [7, 12, 17][Math.floor(r.next() * 3)],
-        hedges: polarise(r.next()),                      // tolerance for qualifiers
-        ceremony: polarise(r.next()),                    // appetite for markers and sign-offs
-        naming: polarise(r.next()),                      // being addressed by name
-        deference: polarise(r.next())                    // willingness to be given orders
+        hedges: polarise(r.next()),
+        ceremony: polarise(r.next()),
+        naming: polarise(r.next()),
+        deference: polarise(r.next())
       },
       name,
       faction: spec.faction,
@@ -7614,9 +6042,6 @@ export function makeCrew(n = 24, rng = null) {
       }
     });
   }
-  // Stations. Three rather than one: a single ring means every docking conversation in the
-  // system happens with the same voice, and with two dozen ships that one voice ends up
-  // holding a third of the traffic on its own.
   const rings = [
     { name: 'Ostrava Ring', x: 700, y: 450, berths: 4 },
     { name: 'Harrow Point Yard', x: 300, y: 780, berths: 3 },
@@ -7634,33 +6059,10 @@ export function makeCrew(n = 24, rng = null) {
 
 const relKey = (a, b) => [a, b].sort().join('~');
 
-
-/**
- * The memory store, indexed.
- *
- * It began as an array with a filter over it, which is the right first version: it is four
- * lines, it is obviously correct, and at a crew of nine nobody notices. At a crew of forty it
- * is the whole cost of the simulation. `recallBetween` is called from `when` clauses, and
- * every topic's `when` runs against every candidate on every tick, so a linear scan of a
- * store that grows without bound turns one tick into tens of thousands of comparisons —
- * three thousand ticks took nearly three minutes, which is the difference between a trainer
- * and a screensaver.
- *
- * So: rows bucketed per (holder, subject); a set of types per bucket, so the existence check
- * that `when` clauses actually use is a hash lookup; and a cached regard figure per bucket,
- * invalidated when the bucket changes or when enough simulated time has passed for the decay
- * to matter.
- *
- * The per-pair cap is the other half. A generous bank is not an unbounded one — an unbounded
- * one is a leak with a nice name — so when a pair's row count passes the cap, the oldest half
- * is folded into a single consolidated row carrying their summed weight. Nothing is lost that
- * regard depends on; what is lost is the ability to cite each of forty routine check-ins
- * individually, which is exactly what a character would lose too.
- */
 export function createMemoryStore(opts = {}) {
   const perPair = opts.perPair || 120;
   const halfLife = opts.halfLife || 3600;
-  const buckets = new Map();          // "holder|subject" -> bucket
+  const buckets = new Map();
   let total = 0;
 
   const bucketOf = (holder, subject, make = false) => {
@@ -7673,7 +6075,6 @@ export function createMemoryStore(opts = {}) {
     return bk;
   };
 
-  /** Fold the oldest half of a bucket into one row that keeps its weight and loses its detail. */
   function consolidate(bk) {
     const half = Math.floor(bk.rows.length / 2);
     if (half < 2) return;
@@ -7712,18 +6113,12 @@ export function createMemoryStore(opts = {}) {
     return type ? bk.rows.filter(r => r.type === type) : bk.rows;
   };
 
-  /** The check `when` clauses make constantly: does this character hold anything of this kind? */
   const has = (holder, subject, type) => {
     const bk = bucketOf(holder, subject);
     if (!bk) return false;
     return type ? bk.types.has(type) : bk.rows.length > 0;
   };
 
-  /**
-   * Decayed, hearsay-discounted regard, cached. The cache is dropped when the bucket changes
-   * and expires on its own after a slice of simulated time — the decay curve does not move
-   * fast enough for a fresher figure than that to mean anything.
-   */
   function regard(holder, subject, now) {
     const bk = bucketOf(holder, subject);
     if (!bk) return 0;
@@ -7738,7 +6133,6 @@ export function createMemoryStore(opts = {}) {
     return v;
   }
 
-  /** Everything, flattened. For saving, and for the tests that count. */
   const flat = () => {
     const out = [];
     for (const bk of buckets.values()) out.push(...bk.rows);
@@ -7757,15 +6151,6 @@ export function createMemoryStore(opts = {}) {
   };
 }
 
-/**
- * A live world.
- *
- * @param {object} opts
- *   seed      world seed; same seed, same conversations
- *   units     supply your own population instead of a generated one
- *   crewSize  how many ships to generate when `units` is not given
- *   logCap    how many transmissions to keep
- */
 export function createWorld(opts = {}) {
   const seed = opts.seed != null ? opts.seed : 1337;
   seedWorld(seed);
@@ -7776,19 +6161,14 @@ export function createWorld(opts = {}) {
     perPair: opts.memoryPerPair || 120,
     halfLife: opts.memoryHalfLife || 3600
   });
-  // How each character has learned to talk to each other character. Lives with the world
-  // rather than with the units, because it is a property of the pair.
-  // Generous by default. A crew of thirty produces tens of thousands of phrasing rows over a
-  // long session, and a cap of four thousand meant the bank spent most of its life evicting
-  // rows it was still learning from — the reason the first learning curve came out flat.
   const speech = createSpeechMemory({
     cap: opts.speechCap || 40000,
     priorWeight: opts.priorWeight || 4,
     historyCap: opts.historyCap || 20000
   });
   const log = [];
-  const lastRaisedAt = new Map();   // "a~b:topic" -> t
-  const lastTopicOf = new Map();    // "a~b" -> topic key
+  const lastRaisedAt = new Map();
+  const lastTopicOf = new Map();
   const obligations = [];
   let logCap = opts.logCap || 300;
   let t = 0;
@@ -7799,7 +6179,6 @@ export function createWorld(opts = {}) {
     return rels.get(k);
   };
 
-  // The most recent hull to drop off the board, for the topics that remember one.
   let lastLost = null;
 
   const playerRels = new Map();
@@ -7810,26 +6189,11 @@ export function createWorld(opts = {}) {
 
   const nameOf = x => (x && x.name) ? x.name : x;
 
-  /** Memories a character holds about a subject, newest last. */
   const recall = (holder, subject, type = null) =>
     memories.list(nameOf(holder), nameOf(subject), type);
 
-  /**
-   * Regard as a derived figure rather than a stored one. Hearsay counts for less than
-   * something witnessed, and everything decays: a grudge nobody refreshes fades, which is
-   * what stops one bad exchange in the first minute defining a character forever.
-   *
-   * Cached per pair, because this is the hottest read in the world. A `when` clause may call
-   * it once per candidate per tick, and at a crew of forty that was thirty thousand full
-   * scans of the memory store per second of simulated time — the reason a training run of
-   * any useful length was impossible before.
-   */
   const regardFrom = (holder, subject) => memories.regard(nameOf(holder), nameOf(subject), t);
 
-  // ── the world callbacks every `when` clause and topic may read ──────
-  // LIVING GALAXY 0.3.16: the host may ground any of these callbacks on its own world
-  // (opts.ground(a, b) → an object whose keys override the stock ones). The only local
-  // change to this file.
   const worldCtx = (a, b) => Object.assign(worldCtxStock(a, b), opts.ground ? opts.ground(a, b) : null);
   const worldCtxStock = (a, b) => ({
     a, b,
@@ -7846,11 +6210,7 @@ export function createWorld(opts = {}) {
       return at == null ? null : t - at;
     },
     lastTopic: (x, y) => lastTopicOf.get(relKey(x.name, y.name)) || null,
-    // A hash lookup rather than a scan: this is the single most-called callback in the file.
     recallBetween: (x, y, type) => memories.has(nameOf(x), nameOf(y), type),
-    // A specific filed exchange, for the topics that talk about the past rather than about
-    // the board. Weighted memories first: the thing worth bringing up is the thing that
-    // mattered, not the most recent routine check-in.
     recallDetail: (x, y) => {
       const rows = recall(x, y).filter(m => m.type !== 'spoke-with');
       if (!rows.length) return null;
@@ -7871,9 +6231,6 @@ export function createWorld(opts = {}) {
     beaconFault: u => !!u.beaconFault,
     trafficNear: u => units.filter(o => o !== u && dist(o, u) < 600).length,
     berthsFree: (u) => {
-      // The nearest ring, not simply the first one in the array. With three stations in the
-      // system, answering every docking request with Ostrava's berth count meant two of them
-      // were never really in the conversation.
       const rings = units.filter(x => x.isStation);
       if (!rings.length) return 0;
       const near = rings.slice().sort((p, q) => dist(p, u || a) - dist(q, u || a))[0];
@@ -7888,14 +6245,6 @@ export function createWorld(opts = {}) {
     wasHonest: u => u.faction !== 'pirate' && rng.next() < 0.7,
     lostHull: () => lastLost,
 
-    /**
-     * How a line landed on the ship that heard it, as a number between about -1 and +1.
-     *
-     * This is the world's half of the learning loop. The speaker chooses a shape; the
-     * listener's taste decides whether that shape was the right one for it; the bank
-     * remembers. Nothing here looks at whether the sentence was *good* — only at whether it
-     * suited this particular listener, which is the only thing a speaker could learn.
-     */
     reception: (listener, text, move, frame) => {
       if (!listener || !text) return 0;
       const taste = listener.taste ||
@@ -7903,32 +6252,20 @@ export function createWorld(opts = {}) {
       const words = text.split(/\s+/).length;
       let d = 0;
 
-      // Length. Kept as a band rather than a point: a listener who wants short lines is not
-      // insulted by one word either side of its ideal, and scoring the exact word count made
-      // most of the figure noise the speaker could not act on. The band is what the length
-      // buckets in the phrasing bank can actually learn — three coarse choices, matched
-      // against three coarse preferences.
       const miss = Math.max(0, Math.abs(words - taste.words) - 3);
       d -= Math.min(0.45, miss * 0.045);
 
-      // Qualifiers. A ship with no patience for them hears them as waffle.
       const hedged = /\b(I think|near enough|give or take|I reckon|allegedly|so they tell me|maybe|unless I am reading it wrong|approximately|nominally)\b/i.test(text);
       if (hedged) d += (taste.hedges - 0.5) * 0.9;
 
-      // Ceremony: the markers and sign-offs that dress a transmission. Some hulls want to be
-      // addressed properly and some want you to get on with it.
       const ceremonial = /^(Be advised|Advising|For the record|Note that|Here is the thing|Tell you what|Right then|Listen|Look)/i.test(text) ||
         /\b(out|clear)\.$/i.test(text);
       if (ceremonial) d += (taste.ceremony - 0.5) * 0.9;
 
-      // Being named. Separate from ceremony, because they are separate things to want: some
-      // ships take being addressed by name as courtesy and some as being talked at.
       const named = /,\s+[A-Z][a-z]+( \d\d)?[.?!]$/.test(text) || /^[A-Z][a-z]+( \d\d)?,/.test(text);
       if (named) d += (taste.naming - 0.5) * 0.8;
 
-      // Being told what to do.
       if (move === 'directive') d += (taste.deference - 0.5) * 0.8;
-      // Being accused is never welcome, but a patient hull takes it better than a proud one.
       if (move === 'accusation') d -= 0.3 + (1 - taste.deference) * 0.4;
 
       return Math.max(-1.2, Math.min(1.2, d));
@@ -7940,7 +6277,6 @@ export function createWorld(opts = {}) {
     }
   });
 
-  /** Apply what an exchange filed: memories, obligations, and the relationship counters. */
   function commit(key, ctx, script) {
     const pairK = relKey(ctx.a.name, ctx.b.name);
     lastRaisedAt.set(`${pairK}:${key}`, t);
@@ -7956,8 +6292,6 @@ export function createWorld(opts = {}) {
         type: m.type, weight: m.weight, hearsay: m.hearsay, topic: m.topic, at: t
       });
     }
-    // Regard between the pair is re-derived rather than incremented, so it always matches
-    // what is actually on file.
     r.regard = (regardFrom(ctx.a, ctx.b) + regardFrom(ctx.b, ctx.a)) / 2;
 
     const ob = obligationFrom(key, ctx, true);
@@ -7974,15 +6308,10 @@ export function createWorld(opts = {}) {
     while (log.length > logCap) log.shift();
   }
 
-  /** Nudge the world so the same pair does not have the same conditions forever. */
   function drift() {
     for (const u of units) {
       if (u.isStation) { u.berths = Math.max(0, Math.min(4, (u.berths || 2) + (rng.next() < 0.2 ? 1 : -1) * (rng.next() < 0.5 ? 1 : 0))); continue; }
       if (u.position) {
-        // Wander, then lean back toward the place this ship works out of. Pure random walk
-        // spreads a large crew evenly across the system within a few thousand ticks, and an
-        // even spread means every pair is equally likely — which is the same as no
-        // relationships at all, because nobody meets anybody twice.
         u.position.x = Math.max(0, Math.min(1400, u.position.x + (rng.next() - 0.5) * 70));
         u.position.y = Math.max(0, Math.min(900, u.position.y + (rng.next() - 0.5) * 70));
         const home = ANCHORS.find(an => an.name === u.home);
@@ -8000,26 +6329,16 @@ export function createWorld(opts = {}) {
       if (rng.next() < 0.02) u.hazard = !u.hazard;
       if (rng.next() < 0.01) u.beaconFault = !u.beaconFault;
       if (rng.next() < 0.03) u.hp = Math.max(8, Math.min(u.maxHp, u.hp + (rng.next() - 0.4) * 20));
-      // A hull that drops below nothing is gone, and the belt talks about it afterwards.
       if (u.hp <= 9 && rng.next() < 0.03) { lastLost = u.name; u.hp = Math.round(u.maxHp * 0.4); }
       if (rng.next() < 0.04) u.task = ['mine', 'haul', 'transit', 'patrol', 'work', 'idle'][Math.floor(rng.next() * 6)];
       if (rng.next() < 0.02) u.nearestName = PLACES[Math.floor(rng.next() * PLACES.length)];
     }
   }
 
-  /**
-   * Advance the world. Returns the transmissions produced this tick — usually none, which
-   * is correct: a channel that carries traffic every second is not a working band, it is a
-   * broadcast, and silence is what makes the traffic worth overhearing.
-   */
   function tick(dt = 1, force = false) {
     t += dt;
     drift();
 
-    // With two dozen ships in the system, one candidate exchange per tick means any given
-    // pair meets about as often as it did when there were nine — which is to say the
-    // population grew and the *evidence per relationship* shrank. Attempts scale with the
-    // crew so a bigger world is a busier one rather than a thinner one.
     const attempts = Math.max(1, opts.pairsPerTick || Math.ceil(units.length / 8));
     const produced = [];
 
@@ -8029,8 +6348,6 @@ export function createWorld(opts = {}) {
       const a = units[Math.floor(rng.next() * units.length)];
       const candidates = units.filter(u => u !== a && dist(u, a) < 900);
       if (!candidates.length) continue;
-      // Nearer hulls are likelier to be the one raised — proximity is what makes a
-      // neighbour, and a neighbour is what makes a relationship worth learning from.
       const weighted = candidates.map(u => ({ u, w: 1 / (1 + dist(u, a) / 300) }));
       const total = weighted.reduce((sum, x) => sum + x.w, 0);
       let draw = rng.next() * total;
@@ -8049,11 +6366,6 @@ export function createWorld(opts = {}) {
     return produced;
   }
 
-  /**
-   * Run the world hard and quietly. Training the phrasing bank needs thousands of exchanges,
-   * and rendering every one of them is what makes that slow — this keeps the memory and the
-   * learning, and throws away all but the tail of the transcript.
-   */
   function fastForward(ticks = 1000, dt = 3) {
     const before = speech.size;
     let lines = 0;
@@ -8061,17 +6373,6 @@ export function createWorld(opts = {}) {
     return { ticks, lines, phrasingsBefore: before, phrasingsAfter: speech.size, time: t };
   }
 
-  /**
-   * Fast-forward the world to warm the phrasing bank.
-   *
-   * A demo that starts cold shows a crew with nothing learned, which is the least
-   * interesting state the system has. Training runs the same tick loop with the log
-   * suppressed — the transmissions are what cost memory, not the learning — and returns
-   * before/after figures so the caller can show that it did something.
-   *
-   * `budgetMs` makes it chunkable: the browser calls it repeatedly in small slices so the
-   * page keeps painting, and the same call runs uninterrupted headless.
-   */
   function train(targetLines = 4000, trainOpts = {}) {
     const budgetMs = trainOpts.budgetMs || Infinity;
     const started = Date.now();
@@ -8080,12 +6381,6 @@ export function createWorld(opts = {}) {
     const keepLog = logCap;
     let lines = 0, ticks = 0;
 
-    // The log is the only unbounded cost in a training run, and nobody reads a hundred
-    // thousand transmissions. Keep the last handful so the band is not empty afterwards —
-    // unless the caller is about to measure the output, in which case it needs a sample big
-    // enough to measure. Profiling forty lines and calling it a corpus reading was giving a
-    // question rate of exactly zero, which is a statement about the sample and not about
-    // the generator.
     logCap = trainOpts.keepLog || 40;
     while (lines < targetLines) {
       lines += tick(trainOpts.dt || 3).length;
@@ -8104,10 +6399,6 @@ export function createWorld(opts = {}) {
     };
   }
 
-  /**
-   * The log as dialogues rather than as lines, which is what any corpus measurement needs:
-   * a conversation is the unit, not a transmission.
-   */
   function dialogues() {
     const byExchange = new Map();
     for (const l of log) {
@@ -8118,27 +6409,15 @@ export function createWorld(opts = {}) {
     return [...byExchange.values()];
   }
 
-  /** The log as text, in the format `parseTranscript` reads back. */
   const transcript = () => dialogues()
     .map(d => d.map(t => `${t.speaker}: ${t.text}`).join('\n')).join('\n\n');
 
-  /** What this world's own output looks like, measured the way a corpus would be. */
   const profile = () => profileOf(dialogues(), { source: `world ${seed}` });
 
-  /**
-   * Run, measure, correct, run again.
-   *
-   * This is the honest form of "train on its own output". Nothing here learns language from
-   * the log — that would only reinforce what the generator already over-produces. What it
-   * does is measure the log against the shape of real conversation and move three global
-   * dials to close the gap: how full the sentences are, how long the exchanges run, and how
-   * often anybody asks anything. Two rounds converge; the second round exists because moving
-   * the dials changes the thing being measured.
-   */
   function selfTrain(linesPerRound = 8000, rounds = 2) {
     const history = [];
     const keepLog = logCap;
-    logCap = 20000;                       // enough of a sample to measure honestly
+    logCap = 20000;
     for (let i = 0; i < rounds; i++) {
       train(linesPerRound, { keepLog: 20000 });
       const p = profile();
@@ -8158,7 +6437,6 @@ export function createWorld(opts = {}) {
     return { history, after, gaps: compareProfiles(after), dials: Object.assign({}, CALIBRATION) };
   }
 
-  /** Say something to a ship. Files the exchange the same way an NPC one would be filed. */
   function talk(nameOrUnit, text) {
     const npc = typeof nameOrUnit === 'string'
       ? units.find(u => u.name === nameOrUnit) : nameOrUnit;
@@ -8188,7 +6466,6 @@ export function createWorld(opts = {}) {
     return reply;
   }
 
-  /** Why does this character feel that way? The audit trail behind a regard figure. */
   function whyRegard(holder, subject) {
     const h = typeof holder === 'string' ? holder : holder.name;
     const s = subject === 'player' ? 'player' : (subject.name || subject);
@@ -8203,7 +6480,6 @@ export function createWorld(opts = {}) {
     rel, playerRel, regardFor: regardFrom, whyRegard, recall, train,
     dialogues, transcript, profile, selfTrain,
     speech,
-    /** What has this character learned about being understood? */
     speechReport: (name, limit) => speech.report(typeof name === 'string' ? name : name && name.name, limit),
     tick, fastForward, talk, ctxFor: worldCtx,
     channels: () => [...new Set(log.map(l => l.channel))],
@@ -8215,16 +6491,6 @@ export function createWorld(opts = {}) {
   };
 }
 
-// ═════════════════════════════════════════════════════════════════════
-//  14. UNIFIED SELF-TEST
-// ═════════════════════════════════════════════════════════════════════
-//
-// `runSpeechSelfTest()` runs the grammar cases, the topic table checks, and then the two
-// things neither of those could check on its own: a world left running for a few thousand
-// ticks, and a battery of things a human might type. Both are the cases that only exist
-// once the pieces are in one file, which is the argument for the file being one file.
-
-/** Things a player might plausibly say, including things the parser should decline. */
 const PLAYER_BATTERY = [
   'hello there', 'hi', 'what is your status?', 'where are you?',
   'anything on the ore?', 'what grade is that seam?', 'what are you carrying?',
@@ -8253,7 +6519,6 @@ function checkPlayerTalk() {
       else if (p.text !== reply.text) bad.push(`${u.name} unstable reply: ${JSON.stringify(reply.text)}`);
     }
   }
-  // Being threatened has to cost something, or none of the reputation machinery is wired up.
   const victim = w.units[0];
   const before = w.regardFor(victim, 'player');
   w.talk(victim.name, 'hand over your cargo or else');
@@ -8279,9 +6544,6 @@ function checkWorld(ticks = 1500) {
       if (!l.channel || !l.speaker || !l.listener) bad.push(`${l.topic}: log line missing routing fields`);
     }
   }
-  // Moves and adjacency, over a world rather than a fixture. Both are checked here as well
-  // as in the topic tests, because the director coerces replies and a coercion that produced
-  // an illegal move would be invisible to a test that never ran one.
   let prev = null;
   for (const l of w.log) {
     if (l.move) {
@@ -8295,9 +6557,6 @@ function checkWorld(ticks = 1500) {
     prev = l;
   }
 
-  // The bank has to be doing something. Rows with a non-zero mean are the evidence that
-  // reactions are being credited back to the line that provoked them; without them the
-  // learning layer is an expensive no-op.
   const learned = w.speechReport(null, 400);
   if (!learned.rows) bad.push('nobody recorded a single phrasing');
   else if (!learned.best.some(r => r.mean !== 0)) bad.push('phrasings were recorded but no reaction was ever credited');
@@ -8306,28 +6565,13 @@ function checkWorld(ticks = 1500) {
   if (!lines) bad.push('a world left running produced no traffic at all');
   if (topics.size < 8) bad.push(`only ${topics.size} distinct topics fired over ${ticks} ticks`);
   if (!w.memories.length) bad.push('conversations left no memory behind');
-  // Reputation must actually move, or the memory store is a write-only log.
   const spread = w.units.map(u => Math.abs(w.regardFor(u, w.units[(w.units.indexOf(u) + 1) % w.units.length])));
   if (!spread.some(x => x > 0.01)) bad.push('no relationship developed any regard in either direction');
-  // And the log must not be one topic on repeat.
   const recent = w.log.slice(-40).map(l => l.topic);
   if (new Set(recent).size < 3) bad.push('the last forty transmissions covered fewer than three topics');
   return { bad: [...new Set(bad)], lines, topics: topics.size, memories: w.memories.length };
 }
 
-/**
- * Does the learning loop actually earn its place?
- *
- * The only honest way to ask is an A/B: the same seed, the same crew, the same topics, run
- * twice — once with the bank steering delivery and once with it merely recording. If the
- * steered arm's lines do not land better on the ships that heard them, the whole apparatus
- * is decoration and should be deleted rather than admired.
- *
- * The effect is small in absolute terms (a few percent of the reception scale) and that is
- * expected: most of how a line lands is decided by what the conversation is about, which is
- * not something a speaker's manner can fix. What matters is that it is positive, and that it
- * is positive across seeds rather than in the one that happened to be tried first.
- */
 function checkLearning(seeds = [12, 44], lines = 25000) {
   const bad = [];
   const gains = [];
@@ -8342,20 +6586,12 @@ function checkLearning(seeds = [12, 44], lines = 25000) {
     gains.push(learned - control);
   }
   const mean = gains.reduce((a, b) => a + b, 0) / gains.length;
-  // The floor is a real number now, not merely "not negative". Before the reception function
-  // was rebalanced the gain sat around +0.005, which was positive and almost meaningless; if
-  // a future change drags it back down there, that is a regression worth failing over.
-  // The floor scales with how much training the caller asked for: the gain is an average over
-  // the whole run, and a short run spends most of it cold. Eighteen thousand lines is enough
-  // to see the effect but not enough to see all of it, and a fixed floor calibrated on longer
-  // runs was failing the test for being run briefly rather than for anything being wrong.
   const floor = lines >= 30000 ? 0.018 : 0.008;
   if (mean < floor) bad.push(`training barely improved delivery (mean gain ${mean.toFixed(4)}, floor ${floor})`);
   if (gains.some(g => g < -0.01)) bad.push(`training made delivery worse on at least one seed (${gains.map(g => g.toFixed(4)).join(', ')})`);
   return { bad, gains, mean };
 }
 
-/** A crew of thirty, run hard, to catch what only breaks at scale. */
 function checkScale(crew = 32, lines = 12000) {
   const bad = [];
   const w = createWorld({ seed: 5150, crewSize: crew, chattiness: 1, logCap: 60 });
@@ -8365,16 +6601,12 @@ function checkScale(crew = 32, lines = 12000) {
   if (!r.done) bad.push('the trainer did not reach its line target');
   if (ms / r.lines > 2) bad.push(`generation is too slow to train with: ${(ms / r.lines).toFixed(2)}ms per line`);
 
-  // The store must stay bounded per pair, or a long session is a leak with a nice name.
   let worst = 0;
   for (const u of w.units) for (const v of w.units) {
     if (u === v) continue;
     worst = Math.max(worst, w.recall(u, v).length);
   }
   if (worst > 200) bad.push(`a single pair holds ${worst} memories — consolidation is not firing`);
-  // Consolidation, tested directly rather than inferred from the world: a run long enough to
-  // push a single pair past the cap naturally is longer than a test should be, and "the store
-  // is large so it must have consolidated" is not the same claim at all.
   const store = createMemoryStore({ perPair: 40, halfLife: 1e9 });
   let pushed = 0;
   for (let i = 0; i < 400; i++) {
@@ -8384,9 +6616,6 @@ function checkScale(crew = 32, lines = 12000) {
   const held = store.list('A', 'B').length;
   if (held > 40) bad.push(`consolidation did not bound a pair: ${held} rows against a cap of 40`);
   if (!store.list('A', 'B').some(m => m.type === 'earlier-dealings')) bad.push('consolidation left no summary row');
-  // Regard is what the rows are *for*, so it has to survive the fold. With decay switched off
-  // the sum should be intact, and it saturates at the clamp — which is the point: a character
-  // with two hundred good dealings is not twice as fond as one with a hundred.
   if (store.regard('A', 'B', 400) < 0.99) bad.push('consolidation lost the weight it was holding');
   if (store.has('A', 'B', 'gave-tip') !== true) bad.push('consolidation lost the type index');
 
@@ -8395,25 +6624,21 @@ function checkScale(crew = 32, lines = 12000) {
   return { bad, ms, lines: r.lines, perLine: ms / r.lines, memories: w.memories.length, worstPair: worst };
 }
 
-/** The corpus layer: parsing, measuring, and the calibration loop actually closing a gap. */
 function checkCorpus() {
   const bad = [];
 
-  // Three transcript formats in, dialogues out.
   const named = parseTranscript('A: hello there\nB: hello yourself\n\nA: again\nB: again');
   if (named.length !== 2 || named[0].length !== 2) bad.push('named-speaker transcripts did not parse');
   const eou = parseTranscript('hello __eou__ hi __eou__ how are you __eou__');
   if (eou.length !== 1 || eou[0].length !== 3) bad.push('__eou__ transcripts did not parse');
   if (parseTranscript('').length) bad.push('an empty transcript produced dialogues');
 
-  // Measurement has to be sample-size stable, or comparing two corpora is meaningless.
   const short = profileOf(parseTranscript('A: one two three four\nB: five six seven eight'));
   if (!short || Math.abs(short.wordsPerUtterance - 4) > 0.01) bad.push('word counting is wrong');
   if (short.questionRate !== 0) bad.push('question detection fired on statements');
   const asked = profileOf(parseTranscript('A: are you there?\nB: yes'));
   if (Math.abs(asked.questionRate - 0.5) > 0.01) bad.push('question detection missed a question');
 
-  // A profile of a big sample and of a small one must give comparable variety figures.
   const big = [], small = [];
   for (let i = 0; i < 400; i++) big.push([{ speaker: 'A', text: `line number ${i} of the log` }]);
   for (let i = 0; i < 40; i++) small.push([{ speaker: 'A', text: `line number ${i} of the log` }]);
@@ -8422,8 +6647,6 @@ function checkCorpus() {
     bad.push(`lexical variety is sample-size dependent: ${ps.typeTokenRatio.toFixed(2)} vs ${pb.typeTokenRatio.toFixed(2)}`);
   }
 
-  // And the loop has to close a gap it can close. Turn count is the one the dials control
-  // most directly, so it is the one worth asserting on.
   resetCalibration();
   const w = createWorld({ seed: 808, crewSize: 16, chattiness: 1 });
   const r = w.selfTrain(4000, 2);
@@ -8435,7 +6658,6 @@ function checkCorpus() {
   return bad;
 }
 
-/** Everything, headless. Returns { pass, fail, failures }. */
 export function runSpeechSelfTest(opts = {}) {
   const { verbose = true } = opts;
   const failures = [];
@@ -8481,23 +6703,16 @@ export function runSpeechSelfTest(opts = {}) {
   return report;
 }
 
-// One namespace for the debug console and for any non-module consumer.
 if (typeof window !== 'undefined') {
   window.npcSpeech = {
-    // grammar
     realise, realiseAll, speak, proof, isWellFormed, LEX, FRAMES, REGISTERS,
     resetGrammarMemory, serialiseGrammarMemory, restoreGrammarMemory, grammarStats, varietyOf,
-    // content helpers
     quantity, described, place, timeRef, bearing, phonetic, shortName, listOf, combine,
-    // topics and engine
     TOPICS, TOPIC_KEYS, CHANNELS, utter, exchange, availableTopics, chooseTopic, scoreTopic,
     memoriesFrom, obligationFrom, topicStats, sampleTraffic,
-    // player and world
     talkToNpc, parsePlayerLine, INTENTS, PLAYER_PROMPTS, createWorld, makeCrew,
-    // corpus
     parseTranscript, profileOf, compareProfiles, calibrate, fitTarget, currentTarget,
     resetCalibration, CALIBRATION, TARGET,
-    // tests
     runSpeechSelfTest, runGrammarSelfTest, runTopicSelfTest
   };
 }

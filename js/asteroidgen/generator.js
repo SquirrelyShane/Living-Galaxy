@@ -5,12 +5,11 @@ import { makeRockGeometry, computeNormals } from './debris.js';
 
 export const GENERATOR_VERSION = '1.1.0';
 
-/** Cube-sphere subdivisions per face edge. Triangles = 12 · n². */
 const DETAIL_MAP = {
-  low: 56, // ~38k tris
-  medium: 80, // ~77k
-  high: 113, // ~153k
-  ultra: 158, // ~300k
+  low: 56,
+  medium: 80,
+  high: 113,
+  ultra: 158,
 };
 
 const SHAPE_TABLE = [
@@ -35,8 +34,6 @@ export const SHAPE_LABELS = {
   top: 'Spinning top',
   angular: 'Angular',
 };
-
-/* ------------------------------------------------------------ helpers */
 
 function smoothstep(e0, e1, x) {
   const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
@@ -66,7 +63,6 @@ function tangentBasis(n) {
   return { t: [tx, ty, tz], b: [bx, by, bz] };
 }
 
-/** Random orthonormal frame (rows e1, e2, e3). */
 function randomFrame(rng) {
   const u1 = rng.next();
   const u2 = rng.next() * Math.PI * 2;
@@ -85,7 +81,6 @@ function makeEllipsoid(rng, A, B, C, cx = 0, cy = 0, cz = 0) {
   return { e, R: [A, B, C], c: [cx, cy, cz] };
 }
 
-/** Radial distance of an origin-centred ellipsoid along unit dir. */
 function ellipsoidR(E, x, y, z) {
   const a = (x * E.e[0][0] + y * E.e[0][1] + z * E.e[0][2]) / E.R[0];
   const b = (x * E.e[1][0] + y * E.e[1][1] + z * E.e[1][2]) / E.R[1];
@@ -93,7 +88,6 @@ function ellipsoidR(E, x, y, z) {
   return 1 / Math.sqrt(a * a + b * b + c * c);
 }
 
-/** Far intersection of a ray from the origin with an offset ellipsoid (0 on miss). */
 function rayEllipsoid(E, x, y, z) {
   let a = 0, b = 0, c = -1;
   for (let k = 0; k < 3; k++) {
@@ -110,10 +104,6 @@ function rayEllipsoid(E, x, y, z) {
   return t > 0 ? t : 0;
 }
 
-/**
- * Indexed cube-sphere with exactly shared seam vertices (lattice keys) and an
- * equi-angular warp, so triangles stay near-uniform with no pole pinching.
- */
 export function buildCubeSphere(n) {
   const N1 = n + 1;
   const keyToId = new Map();
@@ -160,7 +150,6 @@ export function buildCubeSphere(n) {
   return { dirs: new Float32Array(dirs), index: new Uint32Array(tris) };
 }
 
-/** CSR vertex adjacency from a triangle index (edges counted per triangle). */
 function buildAdjacency(count, index) {
   const deg = new Uint32Array(count + 1);
   for (let t = 0; t < index.length; t += 3) {
@@ -207,13 +196,6 @@ function mixRgb(a, b, t) {
   return { r: a.r + (b.r - a.r) * t, g: a.g + (b.g - a.g) * t, b: a.b + (b.b - a.b) * t };
 }
 
-/* ------------------------------------------------------------ craters */
-
-/**
- * Crater population in unit-sphere chord space. Power-law sizes, degradation
- * by age (old = shallow, soft rims, regolith-ponded floors), fresh rayed craters,
- * obliques, secondaries, and a small-crater saturation layer.
- */
 function populateCraters(rng, density) {
   const list = [];
   const make = (dir, D, age, simple, extra = {}) => {
@@ -268,7 +250,6 @@ function populateCraters(rng, density) {
       }
     }
   }
-  // giant old basins that bite into the silhouette
   const nBasin = rng.int(0, 2) + (density > 0.45 ? 1 : 0);
   for (let i = 0; i < nBasin; i++) {
     const D = rng.range(0.5, 0.95);
@@ -335,8 +316,6 @@ function craterEval(x, y, z, c) {
   return dR;
 }
 
-/* ---------------------------------------------------------- grooves */
-
 function populateGrooves(rng, roughness) {
   const list = [];
   if (rng.next() > 0.28 + roughness * 0.6) return list;
@@ -383,8 +362,6 @@ function grooveEval(x, y, z, G) {
   return -d;
 }
 
-/* ------------------------------------------------------------ main */
-
 export function generateAsteroid(params) {
   const seedStr = params.seed || 'Psyche-7749';
   const seed = hashString(seedStr);
@@ -406,7 +383,6 @@ export function generateAsteroid(params) {
   const { dirs, index } = buildCubeSphere(n);
   const count = dirs.length / 3;
 
-  /* ---- shape kind (always consume the roll so overrides keep other rolls stable) */
   let roll = rng.next();
   let shapeKind = SHAPE_TABLE[0][0];
   for (const [k, w] of SHAPE_TABLE) {
@@ -425,7 +401,6 @@ export function generateAsteroid(params) {
   const warpSeed = seed + 311;
   const gritSeed = seed + 523;
 
-  /* ---- base body: triaxial ellipsoid, ratios by kind */
   const axisRanges = {
     spheroid: [[0.9, 1], [0.84, 0.97]],
     ellipsoid: [[0.72, 0.92], [0.55, 0.8]],
@@ -438,7 +413,7 @@ export function generateAsteroid(params) {
   const bRatio = rng.range(axisRanges[0][0], axisRanges[0][1]);
   const cRatio = Math.min(bRatio, rng.range(axisRanges[1][0], axisRanges[1][1]));
   const body = makeEllipsoid(rng, 1, bRatio, cRatio);
-  const spinAxis = body.e[2]; // short axis = max-inertia spin axis
+  const spinAxis = body.e[2];
 
   const lobes = [];
   if (shapeKind === 'contact-binary') {
@@ -449,7 +424,6 @@ export function generateAsteroid(params) {
     lobes.push(makeEllipsoid(rng, ra * rng.range(1, 1.2), ra * rng.range(0.85, 1), ra * rng.range(0.75, 0.95), dir[0] * sep, dir[1] * sep, dir[2] * sep));
     const lb = makeEllipsoid(rng, rb * rng.range(1, 1.15), rb * rng.range(0.85, 1), rb * rng.range(0.75, 0.95), -dir[0] * sep, -dir[1] * sep, -dir[2] * sep);
     lobes.push(lb);
-    // ensure origin is inside both lobes along the separation axis
     for (const L of lobes) L.R = L.R.map((r) => Math.max(r, sep + 0.1));
   } else if (shapeKind === 'rubble-pile') {
     lobes.push(makeEllipsoid(rng, rng.range(0.66, 0.78), rng.range(0.6, 0.72), rng.range(0.52, 0.66)));
@@ -514,7 +488,6 @@ export function generateAsteroid(params) {
       const den = x * cut.n[0] + y * cut.n[1] + z * cut.n[2];
       if (den > 0.02) rs = smin(rs, cut.h / den, cut.k);
     }
-    // fracture faces stay planar: damp relief where a cut is active
     const facet = cuts.length ? smoothstep(0.0, 0.03, rsUncut - rs) : 0;
 
     const px = x * rs, py = y * rs, pz = z * rs;
@@ -555,7 +528,6 @@ export function generateAsteroid(params) {
     facetArr[i] = facet;
   }
 
-  // normalise to unit mean radius so every shape frames the same
   let mean = 0;
   for (let i = 0; i < count; i++) mean += radius[i];
   mean /= count;
@@ -564,7 +536,6 @@ export function generateAsteroid(params) {
     rBaseArr[i] /= mean;
   }
 
-  /* ---- ore features (direction space) */
   const oreKeys = Object.keys(klass.ores).filter((k) => ORES[k]);
   const oreSeeds = {};
   const composition = { _rock: 0 };
@@ -583,7 +554,6 @@ export function generateAsteroid(params) {
     else h = h.map((v) => v / hl);
     for (let s = 0; s < steps; s++) {
       const last = pts[pts.length - 1];
-      // Rodrigues rotation of heading about the current surface normal
       const th = rng.range(-0.7, 0.7);
       const ct = Math.cos(th), st = Math.sin(th);
       const kd = last[0] * h[0] + last[1] * h[1] + last[2] * h[2];
@@ -605,12 +575,6 @@ export function generateAsteroid(params) {
     return pts;
   };
 
-  /* LIVING GALAXY: seams are sized for the mesh they land on. The generator's
-   * own widths are drawn for a 56–158-cell survey mesh; a game body is 7–18
-   * cells, where a 0.04-chord vein falls between vertices and the rock reads
-   * as bare. featureScale widens what is drawn; featureDensity multiplies the
-   * class weight that decides how many nets and spots each ore gets. Both
-   * default to 1, which is the generator exactly as shipped. */
   const featureScale = params.featureScale ?? 1;
   const featureDensity = params.featureDensity ?? 1;
   const features = [];
@@ -699,7 +663,6 @@ export function generateAsteroid(params) {
     }
   }
 
-  /* ---- positions, normals, cavity */
   const positions = new Float32Array(count * 3);
   let maxR = 0;
   for (let i = 0; i < count; i++) {
@@ -724,7 +687,6 @@ export function generateAsteroid(params) {
     lapScale = sample.length ? sample[Math.floor(sample.length * 0.95)] || 1e-4 : 1e-4;
   }
 
-  /* ---- colours / PBR attributes */
   const colors = new Float32Array(count * 3);
   const metals = new Float32Array(count);
   const roughs = new Float32Array(count);
@@ -757,10 +719,8 @@ export function generateAsteroid(params) {
     const dj = 0.86 + dust * 0.2;
     rock.r *= dj; rock.g *= dj; rock.b *= dj;
 
-    // bedrock on scarps / fresh ejecta is brighter & less space-weathered
     rock = mixRgb(rock, { r: accent.r * 1.3, g: accent.g * 1.3, b: accent.b * 1.3 }, exposed * 0.45);
     const lift = 1 + freshArr[i] * 0.4 + convex * 0.08;
-    // ponded fine regolith
     rock = mixRgb(rock, { r: pondRgb.r * 1.08, g: pondRgb.g * 1.08, b: pondRgb.b * 1.06 }, pond * 0.7);
     const ao = 1 - 0.42 * cavity;
     rock.r *= lift * ao; rock.g *= lift * ao; rock.b *= lift * ao;
@@ -769,7 +729,6 @@ export function generateAsteroid(params) {
     let metal = klass.metalness * (0.85 + dust * 0.2);
     let er = 0, eg = 0, eb = 0;
 
-    // frost in cold traps (crater floors, grooves, high latitude)
     if (iceAffinity > 0) {
       const lat = Math.abs(x * spinAxis[0] + y * spinAxis[1] + z * spinAxis[2]);
       const trap = cavity * 0.9 + pond * 0.4 + smoothstep(0.8, 0.97, lat) * 0.6;
@@ -892,10 +851,6 @@ export function generateAsteroid(params) {
   };
 }
 
-/**
- * Near-surface rubble: meshed boulders seated on the regolith plus a lofted
- * halo of chips and specks. Rock variants come from debris.js.
- */
 export function buildRubbleField(asteroid, seedStr) {
   const rng = new RNG(hashString(String(seedStr) + ':rubble'));
   const group = new THREE.Group();
@@ -916,7 +871,6 @@ export function buildRubbleField(asteroid, seedStr) {
     let nx = nrm.getX(vi), ny = nrm.getY(vi), nz = nrm.getZ(vi);
     const px = pos.getX(vi), py = pos.getY(vi), pz = pos.getZ(vi);
     const pl = Math.hypot(px, py, pz) || 1;
-    // boulders prefer level ground; retry once on steep slopes
     if (seated && (nx * px + ny * py + nz * pz) / pl < 0.8) {
       vi = Math.floor(rng.next() * pos.count);
       nx = nrm.getX(vi); ny = nrm.getY(vi); nz = nrm.getZ(vi);

@@ -14,7 +14,7 @@
  *   6. the avoidance solver sees a hole
  */
 
-import { ORES as GAME_ORES } from "../js/materials.js";
+import { ORES as GAME_ORES } from "../js/economy/materials.js";
 import { CLASSES, CLASS_IDS } from "../js/bodygen/classes.js";
 import { ORES as GEN_ORES, ASTEROID_CLASSES } from "../js/asteroidgen/ores.js";
 import { generateBody, assayRock, rockParams, rogueParams, DETAIL, faceCount, SHAPE_KINDS, MESH_RADIUS } from "../js/bodygen/body.js";
@@ -22,9 +22,9 @@ import { patchGeneratorShaders } from "../js/bodygen/gl.js";
 import { SHADERS } from "../js/asteroidgen/debris.js";
 import { IMPACT_SHADERS } from "../js/asteroidgen/impact-shaders.js";
 import { horizon as kerrHorizon, isco as kerrIsco } from "../js/asteroidgen/kerr.js";
-import { HOLE, holes, holeRadii, holeAccel, holeWarpBlock, rollTransit, resetHoles, spawnTransit, collapseStar, holeWire, adoptHoles, stepHoles, massOf } from "../js/holes.js";
-import { IMPACTS, runs, resetImpacts, startStrike, startCollision, stepImpacts } from "../js/impacts.js";
-import { chunks, addChunk, resetDebris } from "../js/debris.js";
+import { HOLE, holes, holeRadii, holeAccel, holeWarpBlock, rollTransit, resetHoles, spawnTransit, collapseStar, holeWire, adoptHoles, stepHoles, massOf } from "../js/world/events/holes.js";
+import { IMPACTS, runs, resetImpacts, startStrike, startCollision, stepImpacts } from "../js/world/events/impacts.js";
+import { chunks, addChunk, resetDebris } from "../js/world/debris.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -249,7 +249,7 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
 
 /* ---- 6. the solver sees one ------------------------------------------------------ */
 {
-  const { threatTo } = await import("../js/avoid.js");
+  const { threatTo } = await import("../js/flight/avoid.js");
   resetHoles();
   const ship = { pos: { x: 0, y: 0, z: 0 }, vel: { x: 0, y: 0, z: 0 } };
   const h = spawnTransit({ ship, rng: () => 0.5, time: 0, rs: 2000, speed: 0 });
@@ -261,12 +261,12 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
 
 /* ---- 7. in the sim --------------------------------------------------------------- */
 {
-  const { sim, launchSim, tickSim, summonHole, warpBlock, goSupernova } = await import("../js/sim.js");
-  const { makePilot } = await import("../js/pilot.js");
-  const { impactors } = await import("../js/impactors.js");
-  const { gnn } = await import("../js/gnn.js");
-  const { bodyById: liveBody, bodyPosition, bodyVelocity, starBody } = await import("../js/bodies.js");
-  const { chunks: liveChunks } = await import("../js/debris.js");
+  const { sim, launchSim, tickSim, summonHole, warpBlock, goSupernova } = await import("../js/sim/sim.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
+  const { impactors } = await import("../js/world/events/impactors.js");
+  const { gnn } = await import("../js/comms/gnn.js");
+  const { bodyById: liveBody, bodyPosition, bodyVelocity, starBody } = await import("../js/world/bodies.js");
+  const { chunks: liveChunks } = await import("../js/world/debris.js");
   makePilot("Rocks", "terran", "mining", null);
   launchSim("RockTest", "sol");
   sim.phase = "play";

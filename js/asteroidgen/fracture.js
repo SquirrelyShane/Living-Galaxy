@@ -1,46 +1,8 @@
-/**
- * Fracture: split a body mesh into Voronoi chunks and animate them on the GPU.
- *
- * fractureGeometry() tags every vertex with a chunk id (aChunk) and a crack
- * proximity (aCrack, 1 on a cell border) using a noise-warped 3D Voronoi, so
- * crack lines wander like real fractures.
- *
- * v1.8: detached chunks are driven from the CPU (tidal.js / impact-sim.js run the
- * physics). Per chunk the shader gets its centre and orientation in the mesh's
- * local frame plus heat, visibility and a spaghettification stretch; it only
- * places, stretches (along the direction to the hole, uBHLocal), morphs and
- * shades. The attached remainder rides the mesh with a strain bulge.
- *
- * Heat maps to an incandescence ramp (dull red → orange → yellow-white →
- * compressed blue-white).
- *
- * Chunks are solid: every crack edge of a chunk's surface patch is walled down
- * through a rough inner ring to an apex inside the body (closed, consistently
- * wound). Inner faces carry aInner = depth (crust → mantle → core), so fresh
- * fracture faces read as rock that glows molten toward the core when hot.
- * uVeins lights wandering molten veins across the surface (noise iso-lines +
- * crack seams) — planets once their atmosphere is gone, strained asteroids,
- * impact survivors.
- *
- * Re-forming (FRACTURE_MORPH): every chunk also gets a rounded target shape —
- * a volume-matched ellipsoid fitted to the piece (PCA), lumpy, with a few
- * small craters — as aMorph / aMorphN. After its reform delay (uChunkC.w) a
- * detached piece relaxes from jagged wedge into a new small asteroid, keeping
- * its original surface and fresh-rock fracture patches. Planet pieces skip it
- * and stay visibly broken.
- *
- */
 import * as THREE from 'three';
 import { RNG, hashString, unitVec, valueNoise3 } from './rng.js';
 
 export const FRACTURE_MAX = 32;
 
-/* ------------------------------------------------------------------ CPU */
-
-/**
- * @param {THREE.BufferGeometry} geometry  indexed or not; needs position (+ optional color)
- * @returns {{ count, centroids: number[][], counts: number[], colors: number[][], radius: number, seeds: number[][] }}
- */
 export function fractureGeometry(geometry, { chunks = 24, seed = 1, jitter = 0.16, crust = null, mantle = null, apexDepth = 0.3, morph = false } = {}) {
   const pos = geometry.attributes.position.array;
   const col = geometry.attributes.color?.array;
@@ -109,7 +71,6 @@ export function fractureGeometry(geometry, { chunks = 24, seed = 1, jitter = 0.1
   return info;
 }
 
-/** Jacobi eigen-decomposition of a symmetric 3×3 → { values[3], vectors[3][3] (columns as rows) }. */
 export function eigen3(m) {
   const a = [m[0].slice(), m[1].slice(), m[2].slice()];
   const v = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
@@ -141,11 +102,6 @@ export function eigen3(m) {
   return { values: [a[0][0], a[1][1], a[2][2]], vectors: [0, 1, 2].map((j) => [v[0][j], v[1][j], v[2][j]]) };
 }
 
-/**
- * Rounded "new asteroid" target for every vertex of every chunk: star-shaped
- * projection from the chunk's volume centroid onto a fitted, volume-matched,
- * lumpy, cratered ellipsoid. Adds aMorph + aMorphN. Returns per-chunk shape info.
- */
 function computeMorphTargets(geometry, info, seed) {
   const pos = geometry.attributes.position.array;
   const nrm = geometry.attributes.normal?.array;
@@ -153,7 +109,6 @@ function computeMorphTargets(geometry, info, seed) {
   const idx = geometry.index.array;
   const V = pos.length / 3;
   const n = info.count;
-  // volume + volume centroid per chunk (closed meshes, origin tetrahedra)
   const vol = new Float64Array(n);
   const cen = Array.from({ length: n }, () => [0, 0, 0]);
   for (let t = 0; t < idx.length; t += 3) {
@@ -182,7 +137,7 @@ function computeMorphTargets(geometry, info, seed) {
     const { values, vectors } = eigen3(m);
     let ax = values.map((l) => Math.sqrt(Math.max(1e-8, 3 * l)));
     const amax = Math.max(...ax);
-    ax = ax.map((a) => Math.max(a, amax * 0.55)); // rubble re-accretes rounder than the shard
+    ax = ax.map((a) => Math.max(a, amax * 0.55));
     const V0 = Math.max(1e-6, vol[k]);
     const s = Math.cbrt(V0 / ((4 / 3) * Math.PI * ax[0] * ax[1] * ax[2]));
     ax = ax.map((a) => a * s);
@@ -219,7 +174,6 @@ function computeMorphTargets(geometry, info, seed) {
     return [sh.center[0] + dx * r, sh.center[1] + dy * r, sh.center[2] + dz * r];
   };
   for (let i = 0; i < V; i++) morph.set(target(i), i * 3);
-  // star projection + craters lose volume: rescale each target about its centre to the shard's volume
   const vol1 = new Float64Array(n);
   for (let t = 0; t < idx.length; t += 3) {
     const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
@@ -235,7 +189,6 @@ function computeMorphTargets(geometry, info, seed) {
     for (let j = 0; j < 3; j++) morph[i * 3 + j] = sh.center[j] + (morph[i * 3 + j] - sh.center[j]) * sh.scale;
   }
 
-  // smooth target normals shared by coincident target positions inside a chunk
   const acc = new Map();
   const key = (i) => `${ch[i]}|${Math.round(morph[i * 3] * 4e3)}|${Math.round(morph[i * 3 + 1] * 4e3)}|${Math.round(morph[i * 3 + 2] * 4e3)}`;
   for (let t = 0; t < idx.length; t += 3) {
@@ -261,12 +214,6 @@ function computeMorphTargets(geometry, info, seed) {
   return shapes;
 }
 
-/**
- * Close every chunk into a solid: for each crack (boundary) edge a→b of a chunk's
- * surface patch add a wall strip b→a → inner ring → apex. The inner ring is
- * noise-displaced so fracture faces are rough. Adds flat-shaded, non-indexed
- * triangles appended to the index. Returns the number of triangles added.
- */
 function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
   const index = geometry.index;
   if (!index) return 0;
@@ -275,7 +222,6 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
   const chunkAttr = geometry.attributes.aChunk.array;
   const V = pos.length / 3;
 
-  // boundary edges appear exactly once (crack split gave each chunk its own vertices)
   const edgeCount = new Map();
   const key = (a, b) => (a < b ? a * 4294967296 + b : b * 4294967296 + a);
   for (let t = 0; t < idx.length; t += 3) {
@@ -287,9 +233,7 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
   const R = info.radius;
   const apex = info.centroids.map((c) => [c[0] * apexDepth, c[1] * apexDepth, c[2] * apexDepth]);
 
-  // The crack boundary zig-zags along triangle edges; walling straight down from it folds
-  // the inner ring over itself. Smooth each boundary loop first (neighbours along the loop).
-  const loopNb = new Map(); // boundary vertex → [prev, next]
+  const loopNb = new Map();
   for (let t = 0; t < idx.length; t += 3) {
     for (let j = 0; j < 3; j++) {
       const a = idx[t + j], b = idx[t + (j + 1) % 3];
@@ -328,7 +272,7 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
     return p;
   };
 
-  const tris = []; // [p0, p1, p2, depth0, depth1, depth2, chunk, srcVertex]
+  const tris = [];
   for (let t = 0; t < idx.length; t += 3) {
     for (let j = 0; j < 3; j++) {
       const a = idx[t + j], b = idx[t + (j + 1) % 3];
@@ -338,7 +282,6 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
       const pb = [pos[b * 3], pos[b * 3 + 1], pos[b * 3 + 2]];
       const ra = ring(a, k), rb = ring(b, k);
       const sa = smooth.get(a), sb = smooth.get(b);
-      // shading normals come from the smoothed loop so the jagged crack edge does not stripe
       const t1 = [pb, pa, ra, 0.05, 0.05, 0.5, k, a]; t1.ns = [sb, sa, ra];
       const t2 = [pb, ra, rb, 0.05, 0.5, 0.5, k, b]; t2.ns = [sb, ra, rb];
       const t3 = [rb, ra, apex[k], 0.5, 0.5, 1, k, a]; t3.ns = [rb, ra, apex[k]];
@@ -362,8 +305,6 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
     const j = rngC.range(0.85, 1.1);
     return { crust: mixc(c, crust || c.map((v) => v * 0.55), crust ? 0.75 : 1).map((v) => v * j), mantle: mantle || c.map((v) => v * 0.3) };
   });
-  // smooth normals across each chunk's fracture walls (positions shared per chunk), so the
-  // fan of thin wall triangles shades as one rough surface instead of stripes
   const nAcc = new Map();
   const pk = (p, k) => `${k}|${Math.round(p[0] * 2e3)}|${Math.round(p[1] * 2e3)}|${Math.round(p[2] * 2e3)}`;
   for (const tr of tris) {
@@ -375,7 +316,6 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
     for (let c = 0; c < 3; c++) {
       const key2 = pk(tr[c], tr[6]);
       const a = nAcc.get(key2) || [0, 0, 0];
-      // accumulate at the real vertex key so both jagged and smoothed corners share it
       a[0] += fn[0]; a[1] += fn[1]; a[2] += fn[2];
       nAcc.set(key2, a);
     }
@@ -390,7 +330,7 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
       const p = tr[c];
       next.position.set(p, o * 3);
       if (next.normal) {
-        const a = c < 2 || tr[5] !== 1 ? nAcc.get(pk(p, k)) : tr.fn; // apex keeps its own face normal
+        const a = c < 2 || tr[5] !== 1 ? nAcc.get(pk(p, k)) : tr.fn;
         const l = Math.hypot(a[0], a[1], a[2]) || 1;
         next.normal.set([a[0] / l, a[1] / l, a[2] / l], o * 3);
       }
@@ -400,8 +340,6 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
       if (next.aCrack) next.aCrack[o] = 1 - d;
       if (col) {
         const sh = chunkShade[k];
-        // low-frequency tint from the smoothed loop only (per-vertex high frequencies smear into radial stripes);
-        // fine grain is added per pixel in the shader
         const ps = tr.ns[c];
         const grain = 0.8 + 0.4 * (0.5 + 0.5 * valueNoise3(ps[0] * 3.5 / R, ps[1] * 3.5 / R, ps[2] * 3.5 / R, seed + 211));
         const m = mixc(sh.crust, sh.mantle, Math.min(1, d * 1.1));
@@ -409,7 +347,6 @@ function solidifyChunks(geometry, info, { seed, crust, mantle, apexDepth }) {
       }
       if (next.aRough) next.aRough[o] = 0.95;
       if (next.aMetal) next.aMetal[o] = 0.04;
-      // aEmit and any other attributes stay zero on fracture faces
       newIdx[io++] = o;
       o++;
     }
@@ -424,12 +361,6 @@ function mixc(a, b, t) {
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 }
 
-/**
- * Give every triangle exactly one owning chunk (majority of its corners) and
- * duplicate corner vertices that belong to another chunk, so separating chunks
- * never stretch a triangle across the gap. Extends every vertex attribute.
- * @returns {number} vertices added
- */
 function splitAlongCracks(geometry, aChunk) {
   const index = geometry.index;
   if (!index) return 0;
@@ -476,16 +407,15 @@ function splitAlongCracks(geometry, aChunk) {
   return extra.length;
 }
 
-/** Shared uniform objects for one fractured body. */
 export function createFractureUniforms() {
   const A = new Float32Array(FRACTURE_MAX * 4);
   const C = new Float32Array(FRACTURE_MAX * 4);
   const D = new Float32Array(FRACTURE_MAX * 4);
   for (let k = 0; k < FRACTURE_MAX; k++) {
-    A[k * 4 + 3] = -1; // all attached
-    C[k * 4 + 1] = 1; // visible
-    C[k * 4 + 2] = 1; // no stretch
-    D[k * 4 + 3] = 1; // identity orientation
+    A[k * 4 + 3] = -1;
+    C[k * 4 + 1] = 1;
+    C[k * 4 + 2] = 1;
+    D[k * 4 + 3] = 1;
   }
   return {
     uTime: { value: 0 },
@@ -502,7 +432,6 @@ export function createFractureUniforms() {
   };
 }
 
-/** Reset one chunk slot to attached. */
 export function resetFractureChunk(u, k) {
   u.uChunkA.value.set([0, 0, 0, -1], k * 4);
   u.uChunkB.value.set([0, 0, 0, 0], k * 4);
@@ -510,10 +439,8 @@ export function resetFractureChunk(u, k) {
   u.uChunkD.value.set([0, 0, 0, 1], k * 4);
 }
 
-/* ----------------------------------------------------------------- GLSL */
-
 export const FRACTURE_GLSL = {
-  vertexPars: /* glsl */ `
+  vertexPars: `
 uniform float uTime;
 uniform vec4 uChunkA[FRACTURE_MAX];  // centroid.xyz (local), detach time (< 0 = attached)
 uniform vec4 uChunkB[FRACTURE_MAX];  // centre now (local) · w = seed
@@ -581,7 +508,7 @@ vec3 fractureVertex(vec3 pos, out mat3 R, out float heat) {
   return B.xyz + o * C.y;
 }
 `,
-  fragmentPars: /* glsl */ `
+  fragmentPars: `
 uniform float uTime;
 uniform float uCoreHeat;
 uniform float uVeins;
@@ -619,8 +546,7 @@ float fracVeins(vec3 p) {
   return max(line, branch * 0.6 * smoothstep(0.4, 0.8, uVeins));
 }
 `,
-  // expects vec4 diffuseColor, vec3 totalEmissiveRadiance in scope
-  fragmentApply: /* glsl */ `
+  fragmentApply: `
 {
   float fh = vFracHeat;
   float innerFace = step(0.001, vFracInner);
@@ -648,18 +574,13 @@ float fracVeins(vec3 p) {
   if (!gl_FrontFacing) diffuseColor.rgb *= mix(0.35, 1.0, innerFace);
 }
 `,
-  // MeshStandard only: undo three's DoubleSide normal flip on folded fracture faces
-  normalFix: /* glsl */ `
+  normalFix: `
 if (!gl_FrontFacing && vFracInner > 0.0) {
   normal = -normal;
 }
 `,
 };
 
-/**
- * Inject fracture animation into a MeshStandardMaterial (keeps any existing
- * onBeforeCompile, e.g. the rock PBR attributes).
- */
 export function applyFracture(material, uniforms, { morph = false } = {}) {
   const prev = material.onBeforeCompile;
   const prevKey = material.customProgramCacheKey ? material.customProgramCacheKey() : '';
@@ -691,7 +612,6 @@ vFracCrack = aCrack;`
   return material;
 }
 
-/** Depth material running the same fracture animation (correct shadows). */
 export function makeFractureDepthMaterial(uniforms, { morph = false } = {}) {
   const mat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, side: THREE.DoubleSide });
   mat.name = 'fracture-depth';
@@ -713,7 +633,6 @@ transformed = fractureVertex(position, fracR, fracHeat);`
   return mat;
 }
 
-/** Heat ramp mirror for CPU-side colouring (particles). */
 export function heatColor(h) {
   const ss = (a, b, x) => {
     const t = Math.max(0, Math.min(1, (x - a) / (b - a)));

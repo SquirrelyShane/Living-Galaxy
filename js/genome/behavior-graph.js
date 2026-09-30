@@ -1,22 +1,9 @@
-/* Living Galaxy — BEHAVIOR GRAPH engine, ported verbatim from the genome-agent
- * project (v1.0) and rewrapped as an ES module.
- *
- * Not a tree: nodes may be entered from several parents and may link back into
- * branches that reach them. Every hop appends to a trace, and that trace is
- * what answers "what made me take this action" in an NPC's journal.
- */
-
-
 const MAX_DEPTH = 64;
 
 class GraphError extends Error {
   constructor(msg, code, detail) { super(msg); this.name = 'GraphError'; this.code = code; this.detail = detail; }
 }
 
-/**
- * Build a runnable graph from a node map.
- * @param {Object} def { id, root, nodes: { [id]: node } }
- */
 function createGraph(def) {
   if (!def || !def.nodes) throw new GraphError('Graph needs a nodes map', 'BAD_GRAPH');
   const root = def.root || 'root';
@@ -37,7 +24,6 @@ function createGraph(def) {
   return graph;
 }
 
-/** All outgoing edges of a node, as [{to, kind, label}]. */
 function edgesOf(node, id) {
   const out = [];
   switch (node.type) {
@@ -64,11 +50,6 @@ function edgesOf(node, id) {
   return out;
 }
 
-/**
- * Static validation. Catches the failure modes a hand-authored graph
- * actually hits: dangling edges, unreachable nodes, action-less sinks.
- * Cycles are REPORTED, not rejected — they are how branches link back.
- */
 function validateGraph(graph) {
   const errors = [], warnings = [];
   const ids = Object.keys(graph.nodes);
@@ -87,7 +68,6 @@ function validateGraph(graph) {
     if (n.type === 'select' && (!n.options || n.options.length < 2)) warnings.push(`Select ${id} has fewer than 2 options`);
   }
 
-  // reachability from root
   const seen = new Set([graph.root]);
   const stack = [graph.root];
   while (stack.length) {
@@ -98,12 +78,11 @@ function validateGraph(graph) {
   }
   for (const id of ids) if (!seen.has(id)) warnings.push(`Node ${id} is unreachable from root`);
 
-  // cycle inventory (informational — cross-links are intentional)
   const cycles = [];
   const colour = {};
   const path = [];
   (function dfs(id) {
-    if (!graph.nodes[id]) return;   // dangling edge: already reported above
+    if (!graph.nodes[id]) return;
     colour[id] = 1; path.push(id);
     for (const e of edgesOf(graph.nodes[id], id)) {
       if (colour[e.to] === 1) cycles.push(path.slice(path.indexOf(e.to)).concat(e.to));
@@ -113,7 +92,6 @@ function validateGraph(graph) {
   })(graph.root);
 
   const actions = ids.filter(i => graph.nodes[i] && graph.nodes[i].type === 'action');
-  // fan-in: how many distinct parents each node has — the cross-link metric
   const fanIn = {};
   for (const id of ids) {
     if (!graph.nodes[id] || !graph.nodes[id].type) continue;
@@ -132,17 +110,6 @@ function validateGraph(graph) {
   };
 }
 
-/**
- * Drop edges that point at nodes which are not present, then drop whatever
- * that leaves unreachable. This is what makes a subset of behaviour packs a
- * valid graph instead of a pile of dangling references — compose whichever
- * domains a project needs and the rest is pruned rather than throwing.
- *
- * @param {Object} nodes  raw node map (mutated copy is returned)
- * @param {string} root
- * @param {string} fallback  node every severed edge is redirected to
- * @returns {{ nodes:Object, pruned:{edges:number, nodes:string[]} }}
- */
 function pruneGraph(nodes, root = 'root', fallback = 'act.observe') {
   const out = Object.assign({}, nodes);
   if (!out[fallback]) throw new GraphError(`Prune fallback "${fallback}" is not in the node set`, 'NO_FALLBACK');
@@ -181,7 +148,6 @@ function pruneGraph(nodes, root = 'root', fallback = 'act.observe') {
     out[id] = n;
   }
 
-  // drop anything no longer reachable
   const seen = new Set([root]), stack = [root];
   while (stack.length) {
     const id = stack.pop();
@@ -194,14 +160,6 @@ function pruneGraph(nodes, root = 'root', fallback = 'act.observe') {
   return { nodes: out, pruned: { edges: severed, nodes: dropped } };
 }
 
-/**
- * Walk the graph to a terminal action.
- *
- * @param {Object} graph
- * @param {Object} ctx  arbitrary decision context handed to every predicate
- * @param {Object} [opts] { rng, entry, maxDepth }
- * @returns {{ action, params, node, trace, path, depth }}
- */
 function decide(graph, ctx, opts = {}) {
   const rng = opts.rng || Math.random;
   const maxDepth = opts.maxDepth || MAX_DEPTH;
@@ -216,11 +174,8 @@ function decide(graph, ctx, opts = {}) {
     if (!node) throw new GraphError(`Traversal hit missing node "${id}"`, 'MISSING_NODE', { path });
 
     if (visited.has(id)) {
-      // A back-link fired twice in one decision — the situation is
-      // genuinely ambiguous. Bail to the node's own fallback rather than spin.
       trace.push({ node: id, type: node.type, outcome: 'revisit-break', reason: 'this branch had already been considered this tick, so I stopped going round' });
       if (node.onLoop && graph.nodes[node.onLoop]) { id = node.onLoop; continue; }
-      // walk back up the path for the nearest ancestor that declares a loop exit
       let escaped = false;
       for (let k = path.length - 1; k >= 0; k--) {
         const anc = graph.nodes[path[k]];
@@ -306,8 +261,6 @@ function decide(graph, ctx, opts = {}) {
     throw new GraphError(`Unknown node type "${node.type}" at ${id}`, 'BAD_NODE_TYPE', { path });
   }
 
-  // Exhausted without landing on an action. In a cross-linked graph this is a
-  // legitimate outcome, not a crash — take the declared fallback if there is one.
   if (graph.fallback) {
     const fb = graph.nodes[graph.fallback];
     if (fb && fb.type === 'action') {
@@ -320,10 +273,6 @@ function decide(graph, ctx, opts = {}) {
   throw new GraphError('Decision exceeded max depth without reaching an action', 'DEPTH_EXCEEDED', { path, trace });
 }
 
-/**
- * Render a trace as the plain-language chain of reasoning behind an action.
- * This is the "what made me take this action" field, verbatim.
- */
 function explainTrace(trace) {
   return trace
     .filter(t => t.type !== 'link' || t.reason)
@@ -331,10 +280,8 @@ function explainTrace(trace) {
     .filter(Boolean);
 }
 
-/** Compact one-line form: "root > threat.check > survival.entry > flee" */
 function pathString(path) { return path.join(' > '); }
 
-/** Mermaid source for the whole graph. Handy for eyeballing the cross-links. */
 function toMermaid(graph) {
   const lines = ['graph TD'];
   const shape = { action: id => `${id}(["${id}"])`, select: id => `${id}{{"${id}"}}`,

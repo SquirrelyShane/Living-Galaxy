@@ -1,11 +1,8 @@
-/* Prefabs — stores, fluid interfaces, thermal louvers, cargo, robots, beacons.
- * Added with the 21-domain catalog; same contract as every other prefab file. */
 import * as THREE from "three";
 import { G, addMesh } from "../core/geometry.js";
 import { ALL_FACES } from "./_common.js";
 
 export default {
-  /* spherical COPV / pressurant bottle in a cradle */
   sphereTank: { faces: ALL_FACES, fp: (s) => ({ w: s * 1.5, h: s * 1.6, d: s * 1.5 }),
     build(g, s, p, S, rng) {
       const m = S.mats; const skin = m[p.tint] || m.light;
@@ -18,7 +15,6 @@ export default {
       S.lamp(g, { color: p.hazard ? "#ffb03a" : "#7dffbe", y: s * 1.62, r: s * 0.05, mode: "pulse", period: 3.4, base: 3.5 });
     } },
 
-  /* umbilical / quick-disconnect panel: recessed plate, QD rows, hose stubs */
   umbilical: { faces: ALL_FACES.concat(["stern"]), fp: (s) => ({ w: s * 1.5, h: s * 0.5, d: s * 1.2 }),
     build(g, s, p, S, rng) {
       const m = S.mats;
@@ -35,7 +31,6 @@ export default {
       g.userData.dock = { kind: "fuel", arms: [], blinkers: [], status: null, umbilical: true };
     } },
 
-  /* louvered radiator: slats that open with the deploy toggle */
   louver: { faces: ALL_FACES, fp: (s) => ({ w: s * 2.0, h: s * 0.6, d: s * 1.5 }),
     build(g, s, p, S, rng) {
       const m = S.mats;
@@ -50,7 +45,6 @@ export default {
       S.lamp(g, { box: true, color: "#ff6a3a", y: s * 0.16, z: s * 0.68, r: 1, sx: s * 1.7, sy: s * 0.03, sz: s * 0.05, mode: "pulse", period: 3, base: 2 });
     } },
 
-  /* MLI blanket — gold foil with strap grid */
   mli: { faces: ALL_FACES, fp: (s) => ({ w: s * 1.8, h: s * 0.18, d: s * 2.0 }),
     build(g, s, p, S, rng) {
       const m = S.mats;
@@ -59,7 +53,6 @@ export default {
       for (let j = -1; j <= 1; j++) addMesh(g, G.box(), m.dark, 0, s * 0.14, j * s * 0.6, 0, 0, 0, s * 1.7, s * 0.012, s * 0.03);
     } },
 
-  /* emergency beacon: dome, cage, hard white strobe */
   beacon: { faces: ALL_FACES, fp: (s) => ({ w: s * 0.8, h: s * 0.9, d: s * 0.8 }),
     build(g, s, p, S, rng) {
       const m = S.mats;
@@ -71,7 +64,6 @@ export default {
       S.lamp(g, { color: p.lamp || "#ffffff", y: s * 0.62, r: s * 0.12, mode: "strobe", period: 1.0, base: 12 });
     } },
 
-  /* standard cargo rack / container stack */
   container: { faces: ALL_FACES, fp: (s) => ({ w: s * 1.7, h: s * 1.3, d: s * 2.2 }),
     build(g, s, p, S, rng) {
       const m = S.mats;
@@ -88,7 +80,6 @@ export default {
       S.lamp(g, { color: "#ffb03a", x: -s * 0.7, y: s * 1.26, z: -s * 0.95, r: s * 0.05, mode: "blink", period: 2.2, duty: 0.2, base: 5 });
     } },
 
-  /* pressurized transfer tunnel stub with bellows */
   tunnel: { faces: ALL_FACES.concat(["bow", "stern"]), fp: (s) => ({ w: s * 1.5, h: s * 1.7, d: s * 1.5 }),
     build(g, s, p, S, rng) {
       const m = S.mats;
@@ -103,7 +94,6 @@ export default {
       g.userData.dock = { kind: "crew", arms: [], blinkers: [], status: null, iris };
     } },
 
-  /* hull crawler robot — body on a short rail, patrols back and forth */
   crawler: { faces: ALL_FACES, fp: (s) => ({ w: s * 0.9, h: s * 0.6, d: s * 2.6 }),
     build(g, s, p, S, rng) {
       const m = S.mats;

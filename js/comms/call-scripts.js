@@ -1,10 +1,3 @@
-// js/comms/call-scripts.js — what the other end of the channel says.
-//
-// Every script is a small dialogue tree: { start, nodes: { id: { text, options?, end? } } }.
-// Options can carry an `effect(ctx)` — the director runs it when the pilot picks
-// that line, so a bribe costs credits and a clearance actually opens the clamps.
-// The factories take the station/contact so the words carry its name and sector.
-
 const VOICE = {
   logistic: { hail: "traffic", style: "clipped" },
   military: { hail: "control", style: "hard" },
@@ -17,7 +10,6 @@ const VOICE = {
 const short = (name) => String(name || "").split(" ")[0].toUpperCase();
 const pick = (rnd, arr) => arr[Math.floor(rnd() * arr.length) % arr.length];
 
-/* ---- NPC → player: a port sees you on approach --------------------------- */
 export function approachScript(st, ctx) {
   const v = VOICE[st.sector] ?? VOICE.civilian;
   const who = short(st.name);
@@ -84,7 +76,6 @@ export function approachScript(st, ctx) {
   };
 }
 
-/* ---- port → a hull on its lane or in its mouth with no berth ------------- */
 export function laneScript(st, ctx, where = "lane") {
   const v = VOICE[st.sector] ?? VOICE.civilian;
   const who = short(st.name);
@@ -115,7 +106,6 @@ export function laneScript(st, ctx, where = "lane") {
   };
 }
 
-/* ---- player → port while docked: clearance to leave --------------------- */
 export function undockScript(st, ctx) {
   const who = short(st.name);
   return {
@@ -169,11 +159,6 @@ export function undockScript(st, ctx) {
   };
 }
 
-/* ---- GNN: the news desk --------------------------------------------------
- * A major planetary impact goes out as a galactic news broadcast. It rings
- * the puck like any contact; answer it and the bulletin types itself out on
- * the transcript. The desk does not take questions — but it will mark the
- * site on your chart.                                                       */
 export function newsScript(report, ctx) {
   const { body, rock, tier, tempK, integrity, shattered, speed, blast, contractRate } = report;
   const lede = shattered
@@ -181,7 +166,6 @@ export function newsScript(report, ctx) {
     : tier === "cataclysm"
       ? `A catastrophic impact on ${body}. The strike, designated ${rock}, came in at ${Math.round(speed)} u/s. Shockwaves are visible from orbit.`
       : `A major impact is confirmed on ${body} — impactor ${rock}, ${Math.round(speed)} u/s at entry.`;
-  /* the body count — the blast wave's paperwork */
   const casualties = [];
   if (blast?.portsLost?.length) casualties.push(`${blast.portsLost.join(" and ")} ${blast.portsLost.length > 1 ? "are" : "is"} gone with the world`);
   if (blast?.portsHit?.length) casualties.push(blast.portsHit.map((h) => `${h.name} reports ${h.guns ? `${h.guns} batter${h.guns > 1 ? "ies" : "y"} out and ` : ""}stock losses`).join("; "));
@@ -222,7 +206,6 @@ export function newsScript(report, ctx) {
   };
 }
 
-/** One-node desk reads: droughts and terraform bonds ride the same channel. */
 export function marketScript(line, action = null) {
   return {
     start: "read",
@@ -240,7 +223,6 @@ export function marketScript(line, action = null) {
   };
 }
 
-/* ---- NPC → player: a free port with its guns up ------------------------- */
 export function pirateScript(st, ctx) {
   const who = short(st.name);
   const ask = Math.max(150, Math.round(ctx.cargoValue() * 0.35));
@@ -282,7 +264,6 @@ export function pirateScript(st, ctx) {
   };
 }
 
-/* ---- player → drone/guard: nobody civil is listening -------------------- */
 export function guardScript(c) {
   return {
     start: "warn",
@@ -295,14 +276,12 @@ export function guardScript(c) {
   };
 }
 
-/* ---- port answers a cold hail from open space --------------------------- */
 export function portScript(st, ctx) {
   const s = approachScript(st, ctx);
   s.nodes.hail.text = `${short(st.name)} ${VOICE[st.sector]?.hail ?? "control"} reading you. Go ahead.`;
   return s;
 }
 
-/* ---- NPC ↔ NPC: what the open channels sound like ----------------------- */
 const CHATTER = {
   logistic: [
     ["Manifest for the {A} run is short two pallets.", "Short is what the ledger says. Send it anyway."],
@@ -336,7 +315,6 @@ const CHATTER = {
   ],
 };
 
-/** One overheard exchange between two ports: [{from, to, text}, …] */
 export function chatterExchange(a, b, rnd) {
   const pool = CHATTER[a.sector] ?? CHATTER.civilian;
   const lines = pick(rnd, pool);
@@ -346,14 +324,6 @@ export function chatterExchange(a, b, rnd) {
   return lines.map((t, i) => ({ from: i % 2 === 0 ? a : b, to: i % 2 === 0 ? b : a, text: fill(t) }));
 }
 
-/**
- * llama.cpp (OpenAI-compatible) provider for a local inference server.
- * Falls back silently to the scripted node if the server is slow or down —
- * CallSession already guards it with providerTimeoutMs.
- */
-/* One warning, then stop asking. A voice provider that answers 404/405/501 is
- * not there, and the scripted lines are a complete fallback — so a call still
- * works, it just stops paying a dead round trip per line. */
 const deadProviders = new Set();
 function providerGone(status, url) {
   if (deadProviders.has(url)) return;
@@ -383,24 +353,13 @@ Intent to convey: ${node.text}`;
         ],
       }),
     });
-    /* `fetch` only REJECTS on a network failure. A 404 from a misconfigured
-     * host, or a 500 with a JSON error body, RESOLVES — so without this check
-     * `res.json()` either throws a SyntaxError into a silent catch upstream or
-     * quietly yields undefined, and every node of every call re-issues the
-     * dead request forever. Same shape as the /cradle/put flood. */
     if (!res.ok) { providerGone(res.status, url); return null; }
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content?.trim();
-    return text ? { text } : null; // options stay scripted → choices remain authored
+    return text ? { text } : null;
   };
 }
 
-/* ---- NPC traffic answers a hail ------------------------------------------- */
-/**
- * @param n       traffic hull (js/npc/traffic.js)
- * @param status  vesselStatus(n) line
- * @param ctx     { market: string, crewLine: string }
- */
 export function vesselScript(n, status, ctx) {
   const cs = n.name.split(" ").pop();
   return {
@@ -421,7 +380,6 @@ export function vesselScript(n, status, ctx) {
   };
 }
 
-/** What a hull says on the open channel when its job changes. [fromLine, replyLine] or null. */
 export function trafficLines(n, job, rnd) {
   const cs = n.name.split(" ").pop();
   const at = n.toName || "control";

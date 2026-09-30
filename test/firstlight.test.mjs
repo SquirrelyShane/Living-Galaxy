@@ -27,7 +27,7 @@ const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m
   const { graph, block, current } = await import("../tools/preload.mjs");
   const g = graph();
   const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
-  ok(g.length > 200 && g.includes("./js/sim.js") && g.includes("./vendor/three.module.min.js"), `the walk finds the graph, three included (${g.length} modules)`);
+  ok(g.length > 200 && g.includes("./js/sim/sim.js") && g.includes("./vendor/three.module.min.js"), `the walk finds the graph, three included (${g.length} modules)`);
   ok(g.includes("./vendor/three.core.min.js"), "and follows the import map into three's own core");
   ok(current(html) === block(g), "index.html's preload block is the graph as it stands");
   let clean = true;
@@ -43,18 +43,18 @@ const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m
   const card = html.indexOf('id="btn-continue"'), early = html.indexOf("__lgFlyQueued"), mod = html.indexOf('src="./js/main.js"');
   ok(card > 0 && early > card && early < mod, "the early painter runs after the button exists and before the game module");
   ok(/lgaa-save-v1/.test(html) && /lgaa\.pilot\.v1/.test(html), "it reads the same two records FLY AS does");
-  const { PILOT_KEY } = await import("../js/pilot.js");
+  const { PILOT_KEY } = await import("../js/flight/pilot.js");
   ok(PILOT_KEY === "lgaa.pilot.v1", "and the pilot key has not moved under it");
-  const hud = fs.readFileSync(new URL("../js/hud.js", import.meta.url), "utf8");
+  const hud = fs.readFileSync(new URL("../js/ui/hud.js", import.meta.url), "utf8");
   ok(/__lgFlyQueued/.test(hud), "the HUD honours a tap held from before boot");
   ok(/if \(window\.__lgBooted\) return;/.test(html), "and the early handler stands down once the game is up");
 }
 
 /* ---- the same sky twice holds its ports --------------------------------------------- */
 {
-  const { sim, loadSky } = await import("../js/sim.js");
-  const { stations } = await import("../js/stations.js");
-  const { carriedCount } = await import("../js/stationyard.js");
+  const { sim, loadSky } = await import("../js/sim/sim.js");
+  const { stations } = await import("../js/station/stations.js");
+  const { carriedCount } = await import("../js/station/stationyard.js");
 
   let t = performance.now();
   loadSky("Vesiaphou");
@@ -85,13 +85,13 @@ const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m
 
 /* ---- a returning pilot's backdrop is the sky they fly into -------------------------- */
 {
-  const hud = fs.readFileSync(new URL("../js/hud.js", import.meta.url), "utf8");
+  const hud = fs.readFileSync(new URL("../js/ui/hud.js", import.meta.url), "utf8");
   ok(/sv0\.lastSky && sv0\.callsign && loadPilot\(\)/.test(hud), "the menu previews lastSky when FLY AS is on offer");
 }
 
 /* ---- the engine keeps a sky's skins across its rebuild ------------------------------ */
 {
-  const eng = fs.readFileSync(new URL("../js/engine.js", import.meta.url), "utf8");
+  const eng = fs.readFileSync(new URL("../js/render/engine.js", import.meta.url), "utf8");
   ok(/texCacheFor\(sim\.skySeed\)/.test(eng) && /map\.userData\.keep = true/.test(eng), "painted skins are cached per sky and marked keep");
 }
 

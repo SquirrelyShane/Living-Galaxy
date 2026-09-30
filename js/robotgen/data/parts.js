@@ -1,16 +1,3 @@
-/* robotgen/src/data/parts.js — the robot parts catalogue.
- *
- * Same shape as STATIONGEN's parts list and NEWSHIPGEN's part catalogue: an id,
- * a name, a mass, net power and heat, and a bill of materials — here written as
- * counts of catalogue COMPONENTS (`c.*`), which roll up to raw `m.*` stock the
- * same way a ship part does. So a yard can quote a robot, a shuttle and a
- * station module off one manifest.
- *
- *   mass  kg           pwr  W (+ generates, − draws)      heat  W to reject
- *   bom   { componentId: count }   fractional counts are fine (half a harness run)
- *
- * A part is an ASSEMBLY, not a mesh: `bom.js` picks parts from the spec and
- * counts them, so the parts list and the geometry stay independently editable. */
 import { COMPONENTS } from './catalog.js';
 
 export const PART_DOMAINS = {
@@ -39,7 +26,6 @@ const P = (id, name, o) => {
   return p;
 };
 
-/* ---- frame & structure ---------------------------------------------------- */
 P('r.fr.spine_light',   'Light spine / core frame',        { mass: 3.2,  bom: { 'c.frame_rib': 3, 'c.frame_tube': 4, 'c.bolt_m4': 3, 'c.insert': 1 } });
 P('r.fr.spine_std',     'Standard spine / core frame',     { mass: 9.0,  bom: { 'c.frame_rib': 6, 'c.frame_tube': 8, 'c.frame_al': 0.6, 'c.bolt_m6': 3, 'c.insert': 2 } });
 P('r.fr.spine_heavy',   'Heavy spine / load frame',        { mass: 26.0, bom: { 'c.frame_rib': 10, 'c.frame_ti': 2.2, 'c.frame_al': 1.6, 'c.bolt_m6': 6, 'c.insert': 4 } });
@@ -51,7 +37,6 @@ P('r.fr.neck_column',   'Neck column + slip ring',         { mass: 1.6,  pwr: -4
 P('r.fr.bumper_ring',   'Compliant bumper ring',           { mass: 1.1,  bom: { 'c.bumper_foam': 4, 'c.strain_net': 0.4 } });
 P('r.fr.hardpoint',     'Universal hardpoint / rail',      { mass: 0.6,  bom: { 'c.insert': 0.4, 'c.connector': 1, 'c.bolt_m4': 0.5 } });
 
-/* ---- actuation ------------------------------------------------------------ */
 P('r.ac.joint_micro',   'Micro servo joint',               { mass: 0.15, pwr: -8,   bom: { 'c.servo_micro': 1, 'c.esc': 0.4 } });
 P('r.ac.joint_light',   'Light servo joint',               { mass: 1.1,  pwr: -45,  heat: 12, bom: { 'c.servo_joint': 1, 'c.esc': 1, 'c.harness': 0.1 } });
 P('r.ac.joint_std',     'Harmonic limb joint',             { mass: 3.2,  pwr: -160, heat: 40, bom: { 'c.hd_joint': 1, 'c.esc': 1, 'c.brake_park': 1, 'c.harness': 0.15 } });
@@ -59,7 +44,6 @@ P('r.ac.joint_heavy',   'Heavy hydraulic joint',           { mass: 8.5,  pwr: -4
 P('r.ac.tendon_set',    'Tendon drive set',                { mass: 0.9,  pwr: -30,  bom: { 'c.tendon_drive': 1, 'c.servo_micro': 4 } });
 P('r.ac.hydraulic_pack','Hydraulic power pack',            { mass: 11.0, pwr: -900, heat: 320, bom: { 'c.pump': 2, 'c.tank_liquid': 0.5, 'c.valve_latch': 6, 'c.coldplate': 1 } });
 
-/* ---- drive & locomotion --------------------------------------------------- */
 P('r.dr.leg_light',     'Light walking leg',               { mass: 4.6,  pwr: -180, heat: 45, bom: { 'c.hd_joint': 1, 'c.servo_joint': 2, 'c.frame_tube': 2, 'c.foot_pad': 1, 'c.esc': 2 } });
 P('r.dr.leg_std',       'Standard walking leg',            { mass: 12.0, pwr: -420, heat: 110, bom: { 'c.hd_joint': 3, 'c.frame_tube': 3, 'c.foot_pad': 1, 'c.esc': 3, 'c.harness': 0.4 } });
 P('r.dr.leg_heavy',     'Heavy load-bearing leg',          { mass: 31.0, pwr: -1100, heat: 300, bom: { 'c.hydraulic_ram': 3, 'c.hd_joint': 2, 'c.frame_ti': 1.2, 'c.foot_pad': 2, 'c.esc': 3 } });
@@ -74,7 +58,6 @@ P('r.dr.hover_fan',     'Hover lift fan',                  { mass: 2.6,  pwr: -8
 P('r.dr.hover_skirt',   'Hover skirt section',             { mass: 1.0,  bom: { 'c.skirt_seg': 2 } });
 P('r.dr.thruster_vane', 'Vector vane + attitude jet',      { mass: 1.2,  pwr: -60, bom: { 'c.servo_joint': 1, 'c.control_surf': 1 } });
 
-/* ---- flight --------------------------------------------------------------- */
 P('r.fl.rotor_unit',    'Rotor unit (motor + blades)',     { mass: 1.5,  pwr: -700, heat: 90,  bom: { 'c.motor': 1, 'c.rotor_hub': 1, 'c.rotor_blade': 2, 'c.esc': 1 } });
 P('r.fl.rotor_ducted',  'Ducted rotor unit',               { mass: 2.4,  pwr: -820, heat: 110, bom: { 'c.motor': 1, 'c.rotor_hub': 1, 'c.rotor_blade': 3, 'c.duct_ring': 1, 'c.esc': 1 } });
 P('r.fl.boom',          'Rotor boom + wiring',             { mass: 0.5,  bom: { 'c.boom_arm': 1.5, 'c.harness': 0.15 } });
@@ -83,14 +66,11 @@ P('r.fl.wing_panel',    'Wing panel + spar',               { mass: 1.3,  bom: { 
 P('r.fl.tail_group',    'Tail group + surfaces',           { mass: 0.9,  pwr: -20, bom: { 'c.wing_panel': 0.5, 'c.control_surf': 2 } });
 P('r.fl.control_surf',  'Control surface + servo',         { mass: 0.35, pwr: -14, bom: { 'c.control_surf': 1 } });
 P('r.fl.pusher_prop',   'Prop drive (motor + prop)',       { mass: 1.4,  pwr: -900, heat: 110, bom: { 'c.motor': 1, 'c.prop_disc': 1, 'c.esc': 1 } });
-// a turbofan burns its own fuel: the tank is booked as stored energy and the
-// pod's shaft power as draw, so endurance falls out of the same sum as a battery
 P('r.fl.microjet',      'Micro turbofan pod',              { mass: 6.0,  pwr: -2600, heat: 900, kwh: 1.8, bom: { 'c.microjet': 1, 'c.tank_liquid': 0.4, 'c.valve_latch': 2 } });
 P('r.fl.air_data',      'Air-data + flight IMU set',       { mass: 0.5,  pwr: -6, bom: { 'c.pitot': 1, 'c.imu_mems': 2, 'c.gnss_ant': 1 } });
 P('r.fl.skid',          'Landing skid / gear leg',         { mass: 0.7,  bom: { 'c.landing_skid': 1 } });
 P('r.fl.chute',         'Recovery parachute',              { mass: 1.0,  bom: { 'c.parachute': 1, 'c.sep_bolt': 1 } });
 
-/* ---- power ---------------------------------------------------------------- */
 P('r.pw.pack_small',    'Battery pack (0.5 kWh)',          { kwh: 0.5, mass: 2.6,  bom: { 'c.lipo_pack': 1, 'c.pdb': 0.5 } });
 P('r.pw.pack_std',      'Battery pack (2 kWh)',            { kwh: 2.0, mass: 9.6,  bom: { 'c.lipo_pack': 4, 'c.pdb': 1 } });
 P('r.pw.pack_large',    'Battery bank (6 kWh)',            { kwh: 6.0, mass: 28.0, bom: { 'c.lipo_pack': 11, 'c.pdb': 2, 'c.coldplate': 1 } });
@@ -100,7 +80,6 @@ P('r.pw.isotope',       'Isotope trickle charger',         { mass: 3.6,  pwr: 25
 P('r.pw.bus',           'Power bus + protection',          { mass: 1.2,  pwr: -8, bom: { 'c.pdb': 1, 'c.converter': 0.3, 'c.harness': 1 } });
 P('r.pw.charge_port',   'Dock / charge interface',         { mass: 0.8,  bom: { 'c.charge_port': 1, 'c.connector': 2 } });
 
-/* ---- sensors & head ------------------------------------------------------- */
 P('r.sn.optic_mono',    'Optic pod (mono)',                { mass: 0.35, pwr: -6,  bom: { 'c.cam_module': 1, 'c.glazing_sm': 1, 'c.pcb': 0.5 } });
 P('r.sn.optic_stereo',  'Optic pod (stereo depth)',        { mass: 0.6,  pwr: -12, bom: { 'c.depth_pair': 1, 'c.glazing_sm': 2 } });
 P('r.sn.optic_thermal', 'Thermal optic pod',               { mass: 0.5,  pwr: -9,  bom: { 'c.thermal_cam': 1, 'c.glazing_sm': 1 } });
@@ -118,7 +97,6 @@ P('r.sn.spectro',       'Spectrometer head',               { mass: 1.3,  pwr: -2
 P('r.sn.xray',          'Backscatter X-ray head',          { mass: 7.0,  pwr: -220, heat: 160, bom: { 'c.xray_backsc': 1 } });
 P('r.sn.mast',          'Sensor mast + rotator',           { mass: 2.2,  pwr: -25, bom: { 'c.telescopic': 0.3, 'c.motor': 1, 'c.lidar_puck': 0.5 } });
 
-/* ---- compute, autonomy, comms --------------------------------------------- */
 P('r.cd.cpu_core',      'Flight / motion controller',      { mass: 0.6,  pwr: -25, heat: 20, bom: { 'c.cpu_tmr': 1, 'c.pcb': 2, 'c.connector': 3 } });
 P('r.cd.autonomy',      'Autonomy stack (inference)',      { mass: 1.4,  pwr: -120, heat: 110, bom: { 'c.nn_module': 2, 'c.pcb': 2, 'c.coldplate': 0.3 } });
 P('r.cd.safety',        'Safety controller + E-stop',      { mass: 1.0,  pwr: -8,  bom: { 'c.safety_plc': 1, 'c.estop': 1, 'c.harness': 0.4 } });
@@ -128,7 +106,6 @@ P('r.cd.dish',          'Steerable dish / relay head',     { mass: 2.4,  pwr: -3
 P('r.cd.harness',       'Internal harness run',            { mass: 1.0,  bom: { 'c.harness': 0.5, 'c.connector': 4 } });
 P('r.cd.recorder',      'Mission recorder / evidence log', { mass: 0.5,  pwr: -6, bom: { 'c.pcb': 1, 'c.memory': 0.3 } });
 
-/* ---- end effectors & tools ------------------------------------------------ */
 P('r.ee.gripper',       'Two-finger gripper',              { mass: 1.6,  pwr: -40, bom: { 'c.gripper_2f': 1, 'c.tool_changer': 0.4 } });
 P('r.ee.hand',          'Dexterous five-finger hand',      { mass: 3.1,  pwr: -70, heat: 20, bom: { 'c.hand_5f': 1, 'c.pcb': 1 } });
 P('r.ee.claw',          'Utility claw',                    { mass: 2.0,  pwr: -45, bom: { 'c.gripper_2f': 1, 'c.servo_joint': 1 } });
@@ -147,7 +124,6 @@ P('r.ee.medkit',        'Field medical pack + arm',        { mass: 7.0,  pwr: -4
 P('r.ee.winch',         'Cable winch',                     { mass: 6.2,  pwr: -700, heat: 150, bom: { 'c.winch': 1 } });
 P('r.ee.disruptor',     'EOD disruptor',                   { mass: 8.2,  pwr: -30, bom: { 'c.disruptor': 1 } });
 
-/* ---- armour & protection --------------------------------------------------- */
 P('r.ar.plate',         'Armour plate section',            { mass: 2.0,  bom: { 'c.armor_tile': 1, 'c.bolt_m6': 0.3 } });
 P('r.ar.composite',     'Composite panel section',         { mass: 1.3,  bom: { 'c.armor_tile': 0.6, 'c.honeycomb': 0.2, 'c.adhesive': 0.2 } });
 P('r.ar.ablative',      'Ablative panel section',          { mass: 1.1,  bom: { 'c.ablative_tile': 1, 'c.adhesive': 0.2 } });
@@ -157,7 +133,6 @@ P('r.ar.shield_field',  'Field emitter ring',              { mass: 12.0, pwr: -3
 P('r.ar.seal_ip',       'Sealed / washdown enclosure kit', { mass: 1.5,  bom: { 'c.seal_oring': 4, 'c.filter': 2, 'c.fan': 0.3 } });
 P('r.ar.rad_liner',     'Radiation liner',                 { mass: 5.0,  bom: { 'c.pe_shield': 0.5, 'c.b4c_tile': 0.4 } });
 
-/* ---- weapons --------------------------------------------------------------- */
 P('r.wp.smallarm',      'Integrated small-arm',            { mass: 6.5,  pwr: -20, bom: { 'c.gun_barrel': 0.15, 'c.ammo_feed': 0.15, 'c.fire_control': 0.2 } });
 P('r.wp.autocannon',    'Light autocannon mount',          { mass: 44.0, pwr: -120, heat: 80, bom: { 'c.autocannon_sm': 1, 'c.turret_ring': 0.2, 'c.fire_control': 0.3 } });
 P('r.wp.gatling',       'Rotary cannon mount',             { mass: 21.0, pwr: -900, heat: 300, bom: { 'c.gatling_sm': 1, 'c.turret_ring': 0.15 } });
@@ -175,7 +150,6 @@ P('r.wp.muzzle',        'Muzzle device',                   { mass: 0.6,  bom: { 
 P('r.wp.magazine',      'Magazine / cell',                 { mass: 2.4,  bom: { 'c.magazine': 0.06, 'c.ammo_feed': 0.05 } });
 P('r.wp.underbarrel',   'Underbarrel module',              { mass: 1.4,  pwr: -6, bom: { 'c.grenade_lchr': 0.08, 'c.work_lamp': 0.5 } });
 
-/* ---- career kit & payload --------------------------------------------------- */
 P('r.kt.cargo_rack',    'Cargo rack + bins',               { mass: 6.0,  bom: { 'c.cargo_bin': 1.5, 'c.rack_frame': 0.2, 'c.latch': 2 } });
 P('r.kt.forks',         'Pallet fork set',                 { mass: 16.0, pwr: -400, heat: 90, bom: { 'c.pallet_fork': 1, 'c.hydraulic_ram': 0.5 } });
 P('r.kt.tank',          'Liquid payload tank',             { mass: 3.0,  bom: { 'c.tank_liquid': 1, 'c.pump': 0.3 } });
@@ -196,21 +170,18 @@ P('r.kt.display',       'Status / face display',           { mass: 0.7,  pwr: -1
 P('r.kt.siren',         'Siren + light bar',               { mass: 1.6,  pwr: -70, bom: { 'c.siren': 1 } });
 P('r.kt.toolboard',     'Tool board / changer rack',       { mass: 3.2,  bom: { 'c.tool_changer': 2, 'c.rack_frame': 0.1 } });
 
-/* ---- thermal & environment --------------------------------------------------- */
 P('r.th.fan_loop',      'Forced-air cooling loop',         { mass: 1.4,  pwr: -45, heat: -600, bom: { 'c.fan': 1, 'c.filter': 1, 'c.coldplate': 0.3 } });
 P('r.th.liquid_loop',   'Pumped liquid cooling loop',      { mass: 4.0,  pwr: -90, heat: -2400, bom: { 'c.pump': 1, 'c.coldplate': 2, 'c.heatpipe': 2, 'c.radiator_panel': 0.4 } });
 P('r.th.radiator',      'Body radiator panel',             { mass: 1.8,  heat: -700, bom: { 'c.radiator_panel': 0.4, 'c.heatpipe': 1 } });
 P('r.th.heater',        'Survival heater set',             { mass: 0.5,  pwr: -60, bom: { 'c.heater': 4 } });
 P('r.th.dust_seal',     'Dust / splash sealing',           { mass: 0.8,  bom: { 'c.seal_oring': 3, 'c.filter': 1 } });
 
-/* ---- service, safety, interface --------------------------------------------- */
 P('r.sv.beacon',        'Hazard beacon set',               { mass: 0.4,  pwr: -18, bom: { 'c.beacon_led': 3 } });
 P('r.sv.worklamp',      'Work lamp set',                   { mass: 0.7,  pwr: -55, bom: { 'c.work_lamp': 2 } });
 P('r.sv.service_panel', 'Service hatch + diagnostics port',{ mass: 1.1,  bom: { 'c.hatch': 0.05, 'c.connector': 3, 'c.pcb': 0.3 } });
 P('r.sv.id_plate',      'Designation plate + livery',      { mass: 0.2,  bom: { 'c.shell_panel': 0.3, 'c.adhesive': 0.2 } });
 P('r.sv.transponder',   'Identify / transponder',          { mass: 0.3,  pwr: -5, bom: { 'c.uwb_tag': 2, 'c.pcb': 0.4 } });
 
-/* ---- micro tier — sub-metre scouts and inspection flyers ------------------- */
 P('r.fr.spine_micro',   'Micro airframe plate stack',      { mass: 0.25, bom: { 'c.frame_micro': 3, 'c.bolt_m4': 0.2 } });
 P('r.fr.shell_micro',   'Micro shell / canopy',            { mass: 0.10, bom: { 'c.shell_micro': 2 } });
 P('r.fr.hardpoint_mi',  'Micro payload rail',              { mass: 0.05, bom: { 'c.frame_micro': 0.5, 'c.connector': 0.1 } });
@@ -251,14 +222,6 @@ P('r.sv.beacon_micro',  'Micro nav strobes',               { mass: 0.05, pwr: -2
 P('r.sv.id_micro',      'Micro ident plate + tag',         { mass: 0.03, pwr: -0.5, bom: { 'c.uwb_tag': 0.4, 'c.shell_micro': 0.1 } });
 P('r.dr.leg_micro',     'Micro walking leg',               { mass: 0.35, pwr: -22, heat: 5, bom: { 'c.servo_micro': 3, 'c.boom_micro': 2, 'c.esc_micro': 1 } });
 
-/* ---- mass reconciliation -----------------------------------------------------
- * The components decide. Where a part's listed components already weigh more
- * than the part was pencilled in at, the part's mass is raised to what it is
- * actually made of; where they weigh less, the difference is filled with the
- * structure a real assembly carries anyway — frame, shell, fasteners — exactly
- * the way NEWSHIPGEN fills a part out to its mass. After this pass every part
- * satisfies  Σ(component mass) == part.mass,  so the manifest cannot quietly
- * invent or lose kilograms on the way down to raw stock. */
 const FILL_STD = [['c.frame_rib', 0.55], ['c.shell_panel', 0.35], ['c.bolt_m4', 0.10]];
 const FILL_MICRO = [['c.frame_micro', 0.55], ['c.shell_micro', 0.35], ['c.bolt_m4', 0.10]];
 function bomKg(bom) {
@@ -289,7 +252,6 @@ export function reconcileParts() {
   return report;
 }
 
-/* ---- micro-tier stores: what a sub-metre airframe is actually allowed to carry -- */
 P('r.wp.missiles_micro','Micro munition rail (2 tube)',    { mass: 2.0,  pwr: -8, bom: { 'c.smoke_tube': 1.6, 'c.pcb_sm': 2, 'c.sep_bolt': 1 } });
 P('r.wp.smallarm_micro','Micro weapon pod',                { mass: 0.9,  pwr: -6, bom: { 'c.gun_barrel': 0.015, 'c.pcb_sm': 1, 'c.frame_micro': 2 } });
 P('r.wp.jammer_micro',  'Micro EW pod',                    { mass: 0.7,  pwr: -120, heat: 90, bom: { 'c.tr_module': 1, 'c.pcb_sm': 2 } });
@@ -302,8 +264,6 @@ P('r.ee.tool_micro',    'Micro tool head',                 { mass: 0.14, pwr: -6
 P('r.dr.hover_micro',   'Micro lift fan',                  { mass: 0.30, pwr: -240, heat: 40, bom: { 'c.motor_micro': 2, 'c.duct_micro': 1, 'c.esc_micro': 1 } });
 P('r.dr.skirt_micro',   'Micro hover skirt section',       { mass: 0.09, bom: { 'c.skirt_seg': 0.16 } });
 
-
-/* ---- v1.7: the hardware the taxonomy grew ---------------------------------- */
 P('r.wp.railgun',       'Shoulder railgun',                { mass: 52.0, pwr: -9000, heat: 5200, bom: { 'c.rail_barrel': 0.32, 'c.capacitor': 6, 'c.power_switch': 8, 'c.turret_ring': 0.2 } });
 P('r.kt.winch_mount',   'Shoulder winch + cable',          { mass: 7.4,  pwr: -800, heat: 160, bom: { 'c.winch': 1, 'c.frame_rib': 2 } });
 P('r.sv.floodlight',    'Floodlight head',                 { mass: 2.2,  pwr: -220, heat: 120, bom: { 'c.work_lamp': 3, 'c.servo_joint': 1, 'c.pcb': 0.5 } });

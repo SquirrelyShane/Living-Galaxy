@@ -7,7 +7,7 @@
 Then open the printed URL in your phone browser.
 
 Besides serving the files it is a tiny in-memory relay so pilots on the same
-server can see each other and talk (js/net.js):
+server can see each other and talk (js/net/net.js):
 
     POST /net/send   {"room","from","kind":"state"|"msg","to"?,"data"}
     GET  /net/poll?room=&self=&since=   (since=-1 on a fresh join)
@@ -356,7 +356,7 @@ class ChatBook:
 
     @staticmethod
     def _read(data) -> tuple[str, str]:
-        """Pull a kind and a line of text out of whatever js/chat.js sent."""
+        """Pull a kind and a line of text out of whatever js/comms/chat.js sent."""
         if isinstance(data, dict):
             kind = str(data.get("kind") or data.get("channel") or data.get("t") or "msg")[:16]
             for key in ("text", "line", "body", "message", "say"):

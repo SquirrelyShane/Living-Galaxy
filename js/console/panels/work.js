@@ -1,17 +1,8 @@
-/* LIVING GALAXY — CONSOLE › WORK: MISSION (the autopilot's orders) · DRONES · FLEET.
- *
- * MISSION is the editor for js/mission/script.js: presets, the pilot's saved
- * list, step rows, an ADD STEP picker, a step sheet (target / until / per-step
- * overrides), the loop row, RUN, and the live card with the ask banner. The
- * editor is rebuilt on every edit (cheap, a dozen rows); only the live card
- * is refreshed per HUD frame. DRONES and FLEET live in their own modules.
- */
-
 import { el, section, note, row, button, group, chips, card } from "../kit.js";
-import { sim } from "../../sim.js";
-import { BODIES } from "../../bodies.js";
-import { stations } from "../../stations.js";
-import { hasUpgrade } from "../../upgrades.js";
+import { sim } from "../../sim/sim.js";
+import { BODIES } from "../../world/bodies.js";
+import { stations } from "../../station/stations.js";
+import { hasUpgrade } from "../../economy/upgrades.js";
 import {
   OPS, COND_KEYS, COND_OPS, WARP_POLICIES, ON_FAIL, makeMission, makeStep, validate, describeStep, describeCond, presets, loadMissions, saveMissions, serialize, deserialize, missionCore,
 } from "../../mission/script.js";
@@ -19,9 +10,9 @@ import { mission, missionStatusLine, startMission, stopMission, pauseMission, re
 import workDrones from "./work-drones.js";
 import workFleet from "./work-fleet.js";
 import workTape from "./work-tape.js";
-import { fabReport, cancelFab } from "../../fabricate.js";
+import { fabReport, cancelFab } from "../../economy/fabricate.js";
 import { closeConsole } from "../console.js";
-import { startCoreTutorial } from "../../tutorial.js";
+import { startCoreTutorial } from "../../ui/tutorial.js";
 
 const DOC = globalThis.document ?? null;
 void DOC;
@@ -30,47 +21,22 @@ const CAPS = [{ id: 0.25, label: "25%" }, { id: 0.5, label: "50%" }, { id: 0.75,
 const WARPS = WARP_POLICIES.map((w) => ({ id: w, label: w.toUpperCase() }));
 const COND_UNITS = { hold: "%", charge: "%", credits: "cr", hull: "hp", time: "s", cargoOf: "u", loops: "×", docked: "" };
 const tell = (msg) => { if (msg) { sim.notice = msg; sim.noticeAt = sim.wall; } };
-/* A refusal the pilot can actually SEE.
- *
- * `tell` writes sim.notice, which paints on the HUD — and the console is a
- * full-screen sheet drawn OVER the HUD, so every "no" this editor ever gave
- * while it was open went somewhere the pilot could not look at. Tapping DOCK
- * under the one-step limit lit the chip, added nothing, opened no sheet and
- * said nothing: the editor looked broken rather than locked. Refusals go in
- * the panel now, and to the HUD as well for when the console is shut. */
 const deny = (msg, render) => { ed.msg = msg; ed.core = false; tell(msg); render?.(); };
-/* A refusal that is ALWAYS the same refusal — "you need a Mission core" — and
- * so gets the one thing a plain notice cannot give: somewhere to go. The block
- * explains the core, and SHOW ME HOW shuts the console and starts the
- * walkthrough, which finds the nearest yard that fits one and flies you there.
- * It also fires the walkthrough automatically the FIRST time, because a pilot
- * who has just been told no is exactly the pilot who needs it. */
 const denyCore = (msg, render) => {
   ed.msg = msg;
   ed.core = true;
   tell(msg);
-  try { startCoreTutorial(false); } catch { /* the card is a nicety, not the fix */ }
+  try { startCoreTutorial(false); } catch {}
   render?.();
 };
 
-/* the editor's state survives sub-tab hops while the console is open */
 const ed = { draft: null, open: null, list: null, dirty: false, msg: "", core: false };
 const list = () => (ed.list ??= loadMissions());
 const persist = () => { const e = saveMissions(list()); if (e) tell(`Could not save missions: ${e}`); };
-/* A copy is YOURS. `builtin` is dropped along with `preset`, because the four
- * stock loops fly without a Mission core and a copy of one must not — otherwise
- * "duplicate MINE LOOP, then edit it" would be a way around the core entirely. */
 const fresh = (m, name = m.name) => { const c = deserialize(serialize(m)); return makeMission({ ...c, id: undefined, name, preset: false, builtin: false, createdAt: sim.time, runs: 0 }); };
 const capLabel = (v) => (v == null ? "—" : v > 1 ? "OD" : `${Math.round(v * 100)}%`);
 
-/* ---- the live card --------------------------------------------------------- */
-
 function liveCard(root, push) {
-  /* the subtitle has to EXIST to be written to every frame: kit.card only adds
-   * the <small> when it is given a hint, and "" is not one — so the refresher
-   * wrote textContent on null, and that threw out of the console paint, out of
-   * the HUD paint, and out of the engine's tick before it could render. An
-   * active mission plus this panel open froze the canopy for good. */
   const c = card("AUTOPILOT", "—");
   const status = el("p", "tstatus");
   const banner = el("div", "task-banner");
@@ -110,8 +76,6 @@ function liveCard(root, push) {
   });
 }
 
-/* ---- the step sheet ------------------------------------------------------------ */
-
 function targetOptions(op) {
   const out = [];
   const spec = OPS[op];
@@ -128,7 +92,6 @@ function targetOptions(op) {
 const refKey = (r) => (r ? `${r.kind}:${r.id ?? r.name ?? ""}` : "");
 const refLabel = (r) => r.name ?? { "best-buyer": "best buyer", "best-smelter": "best smelter", "nearest-port": "nearest port", seam: "nearest seam", here: "here", locked: "locked target" }[r.kind] ?? r.kind;
 
-/** metric chips × op chips × numeric stepper; writes into holder[key] */
 function condBuilder(holder, key, onChange) {
   const wrap = el("div", "tcond");
   const c = holder[key] ?? null;
@@ -207,12 +170,10 @@ function stepSheet(m, ix, render) {
   return c.card;
 }
 
-/* ---- the editor ------------------------------------------------------------------- */
-
 function editor(root, ctx) {
   const host = el("div", "tmission");
   root.append(host);
-  const core = () => missionCore();   /* either core — js/mission/run.js */
+  const core = () => missionCore();
   const render = () => {
     host.replaceChildren();
     if (ed.msg) {
@@ -227,10 +188,6 @@ function editor(root, ctx) {
       r.value.append(button("OK", () => { ed.msg = ""; ed.core = false; render(); }, "tiny"));
       host.append(w);
     }
-    /* presets */
-    /* What is on the ports' lines, wherever you are. A fabrication job runs on
-     * sim time at a berth you have probably already left, so without this the
-     * only way to know how it was getting on was to fly back and open the deck. */
     const jobs = fabReport();
     if (jobs.length) {
       const fs = section(`PORT LINES · ${jobs.length}`);
@@ -244,11 +201,6 @@ function editor(root, ctx) {
       root.append(fs);
     }
 
-    /* The four stock loops. They are `builtin`, so RUN flies them whether or
-     * not a Mission core is aboard — the core gates missions you WRITE, and
-     * gating the ones the game ships with left a coreless pilot with no
-     * multi-step autopilot at all. COPY lifts one into the editor, and that
-     * copy is yours, and gated. */
     const sp = section("PRESETS");
     note(sp, "Built in — these fly with no Mission core fitted. COPY makes one yours to edit.");
     for (const p of presets()) {
@@ -263,7 +215,6 @@ function editor(root, ctx) {
       ));
     }
     host.append(sp);
-    /* the saved list */
     const ss = section("SAVED MISSIONS");
     if (!list().length) note(ss, "Nothing saved yet — pick a preset or build one below, then SAVE.");
     for (const m of list()) {
@@ -276,7 +227,6 @@ function editor(root, ctx) {
       ));
     }
     host.append(ss);
-    /* the draft */
     const m = ed.draft ??= makeMission({ name: "New mission", steps: [], createdAt: sim.time });
     const se = section("EDITOR");
     if (!core()) note(se, "Without a Mission core (refit at a logistic or military yard) the autopilot flies one step at a time; loops and multi-step missions wait for the core.");
@@ -287,7 +237,6 @@ function editor(root, ctx) {
     dCap.value.append(chips(CAPS, { value: m.defaults.thrustCap, onPick: (v) => { m.defaults.thrustCap = v; } }).row);
     const dWarp = row(se, "Warp", { hint: "auto jumps · ask parks aligned and asks · never is sublight only" });
     dWarp.value.append(chips(WARPS, { value: m.defaults.warp, onPick: (v) => { m.defaults.warp = v; } }).row);
-    /* steps */
     const errs = validate(m);
     m.steps.forEach((s, i) => {
       const bad = errs.find((e) => e.step === i);
@@ -297,9 +246,6 @@ function editor(root, ctx) {
       if (ed.open === i) se.append(stepSheet(m, i, render));
     });
     const add = el("div", "tadd");
-    /* The one-step limit is stated BEFORE it is hit, not after. Without a
-     * Mission core a mission is one step, and a row of chips that all look
-     * tappable is a promise the editor cannot keep. */
     const locked = !core() && m.steps.length >= 1;
     add.append(el("p", "tlab", locked ? "ADD STEP · LOCKED" : "ADD STEP"));
     if (locked) note(add, "One step at a time until a Mission core is fitted — refit at a logistic or military yard. The presets above still run as they are.");
@@ -317,7 +263,6 @@ function editor(root, ctx) {
     if (locked) for (const b of addRow.children) b.disabled = true;
     add.append(addRow);
     se.append(add);
-    /* loop */
     const L = m.loop;
     const lr = row(se, "Loop", { hint: L.mode === "until" ? `until ${describeCond(L.until)}` : "" });
     lr.value.append(chips([{ id: "none", label: "NONE" }, { id: "count", label: "×N" }, { id: "until", label: "UNTIL" }], {
@@ -337,7 +282,6 @@ function editor(root, ctx) {
     se.append(group(
       button("RUN", () => {
         if (startMission(m)) { ed.msg = ""; ctx.openConsole?.("nav", "autopilot"); return; }
-        /* startMission already put its reason on sim.notice, behind this sheet */
         deny(sim.notice || "The autopilot would not take that mission.", render);
       }, "accent"),
       button("SAVE", () => { const i = list().findIndex((x) => x.id === m.id); if (i >= 0) list()[i] = m; else list().push(m); persist(); tell(`${m.name} saved.`); render(); }),
@@ -347,8 +291,6 @@ function editor(root, ctx) {
   };
   render();
 }
-
-/* ---- the panel ------------------------------------------------------------------------ */
 
 export default {
   id: "work",

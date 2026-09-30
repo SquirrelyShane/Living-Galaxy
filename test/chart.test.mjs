@@ -7,14 +7,14 @@
 import {
   sim, launchSim, tickSim, warpNodeById, warpDestination, warpBlock, plotRoute, clearArrival, POINT_ARRIVE_R,
   addWaypointAt, selectBody, targetPosition, sensorRange, SENSOR_R, throttleCap, setThrottle, stepWarp,
-} from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { BODIES, bodyPosition, currentSystem, dist3 } from "../js/bodies.js";
+} from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { BODIES, bodyPosition, currentSystem, dist3 } from "../js/world/bodies.js";
 const _hp = { x: 0, y: 0, z: 0 };
-import { inBelt, nearbyRocks, CELL } from "../js/field.js";
-import { autopilot, engageAutoWarp, engageAutopilot, disengageAutopilot, tickAutopilot } from "../js/autopilot.js";
-import { assayPoint, beltBandAt, remoteScan, launchProbe, probes, stepProbes, PROBE_SPEED, SCAN_REACH } from "../js/probes.js";
-import { setInjectedKeys, sampleInput, touch } from "../js/input.js";
+import { inBelt, nearbyRocks, CELL } from "../js/world/field.js";
+import { autopilot, engageAutoWarp, engageAutopilot, disengageAutopilot, tickAutopilot } from "../js/flight/autopilot.js";
+import { assayPoint, beltBandAt, remoteScan, launchProbe, probes, stepProbes, PROBE_SPEED, SCAN_REACH } from "../js/flight/probes.js";
+import { setInjectedKeys, sampleInput, touch } from "../js/core/input.js";
 import { captain } from "../js/npc/captain.js";
 
 let pass = 0, fail = 0;
@@ -58,7 +58,7 @@ ok(route.hazards.some((h) => h.kind === "belt"), "a belt destination lists the b
   ok(/WELL/.test(sim.warp.block), `next to ${home.name} the core reads its well (${sim.warp.block})`);
   /* the well ends where the pull falls off: past wellEdge the core spools even with the world still dominant */
   {
-    const { wellEdge, warpBlock } = await import("../js/sim.js");
+    const { wellEdge, warpBlock } = await import("../js/sim/sim.js");
     const edge = wellEdge(home);
     ok(edge <= home.radius * 8 && edge >= home.radius * 4, `${home.name}'s well ends between 4 and 8 radii (${(edge / 100).toFixed(0)} km)`);
     const p0 = { ...sim.ship.pos };

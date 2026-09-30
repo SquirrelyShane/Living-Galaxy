@@ -9,14 +9,14 @@
  *   node --import ./test/three-register.mjs test/hullspec.test.mjs
  */
 
-import { SHIP_DB, SIZE_BANDS } from "../js/shipdb.js";
-import { hullSpec, genConfig, manifestTotals, MODULE_PARTS, registerAll } from "../js/hullspec.js";
-import { componentBill, yardQuote, stockLines, partPrice, STOCK_MAP } from "../js/shipcost.js";
+import { SHIP_DB, SIZE_BANDS } from "../js/ships/shipdb.js";
+import { hullSpec, genConfig, manifestTotals, MODULE_PARTS, registerAll } from "../js/ships/hullspec.js";
+import { componentBill, yardQuote, stockLines, partPrice, STOCK_MAP } from "../js/economy/shipcost.js";
 import { SHIP_CLASSES } from "../js/shipgen/data/classes.js";
 import { PARTS } from "../js/shipgen/data/catalog/index.js";
 import { DRIVE_TYPES } from "../js/shipgen/data/drives.js";
 import { MATERIALS } from "../js/shipgen/data/materials.js";
-import { MINERALS } from "../js/materials.js";
+import { MINERALS } from "../js/economy/materials.js";
 import { normalizeConfig, loadoutFor } from "../js/shipgen/generate.js";
 
 let pass = 0;

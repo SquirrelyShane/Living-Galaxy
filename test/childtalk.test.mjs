@@ -11,11 +11,11 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, crewHooks, hireCrew, stationRoster, CYCLE_SECONDS, firstName } from "../js/crew.js";
-import { household, conceive } from "../js/family.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, crewHooks, hireCrew, stationRoster, CYCLE_SECONDS, firstName } from "../js/crew/ledger.js";
+import { household, conceive } from "../js/crew/family.js";
 import { cradle } from "../js/npc/cradle.js";
 import { bondWith } from "../js/crew/children.js";
 import * as CT from "../js/crew/childtalk.js";

@@ -35,10 +35,10 @@ await page.waitForTimeout(1500);
 
 /* dock, hire a watch, and run enough cycles for the book to fill */
 const hired = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { crew, hireCrew, stationRoster } = await import("/js/crew.js");
-  const { setSocial } = await import("/js/family.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { crew, hireCrew, stationRoster } = await import("/js/crew/ledger.js");
+  const { setSocial } = await import("/js/crew/family.js");
   const { runDeckCycle } = await import("/js/crew/deckmind.js");
   sim.ship.credits = 500000;
   sim.crewCapacity = 8;
@@ -132,12 +132,12 @@ if (!corpus.lines || corpus.features !== 16) fail("the training corpus did not e
 
 /* CREW › BONDS: the ladder, and HOUSE: the switches */
 const ladder = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { setSocial } = await import("/js/family.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { setSocial } = await import("/js/crew/family.js");
   const { runDeckCycle } = await import("/js/crew/deckmind.js");
   const R = await import("/js/crew/romance.js");
   const { ladderReport, pairOf } = R;
-  const { crew } = await import("/js/crew.js");
+  const { crew } = await import("/js/crew/ledger.js");
   const { journal } = await import("/js/crew/journal.js");
   setSocial({ romance: "crew", family: true, adult: true, contraception: false });
   sim.crewCapacity = 12;
@@ -182,7 +182,7 @@ if (house.overflow) fail("HOUSE overflows the sheet sideways at 412 px");
 
 /* CREW › SKY: the rest of the board */
 const sky = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   const { stepTraffic } = await import("/js/npc/traffic.js");
   const { tickNpcCrews, npcCrews, crewCensus } = await import("/js/npc/npccrew.js");
   for (let i = 0; i < 14; i++) { sim.time += 90; stepTraffic(sim.time, 90); tickNpcCrews(); }

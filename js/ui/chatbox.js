@@ -1,17 +1,7 @@
-/* LIVING GALAXY — the chatbox.
- *
- * Sits where the thumbstick was (the nose is steered by dragging the sky).
- * One stream over chat.js: the open channel (speech band), GNN bulletins,
- * your drones' reports, ship notices — with tabs, unread badges and the
- * tappable links each message carries. What you type goes out on the band:
- * to the live call if one is up, otherwise to the nearest hull or port in
- * reach, answered in character by the speech engine.
- */
-
-import { chat, CHANNELS, onChat, recent, markRead, follow, post } from "../chat.js";
-import { sim } from "../sim.js";
-import { stations } from "../stations.js";
-import { contacts } from "../turrets.js";
+import { chat, CHANNELS, onChat, recent, markRead, follow, post } from "../comms/chat.js";
+import { sim } from "../sim/sim.js";
+import { stations } from "../station/stations.js";
+import { contacts } from "../flight/turrets.js";
 import { traffic } from "../npc/traffic.js";
 import { talkTo, SPEECH_RANGE } from "../npc/speech.js";
 import { comms } from "../comms/comms.js";
@@ -21,7 +11,7 @@ const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 
-export const chatbox = { channel: "all", size: 0, root: null, seen: 0 };   // size: 0 folded to the input · 1 open · 2 tall
+export const chatbox = { channel: "all", size: 0, root: null, seen: 0 };
 
 function ago(at) { const s = Math.max(0, Math.round(sim.time - at)); return s < 90 ? `${s}s` : s < 5400 ? `${Math.round(s / 60)}m` : `${Math.round(s / 3600)}h`; }
 
@@ -40,7 +30,6 @@ function row(m) {
   return r;
 }
 
-/* unread on the open tab: "All" counts every channel */
 function unreadHere() {
   if (chatbox.channel === "all") return Object.values(chat.unread).reduce((a, n) => a + n, 0);
   return chat.unread[chatbox.channel] ?? 0;
@@ -88,7 +77,6 @@ function paintLog() {
   log.scrollTop = log.scrollHeight;
 }
 
-/** Who a typed line reaches: the live call, else the nearest hull or port in speech range. */
 function target() {
   const s = comms.session;
   if (s && s.isLive) return { session: s };
@@ -99,9 +87,6 @@ function target() {
     if (d >= bd) continue;
     const n = traffic.find((v) => v.id === c.id);
     bd = d;
-    /* the person, not the hull: the band labels a voice by who is flying, and
-     * a reply to you that used the hull name made the same ship look like two
-     * different contacts in the same log */
     best = { entity: n, kind: "vessel", name: n?.captain || c.name, hull: c.name };
   }
   for (const st of stations) { if (st.hostile && !st.claimed) continue; const d = d3(st, sim.ship.pos) * 0.7; if (d < bd) { bd = d; best = { entity: st, kind: "station", name: st.name }; } }
@@ -120,8 +105,6 @@ function send() {
   setTimeout(() => {
     const r = talkTo(t.entity, text, sim.time, t.kind);
     if (!r?.text) { post({ channel: "local", from: t.name, text: "…", tone: "neutral" }); return; }
-    /* talkTo hands back the band's own label for this voice — use it, so a
-     * reply and the same voice's chatter carry one name */
     post({ channel: "local", from: r.speaker || t.name, text: r.text, tone: t.entity?.sector === "pirate" ? "hostile" : "neutral", meta: { to: sim.callsign || "you" } });
   }, 700 + Math.min(1800, text.length * 30));
 }
@@ -131,7 +114,6 @@ export function mountChatbox() {
   if (!root) return;
   chatbox.root = root;
   root.addEventListener("pointerdown", (e) => e.stopPropagation());
-  /* the toggle cycles folded → open → tall → folded; the unread badge opens it */
   $("cb-toggle")?.addEventListener("click", () => setSize((chatbox.size + 1) % 3));
   $("cb-unread")?.addEventListener("click", () => setSize(1));
   $("cb-fold")?.addEventListener("click", () => { $("cb-in")?.blur(); setSize(0); });
@@ -139,13 +121,6 @@ export function mountChatbox() {
   $("cb-send")?.addEventListener("click", send);
   $("cb-in")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); send(); } e.stopPropagation(); });
   $("cb-in")?.addEventListener("keyup", (e) => e.stopPropagation());
-  /* Proxies for controls that live on the retired dash pages: tap the visible
-   * one, the real button gets the click, and its status text is mirrored here
-   * each paint. The APPROACH bar is the live user (index.html); the DOCK and
-   * HAIL side keys were removed in 0.3.07 — not because the mechanism failed,
-   * but because `.side-keys` was painted UNDER the 3D canvas, so every tap on
-   * them went to the sky instead. Anything added here needs to sit in a
-   * stacking context above #view or it will be dead in exactly the same way. */
   const proxies = [...document.querySelectorAll("[data-proxy]")];
   for (const b of proxies) b.addEventListener("click", () => $(b.dataset.proxy)?.click());
   paintTabs(); paintLog();
@@ -172,7 +147,6 @@ export function mountChatbox() {
       const src = $(b.dataset.proxy);
       b.classList.toggle("on", src?.classList.contains("on") || /^ON|DOCKED|LIVE|RING/.test(st));
     }
-    /* every ~10 s the ages tick over */
     const now = performance.now();
     if (now - chatbox.seen < 10000) return;
     chatbox.seen = now;

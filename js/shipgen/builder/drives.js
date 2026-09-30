@@ -1,5 +1,3 @@
-/* StarshipBuilder mixin — Main drive cluster and one builder per drive family.
- * Methods are installed onto StarshipBuilder.prototype by src/builder/StarshipBuilder.js. */
 import * as THREE from "three";
 import { RNG } from "../core/rng.js";
 import { G, makeMat, addMesh, wingShape } from "../core/geometry.js";
@@ -10,9 +8,6 @@ import { PARTS } from "../data/catalog/index.js";
 import { PREFABS, ALL_FACES, fpArea } from "../prefabs/index.js";
 
 export default {
-  /* ================================================================ */
-  /* ENGINES — one builder per drive family                            */
-  /* ================================================================ */
   addEngines(root) {
     const { L, B, H, rng, cls } = this;
     const n = rng.int(cls.engines[0], cls.engines[1]);
@@ -34,7 +29,6 @@ export default {
     const r = Math.min(B, H) * rng.range(0.12, 0.18);
     const len = L * rng.range(0.10, 0.18);
 
-    // mounting pylon shelf across the stern
     addMesh(group, G.box(), this.mats.dark, 0, -H * 0.02, z - len * 0.6, 0, 0, 0, B * 0.62, H * 0.34, L * 0.06);
 
     let lights = 0;
@@ -58,8 +52,6 @@ export default {
     root.add(group);
   },
 
-  /* layered exhaust anchored at the nozzle exit: soft outer sheath, hot core, exit bloom,
-   * and (for chemical / pulse drives) a row of shock diamonds. Every layer is throttle-driven. */
   plume(pod, radius, length, opts = {}) {
     const mats = this.mats;
     const z = opts.z ?? 0, type = this.drive;
@@ -73,11 +65,9 @@ export default {
     };
     const outer = mk(mats.glow, radius, length, opts.opacity ?? 0.34, opts.intensity ?? 2.4, "outer");
     mk(mats.hot, radius * 0.45, length * 0.72, Math.min(0.9, (opts.opacity ?? 0.34) + 0.35), (opts.intensity ?? 2.4) + 1.5, "core");
-    // exit bloom disc
     const dm = mats.hot.clone(); dm.transparent = true; dm.opacity = 0.55; dm.depthWrite = false; dm.side = THREE.DoubleSide; dm.userData.cloned = true;
     const disc = addMesh(pod, G.disc(), dm, 0, 0, z + radius * 0.02, 0, 0, 0, radius * 0.95, radius * 0.95, 1);
     disc.castShadow = false; disc.userData.plume = { type, base: 1, amp: 0.1, op: 0.55, layer: "disc" };
-    // shock diamonds on chemical-family exhausts
     if (["hydrogen", "vector", "pulse", "fusion"].includes(type)) {
       for (let i = 0; i < 3; i++) {
         const sm = mats.hot.clone(); sm.transparent = true; sm.opacity = 0.7; sm.depthWrite = false; sm.userData.cloned = true;
@@ -92,7 +82,6 @@ export default {
     const m = this.mats;
     addMesh(pod, G.cyl(16), m.engine, 0, 0, -len * 0.15, Math.PI / 2, 0, 0, r, len, r);
     addMesh(pod, G.torus(0.12), m.metal, 0, 0, -len * 0.55, 0, 0, 0, r * 1.12, r * 1.12, r * 0.4);
-    // flared bell
     const bell = addMesh(pod, G.taper(1.55, 18), m.engine, 0, 0, len * 0.5, Math.PI / 2, 0, 0, r * 1.05, len * 0.7, r * 1.05);
     bell.material = m.engine;
     addMesh(pod, G.taper(1.4, 18), m.glow, 0, 0, len * 0.52, Math.PI / 2, 0, 0, r * 0.86, len * 0.62, r * 0.86);
@@ -104,7 +93,6 @@ export default {
     const m = this.mats;
     addMesh(pod, G.box(), m.engine, 0, 0, 0, 0, 0, 0, r * 2.3, r * 2.3, len);
     addMesh(pod, G.box(), m.metal, 0, 0, -len * 0.5, 0, 0, 0, r * 2.5, r * 2.5, len * 0.14);
-    // emitter grid
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
         const cell = addMesh(pod, G.cyl(8), m.glow, i * r * 0.72, j * r * 0.72, len * 0.52, Math.PI / 2, 0, 0, r * 0.28, len * 0.06, r * 0.28);
@@ -174,21 +162,17 @@ export default {
     pod.add(gimbal);
   },
 
-  /* ---- HYDROGEN CHEM: cryo tank + clustered bell nozzles ---------- */
   drive_hydrogen(pod, r, len) {
     const m = this.mats;
-    // cryogenic feed tank with frost ribs
     addMesh(pod, G.cyl(16), m.light, 0, 0, -len * 0.55, Math.PI / 2, 0, 0, r * 1.25, len * 0.7, r * 1.25);
     for (let i = 0; i < 3; i++)
       addMesh(pod, G.torus(0.09), m.metal, 0, 0, -len * 0.85 + i * len * 0.3, 0, 0, 0, r * 1.3, r * 1.3, r * 0.3);
     addMesh(pod, G.box(), m.dark, 0, 0, -len * 0.1, 0, 0, 0, r * 2.1, r * 2.1, len * 0.3);
-    // turbopump plumbing
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2 + 0.4;
       addMesh(pod, G.cyl(6), m.metal, Math.cos(a) * r * 1.15, Math.sin(a) * r * 1.15, len * 0.05,
         Math.PI / 2, 0, 0, r * 0.1, len * 0.55, r * 0.1);
     }
-    // 3-bell cluster
     const bells = [[0, 0, 1.0], [-0.72, -0.42, 0.72], [0.72, -0.42, 0.72]];
     for (const [bx, by, bs] of bells) {
       const x = bx * r, y = by * r;
@@ -203,12 +187,10 @@ export default {
     this.count(6);
   },
 
-  /* ---- HALL / ION ARRAY: annular emitter rings (barge doctrine) ---- */
   drive_hall(pod, r, len) {
     const m = this.mats;
     addMesh(pod, G.box(), m.engine, 0, 0, -len * 0.15, 0, 0, 0, r * 2.4, r * 2.4, len * 0.8);
     addMesh(pod, G.box(), m.dark, 0, 0, -len * 0.55, 0, 0, 0, r * 2.7, r * 2.7, len * 0.16);
-    // three concentric emitter halos — the lit rings
     for (let i = 0; i < 3; i++) {
       const rr = r * (1.05 - i * 0.26);
       const ring = addMesh(pod, G.torus(0.10), m.glow, 0, 0, len * 0.42 + i * len * 0.16, 0, 0, 0, rr, rr, r * 0.22);
@@ -216,7 +198,6 @@ export default {
       ring.userData.pulse = { amp: 0.06, speed: 2.2, phase: i * 0.9 };
       addMesh(pod, G.torus(0.16), m.metal, 0, 0, len * 0.42 + i * len * 0.16, 0, 0, 0, rr * 1.16, rr * 1.16, r * 0.16);
     }
-    // magnet spines
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
       addMesh(pod, G.box(), m.metal, Math.cos(a) * r * 1.3, Math.sin(a) * r * 1.3, len * 0.35, 0, 0, 0, r * 0.13, r * 0.13, len * 0.7);
@@ -226,7 +207,6 @@ export default {
     this.count(5);
   },
 
-  /* ---- MICRO-EMITTERS: FEEP / electrospray needle arrays ---------- */
   drive_micro(pod, r, len) {
     const m = this.mats;
     addMesh(pod, G.box(), m.engine, 0, 0, -len * 0.1, 0, 0, 0, r * 2.2, r * 2.2, len * 0.7);
@@ -241,14 +221,11 @@ export default {
     this.count(4);
   },
 
-  /* ---- NUCLEAR THERMAL: reactor drum, radiator fins, long nozzle --- */
   drive_ntr(pod, r, len) {
     const m = this.mats;
     addMesh(pod, G.cyl(14), m.dark, 0, 0, -len * 0.5, Math.PI / 2, 0, 0, r * 1.15, len * 0.6, r * 1.15);
-    // shadow shield
     addMesh(pod, G.cyl(14), m.metal, 0, 0, -len * 0.16, Math.PI / 2, 0, 0, r * 1.45, len * 0.1, r * 1.45);
     addMesh(pod, G.cyl(14), m.engine, 0, 0, len * 0.12, Math.PI / 2, 0, 0, r * 0.85, len * 0.5, r * 0.85);
-    // radiator fins
     for (const sgn of [-1, 1]) {
       addMesh(pod, G.box(), m.panel, sgn * r * 1.9, 0, -len * 0.35, 0, 0, 0, r * 1.5, r * 0.06, len * 0.7);
       for (let i = 0; i < 3; i++)
@@ -261,7 +238,6 @@ export default {
     this.count(5);
   },
 
-  /* ---- GRAVITIC: no exhaust, counter-rotating coils ---------------- */
   drive_gravitic(pod, r, len) {
     const m = this.mats;
     addMesh(pod, G.cyl(16), m.engine, 0, 0, 0, Math.PI / 2, 0, 0, r * 0.7, len * 0.9, r * 0.7);

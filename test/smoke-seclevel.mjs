@@ -28,7 +28,7 @@ await page.click("#btn-sol");
 await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await sleep(1500);
 /* undock if the start put us in a berth, so SOS is a real option */
-await page.evaluate(async () => { const { sim } = await import("/js/sim.js"); sim.ship.dockedAt = null; sim.ship.lastHitBy = null; sim.ship.lastFireAt = -1e9; });
+await page.evaluate(async () => { const { sim } = await import("/js/sim/sim.js"); sim.ship.dockedAt = null; sim.ship.lastHitBy = null; sim.ship.lastFireAt = -1e9; });
 await sleep(600);
 
 const badge = await page.evaluate(() => { const b = document.querySelector("#sec-badge"); const r = b?.getBoundingClientRect(); return { present: Boolean(b), level: b?.dataset.level, text: b?.textContent, visible: Boolean(r && r.width > 10 && r.top >= 0 && r.bottom < innerHeight) }; });
@@ -45,12 +45,12 @@ await page.screenshot({ path: "/tmp/sec-green.png" });
 
 await page.evaluate(() => document.querySelector("#sec-card .sec-sos")?.click());
 await sleep(700);
-const called = await page.evaluate(async () => { const S = await import("/js/seclevel.js"); const { distress } = await import("/js/npc/security.js"); const c = distress.find((x) => x.victimId === "self"); return { call: Boolean(c), state: c?.state, text: document.querySelector("#sec-card")?.textContent ?? "", sosOff: document.querySelector("#sec-card .sec-sos")?.disabled, id: S.secState.sosId }; });
+const called = await page.evaluate(async () => { const S = await import("/js/corp/seclevel.js"); const { distress } = await import("/js/npc/security.js"); const c = distress.find((x) => x.victimId === "self"); return { call: Boolean(c), state: c?.state, text: document.querySelector("#sec-card")?.textContent ?? "", sosOff: document.querySelector("#sec-card .sec-sos")?.disabled, id: S.secState.sosId }; });
 ok(called.call && called.id, `SOS puts the player's call on the bus (${called.state})`);
 ok(called.sosOff, "and closes the button while a wing is coming");
 
 /* a hit: yellow */
-await page.evaluate(async () => { const { sim } = await import("/js/sim.js"); sim.ship.lastHitBy = "smoke"; sim.ship.lastHitAt = sim.time; });
+await page.evaluate(async () => { const { sim } = await import("/js/sim/sim.js"); sim.ship.lastHitBy = "smoke"; sim.ship.lastHitAt = sim.time; });
 await sleep(700);
 const yellow = await page.evaluate(() => ({ level: document.querySelector("#sec-badge")?.dataset.level, text: document.querySelector("#sec-card")?.textContent ?? "" }));
 ok(yellow.level === "yellow" && /IN COMBAT/.test(yellow.text), "shot at: YELLOW · IN COMBAT");
@@ -58,7 +58,7 @@ ok(/SOS closed: in combat/.test(yellow.text), "with SOS closed and the reason gi
 await page.screenshot({ path: "/tmp/sec-yellow.png" });
 
 /* heat: red, and the fine at a port */
-await page.evaluate(async () => { const { sim } = await import("/js/sim.js"); const { pilot } = await import("/js/pilot.js"); const { stations } = await import("/js/stations.js"); pilot.secHeat = 3.5; sim.ship.lastHitBy = null; sim.ship.credits = 20000; sim.ship.dockedAt = stations.find((s) => !s.hostile && s.sector !== "pirate").id; });
+await page.evaluate(async () => { const { sim } = await import("/js/sim/sim.js"); const { pilot } = await import("/js/flight/pilot.js"); const { stations } = await import("/js/station/stations.js"); pilot.secHeat = 3.5; sim.ship.lastHitBy = null; sim.ship.credits = 20000; sim.ship.dockedAt = stations.find((s) => !s.hostile && s.sector !== "pirate").id; });
 await sleep(700);
 const red = await page.evaluate(() => { const d = document.querySelector("#sec-badge-deck"); const r = d?.getBoundingClientRect(); return { level: document.querySelector("#sec-badge")?.dataset.level, deck: d?.dataset.level, deckVisible: Boolean(r && r.width > 10 && r.top >= 0 && r.bottom < innerHeight), text: document.querySelector("#sec-card")?.textContent ?? "", fine: Boolean(document.querySelector("#sec-card .sec-fine")) }; });
 ok(red.deck === "red" && red.deckVisible, "docked, the deck carries the diamond too — where PAY FINE is needed");
@@ -67,7 +67,7 @@ ok(red.fine, "PAY FINE is offered at an honest port");
 await page.screenshot({ path: "/tmp/sec-red.png" });
 await page.evaluate(() => document.querySelector("#sec-card .sec-fine")?.click());
 await sleep(700);
-const paid = await page.evaluate(async () => { const { pilot } = await import("/js/pilot.js"); return { heat: pilot.secHeat, level: document.querySelector("#sec-badge")?.dataset.level }; });
+const paid = await page.evaluate(async () => { const { pilot } = await import("/js/flight/pilot.js"); return { heat: pilot.secHeat, level: document.querySelector("#sec-badge")?.dataset.level }; });
 ok(paid.heat === 0 && paid.level !== "red", `paying clears the heat (${paid.level})`);
 
 const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);

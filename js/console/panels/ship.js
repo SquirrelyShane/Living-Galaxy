@@ -1,25 +1,15 @@
-/* LIVING GALAXY — CONSOLE › SHIP: STATUS · POWER · SYSTEMS · TRIM
- *
- * The numbers behind the gauges and every knob that has no business being a
- * thumb control: condition, the well you are in, the load ledger and shed
- * order, postures, master switches, engagement rules, trim. Each sub builds
- * its DOM once and pushes refreshers (ctx.push) that tick at HUD rate.
- */
-
 import { button, el, group, note, pct, row, section, setBar, slider, fmtDist, fmtTime, clockOf } from "../kit.js";
-import { mining, turretAim } from "../../turrets.js";
+import { mining, turretAim } from "../../flight/turrets.js";
 import { ring, sparkline } from "../../ui/charts.js";
-import { MINING_MODES, SHED_LABEL, TUNE_SPEC, TURRET_MODES, batteryCap } from "../../ship.js";
-import { moveShed, resetTune, setMiningMode, setTune, setTurretMode, sim, stationStatus, toggleSystem } from "../../sim.js";
-import { useGameStore } from "../../store.js";
-import { autopilot, sustainableThrottle } from "../../autopilot.js";
+import { MINING_MODES, SHED_LABEL, TUNE_SPEC, TURRET_MODES, batteryCap } from "../../flight/ship.js";
+import { moveShed, resetTune, setMiningMode, setTune, setTurretMode, sim, stationStatus, toggleSystem } from "../../sim/sim.js";
+import { useGameStore } from "../../core/store.js";
+import { autopilot, sustainableThrottle } from "../../flight/autopilot.js";
 import { duties, dutyReport } from "../../crew/duties.js";
 import { robotsSummary } from "../../crew/robots.js";
-import { upgradeLines } from "../../upgrades.js";
+import { upgradeLines } from "../../economy/upgrades.js";
 
 const DOC = globalThis.document ?? null;
-
-/* ---- postures (the CMD deck's one good idea) ----------------------------- */
 
 export const POSTURES = [
   { id: "cruise", label: "Cruise", hint: "shields up, guns safe, assist on, sentry watching", want: { shields: true, engines: true, turretsArmed: false, assist: true, sentry: true, lights: false } },
@@ -48,9 +38,6 @@ export function applyPosture(p) {
   sim.noticeAt = sim.wall;
 }
 
-/* ---- STATUS ---------------------------------------------------------------- */
-
-/** Passive telemetry: the last two hours of the ship as readouts you glance at. */
 function telemetryBlock(root, push) {
   const sec = section("Telemetry");
   const strip = el("div", "tele-strip");
@@ -80,7 +67,6 @@ function telemetryBlock(root, push) {
     rHeat.update(sim.heat);
     const held = T.cargo.length ? T.cargo[T.cargo.length - 1] / ship.cargoCap : NaN;
     rHold.update(Number.isFinite(held) ? held : 0);
-    /* the sparklines only change when a sample lands (every 3 s) — no reason to rebuild them at 14 Hz */
     const stamp = `${T.at}:${T.cargo.length}`;
     if (stamp === sampledAt) return;
     sampledAt = stamp;
@@ -186,8 +172,6 @@ function mountStatus(root, push) {
   });
 }
 
-/* ---- POWER ----------------------------------------------------------------- */
-
 function mountPower(root, push) {
   const ship = sim.ship;
 
@@ -204,8 +188,6 @@ function mountPower(root, push) {
   root.append(trimSec);
 
   const led = section("Load ledger");
-  /* every row reads ship.draws — what stepPower actually billed this tick —
-   * so the ledger adds up to the load instead of re-deriving it with its own sums */
   const dr = (k) => () => ship.draws?.[k] ?? 0;
   const items = [
     ["Life support", dr("life"), () => true],
@@ -260,13 +242,11 @@ function mountPower(root, push) {
       setBar(item.r.bar, d / Math.max(ship.reactor, 1), live ? null : "warn");
     }
     const P = autopilot.power ?? {};
-    const sus = sustainableThrottle(ship); // live: autopilot.power only refreshes while a leg flies
+    const sus = sustainableThrottle(ship);
     apRow.value.textContent = autopilot.on ? `${Math.round((P.throttle ?? 0) * 100)}% now · ${Math.round(sus * 100)}% sustainable` : `${Math.round(sus * 100)}% sustainable`;
     drawShed();
   });
 }
-
-/* ---- SYSTEMS --------------------------------------------------------------- */
 
 function mountSystems(root, push) {
   const ship = sim.ship;
@@ -382,8 +362,6 @@ function mountSystems(root, push) {
   });
 }
 
-/* ---- TRIM ------------------------------------------------------------------ */
-
 function mountTrim(root, push, ctx) {
   const ship = sim.ship;
   const trim = section("Handling and hardpoint trim");
@@ -422,8 +400,6 @@ function mountTrim(root, push, ctx) {
     }
   });
 }
-
-/* ---- the panel ------------------------------------------------------------- */
 
 const SUBS = { status: mountStatus, power: mountPower, systems: mountSystems, trim: mountTrim };
 

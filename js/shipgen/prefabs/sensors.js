@@ -1,7 +1,3 @@
-/* Prefabs — Antennas, optics and scanning heads.
- * Each prefab: faces (default mount faces), fp(s, part, face) → footprint {w,h,d} in ship units
- * (w along the face u-axis, d along v, h outward), build(g, s, part, S, rng) where g is a group
- * whose +Y points away from the hull and S is the StarshipBuilder (mats, lamp, dockBody…). */
 import * as THREE from "three";
 import { G, addMesh } from "../core/geometry.js";
 import { ALL_FACES } from "./_common.js";
@@ -11,7 +7,6 @@ export default {
     build(g, s, p, S, rng) {
       const m = S.mats; const mastH = s * 0.7;
       if (p.flush) {
-        // conformal phased-array plate in place of the parabolic dish
         addMesh(g, G.box(), m.dark, 0, s * 0.08, 0, 0, 0, 0, s * 1.6, s * 0.16, s * 1.6);
         const face = addMesh(g, G.box(), m.glassDark, 0, s * 0.19, 0, 0, 0, 0, s * 1.5, s * 0.05, s * 1.5); face.castShadow = false;
         for (let i = -2; i <= 2; i++) { addMesh(g, G.box(), m.metal, i * s * 0.3, s * 0.22, 0, 0, 0, 0, s * 0.012, s * 0.01, s * 1.5); addMesh(g, G.box(), m.metal, 0, s * 0.22, i * s * 0.3, 0, 0, 0, s * 1.5, s * 0.01, s * 0.012); }
@@ -38,7 +33,6 @@ export default {
     build(g, s, p, S, rng) {
       const m = S.mats;
       if (p.flush) {
-        // low teardrop blister
         addMesh(g, G.sphere(), m.light, 0, s * 0.05, 0, 0, 0, 0, s * 0.7, s * 0.42, s * 0.95);
         addMesh(g, G.torus(0.05), m.accent, 0, s * 0.08, 0, Math.PI / 2, 0, 0, s * 0.72, s * 0.96, s * 0.3);
         g.userData.sensor = { kind: "radome" };
@@ -56,7 +50,6 @@ export default {
     build(g, s, p, S, rng) {
       const m = S.mats; const hh = s * 2.4;
       if (p.flush) {
-        // swept blade antenna, edge-on to the flow
         addMesh(g, G.box(), m.dark, 0, s * 0.05, 0, 0, 0, 0, s * 0.2, s * 0.1, s * 1.1);
         addMesh(g, G.box(), m.light, 0, s * 0.36, s * 0.1, 0.5, 0, 0, s * 0.06, s * 0.6, s * 0.8);
         S.lamp(g, { color: "#ffffff", y: s * 0.62, z: s * 0.35, r: s * 0.04, mode: "blink", period: 2.2, duty: 0.12, phase: rng.next(), base: 6 });
@@ -74,7 +67,6 @@ export default {
     build(g, s, p, S, rng) {
       const m = S.mats;
       if (p.flush) {
-        // recessed aperture window with a shutter frame
         addMesh(g, G.box(), m.dark, 0, s * 0.08, 0, 0, 0, 0, s * 0.95, s * 0.16, s * 0.95);
         const w = addMesh(g, G.cyl(14), m.glassDark, 0, s * 0.18, 0, 0, 0, 0, s * 0.34, s * 0.04, s * 0.34); w.castShadow = false;
         addMesh(g, G.torus(0.1), m.metal, 0, s * 0.19, 0, Math.PI / 2, 0, 0, s * 0.36, s * 0.36, s * 0.2);
@@ -98,7 +90,6 @@ export default {
     build(g, s, p, S, rng) {
       const m = S.mats;
       if (p.flush) {
-        // flat aperture window; the scan stays in software
         addMesh(g, G.box(), m.dark, 0, s * 0.08, 0, 0, 0, 0, s * 1.0, s * 0.16, s * 1.0);
         const w = addMesh(g, G.box(), m.glassDark, 0, s * 0.19, 0, 0, 0, 0, s * 0.86, s * 0.05, s * 0.86); w.castShadow = false;
         const rot = new THREE.Group(); rot.position.set(0, s * 0.2, 0); rot.userData.spin = { axis: "y", speed: 1.4 }; rot.userData.sensor = { kind: "pod" };
@@ -122,7 +113,6 @@ export default {
     build(g, s, p, S, rng) {
       const m = S.mats; const u = s * 0.9;
       if (p.flush) {
-        // low fairing with a slit window; the head still sweeps inside
         addMesh(g, G.box(), m.dark, 0, s * 0.08, 0, 0, 0, 0, s * 1.4, s * 0.16, s * 1.8);
         addMesh(g, G.sphere(), m.hull, 0, s * 0.1, 0, 0, 0, 0, s * 0.7, s * 0.45, s * 0.9);
         const win = addMesh(g, G.box(), m.glassDark, 0, s * 0.3, -s * 0.35, -0.5, 0, 0, s * 1.0, s * 0.18, s * 0.06); win.castShadow = false;
@@ -146,5 +136,4 @@ export default {
       g.add(yaw);
     } },
 
-  /* weapons wrap the existing family builders */
 };

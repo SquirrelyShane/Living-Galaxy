@@ -10,20 +10,20 @@
  * the money the next run has to buy cargo with.
  */
 
-import { sim, launchSim, tickSim, crewCapacity } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { crew, crewWageTotal, stationRoster, resetCrew, CYCLE_SECONDS } from "../js/crew.js";
+import { sim, launchSim, tickSim, crewCapacity } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { crew, crewWageTotal, stationRoster, resetCrew, CYCLE_SECONDS } from "../js/crew/ledger.js";
 import { dutyOf, postKind, dutyOptions } from "../js/crew/roster.js";
-import { company, hasCompany, resetCompany, COMPANY, CHARTERS } from "../js/company.js";
-import { holdRoom } from "../js/ship.js";
+import { company, hasCompany, resetCompany, COMPANY, CHARTERS } from "../js/corp/company.js";
+import { holdRoom } from "../js/flight/ship.js";
 import {
   RUN, WANTED, CHARTER_FOR, biz, runBusiness, bizReport, bizLine, resetBusiness,
   considerHire, considerFound, considerSettle, considerTreasury, considerLayoff,
   wantScore, hasPostFor, payrollPerMin, workingCapital, postThem,
 } from "../js/aria/company.js";
-import { netWorth, CAREER_DEPT } from "../js/ariaplay.js";
+import { netWorth, CAREER_DEPT } from "../js/aria/play.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

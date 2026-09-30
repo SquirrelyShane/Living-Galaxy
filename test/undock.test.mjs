@@ -7,13 +7,13 @@
  * clamps stay on until it is done (0.3.25). The refusal was a notice on the
  * HUD, which the station deck covers — the button simply did nothing. */
 
-import { sim, launchSim, tickSim, toggleDock } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { boardFor, acceptContract, contracts, resetContracts, BOARD } from "../js/contracts.js";
-import { handlingLeft, clearDockwork } from "../js/dockwork.js";
-import { releaseTractor } from "../js/stationworks.js";
+import { sim, launchSim, tickSim, toggleDock } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { boardFor, acceptContract, contracts, resetContracts, BOARD } from "../js/economy/contracts.js";
+import { handlingLeft, clearDockwork } from "../js/station/dockwork.js";
+import { releaseTractor } from "../js/station/stationworks.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

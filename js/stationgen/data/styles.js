@@ -1,20 +1,3 @@
-/* Architecture styles: the *language* a station is built in.
- *
- * An archetype says what a station is for; a style says how its builders
- * build. The style weights which body forms each module family may take
- * (see prefabs/forms.js), which decorative kit goes on afterwards, how the
- * hangar mouths are cut, which structural alloy the hull is skinned in and
- * which hull grammars it favours. Every station rolls its own instance of
- * each form, so two stations in the same style are cousins, not twins.
- *
- *   cathedral   naves, pointed arches, buttresses, spires, rose windows — the pilgrim orders
- *   bastion     sloped armour, faceted keeps, gun blisters, blast doors — military spec
- *   civic       clean stacked decks, window bands, terraces — cities and trade
- *   industrial  drums, stacks, pipe, hazard stripes, exposed frames — the works
- *   frontier    welded hulls of odd sizes, patches, girders, cables — free ports
- *   research    faceted white pods, glass strips, dishes, crystal masts
- *   agrarian    glazed vaults, domes, green under glass, sun-facing everything
- */
 export const STYLES_ARCH = {
   cathedral: {
     label: "Cathedral", blurb: "the pilgrim orders build in naves and spires",
@@ -89,7 +72,6 @@ export const STYLES_ARCH = {
 };
 export const STYLE_KEYS = Object.keys(STYLES_ARCH);
 
-/** Pick from a weight table with the rng. */
 export function roll(rng, table, filter = null) {
   const pairs = Object.entries(table).filter(([k, w]) => w > 0 && (!filter || filter(k)));
   if (!pairs.length) return null;

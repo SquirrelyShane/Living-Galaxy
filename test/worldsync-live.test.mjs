@@ -1,8 +1,8 @@
 // node --import ./test/three-register.mjs test/worldsync-live.test.mjs
 import assert from 'node:assert/strict';
-const {applyWorldSnapshot}=await import('../js/sim.js');
-const {impactors}=await import('../js/impactors.js');
-const {holes}=await import('../js/holes.js');
+const {applyWorldSnapshot}=await import('../js/sim/sim.js');
+const {impactors}=await import('../js/world/events/impactors.js');
+const {holes}=await import('../js/world/events/holes.js');
 const {trafficDown}=await import('../js/npc/traffic.js');
 impactors.push({id:'new-rock',x:99});holes.push({id:'new-hole'});trafficDown.test=200;
 const stale={v:1,bodies:{},ports:{},lost:[],impactors:[],holes:[],trafficDown:{test:1}};

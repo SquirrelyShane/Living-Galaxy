@@ -15,10 +15,10 @@
  * the complaint was about what the belt felt like, not about a curve.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stepStations } from "../js/stations.js";
-import { currentSystem } from "../js/bodies.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stepStations } from "../js/station/stations.js";
+import { currentSystem } from "../js/world/bodies.js";
 import { traffic, stepTraffic } from "../js/npc/traffic.js";
 import { stepNpcCombat } from "../js/npc/combat.js";
 import { stepSecurity } from "../js/npc/security.js";

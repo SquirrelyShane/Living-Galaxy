@@ -10,10 +10,10 @@
  */
 import { generateNPC, ensureIdentity, PRONOUNS, GENDERS } from "../js/npc/cradle.js";
 import { genomeIdentity, SEX_SPLIT, NONBINARY_SHARE, createSpacer } from "../js/genome/spacer.js";
-import { personName, givenName } from "../js/names.js";
+import { personName, givenName } from "../js/world/names.js";
 import { LEXICONS } from "../js/data/lexicons.js";
-import { RACES } from "../js/races.js";
-import { genderMark, pronounOf } from "../js/crew.js";
+import { RACES } from "../js/crew/races.js";
+import { genderMark, pronounOf } from "../js/crew/ledger.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -91,8 +91,8 @@ function mulberry(seedStr) {
 /* ---- captains carry it onto the hull, so the directory can print it ------- */
 {
   const { buildRoster, captainLine } = await import("../js/npc/traffic.js");
-  const { launchSim, sim } = await import("../js/sim.js");
-  const { makePilot } = await import("../js/pilot.js");
+  const { launchSim, sim } = await import("../js/sim/sim.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
   makePilot("Dir", "terran", "general", null);
   launchSim("GenderTest", "sol");
   const { traffic } = await import("../js/npc/traffic.js");

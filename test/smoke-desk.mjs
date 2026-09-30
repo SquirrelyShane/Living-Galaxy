@@ -33,10 +33,10 @@ const ok = (c, m) => { if (c) { pass++; console.log("  ok ", m); } else { fail++
 
 const r = await page.evaluate(async () => {
   const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { renderDesk, renderHeld } = await import("/js/boardview.js");
-  const { contracts } = await import("/js/contracts.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { renderDesk, renderHeld } = await import("/js/ui/boardview.js");
+  const { contracts } = await import("/js/economy/contracts.js");
   const st = stations.find((s) => s.sector !== "pirate");
   sim.ship.dockedAt = st.id;
   const host = document.createElement("div");

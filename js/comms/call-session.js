@@ -1,12 +1,3 @@
-// js/comms/call-session.js
-// LIVING GALAXY — comms call session. No DOM, no timers. Driven entirely by tick(dtMs)
-// so it obeys the HUD TIME control (1x/8x/40x/pause) like the rest of the sim.
-//
-// Two flavours share one state machine:
-//   scripted — an NPC on the other end walks a dialogue tree (o.script)
-//   live     — another pilot on the relay (o.live): nothing auto-answers,
-//              lines arrive through receive(), and say() is free text.
-
 export const CallState = Object.freeze({
   IDLE: 'idle',
   RINGING_IN: 'ringing_in',
@@ -43,15 +34,14 @@ let _lineId = 0;
 export class TranscriptLine {
   constructor({ speaker, name, text, quality = 1, cps = 42, seed = 1 }) {
     this.id = ++_lineId;
-    this.speaker = speaker;          // 'peer' | 'self' | 'sys'
+    this.speaker = speaker;
     this.name = name;
     this.text = text;
     this.cps = cps;
-    this.chars = 0;                  // characters revealed
+    this.chars = 0;
     this.done = false;
     this.mask = TranscriptLine.mask(text, quality, seed);
   }
-  // Deterministic dropout mask: weak signal eats characters, not whole words.
   static mask(text, quality, seed) {
     if (quality >= 0.999) return null;
     const rnd = mulberry(seed);
@@ -75,20 +65,6 @@ export class TranscriptLine {
 }
 
 export class CallSession extends Emitter {
-  /**
-   * @param {object} o
-   * @param {string} o.peerName   display name, e.g. 'ZERZE CONTROL'
-   * @param {string} o.channel    e.g. 'CH 4'
-   * @param {number} o.rangeU     range in game units — drives light-lag
-   * @param {number} o.msPerUnit  light-lag per unit (default 2ms → 213u = 426ms)
-   * @param {number} o.quality    0..1 signal quality → garble + dropout
-   * @param {object} o.script     { start:'id', nodes:{ id:{ text, options?, next?, end? } } }
-   * @param {function} [o.provider] async ({history,node,session}) => {text, options}
-   * @param {boolean}  [o.live]     another human: no auto-answer, free-form lines
-   * @param {string}   [o.talkNode] scripted call that also takes free text: say() enters this node
-   * @param {boolean}  [o.hostile]  paints the ring red
-   * @param {object}   [o.peer]     whatever the caller wants to hang on the session (station, contact…)
-   */
   constructor(o = {}) {
     super();
     this.peerName = o.peerName || 'UNKNOWN';
@@ -101,14 +77,14 @@ export class CallSession extends Emitter {
     this.provider = o.provider || null;
     this.providerTimeoutMs = o.providerTimeoutMs ?? 4000;
     this.ringTimeoutMs = o.ringTimeoutMs ?? 15000;
-    this.replyTimeoutMs = o.replyTimeoutMs ?? 0;   // 0 = never nag
+    this.replyTimeoutMs = o.replyTimeoutMs ?? 0;
     this.seed = o.seed ?? 1337;
     this.live = !!o.live;
     this.hostile = !!o.hostile;
     this.peer = o.peer ?? null;
     this.kind = o.kind || (this.live ? 'peer' : 'npc');
-    this.peerAnswerMs = o.answerMs;   // undefined → 1400 + 2×lag; Infinity → nobody home
-    this.talkNode = o.talkNode ?? null; // scripted calls that also take free text route it here (npc/speech.js)
+    this.peerAnswerMs = o.answerMs;
+    this.talkNode = o.talkNode ?? null;
 
     this.state = CallState.IDLE;
     this.lines = [];
@@ -116,7 +92,7 @@ export class CallSession extends Emitter {
     this.elapsedMs = 0;
     this.ringMs = 0;
     this.peerTyping = false;
-    this._queue = [];       // [{at, fn}] scheduled in session-time
+    this._queue = [];
     this._clock = 0;
     this._node = null;
     this._rnd = mulberry(this.seed);
@@ -134,13 +110,11 @@ export class CallSession extends Emitter {
   }
   _at(delayMs, fn) { this._queue.push({ at: this._clock + Math.max(0, delayMs), fn }); }
 
-  // --- lifecycle -----------------------------------------------------------
   hail({ incoming = true } = {}) {
     this.ringMs = 0;
     this._set(incoming ? CallState.RINGING_IN : CallState.RINGING_OUT);
     this.emit('ring', { incoming });
     if (!incoming && !this.live) {
-      // peer picks up on its own; light-lag makes long-range hails feel long
       this._at(this.peerAnswerMs ?? (1400 + this.lagMs * 2), () => {
         if (this.state !== CallState.RINGING_OUT) return;
         this._set(CallState.CONNECTING);
@@ -160,7 +134,6 @@ export class CallSession extends Emitter {
     return true;
   }
 
-  /** Live calls: the far end picked up (or we did) — carrier is up, no script to walk. */
   connect() {
     if (this.state === CallState.ACTIVE) return false;
     this._queue.length = 0;
@@ -168,13 +141,11 @@ export class CallSession extends Emitter {
     return true;
   }
 
-  /** Live calls: a line from the far end. Garbled by signal quality like any peer line. */
   receive(text, name) {
     if (!this.isLive) return null;
     return this._push('peer', name || this.peerName, String(text), this.quality);
   }
 
-  /** Nobody answered, or the far end has no radio at all. */
   unreachable() {
     if (this.state === CallState.CLOSED) return false;
     this._queue.length = 0;
@@ -201,21 +172,20 @@ export class CallSession extends Emitter {
     return true;
   }
 
-  // --- dialogue ------------------------------------------------------------
   choose(optionId) {
     if (!this.active) return false;
     const opt = this.options.find(o => o.id === optionId);
     if (!opt) return false;
     this.options = [];
     this.emit('options', this.options);
-    this._push('self', this.selfName, opt.text ?? opt.label, 1); // local echo: clean, instant-ish
+    this._push('self', this.selfName, opt.text ?? opt.label, 1);
     this.emit('choice', opt);
     if (opt.end) { this._at(this.lagMs + 400, () => this.end('ended')); return true; }
     this._at(this.lagMs + 120, () => this._enter(opt.next));
     return true;
   }
 
-  say(text) { // free-form player line (keyboard input, or a live call)
+  say(text) {
     if (!this.active) return false;
     text = String(text).trim();
     if (!text) return false;
@@ -245,13 +215,13 @@ export class CallSession extends Emitter {
         );
         if (res?.text) text = res.text;
         if (res?.options) options = res.options;
-      } catch { /* keep scripted fallback — never leave the player stranded */ }
+      } catch {}
     }
 
     this.peerTyping = false;
     this.emit('typing', false);
     this._push('peer', this.peerName, text, this.quality);
-    this.emit('node', this._node);   // director runs node.effect (clamps, tolls, standing)
+    this.emit('node', this._node);
 
     const opts = (options || []).map((o, i) => ({
       id: o.id || `${nodeId}:${i}`,
@@ -259,8 +229,8 @@ export class CallSession extends Emitter {
       text: o.text || o.label,
       next: o.next,
       end: !!o.end,
-      effect: o.effect || null,   // fn(session) run by the director when chosen
-      tone: o.tone || 'neutral'   // neutral | firm | hostile | friendly
+      effect: o.effect || null,
+      tone: o.tone || 'neutral'
     }));
     this._pendingOptions = opts;
     if (node.end) this._at(this._speakMs(text) + 600, () => this.end('ended'));
@@ -298,7 +268,6 @@ export class CallSession extends Emitter {
     }
   }
 
-  // --- clock ---------------------------------------------------------------
   tick(dtMs) {
     if (this.state === CallState.CLOSED || this.state === CallState.IDLE) return;
     this._clock += dtMs;
@@ -327,7 +296,6 @@ export class CallSession extends Emitter {
       if (last && !last.done) {
         const shown = Math.floor(last.chars);
         if (last.advance(dtMs)) this._flushOptions();
-        /* only wake the UI when a character actually landed — no DOM churn on a frame that revealed nothing */
         if (last.done || Math.floor(last.chars) !== shown) this.emit('update');
       } else if (this._pendingOptions) {
         this._flushOptions();

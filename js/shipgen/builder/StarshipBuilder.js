@@ -1,6 +1,3 @@
-/* StarshipBuilder — core: build() pipeline, hull-volume tracking, hardpoint frame, lamps.
- * Geometry passes live in mixins (hull, drives, weapons, glazing, docking, placement, details)
- * so each can be upgraded on its own. */
 import * as THREE from "three";
 import { RNG } from "../core/rng.js";
 import { G, makeMat, addMesh, wingShape, FINISHES } from "../core/geometry.js";
@@ -34,13 +31,11 @@ export class StarshipBuilder {
     this.occ = [];
     this.eq = Object.assign({}, EQUIP_DEFAULT, CLASS_EQUIP[opts.shipClass] || {});
 
-
     const rng = this.rng;
     const C = this.cls;
-    // design regime: the flight environment the hull is shaped for
     this.regimeKey = (opts.designRegime && opts.designRegime !== "auto") ? opts.designRegime : (C.regime || "deep");
     this.aero = DESIGN_REGIMES[this.regimeKey] || DESIGN_REGIMES.deep;
-    const fin = this.aero.fineness;                       // stretch along the flow, slim across it, keep volume
+    const fin = this.aero.fineness;
     this.L = rng.range(...C.length) * opts.lengthBias * opts.scale * fin;
     this.B = rng.range(...C.beam) * opts.beamBias * opts.scale / Math.sqrt(fin);
     this.H = rng.range(...C.height) * opts.scale / Math.sqrt(fin);
@@ -70,9 +65,7 @@ export class StarshipBuilder {
       hot:    makeMat(hotCol,         { metalness: 0.02, roughness: 0.2, emissive: hotCol, emissiveIntensity: 4.0 }),
       glass:  makeMat("#bfe6ff",      { metalness: 0.05, roughness: 0.06, emissive: "#63b5ff", emissiveIntensity: 0.9, transparent: true, opacity: 0.68 }),
       panel:  skin(new THREE.Color(opts.primary).lerp(new THREE.Color("#000000"), 0.2), { metalness: 0.5, roughness: 0.62 }),
-      // tinted structural glazing — bridge canopy / viewports / array faces
       glassDark: makeMat("#101d29", { metalness: 0.25, roughness: 0.07, emissive: "#0d2f45", emissiveIntensity: 0.45, transparent: true, opacity: 0.92 }),
-      // warm cabin light behind crew viewports
       winLit: makeMat("#ffe3b8", { metalness: 0.0, roughness: 0.45, emissive: "#ffd39a", emissiveIntensity: 1.9 }),
       hazard: makeMat("#ffb03a", { metalness: 0.3, roughness: 0.5, emissive: "#ffb03a", emissiveIntensity: 0.7 }),
       rubber: makeMat("#171c24", { metalness: 0.15, roughness: 0.85 }),
@@ -92,7 +85,6 @@ export class StarshipBuilder {
     this.addSuperstructure(root);
     if (this.aero.fairings) this.addFairings(root);
     this.hardpoints();
-    // catalog unit: one "bay" of exterior real estate — follows the hull but never absurd on giants or needles
     this.U = THREE.MathUtils.clamp(Math.min(this.B, this.H) * 0.18, 0.75, 2.4);
     if (opts.wings && C.wings !== "none") this.addWings(root);
     this.addEngines(root);
@@ -112,7 +104,6 @@ export class StarshipBuilder {
 
   count(n = 1) { this.partCount += n; }
 
-  /* ---- hull volume tracking so detail can sit flush ---------------- */
   vol(parent, mat, x, y, z, w, h, d, rz = 0) {
     const m = addMesh(parent, G.box(), mat, x, y, z, 0, 0, rz, w, h, d);
     this.hullVols.push({ x, y, z, w, h, d });
@@ -120,7 +111,6 @@ export class StarshipBuilder {
     return m;
   }
 
-  /* pick a point on the outer surface of a tracked hull volume */
   pickSurface(rng, faces = ["top", "side", "bottom"], zRange = null) {
     const pool = this.hullVols.filter(v => v.w > this.B * 0.15 && v.d > this.L * 0.08);
     if (!pool.length) return null;
@@ -138,18 +128,13 @@ export class StarshipBuilder {
     return { pos: [v.x, v.y + v.h * 0.5, v.z], face: "top", vol: v };
   }
 
-  /* ---- HARDPOINT FRAME -------------------------------------------- *
-   * One reference volume + normalised (u,v) face coordinates, so every
-   * module can be placed deliberately instead of scattered at random.  */
   hardpoints() {
-    // a volume is mountable real estate if two of its dimensions are substantial (thin side pads count)
     const pool = this.hullVols.filter(v => !v.shield && Math.max(v.w, v.h) > this.B * 0.18 && Math.min(v.w, v.h) > this.B * 0.05 && v.d > this.L * 0.12);
     pool.sort((a, b) => (b.w * b.d * b.h) - (a.w * a.d * a.h));
     this.main = pool[0] || { x: 0, y: 0, z: 0, w: this.B * 0.6, h: this.H * 0.6, d: this.L * 0.7 };
     this.mainPool = pool;
   }
 
-  /* face + normalised coords -> world position on that face */
   hp(face, u, v, vol) {
     const V = vol || this.main;
     switch (face) {
@@ -162,8 +147,6 @@ export class StarshipBuilder {
     }
   }
 
-  /* ---- LAMPS ------------------------------------------------------- *
-   * modes: steady | pulse | blink | strobe | double | chase            */
   lamp(parent, o) {
     const color = o.color || "#ffffff";
     const base = o.base ?? 4.0;
@@ -186,7 +169,6 @@ export class StarshipBuilder {
     return mesh;
   }
 
-  /* face helpers kept on the class for backwards compatibility */
   static faceNormal(f) { return faceNormal(f); }
   static faceEuler(f) { return faceEuler(f); }
   static faceRotation(f) { return faceRotation(f); }

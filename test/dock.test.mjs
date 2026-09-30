@@ -9,14 +9,14 @@
 const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { sim, launchSim, tickSim, toggleDock, shiftClock } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { touch } = await import("../js/input.js");
-const { stations } = await import("../js/stations.js");
-const { bodyById, bodyPosition, bodyVelocity } = await import("../js/bodies.js");
-const { tractor, releaseTractor, clearDockRequest } = await import("../js/stationworks.js");
-const { threatTo, deliberate, surfaceOnly } = await import("../js/avoid.js");
-const AP = await import("../js/autopilot.js");
+const { sim, launchSim, tickSim, toggleDock, shiftClock } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { touch } = await import("../js/core/input.js");
+const { stations } = await import("../js/station/stations.js");
+const { bodyById, bodyPosition, bodyVelocity } = await import("../js/world/bodies.js");
+const { tractor, releaseTractor, clearDockRequest } = await import("../js/station/stationworks.js");
+const { threatTo, deliberate, surfaceOnly } = await import("../js/flight/avoid.js");
+const AP = await import("../js/flight/autopilot.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -73,7 +73,7 @@ const reset = () => { AP.disengageAutopilot("reset"); releaseTractor(); clearDoc
   tickSim(DT);
   const before = { x: ship.pos.x - st.x, y: ship.pos.y - st.y, z: ship.pos.z - st.z };
   shiftClock(1.5);
-  const { stepStations } = await import("../js/stations.js");
+  const { stepStations } = await import("../js/station/stations.js");
   stepStations(sim.time);
   const drift = Math.hypot(ship.pos.x - st.x - before.x, ship.pos.y - st.y - before.y, ship.pos.z - st.z - before.z);
   ok(drift < 20, `a 1.5 s room-clock jump leaves the hull where it was against the port (${drift.toFixed(1)} u; 0.3.03: ${Math.round(Math.hypot(st.vx, st.vy, st.vz) * 1.5)} u)`);

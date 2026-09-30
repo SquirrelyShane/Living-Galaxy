@@ -11,18 +11,18 @@
  * money — where it used to lose some every round.
  */
 
-import { sim, launchSim, tickSim, sellPriceAt, buyPriceAt } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { autopilot, bestPortFor } from "../js/autopilot.js";
-import { touch } from "../js/input.js";
-import { currentSystem } from "../js/bodies.js";
-import { BATTERY, holdRoom } from "../js/ship.js";
+import { sim, launchSim, tickSim, sellPriceAt, buyPriceAt } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { autopilot, bestPortFor } from "../js/flight/autopilot.js";
+import { touch } from "../js/core/input.js";
+import { currentSystem } from "../js/world/bodies.js";
+import { BATTERY, holdRoom } from "../js/flight/ship.js";
 import { presets, validate } from "../js/mission/script.js";
 import { mission, missionHooks, startMission, stopMission } from "../js/mission/run.js";
-import { tradeRoutes, bestRoute, sellable, routeLine } from "../js/traderoutes.js";
-import { contracts } from "../js/contracts.js";
-import { notePlayerChoice } from "../js/aria.js";
+import { tradeRoutes, bestRoute, sellable, routeLine } from "../js/economy/traderoutes.js";
+import { contracts } from "../js/economy/contracts.js";
+import { notePlayerChoice } from "../js/aria/aria.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

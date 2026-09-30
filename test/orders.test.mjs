@@ -16,19 +16,19 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, rapportBetween } from "../js/crew.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, rapportBetween } from "../js/crew/ledger.js";
 import * as DM from "../js/crew/deckmind.js";
 import * as OR from "../js/crew/orders.js";
 import { journal } from "../js/crew/journal.js";
 import { duties } from "../js/crew/duties.js";
 import { habitsLearned } from "../js/crew/learn.js";
-import * as CO from "../js/company.js";
-import * as LIFE from "../js/stafflife.js";
-import * as CARE from "../js/staffcare.js";
-import * as CLK from "../js/stationclock.js";
+import * as CO from "../js/corp/company.js";
+import * as LIFE from "../js/station/stafflife.js";
+import * as CARE from "../js/station/staffcare.js";
+import * as CLK from "../js/station/stationclock.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

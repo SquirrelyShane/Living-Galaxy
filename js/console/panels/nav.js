@@ -1,36 +1,25 @@
-/* LIVING GALAXY — CONSOLE › NAV: TARGETS · SURVEY · AUTOPILOT · MARKS · CONTACTS
- *
- * The locked body and every body nearest-first, the mission autopilot's
- * status and one-step orders, waypoints with live range/bearing/elevation,
- * and the sensor contacts whose relations the turret rules read.
- */
-
 import { button, el, group, note, row, section, fmtDist } from "../kit.js";
-import { BODIES, bodyById, bodyPosition, dist3, tempLabel } from "../../bodies.js";
-import { contacts } from "../../turrets.js";
-import { TURRET_MODES, forwardOf, rightOf, upOf } from "../../ship.js";
-import { anchorHint } from "../../anchors.js";
-import { addBodyWaypoint, addWaypoint, cycleRelation, removeWaypoint, requestScan, selectBody, setActiveWaypoint, setRelation, sim, stationStatus, toggleWarp, warpBlock, warpStatus, waypointPosition } from "../../sim.js";
+import { BODIES, bodyById, bodyPosition, dist3, tempLabel } from "../../world/bodies.js";
+import { contacts } from "../../flight/turrets.js";
+import { TURRET_MODES, forwardOf, rightOf, upOf } from "../../flight/ship.js";
+import { anchorHint } from "../../world/anchors.js";
+import { addBodyWaypoint, addWaypoint, cycleRelation, removeWaypoint, requestScan, selectBody, setActiveWaypoint, setRelation, sim, stationStatus, toggleWarp, warpBlock, warpStatus, waypointPosition } from "../../sim/sim.js";
 import { mission, missionStatusLine, startMission, stopMission, pauseMission, resumeMission, answerAsk } from "../../mission/run.js";
 import { oneStep } from "../../mission/script.js";
-import * as AP from "../../autopilot.js";
-import { nearbyRocks, inBelt } from "../../field.js";
+import * as AP from "../../flight/autopilot.js";
+import { nearbyRocks, inBelt } from "../../world/field.js";
 import { assayRock } from "../../bodygen/body.js";
 import { CLASSES } from "../../bodygen/classes.js";
-import { shipFx } from "../../ship.js";
-import { ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceReport, adviceReport } from "../../aria.js";
-import { stationById } from "../../stations.js";
-import { goodName } from "../../materials.js";
+import { shipFx } from "../../flight/ship.js";
+import { ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceReport, adviceReport } from "../../aria/aria.js";
+import { stationById } from "../../station/stations.js";
+import { goodName } from "../../economy/materials.js";
 
-/* 0.3.67: what a mark follows, in words */
 const markHint = (w) => (w.body ? "tracks the body" : w.lost ? "last seen — the thing it followed is gone" : anchorHint(w.anchor));
 
-/* `nearestSeam` is a primitive package C exports from autopilot.js; reach it through the namespace so the panel loads either way. */
 const autopilot = AP.autopilot;
 
 const _p = { x: 0, y: 0, z: 0 };
-
-/* ---- TARGETS --------------------------------------------------------------- */
 
 const lockedRef = () => (sim.selected ? { kind: "locked", id: sim.selected, name: bodyById(sim.selected)?.name } : null);
 
@@ -90,7 +79,6 @@ function mountTargets(root, push) {
     blockRow.value.className = `v ${why && st.state === "idle" ? "hot" : "good"}`;
 
     const sorted = rows.map((r) => { bodyPosition(r.id, sim.time, _p); return { r, d: dist3(ship.pos, _p) }; }).sort((a, b) => a.d - b.d);
-    /* only re-seat the rows when the order actually changes — an append per row per tick is a reflow storm */
     const order = sorted.map((x) => x.r.id).join("|");
     const reorder = order !== navOrder;
     navOrder = order;
@@ -101,8 +89,6 @@ function mountTargets(root, push) {
     }
   });
 }
-
-/* ---- AUTOPILOT ------------------------------------------------------------- */
 
 const CAPS = [[0.25, "25%"], [0.5, "50%"], [0.75, "75%"], [1, "100%"]];
 const WARPS = [["auto", "AUTO"], ["ask", "ASK"], ["never", "NEVER"]];
@@ -174,8 +160,6 @@ function mountAutopilot(root, push, ctx) {
   });
 }
 
-/* ---- MARKS ----------------------------------------------------------------- */
-
 function mountMarks(root, push) {
   const mark = section("Mark a position");
   note(mark, "At these distances a bearing is worth more than a map. The active mark draws in the canopy and reads out on the HUD.");
@@ -234,8 +218,6 @@ function mountMarks(root, push) {
   });
 }
 
-/* ---- CONTACTS -------------------------------------------------------------- */
-
 function mountContacts(root, push) {
   const ship = sim.ship;
   const head = section("Sensor contacts");
@@ -281,13 +263,6 @@ function mountContacts(root, push) {
   function bulk(rel) { for (const c of contacts) if (c.relation !== rel) setRelation(c.id, rel); key = ""; }
 }
 
-/* ---- ARIA ------------------------------------------------------------------
- *
- * What the ship's core has learned from watching you, and the button that
- * lets it fly. It is not a second autopilot — it holds the conn the way a crew
- * captain does — and the core it flies with is the one that has been taking a
- * label off your own hands since the first time you took the stick.
- */
 function mountAria(root) {
   const w = ariaWatchReport();
   const s = section(w.flying ? "ARIA — HAS THE CONN" : "ARIA — THE SHIP'S CORE");
@@ -328,15 +303,6 @@ function mountAria(root) {
   }
 }
 
-/* ---- SURVEY ----------------------------------------------------------------
- *
- * What the locked rock actually is. The class, the mineral suite, and a
- * prospector's ticket priced off what a cutter would recover — the same
- * numbers the canopy is painting, because both come out of js/bodygen/.
- *
- * Without the assay deck refit you get the headline and the class, which is
- * what a survey set can tell from a spectrum. With it you get the whole suite.
- */
 export function lockedRock() {
   const id = sim.lock?.id;
   if (!id || !inBelt(sim.ship.pos)) return null;
@@ -378,8 +344,6 @@ function mountSurvey(root) {
   }
   root.append(t);
 }
-
-/* ---- the panel ------------------------------------------------------------- */
 
 const SUBS = { targets: mountTargets, survey: mountSurvey, autopilot: mountAutopilot, aria: mountAria, marks: mountMarks, contacts: mountContacts };
 

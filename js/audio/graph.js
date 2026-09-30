@@ -1,31 +1,8 @@
-/* LIVING GALAXY — the audio graph.
- *
- * One AudioContext, five named buses, two reverbs and a limiter. Nothing is
- * loaded: every sound in the game is synthesised at the moment it plays, the
- * same way every hull and every world is. That is not purity for its own
- * sake — it means a new cue costs a few lines instead of a wav file, the
- * whole kit survives being served off a phone, and a sound can be tuned by
- * the thing that triggered it (how hard the rock hit, how far off the lane
- * you are) rather than picked from a handful of takes.
- *
- * The palette is Interstellar's, which is a narrow one on purpose: pipe
- * organ, sub-bass, air, wood and metal. No bright digital beeps anywhere —
- * the thing being replaced was one loud sine doing twenty different jobs.
- *
- *   BUSES   ui · world · alert · ambience · engine
- *   SENDS   room (0.9 s) · space (4.6 s)
- *   MASTER  → limiter → destination
- */
-
 export const BUSES = ["ui", "world", "alert", "ambience", "engine"];
 
-/* Defaults chosen so the bed sits under everything and an alert cuts. */
 const DEFAULT_LEVELS = { ui: 0.55, world: 0.8, alert: 0.95, ambience: 0.6, engine: 0.5, master: 0.7 };
 const LS_KEY = "lgaa.audio.mix";
 
-/* A hard ceiling on simultaneous synthesised voices. A phone that is already
- * drawing a sky does not have the headroom for fifty oscillators, and past
- * about this many nobody can hear the difference anyway. */
 const MAX_VOICES = 26;
 
 let kit = null;
@@ -33,20 +10,13 @@ let muted = false;
 let levels = { ...DEFAULT_LEVELS };
 let voices = 0;
 
-/* ---- tuning -------------------------------------------------------------
- * Every pitched sound in the game comes out of one scale, so a cue can never
- * clash with the bed underneath it. A natural minor on A: no major third
- * anywhere, which is most of why the palette reads as cold rather than
- * cheerful.
- */
-export const ROOT = 55;                                  // A1
-const STEPS = [0, 2, 3, 5, 7, 8, 10];                    // aeolian
+export const ROOT = 55;
+const STEPS = [0, 2, 3, 5, 7, 8, 10];
 export function degree(n, octave = 0) {
   const i = ((n % 7) + 7) % 7;
   const oct = octave + Math.floor(n / 7);
   return ROOT * Math.pow(2, oct + STEPS[i] / 12);
 }
-/** Named handles for the notes cues actually use. */
 export const NOTE = {
   A0: ROOT / 2, A1: ROOT, A2: ROOT * 2, A3: ROOT * 4, A4: ROOT * 8,
   C2: degree(2, 1), D2: degree(3, 1), E2: degree(4, 1), F2: degree(5, 1), G2: degree(6, 1),
@@ -54,12 +24,6 @@ export const NOTE = {
   C4: degree(2, 3), D4: degree(3, 3), E4: degree(4, 3),
 };
 
-/* ---- reverb -------------------------------------------------------------
- * Two impulse responses, generated rather than loaded. Noise under an
- * exponential decay is a crude reverb and an entirely convincing one at this
- * scale; the only refinements that matter are a little stereo decorrelation
- * so it opens up, and rolling the top off the tail so it does not hiss.
- */
 function impulse(ctx, seconds, decay, damp) {
   const rate = ctx.sampleRate;
   const len = Math.max(1, Math.floor(rate * seconds));
@@ -70,12 +34,9 @@ function impulse(ctx, seconds, decay, damp) {
     for (let i = 0; i < len; i++) {
       const t = i / len;
       const env = Math.pow(1 - t, decay);
-      /* one-pole low pass over the noise: the tail darkens as it dies, the
-       * way a real room does */
       lp += (Math.random() * 2 - 1 - lp) * damp;
       d[i] = lp * env;
     }
-    /* a couple of early reflections give the short room a size */
     if (seconds < 2) {
       for (const [at, g] of [[0.011, 0.5], [0.019, 0.36], [0.029, 0.22]]) {
         const k = Math.floor(rate * (at + ch * 0.0013));
@@ -85,8 +46,6 @@ function impulse(ctx, seconds, decay, damp) {
   }
   return buf;
 }
-
-/* ---- the kit ------------------------------------------------------------ */
 
 function readMix() {
   try {
@@ -100,7 +59,7 @@ function readMix() {
 }
 
 function writeMix() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(levels)); } catch { /* private mode */ }
+  try { localStorage.setItem(LS_KEY, JSON.stringify(levels)); } catch {}
 }
 
 export function ensureAudio() {
@@ -112,10 +71,6 @@ export function ensureAudio() {
   const ctx = new AC({ latencyHint: "interactive" });
   levels = readMix();
 
-  /* A limiter, not a compressor doing limiter duty: a hard knee up near 0 dB
-   * so a burst of cues on top of the bed never clips, and nothing below it is
-   * touched. The old kit had no protection at all, which is part of why one
-   * tone read as "loud". */
   const limiter = ctx.createDynamicsCompressor();
   limiter.threshold.value = -3;
   limiter.knee.value = 0;
@@ -144,9 +99,6 @@ export function ensureAudio() {
   for (const name of BUSES) {
     const g = ctx.createGain();
     g.gain.value = levels[name];
-    /* Ducking rides on its own node so the player's level and the duck never
-     * fight over the same AudioParam — the old single-gain approach is how
-     * you end up with a bus stuck at 30% after an alert. */
     const d = ctx.createGain();
     d.gain.value = 1;
     g.connect(d);
@@ -182,8 +134,6 @@ export function now() {
   return k ? k.ctx.currentTime : 0;
 }
 
-/* ---- mix ---------------------------------------------------------------- */
-
 export function setMuted(v) {
   muted = Boolean(v);
   if (!kit) return;
@@ -204,11 +154,6 @@ export function setBusLevel(name, value) {
 export function busLevels() { return { ...levels }; }
 export function resetMix() { for (const k of Object.keys(DEFAULT_LEVELS)) setBusLevel(k, DEFAULT_LEVELS[k]); }
 
-/**
- * Pull everything except alerts down for a moment. A warning that arrives
- * under a full engine bed and a station hum is a warning nobody hears, and
- * turning the alert up instead is how you get the thing being replaced here.
- */
 export function duck(depth = 0.45, holdMs = 700) {
   const k = kit;
   if (!k) return;
@@ -223,26 +168,14 @@ export function duck(depth = 0.45, holdMs = 700) {
   }
 }
 
-/* ---- voices -------------------------------------------------------------
- * A claim/release pair rather than a pool of pre-built nodes: Web Audio
- * sources are single-use by design, so pooling them buys nothing. What is
- * worth having is the cap and the priority, so a click cannot starve an
- * alarm.
- */
 export function claimVoice(priority = 0) {
   if (voices >= MAX_VOICES && priority < 2) return false;
-  if (voices >= MAX_VOICES + 8) return false;      // even alerts have a ceiling
+  if (voices >= MAX_VOICES + 8) return false;
   voices++;
   return true;
 }
 export function releaseVoice() { voices = Math.max(0, voices - 1); }
 
-/**
- * Wire a voice's output and schedule its own teardown. Everything that makes
- * a sound goes through here, which is the only reason the node count comes
- * back down: a forgotten disconnect in a game that plays a cue per tap is a
- * leak with a stopwatch on it.
- */
 export function toBus(node, busName, { room = 0, space = 0, stopAt = 0, sources = [] } = {}) {
   const k = ensureAudio();
   if (!k) return;
@@ -252,12 +185,12 @@ export function toBus(node, busName, { room = 0, space = 0, stopAt = 0, sources 
   if (space > 0) { const g = k.ctx.createGain(); g.gain.value = space; node.connect(g); g.connect(k.sends.space); tidy(g, stopAt); }
   tidy(node, stopAt);
   for (const s of sources) {
-    try { s.stop(stopAt); } catch { /* already stopped */ }
+    try { s.stop(stopAt); } catch {}
   }
   if (stopAt > 0) {
     const ms = Math.max(0, (stopAt - k.ctx.currentTime) * 1000) + 260;
     setTimeout(() => {
-      for (const s of sources) { try { s.disconnect(); } catch { /* gone */ } }
+      for (const s of sources) { try { s.disconnect(); } catch {} }
       releaseVoice();
     }, ms);
   }
@@ -267,14 +200,9 @@ function tidy(node, stopAt) {
   const k = kit;
   if (!k || stopAt <= 0) return;
   const ms = Math.max(0, (stopAt - k.ctx.currentTime) * 1000) + 300;
-  setTimeout(() => { try { node.disconnect(); } catch { /* gone */ } }, ms);
+  setTimeout(() => { try { node.disconnect(); } catch {} }, ms);
 }
 
-/* ---- noise --------------------------------------------------------------
- * One shared noise buffer. Air, hull rumble, thruster wash, metal strikes
- * and the reverb tails all start life here, so it is built once and looped
- * rather than allocated per cue.
- */
 let noiseBuf = null;
 export function noiseBuffer() {
   const k = ensureAudio();
@@ -287,8 +215,6 @@ export function noiseBuffer() {
     let b0 = 0, b1 = 0, b2 = 0;
     for (let i = 0; i < len; i++) {
       const w = Math.random() * 2 - 1;
-      /* Pinked: white noise reads as hiss, and there is no hiss anywhere in
-       * this palette. Cheap three-pole approximation. */
       b0 = 0.99765 * b0 + w * 0.0990460;
       b1 = 0.96300 * b1 + w * 0.2965164;
       b2 = 0.57000 * b2 + w * 1.0526913;
@@ -297,8 +223,6 @@ export function noiseBuffer() {
   }
   return noiseBuf;
 }
-
-/* ---- lifecycle ---------------------------------------------------------- */
 
 let resuming = false;
 export function unlock() {
@@ -316,7 +240,6 @@ export function resumeIfNeeded() {
   }
 }
 
-/** Tests and the audition lab drive an OfflineAudioContext through here. */
 export function _installContext(ctx) {
   kit = null;
   voices = 0;

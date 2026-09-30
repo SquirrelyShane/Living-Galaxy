@@ -1,25 +1,10 @@
-/* LIVING GALAXY — robot crew.
- *
- * A yard at an industrial, civilian or military port prints one design per
- * kind from the ROBOTGEN catalogue (robotgen/spec.js, the same generator the
- * drone lines use). A bought robot is a crew member with `robot: true`: it
- * stands a station like a hand does (its complexId puts it in a room via
- * deckplan.stationRoomFor), but it draws no wage, has no morale worth
- * moving, courts nobody and cannot hold the conn. What it wants instead is
- * power — Σ kW lands on ship.extraDraw — and maintenance: condition falls
- * with the hull's wear backlog and comes back under an engineer, or at a
- * yard for credits. Robots persist per sky: they are property.
- * Contract: PLAN.md §4.7.
- */
-
 import { generateRobot } from "../robotgen/spec.js";
-import { crew } from "../crew.js";
-import { sim } from "../sim.js";
-import { fx } from "../upgrades.js";
+import { crew } from "./ledger.js";
+import { sim } from "../sim/sim.js";
+import { fx } from "../economy/upgrades.js";
 import { duties } from "./duties.js";
 import { PRONOUNS } from "../npc/cradle.js";
 
-/** kind → robotgen role, complexId (→ station via deckplan.stationRoomFor), power, base price */
 export const ROBOT_KINDS = {
   deckhand: { label: "Deckhand",  role: "labor",      loco: "biped",   complexId: "logistics",      kw: 1.2, base: 2600 },
   engineer: { label: "Engineer",  role: "utility",    loco: "biped",   complexId: "energy",         kw: 1.6, base: 4200 },
@@ -33,17 +18,14 @@ export const ROBOT_KINDS = {
 export const ROBOT_PRICE_K = 0.12;
 export const ROBOT_SECTORS = ["industrial", "civilian", "military"];
 
-/* the rates, per second of sim time */
-export const ROBOT_WEAR = 0.02;       // condition/s × (1 + duties.wear), halved by the charging bay
-export const ROBOT_REPAIR = 0.05;     // condition/s an engineer at Engineering restores to each other robot
-export const ROBOT_IDLE_AT = 30;      // below this a robot is off the rota until serviced
-export const SERVICE_CR = 60;         // per point of condition at a yard
+export const ROBOT_WEAR = 0.02;
+export const ROBOT_REPAIR = 0.05;
+export const ROBOT_IDLE_AT = 30;
+export const SERVICE_CR = 60;
 export const SCRAP_REFUND = 0.4;
 
-/** { n: lifetime buys this sky (ids), sinceSave: seconds } */
 export const robots = { n: 0, sinceSave: 0 };
 
-/* a port's livery follows its sector, as the drone lines do */
 const SECTOR_PALETTES = {
   industrial: ["industrial", "hazard", "ferrite"],
   military: ["military", "security", "ferrite"],
@@ -58,11 +40,9 @@ function hash(s) {
   return h >>> 0;
 }
 
-/* the generator is not cheap: remember the designs already printed */
 const DESIGN_CACHE = new Map();
 const DESIGN_CACHE_MAX = 120;
 
-/** The yard's tag for one (kind, seed, sector): designation, chassis, mass, kW, cost. */
 export function robotDesign(kind, seed, sector = null) {
   const key = `${kind}|${seed}|${sector ?? ""}`;
   const hit = DESIGN_CACHE.get(key);
@@ -98,7 +78,6 @@ function berthsUsedAboard() {
   return crew.aboard.length;
 }
 
-/** What buying `kind` here would run into, or null. */
 function blockerFor(K, st, price) {
   if (!st || !ROBOT_SECTORS.includes(st.sector)) return `no robot yard at a ${st?.sector ?? "—"} port`;
   if (berthsUsedAboard() >= (sim.robotCapacity ?? sim.crewCapacity ?? 2)) return "no frames or berths free";
@@ -106,7 +85,6 @@ function blockerFor(K, st, price) {
   return null;
 }
 
-/** → [{ kind, label, designation, spec, price, kw, blocker }] — one design per (kind, port). */
 export function robotCatalogue(st, seed = `${sim.callsign}:${st?.id}`) {
   return Object.entries(ROBOT_KINDS).map(([kind, K]) => {
     const spec = robotDesign(kind, seed, st?.sector ?? null);
@@ -120,7 +98,6 @@ function note(msg) {
   crew.log.length = Math.min(crew.log.length, 30);
 }
 
-/** Buys one robot of `kind` at port `st`. → null | error. */
 export function buyRobot(kind, st) {
   const K = ROBOT_KINDS[kind];
   if (!K) return "No such robot";
@@ -148,7 +125,6 @@ export function buyRobot(kind, st) {
   return null;
 }
 
-/** Scraps a robot for 40% of what it cost. → null | error */
 export function scrapRobot(id) {
   const i = crew.aboard.findIndex((m) => m.id === id && m.robot);
   if (i < 0) return "Not aboard";
@@ -165,7 +141,6 @@ export function robotsAboard() {
   return crew.aboard.filter((m) => m.robot);
 }
 
-/** Standing Engineering and able to work: a human in a fit mood or a robot with a working frame. */
 function isEngineer(m) {
   const atEng = m.duty ? m.duty === "eng" : m.complexId === "energy";
   return atEng && (m.robot ? (m.condition ?? 0) >= ROBOT_IDLE_AT : (m.morale ?? 0) >= 40);
@@ -175,10 +150,6 @@ export function engineerAboard() {
   return crew.aboard.some(isEngineer);
 }
 
-/**
- * Called from the sim's career step beside tickCrew, with scaled seconds.
- * Writes ship.extraDraw, wears the frames, flags the ones that need a yard.
- */
 export function tickRobots(dt) {
   const ship = sim.ship;
   const bots = robotsAboard();
@@ -190,7 +161,6 @@ export function tickRobots(dt) {
   let draw = 0;
   for (const m of bots) {
     m.condition = Math.max(0, Math.min(100, (m.condition ?? 100) - wear));
-    /* an engineer at Engineering restores the others — a robot cannot service itself */
     if (m.condition < 100 && fixers.some((o) => o !== m)) m.condition = Math.min(100, m.condition + ROBOT_REPAIR * dt);
     m.idle = m.condition < ROBOT_IDLE_AT;
     if (m.condition > 0) draw += m.kw;
@@ -201,12 +171,10 @@ export function tickRobots(dt) {
   return null;
 }
 
-/** What SERVICE ALL would cost here: 60 cr a point over every robot. */
 export function servicePrice() {
   return robotsAboard().reduce((a, m) => a + Math.ceil(100 - (m.condition ?? 100)), 0) * SERVICE_CR;
 }
 
-/** Docked at a yard: every robot back to 100. → null | error */
 export function serviceAll(st) {
   if (!st || !ROBOT_SECTORS.includes(st.sector)) return "No robot yard here";
   const cost = servicePrice();
@@ -219,7 +187,6 @@ export function serviceAll(st) {
   return null;
 }
 
-/** → { n, kw, worst: { name, condition } | null } */
 export function robotsSummary() {
   const bots = robotsAboard();
   let worst = null;
@@ -227,18 +194,15 @@ export function robotsSummary() {
   return { n: bots.length, kw: Math.round(bots.reduce((a, m) => a + (m.condition > 0 ? m.kw : 0), 0) * fx("robotDraw", 1) * 10) / 10, worst };
 }
 
-/* ---- persistence: robots are property, per sky ---------------------------- */
-
 export const ROBOTS_KEY = () => `lgaa.robots.v1:${sim.skySeed}:${sim.callsign}`;
 
 export function saveRobots() {
   try {
     globalThis.localStorage?.setItem(ROBOTS_KEY(), JSON.stringify({ n: robots.n, aboard: robotsAboard() }));
-  } catch { /* quota, or no window */ }
+  } catch {}
   return null;
 }
 
-/** Puts this sky's robots back aboard. Called by launchSim after resetCrew(). Returns the members restored. */
 export function loadRobots() {
   let data = null;
   try {

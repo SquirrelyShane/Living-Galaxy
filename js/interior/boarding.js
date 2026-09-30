@@ -1,35 +1,13 @@
-/* LIVING GALAXY experimental — boarding actions.
- *
- * Refuse a pirate toll inside pod range and the watch sends a breach team:
- * a pod crosses (you can outrun it), clamps on at the airlock, and intruders
- * are on your deck — red on the plan, counted by the interior sensors, felt
- * in the sim whether the deck plan is open or not.
- *
- * The fight is the crew's, resolved a round every five seconds:
- *   defense = Σ over hands  (security skill + grit) × morale, doubled for
- *             security-complex crew, + the maintenance robotics, + the
- *             sensor net (a watched corridor is a killing floor), + a
- *             docked port's own security if you make the clamps.
- * Intruders sabotage while they live — the hull bleeds a little every round
- * they hold a deck — and hands take morale hits (a nurse in a gunfight is
- * not having a good cycle). Beaten intruders are captured if the hull has a
- * BRIG, otherwise spaced; brigged prisoners turn into a Marshal's bounty the
- * next time you dock anywhere that is not hostile.
- *
- * `startBoarding(n, from)` is also the console/test hook — anything (a
- * derelict, a bad passenger, a story) can put intruders on the deck.
- */
-
-import { sim, logEvent } from "../sim.js";
-import { applyDamage } from "../ship.js";
-import { crew } from "../crew.js";
+import { sim, logEvent } from "../sim/sim.js";
+import { applyDamage } from "../flight/ship.js";
+import { crew } from "../crew/ledger.js";
 import { cradle, generateNPC } from "../npc/cradle.js";
-import { catalogue } from "../gdb.js";
+import { catalogue } from "../corp/gdb.js";
 
 export const boarding = {
-  pods: [],        // inbound: { eta, n, from }
-  intruders: [],   // aboard: { id, name, hp, skill }
-  brig: [],        // captured, awaiting a Marshal
+  pods: [],
+  intruders: [],
+  brig: [],
   round: 0,
   lastRound: 0,
   log: [],
@@ -43,13 +21,12 @@ function note(text, kind = "combat") {
   sim.lastToastAt = sim.time;
 }
 
-export const POD_RANGE = 7000;   // refuse inside this and the pod launches
-const POD_SPEED = 220;           // u/s — slow enough to run from
+export const POD_RANGE = 7000;
+const POD_SPEED = 220;
 const ROUND_S = 5;
-const SABOTAGE_HULL = 1.2;       // hull per living intruder per round
-const BOUNTY = 400;              // cr per prisoner, at the Marshal's window
+const SABOTAGE_HULL = 1.2;
+const BOUNTY = 400;
 
-/** A pirate port answers a refusal with a breach team. */
 export function launchPod(st, n = 0) {
   const d = Math.hypot(st.x - sim.ship.pos.x, st.y - sim.ship.pos.y, st.z - sim.ship.pos.z);
   if (d > POD_RANGE) return false;
@@ -59,18 +36,16 @@ export function launchPod(st, n = 0) {
   return true;
 }
 
-/** Put intruders on the deck directly (pod arrival, console, future stories). */
 export function startBoarding(n, from = "a breach pod") {
   for (let i = 0; i < n; i++) {
     const rec = generateNPC(`boarder:${sim.skySeed}:${sim.time.toFixed(0)}:${i}`, { complexId: "security", sky: sim.skySeed });
-    catalogue(rec, { kind: "boarder", sky: sim.skySeed ?? null, group: [...crew.aboard, ...boarding.intruders.map((x) => x.rec ?? x)] });   // 0.3.54
+    catalogue(rec, { kind: "boarder", sky: sim.skySeed ?? null, group: [...crew.aboard, ...boarding.intruders.map((x) => x.rec ?? x)] });
     boarding.intruders.push({ id: rec.id, name: rec.name, hp: 100, skill: 20 + Math.floor(Math.random() * 30), rec });
   }
   syncSensors();
   note(`BREACH — ${n} intruder${n > 1 ? "s" : ""} through the airlock (${from}). The crew is on it.`);
 }
 
-/** The deck's defense per round. Exported so the test can price a crew. */
 export function defensePower() {
   let p = 0;
   for (const m of crew.aboard) {
@@ -82,8 +57,8 @@ export function defensePower() {
     p += (8 + sec + grit) * morale * trade;
   }
   p += (sim.interior?.robots ?? 0) * 5;
-  p += (sim.interior?.sensors ?? 0) * 0.6; // a watched corridor
-  if (sim.ship.dockedAt) p += 40;          // port security storms aboard
+  p += (sim.interior?.sensors ?? 0) * 0.6;
+  if (sim.ship.dockedAt) p += 40;
   return p;
 }
 
@@ -91,9 +66,7 @@ function syncSensors() {
   if (sim.interior) sim.interior.intruders = boarding.intruders;
 }
 
-/** Called from the sim tick (sim seconds). */
 export function tickBoarding(dt) {
-  /* pods in the black */
   for (const pod of [...boarding.pods]) {
     const d = Math.hypot(pod.x - sim.ship.pos.x, pod.y - sim.ship.pos.y, pod.z - sim.ship.pos.z);
     if (d > POD_RANGE * 2.2) {
@@ -106,12 +79,6 @@ export function tickBoarding(dt) {
       startBoarding(pod.n, pod.from);
     }
   }
-  /* Prisoners used to be swept off the ship for a flat fee the moment you
-   * docked anywhere. They are people now (crew/captive.js): who you hand over,
-   * who you sell back, who you let go and who you end up crewing with are all
-   * decisions, and a hatch that empties itself takes every one of them away.
-   * Boarders you have not spoken to still go quietly — anybody you have
-   * actually dealt with, or who came off a ticket, stays for you to decide. */
   if (sim.ship.dockedAt && boarding.brig.length) {
     const quiet = boarding.brig.filter((p) => !p.fromTicket && !p.state);
     if (quiet.length) {
@@ -131,12 +98,10 @@ export function tickBoarding(dt) {
   boarding.lastRound = sim.time;
   boarding.round++;
 
-  /* sabotage while they hold the deck */
   applyDamage(sim.ship, SABOTAGE_HULL * boarding.intruders.length, null, sim.time);
 
   const def = defensePower();
   const atk = boarding.intruders.reduce((a, i) => a + i.skill, 0);
-  /* the crew works the intruders down; the intruders work the crew's nerve */
   for (const i of boarding.intruders) i.hp -= (def / boarding.intruders.length) * (0.6 + Math.random() * 0.6) * 0.25;
   for (const m of crew.aboard) {
     if (Math.random() < Math.min(0.5, atk / 400)) m.morale = Math.max(5, m.morale - 4);
@@ -147,7 +112,7 @@ export function tickBoarding(dt) {
     const hasBrig = Boolean(sim.interior?.hasBrig);
     if (hasBrig) {
       boarding.brig.push(i);
-      i.rec.status = "captive"; // off the hiring pools; the record keeps the story
+      i.rec.status = "captive";
       cradle.put(i.rec);
       cradle.note(i.rec.id, `Captured boarding ${sim.callsign ?? "a hull"}'s ship — held in the brig`);
       note(`${i.name} is down and dragged to the brig.`);
@@ -158,7 +123,7 @@ export function tickBoarding(dt) {
   if (!boarding.intruders.length && boarding.round > 0) {
     note(`Deck clear. ${boarding.brig.length ? `${boarding.brig.length} in the brig for the Marshal.` : "The crew stands down."}`);
     boarding.round = 0;
-    for (const m of crew.aboard) m.morale = Math.min(100, m.morale + 6); // won the day
+    for (const m of crew.aboard) m.morale = Math.min(100, m.morale + 6);
   }
   syncSensors();
 }

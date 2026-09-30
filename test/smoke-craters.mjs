@@ -23,8 +23,8 @@ await page.waitForSelector("#hud:not(.hidden)", { timeout: 30000 });
 await page.waitForTimeout(2500);
 
 const out = await page.evaluate(async () => {
-  const { sim, strikeBody } = await import("/js/sim.js");
-  const { BODIES, bodyPosition } = await import("/js/bodies.js");
+  const { sim, strikeBody } = await import("/js/sim/sim.js");
+  const { BODIES, bodyPosition } = await import("/js/world/bodies.js");
   const world = BODIES.find((b) => b.kind !== "star" && b.kind !== "gas" && !b.shattered);
   /* one bite facing the camera, one on the limb so the silhouette shows it */
   strikeBody(world.id, world.radius * 0.55, 1100, { nx: 0, ny: 0, nz: 1 });
@@ -66,8 +66,8 @@ await page.screenshot({ path: "/tmp/crater.png" });
 
 /* shatter a moon and make sure the remnant core rebuilds as a jagged shard */
 const shard = await page.evaluate(async () => {
-  const { sim, strikeBody } = await import("/js/sim.js");
-  const { BODIES } = await import("/js/bodies.js");
+  const { sim, strikeBody } = await import("/js/sim/sim.js");
+  const { BODIES } = await import("/js/world/bodies.js");
   const moon = BODIES.find((b) => b.kind !== "star" && b.kind !== "gas" && !b.shattered && b.radius < 2000 && !b.craters?.length);
   for (let i = 0; i < 14 && !moon.shattered; i++) strikeBody(moon.id, moon.radius * 0.8, 1400);
   await new Promise((r) => setTimeout(r, 1200));

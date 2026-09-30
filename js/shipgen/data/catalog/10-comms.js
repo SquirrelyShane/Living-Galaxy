@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 10 — COMMUNICATIONS & NETWORKING */
 export default {
   id: "d10", name: "10 Communications & Networking",
   sheet: {

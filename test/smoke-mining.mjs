@@ -37,11 +37,11 @@ const tut = await page.evaluate(() => {
 console.log("tutorial:", JSON.stringify(tut));
 
 const res = await page.evaluate(async () => {
-  const { sim, togglePointerLock, clearLock } = await import("/js/sim.js");
-  const { currentSystem } = await import("/js/bodies.js");
-  const { nearbyRocks } = await import("/js/field.js");
-  const { mining } = await import("/js/turrets.js");
-  const { pilot } = await import("/js/pilot.js");
+  const { sim, togglePointerLock, clearLock } = await import("/js/sim/sim.js");
+  const { currentSystem } = await import("/js/world/bodies.js");
+  const { nearbyRocks } = await import("/js/world/field.js");
+  const { mining } = await import("/js/flight/turrets.js");
+  const { pilot } = await import("/js/flight/pilot.js");
   const ship = sim.ship;
   /* into the belt, find a rock, sit 500 u off it and look at it */
   const belt = currentSystem.belt;
@@ -75,7 +75,7 @@ await page.screenshot({ path: "/tmp/laser-on.png" });
  * sample catches three lengths and the next catches two. Watch the whole
  * shutoff instead and judge it on what happened across it. */
 const fade = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   const gl = window.__lgGL;
   const find = () => gl.scene.children.find((o) => o.isGroup && o.children.length === 8 && o.children[0].isMesh && o.children[0].geometry.type === "CylinderGeometry");
   sim.ship.miningMode = "off";

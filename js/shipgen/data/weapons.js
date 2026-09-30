@@ -1,5 +1,3 @@
-/* Weapon families used by class doctrine (arms mix) and the Drydock weapon-suite select.
- * Geometry lives in src/builder/weapons.js, catalog rows in data/catalog/18-safety-defense.js. */
 export const WEAPON_TYPES = {
   railgun:  { label: "Railgun",         size: 1.35, mounts: ["top", "side"] },
   beam:     { label: "Beam Turret",     size: 1.0,  mounts: ["top", "bottom", "side"] },

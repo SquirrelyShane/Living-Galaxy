@@ -1,12 +1,3 @@
-// robotgen/src/world.js — the planet a machine was built for.
-//
-// v1.7: a world also decides whether FLYING works at all. A rotor and a wing
-// need air, so vacuum worlds zero them out and thin or dense atmospheres scale
-// them; that is the same one-line bias every other draw goes through.
-//
-// A world does two things: it sets the gravity the animator runs under, and it
-// biases every weighted draw in the spec generator. The draw COUNT never
-// changes, so a world shifts the odds without desynchronising a seed.
 import { generateRobot, makeRng, PALETTES } from './spec.js';
 
 export const WORLDS = {
@@ -111,7 +102,6 @@ export const FLIES = (world) => {
   return !w || !w.loco || (w.loco.rotor !== 0 || w.loco.plane !== 0);
 };
 
-/* ---------- settlements: who is actually on the ground ---------- */
 export const SETTLEMENTS = {
   mining:   { label: 'Mining claim',     roles: { mining: 4, industrial: 3, salvage: 2.5, labor: 3, survey: 2, security: 1.5, utility: 1.5, loader: 1.5 } },
   research: { label: 'Research station', roles: { science: 4, survey: 3, drone: 3, medic: 2, service: 2, inspector: 1.5, security: 1 } },
@@ -137,10 +127,6 @@ export const gravityOf = (world) => {
 const FACTION_A = ['Halden', 'Novak', 'Ostara', 'Kessler', 'Bright', 'Corvid', 'Tenno', 'Mahara', 'Ferrous', 'Quiet'];
 const FACTION_B = ['Reclamation', 'Freight', 'Survey Group', 'Works', 'Combine', 'Cooperative', 'Salvage', 'Holdings', 'Expedition', 'Authority'];
 
-/**
- * A crowd that reads as one place: shared livery, shared designation prefix, a
- * role mix that suits the settlement, and every frame built for this gravity.
- */
 export function generatePopulation(seed, worldKey, count = 6, opts = {}) {
   const world = resolveWorld(worldKey) || WORLDS.earthlike;
   const rng = makeRng(String(seed) + '|' + world.key + '|pop');
@@ -158,13 +144,10 @@ export function generatePopulation(seed, worldKey, count = 6, opts = {}) {
   };
 
   const members = [];
-  const onLivery = Math.ceil(count * 0.6);       // the crowd has to read as one place,
-  for (let i = 0; i < count; i++) {              // so most of it wears the livery by quota
+  const onLivery = Math.ceil(count * 0.6);
+  for (let i = 0; i < count; i++) {
     let role = rng.weighted(settlement.roles);
-    // an air career on an airless world would be built as a grounded frame the
-    // moment its loco bias hits zero — pick it deliberately rather than by accident
     if (!FLIES(world) && (role === 'recon' || role === 'inspector' || role === 'interceptor')) role = 'survey';
-    // the rest are contractors, salvage and hand-me-downs in their own colours
     const palette = (i < onLivery || rng.chance(0.5)) ? livery : undefined;
     const spec = generateRobot(`${seed}|${world.key}|${i}`, { world, role, palette });
     spec.faction = faction.name;

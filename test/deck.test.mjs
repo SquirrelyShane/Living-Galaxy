@@ -7,7 +7,7 @@
  * console for the roster.
  */
 import { readFileSync } from "node:fs";
-import { deckTabs } from "../js/stationdeck.js";
+import { deckTabs } from "../js/station/stationdeck.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.log("  FAIL", m); } };
@@ -23,13 +23,13 @@ for (const p of panels) ok(inHtml.includes(p), `panel "${p}" has a tab`);
 for (const gone of ["log", "crew"]) ok(!inHtml.includes(gone) && !panels.includes(gone), `"${gone}" is the console's, not the deck's`);
 for (const kept of ["market", "shipyard", "board", "hall", "works", "drones", "robots", "refit", "blueprint"]) ok(inHtml.includes(kept), `the port keeps "${kept}"`);
 
-const src = readFileSync(new URL("../js/stationdeck.js", import.meta.url), "utf8");
+const src = readFileSync(new URL("../js/station/stationdeck.js", import.meta.url), "utf8");
 ok(!/foundCompany|commissionHull|transfer\(|fleetReport/.test(src), "no register, treasury or fleet on the deck");
-ok(/hallPanel/.test(src), "the hall is drawn by js/deckhall.js");
+ok(/hallPanel/.test(src), "the hall is drawn by js/station/deckhall.js");
 ok(!/openConsole\("corp", "company"\)/.test(src), "the registrar is on the deck, not a jump to CON");
 
 /* 0.3.49: the hall keeps you on the deck */
-const hall = readFileSync(new URL("../js/deckhall.js", import.meta.url), "utf8");
+const hall = readFileSync(new URL("../js/station/deckhall.js", import.meta.url), "utf8");
 ok(!/openConsole/.test(hall), "nothing in the hall throws you into the console");
 ok(/mountTalk\(/.test(hall) && /settleFamily\(m\.id, "staff"\)/.test(hall) && /settleFamily\(m\.id, "payoff"\)/.test(hall), "your crew: TALK, SETTLE and PAY OFF inline");
 ok(/el\("input", "sd-input"\)/.test(hall) && /foundCompany\(name\.value/.test(hall), "the registrar takes a typed name");

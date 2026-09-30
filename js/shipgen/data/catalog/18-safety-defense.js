@@ -1,6 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 18 — SAFETY, SURVIVABILITY & DEFENSE.
- * Weapon effectors are catalog-level only; construction detail is out of scope. */
 export default {
   id: "d18", name: "18 Safety, Survivability & Defense",
   sheet: {

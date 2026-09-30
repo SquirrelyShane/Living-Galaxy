@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 16 — ROBOTICS, MAINTENANCE & SERVICING */
 export default {
   id: "d16", name: "16 Robotics, Maintenance & Servicing",
   sheet: {

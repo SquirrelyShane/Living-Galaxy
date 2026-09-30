@@ -3,11 +3,11 @@
  *   node --import ./test/three-register.mjs test/crew-life.test.mjs
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, tickCrew, CYCLE_SECONDS, crewWageTotal, crewHooks, resetCrew } from "../js/crew.js";
-import { crewTopics, couldCourt, adjustTrust, adjustMorale, bumpTrust, setSocial } from "../js/family.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, tickCrew, CYCLE_SECONDS, crewWageTotal, crewHooks, resetCrew } from "../js/crew/ledger.js";
+import { crewTopics, couldCourt, adjustTrust, adjustMorale, bumpTrust, setSocial } from "../js/crew/family.js";
 import { crewEffects, shiftPhase } from "../js/npc/crewfx.js";
 import { roster, setDuty, dutyOf, dutyOptions, currentPlan, ROSTER_SORTS } from "../js/crew/roster.js";
 import { TREE, ROBOT_TOPICS, topicsFor, lockedTopicsFor, open, choose, memoryOf, answerFreeText, greet, tierOf, forgetTalk, TIER_NAMES } from "../js/crew/talk.js";

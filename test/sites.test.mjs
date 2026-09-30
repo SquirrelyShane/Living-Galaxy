@@ -8,14 +8,14 @@
  * still there around them; and closing the job takes the seam away.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { currentSystem } from "../js/bodies.js";
-import { nearbyRocks, depleted, wearRock, inBelt, CELL } from "../js/field.js";
-import { sites, openSite, closeSite, clearSites, siteById, sitesNear, pickSpot, spotLine, siteReport, classForOre } from "../js/sites.js";
-import { boardFor, acceptContract, abandonContract, deliverContracts, contracts, resetContracts, BOARD, jobStatus } from "../js/contracts.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { currentSystem } from "../js/world/bodies.js";
+import { nearbyRocks, depleted, wearRock, inBelt, CELL } from "../js/world/field.js";
+import { sites, openSite, closeSite, clearSites, siteById, sitesNear, pickSpot, spotLine, siteReport, classForOre } from "../js/economy/sites.js";
+import { boardFor, acceptContract, abandonContract, deliverContracts, contracts, resetContracts, BOARD, jobStatus } from "../js/economy/contracts.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

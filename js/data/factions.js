@@ -1,38 +1,3 @@
-// LIVING GALAXY — the galactic powers. Ported from Living Galaxy (src/data/factions.js,
-// lg-1.04.00) verbatim: this is the refined political layer Astra was missing.
-// Astra's per-sky corporations (corps.js) are chartered under these powers, so
-// a local outfit inherits a bloc, a charter, a temper and a war.
-//
-// Living Galaxy — who is out here, and what they did to each other.
-//
-// Standing has been three numbers since v0.5: `coalition`, `pirate`, `independent`. Three
-// blocs is enough to decide whether a station opens its clamps, and it is not enough for
-// anything else. Every corporation in the game shared one reputation; a haulier who spent
-// six hours running freight for one cartel was equally welcome at its rival's berths; and
-// the "corp war" that the lineage descriptions kept alluding to had no representation at
-// all — it was scenery in a text field.
-//
-// This file is the world's political layer as data. Three things live here:
-//
-//   1. **Blocs** — the three coarse alignments, kept because docking rules, bounty payment
-//      and the NPC hostility check all read them and are correct as they are.
-//   2. **Powers** — the actual organisations. Corporations, governments, syndicates and
-//      the two guilds. Each belongs to a bloc, each holds its own opinion of you, and each
-//      holds its own opinion of *the others*, which is what makes a war expressible.
-//   3. **History** — a dated timeline. Not flavour text: every entry names the powers it
-//      involved and what it changed, and `relationOf()` is derived from the events rather
-//      than declared beside them, so the fiction and the mechanics cannot drift apart.
-//
-// ## The design rule
-//
-// **A faction is a thing you can be in trouble with.** If a power cannot refuse you a
-// contract, price you differently, or send somebody after you, it does not belong in this
-// table — it belongs in a description string. Every power below does at least one.
-
-// ── the blocs ────────────────────────────────────────────────────────
-// Unchanged, and deliberately so. `systems/reputation.js` resolves any power to its bloc
-// for the coarse questions (may I dock, will they shoot) and asks this file for the fine
-// ones (will this desk hire me, what does that cost).
 export const BLOCS = {
   coalition:   { name: 'Coalition',   color: 0x4fd6ff, desc: 'Chartered space. Law, tariffs, and paperwork that mostly works.' },
   independent: { name: 'Independent', color: 0x54e0a0, desc: 'Everyone who signed nothing. Belters, free ports, contract crews.' },
@@ -40,16 +5,6 @@ export const BLOCS = {
 };
 export const BLOC_KEYS = Object.keys(BLOCS);
 
-// ── the powers ───────────────────────────────────────────────────────
-//
-// Nine, which is the number that came out of asking "can this refuse me work?" of every
-// name the game already used somewhere. Four were already in `data/origins.js` as
-// corporations you could be born into; the rest were implied by stations, contract issuers
-// and NPC factions that had no organisation behind them.
-//
-// `charter` is what the power actually sells or enforces, and it is what decides which
-// contract families its desks post. `temper` biases how fast standing moves: a syndicate
-// forgives quickly and forgets nothing, a bureau is the reverse.
 export const POWERS = {
   meridian: {
     name: 'Meridian Combine',
@@ -64,8 +19,6 @@ export const POWERS = {
            'of power than a fleet and has outlasted several.',
     doctrine: 'Everything is a position. Including you.',
     hires: ['courier', 'supply', 'survey', 'escort'],
-    // What this power thinks of the others, before history is applied. Derived values live
-    // in `relationOf()`; these are the standing grudges the timeline then modifies.
     regard: { severance: -0.5, freewake: 0.2, aurelian: 0.4, halloway: -0.2, kessler: -0.7 }
   },
 
@@ -106,10 +59,6 @@ export const POWERS = {
     short: 'Freewake',
     bloc: 'independent',
     color: 0x54e0a0,
-    // 'logistics', not 'logistic'. It was the singular until v1.02.39, which was harmless
-    // for as long as `charter` was read by nobody and silently wrong the moment it decided
-    // which desk a depot belongs to: the one power in the galaxy whose whole charter is
-    // freight would not have been offered a logistics station.
     charter: 'logistics',
     temper: { gain: 1.3, loss: 0.8, memory: 0.3 },
     seat: 'the free ports',
@@ -203,18 +152,8 @@ export const POWERS = {
 };
 export const POWER_KEYS = Object.keys(POWERS);
 
-/** Powers belonging to a bloc. */
 export const powersOf = bloc => POWER_KEYS.filter(k => POWERS[k].bloc === bloc);
 
-// ── history ──────────────────────────────────────────────────────────
-//
-// A dated timeline, and the mechanical source of truth for who hates whom. Each entry
-// names its participants and the shift it caused, so `relationOf()` can *derive* a
-// relationship instead of reading a second table that would immediately drift from the
-// story beside it. Same rule the NPC layer follows in v1.00.90: derive relationships, do
-// not store them.
-//
-// Dates are Coalition Reckoning — CR 0 is the signing of the Charter.
 export const HISTORY = [
   {
     year: 0,
@@ -307,20 +246,10 @@ export const HISTORY = [
   }
 ];
 
-/** The current year, so a dossier can date what it says. */
 export const NOW = HISTORY[HISTORY.length - 1].year;
-
-// ── derived relationships ────────────────────────────────────────────
 
 const relCache = new Map();
 
-/**
- * How power `a` regards power `b`, from −1 (war) to +1 (allied).
- *
- * Base regard plus every historical shift that names the pair, clamped. Derived rather
- * than declared so the timeline is the single source of truth: adding an event to
- * `HISTORY` changes the politics, and nothing else has to be edited to agree with it.
- */
 export function relationOf(a, b) {
   if (a === b) return 1;
   const key = a + '>' + b;
@@ -335,9 +264,6 @@ export function relationOf(a, b) {
       if ((x === a && y === b) || (x === b && y === a)) v += e.shift[pair];
     }
   }
-  // Blocs pull. Two powers under the same charter are colleagues before they are rivals,
-  // and two across the Coalition/Outer line start from a worse place than their own
-  // opinions of each other would suggest.
   if (A.bloc === B.bloc) v += 0.15;
   else if ((A.bloc === 'coalition' && B.bloc === 'pirate') ||
            (A.bloc === 'pirate' && B.bloc === 'coalition')) v -= 0.35;
@@ -347,7 +273,6 @@ export function relationOf(a, b) {
   return v;
 }
 
-/** Words for a relationship, for the dossier. */
 export function relationLabel(v) {
   if (v >= 0.5) return 'allied';
   if (v >= 0.2) return 'friendly';
@@ -357,7 +282,6 @@ export function relationLabel(v) {
   return 'at war';
 }
 
-/** Every pair currently at war or hostile — the live corp wars, derived. */
 export function activeWars() {
   const out = [];
   for (let i = 0; i < POWER_KEYS.length; i++) {
@@ -370,11 +294,9 @@ export function activeWars() {
   return out.sort((x, y) => x.value - y.value);
 }
 
-/** Historical entries that name this power, newest first. */
 export const historyOf = power =>
   HISTORY.filter(e => (e.powers || []).includes(power)).slice().reverse();
 
-/** The power a station's issuer key resolves to, tolerating a bloc name. */
 export function powerFor(key) {
   if (POWERS[key]) return key;
   const list = powersOf(key);

@@ -10,7 +10,7 @@
  * these are the words, in the three ways the three engines phrase it.
  */
 
-import { EXPECTS, readFailure, explain, showFailure, guard } from "../js/boot.js";
+import { EXPECTS, readFailure, explain, showFailure, guard } from "../js/core/boot.js";
 import { VERSION } from "../js/version.js";
 
 let pass = 0, fail = 0;

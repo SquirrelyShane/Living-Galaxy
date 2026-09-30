@@ -2,7 +2,7 @@
  *
  *   node --import ./test/three-register.mjs test/fabricate.test.mjs
  *
- * js/fabricate.js is a leaf — it imports the materials table and nothing else,
+ * js/economy/fabricate.js is a leaf — it imports the materials table and nothing else,
  * and the clock, the stock, the credits and the locker are injected. So the
  * solver AND the job queue both drive here with a fake port and no sim, which
  * is the whole reason it was built that way.
@@ -18,8 +18,8 @@ const t = async (name, fn) => {
 const {
   FAB, fabJobs, recipeFor, billOfMaterials, fabMargin, planJob, canFabAt, fabMenuAt,
   orderFab, cancelFab, stepFab, fabQueueAt, fabReport, wireFab, resetFab,
-} = await import("../js/fabricate.js");
-const { ORES, COMPONENTS, MINERALS, ALL_GOODS } = await import("../js/materials.js");
+} = await import("../js/economy/fabricate.js");
+const { ORES, COMPONENTS, MINERALS, ALL_GOODS } = await import("../js/economy/materials.js");
 
 /* ---- a world of our own ---------------------------------------------------- */
 let NOW = 0;

@@ -13,14 +13,14 @@
 const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { sim, launchSim, tickSim } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { touch } = await import("../js/input.js");
-const { upgrades, hasUpgrade } = await import("../js/upgrades.js");
-const { stations } = await import("../js/stations.js");
+const { sim, launchSim, tickSim } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { touch } = await import("../js/core/input.js");
+const { upgrades, hasUpgrade } = await import("../js/economy/upgrades.js");
+const { stations } = await import("../js/station/stations.js");
 const { missionCore, presets } = await import("../js/mission/script.js");
-const { CORE_STEPS, coreYard, core, resetCoreTrack } = await import("../js/tutorial-core.js");
-const { tutorial, startTutorial, startCoreTutorial, skipTutorial, tickTutorial, tutorialSteps, tutorialEvaluate } = await import("../js/tutorial.js");
+const { CORE_STEPS, coreYard, core, resetCoreTrack } = await import("../js/ui/tutorial-core.js");
+const { tutorial, startTutorial, startCoreTutorial, skipTutorial, tickTutorial, tutorialSteps, tutorialEvaluate } = await import("../js/ui/tutorial.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

@@ -1,23 +1,9 @@
-/* LIVING GALAXY — a baked body in the scene.
- *
- * Turns a growBaked() result (js/bodygen/body.js, grown in the worker) into a
- * geometry, three data textures and a material. The material is a
- * MeshStandardMaterial with the surface read from the atlases instead of
- * vertex attributes: albedo (stored as √ so dark rock keeps its 8 bits),
- * metalness, roughness, emission, and — the whole point — the generator's own
- * full-resolution normal, in object space, turned into view space per
- * fragment. The same material works instanced (the belt field's class
- * prototypes, tinted per instance) and on a single grown body.
- *
- * Every baked material shares one program; only its textures differ.
- */
-
 import { CLASSES } from "./classes.js";
 
 function dataTex(THREE, arr, W, H) {
   const t = new THREE.DataTexture(arr, W, H, THREE.RGBAFormat, THREE.UnsignedByteType);
   t.magFilter = THREE.LinearFilter;
-  t.minFilter = THREE.LinearFilter;   // an atlas has no mip-safe gutters; texels are vertices anyway
+  t.minFilter = THREE.LinearFilter;
   t.generateMipmaps = false;
   t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
   t.needsUpdate = true;
@@ -54,7 +40,6 @@ varying vec3 vBakeN2;
 vec4 gBakeA;
 vec4 gBakeB;`;
 
-/** The material for one bake. `emitScale` 0 means the body has no glow atlas. */
 export function bakedMaterial(THREE, { texA, texB, texC = null, emitScale = 0 }) {
   const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.7, emissive: 0x000000 });
   const uniforms = {
@@ -85,7 +70,6 @@ normal = normalize(mat3(vBakeN0, vBakeN1, vBakeN2) * (gBakeB.rgb * 2.0 - 1.0));`
   return mat;
 }
 
-/** One mesh of a bake as a BufferGeometry (atlas coordinates on `aBakeUv`). */
 export function bakedGeometry(THREE, m) {
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.BufferAttribute(m.positions, 3));
@@ -96,11 +80,6 @@ export function bakedGeometry(THREE, m) {
   return g;
 }
 
-/**
- * Everything the renderer needs for one grown result: geometries (one per L),
- * textures, the material, and a `built` record shaped like generateBody's, so
- * the assay card, the shatter field and the tests read it the same way.
- */
 export function mountBakedData(THREE, d) {
   const texA = dataTex(THREE, d.texA, d.W, d.Ht);
   const texB = dataTex(THREE, d.texB, d.W, d.Ht);
@@ -108,7 +87,6 @@ export function mountBakedData(THREE, d) {
   const material = bakedMaterial(THREE, { texA, texB, texC, emitScale: d.emitScale });
   const geometries = d.meshes.map((m) => bakedGeometry(THREE, m));
   const m0 = d.meshes[0];
-  /* the shatter field samples its palette off the body's colour attribute */
   const color = new THREE.BufferAttribute(m0.colors, 3);
   const meta = d.meta;
   const built = {

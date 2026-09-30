@@ -1,34 +1,11 @@
-/* LIVING GALAXY — the children.
- *
- * A child has had a real crossover genome earlier: `breed()` in
- * genome/spacer.js crosses both parents, and heritage.js teaches them the
- * house trade. What was missing is that none of it was ever SHOWN. A child was
- * a name and an age on the bonds tab; you could not see what they had got from
- * whom, whether it was a gift or a burden, and you could not do anything with
- * them for the forty-eight cycles before they came of age and walked off.
- *
- * So, three things:
- *
- *   inheritance(child) — what they got, named, measured against the parents
- *                        they got it from, as boons and flaws
- *   childActs(child)   — what a captain can do about it
- *   raise(child, act)  — doing it, which moves their ledger and their skills
- *
- * The measurement is the honest part: a boon is not "the genome rolled high",
- * it is "this is better than BOTH the people it came from", which is the only
- * comparison a parent would actually make.
- */
-
 import { cradle, genomeOf } from "../npc/cradle.js";
 import { skillAptitude, genomeTraits, kinship } from "../genome/spacer.js";
-import { household, personById, note } from "../family.js";
-import { crew, firstName } from "../crew.js";
-import { logEvent, sim } from "../sim.js";
+import { household, personById, note } from "./family.js";
+import { crew, firstName } from "./ledger.js";
+import { logEvent, sim } from "../sim/sim.js";
 import { COMPLEXES } from "../careers/complexes.js";
 import { line as V, wrap as voiceWrap } from "./voice.js";
 
-/* How far above or below both parents a reading has to be before it is worth
- * a word. Below this it is just a number. */
 const BOON = 0.07;
 
 export const APT_LABEL = {
@@ -49,18 +26,9 @@ const TRAIT_LABEL = {
 };
 
 function parentsOf(child) {
-  /* the ledger first: a crew member object carries a name and a mood, the
-   * CRADLE record carries the genome, and the genome is the whole question */
   return (child?.parents ?? []).map((id) => (id === "player" ? null : cradle.get(id) ?? personById(id))).filter(Boolean);
 }
 
-/**
- * What this child got, and from whom.
- *
- * Returns { boons, flaws, shares, kin, complex } — `shares` is how much of
- * each parent is measurably in them, which is the thing people actually want
- * to know and which kinship() can answer honestly.
- */
 export function inheritance(child) {
   const rec = cradle.get(child?.id) ?? child;
   const g = genomeOf(rec);
@@ -107,20 +75,10 @@ export function inheritance(child) {
   const h = rec.heritage;
   return {
     boons: boons.slice(0, 5), flaws: flaws.slice(0, 4), shares, kin: kin.slice(0, 6), apt,
-    /* 0.3.57: heritage keeps `learn` per skill ({ mining: 1.3, … }); the card
-     * printed it with toFixed and threw — so a child of a trade house took the
-     * whole HOUSEHOLD section down with it. The number is the house's best. */
     complex: h ? { id: h.complexId, name: (COMPLEXES[h.complexId]?.name ?? h.complexId).replace(/ Complex$/, ""), generation: h.generation ?? 1, learn: typeof h.learn === "number" ? h.learn : Math.max(1, ...Object.values(h.learn ?? {}).filter(Number.isFinite)) } : null,
   };
 }
 
-/* ---- raising them ----------------------------------------------------------
- *
- * Forty-eight cycles is a long time to watch a name tick up. These are the
- * four things a captain on a working ship can actually do, and each one bends
- * something real: the child's bond with you, which follows them into the
- * hiring hall, and what they will be good at when they get there.
- */
 export const CHILD_ACTS = [
   { id: "time", label: "Spend the watch with them", bond: 5, apt: null, why: "somebody being there is most of it" },
   { id: "teach", label: "Teach them the trade", bond: 2, apt: "house", why: "the house trade, hands-on, years early" },
@@ -134,10 +92,6 @@ export function bondWith(child) {
   return Math.max(0, Math.min(100, household.bonds?.[bondKey(child?.id)] ?? 0));
 }
 
-/**
- * Do one of them. Returns { ok, line, tag } the way a beat does, so the panel
- * can render it with the same shape it already knows.
- */
 export function raise(child, actId) {
   const act = CHILD_ACTS.find((a) => a.id === actId);
   const rec = cradle.get(child?.id);
@@ -152,11 +106,9 @@ export function raise(child, actId) {
     const key = act.apt === "house" ? (COMPLEXES[h?.complexId]?.primarySkills ?? [])[0] : act.apt;
     if (key) {
       rec.skills ??= {};
-      /* capped by what the body can carry: teaching does not beat aptitude,
-       * it just gets there sooner — the same rule heritage.js uses */
       const ceiling = Math.round(28 + (rec.aptitude?.[key] ?? 0.5) * 42);
       const before = rec.skills[key] ?? 0;
-      rec.skills[key] = Math.max(before, Math.min(ceiling, before + 2));   // 0.3.57: never taught DOWN to the ceiling
+      rec.skills[key] = Math.max(before, Math.min(ceiling, before + 2));
       taught = rec.skills[key] > before ? key : null;
     }
   }
@@ -173,23 +125,11 @@ export function raise(child, actId) {
   return { ok: true, line, tag: bits.join(" · "), bond: bondWith(child) };
 }
 
-/**
- * What a grown child carries out of the door.
- *
- * Called by family.js when they come of age. A child who was raised — time
- * spent, trade taught — leaves with the captain's name on their record and a
- * standing offer; one who was not is a stranger in a hall like anyone else.
- */
 export function comeOfAge(child) {
   const rec = cradle.get(child?.id);
   if (!rec) return null;
   const bond = bondWith(child);
 
-  /* The boons and flaws stop being a description and start being a number.
-   * An aptitude that beat both parents is worth a head start in that skill
-   * when they walk into a hall; one that came in under both is a gap they
-   * will have to work out of. The heritage cap still applies — a gift gets
-   * you there sooner, it does not get you past what the body can carry. */
   const inh = inheritance(child);
   rec.skills ??= {};
   const marks = [];
@@ -219,7 +159,6 @@ export function comeOfAge(child) {
   return { welcome: false, bond };
 }
 
-/** Children currently aboard, with everything a panel needs. */
 export function childrenAboard() {
   return household.children.map((c) => ({
     c,

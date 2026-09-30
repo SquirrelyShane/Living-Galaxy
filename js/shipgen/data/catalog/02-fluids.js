@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 02 — PROPELLANT, FLUIDS & STORES */
 export default {
   id: "d02", name: "02 Propellant, Fluids & Stores",
   sheet: {

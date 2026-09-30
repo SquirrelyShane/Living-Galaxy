@@ -10,13 +10,13 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, CYCLE_SECONDS } from "../js/crew.js";
-import * as CO from "../js/company.js";
-import * as SL from "../js/stationlife.js";
-import * as LN from "../js/staffline.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, CYCLE_SECONDS } from "../js/crew/ledger.js";
+import * as CO from "../js/corp/company.js";
+import * as SL from "../js/station/stationlife.js";
+import * as LN from "../js/station/staffline.js";
 import { cradle } from "../js/npc/cradle.js";
 
 let pass = 0, fail = 0;

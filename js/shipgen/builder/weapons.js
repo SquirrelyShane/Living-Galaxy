@@ -1,5 +1,3 @@
-/* StarshipBuilder mixin — Weapon family geometry (turret / launcher tags drive the Ops fire control).
- * Methods are installed onto StarshipBuilder.prototype by src/builder/StarshipBuilder.js. */
 import * as THREE from "three";
 import { RNG } from "../core/rng.js";
 import { G, makeMat, addMesh, wingShape } from "../core/geometry.js";
@@ -127,7 +125,6 @@ export default {
     g.userData.launcher = { kind: "torpedo", cells: [[-u * 0.28, u * 0.35, -u * 1.6], [u * 0.28, u * 0.35, -u * 1.6]], rate: 1.6, up: [0, 0, -1] };
   },
 
-  /* ---- COILGUN: rail-style yoke with a stack of drive coils, blue slug ------------------- */
   wpn_coil(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.box(), m.dark, 0, u * 0.16, 0, 0, 0, 0, u * 1.6, u * 0.32, u * 1.9);
@@ -145,7 +142,6 @@ export default {
     g.add(yoke);
   },
 
-  /* ---- AUTOCANNON: twin barrels, box magazine, ejection port -------------------------- */
   wpn_auto(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.cyl(12), m.dark, 0, u * 0.2, 0, 0, 0, 0, u * 0.9, u * 0.4, u * 0.9);
@@ -153,7 +149,7 @@ export default {
     head.userData.scan = { base: head.rotation.y, yawAmp: rng.range(0.8, 2.0), yawSpeed: rng.range(0.4, 0.9), pitchAmp: rng.range(0.06, 0.2), pitchSpeed: rng.range(0.4, 0.9), phase: rng.next() * 6.283 };
     head.userData.turret = { kind: "auto", muzzle: [0, u * 0.05, -u * 1.9], rate: 0.5 };
     addMesh(head, G.box(), m.hull, 0, 0, 0, 0, 0, 0, u * 1.1, u * 0.7, u * 1.2);
-    addMesh(head, G.box(), m.dark, u * 0.65, u * 0.1, u * 0.2, 0, 0, 0, u * 0.3, u * 0.5, u * 0.8);   // magazine
+    addMesh(head, G.box(), m.dark, u * 0.65, u * 0.1, u * 0.2, 0, 0, 0, u * 0.3, u * 0.5, u * 0.8);
     for (const sgn of [-1, 1]) {
       addMesh(head, G.cyl(8), m.metal, sgn * u * 0.18, u * 0.05, -u * 1.0, Math.PI / 2, 0, 0, u * 0.09, u * 1.7, u * 0.09);
       addMesh(head, G.cyl(8), m.dark, sgn * u * 0.18, u * 0.05, -u * 1.85, Math.PI / 2, 0, 0, u * 0.13, u * 0.2, u * 0.13);
@@ -162,7 +158,6 @@ export default {
     g.add(head);
   },
 
-  /* ---- FLAK: short twin barrels + ranging dish, proximity-fused shells ------------------ */
   wpn_flak(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.cyl(12), m.dark, 0, u * 0.2, 0, 0, 0, 0, u * 1.0, u * 0.4, u * 1.0);
@@ -176,7 +171,6 @@ export default {
     g.add(head);
   },
 
-  /* ---- PLASMA LANCE: long confinement barrel, continuous beam -------------------------- */
   wpn_lance(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.box(), m.dark, 0, u * 0.2, 0, 0, 0, 0, u * 1.6, u * 0.4, u * 1.8);
@@ -190,7 +184,6 @@ export default {
     g.add(barrel);
   },
 
-  /* ---- PARTICLE BEAM: accelerator ring behind a beam director --------------------------- */
   wpn_particle(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.cyl(14), m.dark, 0, u * 0.18, 0, 0, 0, 0, u * 1.1, u * 0.36, u * 1.1);
@@ -205,7 +198,6 @@ export default {
     g.add(turret);
   },
 
-  /* ---- LASER CIWS: PDC-class mount, tracking radome, rapid short pulses ----------------- */
   wpn_ciws(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.cyl(10), m.dark, 0, u * 0.2, 0, 0, 0, 0, u * 0.8, u * 0.4, u * 0.8);
@@ -220,7 +212,6 @@ export default {
     g.add(head);
   },
 
-  /* ---- CHAFF / DECOY DISPENSER: angled tube bank ---------------------------------------- */
   wpn_chaff(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.box(), m.dark, 0, u * 0.25, 0, 0, 0, 0, u * 1.4, u * 0.5, u * 1.0);
@@ -234,7 +225,6 @@ export default {
     g.userData.launcher = { kind: "chaff", cells, rate: 0.9, up: [0, 1, -0.6] };
   },
 
-  /* ---- DRIFT-MINE LAYER: aft-facing rack of blinking mines ------------------------------- */
   wpn_mines(g, u, rng) {
     const m = this.mats;
     addMesh(g, G.box(), m.dark, 0, u * 0.3, 0, 0, 0, 0, u * 2.0, u * 0.6, u * 1.6);

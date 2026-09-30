@@ -1,59 +1,40 @@
-/* LIVING GALAXY — the comms director.
- *
- * Four kinds of traffic run through one channel overlay:
- *
- *   NPC → you     a port sees you on approach, a free port makes a demand,
- *                 a guard warns you off. They ring the puck; you answer or not.
- *   you → NPC     HAIL on the AUX page calls whatever is locked, the port you
- *                 are clamped to, or the nearest port. Scripted dialogue with
- *                 real consequences — clearances open clamps, tolls cost credits,
- *                 refusals cost standing.
- *   NPC ↔ NPC     the open channels: ports talking to each other. Overheard on
- *                 the ticker when LISTEN is on, logged to the flight log.
- *   you ↔ pilot   another human on the same server (js/net.js). Live call:
- *                 free text both ways, light-lag from real range, no script.
- *
- * Scripted calls run on sim time, so TIME and pause govern them. Live calls
- * run on the wall clock — the other pilot's clock is not yours to compress.
- */
-
 import { CallSession, CallState } from "./call-session.js";
 import { CallUI } from "./call-ui.js";
 import { approachScript, guardScript, laneScript, marketScript, newsScript, pirateScript, portScript, trafficLines, undockScript, vesselScript } from "./call-scripts.js";
 import { traffic, trafficHooks, vesselById, vesselStatus, captainLine } from "../npc/traffic.js";
 import { fightCentre } from "../npc/battles.js";
 import { cradle, traitLine } from "../npc/cradle.js";
-import { addBodyWaypoint, addWaypointAt, addAnchoredWaypoint, logEvent, selectBody, sim, takeSalvageContract, toggleDock, portWants } from "../sim.js";
-import { BODIES, bodyTempK } from "../bodies.js";
-import { nearestStation, stationById, stations } from "../stations.js";
-import { contacts } from "../turrets.js";
-import { requestDock, hasDockRequest } from "../stationworks.js";
-import { adjustStanding, corpOfStation, corpOfVessel, standingLabel } from "../corps.js";
-import { baseValue } from "../materials.js";
-import { shortagesOf } from "../economy.js";
-import { pilot } from "../pilot.js";
+import { addBodyWaypoint, addWaypointAt, addAnchoredWaypoint, logEvent, selectBody, sim, takeSalvageContract, toggleDock, portWants } from "../sim/sim.js";
+import { BODIES, bodyTempK } from "../world/bodies.js";
+import { nearestStation, stationById, stations } from "../station/stations.js";
+import { contacts } from "../flight/turrets.js";
+import { requestDock, hasDockRequest } from "../station/stationworks.js";
+import { adjustStanding, corpOfStation, corpOfVessel, standingLabel } from "../corp/corps.js";
+import { baseValue } from "../economy/materials.js";
+import { shortagesOf } from "../economy/economy.js";
+import { pilot } from "../flight/pilot.js";
 import { launchPod } from "../interior/boarding.js";
-import { net, onMessage } from "../net.js";
-import { WARN, CREW } from "../audio.js";
-import { rngFromSeed } from "../generate.js";
-import { post as chatPost } from "../chat.js";
-import { gnnPost } from "../gnn.js";
+import { net, onMessage } from "../net/net.js";
+import { WARN, CREW } from "../audio/index.js";
+import { rngFromSeed } from "../world/generate.js";
+import { post as chatPost } from "./chat.js";
+import { gnnPost } from "./gnn.js";
 import { groundedReport, urgentReport, transitionReport, resetReports } from "../npc/reports.js";
 import { SIGN_OFF, chatter as speechChatter, noteLost, resetSpeech, speechStats, talkChips, talkTo, regardOf } from "../npc/speech.js";
 
 const APPROACH_RANGE = 9000;
 const PIRATE_RANGE = 12000;
 const HAIL_RANGE = 60000;
-const CARRIER_RANGE = 240000; // beyond this the lag is minutes: no carrier
+const CARRIER_RANGE = 240000;
 const CHATTER_RANGE = 140000;
-const MS_PER_UNIT = 0.02; // 9000 u → 180 ms; 60000 u → 1.2 s
+const MS_PER_UNIT = 0.02;
 const COOLDOWN = { approach: 320, pirate: 420, chatter: [28, 75] };
 
 export const comms = {
   ui: null,
   session: null,
   listen: true,
-  peerId: null, // live call: who is on the other end
+  peerId: null,
   cooldown: new Map(),
   chatter: { next: 0, queue: [], at: 0, rnd: Math.random },
   lastSim: 0,
@@ -67,13 +48,11 @@ const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 const quality = (d) => clamp(1 - d / 80000, 0.3, 1);
 const busy = () => Boolean(comms.session && (comms.session.isRinging || comms.session.isLive));
 
-/* ---- consequences a script can reach for ---------------------------------- */
 function stationCtx(st) {
   const corp = corpOfStation(st);
   return {
     range: () => d3(st, sim.ship.pos),
     flagged: () => Boolean(pilot.corpId && corp && corp.id === pilot.corpId),
-    /* what the port is short of right now, by how far over book it pays (economy.js) */
     wants: () => portWants(st, 3).filter((w) => w.over > 1.05).map((w) => `${w.name} (${w.pays} cr)`),
     credits: () => sim.ship.credits,
     pay: (n, why) => {
@@ -83,14 +62,11 @@ function stationCtx(st) {
     undock: () => {
       if (sim.ship.dockedAt === st.id) toggleDock();
     },
-    /* a berth: from here on the entry lane and the mouth hand you to the tractor */
     request: () => { requestDock(st, sim.time); logEvent(`Berth granted at ${st.name}`, "port"); },
     requested: () => hasDockRequest(st, sim.time),
     standing: (delta, why) => corp && adjustStanding(corp.id, delta, why),
-    /* a refused toll inside pod range gets a breach team, not just the guns */
     board: () => launchPod(st),
     cargoValue: () => Object.entries(sim.ship.hold).reduce((s, [id, q]) => s + q * baseValue(id), 0),
-    /* the guns of a free port answer to the watch — not to relation flags */
     provoke: () => {
       st.truceUntil = -1;
       for (const c of contacts) if (c.stationId === st.id) c.truceUntil = -1;
@@ -104,7 +80,6 @@ function stationCtx(st) {
   };
 }
 
-/* ---- session plumbing ----------------------------------------------------- */
 function attach(session, { wall = false } = {}) {
   if (comms.session && comms.session !== session) comms.session.end("superseded");
   comms.session = session;
@@ -129,7 +104,7 @@ function attach(session, { wall = false } = {}) {
   session.on("line", (l) => {
     if (l.speaker !== "sys") logEvent(`${l.speaker === "self" ? "TX" : "RX"} ${l.name}: ${l.text}`, "comms");
   });
-  comms.ui.hideChatter(); // the open channels drop out when you are on one
+  comms.ui.hideChatter();
   comms.ui.attach(session);
   paintAux();
   return session;
@@ -152,7 +127,6 @@ function cool(key) {
   comms.cooldown.set(key, sim.time);
 }
 
-/* ---- NPC → you ------------------------------------------------------------- */
 function stationCall(st, script, { incoming, hostile = false, ringTimeoutMs, talk = null } = {}) {
   const d = d3(st, sim.ship.pos);
   const s = npcSession({
@@ -180,9 +154,6 @@ function findBodyByName(name) {
   return null;
 }
 
-/* the news desk: a major strike anywhere in the sky goes out as a bulletin.
- * GNN is auto-accepted: it lands in chat (with the desk link and the actions),
- * never rings the puck. The script text is the same the old call read. */
 function stepNews() {
   const hit = sim.lastImpact;
   if (!hit || hit.sev < 0.05) return;
@@ -217,7 +188,6 @@ function stepNews() {
   logEvent(`GNN bulletin — ${b.name}`, "comms");
 }
 
-/* the markets desk: droughts and terraform bonds read out on the same channel */
 function stepMarkets() {
   const d = sim.market?.drought;
   if (d && comms.droughtAt !== d.until && cooled("news:drought", 60)) {
@@ -251,8 +221,6 @@ function stepMarkets() {
       broadcast(marketScript(`A terraform bond has been certified in this system. The charters are calling it "the neighbourhood improving." Standing follows the paper.`));
     }
   }
-  /* the markets desk proper: a port whose lines are stalled on something is a bulletin, and a job */
-  /* the probe itself is throttled on its own clock: it walks every port's ledger, and mostly finds nothing */
   if (sim.time > 240 && cooled("news:short", 420) && cooled("news:short:probe", 15)) {
     cool("news:short:probe");
     const short = stations
@@ -275,7 +243,6 @@ function stepMarkets() {
   }
 }
 
-/* a markets/security read-out, auto-accepted: marketScript's text, its action as a link */
 function broadcast(script, desk = "markets") {
   const read = script.nodes.read;
   const text = read.text.replace(/^GNN MARKETS — /, "");
@@ -291,7 +258,6 @@ function broadcast(script, desk = "markets") {
   return null;
 }
 
-/* the security desk: a firefight goes out on the same channel, with a mark */
 function stepBattles() {
   const e = sim.engagement;
   if (!e) return;
@@ -333,7 +299,6 @@ function stepIncoming() {
   stepMarkets();
   stepBattles();
   if (busy() || sim.ship.dockedAt || sim.time < (comms.quietUntil ?? 0)) return;
-  /* on a port's entry lane or in its mouth with no berth asked for: control wants a word */
   const ap = sim.approach;
   if (ap && cooled(`ln:${ap.st.id}`, 90)) {
     cool(`ln:${ap.st.id}`);
@@ -357,7 +322,6 @@ function stepIncoming() {
   }
 }
 
-/* ---- you → NPC / pilot ----------------------------------------------------- */
 export function hail() {
   const s = comms.session;
   if (s && s.isRinging) {
@@ -397,10 +361,6 @@ export function hail() {
   WARN.deny();
 }
 
-/* ---- free talk (npc/speech.js) ---------------------------------------------
- * A hailed hull or port keeps its scripted options (the ones with consequences) and
- * gains TALK: quick lines or free text, answered in character by the speech engine,
- * filed as memory, with the regard it earns handed back as standing. */
 function withTalk(script, entity, kind) {
   if (!script?.nodes || !script.start) return { script, talk: null };
   const start = script.nodes[script.start];
@@ -475,7 +435,7 @@ function hailContact(c) {
     script,
     hostile: c.relation === "hostile",
     peer: c,
-    answerMs: guard || n ? undefined : Infinity, // a rogue drone has no radio
+    answerMs: guard || n ? undefined : Infinity,
     ringTimeoutMs: 7000,
   });
   attach(s);
@@ -484,7 +444,6 @@ function hailContact(c) {
   return s;
 }
 
-/* ---- you ↔ pilot (live, over the relay) ------------------------------------ */
 function nearestPeer(range) {
   let best = null;
   let bd = range;
@@ -547,7 +506,6 @@ function onPeerMessage(from, d) {
       const c = contacts.find((x) => x.id === from) ?? { id: from, kind: "peer", name: d.name || "PILOT", x: sim.ship.pos.x, y: sim.ship.pos.y, z: sim.ship.pos.z };
       logEvent(`Incoming hail — ${c.name}`, "comms");
       const sess = peerSession(c, true);
-      /* our accept/reject goes back over the wire */
       const off = sess.on("state", (st) => {
         if (st === CallState.CONNECTING) {
           sendPeer({ op: "accept" }, from);
@@ -576,7 +534,6 @@ function onPeerMessage(from, d) {
   }
 }
 
-/* ---- NPC ↔ NPC: the open channels ----------------------------------------- */
 function stepChatter(dtSim) {
   const ch = comms.chatter;
   if (ch.queue.length) {
@@ -586,14 +543,12 @@ function stepChatter(dtSim) {
       const d = d3(line.from, sim.ship.pos);
       const q = quality(d);
       const text = q < 0.999 ? garble(line.text, q, ch.rnd) : line.text;
-      /* the band lives in the chatbox now (ui/chatbox.js over chat.js); the ticker is for calls */
       if (comms.listen) logEvent(`${line.from.name} › ${line.to.name}: ${text}`, "comms");
       chatPost({ channel: "local", from: line.from.name, text, tone: line.from.sector === "pirate" ? "hostile" : line.urgent ? "alert" : "neutral", meta: { to: line.to?.name ?? null } });
       ch.at = -(3.2 + line.text.length / 26);
     }
     return;
   }
-  /* 0.3.16: a hull that is actually being shot calls it at once, whatever the band is doing */
   if (sim.time >= (ch.urgentAt ?? 0)) {
     ch.urgentAt = sim.time + 2;
     const may = urgentReport(sim.ship.pos, sim.time);
@@ -602,24 +557,14 @@ function stepChatter(dtSim) {
   if (sim.time < ch.next) return;
   ch.next = sim.time + COOLDOWN.chatter[0] + ch.rnd() * (COOLDOWN.chatter[1] - COOLDOWN.chatter[0]);
   noteShootDowns();
-  /* first-hand reports — a port's real traffic from a hull that is there, a
-   * miner's real seam and the real threats on its belt, a picket's real sweep
-   * (npc/reports.js) — share the band with the speech engine's exchanges */
   if (ch.rnd() < 0.5) {
     const rep = groundedReport(sim.ship.pos, sim.time, ch.rnd);
     if (rep) { ch.queue = [rep]; ch.at = 0; return; }
   }
-  /* The band is pilots. It used to be three parts speech engine to one part
-   * port-to-port shop talk between two buildings a hundred thousand units
-   * apart, which is the thing that made the channel read as machinery rather
-   * than as a system with people in it. Ports keep every line they actually
-   * need — the approach hail, the lane, clearance, the pirate demand — and
-   * those are calls on the puck, not gossip on the open channel. */
   const ex = speechChatter(sim.ship.pos, sim.time, ch.rnd, { skySeed: sim.skySeed });
   if (ex) { ch.queue = ex.lines.map(bandLine); ch.at = 0; }
 }
 
-/* speech-engine line → the ticker's shape: range and colour from the real hull or port */
 function bandLine(l) {
   const at = (u) => u.ref ?? u;
   const f = at(l.from);
@@ -627,7 +572,6 @@ function bandLine(l) {
   return { from: { name: l.from.name, x: f.x, y: f.y, z: f.z, sector }, to: { name: l.to.name }, text: l.text };
 }
 
-/* hulls that went off the board since the last look: the band remembers the last one lost */
 const downSeen = new Set();
 function noteShootDowns() {
   for (const n of traffic) {
@@ -644,7 +588,6 @@ function garble(text, q, rnd) {
   return out;
 }
 
-/* ---- HUD wiring ------------------------------------------------------------ */
 function paintAux() {
   const s = comms.session;
   const st = $("aux-hail-st");
@@ -670,19 +613,15 @@ function paintAux() {
   $("aux-listen")?.classList.toggle("on", comms.listen);
 }
 
-/** Traffic on the open channel: a hull changing job near you says so, and the port answers. */
 function onVesselTransition(n, from, job) {
   const d = d3(n, sim.ship.pos);
   if (d > CHATTER_RANGE) return;
   const ch = comms.chatter;
   if (ch.queue.length > 4) return;
   const port = stations.find((st) => st.name === n.toName) ?? nearestStation(n, Infinity)?.station;
-  /* 0.3.16: a miner starting on its claim says what is in the rock and who is on the belt;
-   * one coming in says what it actually cut. From the sky, not the stock lines. */
   const rep = transitionReport(n, job, sim.time);
   if (rep) { ch.queue.push(rep); if (ch.at > 0) ch.at = 0; return; }
-  if (n.role === "miner" && (job === "cutting" || job === "approach")) return;   // the stock lines would invent it
-  /* the hull that changed job opens, to the port it is dealing with if it can reach it */
+  if (n.role === "miner" && (job === "cutting" || job === "approach")) return;
   if (job && ch.rnd() < 0.7) {
     const ex = speechChatter(sim.ship.pos, sim.time, ch.rnd, { skySeed: sim.skySeed, forceSpeaker: n.id, prefer: port?.id ?? null });
     if (ex) { ch.queue.push(...ex.lines.slice(0, 4).map(bandLine)); if (ch.at > 0) ch.at = 0; return; }
@@ -690,8 +629,6 @@ function onVesselTransition(n, from, job) {
   const lines = trafficLines(n, job, ch.rnd);
   if (!lines) return;
   if (!port) return;
-  /* the hull calls the port and the port does NOT answer on the open channel —
-   * a berth is granted on the puck, by name, or it is not granted */
   ch.queue.push({ from: { name: captainLine(n).split(" · ")[0] || n.name, x: n.x, y: n.y, z: n.z, sector: "traffic" }, to: { name: port.name }, text: lines[0] });
   if (ch.at > 0) ch.at = 0;
 }
@@ -699,8 +636,6 @@ function onVesselTransition(n, from, job) {
 export function mountComms() {
   trafficHooks.onTransition = onVesselTransition;
   if (comms.ui) return comms;
-  /* On <body>, not in #hud: the HUD is a stacking context that sits under the
-   * station deck and the terminal, and a call has to reach you on the deck. */
   comms.ui = new CallUI({ mount: document.body });
   comms.ui.root.hidden = true;
   $("aux-hail")?.addEventListener("click", () => hail());
@@ -715,7 +650,6 @@ export function mountComms() {
   onMessage(onPeerMessage);
   comms.lastSim = sim.time;
 
-  /* Keyboard: H hails / answers, Escape is already pause — leave it alone. */
   window.addEventListener("keydown", (e) => {
     const t = e.target;
     if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
@@ -734,7 +668,6 @@ export function mountComms() {
 
 function step() {
   const dtSim = Math.max(0, sim.time - comms.lastSim);
-  /* sim.wall stops on pause; a live call runs on the other pilot's clock, so use the real one */
   const nowMs = performance.now();
   const dtWall = comms.lastWallMs == null ? 0 : Math.min(0.5, Math.max(0, (nowMs - comms.lastWallMs) / 1000));
   comms.lastSim = sim.time;
@@ -758,18 +691,16 @@ function step() {
     resetSpeech(sim.skySeed);
     resetReports();
     downSeen.clear();
-    comms.quietUntil = sim.time + 8; // let the canopy clear before anyone calls
+    comms.quietUntil = sim.time + 8;
   }
-  comms.ui.root.hidden = sim.phase !== "play"; // the pause screen owns the canopy
+  comms.ui.root.hidden = sim.phase !== "play";
   if (sim.phase !== "play") {
-    /* pause freezes scripted calls (sim time) but not a live one — the other pilot keeps talking */
     if (comms.session?.wall) comms.ui.tick(dtWall * 1000);
     return;
   }
 
   const s = comms.session;
   if (s) {
-    /* range and signal follow the world while the channel is open */
     const p = s.peer;
     if (p && Number.isFinite(p.x)) {
       s.rangeU = d3(p, sim.ship.pos);
@@ -777,7 +708,6 @@ function step() {
     }
     if (s.kind === "peer" && s.peer && !contacts.some((c) => c.id === s.peer.id) && s.isLive) s.end("signal lost");
   }
-  /* a live call keeps the other pilot's clock; everything NPC keeps the sim's */
   comms.ui.tick((s && s.wall ? dtWall : dtSim) * 1000);
   stepChatter(dtSim);
   stepIncoming();
@@ -787,7 +717,6 @@ function step() {
   }
 }
 
-/* console access */
 export function wireCommsTest() {
   if (!window.__lg) return;
   window.__lg.comms = {

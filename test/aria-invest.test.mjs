@@ -12,15 +12,15 @@
 const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { sim, launchSim, tickSim } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { touch } = await import("../js/input.js");
-const { stations } = await import("../js/stations.js");
-const { upgrades, hasUpgrade } = await import("../js/upgrades.js");
-const { company, foundCompany } = await import("../js/company.js");
+const { sim, launchSim, tickSim } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { touch } = await import("../js/core/input.js");
+const { stations } = await import("../js/station/stations.js");
+const { upgrades, hasUpgrade } = await import("../js/economy/upgrades.js");
+const { company, foundCompany } = await import("../js/corp/company.js");
 const { droneOps } = await import("../js/drones/ops.js");
-const { wireAria } = await import("../js/aria.js");
-const { ariaPilot, planJob, refitPlan, buildPlan, notePlayerJob, ARIA_JOBS, INVEST_JOBS } = await import("../js/aria-pilot.js");
+const { wireAria } = await import("../js/aria/aria.js");
+const { ariaPilot, planJob, refitPlan, buildPlan, notePlayerJob, ARIA_JOBS, INVEST_JOBS } = await import("../js/aria/pilot.js");
 const { mission, EXEC } = await import("../js/mission/run.js");
 const { OPS, validate } = await import("../js/mission/script.js");
 

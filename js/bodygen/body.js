@@ -1,72 +1,21 @@
-/* LIVING GALAXY — one asteroid, grown properly.
- *
- * The thin adapter between the game and Shane's asteroid generator, which is
- * vendored as-is at js/asteroidgen/ (v1.01 of the drop-in, the tree whose own
- * README calls itself 1.9.0). Before 0.3 this file WAS the generator — a port of
- * the pre-1.1 one, an icosahedron with craters and veins. Now the generator
- * lives in its own folder and this file only says how the game asks it for a
- * rock:
- *
- *   - which rolls to hand it, in ONE place (`rockParams`, `rogueParams`), because
- *     the generator only draws a roll it was not given — hand it richness here
- *     and not there and the rng stream shifts and the survey card describes a
- *     different rock from the one in the canopy
- *   - how fine a mesh (DETAIL, cells per cube face edge, 12·n² triangles)
- *   - what the rock is worth, priced off the cutter (`assayOf`), not the
- *     generator's toy in-situ ledger
- *   - where the outcrops are, which the renderer seats crystals on
- *
- * What the generator brings that the old port did not: a cube-sphere with no
- * pole pinching; seven body kinds (spheroid, ellipsoid, elongate, contact
- * binary, faceted fragment, rubble pile, spinning top); craters that age —
- * shallow soft-rimmed ponded floors on old ones, bright rayed halos on young
- * ones — plus basins that bite the silhouette and groove families; bedrock
- * brightening on scarps, cavity occlusion, and frost in the cold traps of an
- * ice-bearing class; vein NETWORKS that wander across the surface instead of
- * round spots; seated boulders and a lofted halo of chips.
- *
- * Geometry comes back in the generator's unit frame (mean radius
- * `meshRadius` = 1.65). `scale` is what puts it at the rock's radius: the
- * renderer scales the mesh, rubble and debris together, because the debris
- * shaders and the rubble are laid out in that same unit frame.
- */
-
 import { generateAsteroid, SHAPE_LABELS, SHAPE_KINDS } from "../asteroidgen/generator.js";
 import { bakeLattice } from "./bake.js";
 import { CLASSES } from "./classes.js";
-import { oreLook } from "../rockgen.js";
-import { ORES } from "../materials.js";
+import { oreLook } from "../world/rockgen.js";
+import { ORES } from "../economy/materials.js";
 
 export { SHAPE_LABELS, SHAPE_KINDS };
 
 const ORE_BY_ID = new Map(ORES.map((o) => [o.id, o]));
 
-/* Cells per cube-face edge; a body is 12·n² triangles and 6·n²+2 vertices.
- * Measured in node on this tree: n=5 ~6 ms, n=10 ~11 ms, n=12 ~13 ms to grow
- * (a phone is several times slower, which is why one is grown per frame).
- *   placeholder  the shared stand-in a rogue wears until its own body lands
- *   far          a grown body on the low quality tier
- *   near         the default grown body
- *   high         the high tier, and the rock under the cutter on full
- *   assay        the survey card's sample — no renderer, cached per rock
- *   survey       a close inspection */
 export const DETAIL = { placeholder: 5, far: 7, near: 10, high: 12, assay: 9, survey: 18 };
 export const faceCount = (n) => 12 * n * n;
 
-/* How much wider a seam is drawn than the generator's survey-deck default.
- * Fixed across every detail level, so a rock does not grow fatter veins as it
- * drops a LOD, and the assay's coarse sample sees the seams the canopy shows. */
 export const FEATURE_SCALE = 4;
 export const FEATURE_DENSITY = 4;
 
-/* The generator's own frame: every shape is normalised to this mean radius. */
 export const MESH_RADIUS = 1.65;
 
-/**
- * The rolls a BELT rock hands the generator. Belt rocks leave roughness,
- * craters and shape to the seed — that is what makes two rocks of one class
- * different bodies — and fix what the field already decided.
- */
 export function rockParams(rock) {
   return {
     seed: String(rock.key ?? rock.id ?? "rock"),
@@ -76,12 +25,6 @@ export function rockParams(rock) {
   };
 }
 
-/**
- * The rolls a ROGUE hands it. A rock that has been out there long enough to be
- * catalogued is a survivor: more relief and more craters than a belt rock of
- * the same size. A rogue born from a collision (`m.shape`) is a faceted
- * fragment — the generator's own hand-off rule for a rogue off the Impact Lab.
- */
 export function rogueParams(m, cls) {
   const s = m.seed ?? 0.5;
   const p = {
@@ -96,16 +39,6 @@ export function rogueParams(m, cls) {
   return p;
 }
 
-/**
- * Grow one body.
- *
- * `opts` is either generator params (`seed`, `classId`, `radiusM`, …) or the
- * pre-0.3 shape (`seed`, `cls`, `radius` in world units, `roughness`, `craters`,
- * `richness`, `shape`). `detail` is cells per face edge. Returns the geometry in
- * the generator's unit frame, the `scale` that puts it at `radius`, the assay,
- * the outcrops (unit frame), and the generator's own result as `asteroid` —
- * which is what the rubble and the debris clouds are built from.
- */
 export function generateBody(_THREE, opts = {}) {
   const radius = opts.radius ?? (opts.radiusM != null ? opts.radiusM / 10 : 120);
   const params = {
@@ -144,33 +77,14 @@ export function generateBody(_THREE, opts = {}) {
   };
 }
 
-/* ---- baked bodies ---------------------------------------------------------
- *
- * What the canopy draws since 0.3.02. A body is grown at H cells a face — the
- * generator's own survey resolution, where its craters and veins exist — and
- * baked (js/bodygen/bake.js) onto a lattice of L cells a face. The tiers are
- * off the same device gate as before (engine.js rockQuality):
- *   proto   the belt field: one per class and variant, instanced by the hundred
- *   belt    a rock close aboard
- *   rogue   a catalogued rogue — the biggest thing you fly up to, so the finest
- * `L` must divide `H`. Node timings on this tree to grow: H32 ~40 ms, H48 ~90,
- * H64 ~200, H72 ~260 — which is why growth runs in a worker (grower.js). */
 export const BAKE = {
-  proto: { H: 32, L: [8, 4, 2] }, // 768 triangles close, 192 at a few dozen pixels, 48 at a dozen
+  proto: { H: 32, L: [8, 4, 2] },
   belt: { off: { H: 32, L: [8] }, low: { H: 32, L: [8] }, full: { H: 48, L: [16] }, high: { H: 64, L: [16] } },
   rogue: { off: { H: 32, L: [8] }, low: { H: 48, L: [12] }, full: { H: 64, L: [16] }, high: { H: 72, L: [24] } },
 };
 
-/* The generator's features were tuned for 56 cells a face; below that a seam is
- * widened just enough to land on the lattice (the 0.3 bodies needed ×4 at 10). */
 export const featureAt = (H) => Math.max(1, 56 / H);
 
-/**
- * Grow and bake one body. Plain data in, plain data out — it runs in the grower
- * worker. `opts` takes the same rolls as generateBody plus `H` and `L` (a list).
- * Returns the bake (atlases + one mesh per L) and everything generateBody
- * reports about the rock, with the assay taken off the fine surface.
- */
 export function growBaked(opts = {}) {
   const H = opts.H ?? 48;
   const Ls = Array.isArray(opts.L) ? opts.L : [opts.L ?? 16];
@@ -196,7 +110,6 @@ export function growBaked(opts = {}) {
   };
 }
 
-/** Every transferable buffer of a growBaked result. */
 export function bakedTransfer(d) {
   const out = [d.texA.buffer, d.texB.buffer];
   if (d.texC) out.push(d.texC.buffer);
@@ -204,18 +117,12 @@ export function bakedTransfer(d) {
   return out;
 }
 
-/* An outcrop is where a seam worth calling in breaks the surface: an ore that
- * stands proud (metal), glows, or is worth more than the matrix around it.
- * Thinned by vertex order so a rich rock does not become a pincushion, and
- * capped, because each one is an instance the renderer pays for. */
 function outcropsOf(a) {
   const out = [];
   const pos = a.geometry.attributes.position.array;
   const nrm = a.geometry.attributes.normal.array;
   const ids = a.oreAtVertex;
   const n = ids.length;
-  /* every qualifying vertex first, then thinned evenly: at the generator's own
-   * resolution a seam is a few vertices wide, and a fixed stride stepped over them */
   const hits = [];
   for (let i = 0; i < n; i++) {
     const id = ids[i];
@@ -245,30 +152,13 @@ function outcropsOf(a) {
   return out;
 }
 
-/**
- * The ledger.
- *
- * Priced off what the CUTTER would actually get, not off the rock's mass.
- * A bulk-tonnage figure is the honest physics answer and it is useless here:
- * a 400 u body masses 3×10¹⁴ kg and assays at four hundred billion credits,
- * which tells a player nothing except that the number is theatre. The game
- * already has a yield curve in turrets.js — `(2.5 + (r/60)^1.5 · 5)` units a
- * second, and a rock is cut out in about thirty-one seconds of normal work —
- * so the ticket is that total, split by what fraction of the surface assays as
- * each ore, priced at the same `value` the market pays. A prospector's ticket
- * in the currency the prospector gets paid in.
- */
-export const CUT_SECONDS = 31;           // 1 / 0.032, the normal-cutter wear rate
+export const CUT_SECONDS = 31;
 export function recoverableUnits(radius) {
   return (2.5 + Math.pow(radius / 60, 1.5) * 5) * CUT_SECONDS;
 }
 
 export function assayOf(composition, verts, cls, radius, richness = 1, favour = null) {
   const klass = CLASSES[cls] ?? CLASSES.S;
-  /* the gross is what the cutter would take out of a rock made entirely of
-   * ore; the ticket is only the ore in it, because bare matrix is not cargo.
-   * `units` is therefore the sum of the suite — the two numbers agreeing is the
-   * whole point of a ticket. */
   const gross = recoverableUnits(radius) * (0.8 + richness * 0.25);
   const grade = Math.max(0.2, Math.min(0.96, (klass.grade ?? 0.55) * (0.82 + (richness - 0.85) * 0.9)));
   const shares = suiteShares(composition, verts, klass, favour);
@@ -286,8 +176,6 @@ export function assayOf(composition, verts, cls, radius, richness = 1, favour = 
   const units = rows.reduce((a, r) => a + r.units, 0);
   let seen = 0;
   for (const [id, n] of Object.entries(composition)) if (id !== "_rock") seen += n;
-  /* the bulk figure is still worth carrying for the survey card, it is just
-   * not what the ticket is priced on */
   const metres = radius * 10;
   const massKg = (4 / 3) * Math.PI * Math.pow(metres, 3) * klass.density;
   return {
@@ -297,11 +185,6 @@ export function assayOf(composition, verts, cls, radius, richness = 1, favour = 
   };
 }
 
-/* Which ores, in what proportion. The class table is the prior; what the
- * surface actually shows is the evidence, trusted more the more of it there
- * is; the ore the field hash already gave this rock (what the cutter will put
- * in the hold) is favoured, so the card's headline and the hold agree. Shares
- * under 2% are dropped — a survey set does not report trace. */
 function suiteShares(composition, verts, klass, favour) {
   const w = klass.ores;
   let wSum = 0;
@@ -323,17 +206,6 @@ function suiteShares(composition, verts, klass, favour) {
   return out;
 }
 
-/**
- * The assay WITHOUT the renderer.
- *
- * The survey card wants what a rock is made of; it must not reach into the
- * renderer to get it, and it must work with the graphics gated off. The
- * generator lays its ore features out in DIRECTION space off rolls that come
- * before any per-vertex work, so a coarse body (DETAIL.assay) grown from the
- * same params lands its veins in the same places as the canopy's finer one —
- * the card and the canopy disagree only by sampling. Cached per rock, because
- * a panel repaints and the rock does not change.
- */
 const ASSAY_CACHE = new Map();
 const ASSAY_CAP = 96;
 
@@ -360,19 +232,6 @@ export function assayRock(rock) {
   return { ...base, klass: CLASSES[base.cls], worn, value: base.value * (1 - worn), units: base.units * (1 - worn) };
 }
 
-/**
- * The material a generated body wears: per-vertex colour, metalness and glow —
- * and, given a `map`, the belt's own crater texture laid over it triplanar.
- *
- * Why the texture: the generator's craters, grooves and grit are GEOMETRY, and
- * they are drawn for a survey mesh of 56–158 cells a face. A game body is 7–18,
- * where all of that falls between vertices and a rock reads as a smooth potato.
- * The instanced field already wears a procedural crater albedo per surface
- * class (js/rockgen.js makeRockTexture); sampling the same canvas in object
- * space, as albedo AND as a bump, puts crisp craters on a grown body at any
- * tessellation — and means the body that replaces an instance as you close in
- * has the surface you were already looking at.
- */
 export function bodyMaterial(THREE, { map = null, bump = 2.2, tile = 0.3 } = {}) {
   const mat = new THREE.MeshStandardMaterial({
     vertexColors: true, color: 0xffffff, metalness: 0.35, roughness: 0.62,
@@ -383,9 +242,6 @@ export function bodyMaterial(THREE, { map = null, bump = 2.2, tile = 0.3 } = {})
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
     map.needsUpdate = true;
   }
-  /* Three has no per-vertex metalness/roughness/emissive, and a rock where the
-   * metal does not read as metal is just a painted ball. Three small injections
-   * are cheaper than a custom shader and survive the standard lighting. */
   mat.onBeforeCompile = (shader) => {
     let vs = shader.vertexShader
       .replace("#include <common>", "#include <common>\nattribute float aMetal;\nattribute float aRough;\nattribute vec3 aEmit;\nvarying float vMetal;\nvarying float vRough;\nvarying vec3 vEmit;" + (map ? "\nvarying vec3 vObjPos;\nvarying vec3 vObjN;" : ""))

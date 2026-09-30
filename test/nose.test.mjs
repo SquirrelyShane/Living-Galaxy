@@ -11,12 +11,12 @@
 const store = new Map();
 globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-import { sim, launchSim, tickSim, selectBody, toggleWarp } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { BODIES } from "../js/bodies.js";
-import { forwardOf } from "../js/ship.js";
-import { touch } from "../js/input.js";
-import * as AP from "../js/autopilot.js";
+import { sim, launchSim, tickSim, selectBody, toggleWarp } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { BODIES } from "../js/world/bodies.js";
+import { forwardOf } from "../js/flight/ship.js";
+import { touch } from "../js/core/input.js";
+import * as AP from "../js/flight/autopilot.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (process.env.V) console.log(c ? "  ok  " : "  FAIL", m); if (c) pass++; else { fail++; if (!process.env.V) console.error("  FAIL", m); } };
@@ -76,7 +76,7 @@ const offOf = (vx, vy, vz) => { const f = forwardOf(ship.yaw, ship.pitch); const
   const tgt = BODIES.find((b) => b.name === "Jupiter") ?? BODIES[5];
   selectBody(tgt.id);
   /* point at the lane so the nav computer will take it */
-  const r = await import("../js/sim.js");
+  const r = await import("../js/sim/sim.js");
   const dest = r.warpDestination(r.warpNodeById(tgt.id));
   const dx = dest.x - ship.pos.x, dz = dest.z - ship.pos.z, dy = dest.y - ship.pos.y;
   ship.yaw = ship.aimYaw = Math.atan2(-dx, -dz); ship.pitch = ship.aimPitch = Math.atan2(dy, Math.hypot(dx, dz));

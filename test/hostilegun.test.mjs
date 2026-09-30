@@ -4,7 +4,7 @@
  *
  * THE BUG THIS EXISTS TO PREVENT.
  *
- * js/turrets.js has two loops that shoot at the player. `stepDrones` fires the
+ * js/flight/turrets.js has two loops that shoot at the player. `stepDrones` fires the
  * ambient swarm this file spawns itself. `stepPirates` fires everything in
  * HOSTILE_ROLES — and js/npc/rogues.js does `HOSTILE_ROLES.add("rogue")`, so
  * the 0.3.30 nest wave drones, the ones that actually swarm the belt, were
@@ -26,8 +26,8 @@ import { readFileSync } from "node:fs";
 import { HOSTILE_ROLES } from "../js/npc/traffic.js";
 import "../js/npc/rogues.js";          // this is what adds "rogue" to the set
 
-const ROOT = new URL("../", import.meta.url).pathname;
-const src = readFileSync(ROOT + "js/turrets.js", "utf8");
+const ROOT = new URL("..", import.meta.url).pathname;
+const src = readFileSync(ROOT + "js/flight/turrets.js", "utf8");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

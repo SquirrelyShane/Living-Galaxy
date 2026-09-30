@@ -1,30 +1,4 @@
-/* LIVING GALAXY — chain contracts: the multi-stage work a desk runs.
- *
- * 0.3.21. A chain is a job with a story: three to five stages, each one an
- * ordinary board job built from an existing KIND (js/contracts.js), posted one
- * at a time. Finish a stage and the next one is waiting — here, or at the port
- * the desk sends you to — and the last one pays a bonus and standing on top.
- *
- * DATA ONLY. The engine is js/chains.js; contracts.js builds each stage's job
- * from the kind named here and overrides the title, the text, the pay and the
- * quantity. Which means a chain never invents a mechanic: every stage is
- * something the game already knows how to complete.
- *
- *   { id, cat, name, blurb, sectors?, stages: [{ kind, title, text, payK?, qtyK?, good?, at? }], bonus, standing }
- *
- *   kind    one of that department's kinds (CATEGORIES in contracts.js)
- *   at      "same" — posted at the port the last stage was; "next" — a nearby
- *           port the engine picks and names. Stage 1 has no `at`.
- *   payK    multiplier on the kind's own pay; qtyK on its own quantity
- *   good    forces the ore/cargo where the story needs a particular one
- *
- * The prose is per-stage and the numbers are not: amounts, ore names, port
- * names, drift names, beacon and world names are filled in by the engine from
- * the live sky, so a stage reads the same way the one-off jobs do.
- */
-
 export const CHAINS = [
-  /* ---- MINING & EXTRACTION ---------------------------------------------------- */
   {
     id: "relight-the-furnace",
     cat: "mining",
@@ -58,7 +32,6 @@ export const CHAINS = [
     standing: 12,
   },
 
-  /* ---- FREIGHT & LOGISTICS ------------------------------------------------------ */
   {
     id: "long-thirst",
     cat: "logistics",
@@ -91,7 +64,6 @@ export const CHAINS = [
     standing: 9,
   },
 
-  /* ---- TRADE & PROCUREMENT ------------------------------------------------------ */
   {
     id: "ceramic-squeeze",
     cat: "trade",
@@ -124,7 +96,6 @@ export const CHAINS = [
     standing: 9,
   },
 
-  /* ---- SECURITY & BOUNTIES ------------------------------------------------------- */
   {
     id: "quiet-picket",
     cat: "security",
@@ -157,7 +128,6 @@ export const CHAINS = [
     standing: 9,
   },
 
-  /* ---- SALVAGE & RECOVERY --------------------------------------------------------- */
   {
     id: "adjusters-reconstruction",
     cat: "salvage",
@@ -190,7 +160,6 @@ export const CHAINS = [
     standing: 9,
   },
 
-  /* ---- INDUSTRY & CONSTRUCTION ----------------------------------------------------- */
   {
     id: "line-three-restart",
     cat: "industry",
@@ -240,7 +209,6 @@ export const CHAINS = [
     standing: 12,
   },
 
-  /* ---- ENERGY & FUEL ---------------------------------------------------------------- */
   {
     id: "flare-debt",
     cat: "energy",
@@ -273,7 +241,6 @@ export const CHAINS = [
     standing: 9,
   },
 
-  /* ---- SURVEY & SCIENCE --------------------------------------------------------------- */
   {
     id: "weathering-series",
     cat: "science",
@@ -322,7 +289,6 @@ export const CHAINS = [
     standing: 12,
   },
 
-  /* ---- CIVIC SERVICES ------------------------------------------------------------------ */
   {
     id: "civic-clinic-surge",
     cat: "civic",

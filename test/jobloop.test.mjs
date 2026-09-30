@@ -6,13 +6,13 @@
  * loop, which docked at the best bidder and sold the job's ore there instead
  * of bringing it to the desk that ordered it. */
 
-import { sim, launchSim, sellAllOre } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { clearSites } from "../js/sites.js";
-import { boardFor, acceptContract, contracts, resetContracts, BOARD, owedCargo, jobForSite } from "../js/contracts.js";
-import { engageMiningLoop, disengageAutopilot } from "../js/autopilot.js";
+import { sim, launchSim, sellAllOre } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { clearSites } from "../js/economy/sites.js";
+import { boardFor, acceptContract, contracts, resetContracts, BOARD, owedCargo, jobForSite } from "../js/economy/contracts.js";
+import { engageMiningLoop, disengageAutopilot } from "../js/flight/autopilot.js";
 import { mission, tickMission } from "../js/mission/run.js";
 import { validate } from "../js/mission/script.js";
 

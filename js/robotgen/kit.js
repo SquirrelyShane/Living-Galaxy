@@ -1,11 +1,5 @@
-// robotgen/src/kit.js — career hardware. Everything a unit carries BECAUSE OF
-// THE JOB rather than because of the frame: payload pods on a flyer, chest and
-// hip modules on a ground unit, head modules, and the extra shoulder mounts the
-// bigger catalogue added. Kept out of attach.js so the catalogue can keep
-// growing without the frame builder growing with it.
 import { put, group } from './parts.js';
 
-/* ---------- extra shoulder mounts ---------- */
 function gatling(THREE, K, spec, rig, g, m, dims) {
   const s = dims.w * 0.3 * m.size;
   const yoke = group(THREE, g, 'gatling_yoke', 0, s * 0.4, 0);
@@ -147,7 +141,6 @@ export const EXTRA_MOUNTS = {
   grapple: grappleMount, toolarm: toolArm, ammo: ammoPack, relay: relayMast, hailer,
 };
 
-/* ---------- flyer payload pods ---------- */
 function podShell(THREE, K, spec, rig, parent, w, h, d, name) {
   put(THREE, parent, K.cyl(w * 0.5, w * 0.5, d, 10), K.second, 0, 0, 0, Math.PI / 2, 0, 0, name + '_body');
   put(THREE, parent, K.cone(w * 0.5, d * 0.35, 10), K.second, 0, 0, d * 0.6, Math.PI / 2, 0, 0, name + '_nose');
@@ -246,7 +239,6 @@ const PODS = {
   },
 };
 
-/* ---------- chest, hip and head modules ---------- */
 function buildChest(THREE, K, spec, rig, ctx) {
   const kind = spec.attachments.chest;
   if (!kind || kind === 'none') return;
@@ -330,14 +322,12 @@ function buildHeadModules(THREE, K, spec, rig) {
   }
 }
 
-/* ---------- entry point ---------- */
 export function buildKit(THREE, K, spec, rig, ctx) {
   const A = spec.attachments;
   if (!A) return;
   buildHeadModules(THREE, K, spec, rig);
   if (!spec.flying) { buildChest(THREE, K, spec, rig, ctx); buildHips(THREE, K, spec, rig, ctx); }
 
-  /* flyer stores, hung off the station the spec asked for */
   const dims = ctx.dims;
   for (const p of (A.payload || [])) {
     const fn = PODS[p.type];

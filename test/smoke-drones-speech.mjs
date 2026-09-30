@@ -43,7 +43,7 @@ const setup = await page.evaluate(async () => {
   sim.ship.vel.x = at.vx ?? 0; sim.ship.vel.y = at.vy ?? 0; sim.ship.vel.z = at.vz ?? 0;
   const p = sim.ship.pos;
   contacts.push({ id: "sdrone-smoke-1", kind: "sdrone", name: `${civ.name} interceptor`, relation: "ally", stationId: civ.id, x: p.x + 30, y: p.y + 4, z: p.z - 40, vx: 0, vy: 0, vz: 0, hp: 40, shield: 0, radius: 3, yaw: 0.6, pitch: 0, cooldown: 99, born: sim.time });
-  const { launchProbe } = await import("/js/probes.js");
+  const { launchProbe } = await import("/js/flight/probes.js");
   launchProbe(p.x + 900000, p.y, p.z + 900000, "Smoke probe");
   sim.cameraMode = 1;
   return { hold: hold?.name ?? null, guards: hold?.guards ?? 0, civ: civ.name };
@@ -80,7 +80,7 @@ await page.screenshot({ path: "/tmp/smoke-drones.png" });
 
 /* ---- deck works tab tag (data only) */
 const tag = await page.evaluate(async () => {
-  const { droneSummary } = await import("/js/dronespec.js");
+  const { droneSummary } = await import("/js/drones/dronespec.js");
   const civ = window.__lg.stations.find((s) => s.sector !== "pirate");
   return droneSummary("sdrone", civ.name, civ.sector);
 });

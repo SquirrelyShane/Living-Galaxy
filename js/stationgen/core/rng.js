@@ -1,4 +1,3 @@
-/* Seeded PRNG — every station is reproducible from its seed string. */
 export class RNG {
   constructor(seed) {
     let n = 0;
@@ -23,7 +22,6 @@ export class RNG {
   sign() { return this.next() < 0.5 ? -1 : 1; }
 }
 
-/* Extras the station builder leans on. */
 RNG.prototype.gauss = function (mean = 0, sd = 1) {
   const u = 1 - this.next(), v = this.next();
   return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);

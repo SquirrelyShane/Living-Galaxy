@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 01 — PROPULSION.  drive: rows select the main-drive family; the rest mount. */
 export default {
   id: "d01", name: "01 Propulsion",
   sheet: {

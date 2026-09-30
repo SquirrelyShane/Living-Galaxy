@@ -1,16 +1,4 @@
-/* LIVING GALAXY — console DOM kit.
- *
- * The old terminal's builders (el, section, note, row, button, group, slider,
- * pct, setBar, fmtDist, fmtTime, clockOf) plus two in the same style:
- * chips(list, { value, onPick }) and card(title, hint). Every panel under
- * js/console builds its DOM from these and nothing else.
- *
- * No DOM access at import time: `document` is only touched inside builders.
- */
-
 const DOC = globalThis.document ?? null;
-
-/* ---- formatting --------------------------------------------------------- */
 
 export function fmtDist(d) {
   if (!isFinite(d)) return "—";
@@ -34,8 +22,6 @@ export function clockOf(t) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-/* ---- tiny DOM builders -------------------------------------------------- */
-
 export function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -53,7 +39,6 @@ export function note(parent, text) {
   parent.append(el("p", null, text));
 }
 
-/** label + right-aligned value, optional sub-hint and a bar under the label */
 export function row(parent, label, opts = {}) {
   const r = el("div", "trow");
   const k = el("div", "k");
@@ -85,7 +70,6 @@ export function group(...kids) {
   return g;
 }
 
-/** label + range input, wired straight to a getter/setter pair */
 export function slider(parent, spec, get, set, fmt) {
   const wrap = el("div", "tslider");
   const lab = el("div", "lab");
@@ -105,8 +89,6 @@ export function slider(parent, spec, get, set, fmt) {
     set(Number(input.value));
     show();
   });
-  /* Track the actual drag rather than focus: a slider you tapped and let go of
-   * still has focus, and must follow a reset or an external change. */
   let dragging = false;
   input.addEventListener("pointerdown", () => {
     dragging = true;
@@ -145,11 +127,6 @@ export function setBar(bar, frac, tone) {
   holder.classList.toggle("warn", tone === "warn");
 }
 
-/* ---- console additions -------------------------------------------------- */
-
-/** A row of pick-one chips. `list` is [{ id, label, cls?, hint? }] or plain
- * strings; `value` marks the current one; `onPick(id)` fires on tap. Returns
- * { row, set(id) } so a refresher can move the highlight without rebuilding. */
 export function chips(list, { value = null, onPick = null } = {}) {
   const r = el("div", "tchips");
   const items = list.map((it) => (typeof it === "string" ? { id: it, label: it } : it));
@@ -175,7 +152,6 @@ export function chips(list, { value = null, onPick = null } = {}) {
   return { row: r, set, get: () => current };
 }
 
-/** A titled card with an optional hint line; append rows/groups to `.body`. */
 export function card(title, hint) {
   const c = el("div", "tcard");
   const head = el("div", "head");

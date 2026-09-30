@@ -30,14 +30,14 @@ await sleep(1500);
 
 /* a few halls and hull crews, the way play fills the catalogue */
 const filled = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { stations } = await import("/js/stations.js");
-  const { stationRoster } = await import("/js/crew.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { stations } = await import("/js/station/stations.js");
+  const { stationRoster } = await import("/js/crew/ledger.js");
   const { traffic } = await import("/js/npc/traffic.js");
   const { crewOf } = await import("/js/npc/npccrew.js");
   for (const st of stations.slice(0, 4)) stationRoster(st, 0, sim.skySeed);
   for (const v of traffic.slice(0, 20)) crewOf(v);
-  const G = await import("/js/gdb.js");
+  const G = await import("/js/corp/gdb.js");
   await G.flushGdb();
   return G.census({ sky: sim.skySeed });
 });
@@ -73,7 +73,7 @@ await page.screenshot({ path: "/tmp/gdb-panel.png" });
 
 /* the relay has them */
 const relay = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   const r = await fetch(`/gdb/all?room=${encodeURIComponent(sim.skySeed)}`);
   const j = await r.json();
   return { status: r.status, n: j.entries?.length ?? 0 };

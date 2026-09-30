@@ -3,15 +3,15 @@
  *   node --import ./test/three-register.mjs test/bounty.test.mjs
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, tickCrew, CYCLE_SECONDS } from "../js/crew.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, tickCrew, CYCLE_SECONDS } from "../js/crew/ledger.js";
 import { cradle, generateNPC, ensureIdentity, PRONOUNS } from "../js/npc/cradle.js";
 import { createSpacer, genomeIdentity, SEX_SPLIT, NONBINARY_SHARE } from "../js/genome/spacer.js";
-import { givenName, nameRng } from "../js/names.js";
+import { givenName, nameRng } from "../js/world/names.js";
 import { LEXICONS } from "../js/data/lexicons.js";
-import { corps, corpById, corpRelation, corpOfStation } from "../js/corps.js";
+import { corps, corpById, corpRelation, corpOfStation } from "../js/corp/corps.js";
 import { boarding } from "../js/interior/boarding.js";
 import {
   bounty, boardAt, takeTicket, abandonTicket, ticketsHeld, attemptCapture, canAttempt,
@@ -72,7 +72,7 @@ const ship = sim.ship;
     byGender[r.gender].push(r.name.split(" ")[0]);
   }
   /* Names no longer come from three fixed pools — they come out of the forge
-   * in js/names.js, where gender rides on the ending and a share of every
+   * in js/world/names.js, where gender rides on the ending and a share of every
    * draw takes the neutral set anyway. Two samples of 900 will almost never
    * land on the same forged string twice, so the shared half of the property
    * is measured against a deep sample of men's names rather than against the

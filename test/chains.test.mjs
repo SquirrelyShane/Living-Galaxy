@@ -8,13 +8,13 @@
  * standing; and breaking one off takes it off the boards for a while.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stationById } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { CHAINS, CHAIN_BY_ID, chains, chainOffersAt, chainReport, homePortOf, nextPortFrom, resetChains, chainBonus } from "../js/chains.js";
-import { boardFor, acceptContract, abandonContract, deliverContracts, contracts, resetContracts, CATEGORIES, CATEGORY_ORDER, BOARD, acceptBlocker } from "../js/contracts.js";
-import { stockOf } from "../js/economy.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stationById } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { CHAINS, CHAIN_BY_ID, chains, chainOffersAt, chainReport, homePortOf, nextPortFrom, resetChains, chainBonus } from "../js/economy/chains.js";
+import { boardFor, acceptContract, abandonContract, deliverContracts, contracts, resetContracts, CATEGORIES, CATEGORY_ORDER, BOARD, acceptBlocker } from "../js/economy/contracts.js";
+import { stockOf } from "../js/economy/economy.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

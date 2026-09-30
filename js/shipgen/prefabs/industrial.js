@@ -1,7 +1,3 @@
-/* Prefabs — Mining, manipulation and labs.
- * Each prefab: faces (default mount faces), fp(s, part, face) → footprint {w,h,d} in ship units
- * (w along the face u-axis, d along v, h outward), build(g, s, part, S, rng) where g is a group
- * whose +Y points away from the hull and S is the StarshipBuilder (mats, lamp, dockBody…). */
 import * as THREE from "three";
 import { G, addMesh } from "../core/geometry.js";
 import { ALL_FACES } from "./_common.js";
@@ -13,14 +9,12 @@ export default {
       const face = g0.userData.part ? g0.userData.part.face : "bow";
       let g = g0;
       if (face !== "bow") {
-        // lay the boom along the hull, shoulder aft, cutter head reaching past the bow
         g = new THREE.Group(); g.rotation.x = -Math.PI / 2; g.position.set(0, s * 0.35, s * 2.6); g0.add(g);
         addMesh(g0, G.box(), S.mats.dark, 0, s * 0.2, s * 2.0, 0, 0, 0, s * 1.6, s * 0.4, s * 1.4);
       }
       const m = S.mats; const r = s * 0.42, arm = s * 3.2;
       addMesh(g, G.box(), m.dark, 0, s * 0.35, 0, 0, 0, 0, r * 2.6, s * 0.7, r * 2.6);
       addMesh(g, G.cyl(10), m.metal, 0, s * 0.7 + arm * 0.35, 0, 0, 0, 0, r * 0.85, arm * 0.75, r * 0.85);
-      // inner stage telescopes out when mining starts (see ops: dd.ext)
       const inner = addMesh(g, G.cyl(10), m.panel, 0, s * 0.7 + arm * 0.72, 0, 0, 0, 0, r * 0.62, arm * 0.5, r * 0.62);
       for (const sgn of [-1, 1]) addMesh(g, G.cyl(6), m.metal, sgn * r * 0.9, s * 0.7 + arm * 0.35, r * 0.5, 0, 0, 0, r * 0.16, arm * 0.55, r * 0.16);
       const head = new THREE.Group(); head.position.set(0, s * 0.7 + arm * 0.98, 0);
@@ -35,7 +29,6 @@ export default {
       const tipY = head.position.y + r * 3.9;
       g0.userData.drill = { head, tip: [0, tipY, 0], tipBase: tipY, emitter: [0, s * 0.7 + arm * 0.55, -r * 1.9], baseSpin: head.userData.spin.speed, node: g,
         inner, innerBaseY: inner.position.y, innerBaseScale: inner.scale.y, headBaseY: head.position.y, ext: 0, extTarget: 0, extMax: arm * 0.9 };
-      // reserve the cutting envelope ahead of the head so nothing else mounts in the drill's swing
       g0.userData.workzone = { node: g, center: [0, tipY + s * 1.5, 0], size: [s * 1.7, s * 3.2, s * 1.7] };
       S.lamp(g, { color: "#fff0c8", y: s * 0.7 + arm * 0.55, z: -r * 1.9, r: r * 0.34, mode: "steady", base: 5 });
       S.lamp(g, { color: "#ff8a2a", x: r * 1.7, y: s * 0.7, z: r * 1.6, r: r * 0.30, mode: "blink", period: 0.9, duty: 0.3, phase: rng.next(), base: 7 });

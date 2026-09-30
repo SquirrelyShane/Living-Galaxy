@@ -10,6 +10,29 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.78 — 2026-09-30
+
+Code files carry code; the docs carry everything else. `js/` grouped by domain.
+
+This zip includes 0.3.77 (the code-docs build), which was never applied on its own — go straight from 0.3.76 to 0.3.78.
+
+### Players
+
+- Nothing changes in play. Every module is byte-for-byte the same program: comments moved out, files moved into folders, import paths rewritten.
+
+### Developers
+
+- **0.3.77 — `docs/`.** Every comment in `js/` (8,379, 1.1 MB) moved into `docs/files/<path>.md`, one doc per code file: about, imports (unused ones flagged), importers, exports and who uses each, effects (events, storage keys, fetch endpoints, DOM ids, key codes, timers, globals), and every symbol with its line range, what it calls, what calls it, and its notes. Project-wide traces in `docs/trace/` (imports with cycles, calls, events, storage, network, dom, input, timers, globals, hygiene); machine-readable `docs/index.json`. Notes live in `<!-- note:KEY -->` slots the builder preserves; inline notes are pinned to a code line and re-found on every build.
+- `tools/codedocs/build.mjs` (`--migrate` moves any new code comment into its slot and strips it, each file checked AST-identical before it is written; `--check` for tests). Kept in code: licence/`/*!` headers, `__PURE__`, lint directives, and a first-line `Generated.` header (voice-bank's 600-line exemption). Uses a vendored acorn 8.16 (`tools/codedocs/vendor/`, MIT) — dev tooling only, never loaded by the game.
+- **0.3.78 — the move.** 99 flat files into `core/ net/ sim/ world/ world/events/ flight/ aria/ render/ ui/ station/ economy/ corp/ ships/ drones/ crew/ comms/ audio/`; `main.js` and `version.js` stay at `js/` (index.html and lg-patch.sh read them by path). Table: `tools/codedocs/moves-0.3.78.json`; tool: `tools/codedocs/move.mjs` (dry run by default) — rewrote 1,475 import specifiers and 4,018 path strings across `js/ test/ tools/ host/`, index.html, server.py and README, then `tools/preload.mjs` regenerated the preload block. Renames: `aria.js → aria/aria.js`, `aria-pilot.js → aria/pilot.js`, `ariaplay.js → aria/play.js`, `crew.js → crew/ledger.js`, `audio.js → audio/index.js`, `sim.js → sim/sim.js`.
+- **A zip can delete now.** `tools/prune/<version>.txt` lists removed files; `tools/lg-patch.sh apply` removes them before the tests, `deploy` removes them from a plain-folder desktop copy, and `tools/lg-patch.sh prune TO` does it by hand. Repo-relative paths only — `..` or `/…` stops the run. The running copy of the script is the pre-unzip one, so **this once**: `apply 0.3.76 0.3.78`, then `prune 0.3.78`, then `ship`.
+- `test/worldsync-revision.test.mjs` maps the new specifiers. `crew/ledger.js`, `crew/family.js`, `crew/races.js` now sit inside the console/crew/mission import-in-node and 600-line gates (all pass).
+- Found for next time (`docs/trace/hygiene.md`, `docs/REORG_PLAN.md`): 109 unused imports, 29 never-referenced top-level symbols, `sim/sim.js` in a 37-file import cycle, `render/engine.js › mountGame` one 2,564-line function.
+
+Files: every `js/` file except `js/crew/voice-bank.js` and `js/vendor/`; 99 moved (`tools/prune/0.3.78.txt`); `index.html`, `server.py`, `README.md`, `CHANGELOG.md`, `host/sol-host.mjs`, `host/three-loader.mjs`, `tools/*` path updates, `tools/lg-patch.sh`, `tools/codedocs/*`, `tools/prune/0.3.78.txt`; `docs/**`; tests with rewritten paths, `test/lgpatch.test.mjs` (+4), `test/codedocs.test.mjs` (new).
+
+Verified: all 96 node suites green (95 on the untouched 0.3.76 tree first, same result; `nav` needed its comment check turned into a code check, `worldsync-revision` its specifier map). Every relative path in `js/ test/ tools/ host/` and index.html resolves (2,705 checked). Browser: the page loads all 319 modules with no 404 besides the optional addon and `/api/me`; smoke-ui, smoke-rocks, smoke-attract, smoke-docking, smoke-economy, smoke-mining green. The other 34 smokes not run. Not played on a phone.
+
 ## 0.3.76 — 2026-09-28
 
 Ore unloads in seconds, not minutes.

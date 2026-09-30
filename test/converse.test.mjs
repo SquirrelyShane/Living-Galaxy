@@ -9,11 +9,11 @@
  * something to pick up.
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { crew, hireCrew, stationRoster, crewHooks } from "../js/crew.js";
-import { setSocial } from "../js/family.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { crew, hireCrew, stationRoster, crewHooks } from "../js/crew/ledger.js";
+import { setSocial } from "../js/crew/family.js";
 import { TREE, THREADS, topicsFor, open, choose, memoryOf, forgetTalk, greet } from "../js/crew/talk.js";
 import { hopeFundOf } from "../js/crew/talk-threads.js";
 

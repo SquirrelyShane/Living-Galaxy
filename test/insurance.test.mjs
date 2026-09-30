@@ -26,9 +26,9 @@ import {
   TIERS, TIER_BY_ID, policies, insuranceLog, resetInsurance,
   premiumFor, payoutFor, quoteAll, insure, policyFor, isInsured, release, claim,
   insuranceReport, playerKey, droneKey, npcKey, coverForVessel, downScaleFor, DOWN_SCALE,
-} from "../js/insurance.js";
-import { SHIP_DB, shipById, DEFAULT_SHIP_ID } from "../js/shipdb.js";
-import { yardQuote, ISSUE_RATE } from "../js/shipcost.js";
+} from "../js/economy/insurance.js";
+import { SHIP_DB, shipById, DEFAULT_SHIP_ID } from "../js/ships/shipdb.js";
+import { yardQuote, ISSUE_RATE } from "../js/economy/shipcost.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -162,9 +162,9 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
 
 /* ---- 7. losing the player's hull ----------------------------------------- */
 {
-  const { sim, launchSim, loseHull } = await import("../js/sim.js");
-  const { makePilot } = await import("../js/pilot.js");
-  const { currentShipId } = await import("../js/sim.js");
+  const { sim, launchSim, loseHull } = await import("../js/sim/sim.js");
+  const { makePilot } = await import("../js/flight/pilot.js");
+  const { currentShipId } = await import("../js/sim/sim.js");
 
   makePilot("Underwriter", "terran", "freight", null);
   launchSim("InsuranceTest", "sol");

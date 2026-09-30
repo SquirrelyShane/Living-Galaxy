@@ -1,18 +1,8 @@
-/* Living Galaxy — CONSOLE › CREW › BRIG.
- *
- * Whoever you took, and what you are doing about them. Two bars that move in
- * opposite directions if you are careless: how far they are from giving you
- * anything, and what they make of you. Everything on the humane side moves
- * both the right way, slowly. Everything on the hard side buys the first with
- * the second — which is fine if you only ever wanted the ticket cashed.
- *
- */
-
 import { el, section, note, row, button, group, chips, setBar, card } from "../kit.js";
-import { sim } from "../../sim.js";
-import { genderMark } from "../../crew.js";
+import { sim } from "../../sim/sim.js";
+import { genderMark } from "../../crew/ledger.js";
 import { boarding } from "../../interior/boarding.js";
-import { corpById } from "../../corps.js";
+import { corpById } from "../../corp/corps.js";
 import { captives, INTERACTIONS, canInteract, interact, canRecruit, recruit, guardStrength, RESIST_WORD, REGARD_WORD, RECRUIT_RESISTANCE, RECRUIT_REGARD } from "../../crew/captive.js";
 import { deliver, release, ransom, brigBerths } from "../../npc/bounty.js";
 

@@ -13,8 +13,8 @@ globalThis.__worldsyncTest={
   impactors:{adoptImpactors:wire=>ctx.live=wire,impactorWire:()=>ctx.live,setImpactorAuthority:()=>{}},
   traffic:{markVesselDown:()=>{},trafficDown:ctx.trafficDown,traffic:[],vesselById:()=>null}
 };
-const groups={'./gnn.js':'gnn','./net.js':'net','./sim.js':'sim','./holes.js':'holes','./impactors.js':'impactors','./npc/traffic.js':'traffic'};
-let source=await readFile(new URL('../js/worldsync.js',import.meta.url),'utf8');
+const groups={'../comms/gnn.js':'gnn','./net.js':'net','../sim/sim.js':'sim','../world/events/holes.js':'holes','../world/events/impactors.js':'impactors','../npc/traffic.js':'traffic'};
+let source=await readFile(new URL('../js/net/worldsync.js',import.meta.url),'utf8');
 source=source.replace(/import \{([^}]+)\} from "([^"]+)";/g,(_,names,path)=>{
   const group=groups[path];assert.ok(group,`dependency mapped: ${path}`);
   const code=names.split(',').map(n=>n.trim()).map(n=>`export const ${n}=globalThis.__worldsyncTest.${group}.${n};`).join('\n');

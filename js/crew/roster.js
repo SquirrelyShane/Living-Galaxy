@@ -1,25 +1,15 @@
-/* LIVING GALAXY — the crew roster: sorted, filtered, and who is posted where.
- *
- * The deck plan already knows where a hand works from their trade
- * (deckplan.stationRoomFor). This adds the captain's word: `m.duty` is a room
- * kind ("eng", "cargo", …) and stationRoomFor honours it first, so crewfx's
- * trim, duties' wear model and the interior walkers all follow the assignment
- * without knowing it was made. Contract: PLAN.md §4.1.
- */
-
-import { crew } from "../crew.js";
-import { sim, currentShipId } from "../sim.js";
-import { shipById } from "../shipdb.js";
+import { crew } from "./ledger.js";
+import { sim, currentShipId } from "../sim/sim.js";
+import { shipById } from "../ships/shipdb.js";
 import { hullPlan, stationRoomFor } from "../interior/deckplan.js";
 import { shiftPhase } from "../npc/crewfx.js";
 import { cradle } from "../npc/cradle.js";
 import { tiesOf } from "./bonds.js";
-import { trustOf } from "../family.js";
+import { trustOf } from "./family.js";
 
 export const ROSTER_SORTS = ["name", "career", "station", "morale", "trust", "wage", "kind"];
 export const ROSTER_FILTERS = ["all", "human", "robot", "on", "off", "unsettled"];
 
-/** Room kinds a hand can be posted to, with the label the roster shows. */
 export const KIND_LABEL = {
   eng: "Engineering", sensor: "Sensors", sec: "Security", med: "Medbay", cargo: "Cargo", office: "Office",
   bridge: "Bridge", agri: "Agri", lab: "Lab", works: "Works", industry: "Works",
@@ -28,7 +18,6 @@ const NOT_A_POST = new Set(["quarters", "mess", "airlock", "captain", "brig"]);
 
 let planCache = { key: "", plan: null };
 
-/** hullPlan(shipById(currentShipId()), sim.callsign) — the same key crewfx uses. */
 export function currentPlan() {
   const id = currentShipId?.() ?? "general_b";
   const seed = sim.callsign || "sol";
@@ -37,19 +26,16 @@ export function currentPlan() {
   return planCache.plan;
 }
 
-/** Where this hand stands their watch: honours m.duty, else their trade. */
 export function dutyOf(m, plan = currentPlan()) {
   if (!m || !plan) return null;
   return stationRoomFor(plan, m);
 }
 
-/** The room kind crewfx credits a room as: an industrial hall of kind "works" is "industry". */
 export function postKind(room) {
   if (!room) return null;
   return room.industrial && !KIND_LABEL[room.kind] ? "industry" : room.kind;
 }
 
-/** [{ kind, label }] — distinct postable room kinds on this hull. */
 export function dutyOptions(plan = currentPlan()) {
   const seen = new Map();
   for (const r of plan?.rooms ?? []) {
@@ -59,7 +45,6 @@ export function dutyOptions(plan = currentPlan()) {
   return [...seen.values()];
 }
 
-/** Post a hand to a room kind (null = back to their trade). Returns null or the reason it failed. */
 export function setDuty(memberId, roomKind = null) {
   const m = crew.aboard.find((x) => x.id === memberId);
   if (!m) return "Not aboard";
@@ -93,11 +78,6 @@ const SORTERS = {
   kind: (a, b) => Number(a.robot) - Number(b.robot),
 };
 
-/**
- * The roster, sorted and filtered. filter: { kind: "all"|"human"|"robot",
- * shift: "on"|"off"|null, unsettled: bool } or one of ROSTER_FILTERS as a string.
- * → [{ m, station, phase, duty, ties, robot }]
- */
 export function roster({ sort = "name", filter = {}, time = sim.time ?? 0 } = {}) {
   const plan = currentPlan();
   const f = normFilter(filter);
@@ -114,7 +94,6 @@ export function roster({ sort = "name", filter = {}, time = sim.time ?? 0 } = {}
     rows.push({ m, station, phase, duty: m.duty ? station : null, ties: tiesOf(m), robot });
   }
   const sorter = SORTERS[sort] ?? SORTERS.name;
-  /* stable: fall back to name, then id */
   rows.sort((a, b) => sorter(a, b) || cmp(a.m.name, b.m.name) || cmp(a.m.id, b.m.id));
   return rows;
 }

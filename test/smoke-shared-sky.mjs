@@ -46,10 +46,10 @@ await B.page.waitForTimeout(3000);
  * was never the right measurement.
  */
 const probe = (page) => page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { net } = await import("/js/net.js");
-  const { worldsync } = await import("/js/worldsync.js");
-  const { impactors } = await import("/js/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { net } = await import("/js/net/net.js");
+  const { worldsync } = await import("/js/net/worldsync.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
   const { traffic } = await import("/js/npc/traffic.js");
   const v = traffic.find((n) => n.role === "patrol");
   /* the room's clock as this client last heard it, and its own distance from
@@ -109,8 +109,8 @@ else {
 
 /* A gets a rock; B should mirror it within a couple of wstate beats */
 await A.page.evaluate(async () => {
-  const { impactors } = await import("/js/impactors.js");
-  const { sim } = await import("/js/sim.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
   impactors.push({ id: "impSMOKE", name: "Smoke Rock", x: sim.ship.pos.x + 40000, y: 0, z: sim.ship.pos.z, vx: -50, vy: 0, vz: 0, r: 300, seed: 0.4, spin: 0.1, born: sim.time, deflected: 0, lastWell: null });
 });
 await B.page.waitForTimeout(3200);
@@ -120,16 +120,16 @@ if (!b.rocks.includes("impSMOKE")) fails.push("B did not mirror A's rock");
 
 /* A's rock lands: B's world takes the same crater */
 const struck = await A.page.evaluate(async () => {
-  const { strikeBody } = await import("/js/sim.js");
-  const { BODIES, bodyById } = await import("/js/bodies.js");
+  const { strikeBody } = await import("/js/sim/sim.js");
+  const { BODIES, bodyById } = await import("/js/world/bodies.js");
   const w = BODIES.find((x) => x.kind !== "star" && x.kind !== "gas" && !x.shattered);
   const tier = strikeBody(w.id, w.radius * 0.35, 900);
   return { id: w.id, name: w.name, tier, craters: bodyById(w.id).craters.length };
 });
 await B.page.waitForTimeout(1500);
 const bCr = await B.page.evaluate(async (id) => {
-  const { bodyById } = await import("/js/bodies.js");
-  const { worldsync } = await import("/js/worldsync.js");
+  const { bodyById } = await import("/js/world/bodies.js");
+  const { worldsync } = await import("/js/net/worldsync.js");
   return { craters: bodyById(id).craters.length, integrity: bodyById(id).integrity, strikesIn: worldsync.stats.strikesIn };
 }, struck.id);
 console.log("A struck", struck.name, struck.tier, "craters A:", struck.craters, "B:", bCr.craters, "strikesIn:", bCr.strikesIn);
@@ -140,8 +140,8 @@ await A.page.waitForTimeout(1500);
 const C = await pilot("LateCharlie");
 await C.page.waitForTimeout(3500);
 const cCr = await C.page.evaluate(async (id) => {
-  const { bodyById } = await import("/js/bodies.js");
-  const { worldsync } = await import("/js/worldsync.js");
+  const { bodyById } = await import("/js/world/bodies.js");
+  const { worldsync } = await import("/js/net/worldsync.js");
   return { craters: bodyById(id).craters.length, applied: worldsync.applied, pulls: worldsync.stats.pulls, host: worldsync.host };
 }, struck.id);
 console.log("late joiner C:", JSON.stringify(cCr));

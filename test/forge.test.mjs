@@ -10,9 +10,9 @@
  */
 
 import * as THREE from "../vendor/three.module.min.js";
-import { SHIP_DB } from "../js/shipdb.js";
-import { forgeShip, forgeShipScaled, tickHull, releaseHull } from "../js/shipforge.js";
-import { hullSpec } from "../js/hullspec.js";
+import { SHIP_DB } from "../js/ships/shipdb.js";
+import { forgeShip, forgeShipScaled, tickHull, releaseHull } from "../js/ships/shipforge.js";
+import { hullSpec } from "../js/ships/hullspec.js";
 
 let pass = 0;
 let fail = 0;

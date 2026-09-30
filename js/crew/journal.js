@@ -1,30 +1,7 @@
-/* Living Galaxy — the NPC JOURNAL: what a person did, and why, on the record.
- *
- * CRADLE has always kept a `history` — one line of prose per event, good for
- * a card and useless for anything else. This is the machine-readable layer
- * underneath it: one full record per decision, in the same shape the
- * genome-agent project writes (docs/RECORD-SCHEMA.md), re-pointed at a hull
- * instead of a grid world. Surroundings are the room and the hull's state;
- * holdings are wages owed, kit and know-how; the world that gets marked is
- * the ship.
- *
- * Storage is deliberately asymmetric. Records live in a session ring in
- * memory (everything, for the panel and the tests) and a short capped tail on
- * the CRADLE record (the last JOURNAL_KEEP, for the ledger, so a hand who
- * signs on at Kessler Reach two skies later still carries the row about the
- * night they stopped speaking to the cook). `exportJournals()` writes the lot.
- *
- * Records are data, never instructions: nothing downstream evaluates a
- * `summary` or a `reasoning` line, it only prints them.
- *
- */
-
 import { cradle } from "../npc/cradle.js";
 
 export const JOURNAL_VERSION = 1;
-/** Full records kept on a ledger record. The session ring keeps far more. */
 export const JOURNAL_KEEP = 12;
-/** Full records kept in memory across the whole crew this session. */
 export const RING_CAP = 400;
 
 const ring = [];
@@ -32,16 +9,12 @@ const byAgent = new Map();
 
 export const journal = {
   get size() { return ring.length; },
-  /** Every record this session, newest last. */
   all() { return ring.slice(); },
-  /** Newest first, for one hand. */
   of(id, n = 20) { return (byAgent.get(id) ?? []).slice(-n).reverse(); },
-  /** The most recent record for a hand, or null. */
   last(id) { const a = byAgent.get(id); return a?.length ? a[a.length - 1] : null; },
   clear() { ring.length = 0; byAgent.clear(); },
 };
 
-/** File a record: session ring, per-agent index, and the ledger tail. */
 export function fileRecord(rec) {
   if (!rec?.agent?.id) return rec;
   ring.push(rec);
@@ -61,13 +34,8 @@ export function fileRecord(rec) {
   return rec;
 }
 
-/** 3 decimal places, the schema's rule, applied at write time. */
 export const r3 = (v) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v * 1000) / 1000 : v);
 
-/**
- * {from, to, delta} for every key that actually moved. Returns null when
- * nothing did — the schema's own convention, and what keeps records small.
- */
 export function diffOf(before, after, min = 0.0005) {
   const out = {};
   let any = false;
@@ -80,7 +48,6 @@ export function diffOf(before, after, min = 0.0005) {
   return any ? out : null;
 }
 
-/** One written sentence covering the whole record. */
 export function writeSummary(rec) {
   const parts = [];
   const s = rec.observedSurroundings;
@@ -103,13 +70,6 @@ export function writeSummary(rec) {
   return parts.join(" ");
 }
 
-/* ---- serialization ------------------------------------------------------- */
-
-/**
- * The whole flight recorder: every ledger record with its genome, lineage and
- * journal, plus this session's ring. Written by CONSOLE › CREW › LOG › EXPORT
- * and readable straight back by importJournals().
- */
 export function exportJournals({ session = true } = {}) {
   const records = cradle.all().map((r) => ({
     id: r.id, name: r.name, raceId: r.raceId, seed: r.seed,
@@ -128,7 +88,6 @@ export function exportJournals({ session = true } = {}) {
   }, null, 1);
 }
 
-/** Take journals back in. Ledger records must already exist (importLedger first). */
 export function importJournals(json) {
   const j = typeof json === "string" ? JSON.parse(json) : json;
   let n = 0;
@@ -146,11 +105,6 @@ export function importJournals(json) {
   return n;
 }
 
-/**
- * Drop stored journals from people who are not aboard, oldest first. Called
- * when localStorage refuses a write rather than losing the ledger itself —
- * a person's genome and history are worth more than their last twelve watches.
- */
 export function shedJournals(keepIds = new Set()) {
   let freed = 0;
   for (const r of cradle.all()) {
@@ -161,7 +115,6 @@ export function shedJournals(keepIds = new Set()) {
   return freed;
 }
 
-/** [{ id, action, kind, label, n }] — what this hand spends their life doing. */
 export function habitsOf(id) {
   const mine = byAgent.get(id) ?? [];
   const count = new Map();

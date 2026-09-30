@@ -45,9 +45,9 @@ await page.waitForTimeout(1500);
 
 /* ---- a rock on Earth ---- */
 await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { bodyPosition, bodyVelocity, bodyById } = await import("/js/bodies.js");
-  const { impactors } = await import("/js/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { bodyPosition, bodyVelocity, bodyById } = await import("/js/world/bodies.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
   const earth = bodyById("earth");
   const p = bodyPosition("earth", sim.time, { x: 0, y: 0, z: 0 }), v = bodyVelocity("earth", sim.time, { x: 0, y: 0, z: 0 });
   const hit = { x: p.x + earth.radius, y: p.y, z: p.z };
@@ -60,11 +60,11 @@ await page.evaluate(async () => {
   impactors.length = 0;
   impactors.push({ id: "impSmoke", name: "Smoke Anvil", r: 700, x: hit.x + 4200, y: hit.y + 300, z: hit.z - 900, vx: v.x - 1100, vy: v.y, vz: v.z + 160, seed: 0.15, spin: 0.1, born: sim.time, deflected: 0 });
 });
-await until(async () => (await import("/js/impacts.js")).runs.length > 0, 60000);
+await until(async () => (await import("/js/world/events/impacts.js")).runs.length > 0, 60000);
 await page.waitForTimeout(2500);
 const strike = await page.evaluate(async () => {
-  const { runs } = await import("/js/impacts.js");
-  const { chunks } = await import("/js/debris.js");
+  const { runs } = await import("/js/world/events/impacts.js");
+  const { chunks } = await import("/js/world/debris.js");
   const gl = window.__lgGL;
   const run = runs[0];
   const view = gl.impactFx.views.get(run.id);
@@ -87,15 +87,15 @@ await page.screenshot({ path: "_scratch/impact-smoke.png" });
 
 /* let the run finish and the view go */
 await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   sim.timeScale = 8;
 });
-await until(async () => (await import("/js/impacts.js")).runs.length === 0, 90000);
+await until(async () => (await import("/js/world/events/impacts.js")).runs.length === 0, 90000);
 await page.waitForTimeout(3000);
 const after = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
+  const { sim } = await import("/js/sim/sim.js");
   sim.timeScale = 1;
-  const { chunks } = await import("/js/debris.js");
+  const { chunks } = await import("/js/world/debris.js");
   return { held: chunks.filter((c) => c.driven).length, chunks: chunks.length, views: window.__lgGL.impactFx.views.size };
 });
 console.log("after:", JSON.stringify(after));
@@ -105,17 +105,17 @@ ok(await page.evaluate(() => window.__lgGL.impactFx.views.size === 0), "and the 
 
 /* ---- rock on rock ---- */
 await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { impactors } = await import("/js/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
   const base = { x: sim.ship.pos.x + 60000, y: sim.ship.pos.y + 20000, z: sim.ship.pos.z };
   impactors.length = 0;
   impactors.push({ id: "impL", name: "Left Rock", r: 650, x: base.x - 2500, y: base.y, z: base.z, vx: sim.ship.vel.x + 750, vy: sim.ship.vel.y, vz: sim.ship.vel.z, seed: 0.3, spin: 0.1, born: sim.time - 9, deflected: 0 });
   impactors.push({ id: "impR", name: "Right Rock", r: 480, x: base.x + 2500, y: base.y + 150, z: base.z, vx: sim.ship.vel.x - 850, vy: sim.ship.vel.y, vz: sim.ship.vel.z, seed: 0.6, spin: 0.1, born: sim.time - 9, deflected: 0 });
 });
-await until(async () => (await import("/js/impacts.js")).runs.some((r) => r.kind === "collision"), 60000);
+await until(async () => (await import("/js/world/events/impacts.js")).runs.some((r) => r.kind === "collision"), 60000);
 await page.waitForTimeout(1500);
 const coll = await page.evaluate(async () => {
-  const { runs } = await import("/js/impacts.js");
+  const { runs } = await import("/js/world/events/impacts.js");
   const run = runs.find((r) => r.kind === "collision");
   const view = window.__lgGL.impactFx.views.get(run.id);
   return { rocks: view?.rocks.length ?? 0, visible: view?.rocks.every((r) => r.mesh.visible) ?? false, parts: run.plan.bodies.map((b) => b.detached.length) };
@@ -126,10 +126,10 @@ ok(coll.parts.every((n) => n > 0), `and both break (${coll.parts.join(" / ")} ch
 
 /* ---- a belt rock cut out ---- */
 const shatter = await page.evaluate(async () => {
-  const { sim } = await import("/js/sim.js");
-  const { currentSystem } = await import("/js/bodies.js");
-  const { nearbyRocks, wearRock } = await import("/js/field.js");
-  const { impactors } = await import("/js/impactors.js");
+  const { sim } = await import("/js/sim/sim.js");
+  const { currentSystem } = await import("/js/world/bodies.js");
+  const { nearbyRocks, wearRock } = await import("/js/world/field.js");
+  const { impactors } = await import("/js/world/events/impactors.js");
   impactors.length = 0;
   const belt = currentSystem.belt ?? currentSystem.outerBelt;
   const mid = (belt.inner + belt.outer) / 2;

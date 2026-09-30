@@ -3,13 +3,13 @@
  *   node --import ./test/three-register.mjs test/autopilot.test.mjs
  */
 
-import { sim, launchSim, tickSim, addWaypointAt, stashAt, smeltAll, stashDeposit, stashWithdraw, canSmeltAt } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { autopilot, engageMiningLoop, engageAutopilot, powerThrottle, sustainableThrottle, warpReserve, AP_POWER, bestPortFor, cycleAutoPlan } from "../js/autopilot.js";
-import { touch } from "../js/input.js";
-import { currentSystem, dist3 } from "../js/bodies.js";
-import { BATTERY, cargoTotal } from "../js/ship.js";
-import { stations } from "../js/stations.js";
+import { sim, launchSim, tickSim, addWaypointAt, stashAt, smeltAll, stashDeposit, stashWithdraw, canSmeltAt } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { autopilot, engageMiningLoop, engageAutopilot, powerThrottle, sustainableThrottle, warpReserve, AP_POWER, bestPortFor, cycleAutoPlan } from "../js/flight/autopilot.js";
+import { touch } from "../js/core/input.js";
+import { currentSystem, dist3 } from "../js/world/bodies.js";
+import { BATTERY, cargoTotal } from "../js/flight/ship.js";
+import { stations } from "../js/station/stations.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -83,7 +83,7 @@ sim.dropoutRoll = 1;
 /* ---- the buttons build missions now ----------------------------------------- */
 {
   const { mission, stopMission } = await import("../js/mission/run.js");
-  const { disengageAutopilot } = await import("../js/autopilot.js");
+  const { disengageAutopilot } = await import("../js/flight/autopilot.js");
   const st2 = stations.find((s) => !s.hostile);
   ship.dockedAt = null;
   ok(engageAutopilot(st2.id) && mission.active?.steps[0].op === "APPROACH" && mission.active.builtin && autopilot.on && autopilot.mode === "approach" && autopilot.targetId === st2.id, "engageAutopilot builds a one-step APPROACH mission and mirrors on/mode/target");

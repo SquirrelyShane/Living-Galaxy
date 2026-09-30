@@ -1,13 +1,5 @@
-/* Living Galaxy — CONSOLE › CORP › ACCOUNT: the pilot that follows you.
- *
- * Sign in to living-galaxy.com from inside the game, see what the account
- * holds, sync now, and — the only screen that ever asks — choose between two
- * copies of a pilot when both this device and the account moved. Everything
- * else is js/account.js; this file is the buttons.
- */
-
 import { el, section, note, row, button, group, card } from "../kit.js";
-import { account, accountLine, signIn, signOut, sync, resolve, takeNewer, checkRemote, loadBoard, SITE_LINK } from "../../account.js";
+import { account, accountLine, signIn, signOut, sync, resolve, takeNewer, checkRemote, loadBoard, SITE_LINK } from "../../net/account.js";
 
 const fmtWhen = (t) => {
   if (!t) return "—";
@@ -25,9 +17,6 @@ export function mountAccount(root, ctx) {
   let painted = "";
 
   const paint = () => {
-    /* the key is WHICH card, not the status text: a refused sign-in must not
-     * rebuild the card and throw away what the pilot typed — the status row
-     * carries the words */
     const kind = account.site === false ? "offline" : account.site === null ? "probing" : !account.user ? "signin" : account.conflict ? "conflict" : "in";
     const key = `${kind}|${account.user?.username ?? ""}|${account.user?.verified ?? ""}|${account.version}|${Boolean(account.newer)}`;
     line.value.textContent = accountLine();
@@ -46,8 +35,6 @@ export function mountAccount(root, ctx) {
   ctx.push(paint);
 }
 
-/** 0.3.43 — TOP PILOTS: the site's board, by purse, callsigns only. Fetched
- * when the card builds; a site without one shows nothing. */
 function mountBoard(body) {
   const c = card("TOP PILOTS", "by purse, across every account");
   const holder = el("div");

@@ -1,16 +1,3 @@
-/* LIVING GALAXY — the glyph kit.
- *
- * A "hieroglyphic" that the interface writes in: strings drawn from three
- * unicode blocks every phone ships glyphs for (braille patterns, geometric
- * shapes, box drawing), chosen by a seeded generator so the same person or
- * hull always writes the same sigil. Progress bars are written in it too —
- * a bar filling is the machine compiling a record, cell by cell, the lead
- * cell flickering through candidates before it settles.
- *
- * No dependencies, no layout opinions: it renders into whatever element it
- * is given and animates with requestAnimationFrame when there is a window.
- */
-
 const BRAILLE = "⠁⠃⠇⠏⠟⠿⡿⣿⢸⡇⠶⠭⠪⠵⠳⠞⠜⠚⠙⠓⠋⠑⠡⠨⠰⠸⠴⠦⠖⠲⠺⠾⠽⠼⠻⠷⠯⠧⠗⠗⠝⠍⠉⠅";
 const GEO = "◇◈◆▢▣◫◧◨◩◪◬◭◮○◌◍◎●◐◑◒◓◔◕▲△▴▵▷▹▸▻▼▽▾▿◁◃◂◅";
 const BOX = "╱╲╳═║╬╪╫╠╣╦╩┼┿╂┃━┏┓┗┛┣┫┳┻";
@@ -34,7 +21,6 @@ function pickFrom(alpha, rnd) {
   return cps[Math.floor(rnd() * cps.length)];
 }
 
-/** A deterministic string of `n` glyphs for a seed. `alpha` names an ALPHABETS entry. */
 export function glyphString(seed, n = 12, alpha = "all") {
   const rnd = mulberry(`glyph:${seed}`);
   const a = ALPHABETS[alpha] ?? ALPHABETS.all;
@@ -43,7 +29,6 @@ export function glyphString(seed, n = 12, alpha = "all") {
   return out;
 }
 
-/** The short mark a record signs with: 3–4 glyphs, mixed blocks, stable per seed. */
 export function sigil(seed) {
   const rnd = mulberry(`sigil:${seed}`);
   const n = 3 + (rnd() < 0.4 ? 1 : 0);
@@ -53,21 +38,8 @@ export function sigil(seed) {
   return out;
 }
 
-/* ---- glyph bar ------------------------------------------------------------
- * <div class="gbar">
- *   <div class="gbar-head"><span class="gbar-label">…</span><span class="gbar-val">…</span></div>
- *   <div class="gbar-track"><span class="gcell lit">⠿</span>…</div>
- * </div>
- */
-
 const CELLS_DEFAULT = 18;
 
-/**
- * Render (or re-render) a glyph bar into `host`.
- * @param host   element
- * @param spec   { label, value 0..1, seed, cells, alpha, tone: "cyan"|"amber"|"ok"|"hot", format(value)->string, animate: bool, from: 0..1 }
- * Returns a handle { set(value, animate), el }.
- */
 export function glyphBar(host, spec = {}) {
   const cells = spec.cells ?? CELLS_DEFAULT;
   const alpha = ALPHABETS[spec.alpha] ?? ALPHABETS.all;
@@ -109,7 +81,7 @@ export function glyphBar(host, spec = {}) {
       spans[i].classList.toggle("lit", on);
       const lead = settling && i === lit && lit < cells;
       spans[i].classList.toggle("lead", lead);
-      if (lead) spans[i].textContent = pickFrom(alpha, flick); // the machine trying candidates
+      if (lead) spans[i].textContent = pickFrom(alpha, flick);
       else if (spans[i].textContent !== glyphs[i]) spans[i].textContent = glyphs[i];
     }
     val.textContent = fmt(v);
@@ -144,11 +116,6 @@ export function glyphBar(host, spec = {}) {
   return { set, el: host, sigil: sigil(seed) };
 }
 
-/**
- * A "compile" — several bars filling in sequence with a stagger, plus a
- * sigil line that resolves last. `rows`: [{ label, value, seed, tone, format }].
- * Returns { el, handles, done: Promise }.
- */
 export function compileBlock(host, { title = "COMPILING RECORD", seed = "rec", rows = [], stagger = 90 } = {}) {
   host.classList.add("compile");
   host.innerHTML = "";
@@ -170,7 +137,6 @@ export function compileBlock(host, { title = "COMPILING RECORD", seed = "rec", r
     if (typeof setTimeout === "function") setTimeout(() => hd.set(v, true), stagger * i++);
     else hd.set(v, false);
   }
-  /* the sigil flickers while the bars run, then settles */
   const final = sigil(seed);
   let ticks = 0;
   const total = Math.max(6, rows.length * (stagger / 60) + 10);

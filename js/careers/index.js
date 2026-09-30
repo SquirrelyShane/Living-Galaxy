@@ -1,9 +1,3 @@
-/**
- * Barrel export for the space-age career system.
- *
- *   import { createCharacter, enroll, COMPLEXES } from './careers/index.js';
- */
-
 export { SKILLS, SKILL_LIST, SKILL_CAP, createEmptySkills } from "./skills.js";
 
 export {

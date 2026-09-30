@@ -9,9 +9,9 @@
 const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 
-const { IMPACTS, runs, resetImpacts, startStrike, stepImpacts } = await import("../js/impacts.js");
-const { chunks, addChunk, resetDebris } = await import("../js/debris.js");
-const { holes, holeRadii, holeAccel, resetHoles } = await import("../js/holes.js");
+const { IMPACTS, runs, resetImpacts, startStrike, stepImpacts } = await import("../js/world/events/impacts.js");
+const { chunks, addChunk, resetDebris } = await import("../js/world/debris.js");
+const { holes, holeRadii, holeAccel, resetHoles } = await import("../js/world/events/holes.js");
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -41,14 +41,14 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
 }
 
 /* ---- the sim: a stood-down spool, a lane through a hole, the horizon -------- */
-const { sim, launchSim, tickSim, summonHole, plotRoute, addWaypointAt } = await import("../js/sim.js");
-const { makePilot } = await import("../js/pilot.js");
-const { touch } = await import("../js/input.js");
-const AP = await import("../js/autopilot.js");
+const { sim, launchSim, tickSim, summonHole, plotRoute, addWaypointAt } = await import("../js/sim/sim.js");
+const { makePilot } = await import("../js/flight/pilot.js");
+const { touch } = await import("../js/core/input.js");
+const AP = await import("../js/flight/autopilot.js");
 const { startMission } = await import("../js/mission/run.js");
 const { oneStep } = await import("../js/mission/script.js");
-const { currentSystem } = await import("../js/bodies.js");
-const { stations } = await import("../js/stations.js");
+const { currentSystem } = await import("../js/world/bodies.js");
+const { stations } = await import("../js/station/stations.js");
 const tick = (s) => { for (let i = 0; i < s * 60; i++) tickSim(1 / 60); };
 
 makePilot("Hunt", "terran", "mining", null);

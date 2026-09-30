@@ -2,16 +2,16 @@
  *
  *   node --import ./test/three-register.mjs test/board.test.mjs
  */
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations, stepStations } from "../js/stations.js";
-import { corps, corpOfStation, corpRelation } from "../js/corps.js";
-import { boardFor, acceptBlocker, acceptContract, abandonContract, deliverableAt, deliverContracts, contracts, tickContracts, BOARD, issuersAt } from "../js/contracts.js";
-import { company, foundCompany, transfer, resetCompany, settleAsStaff, staffAt } from "../js/company.js";
-import { fleet, commissionOptions, commissionHull, commissionBlocker, fleetReport, tickFleet, decommissionHull } from "../js/fleet.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations, stepStations } from "../js/station/stations.js";
+import { corps, corpOfStation, corpRelation } from "../js/corp/corps.js";
+import { boardFor, acceptBlocker, acceptContract, abandonContract, deliverableAt, deliverContracts, contracts, tickContracts, BOARD, issuersAt } from "../js/economy/contracts.js";
+import { company, foundCompany, transfer, resetCompany, settleAsStaff, staffAt } from "../js/corp/company.js";
+import { fleet, commissionOptions, commissionHull, commissionBlocker, fleetReport, tickFleet, decommissionHull } from "../js/corp/fleet.js";
 import { traffic, stepTraffic } from "../js/npc/traffic.js";
-import { crew, hireCrew, stationRoster, CYCLE_SECONDS } from "../js/crew.js";
-import { currentSystem } from "../js/bodies.js";
+import { crew, hireCrew, stationRoster, CYCLE_SECONDS } from "../js/crew/ledger.js";
+import { currentSystem } from "../js/world/bodies.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };

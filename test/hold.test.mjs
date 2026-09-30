@@ -8,15 +8,15 @@
  * it or sell it, neither of which may touch somebody else's consignment.
  */
 
-import { sim, launchSim, tickSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
-import { corps } from "../js/corps.js";
-import { contracts, resetContracts } from "../js/contracts.js";
-import { deliver } from "../js/economy.js";
-import { good, bulkOf } from "../js/materials.js";
-import { clearDockwork } from "../js/dockwork.js";
-import { HOLD, holdSlots, holdLine, consignedNow, dropFromHold, sellFromHold, renderHold } from "../js/holdview.js";
+import { sim, launchSim, tickSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
+import { corps } from "../js/corp/corps.js";
+import { contracts, resetContracts } from "../js/economy/contracts.js";
+import { deliver } from "../js/economy/economy.js";
+import { good, bulkOf } from "../js/economy/materials.js";
+import { clearDockwork } from "../js/station/dockwork.js";
+import { HOLD, holdSlots, holdLine, consignedNow, dropFromHold, sellFromHold, renderHold } from "../js/ui/holdview.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) { pass++; if (process.env.V) console.log("  ok", m); } else { fail++; console.error("  FAIL", m); } };

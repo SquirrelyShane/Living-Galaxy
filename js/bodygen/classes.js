@@ -1,32 +1,3 @@
-/* LIVING GALAXY — asteroid taxonomy, written in Living Galaxy's own ores.
- *
- * Shane's asteroid-generator drop-in shipped nine taxonomic classes (C, B, S,
- * M, V, E, D, P, X) and its own 41-species mineral catalogue. The classes are
- * the good part and they are kept; the catalogue is not, because a rock that
- * assays "chalcopyrite" and then puts "copper ore" in the hold is two games.
- * So every weight table below is rewritten in `js/materials.js` ore ids, and
- * the LOOK table in `js/rockgen.js` supplies how each one looks. There is one
- * mineral list in this game and this file does not add a second.
- *
- * The classes do NOT replace the radial bands from v0.0.4 — they sit on top of
- * them. Where you are in the belt decides which classes are PLAUSIBLE (the
- * sunward rim is differentiated metal, the cold outer fifth is carbon and
- * frost); the rock's own hash then picks one from that shortlist. So the belt
- * still reads the way it was designed to, and two rocks a hundred metres apart
- * can still be a stony chondrite and an exposed core fragment.
- */
-
-/* Each class: how it looks in bulk, how dense it is (the assay's mass), and
- * what it is made of as weights over Living Galaxy ore ids. Weights are relative.
- *
- * `grade` is the bulk share of a cut that is cargo rather than matrix. It is a
- * separate number from what the surface SHOWS: the generator paints ore as thin
- * vein networks and spots, a few percent of the face, which is how a seam reads
- * from a cockpit — but a prospector's ticket priced off surface coverage would
- * call every rock in the belt worthless while the cutter fills the hold. So the
- * surface decides WHICH ores and in what proportion (with the class table as
- * the prior), and the class's grade decides how much of the rock is ore. A
- * metal core is mostly ore; a primitive carbonaceous body is mostly matrix. */
 export const CLASSES = {
   C: {
     id: "C", grade: 0.46, name: "C-type · Carbonaceous", tag: "Primitive, hydrated",
@@ -120,15 +91,6 @@ export const CLASSES = {
 
 export const CLASS_IDS = Object.keys(CLASSES);
 
-/**
- * Which classes are plausible at this point in the belt.
- *
- * `band` is what js/field.js already decides from the radius — "metal" for the
- * sunward rim, "stone" for the broad middle, "carbon" for the cold outer
- * fifth, "ice" past the frost line. The shortlists overlap on purpose: a metal
- * rim is mostly M and X but an S-type in it is not a bug, it is a rock that
- * came from somewhere else.
- */
 export const BAND_CLASSES = {
   metal: ["M", "M", "X", "E", "S"],
   stone: ["S", "S", "S", "V", "E", "X", "C"],
@@ -136,13 +98,11 @@ export const BAND_CLASSES = {
   ice: ["D", "P", "C", "B"],
 };
 
-/** Deterministic class for a rock: its own hash against the band's shortlist. */
 export function classFor(band, h) {
   const list = BAND_CLASSES[band] ?? BAND_CLASSES.stone;
   return list[Math.min(list.length - 1, Math.floor(h * list.length))];
 }
 
-/** Abundance-weighted pick from a class's table, off one hash in [0,1). */
 export function classOre(cls, h) {
   const table = CLASSES[cls]?.ores ?? CLASSES.S.ores;
   let total = 0;
@@ -155,7 +115,6 @@ export function classOre(cls, h) {
   return Object.keys(table)[0];
 }
 
-/** The ore ids a class can carry at all, richest first — the assay's shortlist. */
 export function classSuite(cls) {
   const table = CLASSES[cls]?.ores ?? CLASSES.S.ores;
   return Object.entries(table).sort((a, b) => b[1] - a[1]).map(([id]) => id);

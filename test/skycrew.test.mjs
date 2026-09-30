@@ -3,11 +3,11 @@
  *   node --import ./test/three-register.mjs test/skycrew.test.mjs
  */
 
-import { sim, launchSim } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { stations } from "../js/stations.js";
+import { sim, launchSim } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { stations } from "../js/station/stations.js";
 import { traffic, stepTraffic, markVesselDown, vesselStatus } from "../js/npc/traffic.js";
-import { crew, hireCrew, stationRoster, tickCrew, crewHooks, CYCLE_SECONDS } from "../js/crew.js";
+import { crew, hireCrew, stationRoster, tickCrew, crewHooks, CYCLE_SECONDS } from "../js/crew/ledger.js";
 import { cradle } from "../js/npc/cradle.js";
 import { playerHull, vesselHull, ROOM_NAME } from "../js/crew/hull.js";
 import { deckGraph, kindOfNode, ACTION_META, NODE_KIND } from "../js/crew/deckgraph.js";
@@ -15,7 +15,7 @@ import { buildContext, stepHand, stepWatch, runDeckCycle, bodyOf } from "../js/c
 import { ACTIONS, NEED_KEYS } from "../js/crew/deckacts.js";
 import { journal } from "../js/crew/journal.js";
 import { duties } from "../js/crew/duties.js";
-import { setSocial, trustOf } from "../js/family.js";
+import { setSocial, trustOf } from "../js/crew/family.js";
 import {
   npcCrews, tickNpcCrews, tickSky, crewOf, crewSizeOf, moodOf, crewCensus, vesselJournal,
   promote, readRun, applyMood, resetNpcCrews, WORK_BUDGET, BUILD_BUDGET, DESERT_AT, STRIKE_AT,
@@ -30,7 +30,7 @@ import {
   canHavePrivacy, privacyAboard, conceptionOdds, fertilityOf, carrierAndSire, triangleFor,
   ladderReport, ladderLine, kinBetween, prospectsFor, resetRomance,
 } from "../js/crew/romance.js";
-import { household, social, tickHousehold } from "../js/family.js";
+import { household, social, tickHousehold } from "../js/crew/family.js";
 import { generateNPC } from "../js/npc/cradle.js";
 import {
   heritageFor, applyHeritage, heritageLine, learningBonus, houseSkills,

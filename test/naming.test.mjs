@@ -21,8 +21,8 @@
  * to move a station.
  */
 
-import { stationName, openSkyNames, reserveNames, portNameSpace, HUMAN_LAST, HUMAN_GIVEN_M, HUMAN_GIVEN_F } from "../js/naming.js";
-import { personName, offensive } from "../js/names.js";
+import { stationName, openSkyNames, reserveNames, portNameSpace, HUMAN_LAST, HUMAN_GIVEN_M, HUMAN_GIVEN_F } from "../js/world/naming.js";
+import { personName, offensive } from "../js/world/names.js";
 import { LEXICONS } from "../js/data/lexicons.js";
 
 let pass = 0, fail = 0;

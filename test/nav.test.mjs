@@ -16,12 +16,12 @@
  */
 
 import assert from "node:assert/strict";
-import { generateSystem } from "../js/generate.js";
-import { applySystem, BODIES, bodyById, bodyPosition } from "../js/bodies.js";
-import { remnantRadius } from "../js/scale.js";
-import { sim, wellEdge, wellG, WARP } from "../js/sim.js";
-import { threatTo, avoidAim, avoidLevel, deliberate, AVOID } from "../js/avoid.js";
-import { SCAN, levelOf, errorOf, hullTag, classOf } from "../js/contacts.js";
+import { generateSystem } from "../js/world/generate.js";
+import { applySystem, BODIES, bodyById, bodyPosition } from "../js/world/bodies.js";
+import { remnantRadius } from "../js/world/scale.js";
+import { sim, wellEdge, wellG, WARP } from "../js/sim/sim.js";
+import { threatTo, avoidAim, avoidLevel, deliberate, AVOID } from "../js/flight/avoid.js";
+import { SCAN, levelOf, errorOf, hullTag, classOf } from "../js/flight/contacts.js";
 import { FLOW_CAP } from "../js/npc/flow.js";
 import { readFileSync } from "node:fs";
 
@@ -229,14 +229,14 @@ t("resolving takes real time, and letting go loses it", () => {
  * fourteen thousand kilometres out. */
 t("0.3.50: no long-range band — nothing beyond the dish, nothing under drive", () => {
   assert.equal(SCAN.track_r, undefined, "the 1.4 million u coarse-return band is gone");
-  const src = readFileSync("js/contacts.js", "utf8");
+  const src = readFileSync("js/flight/contacts.js", "utf8");
   assert.ok(/if \(dist > range \|\| v\.drive\)/.test(src), "a hull out of range or with its drive lit is not touched");
   assert.ok(/if \(v\.drive\) rec\.res = 0/.test(src), "and one that lights its drive leaves the chart at once");
 });
 
 t("a level-1 return is unnamed, a level-2 return is a class, only level 3 is a name", () => {
   /* mirrors the disclosure ladder in knownContacts() */
-  const src = readFileSync("js/contacts.js", "utf8");
+  const src = readFileSync("js/flight/contacts.js", "utf8");
   const line = src.split("\n").find((l) => l.includes("name: level >="));
   assert.ok(line, "knownContacts no longer gates `name` by level");
   assert.ok(/level >= 3 \? rec\.ref\?\.name/.test(line), "a real name must require level 3");
@@ -244,7 +244,7 @@ t("a level-1 return is unnamed, a level-2 return is a class, only level 3 is a n
 });
 
 t("the canopy names nothing outside sensor range", () => {
-  const src = readFileSync("js/engine.js", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const src = readFileSync("js/render/engine.js", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   assert.ok(/const nameR = drawRange\(\);/.test(src), "the label loop no longer takes its cull radius from the sensors");
   assert.ok(/if \(d > nameR\) continue;/.test(src), "the label loop no longer culls on it");
   assert.ok(!/TRACK_R/.test(src), "a canopy tier beyond sensor range is back");
@@ -280,10 +280,10 @@ t("the kind bracket tells you who is flying it, not what it is", () => {
 });
 
 t("nothing that flies is an abstract placeholder shape", () => {
-  const src = readFileSync("js/engine.js", "utf8");
+  const src = readFileSync("js/render/engine.js", "utf8");
   assert.ok(!/placeholderDrone/.test(src), "the placeholder drone is back");
   assert.ok(!/TetrahedronGeometry/.test(src), "a tetrahedron is flying again");
-  assert.ok(/no real hull yet: draw nothing at all/.test(src), "the draw-nothing fallback was removed");
+  assert.ok(/droneDesign\(c\) : null;\s*if \(!bot\) continue;/.test(src), "the draw-nothing fallback was removed");
 });
 
 t("a port's shuttle is a drone, and the sky is not made of them", () => {
@@ -293,7 +293,7 @@ t("a port's shuttle is a drone, and the sky is not made of them", () => {
 });
 
 t("nothing is labelled on the canopy without a hull under it", () => {
-  const src = readFileSync("js/engine.js", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const src = readFileSync("js/render/engine.js", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   assert.ok(/if \(!flowMeshes\.has\(n\.id\)\) continue;/.test(src), "flow boats can be named with no mesh again");
   assert.ok(/for \(const n of flow\)[\s\S]{0,400}contactView\(n\.id\)/.test(src), "flow boats bypass the scanner again");
 });

@@ -1,5 +1,4 @@
 import { P, INT } from "./_part.js";
-/* 11 — SENSORS & SITUATIONAL AWARENESS */
 export default {
   id: "d11", name: "11 Sensors & Situational Awareness",
   sheet: {

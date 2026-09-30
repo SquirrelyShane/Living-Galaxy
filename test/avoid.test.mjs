@@ -7,14 +7,14 @@
  *
  *   node --import ./test/three-register.mjs test/avoid.test.mjs
  */
-import { sim, launchSim, tickSim, selectBody } from "../js/sim.js";
-import { makePilot } from "../js/pilot.js";
-import { autopilot, engageAutopilot, apProgress, resetProgress, beginUnstick, AP_STUCK } from "../js/autopilot.js";
-import { threatTo, avoidLevel, avoidAim, avoidCommit, clearAvoidCommit, blind, AVOID } from "../js/avoid.js";
-import { touch } from "../js/input.js";
-import { currentSystem, dist3 } from "../js/bodies.js";
-import { stations } from "../js/stations.js";
-import { inBelt, beltExit, aboveBelt, BELT_HALF_HEIGHT, nearbyRocks } from "../js/field.js";
+import { sim, launchSim, tickSim, selectBody } from "../js/sim/sim.js";
+import { makePilot } from "../js/flight/pilot.js";
+import { autopilot, engageAutopilot, apProgress, resetProgress, beginUnstick, AP_STUCK } from "../js/flight/autopilot.js";
+import { threatTo, avoidLevel, avoidAim, avoidCommit, clearAvoidCommit, blind, AVOID } from "../js/flight/avoid.js";
+import { touch } from "../js/core/input.js";
+import { currentSystem, dist3 } from "../js/world/bodies.js";
+import { stations } from "../js/station/stations.js";
+import { inBelt, beltExit, aboveBelt, BELT_HALF_HEIGHT, nearbyRocks } from "../js/world/field.js";
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m); } };
@@ -114,7 +114,7 @@ touch.panX = touch.panY = touch.rcsX = touch.rcsY = 0;
 
 /* ---- the two warp gates now answer to the same invariant ----------------- */
 {
-  const { WARP } = await import("../js/sim.js");
+  const { WARP } = await import("../js/sim/sim.js");
   ok(WARP.wellFloorG > 0, "there is a gravity floor at all");
   /* fly a leg from inside the belt and require that it actually leaves */
   const port = stations.filter((s) => !s.hostile).sort((a, b) => dist3({ x: mid, y: 0, z: 0 }, a) - dist3({ x: mid, y: 0, z: 0 }, b)).find((s) => dist3({ x: mid, y: 0, z: 0 }, s) > 200000);

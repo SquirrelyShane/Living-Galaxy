@@ -8,7 +8,7 @@
  *   1. localStorage. The corporation, the fleet, the callsign and sky
  *      progress, refits, robots, missions, drones — a flat pile of keys that
  *      nothing ever swept. Make a new pilot and you inherited the last one's
- *      company, name and all. js/profile.js now says which key belongs to a
+ *      company, name and all. js/core/profile.js now says which key belongs to a
  *      RUN, which to the DEVICE, and which to the human at the controls, and
  *      creation.js clears the first group when a pilot is made.
  *
@@ -25,7 +25,7 @@
  *      own check below.
  *
  * The load-bearing assertion in here is the LAST one: every localStorage key
- * in the tree must be classified in js/profile.js. That is what stops the next
+ * in the tree must be classified in js/core/profile.js. That is what stops the next
  * feature from quietly adding a twelfth way for a dead pilot to come back.
  *
  *   node --import ./test/three-register.mjs test/profile.test.mjs
@@ -47,7 +47,7 @@ globalThis.localStorage = {
   key: (i) => [...store.keys()][i] ?? null,
 };
 
-const P = await import("../js/profile.js");
+const P = await import("../js/core/profile.js");
 const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = await import("../js/npc/cradle.js");
 
 /* ---- 1. the three groups are a partition, not three overlapping guesses --- */
@@ -189,14 +189,14 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
    * here is cheaper than a cleverer regex that would go wrong later. */
   const NOT_STORAGE = new Map([
     ["lg-rockbody", "js/bodygen/body.js — a three.js shader program cache key"],
-    ["lgaa-net-id", "js/net.js — sessionStorage, one tab, dies with the tab"],
-    ["lg-account", "js/account.js — a DOM event name (0.3.74: the probe is back), not a key"],
+    ["lgaa-net-id", "js/net/net.js — sessionStorage, one tab, dies with the tab"],
+    ["lg-account", "js/net/account.js — a DOM event name (0.3.74: the probe is back), not a key"],
   ]);
   const known = new Set([...P.RUN_KEYS, ...P.DEVICE_KEYS, ...P.LEARNED_KEYS, ...P.SKY_KEYS, "lgaa.profile.v1"]);
   const found = new Map();                // key (or prefix stem) → the file that owns it
   const stems = P.RUN_PREFIXES.map((p) => p.slice(0, -1));
   for (const f of files) {
-    if (f.endsWith("js/profile.js")) continue;
+    if (f.endsWith("js/core/profile.js")) continue;
     const src = readFileSync(f, "utf8");
     for (const m of src.matchAll(/["'`]((?:lgaa|lg)[-.][A-Za-z0-9._-]+)["'`:]/g)) {
       if (!found.has(m[1])) found.set(m[1], f);
@@ -208,7 +208,7 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   }
   const unclassified = [...found].filter(([k]) => !known.has(k) && !stems.includes(k) && !NOT_STORAGE.has(k));
   if (unclassified.length) for (const [k, f] of unclassified) console.error(`    ${k}  (${f})`);
-  ok(unclassified.length === 0, `every storage key is filed in js/profile.js (${unclassified.length} unfiled)`);
+  ok(unclassified.length === 0, `every storage key is filed in js/core/profile.js (${unclassified.length} unfiled)`);
   ok(found.size >= 15, `…and the sweep actually found the keys (${found.size})`);
   /* the reverse: nothing classified has been deleted out from under us */
   const orphans = [...P.RUN_KEYS, ...stems].filter((k) => !found.has(k) && k !== "lgaa-save-v0");
@@ -233,7 +233,7 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
 
 /* ---- 8. creation wires it up --------------------------------------------- */
 {
-  const src = readFileSync("js/creation.js", "utf8");
+  const src = readFileSync("js/ui/creation.js", "utf8");
   ok(/releaseEmployed\(null,/.test(src), "creation releases the last pilot's crew");
   ok(/resetCompany\(\)/.test(src), "…clears the corporation in memory");
   ok(/startRun\(callsign\)/.test(src), "…and starts a new run before the pilot is built");

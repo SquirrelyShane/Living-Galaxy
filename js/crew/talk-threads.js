@@ -1,26 +1,7 @@
-/* LIVING GALAXY — the next part of the conversation.
- *
- * 0.3.17. The talk tree used to be a list of openers: pick one, hear a line,
- * pick an answer, hear a line, done — and the next time you sat down with
- * that hand it was a fresh conversation. The flags the tree set (`hopeBacked`,
- * `longLane`, `looksAfter`, `watchesReactor`, `kidBerth`, `connOffered`) were
- * written and never read by anything.
- *
- * These topics are the other end of those threads. Each one only appears
- * because of something said before, reads the ship as it is now — the mate
- * you said you'd look after and how their morale has actually moved, what
- * payroll actually did since you promised it, how much the hope fund actually
- * holds, what is actually in the lockers — and carries on from there, with
- * choices that answer it. A thread can close, loop back, or leave a new flag
- * for the next part.
- *
- * The labels start with ↻ so a continuing conversation reads as one.
- */
-
-import { crew, crewHooks, firstName, rapportBetween } from "../crew.js";
-import { sim, logEvent } from "../sim.js";
+import { crew, crewHooks, firstName, rapportBetween } from "./ledger.js";
+import { sim, logEvent } from "../sim/sim.js";
 import { duties, wearLine } from "./duties.js";
-import { baseValue } from "../materials.js";
+import { baseValue } from "../economy/materials.js";
 
 const Q = (c, s) => `${c.f}: "${s}"`;
 const go = (c, text, choices) => ({ text: Q(c, text), choices });
@@ -28,13 +9,11 @@ const hi = (t, k) => (t?.[k] ?? 0.5) > 0.6;
 const F = (c) => c.memory.flags;
 const mate = (id) => crew.aboard.find((x) => x.id === id) ?? null;
 
-/** Credits the fund holds for a hand: what they put aside plus what the captain matched. */
 export function hopeFundOf(m) {
   return Math.round(m?.memory?.flags?.hopeSaved ?? 0);
 }
 
 export const THREADS = [
-  /* hopes → "I'll help you get there" */
   {
     id: "t-hope", label: "↻ That thing you're saving for", cls: "thread", tier: 1, cooldown: 3,
     when: (m, c) => F(c).hopeBacked === true && c.cycle - (F(c).hopeAt ?? c.cycle) >= 2,
@@ -52,7 +31,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* mess talk → "I'll talk to <them>" */
   {
     id: "t-looked", label: (m, c) => `↻ How's ${firstName(mate(F(c).looksAfter) ?? { name: "they" })} doing?`, cls: "thread", tier: 1, cooldown: 2,
     when: (m, c) => typeof F(c).looksAfter === "string" && Boolean(mate(F(c).looksAfter)) && c.cycle - (F(c).looksAfterAt ?? c.cycle) >= 1,
@@ -72,7 +50,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* the run → "Watch the reactor for me" */
   {
     id: "t-reactor", label: "↻ Anything on the reactor?", cls: "thread", tier: 0, cooldown: 2,
     when: (m, c) => Boolean(F(c).watchesReactor),
@@ -88,7 +65,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* the run → "Keep the tally" */
   {
     id: "t-tally", label: "↻ The tally", cls: "thread", tier: 0, cooldown: 3,
     when: (m, c) => F(c).keepsTally != null,
@@ -108,7 +84,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* the run → "Next time, the long lane" → "If there's time" */
   {
     id: "t-marker", label: "↻ That survey marker", cls: "thread", tier: 0, cooldown: 4,
     when: (m, c) => F(c).markerPromised === true,
@@ -121,7 +96,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* last berth → "On the cycle, every cycle" */
   {
     id: "t-pay", label: "↻ About payroll", cls: "thread", tier: 0, cooldown: 2,
     when: (m, c) => F(c).payPromise === true && ((crew.lastPay?.shortfall ?? 0) > 0 || (!F(c).payKept && c.cycle - (F(c).payFrom ?? c.cycle) >= 5)),
@@ -138,7 +112,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* fears → "I'll keep you safe" → how */
   {
     id: "t-fear", label: "↻ Sleeping any better?", cls: "thread", tier: 1, cooldown: 6,
     when: (m, c) => Boolean(F(c).fearAnswer),
@@ -150,7 +123,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* fears → "We all carry one" → the captain's own */
   {
     id: "t-yourfear", label: "↻ What you said, the other watch", cls: "thread", tier: 1, once: true,
     when: (m, c) => F(c).sharedFear === "ship" || F(c).sharedFear === "crew",
@@ -162,7 +134,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* partner → "Next port, the night's yours" */
   {
     id: "t-night", label: "↻ That night off", cls: "thread", tier: 1, cooldown: 3,
     when: (m, c) => F(c).nightOff === true && c.docked && c.partner && c.partner.id !== "player",
@@ -174,7 +145,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* kids → "I'll teach them myself" */
   {
     id: "t-kid", label: "↻ The kid at the board", cls: "thread", tier: 1, cooldown: 5,
     when: (m, c) => F(c).kidTeacher === "captain" && c.kids.length > 0,
@@ -186,7 +156,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* wage → "Ten more cycles aboard" */
   {
     id: "t-raise", label: "↻ It's been ten cycles", cls: "thread", tier: 1, cooldown: 3,
     when: (m, c) => F(c).raiseOn === "tenure" && c.cycle >= (F(c).raiseAt ?? Infinity),
@@ -197,7 +166,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* captaincy → habits at the conn */
   {
     id: "t-conn", label: "↻ Your habits at the conn", cls: "thread", tier: 2, once: true,
     when: (m, c) => Boolean(F(c).connStyle),
@@ -209,7 +177,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* record → "Tell me" */
   {
     id: "t-story", label: "↻ About what I told you", cls: "thread", tier: 1, once: true,
     when: (m, c) => F(c).toldStory === true,
@@ -219,7 +186,6 @@ export const THREADS = [
       ]);
     },
   },
-  /* mates → "Sort it out with <them>" */
   {
     id: "t-mend", label: (m, c) => `↻ You and ${firstName(mate(F(c).mending) ?? { name: "them" })}`, cls: "thread", tier: 1, cooldown: 3,
     when: (m, c) => typeof F(c).mending === "string" && Boolean(mate(F(c).mending)),
@@ -238,9 +204,6 @@ export const THREADS = [
   },
 ];
 
-/* ---- the fund, cycle by cycle -------------------------------------------------
- * "Put it aside — I'll match it" is a promise with a price: every cycle the hand
- * puts a tenth of the wage in, and the ship matches it or it doesn't. */
 function tickThreads() {
   for (const m of crew.aboard) {
     if (m.robot || !m.memory?.flags) continue;
