@@ -151,3 +151,49 @@
  .tutor {left:calc(var(--edge) + 36px)!important;top:300px!important;width:calc(100% - 118px)!important;max-height:140px!important}
  #hud .chatbox.open,#hud .chatbox.expanded {max-height:180px!important}
 }
+
+/* Reserved top HUD row v1 */
+#hud .hud-top {
+  position:fixed!important;
+  top:env(safe-area-inset-top,0px)!important;
+  left:var(--edge)!important;
+  right:var(--cockpit-right,8px)!important;
+  width:auto!important;
+  height:30px!important;
+  padding:0 4px!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:6px!important;
+  z-index:20;
+}
+#hud .hud-top .hud-brand.panel {
+  position:static!important;
+  width:auto!important;
+  height:30px!important;
+  flex:1 1 auto;
+  min-width:0;
+  padding:0!important;
+  gap:6px;
+}
+#hud .hud-top .hud-brand strong {
+  flex:0 1 auto;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:8px;
+}
+#hud .hud-top .hud-brand > .hud-clock {
+  flex:none;
+  margin-left:auto;
+  font-size:9px;
+  white-space:nowrap;
+}
+#hud .hud-top .sec-badge {
+  flex:none;
+  margin-left:0;
+  pointer-events:auto;
+}
+#hud .instruments {
+  top:calc(env(safe-area-inset-top,0px) + 40px)!important;
+}
