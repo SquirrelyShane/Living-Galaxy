@@ -197,3 +197,18 @@
 #hud .instruments {
   top:calc(env(safe-area-inset-top,0px) + 40px)!important;
 }
+
+/* Landscape right-edge alignment v1 */
+@media (orientation: landscape) {
+  #hud {
+    --cockpit-right: max(8px, env(safe-area-inset-right), env(safe-area-inset-left));
+  }
+  #hud .gauges,
+  #hud .dash,
+  #hud .rcs {
+    right: var(--cockpit-right) !important;
+  }
+  #hud .route {
+    right: calc(var(--cockpit-right) + 110px) !important;
+  }
+}
