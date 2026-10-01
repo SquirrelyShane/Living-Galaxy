@@ -104030,7 +104030,6 @@
       "js/ui/creation.js#$",
       "js/corp/corps.js#buildCorps",
       "js/ui/creation.js#mountCreation>isOpenCareer",
-      "js/ui/creation.js#mountCreation>firstOpen",
       "js/ui/creation.js#mountCreation>setStep"
      ]
     },

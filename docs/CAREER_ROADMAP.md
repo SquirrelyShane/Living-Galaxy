@@ -1,15 +1,15 @@
 # Career roadmap
 
-From 0.3.80, a new pilot can only enrol in **Mining**. The other fifteen careers are greyed on
-the creation screen and in lateral transfer. Each one shows the version it opens in and what
-you will do in it. NPCs, crew, children, the job board and the ship lines still use all
-sixteen. Only the player's choice is gated.
+From 0.3.81, a new pilot can enrol in any of the sixteen careers. The roadmap
+still records which career loops need more work and what their future updates
+will add. It does not restrict creation or lateral transfer.
 
 The switch is `js/careers/status.js`, and `test/careerstatus.test.mjs` guards it.
 
-## The gate: what "fleshed out" means
+## Readiness: what "fleshed out" means
 
-A career opens when it has all nine items that Mining has. Anything short of that stays grey.
+A career has a complete loop when it has all nine items that Mining has. These
+items track planned work and do not gate access.
 
 | item | means | Mining's version |
 |---|---|---|
@@ -63,17 +63,18 @@ split pulls the career cluster out of `sim.js`, and every arc below edits that c
 | **0.9** | Charted | Research, Navigation | 0.9 anomalies: far scan → sample → paper (Research verb) · .01 lane charting beacon by beacon, and selling the chart (Navigation verb) · .02–.05 → **open ×2** |
 | **0.10** | The Town | Healthcare, Agriculture, Education, Communications | 0.10 sick bay: crew, settlers, pulled survivors · .01 hydroponic bay · .02 training crew and raising children into the rolls · .03 relay network + selling news · .04–.08 → **open ×4** |
 
-## How to open a career
+## How to complete a career loop
 
 1. Build the missing gate items, one `.PP` per item.
 2. In `js/careers/status.js`, add the new item to that career's `has`. When all nine are
    there, set `state: "open"`.
-3. Update `test/careerstatus.test.mjs`: the "only mining is open" line becomes the new list.
-4. Add a CHANGELOG entry under **Players**: "‹Career› is open."
+3. Update `test/careerstatus.test.mjs` to check the new readiness metadata while
+   keeping all sixteen careers selectable.
+4. Add a CHANGELOG entry describing the completed loop.
 
 ## Things to watch
 
-- Once a career opens, `BOARD.pay` parity matters again: rerun `aria-bench` against Mining,
+- As a career loop is completed, `BOARD.pay` parity matters: rerun `aria-bench` against Mining,
   as 0.3.24 and 0.3.47 did.
 - Specialisation effects (`careers/effects.js`) are already wired for all 49 specialisations.
   They affect the hull whether or not a career's verb exists, so each arc should check its

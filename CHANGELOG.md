@@ -10,6 +10,17 @@ What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
 
+## 0.3.81 — 2026-09-30
+
+Restore all sixteen career choices. The 0.3.80 roadmap gate prevented new
+pilots from selecting fifteen careers and blocked transfers into them. Career
+readiness remains visible in the roadmap without changing access or saves.
+The boot fallback now names a failed resource instead of showing
+`[object Event]` and assuming a version mismatch.
+
+Verified: career status, careers, boot and generated documentation tests.
+Browser smoke and phone playback remain to be checked after deployment.
+
 ## 0.3.80 — 2026-09-30
 
 Only Mining is selectable. The other fifteen careers are greyed until they are playable.

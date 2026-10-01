@@ -1,6 +1,6 @@
 # js/crew/family.js
 
-[index](../../../README.md) · 438 lines · 52 symbols · 15 imports · 29 importers
+[index](../../../README.md) · 438 lines · 52 symbols · 15 imports · 33 importers
 
 ## About
 
@@ -85,14 +85,18 @@ layer above it:
 - test/skycrew.test.mjs _(outside js/)_ — `setSocial`, `trustOf`
 - test/skycrew.test.mjs _(outside js/)_ — `household`, `social`, `tickHousehold`
 - test/systems.test.mjs _(outside js/)_ — `F`
+- addon/adult/index.js _(outside js/)_ — `social`, `loadSocial`, `setSocial`, `playerAsPerson`, `adjustMorale`, `adjustTrust`
+- addon/adult/legacy-addon.js _(outside js/)_ — `social`, `loadSocial`, `playerAsPerson`
+- addon/adult/npc.js _(outside js/)_ — `social`
+- addon/adult/trees.js _(outside js/)_ — `social`, `loadSocial`, `playerAsPerson`, `adjustMorale`, `adjustTrust`
 
 ## Exports
 
-- [`social`](#s-social) · const — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/hull.js](hull.js.md), [js/crew/romance.js](romance.js.md), test/beats.test.mjs, test/people.test.mjs, test/skycrew.test.mjs
-- [`loadSocial`](#s-loadSocial) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/hull.js](hull.js.md), [js/crew/romance.js](romance.js.md)
-- [`setSocial`](#s-setSocial) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), test/beats.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/genome.test.mjs, test/people.test.mjs, test/skycrew.test.mjs
+- [`social`](#s-social) · const — used by addon/adult/index.js, addon/adult/legacy-addon.js, addon/adult/npc.js, addon/adult/trees.js, [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/hull.js](hull.js.md), [js/crew/romance.js](romance.js.md), test/beats.test.mjs, test/people.test.mjs, test/skycrew.test.mjs
+- [`loadSocial`](#s-loadSocial) · function — used by addon/adult/index.js, addon/adult/legacy-addon.js, addon/adult/trees.js, [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/hull.js](hull.js.md), [js/crew/romance.js](romance.js.md)
+- [`setSocial`](#s-setSocial) · function — used by addon/adult/index.js, [js/console/panels/crew.js](../console/panels/crew.js.md), test/beats.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/genome.test.mjs, test/people.test.mjs, test/skycrew.test.mjs
 - [`playerPronouns`](#s-playerPronouns) · function — **no importer in scanned roots**
-- [`playerAsPerson`](#s-playerAsPerson) · function — used by [js/crew/beats.js](beats.js.md), [js/crew/tiers.js](tiers.js.md), test/people.test.mjs
+- [`playerAsPerson`](#s-playerAsPerson) · function — used by addon/adult/index.js, addon/adult/legacy-addon.js, addon/adult/trees.js, [js/crew/beats.js](beats.js.md), [js/crew/tiers.js](tiers.js.md), test/people.test.mjs
 - [`household`](#s-household) · const — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/children.js](children.js.md), [js/crew/childtalk.js](childtalk.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/romance.js](romance.js.md), test/childtalk.test.mjs, test/genome.test.mjs, test/people.test.mjs, test/skycrew.test.mjs
 - [`note`](#s-note) · function — used by [js/crew/children.js](children.js.md), [js/crew/childtalk.js](childtalk.js.md)
 - [`berthsUsed`](#s-berthsUsed) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), test/people.test.mjs
@@ -104,8 +108,8 @@ layer above it:
 - [`familyOf`](#s-familyOf) · function — used by [js/crew/talk.js](talk.js.md), [js/crew/talkview.js](talkview.js.md), test/people.test.mjs
 - [`settleFamily`](#s-settleFamily) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/station/deckhall.js](../station/deckhall.js.md), test/people.test.mjs
 - [`trustOf`](#s-trustOf) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/roster.js](roster.js.md), [js/crew/talk-trees.js](talk-trees.js.md), [js/crew/talkview.js](talkview.js.md), [js/crew/tiers.js](tiers.js.md), [js/station/deckhall.js](../station/deckhall.js.md), test/beats.test.mjs, test/skycrew.test.mjs
-- [`adjustTrust`](#s-adjustTrust) · function — used by [js/crew/beats.js](beats.js.md), [js/crew/deckacts.js](deckacts.js.md), [js/crew/orders.js](orders.js.md), [js/crew/talk.js](talk.js.md), test/crew-life.test.mjs, test/genome.test.mjs, test/people.test.mjs
-- [`adjustMorale`](#s-adjustMorale) · function — used by [js/crew/beats.js](beats.js.md), [js/crew/bonds.js](bonds.js.md), [js/crew/deckacts.js](deckacts.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/duties.js](duties.js.md), [js/crew/orders.js](orders.js.md), [js/crew/romance.js](romance.js.md), [js/crew/talk.js](talk.js.md), test/crew-life.test.mjs, test/people.test.mjs
+- [`adjustTrust`](#s-adjustTrust) · function — used by addon/adult/index.js, addon/adult/trees.js, [js/crew/beats.js](beats.js.md), [js/crew/deckacts.js](deckacts.js.md), [js/crew/orders.js](orders.js.md), [js/crew/talk.js](talk.js.md), test/crew-life.test.mjs, test/genome.test.mjs, test/people.test.mjs
+- [`adjustMorale`](#s-adjustMorale) · function — used by addon/adult/index.js, addon/adult/trees.js, [js/crew/beats.js](beats.js.md), [js/crew/bonds.js](bonds.js.md), [js/crew/deckacts.js](deckacts.js.md), [js/crew/deckmind.js](deckmind.js.md), [js/crew/duties.js](duties.js.md), [js/crew/orders.js](orders.js.md), [js/crew/romance.js](romance.js.md), [js/crew/talk.js](talk.js.md), test/crew-life.test.mjs, test/people.test.mjs
 - [`bumpTrust`](#s-bumpTrust) · const — used by test/beats.test.mjs, test/crew-life.test.mjs, test/people.test.mjs
 - [`bumpMorale`](#s-bumpMorale) · const — used by test/people.test.mjs
 - [`pairWithPlayer`](#s-pairWithPlayer) · function — used by [js/crew/beats.js](beats.js.md), test/beats.test.mjs

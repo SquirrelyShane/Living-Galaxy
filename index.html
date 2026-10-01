@@ -880,16 +880,21 @@
     <script>
       (function () {
         var seen = null;
-        function grab(e) { if (!seen && e) seen = e.error || e.reason || e.message || e; }
+        function grab(e) {
+          if (seen || !e) return;
+          var source = e.target && (e.target.src || e.target.href);
+          seen = e.error || e.reason || e.message ||
+            (source ? "Failed to load " + source : "A browser resource failed to load");
+        }
         addEventListener("error", grab, true);
         addEventListener("unhandledrejection", grab);
         setTimeout(function () {
           if (window.__lgBooted || !seen || document.getElementById("boot-fail")) return;
-          import("./js/core/boot.js").then(function (m) { m.showFailure(seen); }).catch(function () {
-            var t = String((seen && seen.message) || seen || "").replace(/[&<>]/g, "");
+          import("./js/core/boot.js").then(function (m) { m.showFailure(seen); }).catch(function (error) {
+            var t = String((seen && seen.message) || seen || error || "Unknown load error").replace(/[&<>]/g, "");
             document.body.insertAdjacentHTML("beforeend",
               '<div id="boot-fail"><div class="bf-card"><div class="bf-tag">LIVING GALAXY — AD ASTRUM</div>' +
-              '<h1>Living Galaxy could not start</h1><p>Some files in this folder are a version behind the rest — re-apply the patches in order.</p>' +
+              '<h1>Living Galaxy could not start</h1><p>A required file failed to load. The path below identifies the request to check.</p>' +
               '<pre>' + t + '</pre></div></div>');
             document.documentElement.classList.add("boot-failed");
           });

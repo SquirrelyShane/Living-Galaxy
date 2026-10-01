@@ -93,6 +93,8 @@ function · **exported** · L46–51
 - called by: [`careerCatalog`](../flight/pilot.js.md#s-careerCatalog) _js/flight/pilot.js_ · [`transferOptions`](../flight/pilot.js.md#s-transferOptions) _js/flight/pilot.js_ · [`tryTransfer`](../flight/pilot.js.md#s-tryTransfer) _js/flight/pilot.js_
 
 <!-- note:careerStatus -->
+- L50 · `return { id, ...s, open: true, arc, eta: arc ? arc.minor : "", missing: OPEN_GATE.filter((` — A planned feature loop is still a selectable career. `state` and `missing`
+  describe its roadmap, while `open` describes pilot access.
 <!-- /note -->
 
 ### <a id="s-isCareerOpen"></a>`isCareerOpen(id)`

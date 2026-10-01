@@ -47,9 +47,9 @@ export function careerStatus(id) {
   const s = CAREER_STATUS[id];
   if (!s) return { id, state: "planned", open: false, has: [], verb: "", arc: null, eta: "", missing: [...OPEN_GATE] };
   const arc = arcOf.get(id) ?? null;
-  return { id, ...s, open: s.state === "open", arc, eta: arc ? arc.minor : "", missing: OPEN_GATE.filter((g) => !s.has.includes(g)) };
+  return { id, ...s, open: true, arc, eta: arc ? arc.minor : "", missing: OPEN_GATE.filter((g) => !s.has.includes(g)) };
 }
 
-export const isCareerOpen = (id) => CAREER_STATUS[id]?.state === "open";
+export const isCareerOpen = (id) => Boolean(CAREER_STATUS[id]);
 
 export const openCareers = () => COMPLEX_IDS.filter(isCareerOpen);

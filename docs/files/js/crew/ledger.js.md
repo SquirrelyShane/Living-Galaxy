@@ -1,6 +1,6 @@
 # js/crew/ledger.js
 
-[index](../../../README.md) · 310 lines · 32 symbols · 5 imports · 59 importers
+[index](../../../README.md) · 310 lines · 32 symbols · 5 imports · 61 importers
 
 ## About
 
@@ -92,6 +92,8 @@ player earns, times the outfit's cut.
 - test/skycrew.test.mjs _(outside js/)_ — `crew`, `hireCrew`, `stationRoster`, `tickCrew`, `crewHooks`, `CYCLE_SECONDS`
 - test/stafflife.test.mjs _(outside js/)_ — `crew`, `hireCrew`, `stationRoster`, `CYCLE_SECONDS`
 - test/systems.test.mjs _(outside js/)_ — `crew`, `hireCrew`, `stationRoster`, `CYCLE_SECONDS`
+- addon/adult/index.js _(outside js/)_ — `firstName`, `crewNote`
+- addon/adult/trees.js _(outside js/)_ — `firstName`
 
 ## Exports
 
@@ -103,7 +105,7 @@ player earns, times the outfit's cut.
 - [`FIRST_HAND_WAGE`](#s-FIRST_HAND_WAGE) · const — **no importer in scanned roots**
 - [`hireTerms`](#s-hireTerms) · function — used by [js/aria/company.js](../aria/company.js.md), [js/station/deckhall.js](../station/deckhall.js.md)
 - [`crewWageTotal`](#s-crewWageTotal) · function — used by [js/aria/company.js](../aria/company.js.md), [js/console/panels/crew.js](../console/panels/crew.js.md), [js/station/deckhall.js](../station/deckhall.js.md), test/ariabiz.test.mjs, test/crew-life.test.mjs, test/robots.test.mjs
-- [`firstName`](#s-firstName) · function — used by [js/console/panels/crew-gene.js](../console/panels/crew-gene.js.md), [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/bonds.js](bonds.js.md), [js/crew/children.js](children.js.md), [js/crew/childtalk.js](childtalk.js.md), [js/crew/deckacts.js](deckacts.js.md), [js/crew/orders.js](orders.js.md), [js/crew/romance.js](romance.js.md), [js/crew/talk-threads.js](talk-threads.js.md), [js/crew/talk-trees.js](talk-trees.js.md), [js/crew/talk-wants.js](talk-wants.js.md), [js/crew/talk.js](talk.js.md), test/childtalk.test.mjs
+- [`firstName`](#s-firstName) · function — used by addon/adult/index.js, addon/adult/trees.js, [js/console/panels/crew-gene.js](../console/panels/crew-gene.js.md), [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/beats.js](beats.js.md), [js/crew/bonds.js](bonds.js.md), [js/crew/children.js](children.js.md), [js/crew/childtalk.js](childtalk.js.md), [js/crew/deckacts.js](deckacts.js.md), [js/crew/orders.js](orders.js.md), [js/crew/romance.js](romance.js.md), [js/crew/talk-threads.js](talk-threads.js.md), [js/crew/talk-trees.js](talk-trees.js.md), [js/crew/talk-wants.js](talk-wants.js.md), [js/crew/talk.js](talk.js.md), test/childtalk.test.mjs
 - [`pronounOf`](#s-pronounOf) · function — used by test/gender.test.mjs
 - [`genderMark`](#s-genderMark) · function — used by [js/console/panels/crew-brig.js](../console/panels/crew-brig.js.md), [js/console/panels/crew-gene.js](../console/panels/crew-gene.js.md), [js/console/panels/crew.js](../console/panels/crew.js.md), test/gender.test.mjs
 - [`hireCrew`](#s-hireCrew) · function — used by [js/aria/company.js](../aria/company.js.md), [js/station/deckhall.js](../station/deckhall.js.md), test/beats.test.mjs, test/board.test.mjs, test/bounty.test.mjs, test/childtalk.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/gdb.test.mjs, test/genome.test.mjs, test/line.test.mjs, test/orders.test.mjs, test/people.test.mjs, test/robots.test.mjs, test/skycrew.test.mjs, test/stafflife.test.mjs, test/systems.test.mjs
@@ -116,7 +118,7 @@ player earns, times the outfit's cut.
 - [`bondLine`](#s-bondLine) · function — used by [js/crew/talkview.js](talkview.js.md)
 - [`tickCrew`](#s-tickCrew) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/bounty.test.mjs, test/crew-life.test.mjs, test/genome.test.mjs, test/people.test.mjs, test/robots.test.mjs, test/skycrew.test.mjs
 - [`resetCrew`](#s-resetCrew) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/ariabiz.test.mjs, test/ariaplay.test.mjs, test/beats.test.mjs, test/crew-life.test.mjs
-- [`crewNote`](#s-crewNote) · function — used by [js/crew/bonds.js](bonds.js.md), [js/crew/captive.js](captive.js.md), [js/crew/duties.js](duties.js.md), [js/crew/hull.js](hull.js.md), [js/crew/romance.js](romance.js.md)
+- [`crewNote`](#s-crewNote) · function — used by addon/adult/index.js, [js/crew/bonds.js](bonds.js.md), [js/crew/captive.js](captive.js.md), [js/crew/duties.js](duties.js.md), [js/crew/hull.js](hull.js.md), [js/crew/romance.js](romance.js.md)
 
 ## Effects
 

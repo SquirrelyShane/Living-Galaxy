@@ -396,7 +396,7 @@ export function mountCreation(opts) {
       } else title.textContent = $("callsign").value.trim() || "New pilot";
       if (!corps.length) buildCorps(Math.random);
       if (!choice.raceId) choice.raceId = "terran";
-      if (!isOpenCareer(choice.complexId)) choice.complexId = firstOpen();
+      if (!isOpenCareer(choice.complexId)) choice.complexId = "navigation";
       peekId = null;
       if (choice.corpId === null) choice.corpId = "";
       setStep(0);

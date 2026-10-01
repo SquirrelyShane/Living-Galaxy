@@ -411,13 +411,11 @@ certificate it awards you on the way up — the record of the climb, not a gate.
 If you do not clear the rank-A bar at the door you are taken on as a
 probationary aide on a reduced share until your first promotion.
 
-**Only Mining is open to a new pilot (0.3.80).** The other fifteen complexes
-are on the creation screen greyed, each tagged with the version it opens in;
-tap one to read its ladder and what you will do in it. Lateral transfer shows
-them the same way. They are still the whole galaxy's careers: NPCs, crew,
-children, the board and the ship lines use all sixteen, and a pilot already
-enrolled in one keeps it. What "fleshed out" means and the order they open in:
-[`docs/CAREER_ROADMAP.md`](docs/CAREER_ROADMAP.md) (`js/careers/status.js`).
+**All sixteen careers are selectable (0.3.81).** New pilots can enter any
+complex, and lateral transfers use the ordinary eligibility rules. The roadmap
+still records which career loops need more work; it does not lock access.
+See [`docs/CAREER_ROADMAP.md`](docs/CAREER_ROADMAP.md) and
+`js/careers/status.js` for that progress.
 
 **3 · Corporation.** Fifteen outfits grow with the system: five charter holders
 holding one economic sector each, five alternates working the margins, and five
