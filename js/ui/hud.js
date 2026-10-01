@@ -186,6 +186,7 @@ function stackLeftColumn(force = false) {
 
 let rightSig = "";
 function stackRightColumn(doc) {
+  if (doc.querySelector('link[href*="cockpit.css"]')) return;
   const g = doc.getElementById("gauges"), strip = doc.getElementById("sys-strip"), dash = doc.getElementById("dash");
   if (!g || !strip) return;
   const portrait = (globalThis.innerHeight || 0) >= (globalThis.innerWidth || 0);

@@ -134,3 +134,20 @@
  #hud .dash {bottom:calc(var(--bottom) + 102px)!important}
  #hud .sys-strip {bottom:calc(var(--bottom) + 188px)!important}
 }
+
+
+/* Live HUD panel repair v1 */
+#hud {--cockpit-right:max(8px,env(safe-area-inset-right));}
+#hud .dash {right:var(--cockpit-right)!important;border-right:1px solid var(--glass-line)!important}
+#hud .gauges {right:var(--cockpit-right)!important}
+#hud .route {position:fixed!important;left:auto!important;right:calc(var(--cockpit-right) + 110px)!important;top:38px!important;bottom:auto!important;width:min(300px,38vw)!important;height:auto!important;min-height:48px;max-height:90px!important;overflow:auto!important;padding:6px 8px;background:transparent!important;backdrop-filter:none!important;box-shadow:none!important;border:0!important;border-left:1px solid #75d5ef66!important;color:#ccefff;text-shadow:0 1px 3px #000,0 0 5px #000;font:10px/1.4 monospace}
+#hud .route .route-head {flex-wrap:wrap;gap:3px 10px;white-space:normal}
+#hud .route .route-body {max-height:none!important;overflow:visible!important;white-space:normal;overflow-wrap:anywhere}
+.tutor {position:fixed!important;left:calc(50% - 110px)!important;right:auto!important;top:140px!important;bottom:auto!important;width:220px!important;max-height:calc(100dvh - 190px)!important;overflow:auto!important;font-size:10px!important;z-index:8}
+#hud .chatbox.open,#hud .chatbox.expanded {max-height:calc(100dvh - 150px)!important}
+@media(orientation:portrait){
+ #hud .gauges {top:64px!important}
+ #hud .route {left:var(--edge)!important;right:auto!important;top:190px!important;width:calc(100% - 122px)!important;max-height:100px!important}
+ .tutor {left:calc(var(--edge) + 36px)!important;top:300px!important;width:calc(100% - 118px)!important;max-height:140px!important}
+ #hud .chatbox.open,#hud .chatbox.expanded {max-height:180px!important}
+}

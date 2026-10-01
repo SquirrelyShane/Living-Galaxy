@@ -3869,7 +3869,7 @@ export function publishHud(labels, plots) {
       ? { name: sim.threat.name, kind: sim.threat.kind, t: Math.round(sim.threat.t * 10) / 10, level: avoidLevel(sim.threat) }
       : null,
     response: (() => {
-      const near = nearestCall(ship.pos, 90000);
+      const near = nearestCall(ship.pos, 90000, c => c.sos || (c.byPlayer && c.attackerId !== "self"));
       if (!near) return null;
       const c = near.call;
       const eta = etaOf(c, sim.time);

@@ -182,10 +182,10 @@ export function callById(id) {
   return distress.find((c) => c.id === id) ?? null;
 }
 
-export function nearestCall(pos, maxR = 60000) {
+export function nearestCall(pos, maxR = 60000, include = () => true) {
   let best = null, bestD = maxR;
   for (const c of distress) {
-    if (c.state === "closed") continue;
+    if (c.state === "closed" || !include(c)) continue;
     const d = Math.hypot(c.x - pos.x, c.y - pos.y, c.z - pos.z);
     if (d < bestD) { best = c; bestD = d; }
   }
