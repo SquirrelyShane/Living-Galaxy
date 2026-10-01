@@ -67,7 +67,7 @@ async function afterEnter() {
   fullscreen.wanted = true;
   save();
   await takeWakeLock();
-  try { await globalThis.screen?.orientation?.lock?.("portrait"); } catch {}
+  try { globalThis.screen?.orientation?.unlock?.(); } catch {}
 }
 
 export async function exitFullscreen({ remember = true } = {}) {

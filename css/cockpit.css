@@ -1,0 +1,136 @@
+/* Responsive flight deck. Shared by the game and offline HUD preview. */
+#hud {--edge: max(10px, env(safe-area-inset-left)); --bottom: max(10px, env(safe-area-inset-bottom)); --glass:rgba(3,15,25,.88); --glass-line:#244c60; --glass-accent:#79e5ff; font:12px/1.3 'Segoe UI',sans-serif; color:#d8f3ff;}
+#hud *,#hud *::before,#hud *::after {box-sizing:border-box}
+#hud button,#hud input {font-family:inherit;touch-action:manipulation}
+#hud button:focus-visible,#hud input:focus-visible {outline:2px solid #9df4ff;outline-offset:2px}
+#hud .hud-brand,#hud .gauges,#hud .dash,#hud .hud-notice,#hud .chatbox {border-radius:3px!important;border:1px solid #244c60!important;background:linear-gradient(135deg,rgba(12,37,53,.94),rgba(2,11,20,.9))!important;box-shadow:inset 0 1px #76deff25,0 5px 20px #0005!important;backdrop-filter:blur(8px)}
+#hud .hud-top {position:static!important;width:auto!important}
+#hud .hud-brand {position:absolute;left:var(--edge);top:max(8px,env(safe-area-inset-top));right:var(--edge);height:28px;padding:0 10px;gap:10px}
+#hud .hud-brand strong {font-size:10px;letter-spacing:.18em;color:#a3eaff}
+#hud .hud-brand em {font-size:8px;margin-left:10px;color:#628a9f}
+#hud .hud-brand span {font:9px monospace} #hud .hud-clock {margin-left:auto}
+#hud .instruments {top:46px!important;left:var(--edge)!important;max-width:none!important;gap:4px;width:calc(100% - 20px);flex-wrap:nowrap}
+#hud .inst {flex:1;min-width:0;border-radius:2px;padding:5px 6px;border-color:#244c60;background:#051420de;gap:4px}
+#hud .inst i,#hud .inst u {font:8px monospace;color:#79a1b8} #hud .inst b {font:600 12px monospace;white-space:nowrap}
+#hud .gauges {top:82px!important;left:var(--edge)!important;right:var(--edge)!important;width:auto!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:7px 9px}
+#hud .gauge {display:flex;flex-direction:column;gap:4px;min-width:0;padding:0;background:none;border:0;height:auto;min-height:0}
+#hud .gauge em {width:100%;font:8px monospace;gap:3px} #hud .gauge .bar {width:100%;height:3px;background:#142c38} #hud .gauge .bar b {background:#68dafa;box-shadow:0 0 7px #40bddd60}
+#hud .status {top:128px!important;left:var(--edge);font:8px monospace;letter-spacing:.1em;padding:3px 6px;max-width:90%;border-radius:1px;background:#04101bbd!important}
+#hud .lockbar {top:150px!important;left:var(--edge);width:210px;height:17px;font:8px monospace;border-radius:1px;padding:2px 6px}
+#hud .hud-notice {top:178px!important;left:var(--edge);right:auto;width:210px;padding:8px;text-align:left}
+#hud .hud-notice h2 {font:9px monospace;letter-spacing:.14em;color:#7eddfb} #hud .hud-notice p {font:11px/1.5 sans-serif;margin:4px 0 0}
+#hud .hud-tools {position:fixed!important;top:auto!important;bottom:var(--bottom)!important;left:var(--edge)!important;right:var(--edge)!important;width:auto!important;display:flex!important;flex-direction:row!important;gap:4px!important;height:40px}
+#hud .hud-tools .btn {flex:1;min-width:0;width:auto;height:40px!important;border-radius:3px!important;font-size:9px;background:#081d2a!important;letter-spacing:0}
+#hud .hud-tools .hidden {display:none!important}
+#hud .sys-strip {top:auto!important;left:var(--edge)!important;right:var(--edge)!important;bottom:calc(var(--bottom) + 48px)!important;width:auto!important;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:none!important;border:0!important;box-shadow:none!important;padding:0}
+#hud .sys-strip .sw {height:36px;min-height:36px;border-radius:2px;padding:4px;gap:2px;position:relative;background:#061823!important}
+#hud .sys-strip .sw.wide {grid-column:auto!important} #hud .sys-strip .nm {font:8px monospace;color:#7496ac} #hud .sys-strip .st {font:8px monospace;color:#cff7ff} #hud .sys-strip .led {width:3px;height:12px;position:absolute;left:4px;top:10px;border-radius:0;background:#25414a} #hud .sys-strip .on .led {background:#74efd5;box-shadow:0 0 6px #74efd555}
+#hud .dash {position:absolute;top:auto!important;bottom:calc(var(--bottom) + 94px)!important;right:var(--edge)!important;left:auto!important;width:116px!important;height:238px!important;padding:7px;gap:6px;transform:none!important;display:grid}
+#hud .thr-head {display:flex;align-items:center;justify-content:space-between} #hud .thr-head i {font:8px monospace;color:#739cb3} #hud .thr-head b {font:16px monospace;color:#b9f3ff}
+#hud .thr {grid-template-columns:20px 1fr;gap:5px;min-height:0} #hud .thr-track {width:20px;border-radius:2px} #hud .thr-presets {gap:3px} #hud .thr-presets button {border-radius:2px;font:9px monospace;background:#102735;min-height:22px} #hud .thr-foot {font:8px monospace}
+#hud .warpbar {min-height:34px;border-radius:2px;padding:3px} #hud .warpbar .warp-lab {font-size:9px} #hud .warpbar .warp-state {font-size:7px}
+#hud .rcs {position:absolute;right:var(--edge)!important;left:auto!important;bottom:calc(var(--bottom) + 340px)!important;width:116px!important;height:100px!important;display:grid!important;grid-template-columns:repeat(3,1fr);gap:3px}
+#hud .rcs-btn {border-radius:2px!important;font-size:8px;padding:0;min-width:0;min-height:30px;background:#071b28!important}
+#hud .chatbox {position:fixed!important;left:var(--edge)!important;right:auto!important;bottom:calc(var(--bottom) + 94px)!important;top:auto!important;width:calc(100% - 146px)!important;height:136px!important;max-width:350px;padding:7px;display:flex;flex-direction:column;gap:5px;pointer-events:auto;overflow:hidden}
+#hud .cb-top {display:flex;justify-content:space-between;height:26px;flex:none} #hud .cb-tabs {display:flex;gap:3px;min-width:0}
+#hud .cb-tabs button,#hud .cb-toggle {font:8px monospace;background:#0b2433;color:#88b5cb;border:1px solid #244c60;border-radius:2px;padding:4px;min-width:24px;height:26px} #hud .cb-tabs .on {color:#acf0ff;border-bottom-color:#8aeaff}
+#hud .cb-log {flex:1;min-height:0;overflow:auto;font:10px/1.5 sans-serif;padding:0} #hud .cb-log p {margin:0 0 5px} #hud .cb-log b {font:8px monospace;color:#7adeff}
+#hud .cb-in {display:flex;gap:3px;height:32px;flex:none;padding:0} #hud .cb-in input {min-width:0;width:0;flex:1;height:32px;border:1px solid #234556;border-radius:2px;background:#020b13;color:#d3f4ff;padding:4px;font-size:10px}
+#hud .cb-in button {width:28px;height:32px;min-width:28px;border:1px solid #285265;border-radius:2px;padding:0;background:#102d3c;color:#9befff;font-size:14px} #hud .cb-unread {display:none}
+#hud .chatbox.folded {height:46px!important} #hud .chatbox.expanded {height:240px!important}
+#hud .alarms {top:172px!important} #hud .route {bottom:calc(var(--bottom) + 244px)!important}
+@media (orientation:landscape) {
+ #hud .hud-brand {right:140px}
+ #hud .instruments {width:360px}
+ #hud .gauges {left:auto!important;right:var(--edge)!important;top:10px!important;width:116px!important;grid-template-columns:1fr;gap:5px;padding:7px}
+ #hud .gauge {flex-direction:row;align-items:center;gap:5px} #hud .gauge em {width:56px;flex:none} #hud .gauge .bar {flex:1}
+ #hud .status {top:87px!important} #hud .lockbar {top:107px!important}
+ #hud .hud-notice {top:133px!important;width:220px;padding:6px}
+ #hud .hud-tools {right:140px!important}
+ #hud .sys-strip {left:244px!important;right:140px!important;bottom:calc(var(--bottom) + 48px)!important}
+ #hud .dash {height:calc(100dvh - 128px)!important;max-height:310px;bottom:var(--bottom)!important;width:116px!important}
+ #hud .rcs {right:140px!important;bottom:calc(var(--bottom) + 92px)!important;width:116px!important;height:100px!important}
+ #hud .chatbox {width:224px!important;height:120px!important;bottom:calc(var(--bottom) + 48px)!important}
+ #hud .chatbox.expanded {height:190px!important}
+}
+@media (orientation:portrait) and (max-height:700px) {#hud .rcs {bottom:calc(var(--bottom) + 298px)!important;height:94px!important} #hud .dash {height:196px!important} #hud .hud-notice {width:calc(100% - 146px)} }
+@media (orientation:landscape) and (max-height:390px) {#hud .hud-notice {display:none} #hud .dash {top:106px!important;height:calc(100dvh - 116px)!important} #hud .thr-presets {display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr)} }
+#hud .hud-top .hud-brand.panel {height:28px;padding:0 8px;background:#061522ed!important;border:1px solid #244c60!important}
+#hud .hud-top .hud-brand strong {font-size:10px;letter-spacing:.12em}
+#hud .hud-top .hud-brand strong em {font-size:8px;letter-spacing:.1em}
+#hud .hud-top .hud-brand > span,#hud .hud-top .hud-brand > .hud-clock {font-size:8px}
+#hud .chatbox.open {height:min(45dvh,280px)!important}
+
+/* Compact canopy layout: fixed-size controls never stretch across the view. */
+#hud {--edge:max(6px,env(safe-area-inset-left));--bottom:max(6px,env(safe-area-inset-bottom))}
+#hud .hud-top .hud-brand.panel {height:20px;right:116px;padding:0 5px;background:transparent!important;border:0!important}
+#hud .hud-top .hud-brand strong {font-size:8px} #hud .hud-top .hud-brand strong em {display:none}
+#hud .instruments {top:32px!important;width:260px;gap:3px}
+#hud .inst {padding:3px 4px;flex:0 1 auto} #hud .inst b {font-size:10px} #hud .inst i,#hud .inst u {font-size:7px}
+#hud .gauges {top:24px!important;left:auto!important;right:var(--edge)!important;width:100px!important;grid-template-columns:1fr;gap:4px;padding:5px}
+#hud .gauge {flex-direction:row;align-items:center;gap:4px} #hud .gauge em {width:48px;flex:none;font-size:7px} #hud .gauge .bar {flex:1;height:2px}
+#hud .status {top:60px!important;font-size:7px;padding:2px 4px;max-width:230px;text-align:left}
+#hud .lockbar {top:78px!important;width:180px;font-size:7px;height:14px}
+#hud .hud-notice {top:100px!important;width:180px;padding:5px} #hud .hud-notice h2 {font-size:8px} #hud .hud-notice p {font-size:10px}
+#hud .hud-tools {left:auto!important;right:var(--edge)!important;width:282px!important;bottom:var(--bottom)!important;gap:3px!important;height:26px}
+#hud .hud-tools .btn {flex:0 0 37px!important;width:37px!important;height:26px!important;font-size:8px;border-radius:2px!important}
+#hud .sys-strip {left:auto!important;right:var(--edge)!important;width:232px!important;bottom:calc(var(--bottom) + 32px)!important;gap:3px;grid-template-columns:repeat(5,44px)}
+#hud .sys-strip .sw {height:26px;min-height:26px;padding:2px;gap:0} #hud .sys-strip .nm,#hud .sys-strip .st {font-size:7px} #hud .sys-strip .led {height:8px;top:8px;width:2px;left:2px}
+#hud .dash {top:auto!important;bottom:calc(var(--bottom) + 64px)!important;width:82px!important;height:182px!important;max-height:none;padding:4px;gap:4px}
+#hud .thr {grid-template-columns:13px 1fr;gap:3px} #hud .thr-head i {font-size:7px} #hud .thr-head b {font-size:12px} #hud .thr-track {width:13px}
+#hud .thr-presets {display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:3px} #hud .thr-presets button {min-height:20px;font-size:8px}
+#hud .thr-foot {font-size:7px} #hud .warpbar {min-height:26px;padding:2px} #hud .warpbar .warp-lab {font-size:8px} #hud .warpbar .warp-state {font-size:6px}
+#hud .rcs {bottom:calc(var(--bottom) + 64px)!important;right:calc(var(--edge) + 88px)!important;width:90px!important;height:84px!important;gap:3px}
+#hud .rcs-btn {min-height:26px;font-size:7px}
+#hud .chatbox {left:var(--edge)!important;bottom:calc(var(--bottom) + 64px)!important;width:calc(100% - 202px)!important;max-width:220px;height:112px!important;padding:4px;gap:3px}
+#hud .chatbox.folded {height:32px!important} #hud .cb-in {height:24px;gap:2px} #hud .cb-in input {height:24px;font-size:9px;padding:3px}
+#hud .cb-in button {width:24px;min-width:24px;height:24px;font-size:12px}
+#hud .cb-unread {display:block} #hud .cb-unread::before {width:9px;height:9px;left:6px;top:6px}
+#hud .cb-log {font-size:9px} #hud .cb-tabs button,#hud .cb-toggle {height:22px;font-size:7px} #hud .cb-top {height:22px}
+#hud .chatbox.expanded,#hud .chatbox.open {height:180px!important}
+@media (orientation:landscape) {
+ #hud .hud-top .hud-brand.panel {right:auto;width:300px}
+ #hud .chatbox {bottom:var(--bottom)!important;width:210px!important}
+ #hud .dash {height:178px!important}
+ #hud .hud-notice {display:none}
+}
+@media (orientation:portrait) {
+ #hud .instruments {width:calc(100% - 120px);flex-wrap:wrap}
+ #hud .status {top:86px!important} #hud .lockbar {top:104px!important} #hud .hud-notice {top:128px!important}
+ #hud .chatbox {width:calc(100% - 110px)!important;bottom:calc(var(--bottom) + 156px)!important}
+}
+/* Compact revision: edge throttle, low maneuver pad, left system rail. */
+#hud .dash {right:0!important;width:62px!important;height:158px!important;top:auto!important;bottom:calc(var(--bottom) + 108px)!important;padding:3px;gap:3px;border-right:0!important;border-radius:3px 0 0 3px!important;grid-template-rows:minmax(0,1fr) 25px}
+#hud .thr {grid-template-columns:9px minmax(0,1fr);gap:2px;grid-template-rows:16px minmax(0,1fr) 9px}
+#hud .thr-head {gap:2px;justify-content:space-between} #hud .thr-head i {font-size:6px} #hud .thr-head b {font-size:10px}
+#hud .thr-track {width:9px;min-height:0} #hud .thr-thumb {left:0;right:0;height:4px}
+#hud .thr-presets {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:2px}
+#hud .thr-presets button {font-size:7px;min-height:0;padding:0}
+#hud .thr-foot {font-size:6px;line-height:9px}
+#hud .warp-row {gap:2px} #hud .warpbar {min-height:0;height:25px;padding:1px} #hud .warpbar .warp-lab {font-size:6px} #hud .warpbar .warp-state {font-size:5px}
+#hud .rcs {right:var(--edge)!important;left:auto!important;width:90px!important;height:66px!important;bottom:calc(var(--bottom) + 36px)!important;grid-template-rows:repeat(3,20px);gap:3px}
+#hud .rcs-btn {height:20px;min-height:20px;font-size:6px;padding:0}
+#hud .sys-strip {left:var(--edge)!important;right:auto!important;top:auto!important;bottom:calc(var(--bottom) + 44px)!important;width:30px!important;height:132px;display:grid;grid-template-columns:30px;grid-template-rows:repeat(5,24px);gap:3px}
+#hud .sys-strip .sw {height:24px;min-height:24px;padding:2px 0;gap:1px}
+#hud .sys-strip .sw.wide {grid-column:auto!important}
+#hud .sys-strip .nm,#hud .sys-strip .st {font-size:6px;line-height:8px}
+#hud .sys-strip .led {width:2px;height:7px;left:1px;top:8px}
+#hud .chatbox {left:var(--edge)!important;bottom:var(--bottom)!important;width:220px!important;max-width:calc(100% - 306px)}
+#hud .chatbox:not(.folded) {left:var(--edge)!important}
+@media (orientation:landscape) {
+ #hud .hud-tools {left:auto!important;right:var(--edge)!important;bottom:var(--bottom)!important;display:flex!important;flex-direction:row!important;width:282px!important;height:26px;gap:3px!important}
+ #hud .hud-tools .btn {flex:0 0 37px!important;width:37px!important;height:26px!important}
+ #hud .chatbox,#hud .chatbox:not(.folded) {left:calc(var(--edge) + 36px)!important;right:calc(var(--edge) + 292px)!important;width:auto!important;max-width:none}
+ #hud .dash {height:clamp(86px,calc(100dvh - 206px),122px)!important}
+ #hud .sys-strip {bottom:calc(var(--bottom) + 44px)!important}
+}
+@media (orientation:portrait) {
+ #hud .hud-tools {left:auto!important;right:var(--edge)!important;bottom:var(--bottom)!important;width:154px!important;height:22px;display:flex!important;flex-direction:row!important;flex-wrap:nowrap;gap:2px!important}
+ #hud .hud-tools .btn {width:20px!important;min-width:0;height:22px!important;flex:1 1 0!important;font-size:6px;letter-spacing:0;padding:0!important}
+ #hud .chatbox,#hud .chatbox:not(.folded) {left:var(--edge)!important;bottom:var(--bottom)!important;width:calc(100% - 176px)!important;max-width:none}
+ #hud .cb-in {gap:2px} #hud .cb-in button {width:20px;min-width:20px}
+ #hud .cb-tabs button {font-size:6px;min-width:0;padding:2px}
+ #hud .rcs {bottom:calc(var(--bottom) + 30px)!important}
+ #hud .dash {bottom:calc(var(--bottom) + 102px)!important}
+ #hud .sys-strip {bottom:calc(var(--bottom) + 188px)!important}
+}
