@@ -212,3 +212,25 @@
     right: calc(var(--cockpit-right) + 110px) !important;
   }
 }
+
+/* 0.3.82: live console panel; landscape map and hold sizing */
+#console {background:transparent;pointer-events:none;align-items:flex-start;justify-content:flex-start}
+#console .con-sheet {pointer-events:auto;height:85%!important;max-height:85%!important}
+@media(orientation:landscape){
+ #console .con-sheet {width:min(560px,65vw)!important;height:calc(100dvh - 58px)!important;max-height:calc(100dvh - 58px)!important}
+ #hold {align-items:center;padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left))}
+ #hold .holdbag {width:min(540px,78vw);height:calc(100dvh - 32px);max-height:calc(100dvh - 32px);padding:0}
+ #hold .hv-top {padding:6px 10px;flex:none} #hold-body {min-height:0;flex:1;overflow:auto;padding:8px}
+ #hold .hv-slot {min-height:64px} #hold .btn {min-height:26px;padding:4px 8px;font-size:10px}
+ #hold .icon-btn {width:28px;height:28px}
+ #hud .hud-tools #btn-hold {min-width:0!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px!important;transform:none!important}
+ #map {padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left))}
+ #map .panel.chart {width:100%;max-width:1100px;height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);padding:8px;display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,34%);grid-template-rows:42px minmax(0,1fr) 22px;gap:6px;overflow:hidden}
+ #map .chart-head {grid-column:1/-1;grid-row:1;min-height:0} #map .chart-head h2 {font-size:13px;margin:0}
+ #map .chart-tools .btn {width:30px;height:28px;min-height:28px;padding:2px;font-size:12px}
+ #map .chart-plot {grid-column:1;grid-row:2;min-height:0;height:100%;overflow:hidden}
+ #map .map-svg {width:100%;height:100%;min-height:0}
+ #map .chart-sheet {grid-column:2;grid-row:2/4;height:auto!important;min-height:0;max-height:none;overflow:auto}
+ #map .chart-legend {grid-column:1;grid-row:3;overflow:auto;font-size:8px;white-space:nowrap}
+ #map .chart-hint {font-size:8px} #map .chart-sheet .tbtn {min-height:28px;padding:3px;font-size:9px}
+}

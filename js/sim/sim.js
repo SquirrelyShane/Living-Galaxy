@@ -3381,35 +3381,8 @@ export function tickSim(dt) {
   const a = sampleInput();
   if (justPressed("terminal")) setTerminal(!sim.terminalOpen);
 
-  if (sim.terminalOpen) {
-    a.panX = 0;
-    a.panY = 0;
-    a.rcsX = 0;
-    a.rcsY = 0;
-    a.rcsZ = 0;
-    a.throttleStep = 0;
-    a.throttleZero = false;
-    a.brake = sim.termHold;
-    consumeLook();
-    stepWarp(d);
-    if (sim.warp.state !== "run") {
-      stepShip(a, d);
-      clampDocked();
-      stepTractorTick(d);
-      if (sim.wantScan) {
-        sim.wantScan = false;
-        tryScan();
-      }
-    }
-    syncContacts(sim.ship, sim.remotes, relationOf, sim.time, d);
-    stepShots(sim.ship, d, sim.time, onKill);
-  stepMining(sim.ship, d, sim.time, sim.lock, sim.handsOff ? sim.autoPlan?.seamOre ?? null : null);
-    stepWorld(d);
-    collectBeaconsNear();
-    setEngineLevel(speedOf(sim.ship, sim.frameVel), sim.ship.throttle > 1, sim.ship.throttle);
-    broadcastShip(d);
-    return;
-  }
+  // Console is a live panel; retain the normal simulation path.
+  if (sim.terminalOpen && sim.termHold) a.brake = true;
 
   if (justPressed("pause")) {
     sim.phase = "pause";
