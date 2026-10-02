@@ -124,7 +124,7 @@ const STEPS = [
           ? `No rock in reach. ${c.belt.name[0].toUpperCase() + c.belt.name.slice(1)} is ${fmt(c.belt.dist)} out — MARK it and fly there (or warp toward a world past it), then close on a rock.`
           : "Find rock: watch for impact debris after a strike.";
       }
-      if (c.complex === "salvage") return `SALVAGE is live. Fly through debris (${c.rock ? `${c.rock.name} ${fmt(c.rock.dist)}` : "impacts leave fields"}) inside 2200 u and the tractor brings it aboard.`;
+      if (c.complex === "salvage") return `Take a wreck or pod job from the Salvage board and follow its waypoint. Enable SALVAGE in SHIP systems; keep operations powered and room in the hold. You can also fly through debris (${c.rock ? `${c.rock.name} ${fmt(c.rock.dist)}` : "impacts leave fields"}) inside 2200 u and the tractor brings it aboard.`;
       return `You fly the Fledgling trainer; your complex will sign over a ${c.complex} hull at the issue rate at any yard. Every port pays for what its sector is short of — the map ≡ directory lists them by trade.`;
     },
     action: (c) => (c.complex === "mining" && !(c.rock && c.rock.dist < 25000) && c.belt

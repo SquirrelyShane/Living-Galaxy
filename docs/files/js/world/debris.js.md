@@ -1,6 +1,6 @@
 # js/world/debris.js
 
-[index](../../../README.md) · 210 lines · 19 symbols · 1 imports · 7 importers
+[index](../../../README.md) · 210 lines · 19 symbols · 1 imports · 8 importers
 
 ## About
 
@@ -30,6 +30,7 @@ off a planet either rains back down, settles into a ring, or leaves.
 - [js/sim/sim.js](../sim/sim.js.md) — `addChunk`, `bindDebris`, `burst`, `chunkMass`, `chunks`, `nearDebris`, `removeChunk`, `resetDebris`, `rubbleRing`, `stepDebris`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `chunks`
 - test/asteroids.test.mjs _(outside js/)_ — `chunks`, `addChunk`, `resetDebris`
+- test/salvage.test.mjs _(outside js/)_ — `chunkMass`
 
 ## Exports
 
@@ -42,7 +43,7 @@ off a planet either rains back down, settles into a ring, or leaves.
 - [`nearDebris`](#s-nearDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`removeChunk`](#s-removeChunk) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`addChunk`](#s-addChunk) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/asteroids.test.mjs
-- [`chunkMass`](#s-chunkMass) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md)
+- [`chunkMass`](#s-chunkMass) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md), test/salvage.test.mjs
 - [`debrisCount`](#s-debrisCount) · function — **no importer in scanned roots**
 - `bodyById` — **no importer in scanned roots**
 

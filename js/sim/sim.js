@@ -1,3 +1,4 @@
+import { recoveryBlocker } from "./salvage.js";
 import { applyCareerDefaults as careerDefaults, createCareerStepper } from "./career.js";
 import { BEACONS, BODIES, applySystem, beaconPosition, bodyById, bodyPosition, bodyVelocity, currentSystem, dist3, hashHue, refreshBody, scanRadius, heatBody, coolBodies, bodyTempK, starBody, surveyIds } from "../world/bodies.js";
 import { generateSystem, rngFromSeed, spawnBodyId } from "../world/generate.js";
@@ -3076,7 +3077,7 @@ export function stepContract() {
 
 function stepSalvage(dt) {
   const ship = sim.ship;
-  if (!ship.salvage || !ship.powered.ops) return;
+  if (recoveryBlocker(ship)) return;
   const room = ship.cargoCap - cargoTotal(ship);
   if (room <= 0) return;
   const reach = ship.mods?.salvage ?? 1;
@@ -3088,13 +3089,17 @@ function stepSalvage(dt) {
     c.vz += (ship.pos.z - c.z) * k;
     if (d < 90) {
       const mass = chunkMass(c);
-      addCargo(ship, c.good ?? "iron_ore", mass);
+      const recovered = addCargo(ship, c.good ?? "iron_ore", mass);
+      if (recovered <= 0) continue;
+      work("salvage", recovered * 0.5);
+      work("heavyOps", recovered * 0.2);
       const con = sim.contract;
       if (con && sim.time <= con.until) {
         const b = bodyById(con.bodyId);
-        if (b && dist3(ship.pos, bodyPosition(b.id, sim.time, _bp)) < Math.max(b.well, b.radius * 30)) con.hauled += mass;
+        if (b && dist3(ship.pos, bodyPosition(b.id, sim.time, _bp)) < Math.max(b.well, b.radius * 30)) con.hauled += recovered;
       }
-      removeChunk(c);
+      if (recovered >= mass - 1e-6) removeChunk(c);
+      else c.remainingMass = mass - recovered;
     }
   }
 }

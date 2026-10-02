@@ -109,10 +109,10 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `PREFABS` from `../prefabs/index.js`
 - [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
 - [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `fpArea` from `../prefabs/index.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L70 `stockMult` from `../economy/economy.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L72 `clearDockwork` from `../station/dockwork.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L72 `handlingProgress` from `../station/dockwork.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L95 `notePerf` from `../core/perf.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L71 `stockMult` from `../economy/economy.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L73 `clearDockwork` from `../station/dockwork.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L73 `handlingProgress` from `../station/dockwork.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L96 `notePerf` from `../core/perf.js`
 - [js/ui/hud.js](../files/js/ui/hud.js.md) L12 `recorder` from `../flight/recorder.js`
 - [js/world/events/impacts.js](../files/js/world/events/impacts.js.md) L1 `DETAIL` from `../../bodygen/body.js`
 
@@ -129,7 +129,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
 - [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L75
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2096
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2097
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33

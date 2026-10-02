@@ -62,7 +62,6 @@ export function createCareerStepper({
       work("heavyOps", d * 0.45);
       if (ship.miningMode === "overdrive") work("hazardOps", d * 0.25);
     }
-    if (ship.salvage && ship.powered.ops) work("salvage", d * 0.5);
     if (Math.abs(ship.throttle) > 0.05) work("piloting", d * 0.22);
     if (sim.warp.state === "spool" || sim.warp.state === "run") work("navigation", d * 0.8);
     if (sim.lock.locked) work("dataOps", d * 0.3);

@@ -28,3 +28,7 @@ assert.equal(calls.filter(c=>c[0]==='updateCrewMods').length,1);
 sim.time = 3; step(1);
 assert.equal(calls.filter(c=>c[0]==='updateCrewMods').length,2);
 console.log('careerstep: defaults, payroll, persistence order, training and crew cadence passed');
+
+sim.ship.salvage = true; sim.ship.powered.ops = true;
+training.length = 0; step(1);
+assert.ok(!training.some(([skill]) => skill === 'salvage'), 'idle tractor earns no salvage training');

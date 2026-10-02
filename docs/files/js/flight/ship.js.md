@@ -1,6 +1,6 @@
 # js/flight/ship.js
 
-[index](../../../README.md) · 670 lines · 53 symbols · 5 imports · 42 importers
+[index](../../../README.md) · 670 lines · 53 symbols · 5 imports · 44 importers
 
 ## About
 
@@ -63,6 +63,7 @@ angular inertia. Everything you switch on competes for the same reactor.
 - [js/mission/tradeops.js](../mission/tradeops.js.md) — `holdRoom`, `roomFor`
 - [js/npc/captain.js](../npc/captain.js.md) — `forwardOf`, `cargoTotal`, `batteryCap`
 - [js/render/engine.js](../render/engine.js.md) — `batteryCap`, `forwardOf`, `rightOf`, `speedOf`, `upOf`
+- [js/sim/salvage.js](../sim/salvage.js.md) — `addCargo`
 - [js/sim/sim.js](../sim/sim.js.md) — `batteryCap`, `MINING_MODES`, `SHED_ORDER`, `THROTTLE_MAX`, `THROTTLE_MIN`, `TURRET_MODES`, `defaultTune`, `applyDamage`, `buildDemand`, `closingSpeed`, `absSpeedOf`, `addCargo`, `cargoTotal`, `forwardOf`, `holdRoom`, `takeCargo`, `gravityAt`, `makeShip`, `speedOf`, `stepAttitude`, `stepPower`, `stepTranslation`, `roomFor`
 - [js/ui/holdview.js](../ui/holdview.js.md) — `holdRoom`, `cargoTotal`
 - [js/ui/hud.js](../ui/hud.js.md) — `MINING_MODES`, `THROTTLE_MAX`, `THROTTLE_MIN`, `TURRET_MODES`, `cargoTotal`
@@ -73,6 +74,7 @@ angular inertia. Everything you switch on competes for the same reactor.
 - test/defence.test.mjs _(outside js/)_ — `makeShip`, `applyDamage`
 - test/mission.test.mjs _(outside js/)_ — `BATTERY`
 - test/nose.test.mjs _(outside js/)_ — `forwardOf`
+- test/salvage.test.mjs _(outside js/)_ — `roomFor`
 - test/spacing.test.mjs _(outside js/)_ — `gravityAt`
 - test/stafflife.test.mjs _(outside js/)_ — `roomFor`, `addCargo`, `cargoTotal`, `holdRoom`
 - test/trade.test.mjs _(outside js/)_ — `BATTERY`, `holdRoom`
@@ -121,8 +123,8 @@ angular inertia. Everything you switch on competes for the same reactor.
 - [`cargoTotal`](#s-cargoTotal) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/market.js](../console/panels/market.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/holdview.js](../ui/holdview.js.md), [js/ui/hud.js](../ui/hud.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/autopilot.test.mjs, test/stafflife.test.mjs
 - [`cargoCount`](#s-cargoCount) · function — used by [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md)
 - [`holdRoom`](#s-holdRoom) · function — used by [js/aria/company.js](../aria/company.js.md), [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/economy/traderoutes.js](../economy/traderoutes.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/flight/turrets.js](turrets.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/holdview.js](../ui/holdview.js.md), test/ariabiz.test.mjs, test/stafflife.test.mjs, test/trade.test.mjs
-- [`roomFor`](#s-roomFor) · function — used by [js/aria/play.js](../aria/play.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/sim/sim.js](../sim/sim.js.md), test/stafflife.test.mjs
-- [`addCargo`](#s-addCargo) · function — used by [js/economy/contracts.js](../economy/contracts.js.md), [js/economy/icework.js](../economy/icework.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/flight/turrets.js](turrets.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md), test/stafflife.test.mjs
+- [`roomFor`](#s-roomFor) · function — used by [js/aria/play.js](../aria/play.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/sim/sim.js](../sim/sim.js.md), test/salvage.test.mjs, test/stafflife.test.mjs
+- [`addCargo`](#s-addCargo) · function — used by [js/economy/contracts.js](../economy/contracts.js.md), [js/economy/icework.js](../economy/icework.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/flight/turrets.js](turrets.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/salvage.js](../sim/salvage.js.md), [js/sim/sim.js](../sim/sim.js.md), test/stafflife.test.mjs
 - [`takeCargo`](#s-takeCargo) · function — used by [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md)
 
 ## Effects
@@ -692,7 +694,7 @@ How many units of `id` still fit. Use this, not holdRoom, to size a buy or a job
 function · **exported** · L656–661
 
 - calls: [`roomFor`](#s-roomFor)
-- called by: [`tickContracts`](../economy/contracts.js.md#s-tickContracts) _js/economy/contracts.js_ · [`stepIcework`](../economy/icework.js.md#s-stepIcework) _js/economy/icework.js_ · [`stepDrones`](turrets.js.md#s-stepDrones) _js/flight/turrets.js_ ×2 · [`stepMining`](turrets.js.md#s-stepMining) _js/flight/turrets.js_ ×2 · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stashWithdraw`](../sim/sim.js.md#s-stashWithdraw) _js/sim/sim.js_ · [`stepSalvage`](../sim/sim.js.md#s-stepSalvage) _js/sim/sim.js_ · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_
+- called by: [`tickContracts`](../economy/contracts.js.md#s-tickContracts) _js/economy/contracts.js_ · [`stepIcework`](../economy/icework.js.md#s-stepIcework) _js/economy/icework.js_ · [`stepDrones`](turrets.js.md#s-stepDrones) _js/flight/turrets.js_ ×2 · [`stepMining`](turrets.js.md#s-stepMining) _js/flight/turrets.js_ ×2 · [`recoverSite`](../sim/salvage.js.md#s-recoverSite) _js/sim/salvage.js_ · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stashWithdraw`](../sim/sim.js.md#s-stashWithdraw) _js/sim/sim.js_ · [`stepSalvage`](../sim/sim.js.md#s-stepSalvage) _js/sim/sim.js_ · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_
 
 <!-- note:addCargo -->
 Adds what will fit and returns how much actually went in.

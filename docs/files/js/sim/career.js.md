@@ -1,6 +1,6 @@
 # js/sim/career.js
 
-[index](../../../README.md) · 83 lines · 2 symbols · 0 imports · 2 importers
+[index](../../../README.md) · 82 lines · 2 symbols · 0 imports · 2 importers
 
 ## About
 
@@ -38,7 +38,7 @@ function · **exported** · L1–7
 
 ### <a id="s-createCareerStepper"></a>`createCareerStepper({…})`
 
-function · **exported** · L9–83
+function · **exported** · L9–82
 
 - called by: [`stepCareer`](sim.js.md#s-stepCareer) _js/sim/sim.js_
 

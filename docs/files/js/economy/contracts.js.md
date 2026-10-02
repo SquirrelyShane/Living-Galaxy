@@ -1,6 +1,6 @@
 # js/economy/contracts.js
 
-[index](../../../README.md) · 736 lines · 90 symbols · 18 imports · 25 importers
+[index](../../../README.md) · 753 lines · 90 symbols · 19 imports · 26 importers
 
 ## About
 
@@ -45,24 +45,25 @@ desk without the desk knowing who hates whom.
 
 | line | from | names | target |
 |---|---|---|---|
-| 1 | `../sim/sim.js` | `logEvent`, `sim`, `sellPriceAt`, `currentShipId`, `addWaypointAt`, `addAnchoredWaypoint`, `removeWaypoint` | [js/sim/sim.js](../sim/sim.js.md) |
-| 2 | `../station/stations.js` | `stations`, `stationById` | [js/station/stations.js](../station/stations.js.md) |
-| 3 | `../corp/corps.js` | `corpOfStation`, `corpRelation`, `corps`, `adjustStanding`, `standingLabel` | [js/corp/corps.js](../corp/corps.js.md) |
-| 4 | `../data/factions.js` | `POWERS` | [js/data/factions.js](../data/factions.js.md) |
-| 5 | `./economy.js` | `shortagesOf`, `wantsOf`, `bidPrice`, `askPrice`, `stockOf`, `deliver`, `lift` | [js/economy/economy.js](economy.js.md) |
-| 6 | `./materials.js` | `goodName`, `baseValue`, `good`, `bulkOf`, `ORES`, `SECTORS` | [js/economy/materials.js](materials.js.md) |
-| 7 | `../npc/traffic.js` | `traffic`, `HOSTILE_ROLES` | [js/npc/traffic.js](../npc/traffic.js.md) |
-| 8 | `../npc/flow.js` | `flow` | [js/npc/flow.js](../npc/flow.js.md) |
-| 9 | `../npc/rogues.js` | `nests` | [js/npc/rogues.js](../npc/rogues.js.md) |
-| 10 | `../world/generate.js` | `rngFromSeed` | [js/world/generate.js](../world/generate.js.md) |
-| 11 | `../flight/ship.js` | `takeCargo`, `addCargo`, `roomFor` | [js/flight/ship.js](../flight/ship.js.md) |
-| 12 | `../ships/shipdb.js` | `shipById` | [js/ships/shipdb.js](../ships/shipdb.js.md) |
-| 13 | `../corp/company.js` | `bookRevenue` | [js/corp/company.js](../corp/company.js.md) |
-| 14 | `../flight/pilot.js` | `work`, `pilot` | [js/flight/pilot.js](../flight/pilot.js.md) |
-| 15 | `../world/bodies.js` | `BODIES`, `BEACONS`, `bodyPosition`, `beaconPosition`, `currentSystem`, `scanRadius` | [js/world/bodies.js](../world/bodies.js.md) |
-| 16 | `./sites.js` | `pickSpot`, `spotLine`, `openSite`, `closeSite`, `siteById` | [js/economy/sites.js](sites.js.md) |
-| 17 | `./chains.js` | `chainOffersAt`, `chainVersion`, `noteChainAccept`, `noteChainDone`, `noteChainFail`, `resetChains`, `chainReport`, `wireChains`, `CHAIN`, `chainBonus` | [js/economy/chains.js](chains.js.md) |
-| 18 | `../station/dockwork.js` | `bookHandling` | [js/station/dockwork.js](../station/dockwork.js.md) |
+| 1 | `../sim/salvage.js` | `recoverSite` | [js/sim/salvage.js](../sim/salvage.js.md) |
+| 2 | `../sim/sim.js` | `logEvent`, `sim`, `sellPriceAt`, `currentShipId`, `addWaypointAt`, `addAnchoredWaypoint`, `removeWaypoint` | [js/sim/sim.js](../sim/sim.js.md) |
+| 3 | `../station/stations.js` | `stations`, `stationById` | [js/station/stations.js](../station/stations.js.md) |
+| 4 | `../corp/corps.js` | `corpOfStation`, `corpRelation`, `corps`, `adjustStanding`, `standingLabel` | [js/corp/corps.js](../corp/corps.js.md) |
+| 5 | `../data/factions.js` | `POWERS` | [js/data/factions.js](../data/factions.js.md) |
+| 6 | `./economy.js` | `shortagesOf`, `wantsOf`, `bidPrice`, `askPrice`, `stockOf`, `deliver`, `lift` | [js/economy/economy.js](economy.js.md) |
+| 7 | `./materials.js` | `goodName`, `baseValue`, `good`, `bulkOf`, `ORES`, `SECTORS` | [js/economy/materials.js](materials.js.md) |
+| 8 | `../npc/traffic.js` | `traffic`, `HOSTILE_ROLES` | [js/npc/traffic.js](../npc/traffic.js.md) |
+| 9 | `../npc/flow.js` | `flow` | [js/npc/flow.js](../npc/flow.js.md) |
+| 10 | `../npc/rogues.js` | `nests` | [js/npc/rogues.js](../npc/rogues.js.md) |
+| 11 | `../world/generate.js` | `rngFromSeed` | [js/world/generate.js](../world/generate.js.md) |
+| 12 | `../flight/ship.js` | `takeCargo`, `addCargo`, `roomFor` | [js/flight/ship.js](../flight/ship.js.md) |
+| 13 | `../ships/shipdb.js` | `shipById` | [js/ships/shipdb.js](../ships/shipdb.js.md) |
+| 14 | `../corp/company.js` | `bookRevenue` | [js/corp/company.js](../corp/company.js.md) |
+| 15 | `../flight/pilot.js` | `work`, `pilot` | [js/flight/pilot.js](../flight/pilot.js.md) |
+| 16 | `../world/bodies.js` | `BODIES`, `BEACONS`, `bodyPosition`, `beaconPosition`, `currentSystem`, `scanRadius` | [js/world/bodies.js](../world/bodies.js.md) |
+| 17 | `./sites.js` | `pickSpot`, `spotLine`, `openSite`, `closeSite`, `siteById` | [js/economy/sites.js](sites.js.md) |
+| 18 | `./chains.js` | `chainOffersAt`, `chainVersion`, `noteChainAccept`, `noteChainDone`, `noteChainFail`, `resetChains`, `chainReport`, `wireChains`, `CHAIN`, `chainBonus` | [js/economy/chains.js](chains.js.md) |
+| 19 | `../station/dockwork.js` | `bookHandling` | [js/station/dockwork.js](../station/dockwork.js.md) |
 
 ## Imported by
 
@@ -88,6 +89,7 @@ desk without the desk knowing who hates whom.
 - test/hold.test.mjs _(outside js/)_ — `contracts`, `resetContracts`
 - test/jobloop.test.mjs _(outside js/)_ — `boardFor`, `acceptContract`, `contracts`, `resetContracts`, `BOARD`, `owedCargo`, `jobForSite`
 - test/marks.test.mjs _(outside js/)_ — `boardFor`, `acceptContract`, `abandonContract`, `contracts`, `resetContracts`, `BOARD`, `markTarget`
+- test/salvage.test.mjs _(outside js/)_ — `contracts`, `tickContracts`, `deliverableAt`, `deliverContracts`, `boardFor`
 - test/sites.test.mjs _(outside js/)_ — `boardFor`, `acceptContract`, `abandonContract`, `deliverContracts`, `contracts`, `resetContracts`, `BOARD`, `jobStatus`
 - test/trade.test.mjs _(outside js/)_ — `contracts`
 - test/undock.test.mjs _(outside js/)_ — `boardFor`, `acceptContract`, `contracts`, `resetContracts`, `BOARD`
@@ -99,25 +101,25 @@ desk without the desk knowing who hates whom.
 - [`CATEGORY_ORDER`](#s-CATEGORY_ORDER) · const — used by [js/aria/play.js](../aria/play.js.md), test/ariaplay.test.mjs, test/chains.test.mjs, test/desk.test.mjs
 - [`categoryOf`](#s-categoryOf) · function — used by [js/aria/play.js](../aria/play.js.md)
 - [`BOARD`](#s-BOARD) · const — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/balance.test.mjs, test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/sites.test.mjs, test/undock.test.mjs
-- [`contracts`](#s-contracts) · const — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/economy/traderoutes.js](traderoutes.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), [js/ui/holdview.js](../ui/holdview.js.md), test/ariaplay.test.mjs, test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/hold.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/sites.test.mjs, test/trade.test.mjs, test/undock.test.mjs
+- [`contracts`](#s-contracts) · const — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/economy/traderoutes.js](traderoutes.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), [js/ui/holdview.js](../ui/holdview.js.md), test/ariaplay.test.mjs, test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/hold.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/salvage.test.mjs, test/sites.test.mjs, test/trade.test.mjs, test/undock.test.mjs
 - [`hullFit`](#s-hullFit) · function — used by [js/aria/play.js](../aria/play.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/desk.test.mjs
 - [`issuersAt`](#s-issuersAt) · function — used by test/board.test.mjs, test/desk.test.mjs
 - [`targetPos`](#s-targetPos) · function — used by [js/aria/play.js](../aria/play.js.md), test/desk.test.mjs
 - [`markTarget`](#s-markTarget) · function — used by [js/ui/boardview.js](../ui/boardview.js.md), test/marks.test.mjs
 - [`anchorFor`](#s-anchorFor) · function — **no importer in scanned roots**
-- [`boardFor`](#s-boardFor) · function — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), test/ariaplay.test.mjs, test/ariasense.test.mjs, test/balance.test.mjs, test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/sites.test.mjs, test/undock.test.mjs
+- [`boardFor`](#s-boardFor) · function — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), test/ariaplay.test.mjs, test/ariasense.test.mjs, test/balance.test.mjs, test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/salvage.test.mjs, test/sites.test.mjs, test/undock.test.mjs
 - [`boardByCategory`](#s-boardByCategory) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/desk.test.mjs
 - [`acceptBlocker`](#s-acceptBlocker) · function — used by [js/aria/play.js](../aria/play.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs
 - [`acceptContract`](#s-acceptContract) · function — used by [js/aria/play.js](../aria/play.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/ariaplay.test.mjs, test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/sites.test.mjs, test/undock.test.mjs
 - [`abandonContract`](#s-abandonContract) · function — used by [js/aria/play.js](../aria/play.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/marks.test.mjs, test/sites.test.mjs
-- [`deliverableAt`](#s-deliverableAt) · function — used by [js/aria/play.js](../aria/play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/board.test.mjs, test/desk.test.mjs
+- [`deliverableAt`](#s-deliverableAt) · function — used by [js/aria/play.js](../aria/play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/board.test.mjs, test/desk.test.mjs, test/salvage.test.mjs
 - [`owedCargo`](#s-owedCargo) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/jobloop.test.mjs
 - [`jobForSite`](#s-jobForSite) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), test/jobloop.test.mjs
-- [`deliverContracts`](#s-deliverContracts) · function — used by [js/aria/play.js](../aria/play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/sites.test.mjs
+- [`deliverContracts`](#s-deliverContracts) · function — used by [js/aria/play.js](../aria/play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/board.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/salvage.test.mjs, test/sites.test.mjs
 - [`noteKill`](#s-noteKill) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`noteDestroyed`](#s-noteDestroyed) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/desk.test.mjs
 - [`visitRadius`](#s-visitRadius) · function — **no importer in scanned roots**
-- [`tickContracts`](#s-tickContracts) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/board.test.mjs, test/desk.test.mjs
+- [`tickContracts`](#s-tickContracts) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/board.test.mjs, test/desk.test.mjs, test/salvage.test.mjs
 - [`timeLeft`](#s-timeLeft) · function — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/ui/boardview.js](../ui/boardview.js.md)
 - [`jobStatus`](#s-jobStatus) · function — used by [js/aria/play.js](../aria/play.js.md), [js/ui/boardview.js](../ui/boardview.js.md), test/desk.test.mjs, test/sites.test.mjs
 - [`resetContracts`](#s-resetContracts) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/ariaplay.test.mjs, test/ariasense.test.mjs, test/chains.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/hold.test.mjs, test/jobloop.test.mjs, test/marks.test.mjs, test/sites.test.mjs, test/undock.test.mjs
@@ -131,15 +133,15 @@ _none detected_
 
 ### <a id="s-TIERS"></a>`TIERS`
 
-const · **exported** · L20–24
+const · **exported** · L21–25
 
 <!-- note:TIERS -->
-- L21 · `{ key: "low",  name: "Standard", weight: 58, pay: 1.0,  standing: -10 },` — 0.3.47: 1.55/2.4 → 1.35/1.8. A sealed job is worth having, not a jackpot
+- L22 · `{ key: "low",  name: "Standard", weight: 58, pay: 1.0,  standing: -10 },` — 0.3.47: 1.55/2.4 → 1.35/1.8. A sealed job is worth having, not a jackpot
 <!-- /note -->
 
 ### <a id="s-CATEGORIES"></a>`CATEGORIES`
 
-const · **exported** · L26–36
+const · **exported** · L27–37
 
 <!-- note:CATEGORIES -->
 The departments, and the careers each one pays: every complex in
@@ -149,21 +151,21 @@ whichever career you chose. `skill` is what finishing a job trains.
 
 ### <a id="s-CATEGORY_ORDER"></a>`CATEGORY_ORDER`
 
-const · **exported** · L37–37
+const · **exported** · L38–38
 
 <!-- note:CATEGORY_ORDER -->
 <!-- /note -->
 
 ### <a id="s-KIND_CAT"></a>`KIND_CAT`
 
-const · L38–38
+const · L39–39
 
 <!-- note:KIND_CAT -->
 <!-- /note -->
 
 ### <a id="s-categoryOf"></a>`categoryOf(type)`
 
-function · **exported** · L39–39
+function · **exported** · L40–40
 
 - called by: [`jobsFor`](../aria/play.js.md#s-jobsFor) _js/aria/play.js_ · [`movesNow`](../aria/play.js.md#s-movesNow) _js/aria/play.js_ · [`settle`](#s-settle)
 
@@ -172,7 +174,7 @@ function · **exported** · L39–39
 
 ### <a id="s-SECTOR_WEIGHT"></a>`SECTOR_WEIGHT`
 
-const · L41–48
+const · L42–49
 
 <!-- note:SECTOR_WEIGHT -->
 what a port of each sector mostly needs done (weights per department)
@@ -180,7 +182,7 @@ what a port of each sector mostly needs done (weights per department)
 
 ### <a id="s-CHARTER_LEAN"></a>`CHARTER_LEAN`
 
-const · L49–55
+const · L50–56
 
 <!-- note:CHARTER_LEAN -->
 and what an issuer's charter pushes it toward
@@ -188,16 +190,16 @@ and what an issuer's charter pushes it toward
 
 ### <a id="s-BOARD"></a>`BOARD`
 
-const · **exported** · L57–67
+const · **exported** · L58–68
 
 <!-- note:BOARD -->
-- L58 · `refresh: 480,` — s between re-postings at a port
-- L59 · `offers: 30,` — per port (0.3.18: was 5)
-- L60 · `expires: 900,` — s an offer stands
-- L61 · `deadline: 1500,` — s from acceptance
-- L64 · `maxActive: 5,` — 0.3.18: was 3 — a working pilot runs a few jobs at once
-- L65 · `visitR: 1500,` — u: close enough to a waypoint to count as there (15 km)
-- L66 · `pay: 1.0,` — 0.3.24 — what the desk pays, against the market.
+- L59 · `refresh: 480,` — s between re-postings at a port
+- L60 · `offers: 30,` — per port (0.3.18: was 5)
+- L61 · `expires: 900,` — s an offer stands
+- L62 · `deadline: 1500,` — s from acceptance
+- L65 · `maxActive: 5,` — 0.3.18: was 3 — a working pilot runs a few jobs at once
+- L66 · `visitR: 1500,` — u: close enough to a waypoint to count as there (15 km)
+- L67 · `pay: 1.0,` — 0.3.24 — what the desk pays, against the market.
   
   Lot pricing and the narrower stock band took ~46% out of route profit,
   which was the point; but they took contract-funded careers down with it,
@@ -222,14 +224,14 @@ const · **exported** · L57–67
 
 ### <a id="s-contracts"></a>`contracts`
 
-const · **exported** · L69–69
+const · **exported** · L70–70
 
 <!-- note:contracts -->
 <!-- /note -->
 
 ### <a id="s-pickTier"></a>`pickTier(rnd)`
 
-function · L71–76
+function · L72–77
 
 - called by: [`makeOffer`](#s-makeOffer)
 
@@ -238,7 +240,7 @@ function · L71–76
 
 ### <a id="s-pickOf"></a>`pickOf(rnd, arr)`
 
-function · L77–77
+function · L78–78
 
 - called by: [`KINDS.assay`](#s-KINDS-assay) · [`KINDS.bounty`](#s-KINDS-bounty) · [`KINDS.build`](#s-KINDS-build) ×2 · [`KINDS.chart`](#s-KINDS-chart) · [`KINDS.courier`](#s-KINDS-courier) ×2 · [`KINDS.escort`](#s-KINDS-escort) · [`KINDS.fieldtrip`](#s-KINDS-fieldtrip) · [`KINDS.food`](#s-KINDS-food) · [`KINDS.fuel`](#s-KINDS-fuel) · [`KINDS.haul`](#s-KINDS-haul) ×2 · [`KINDS.ice`](#s-KINDS-ice) · [`KINDS.materials`](#s-KINDS-materials) · [`KINDS.medical`](#s-KINDS-medical) · [`KINDS.mine`](#s-KINDS-mine) · [`KINDS.parts`](#s-KINDS-parts) · [`KINDS.pod`](#s-KINDS-pod) · [`KINDS.procure`](#s-KINDS-procure) · [`KINDS.reactor`](#s-KINDS-reactor) · [`KINDS.relay`](#s-KINDS-relay) · [`KINDS.resupply`](#s-KINDS-resupply) ×2 · [`KINDS.rogues`](#s-KINDS-rogues) · [`KINDS.supply`](#s-KINDS-supply) · [`KINDS.survey`](#s-KINDS-survey) · [`KINDS.tender`](#s-KINDS-tender) · [`KINDS.vein`](#s-KINDS-vein)
 
@@ -247,7 +249,7 @@ function · L77–77
 
 ### <a id="s-weighted"></a>`weighted(rnd, table)`
 
-function · L78–83
+function · L79–84
 
 - called by: [`boardFor`](#s-boardFor)
 
@@ -256,7 +258,7 @@ function · L78–83
 
 ### <a id="s-pilotCareer"></a>`pilotCareer()`
 
-function · L85–85
+function · L86–86
 
 - called by: [`boardFor`](#s-boardFor) ×2
 
@@ -265,7 +267,7 @@ function · L85–85
 
 ### <a id="s-hullFit"></a>`hullFit()`
 
-function · **exported** · L87–93
+function · **exported** · L88–94
 
 - calls: [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`currentShipId`](../sim/sim.js.md#s-currentShipId) _js/sim/sim.js_
 - called by: [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`acceptBlocker`](#s-acceptBlocker) · [`boardFor`](#s-boardFor) · [`renderDesk`](../ui/boardview.js.md#s-renderDesk) _js/ui/boardview.js_
@@ -275,12 +277,12 @@ function · **exported** · L87–93
 
 What the current hull can take on: its hold, whether it carries guns.
 
-- L92 · `return { cap, capFor: (id) => (id ? Math.max(1, Math.floor(cap / bulkOf(id))) : cap), arme` — 0.3.52: `cap` is hold units; how many of a GIVEN good fit is capFor(id)
+- L93 · `return { cap, capFor: (id) => (id ? Math.max(1, Math.floor(cap / bulkOf(id))) : cap), arme` — 0.3.52: `cap` is hold units; how many of a GIVEN good fit is capFor(id)
 <!-- /note -->
 
 #### <a id="s-hullFit-capFor"></a>`hullFit.capFor(id)`
 
-prop · L92–92
+prop · L93–93
 
 - calls: [`bulkOf`](materials.js.md#s-bulkOf) _js/economy/materials.js_
 
@@ -289,7 +291,7 @@ prop · L92–92
 
 ### <a id="s-sized"></a>`sized(fit, frac, lo=, id=)`
 
-function · L94–94
+function · L95–95
 
 - called by: [`KINDS.build`](#s-KINDS-build) · [`KINDS.salvage`](#s-KINDS-salvage) · [`KINDS.wreck`](#s-KINDS-wreck) · [`qtyFor`](#s-qtyFor)
 
@@ -299,7 +301,7 @@ cargo work sized to the hold: `frac` of it, at least `lo` units
 
 ### <a id="s-qtyFor"></a>`qtyFor(fit, frac, lo, id, t)`
 
-function · L95–100
+function · L96–101
 
 - calls: [`sized`](#s-sized) · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_
 - called by: [`KINDS.consign`](#s-KINDS-consign) · [`KINDS.food`](#s-KINDS-food) · [`KINDS.fuel`](#s-KINDS-fuel) · [`KINDS.haul`](#s-KINDS-haul) · [`KINDS.ice`](#s-KINDS-ice) · [`KINDS.materials`](#s-KINDS-materials) · [`KINDS.medical`](#s-KINDS-medical) · [`KINDS.mine`](#s-KINDS-mine) · [`KINDS.parts`](#s-KINDS-parts) · [`KINDS.pod`](#s-KINDS-pod) · [`KINDS.procure`](#s-KINDS-procure) · [`KINDS.reactor`](#s-KINDS-reactor) · [`KINDS.resupply`](#s-KINDS-resupply) · [`KINDS.supply`](#s-KINDS-supply) · [`KINDS.tender`](#s-KINDS-tender) · [`KINDS.vein`](#s-KINDS-vein)
@@ -312,7 +314,7 @@ with the hold, so a big hull sees bigger jobs without a skiff seeing none.
 
 ### <a id="s-charterOf"></a>`charterOf(co)`
 
-function · L102–102
+function · L103–103
 
 - called by: [`boardFor`](#s-boardFor)
 
@@ -322,7 +324,7 @@ function · L102–102
 
 ### <a id="s-issuersAt"></a>`issuersAt(st)`
 
-function · **exported** · L104–112
+function · **exported** · L105–113
 
 - calls: [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`corpRelation`](../corp/corps.js.md#s-corpRelation) _js/corp/corps.js_ · [`rngFromSeed`](../world/generate.js.md#s-rngFromSeed) _js/world/generate.js_
 - via [js/corp/corps.js](../corp/corps.js.md): `corps.filter`
@@ -336,7 +338,7 @@ its ring: two or three civil corporations not at war with the landlord
 
 ### <a id="s-_p"></a>`_p`
 
-const · L114–114
+const · L115–115
 
 <!-- note:_p -->
 ---- where a job points ------------------------------------------------------
@@ -344,7 +346,7 @@ const · L114–114
 
 ### <a id="s-targetPos"></a>`targetPos(t, time=, out=)`
 
-function · **exported** · L115–121
+function · **exported** · L116–122
 
 - calls: [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`beaconPosition`](../world/bodies.js.md#s-beaconPosition) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 - via [js/world/bodies.js](../world/bodies.js.md): `BEACONS.find`
@@ -356,7 +358,7 @@ World position of a job's target right now: a body, a beacon, a point off a port
 
 ### <a id="s-markTarget"></a>`markTarget(a)`
 
-function · **exported** · L123–139
+function · **exported** · L124–140
 
 - calls: [`anchorFor`](#s-anchorFor) · [`targetPos`](#s-targetPos) · [`addAnchoredWaypoint`](../sim/sim.js.md#s-addAnchoredWaypoint) _js/sim/sim.js_ · [`addWaypointAt`](../sim/sim.js.md#s-addWaypointAt) _js/sim/sim.js_ · [`removeWaypoint`](../sim/sim.js.md#s-removeWaypoint) _js/sim/sim.js_
 - called by: [`acceptContract`](#s-acceptContract) · [`tickContracts`](#s-tickContracts) · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
@@ -364,17 +366,17 @@ function · **exported** · L123–139
 <!-- note:markTarget -->
 Put a job's next target on the chart as a waypoint.
 
-- L124 · `const anchor = anchorFor(a);` — 0.3.67 — the mark is pinned to the THING the job is about, not to where
+- L125 · `const anchor = anchorFor(a);` — 0.3.67 — the mark is pinned to the THING the job is about, not to where
   it was when you pressed MARK: a seam job's biggest live rock, the world,
   the beacon, the picket off its moving port, the wanted hull, the boat you
   are escorting, the nest. Only a job whose target is a bare point (a wreck
   or pod drop) marks a point.
-- L128 · `if (sim.waypoints.length === n0) return wp;` — an existing mark on the same thing, now active — yours, left alone
+- L129 · `if (sim.waypoints.length === n0) return wp;` — an existing mark on the same thing, now active — yours, left alone
 <!-- /note -->
 
 ### <a id="s-anchorFor"></a>`anchorFor(a)`
 
-function · **exported** · L141–154
+function · **exported** · L142–155
 
 - calls: [`targetPos`](#s-targetPos) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ · [`siteById`](sites.js.md#s-siteById) _js/economy/sites.js_
 - called by: [`markTarget`](#s-markTarget)
@@ -385,7 +387,7 @@ What a job's mark should follow → { ref, name, at } or null (a bare point).
 
 ### <a id="s-spotSeq"></a>`spotSeq`
 
-const · L156–156
+const · L157–157
 
 <!-- note:spotSeq -->
 0.3.20 — a job with rock in it names a stretch of belt, and accepting it
@@ -395,7 +397,7 @@ laid into the belt the cells already grow, so the run pays twice.
 
 ### <a id="s-jobSpot"></a>`jobSpot(st, rnd, opts=)`
 
-function · L157–160
+function · L158–161
 
 - calls: [`pickSpot`](sites.js.md#s-pickSpot) _js/economy/sites.js_
 - called by: [`KINDS.pod`](#s-KINDS-pod) · [`KINDS.wreck`](#s-KINDS-wreck) · [`withSpot`](#s-withSpot)
@@ -405,7 +407,7 @@ function · L157–160
 
 ### <a id="s-rocksFor"></a>`rocksFor(qty)`
 
-function · L161–161
+function · L162–162
 
 - called by: [`chainOffer`](#s-chainOffer) · [`withSpot`](#s-withSpot)
 
@@ -415,7 +417,7 @@ how many rocks a site needs to carry an order: a handful, and enough of them
 
 ### <a id="s-withSpot"></a>`withSpot(job, st, rnd, opts=)`
 
-function · L163–172
+function · L164–173
 
 - calls: [`jobSpot`](#s-jobSpot) · [`rocksFor`](#s-rocksFor) · [`spotLine`](sites.js.md#s-spotLine) _js/economy/sites.js_
 - called by: [`KINDS.assay`](#s-KINDS-assay) · [`KINDS.ice`](#s-KINDS-ice) · [`KINDS.mine`](#s-KINDS-mine) · [`KINDS.vein`](#s-KINDS-vein)
@@ -426,7 +428,7 @@ The place half of a rock job: the spot, the waypoint target, and the line that n
 
 ### <a id="s-unitBasis"></a>`unitBasis(st, id)`
 
-function · L174–179
+function · L175–180
 
 - calls: [`cheapestSource`](#s-cheapestSource) · [`bidPrice`](economy.js.md#s-bidPrice) _js/economy/economy.js_ · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`good`](materials.js.md#s-good) _js/economy/materials.js_
 - called by: [`deliverJob`](#s-deliverJob)
@@ -457,12 +459,12 @@ of book was paying bid × 1.54 on a Sealed desk, which is money for a trip to
 the shop. For those the basis is the cheapest ask in the sky (+8% for the
 trip), and the premium is lighter.
 
-- L176 · `if (good(id)?.tier === "ore") return { unit: top, k: (t) => 0.7 + 0.3 * t.pay };` — the 0.3.18 shape: the tier leans on it gently
+- L177 · `if (good(id)?.tier === "ore") return { unit: top, k: (t) => 0.7 + 0.3 * t.pay };` — the 0.3.18 shape: the tier leans on it gently
 <!-- /note -->
 
 #### <a id="s-unitBasis-k"></a>`unitBasis.k(t)`
 
-prop · L176–176
+prop · L177–177
 
 - called by: [`deliverJob`](#s-deliverJob)
 
@@ -471,14 +473,14 @@ prop · L176–176
 
 #### <a id="s-unitBasis-k-2"></a>`unitBasis.k~2(t)`
 
-prop · L178–178
+prop · L179–179
 
 <!-- note:unitBasis.k~2 -->
 <!-- /note -->
 
 ### <a id="s-deliverJob"></a>`deliverJob(st, id, qty, prem, fee, t, title, text)`
 
-function · L180–183
+function · L181–184
 
 - calls: [`unitBasis`](#s-unitBasis) · [`unitBasis.k`](#s-unitBasis-k)
 - called by: [`KINDS.assay`](#s-KINDS-assay) · [`KINDS.build`](#s-KINDS-build) · [`KINDS.food`](#s-KINDS-food) · [`KINDS.fuel`](#s-KINDS-fuel) · [`KINDS.ice`](#s-KINDS-ice) · [`KINDS.materials`](#s-KINDS-materials) · [`KINDS.medical`](#s-KINDS-medical) · [`KINDS.mine`](#s-KINDS-mine) · [`KINDS.parts`](#s-KINDS-parts) · [`KINDS.reactor`](#s-KINDS-reactor) · [`KINDS.supply`](#s-KINDS-supply) · [`KINDS.tender`](#s-KINDS-tender) · [`KINDS.vein`](#s-KINDS-vein)
@@ -488,7 +490,7 @@ function · L180–183
 
 ### <a id="s-cheapestSource"></a>`cheapestSource(id, except)`
 
-function · L185–193
+function · L186–194
 
 - calls: [`askPrice`](economy.js.md#s-askPrice) _js/economy/economy.js_ · [`stockOf`](economy.js.md#s-stockOf) _js/economy/economy.js_
 - called by: [`KINDS.procure`](#s-KINDS-procure) · [`KINDS.tender`](#s-KINDS-tender) · [`unitBasis`](#s-unitBasis)
@@ -498,7 +500,7 @@ function · L185–193
 
 ### <a id="s-bestBuyer"></a>`bestBuyer(id, except)`
 
-function · L194–202
+function · L195–203
 
 - calls: [`sellPriceAt`](../sim/sim.js.md#s-sellPriceAt) _js/sim/sim.js_
 - called by: [`KINDS.consign`](#s-KINDS-consign)
@@ -508,7 +510,7 @@ function · L194–202
 
 ### <a id="s-honestOthers"></a>`honestOthers(st)`
 
-function · L203–203
+function · L204–204
 
 - via [js/station/stations.js](../station/stations.js.md): `stations.filter`
 - called by: [`KINDS.build`](#s-KINDS-build) · [`KINDS.courier`](#s-KINDS-courier) · [`KINDS.haul`](#s-KINDS-haul) · [`KINDS.resupply`](#s-KINDS-resupply)
@@ -518,14 +520,14 @@ function · L203–203
 
 ### <a id="s-KINDS"></a>`KINDS`
 
-const · L205–396
+const · L206–397
 
 <!-- note:KINDS -->
 <!-- /note -->
 
 #### <a id="s-KINDS-mine"></a>`KINDS.mine(st, rnd, t, fit)`
 
-prop · L206–211
+prop · L207–212
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`withSpot`](#s-withSpot)
 - via [js/economy/materials.js](materials.js.md): `ORES.find`, `ORES.slice`, `ORES.slice.map`, `ORES.some`
@@ -536,7 +538,7 @@ MINING
 
 #### <a id="s-KINDS-ice"></a>`KINDS.ice(st, rnd, t, fit)`
 
-prop · L212–216
+prop · L213–217
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`withSpot`](#s-withSpot) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -545,7 +547,7 @@ prop · L212–216
 
 #### <a id="s-KINDS-vein"></a>`KINDS.vein(st, rnd, t, fit)`
 
-prop · L217–221
+prop · L218–222
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`withSpot`](#s-withSpot) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -554,7 +556,7 @@ prop · L217–221
 
 #### <a id="s-KINDS-haul"></a>`KINDS.haul(st, rnd, t, fit)`
 
-prop · L222–229
+prop · L223–230
 
 - calls: [`honestOthers`](#s-honestOthers) · [`pickOf`](#s-pickOf) ×2 · [`qtyFor`](#s-qtyFor) · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -564,7 +566,7 @@ LOGISTICS
 
 #### <a id="s-KINDS-supply"></a>`KINDS.supply(st, rnd, t, fit)`
 
-prop · L230–236
+prop · L231–237
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`shortagesOf`](economy.js.md#s-shortagesOf) _js/economy/economy.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -573,7 +575,7 @@ prop · L230–236
 
 #### <a id="s-KINDS-courier"></a>`KINDS.courier(st, rnd, t, fit)`
 
-prop · L237–243
+prop · L238–244
 
 - calls: [`honestOthers`](#s-honestOthers) · [`pickOf`](#s-pickOf) ×2 · [`stockOf`](economy.js.md#s-stockOf) _js/economy/economy.js_ ×2 · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -582,7 +584,7 @@ prop · L237–243
 
 #### <a id="s-KINDS-procure"></a>`KINDS.procure(st, rnd, t, fit)`
 
-prop · L244–253
+prop · L245–254
 
 - calls: [`cheapestSource`](#s-cheapestSource) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`bidPrice`](economy.js.md#s-bidPrice) _js/economy/economy.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -592,37 +594,37 @@ TRADE
 
 #### <a id="s-KINDS-consign"></a>`KINDS.consign(st, rnd, t, fit)`
 
-prop · L254–262
+prop · L255–263
 
 - calls: [`bestBuyer`](#s-bestBuyer) · [`qtyFor`](#s-qtyFor) · [`askPrice`](economy.js.md#s-askPrice) _js/economy/economy.js_ ×2 · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
 <!-- note:KINDS.consign -->
-- L257 · `let best = null;` — the line that sells best somewhere else
+- L258 · `let best = null;` — the line that sells best somewhere else
 <!-- /note -->
 
 #### <a id="s-KINDS-resupply"></a>`KINDS.resupply(st, rnd, t, fit)`
 
-prop · L263–271
+prop · L264–272
 
 - calls: [`honestOthers`](#s-honestOthers) · [`pickOf`](#s-pickOf) ×2 · [`qtyFor`](#s-qtyFor) · [`askPrice`](economy.js.md#s-askPrice) _js/economy/economy.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
 <!-- note:KINDS.resupply -->
-- L264 · `const dest = pickOf(rnd, honestOthers(st));` — a tenant's own shop runs low: bring back a mixed good from the sector's sell list elsewhere
+- L265 · `const dest = pickOf(rnd, honestOthers(st));` — a tenant's own shop runs low: bring back a mixed good from the sector's sell list elsewhere
 <!-- /note -->
 
 #### <a id="s-KINDS-tender"></a>`KINDS.tender(st, rnd, t, fit)`
 
-prop · L272–280
+prop · L273–281
 
 - calls: [`cheapestSource`](#s-cheapestSource) · [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`wantsOf`](economy.js.md#s-wantsOf) _js/economy/economy.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
 <!-- note:KINDS.tender -->
-- L273 · `const w = pickOf(rnd, wantsOf(st, 5));` — the port's buyers put out a tender for something it wants at a fixed price over its bid
+- L274 · `const w = pickOf(rnd, wantsOf(st, 5));` — the port's buyers put out a tender for something it wants at a fixed price over its bid
 <!-- /note -->
 
 #### <a id="s-KINDS-bounty"></a>`KINDS.bounty(st, rnd, t)`
 
-prop · L281–286
+prop · L282–287
 
 - calls: [`pickOf`](#s-pickOf)
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`, `traffic.filter`
@@ -633,7 +635,7 @@ SECURITY
 
 #### <a id="s-KINDS-escort"></a>`KINDS.escort(st, rnd, t)`
 
-prop · L287–291
+prop · L288–292
 
 - calls: [`pickOf`](#s-pickOf)
 - via [js/npc/flow.js](../npc/flow.js.md): `flow.filter`
@@ -643,14 +645,14 @@ prop · L287–291
 
 #### <a id="s-KINDS-patrol"></a>`KINDS.patrol(st, rnd, t)`
 
-prop · L292–300
+prop · L293–301
 
 <!-- note:KINDS.patrol -->
 <!-- /note -->
 
 #### <a id="s-KINDS-rogues"></a>`KINDS.rogues(st, rnd, t)`
 
-prop · L301–307
+prop · L302–308
 
 - calls: [`pickOf`](#s-pickOf)
 - via [js/npc/rogues.js](../npc/rogues.js.md): `nests.filter`
@@ -660,7 +662,7 @@ prop · L301–307
 
 #### <a id="s-KINDS-salvage"></a>`KINDS.salvage(st, rnd, t, fit)`
 
-prop · L308–311
+prop · L309–312
 
 - calls: [`sized`](#s-sized)
 
@@ -670,7 +672,7 @@ SALVAGE
 
 #### <a id="s-KINDS-wreck"></a>`KINDS.wreck(st, rnd, t, fit)`
 
-prop · L312–317
+prop · L313–318
 
 - calls: [`jobSpot`](#s-jobSpot) · [`sized`](#s-sized) · [`spotLine`](sites.js.md#s-spotLine) _js/economy/sites.js_
 
@@ -679,17 +681,17 @@ prop · L312–317
 
 #### <a id="s-KINDS-pod"></a>`KINDS.pod(st, rnd, t, fit)`
 
-prop · L318–324
+prop · L319–325
 
 - calls: [`jobSpot`](#s-jobSpot) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2 · [`spotLine`](sites.js.md#s-spotLine) _js/economy/sites.js_
 
 <!-- note:KINDS.pod -->
-- L319 · `const spot = jobSpot(st, rnd, { spread: 1.6, r: 900 });` — a cargo pod blown off a hauler: fly to it, hold while the tractor takes it, bring it in
+- L320 · `const spot = jobSpot(st, rnd, { spread: 1.6, r: 900 });` — a cargo pod blown off a hauler: fly to it, hold while the tractor takes it, bring it in
 <!-- /note -->
 
 #### <a id="s-KINDS-materials"></a>`KINDS.materials(st, rnd, t, fit)`
 
-prop · L325–331
+prop · L326–332
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`shortagesOf`](economy.js.md#s-shortagesOf) _js/economy/economy.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 - via [js/economy/economy.js](economy.js.md): `shortagesOf.map`, `shortagesOf.map.filter`
@@ -700,7 +702,7 @@ INDUSTRY
 
 #### <a id="s-KINDS-build"></a>`KINDS.build(st, rnd, t, fit)`
 
-prop · L332–340
+prop · L333–341
 
 - calls: [`deliverJob`](#s-deliverJob) · [`honestOthers`](#s-honestOthers) · [`pickOf`](#s-pickOf) ×2 · [`sized`](#s-sized) · [`stockOf`](economy.js.md#s-stockOf) _js/economy/economy.js_ · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×4
 
@@ -709,7 +711,7 @@ prop · L332–340
 
 #### <a id="s-KINDS-parts"></a>`KINDS.parts(st, rnd, t, fit)`
 
-prop · L341–345
+prop · L342–346
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -718,7 +720,7 @@ prop · L341–345
 
 #### <a id="s-KINDS-fuel"></a>`KINDS.fuel(st, rnd, t, fit)`
 
-prop · L346–350
+prop · L347–351
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -728,7 +730,7 @@ ENERGY
 
 #### <a id="s-KINDS-reactor"></a>`KINDS.reactor(st, rnd, t, fit)`
 
-prop · L351–355
+prop · L352–356
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -737,7 +739,7 @@ prop · L351–355
 
 #### <a id="s-KINDS-survey"></a>`KINDS.survey(st, rnd, t)`
 
-prop · L356–361
+prop · L357–362
 
 - calls: [`pickOf`](#s-pickOf)
 - via [js/world/bodies.js](../world/bodies.js.md): `BODIES.filter`
@@ -749,7 +751,7 @@ SCIENCE
 
 #### <a id="s-KINDS-assay"></a>`KINDS.assay(st, rnd, t)`
 
-prop · L362–366
+prop · L363–367
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`withSpot`](#s-withSpot) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -758,7 +760,7 @@ prop · L362–366
 
 #### <a id="s-KINDS-chart"></a>`KINDS.chart(st, rnd, t)`
 
-prop · L367–371
+prop · L368–372
 
 - calls: [`pickOf`](#s-pickOf)
 
@@ -767,7 +769,7 @@ prop · L367–371
 
 #### <a id="s-KINDS-medical"></a>`KINDS.medical(st, rnd, t, fit)`
 
-prop · L372–376
+prop · L373–377
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 
@@ -777,7 +779,7 @@ CIVIC
 
 #### <a id="s-KINDS-food"></a>`KINDS.food(st, rnd, t, fit)`
 
-prop · L377–384
+prop · L378–385
 
 - calls: [`deliverJob`](#s-deliverJob) · [`pickOf`](#s-pickOf) · [`qtyFor`](#s-qtyFor) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2
 - via [js/station/stations.js](../station/stations.js.md): `stations.find`
@@ -787,7 +789,7 @@ prop · L377–384
 
 #### <a id="s-KINDS-relay"></a>`KINDS.relay(st, rnd, t)`
 
-prop · L385–389
+prop · L386–390
 
 - calls: [`pickOf`](#s-pickOf)
 
@@ -796,7 +798,7 @@ prop · L385–389
 
 #### <a id="s-KINDS-fieldtrip"></a>`KINDS.fieldtrip(st, rnd, t)`
 
-prop · L390–395
+prop · L391–396
 
 - calls: [`pickOf`](#s-pickOf) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 - via [js/world/bodies.js](../world/bodies.js.md): `BODIES.filter`, `BODIES.filter.map`, `BODIES.filter.map.sort`, `….map.sort.slice`
@@ -806,7 +808,7 @@ prop · L390–395
 
 ### <a id="s-goodValue"></a>`goodValue(st, id)`
 
-function · L398–398
+function · L399–399
 
 - calls: [`bidPrice`](economy.js.md#s-bidPrice) _js/economy/economy.js_ · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_
 - called by: [`chainOffer`](#s-chainOffer) ×2
@@ -822,22 +824,22 @@ it are the live sky's numbers, not the author's.
 
 ### <a id="s-chainOffer"></a>`chainOffer(st, rnd, now, fit, spec)`
 
-function · L400–437
+function · L401–438
 
 - calls: [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`chainBonus`](chains.js.md#s-chainBonus) _js/economy/chains.js_ · [`goodValue`](#s-goodValue) ×2 · [`rocksFor`](#s-rocksFor) · [`spotLine`](sites.js.md#s-spotLine) _js/economy/sites.js_
 - called by: [`boardFor`](#s-boardFor)
 
 <!-- note:chainOffer -->
-- L405 · `if (stage.qtyK && job.qty) {` — tonnage first: the pay follows it — and never more than the hold can take,
+- L406 · `if (stage.qtyK && job.qty) {` — tonnage first: the pay follows it — and never more than the hold can take,
   or the stage is a job you can accept and can never finish
-- L413 · `if (stage.good && job.good && stage.good !== job.good) {` — the story wants a particular good: swap it and re-price against its worth
-- L418 · `if (job.mech === "haul") job.chainStock = true;` — a consignment the port has to have on the dock: the desk puts it there on accept
-- L425 · `const issuer = corpOfStation(st);` — a chain stage is not gated on standing: you are already in it
+- L414 · `if (stage.good && job.good && stage.good !== job.good) {` — the story wants a particular good: swap it and re-price against its worth
+- L419 · `if (job.mech === "haul") job.chainStock = true;` — a consignment the port has to have on the dock: the desk puts it there on accept
+- L426 · `const issuer = corpOfStation(st);` — a chain stage is not gated on standing: you are already in it
 <!-- /note -->
 
 ### <a id="s-makeOffer"></a>`makeOffer(st, rnd, now, issuer, cat, fit, tierKey=)`
 
-function · L439–456
+function · L440–457
 
 - calls: [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`pickTier`](#s-pickTier)
 - called by: [`boardFor`](#s-boardFor) ×3
@@ -845,12 +847,12 @@ function · L439–456
 <!-- note:makeOffer -->
 One offer at a port, for one issuer, in one department.
 
-- L441 · `for (let k = 0; k < kinds.length; k++) {` — try the department's kinds in a seeded order until one can be posted here
+- L442 · `for (let k = 0; k < kinds.length; k++) {` — try the department's kinds in a seeded order until one can be posted here
 <!-- /note -->
 
 ### <a id="s-boardFor"></a>`boardFor(st, now=)`
 
-function · **exported** · L458–488
+function · **exported** · L459–489
 
 - calls: [`chainOffersAt`](chains.js.md#s-chainOffersAt) _js/economy/chains.js_ · [`chainVersion`](chains.js.md#s-chainVersion) _js/economy/chains.js_ · [`boardFor>add`](#s-boardFor-add) ×4 · [`chainOffer`](#s-chainOffer) · [`charterOf`](#s-charterOf) · [`hullFit`](#s-hullFit) · [`issuersAt`](#s-issuersAt) · [`makeOffer`](#s-makeOffer) ×3 · [`pilotCareer`](#s-pilotCareer) ×2 · [`weighted`](#s-weighted) · [`rngFromSeed`](../world/generate.js.md#s-rngFromSeed) _js/world/generate.js_
 - called by: [`jobsFor`](../aria/play.js.md#s-jobsFor) _js/aria/play.js_ · [`mountBoard`](../console/panels/corp.js.md#s-mountBoard) _js/console/panels/corp.js_ · [`boardByCategory`](#s-boardByCategory)
@@ -858,17 +860,17 @@ function · **exported** · L458–488
 <!-- note:boardFor -->
 The board at a port right now — regenerated on its refresh cadence, seeded.
 
-- L471 · `for (const spec of chainOffersAt(st, now)) add(chainOffer(st, rnd, t0, fit, spec));` — 0.3.21: the chain stages this port owes you go up first — a chain you are
+- L472 · `for (const spec of chainOffersAt(st, now)) add(chainOffer(st, rnd, t0, fit, spec));` — 0.3.21: the chain stages this port owes you go up first — a chain you are
   running is the reason you flew here, and an opener is the desk's own.
-- L472 · `for (const cat of CATEGORY_ORDER) {` — one pass that covers every department (every career has something on the desk)…
-- L476 · `const mine = CATEGORY_ORDER.find((c) => CATEGORIES[c].careers.includes(pilotCareer()));` — …a floor under YOUR career's department: three more, two of them Standard (no standing asked) …
-- L478 · `for (let i = offers.length, guard = 0; i < BOARD.offers && guard < BOARD.offers * 3; guard` — …then the port's own mix
-- L482 · `if (add(makeOffer(st, rnd, t0, issuer, weighted(rnd, table), fit))) i++;` — one posting per job: two outfits (or one twice) do not post the same run for the same good
+- L473 · `for (const cat of CATEGORY_ORDER) {` — one pass that covers every department (every career has something on the desk)…
+- L477 · `const mine = CATEGORY_ORDER.find((c) => CATEGORIES[c].careers.includes(pilotCareer()));` — …a floor under YOUR career's department: three more, two of them Standard (no standing asked) …
+- L479 · `for (let i = offers.length, guard = 0; i < BOARD.offers && guard < BOARD.offers * 3; guard` — …then the port's own mix
+- L483 · `if (add(makeOffer(st, rnd, t0, issuer, weighted(rnd, table), fit))) i++;` — one posting per job: two outfits (or one twice) do not post the same run for the same good
 <!-- /note -->
 
 #### <a id="s-boardFor-sig"></a>`boardFor>sig(o)`
 
-function · L469–469
+function · L470–470
 
 - called by: [`boardFor>add`](#s-boardFor-add) ×2
 
@@ -878,7 +880,7 @@ one posting per job, and never two with the same words on them
 
 #### <a id="s-boardFor-add"></a>`boardFor>add(o)`
 
-function · L470–470
+function · L471–471
 
 - calls: [`boardFor>sig`](#s-boardFor-sig) ×2
 - called by: [`boardFor`](#s-boardFor) ×4
@@ -888,7 +890,7 @@ function · L470–470
 
 ### <a id="s-boardByCategory"></a>`boardByCategory(st, now=)`
 
-function · **exported** · L490–506
+function · **exported** · L491–507
 
 - calls: [`acceptBlocker`](#s-acceptBlocker) ×3 · [`boardFor`](#s-boardFor)
 - called by: [`senseBoard`](../aria/senses.js.md#s-senseBoard) _js/aria/senses.js_ · [`renderDesk`](../ui/boardview.js.md#s-renderDesk) _js/ui/boardview.js_
@@ -900,7 +902,7 @@ first. → [{ cat, name, careers, offers: n, best, issuers: [{ corpId, corpName,
 
 ### <a id="s-acceptBlocker"></a>`acceptBlocker(c)`
 
-function · **exported** · L508–524
+function · **exported** · L509–525
 
 - calls: [`standingLabel`](../corp/corps.js.md#s-standingLabel) _js/corp/corps.js_ · [`hullFit`](#s-hullFit) · [`stockOf`](economy.js.md#s-stockOf) _js/economy/economy.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2 · [`roomFor`](../flight/ship.js.md#s-roomFor) _js/flight/ship.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - via [js/corp/corps.js](../corp/corps.js.md): `corps.find`
@@ -913,24 +915,24 @@ Why you cannot take it, or null.
 
 ### <a id="s-acceptContract"></a>`acceptContract(c)`
 
-function · **exported** · L526–552
+function · **exported** · L527–553
 
 - calls: [`noteChainAccept`](chains.js.md#s-noteChainAccept) _js/economy/chains.js_ · [`acceptBlocker`](#s-acceptBlocker) · [`markTarget`](#s-markTarget) · [`deliver`](economy.js.md#s-deliver) _js/economy/economy.js_ · [`lift`](economy.js.md#s-lift) _js/economy/economy.js_ · [`stockOf`](economy.js.md#s-stockOf) _js/economy/economy.js_ ×2 · [`openSite`](sites.js.md#s-openSite) _js/economy/sites.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`bookHandling`](../station/dockwork.js.md#s-bookHandling) _js/station/dockwork.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`startJob`](../aria/play.js.md#s-startJob) _js/aria/play.js_ · [`renderDesk`](../ui/boardview.js.md#s-renderDesk) _js/ui/boardview.js_
 
 <!-- note:acceptContract -->
-- L532 · `if (c.chainStock && stockOf(st, c.good) < c.qty) deliver(st, c.good, c.qty - stockOf(st, c` — a chain's consignment is the desk's own freight: it is on the dock waiting
-- L533 · `const got = lift(st, c.good, c.qty);` — off the floor and into the hold
-- L534 · `bookHandling(st.id, "buy", c.good, got, sim.ship.mods);` — 0.3.25: loading takes time
-- L542 · `if (a.spot && a.good) {` — 0.3.20: the rock the job wants is laid in at the place the job names
-- L544 · `sim.autoPlan.seam = { x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name, site: Stri` — MINE HERE / MINE LOOP work the site (0.3.67: and its marked rock)
-- L545 · `sim.autoPlan.seamOre = a.good;` — 0.3.22: and the cutter works the ore the job asked for
-- L547 · `if (a.targets?.length || a.markId || a.boatId || a.nestId) markTarget(a);` — 0.3.67: hunts and escorts get a mark on the hull too
+- L533 · `if (c.chainStock && stockOf(st, c.good) < c.qty) deliver(st, c.good, c.qty - stockOf(st, c` — a chain's consignment is the desk's own freight: it is on the dock waiting
+- L534 · `const got = lift(st, c.good, c.qty);` — off the floor and into the hold
+- L535 · `bookHandling(st.id, "buy", c.good, got, sim.ship.mods);` — 0.3.25: loading takes time
+- L543 · `if (a.spot && a.good) {` — 0.3.20: the rock the job wants is laid in at the place the job names
+- L545 · `sim.autoPlan.seam = { x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name, site: Stri` — MINE HERE / MINE LOOP work the site (0.3.67: and its marked rock)
+- L546 · `sim.autoPlan.seamOre = a.good;` — 0.3.22: and the cutter works the ore the job asked for
+- L548 · `if (a.targets?.length || a.markId || a.boatId || a.nestId) markTarget(a);` — 0.3.67: hunts and escorts get a mark on the hull too
 <!-- /note -->
 
 ### <a id="s-settle"></a>`settle(a, ok, why)`
 
-function · L554–601
+function · L555–602
 
 - calls: [`bookRevenue`](../corp/company.js.md#s-bookRevenue) _js/corp/company.js_ ×2 · [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ ×5 · [`corpRelation`](../corp/corps.js.md#s-corpRelation) _js/corp/corps.js_ · [`noteChainDone`](chains.js.md#s-noteChainDone) _js/economy/chains.js_ · [`noteChainFail`](chains.js.md#s-noteChainFail) _js/economy/chains.js_ · [`categoryOf`](#s-categoryOf) · [`closeSite`](sites.js.md#s-closeSite) _js/economy/sites.js_ · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ ×4 · [`removeWaypoint`](../sim/sim.js.md#s-removeWaypoint) _js/sim/sim.js_
 - via [js/corp/corps.js](../corp/corps.js.md): `corps.find`
@@ -938,18 +940,18 @@ function · L554–601
 - called by: [`abandonContract`](#s-abandonContract) · [`deliverContracts`](#s-deliverContracts) · [`tickContracts`](#s-tickContracts)
 
 <!-- note:settle -->
-- L557 · `for (const w of sim.waypoints.filter((x) => x.job === a.id)) removeWaypoint(w.id);` — 0.3.67: the job's own marks go with it (they follow a seam, a hull, a nest
+- L558 · `for (const w of sim.waypoints.filter((x) => x.job === a.id)) removeWaypoint(w.id);` — 0.3.67: the job's own marks go with it (they follow a seam, a hull, a nest
   that is no longer the player's business; a mark you made yourself stays)
-- L559 · `const sp = a.spot, sm = sim.autoPlan.seam;` — 0.3.47: …and the site stops being "the seam". A closed job's spot stayed in
+- L560 · `const sp = a.spot, sm = sim.autoPlan.seam;` — 0.3.47: …and the site stops being "the seam". A closed job's spot stayed in
   autoPlan.seam, so the next free MINE flew back to wherever that job had
   been — found when a dropped vein strike sent ARIA 800,000 u across the
   system to a site that no longer had anything to do with anything.
-- L581 · `const ch = a.chain ? noteChainDone(a) : null;` — 0.3.21: a chain stage closes — the next one is posted, or the whole thing pays out
+- L582 · `const ch = a.chain ? noteChainDone(a) : null;` — 0.3.21: a chain stage closes — the next one is posted, or the whole thing pays out
 <!-- /note -->
 
 ### <a id="s-abandonContract"></a>`abandonContract(id)`
 
-function · **exported** · L603–608
+function · **exported** · L604–609
 
 - calls: [`settle`](#s-settle) · [`takeCargo`](../flight/ship.js.md#s-takeCargo) _js/flight/ship.js_
 - called by: [`startJob`](../aria/play.js.md#s-startJob) _js/aria/play.js_ · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ ×4 · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
@@ -959,7 +961,7 @@ function · **exported** · L603–608
 
 ### <a id="s-cargoOk"></a>`cargoOk(a)`
 
-function · L610–610
+function · L611–611
 
 - called by: [`deliverableAt`](#s-deliverableAt) ×3
 
@@ -969,7 +971,7 @@ a visit job with cargo (a wreck) needs both the flight and the plate
 
 ### <a id="s-deliverableAt"></a>`deliverableAt(stId=)`
 
-function · **exported** · L612–621
+function · **exported** · L613–622
 
 - calls: [`cargoOk`](#s-cargoOk) ×3
 - called by: [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ · [`deliverContracts`](#s-deliverContracts) · [`makeTradeOps.DELIVER`](../mission/tradeops.js.md#s-makeTradeOps-DELIVER) _js/mission/tradeops.js_ · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
@@ -977,12 +979,12 @@ function · **exported** · L612–621
 <!-- note:deliverableAt -->
 Contracts that can be closed at the docked port.
 
-- L619 · `return a.stationId === stId && a.progress >= 1;` — kill, escort, survey
+- L620 · `return a.stationId === stId && a.progress >= 1;` — kill, escort, survey
 <!-- /note -->
 
 ### <a id="s-owedCargo"></a>`owedCargo()`
 
-function · **exported** · L623–631
+function · **exported** · L624–632
 
 - called by: [`sellAllOre`](../sim/sim.js.md#s-sellAllOre) _js/sim/sim.js_
 
@@ -995,7 +997,7 @@ that ordered it. → { good: qty }
 
 ### <a id="s-jobForSite"></a>`jobForSite(siteId)`
 
-function · **exported** · L633–637
+function · **exported** · L634–638
 
 - called by: [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`makeTradeOps.DELIVER`](../mission/tradeops.js.md#s-makeTradeOps-DELIVER) _js/mission/tradeops.js_ ×2
 
@@ -1005,7 +1007,7 @@ function · **exported** · L633–637
 
 ### <a id="s-deliverContracts"></a>`deliverContracts(stId=)`
 
-function · **exported** · L639–654
+function · **exported** · L640–655
 
 - calls: [`deliverableAt`](#s-deliverableAt) · [`settle`](#s-settle) · [`deliver`](economy.js.md#s-deliver) _js/economy/economy.js_ · [`takeCargo`](../flight/ship.js.md#s-takeCargo) _js/flight/ship.js_ · [`bookHandling`](../station/dockwork.js.md#s-bookHandling) _js/station/dockwork.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ · [`makeTradeOps.DELIVER`](../mission/tradeops.js.md#s-makeTradeOps-DELIVER) _js/mission/tradeops.js_ · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
@@ -1013,13 +1015,13 @@ function · **exported** · L639–654
 <!-- note:deliverContracts -->
 Close everything deliverable here. Returns credits paid.
 
-- L643 · `if ((sim.ship.hold[a.good] ?? 0) < a.qty) continue;` — two contracts for one good settle off one hold: the second waits for its own cargo
-- L647 · `bookHandling(stId, "deliver", a.good, got, sim.ship.mods);` — 0.3.25: the crane, not the till
+- L644 · `if ((sim.ship.hold[a.good] ?? 0) < a.qty) continue;` — two contracts for one good settle off one hold: the second waits for its own cargo
+- L648 · `bookHandling(stId, "deliver", a.good, got, sim.ship.mods);` — 0.3.25: the crane, not the till
 <!-- /note -->
 
 ### <a id="s-noteKill"></a>`noteKill(vesselId)`
 
-function · **exported** · L656–658
+function · **exported** · L657–659
 
 - called by: [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_
 
@@ -1029,7 +1031,7 @@ A pirate died: any bounty on it is earned.
 
 ### <a id="s-noteDestroyed"></a>`noteDestroyed(n)`
 
-function · **exported** · L660–669
+function · **exported** · L661–670
 
 - called by: [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_
 
@@ -1039,7 +1041,7 @@ Anything you destroyed: a drone cull counts its drones. (sim.js calls this for e
 
 ### <a id="s-_d"></a>`_d(a, b)`
 
-function · L671–671
+function · L672–672
 
 - called by: [`tickContracts`](#s-tickContracts) ×2
 
@@ -1048,14 +1050,14 @@ function · L671–671
 
 ### <a id="s-_t"></a>`_t`
 
-const · L672–672
+const · L673–673
 
 <!-- note:_t -->
 <!-- /note -->
 
 ### <a id="s-visitRadius"></a>`visitRadius(t)`
 
-function · **exported** · L674–678
+function · **exported** · L675–679
 
 - calls: [`scanRadius`](../world/bodies.js.md#s-scanRadius) _js/world/bodies.js_
 - via [js/world/bodies.js](../world/bodies.js.md): `BODIES.find`
@@ -1070,9 +1072,9 @@ uncompletable before 0.3.22.
 
 ### <a id="s-tickContracts"></a>`tickContracts(dt)`
 
-function · **exported** · L680–710
+function · **exported** · L681–726
 
-- calls: [`_d`](#s-_d) ×2 · [`markTarget`](#s-markTarget) · [`settle`](#s-settle) · [`targetPos`](#s-targetPos) · [`visitRadius`](#s-visitRadius) · [`addCargo`](../flight/ship.js.md#s-addCargo) _js/flight/ship.js_ · [`takeCargo`](../flight/ship.js.md#s-takeCargo) _js/flight/ship.js_
+- calls: [`_d`](#s-_d) ×2 · [`markTarget`](#s-markTarget) · [`settle`](#s-settle) · [`targetPos`](#s-targetPos) · [`visitRadius`](#s-visitRadius) · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×2 · [`addCargo`](../flight/ship.js.md#s-addCargo) _js/flight/ship.js_ · [`takeCargo`](../flight/ship.js.md#s-takeCargo) _js/flight/ship.js_ · [`recoverSite`](../sim/salvage.js.md#s-recoverSite) _js/sim/salvage.js_
 - via [js/npc/flow.js](../npc/flow.js.md): `flow.find`
 - via [js/sim/sim.js](../sim/sim.js.md): `sim.scanned.has`
 - called by: [`stepWorld`](../sim/sim.js.md#s-stepWorld) _js/sim/sim.js_
@@ -1080,13 +1082,13 @@ function · **exported** · L680–710
 <!-- note:tickContracts -->
 Every tick: escorts on station, waypoints flown, surveys filed, deadlines.
 
-- L687 · `a.progress = Math.min(1, (sim.ship.hold[a.good] ?? 0) / a.qty);` — plate is plate: iron ore that came off a wreck counts once it is aboard
-- L699 · `if (a.grant && !a.granted) { const got = addCargo(sim.ship, a.grant.good, a.grant.qty); a.` — a recovered pod comes aboard at the site (what the hold has room for)
+- L689 · `a.progress = Math.min(1, (sim.ship.hold[a.good] ?? 0) / a.qty);` — plate is plate: iron ore that came off a wreck counts once it is aboard
+- L716 · `if (a.grant && !a.granted) { const got = addCargo(sim.ship, a.grant.good, a.grant.qty); a.` — a recovered pod comes aboard at the site (what the hold has room for)
 <!-- /note -->
 
 ### <a id="s-timeLeft"></a>`timeLeft(a)`
 
-function · **exported** · L712–712
+function · **exported** · L728–728
 
 - called by: [`playReport`](../aria/play.js.md#s-playReport) _js/aria/play.js_ ×2 · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ · [`mountBoard`](../console/panels/corp.js.md#s-mountBoard) _js/console/panels/corp.js_ · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
 
@@ -1095,7 +1097,7 @@ function · **exported** · L712–712
 
 ### <a id="s-jobStatus"></a>`jobStatus(a)`
 
-function · **exported** · L714–724
+function · **exported** · L730–741
 
 - calls: [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ · [`siteById`](sites.js.md#s-siteById) _js/economy/sites.js_
 - called by: [`playReport`](../aria/play.js.md#s-playReport) _js/aria/play.js_ · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
@@ -1106,7 +1108,7 @@ One line on what is left to do, for the in-hand list.
 
 ### <a id="s-resetContracts"></a>`resetContracts()`
 
-function · **exported** · L726–731
+function · **exported** · L743–748
 
 - calls: [`resetChains`](chains.js.md#s-resetChains) _js/economy/chains.js_ · [`closeSite`](sites.js.md#s-closeSite) _js/economy/sites.js_
 - called by: [`launchSim`](../sim/sim.js.md#s-launchSim) _js/sim/sim.js_
@@ -1116,7 +1118,7 @@ function · **exported** · L726–731
 
 ### <a id="s-wireContracts"></a>`wireContracts()`
 
-function · **exported** · L733–736
+function · **exported** · L750–753
 
 - calls: [`wireChains`](chains.js.md#s-wireChains) _js/economy/chains.js_
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_

@@ -200,7 +200,7 @@ export function addChunk(c) {
 }
 
 export function chunkMass(c) {
-  return Math.max(1, Math.round(Math.pow(c.r, 1.6) * 0.05));
+  return c.remainingMass ?? Math.max(1, Math.round(Math.pow(c.r, 1.6) * 0.05));
 }
 
 export function debrisCount() {

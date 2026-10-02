@@ -57,7 +57,7 @@ pass. Each arc re-audits its own careers when it starts.
   excluded from source control and static uploads. Their live files and the
   persistent Sol checkpoint are retained.
 - This is structural preparation. No new career verb, ARIA loop or balance
-  milestone is claimed. Salvage's Dead Hulls arc remains planned for 0.4.
+  milestone is claimed. The next main release, 0.3.84, starts the Salvage recovery loop.
 
 ## Order
 
@@ -72,19 +72,34 @@ and 0.3.82 repaired live-console and landscape panels. Hygiene, the shared-state
 cycle reduction, the remaining simulation clusters and render closure split are
 still pending; this slice does not claim those milestones are complete.
 
-| arc | name | careers | slices (one .PP each, in order) |
+Career work uses the main game version in `js/version.js`, CHANGELOG.md and
+PATCH notes. Arc names are themes, not separate version tracks. The former
+0.4–0.10 career assignments are retired; future release numbers are assigned
+when their scope is ready.
+
+| main release / order | theme | careers | work |
 |---|---|---|---|
-| **0.4** | Dead Hulls | Salvage | 0.4 kills and cataclysms leave persistent hulks · .01 cutting a hulk (the verb: plate, parts, black box) · .02 salvage rights, and who owned it yesterday · .03 ARIA salvage loop · .04 bench + smoke-salvage → **open** |
-| **0.5** | The Watch | Security | 0.5 picket wings you fly in (the verb) · .01 disable + board, into the brig · .02 security sites: nests and pirate anchorages · .03 tutorial branch · .04 ARIA combat loop with its thin-hull guard · .05 bench + smoke → **open** |
-| **0.6** | The Floor | Commerce, Logistics | 0.6 a port order book with post and fill (Commerce verb) · .01 bonded manifests on a clock (Logistics verb) · .02 convoys and cargo insurance · .03 trade and freight hull lines + defaults · .04 two tutorial branches · .05 ARIA · .06 bench + smokes → **open ×2** |
-| **0.7** | The Line | Manufacturing, Construction, Shipyard | 0.7 leased fab line, ore to parts (verb, from fabricate.js) · .01 orbital build sites, lift and set (Construction verb) · .02 yard slip, assemble and refit (Shipyard verb) · .03–.06 hulls, tutorials, ARIA, bench + smokes → **open ×3** |
-| **0.8** | Heat and Weather | Energy, Terraforming | 0.8 bunker fuel + port reactor service (Energy verb) · .01 atmoworks becomes projects over days · .02–.05 sites, hulls, tutorials, ARIA/bench/smoke → **open ×2** |
-| **0.9** | Charted | Research, Navigation | 0.9 anomalies: far scan → sample → paper (Research verb) · .01 lane charting beacon by beacon, and selling the chart (Navigation verb) · .02–.05 → **open ×2** |
-| **0.10** | The Town | Healthcare, Agriculture, Education, Communications | 0.10 sick bay: crew, settlers, pulled survivors · .01 hydroponic bay · .02 training crew and raising children into the rolls · .03 relay network + selling news · .04–.08 → **open ×4** |
+| **0.3.84** | **Dead Hulls: Recovery** | Salvage | Powered wreck/pod recovery at contract waypoints; capacity-safe partial collection; training from actual recovered material; tutorial guidance |
+| Next Salvage slices | Dead Hulls | Salvage | Persistent shared combat/cataclysm hulks; visible cutting into plate, parts and black boxes; ownership and salvage rights; ARIA recovery planning; Mining parity benchmark and browser smoke |
+| Then | The Watch | Security | Picket wings; disable and board; brig; nests; tutorial; ARIA; benchmark and smoke |
+| Then | The Floor | Commerce, Logistics | Order book; bonded manifests; convoys; insurance; hulls; tutorials; ARIA; benchmarks and smokes |
+| Then | The Line | Manufacturing, Construction, Shipyard | Leased fab lines; orbital builds; yard assembly and refit; complete the remaining loop checks |
+| Then | Heat and Weather | Energy, Terraforming | Reactor service and fuel; multi-day atmosphere projects; complete loop checks |
+| Then | Charted | Research, Navigation | Anomaly samples and papers; lane charting and chart sales; complete loop checks |
+| Then | The Town | Healthcare, Agriculture, Education, Communications | Sick bay; hydroponics; training and families; relays and news; complete loop checks |
+
+### 0.3.84 limits
+
+Recovery jobs now transfer their own finite cargo at the marked site, with SALVAGE
+and operations power required. Site progress survives leaving and returning during
+the active session. This release does not add contract persistence across reloads
+or shared persistent hulks. Existing saves and live Sol require no reset.
+Readiness stays planned: visible hull cutting, ARIA parity and browser smoke are
+not complete. All sixteen careers remain selectable.
 
 ## How to complete a career loop
 
-1. Build the missing gate items, one `.PP` per item.
+1. Build the missing gate items, in successive main-game releases.
 2. In `js/careers/status.js`, add the new item to that career's `has`. When all nine are
    there, set `state: "open"`.
 3. Update `test/careerstatus.test.mjs` to check the new readiness metadata while

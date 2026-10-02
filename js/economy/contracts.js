@@ -1,3 +1,4 @@
+import { recoverSite } from "../sim/salvage.js";
 import { logEvent, sim, sellPriceAt, currentShipId, addWaypointAt, addAnchoredWaypoint, removeWaypoint } from "../sim/sim.js";
 import { stations, stationById } from "../station/stations.js";
 import { corpOfStation, corpRelation, corps, adjustStanding, standingLabel } from "../corp/corps.js";
@@ -313,14 +314,14 @@ const KINDS = {
     const spot = jobSpot(st, rnd, { spread: 1.5, r: 1200 });
     if (!spot) return null;
     const qty = sized(fit, 0.05 + rnd() * 0.08, 4, "iron_ore");
-    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the wreck in ${spot.name}`, dwell: 20 }], good: "iron_ore", qty, salvage: true, pay: Math.round((600 + qty * 20) * t.pay), title: `Recover a wreck in ${spot.name}`, text: `A hull went down in ${spotLine(spot, st)}. Fly the site, hold twenty seconds for the insurers' scan, and bring back ${qty} plate.` };
+    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the wreck in ${spot.name}`, dwell: 20 }], good: "iron_ore", qty, salvage: true, recovery: true, pay: Math.round((600 + qty * 20) * t.pay), title: `Recover a wreck in ${spot.name}`, text: `A hull went down in ${spotLine(spot, st)}. Fly the marked site, enable SALVAGE in SHIP systems, and hold position while the recovery rig strips ${qty} plate. Unload and return if your hold fills, then deliver the plate here.` };
   },
   pod(st, rnd, t, fit) {
     const spot = jobSpot(st, rnd, { spread: 1.6, r: 900 });
     if (!spot) return null;
     const id = pickOf(rnd, ["steel_plate", "wiring", "motor", "ration", "medkit", "battery", "polymer", "glass"]);
     const qty = Math.max(2, qtyFor(fit, 0.04 + rnd() * 0.08, 2, id, t));
-    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the pod in ${spot.name}`, dwell: 12 }], grant: { good: id, qty }, good: id, qty, pay: Math.round((400 + qty * baseValue(id) * 0.15) * t.pay), title: `Recover a cargo pod — ${goodName(id)} in ${spot.name}`, text: `A hauler lost a pod of ${qty} ${goodName(id)} in ${spotLine(spot, st)}. Fly to it, hold twelve seconds for the tractor, and bring it here. The owner pays the finder.` };
+    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the pod in ${spot.name}`, dwell: 12 }], grant: { good: id, qty }, recovery: true, good: id, qty, pay: Math.round((400 + qty * baseValue(id) * 0.15) * t.pay), title: `Recover a cargo pod — ${goodName(id)} in ${spot.name}`, text: `A hauler lost a pod of ${qty} ${goodName(id)} in ${spotLine(spot, st)}. Fly to it, enable SALVAGE with operations power, and recover it into your hold. Unload and return if needed, then bring the full cargo here. The owner pays the finder.` };
   },
   materials(st, rnd, t, fit) {
     const pool = ["steel", "stainless", "ceramic", "glass", "polymer", "bronze", "superalloy", "aluminium", "copper", "titanium"];
@@ -679,6 +680,7 @@ export function visitRadius(t) {
 
 export function tickContracts(dt) {
   for (const a of [...contracts.active]) {
+    if (sim.time > a.deadline) { if (a.mech === "haul" && a.consigned) takeCargo(sim.ship, a.good, a.consigned); settle(a, false, "expired"); continue; }
     if (a.type === "escort") {
       const boat = flow.find((n) => n.id === a.boatId);
       if (boat?.visible && _d(boat, sim.ship.pos) < 900) { a.onStation = (a.onStation ?? 0) + dt; a.progress = Math.min(1, a.onStation / a.need); }
@@ -694,6 +696,21 @@ export function tickContracts(dt) {
       const T = a.targets[a.leg ?? 0];
       const p = T && targetPos(T, sim.time, _t);
       if (p && _d(p, sim.ship.pos) < visitRadius(T)) {
+        if (a.recovery) {
+          const result = recoverSite(a, sim.ship, dt);
+          a.recoveryNote = result.blocked ?? "Recovering cargo";
+          if (result.recovered > 0) {
+            work("salvage", result.recovered * 0.5);
+            work("heavyOps", result.recovered * 0.2);
+          }
+          if (result.done) {
+            a.progress = 1;
+            a.leg = a.targets.length;
+            a.granted = a.recovered;
+            sim.notice = `${a.title}: cargo recovered — report to ${a.stationName}.`;
+          }
+          continue;
+        }
         a.dwell = (a.dwell ?? 0) + dt;
         if (a.dwell >= (T.dwell ?? 10)) {
           if (a.grant && !a.granted) { const got = addCargo(sim.ship, a.grant.good, a.grant.qty); a.granted = got; }
@@ -705,7 +722,6 @@ export function tickContracts(dt) {
         }
       } else if (a.dwell) a.dwell = Math.max(0, a.dwell - dt * 0.5);
     }
-    if (sim.time > a.deadline) { if (a.mech === "haul" && a.consigned) takeCargo(sim.ship, a.good, a.consigned); settle(a, false, "expired"); }
   }
 }
 
@@ -713,6 +729,7 @@ export function timeLeft(a) { return Math.max(0, a.deadline - sim.time); }
 
 export function jobStatus(a) {
   const mech = a.mech ?? "deliver";
+  if (a.recovery && a.progress < 1) return `${Math.floor(a.recovered ?? 0)}/${a.grant?.qty ?? a.qty} recovered · ${a.recoveryNote ?? "Fly to the waypoint; enable SALVAGE"}`;
   if (mech === "visit") return a.progress >= 1 ? `report to ${a.stationName}` : `${a.targets[a.leg]?.name ?? "target"} (${(a.leg ?? 0) + 1}/${a.targets.length})${a.dwell ? ` · holding ${Math.round(a.dwell)}s/${a.targets[a.leg]?.dwell ?? 10}s` : ""}`;
   if (mech === "survey") return a.progress >= 1 ? `report to ${a.stationName}` : `scan ${a.bodyName}`;
   if (mech === "kill") return a.progress >= 1 ? `pays at ${a.stationName}` : a.killKind === "rogue" ? `${a.kills ?? 0}/${a.count} drones` : `hunt ${a.markName}`;
