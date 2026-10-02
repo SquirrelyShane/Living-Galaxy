@@ -1,12 +1,3 @@
-# 0.3.82 — Live console and landscape panels
-
-- Console uses the normal flight simulation while open; explicit HOLD remains available.
-- Console becomes a nonmodal panel with no full-screen input-blocking backdrop.
-- Landscape system map reserves a full-height plotting area beside scrollable details.
-- Landscape Hold uses a compact header and scrollable inventory; toolbar label stays within its button.
-- Retains the existing portrait Hold and Map layouts and previous HUD repairs.
-- Release deployment requests a fresh Sol; the installer archives the previous live state.
-
 # Changelog
 
 Living Galaxy — Ad Astrum. Newest first.
@@ -18,6 +9,30 @@ are different zips and never the same one twice.
 What the game *is* and how to work on it lives in [`README.md`](README.md).
 
 ---
+
+## 0.3.83 — 2026-10-02
+
+### Career groundwork and project cleanup
+
+- Updated the career roadmap to reflect actual releases and remaining milestones.
+- Extracted career defaults, training and payroll orchestration into `js/sim/career.js`.
+- Removed the empty controls-test module, renderer import and redundant preload.
+- Untracked bundled runtime ledgers/logs while retaining local copies and persistent Sol state.
+- Expanded Git/static-upload exclusions for backend files, dependencies, caches and archives.
+
+All sixteen careers remain selectable. No new career gameplay or readiness gate is added;
+Salvage's Dead Hulls arc remains planned for 0.4. See [PATCH-0.3.83.md](PATCH-0.3.83.md)
+for the short website notes and [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md)
+for cleanup and deployment details.
+
+## 0.3.82 — Live console and landscape panels
+
+- Console uses the normal flight simulation while open; explicit HOLD remains available.
+- Console becomes a nonmodal panel with no full-screen input-blocking backdrop.
+- Landscape system map reserves a full-height plotting area beside scrollable details.
+- Landscape Hold uses a compact header and scrollable inventory; toolbar label stays within its button.
+- Retains the existing portrait Hold and Map layouts and previous HUD repairs.
+- Release deployment requests a fresh Sol; the installer archives the previous live state.
 
 ## 0.3.81 — 2026-09-30
 

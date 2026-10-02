@@ -1,4 +1,3 @@
-import "../core/controls-test.js";
 import * as THREE from "../../vendor/three.module.min.js";
 import {
   BEACONS,

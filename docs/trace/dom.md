@@ -4,7 +4,7 @@
 
 Element ids and selectors the code reaches for — the contract with index.html. `$()` is treated as getElementById.
 
-284 distinct values across 41 files.
+285 distinct values across 41 files.
 
 ### `.cb-empty`
 
@@ -65,8 +65,8 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `.st`
 
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L886
-- dom.query — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1114
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L887
+- dom.query — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1115
 
 ### `.start-card`
 
@@ -74,8 +74,8 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `.sw[data-sys]`
 
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L740
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L885
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L741
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L886
 
 ### `.sw[data-sys="${…}"]`
 
@@ -118,7 +118,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.id — [js/ui/chatbox.js › $](../files/js/ui/chatbox.js.md#s-S) L10
 - dom.id — [js/ui/creation.js › $](../files/js/ui/creation.js.md#s-S) L21
 - dom.id — [js/ui/hud.js › stackLeftColumn](../files/js/ui/hud.js.md#s-stackLeftColumn) L176
-- dom.id — [js/ui/hud.js › $](../files/js/ui/hud.js.md#s-S) L237
+- dom.id — [js/ui/hud.js › $](../files/js/ui/hud.js.md#s-S) L238
 
 ### `‹PUCK_AVOID›`
 
@@ -127,7 +127,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 ### `‹sel›`
 
 - dom.query — [js/ui/dockboot.js › mountDockBoot>$](../files/js/ui/dockboot.js.md#s-mountDockBoot-S) L44
-- dom.query — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L225
+- dom.query — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L226
 - dom.query — [js/ui/tutorial.js › setHilite](../files/js/ui/tutorial.js.md#s-setHilite) L308
 
 ### `‹tag›`
@@ -178,7 +178,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-rcs]`
 
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L694
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L695
 
 ### `[data-wp]`
 
@@ -252,7 +252,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `#thr-presets [data-thr]`
 
-- dom.query — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L370
+- dom.query — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L371
 
 ### `#tutor-act`
 
@@ -300,7 +300,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `alarms`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1014
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1015
 
 ### `aux-atmo`
 
@@ -367,7 +367,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L426
 - dom.create — [js/ui/charts.js › sparkline](../files/js/ui/charts.js.md#s-sparkline) L23
-- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L820
+- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L821
 
 ### `boot-fail`
 
@@ -375,96 +375,96 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `btn-aria`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L791
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L958
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L792
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L959
 
 ### `btn-brake`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L707
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L708
 
 ### `btn-cam`
 
 - dom.id — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L325
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L760
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L957
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L761
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L958
 
 ### `btn-con`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L759
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1041
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L760
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1042
 
 ### `btn-continue`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L572
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L573
 
 ### `btn-create`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L573
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L574
 
 ### `btn-full`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L797
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L798
 
 ### `btn-hold`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L787
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L950
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L788
 - dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L951
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L952
 
 ### `btn-map`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L785
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L786
 
 ### `btn-map-close`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L800
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L801
 
 ### `btn-menu`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L778
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L779
 
 ### `btn-mix-reset`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L828
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L829
 
 ### `btn-mute`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L801
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1040
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L802
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1041
 
 ### `btn-pause`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L763
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L764
 
 ### `btn-plock`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L757
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L758
 
 ### `btn-resume`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L767
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L768
 
 ### `btn-survey`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L756
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L757
 
 ### `btn-tutor`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L768
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L769
 
 ### `btn-warp`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L758
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L900
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L759
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L901
 
 ### `btn-watch`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L772
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L947
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L773
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L948
 
 ### `build-line`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L554
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L555
 
 ### `button`
 
@@ -475,18 +475,18 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L403
 - dom.query — [js/ui/creation.js › mountCreation>setStep](../files/js/ui/creation.js.md#s-mountCreation-setStep) L42
 - dom.query — [js/ui/creation.js › mountCreation>render](../files/js/ui/creation.js.md#s-mountCreation-render) L346
-- dom.query — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L724
+- dom.query — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L725
 - dom.create — [js/ui/map.js › mountMap>openMenu](../files/js/ui/map.js.md#s-mountMap-openMenu) L329
 - dom.create — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L371
 - dom.create — [js/ui/map.js › mountMap>drawDirectory](../files/js/ui/map.js.md#s-mountMap-drawDirectory) L458
 
 ### `button, .btn, .tbtn, .pick, .chip`
 
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L840
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L841
 
 ### `button[data-page]`
 
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L729
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L730
 
 ### `button[data-panel]`
 
@@ -512,15 +512,15 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L388
 - dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L390
 - dom.id — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L396
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L494
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L557
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L591
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L609
-- dom.id — [js/ui/hud.js › mountHud>setMode.onFly](../files/js/ui/hud.js.md#s-mountHud-setMode-onFly) L638
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L495
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L558
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L592
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L610
+- dom.id — [js/ui/hud.js › mountHud>setMode.onFly](../files/js/ui/hud.js.md#s-mountHud-setMode-onFly) L639
 
 ### `canopy`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L897
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L898
 
 ### `canvas`
 
@@ -664,20 +664,20 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `dash`
 
-- dom.id — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L189
+- dom.id — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L190
 
 ### `dash-page-${…}`
 
-- dom.id — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L723
+- dom.id — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L724
 
 ### `dash-page-name`
 
-- dom.id — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L727
+- dom.id — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L728
 
 ### `dash-tabs`
 
-- dom.id — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L724
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L729
+- dom.id — [js/ui/hud.js › mountHud>setPage](../files/js/ui/hud.js.md#s-mountHud-setPage) L725
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L730
 
 ### `dir-chips`
 
@@ -696,8 +696,8 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.create — [js/ui/glyphs.js › glyphBar](../files/js/ui/glyphs.js.md#s-glyphBar) L59
 - dom.create — [js/ui/glyphs.js › compileBlock](../files/js/ui/glyphs.js.md#s-compileBlock) L122
 - dom.create — [js/ui/glyphs.js › compileBlock](../files/js/ui/glyphs.js.md#s-compileBlock) L132
-- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L812
-- dom.create — [js/ui/hud.js › mountHud>rowEl](../files/js/ui/hud.js.md#s-mountHud-rowEl) L905
+- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L813
+- dom.create — [js/ui/hud.js › mountHud>rowEl](../files/js/ui/hud.js.md#s-mountHud-rowEl) L906
 - dom.create — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L254
 - dom.create — [js/ui/map.js › mountMap>drawDirectory](../files/js/ui/map.js.md#s-mountMap-drawDirectory) L451
 - dom.create — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L489
@@ -705,95 +705,95 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `g-cgo`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1006
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1007
 
 ### `g-cgo-btn`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L788
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L789
 
 ### `g-cgo-n`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1006
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1007
 
 ### `g-hull`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1003
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1004
 
 ### `g-hull-n`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1003
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1004
 
 ### `g-o2`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1005
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1006
 
 ### `g-o2-n`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1005
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1006
 
 ### `g-pwr`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1000
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1001
 
 ### `g-pwr-n`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1000
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1001
 
 ### `g-shld`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1004
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1005
 
 ### `g-shld-n`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1004
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1005
 
 ### `gauges`
 
-- dom.id — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L189
+- dom.id — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L190
 
 ### `hangar`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L608
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L609
 
 ### `haz-text`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L976
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L977
 
 ### `hazline`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L970
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L971
 
 ### `heat-wash`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1173
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1174
 
 ### `hold`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L790
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L949
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L791
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L950
 
 ### `hold-body`
 
-- dom.id — [js/ui/hud.js › paintHold](../files/js/ui/hud.js.md#s-paintHold) L466
+- dom.id — [js/ui/hud.js › paintHold](../files/js/ui/hud.js.md#s-paintHold) L467
 
 ### `hold-close`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L789
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L790
 
 ### `hud`
 
 - dom.id — [js/ui/chatbox.js › setSize](../files/js/ui/chatbox.js.md#s-setSize) L48
-- dom.id — [js/ui/hud.js › mountHud>paintClock](../files/js/ui/hud.js.md#s-mountHud-paintClock) L926
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L944
+- dom.id — [js/ui/hud.js › mountHud>paintClock](../files/js/ui/hud.js.md#s-mountHud-paintClock) L927
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L945
 - dom.id — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L266
 
 ### `hud-clock`
 
-- dom.id — [js/ui/hud.js › mountHud>paintClock](../files/js/ui/hud.js.md#s-mountHud-paintClock) L921
+- dom.id — [js/ui/hud.js › mountHud>paintClock](../files/js/ui/hud.js.md#s-mountHud-paintClock) L922
 
 ### `hud-sky`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L962
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L963
 
 ### `i`
 
@@ -801,23 +801,23 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `i-alt`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L967
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L968
 
 ### `i-cls`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L966
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L967
 
 ### `i-g`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L997
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L998
 
 ### `i-vel`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L965
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L966
 
 ### `impact-flash`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L901
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L902
 
 ### `in-conn`
 
@@ -849,24 +849,28 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.create — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L79
 - dom.create — [js/ui/creation.js › mountCreation>renderSky](../files/js/ui/creation.js.md#s-mountCreation-renderSky) L280
 - dom.create — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L380
-- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L816
+- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L817
 
 ### `instruments`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L998
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L999
 
 ### `label`
 
-- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L609
-- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L814
+- dom.query — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L610
+- dom.create — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L815
 
 ### `labels`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1165
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1166
 
 ### `li`
 
 - dom.create — [js/ui/dockboot.js › mountDockBoot>build](../files/js/ui/dockboot.js.md#s-mountDockBoot-build) L66
+
+### `link[href*="cockpit.css"]`
+
+- dom.query — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L189
 
 ### `load-fill`
 
@@ -878,23 +882,23 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `lock-fill`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1126
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1127
 
 ### `lock-name`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1021
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1022
 
 ### `lock-text`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1127
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1128
 
 ### `lockbar`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1124
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1125
 
 ### `map`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L948
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L949
 
 ### `map-dir`
 
@@ -934,93 +938,93 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `markers`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L898
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L899
 
 ### `mix-rows`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L809
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L810
 
 ### `mode-mining`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L744
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1162
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L745
 - dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1163
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1164
 
 ### `mode-mining-st`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1161
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1162
 
 ### `mode-turret`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L743
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1122
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L744
 - dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1123
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1124
 
 ### `mode-turret-st`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1121
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1122
 
 ### `notice`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1022
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1023
 
 ### `notice-card`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L895
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L899
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L896
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L900
 
 ### `op-claim`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L750
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1148
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L751
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1149
 
 ### `op-claim-st`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1147
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1148
 
 ### `op-dock`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L749
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1146
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L750
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1147
 
 ### `op-dock-st`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1137
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1138
 
 ### `op-level`
 
 - dom.id — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L323
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L747
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L748
 
 ### `op-pulse`
 
 - dom.id — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L331
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L746
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1134
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L747
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1135
 
 ### `op-pulse-st`
 
 - dom.id — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L359
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1133
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1134
 
 ### `op-threat`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L754
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1158
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L755
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1159
 
 ### `op-threat-st`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1151
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1152
 
 ### `op-time`
 
 - dom.id — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L328
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L748
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1149
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L749
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1150
 
 ### `op-time-st`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1135
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1136
 
 ### `optgroup`
 
@@ -1032,31 +1036,31 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `pause`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L946
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L947
 
 ### `resp-text`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L989
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L990
 
 ### `respline`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L981
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L982
 
 ### `route-card`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1065
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1066
 
 ### `route-eta`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1076
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1077
 
 ### `route-hazards`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1077
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1078
 
 ### `route-target`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1075
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1076
 
 ### `s`
 
@@ -1173,7 +1177,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `sky-glare`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L902
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L903
 
 ### `small`
 
@@ -1193,15 +1197,15 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `start`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L943
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L944
 
 ### `stat-probes`
 
-- dom.id — [js/ui/hud.js › mountHud>refreshPreview](../files/js/ui/hud.js.md#s-mountHud-refreshPreview) L513
+- dom.id — [js/ui/hud.js › mountHud>refreshPreview](../files/js/ui/hud.js.md#s-mountHud-refreshPreview) L514
 
 ### `stat-survey`
 
-- dom.id — [js/ui/hud.js › mountHud>refreshPreview](../files/js/ui/hud.js.md#s-mountHud-refreshPreview) L512
+- dom.id — [js/ui/hud.js › mountHud>refreshPreview](../files/js/ui/hud.js.md#s-mountHud-refreshPreview) L513
 
 ### `station-deck`
 
@@ -1210,28 +1214,28 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `status`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1038
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1039
 
 ### `stick`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L674
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L675
 
 ### `stick-knob`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L675
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L676
 
 ### `sw-cut`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L735
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1109
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L736
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1110
 
 ### `sys-line`
 
-- dom.id — [js/ui/hud.js › mountHud>refreshPreview](../files/js/ui/hud.js.md#s-mountHud-refreshPreview) L511
+- dom.id — [js/ui/hud.js › mountHud>refreshPreview](../files/js/ui/hud.js.md#s-mountHud-refreshPreview) L512
 
 ### `sys-strip`
 
-- dom.id — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L189
+- dom.id — [js/ui/hud.js › stackRightColumn](../files/js/ui/hud.js.md#s-stackRightColumn) L190
 
 ### `t-alt`
 
@@ -1251,31 +1255,31 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `thr-draw`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1096
 - dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1097
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1098
 
 ### `thr-fill`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L716
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L717
 
 ### `thr-num`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1095
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1096
 
 ### `thr-thumb`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L716
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L717
 
 ### `thr-track`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L716
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1094
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L717
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1095
 
 ### `toast`
 
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1176
 - dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1177
-- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1179
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1178
+- dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L1180
 
 ### `view`
 
@@ -1283,12 +1287,12 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `warp-fill`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L910
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L911
 
 ### `warp-flash`
 
-- dom.id — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1370
+- dom.id — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1369
 
 ### `warp-state`
 
-- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L911
+- dom.id — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L912

@@ -202,6 +202,9 @@ cmd_ship() {
   cd "$REPO"
   git switch -q "update/$to" 2>/dev/null || stop "no branch update/$to — apply it first"
   at "$to" || stop "update/$to is at $(now), not $to"
+  if [ -f tools/clean-project.py ]; then
+    python3 tools/clean-project.py . --apply || stop "project cleanup failed — review the branch before shipping"
+  fi
   git add -A
   if git diff --cached --quiet; then say "nothing new to commit on update/$to"
   else git commit -q -m "Living Galaxy $to"; fi

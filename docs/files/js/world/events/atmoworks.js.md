@@ -175,7 +175,6 @@ function · **exported** · L70–112
 
 - calls: [`adjustStanding`](../../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ · [`work`](../../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×2 · [`logEvent`](../../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ ×2 · [`bandFromK`](../bodies.js.md#s-bandFromK) _js/world/bodies.js_ ×2 · [`bodyTempK`](../bodies.js.md#s-bodyTempK) _js/world/bodies.js_ ×3 · [`atmoFit`](#s-atmoFit) · [`atmoTarget`](#s-atmoTarget)
 - via [js/sim/sim.js](../../sim/sim.js.md): `sim.terraBonds.has`
-- called by: [`stepCareer`](../../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:stepAtmoWorks -->
 Called from the sim tick (sim seconds).

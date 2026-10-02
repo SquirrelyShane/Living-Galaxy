@@ -23,7 +23,7 @@ items track planned work and do not gate access.
 | `bench` | `aria-bench` cr/min within ±30% of Mining | baseline |
 | `smoke` | A browser smoke that runs the whole loop | smoke-mining |
 
-## Audit at 0.3.80
+## Baseline audit at 0.3.80 (retained for 0.3.83)
 
 | career | has | missing | foundation already in the tree |
 |---|---|---|---|
@@ -47,11 +47,30 @@ items track planned work and do not gate access.
 The "has" column is my read of the code as of 0.3.80, not measured play. Treat it as a first
 pass. Each arc re-audits its own careers when it starts.
 
+## 0.3.83 project state
+
+- All sixteen careers remain available; readiness metadata does not restrict access.
+- Career defaults and the career tick now live in `js/sim/career.js`. The
+  public `sim.js` facade and training/payroll behavior are retained.
+- The empty controls-test module, renderer import and preload are removed.
+- Runtime CRADLE/GDB ledgers, logs, local archives and generated caches are
+  excluded from source control and static uploads. Their live files and the
+  persistent Sol checkpoint are retained.
+- This is structural preparation. No new career verb, ARIA loop or balance
+  milestone is claimed. Salvage's Dead Hulls arc remains planned for 0.4.
+
 ## Order
 
-Careers are ordered by how much they already have, cheapest win first. The reorg line lands
-before any of this: 0.3.81 hygiene, 0.3.82 import cycles, and 0.3.83+ the `sim.js` split. The
-split pulls the career cluster out of `sim.js`, and every arc below edits that cluster.
+Careers are ordered by how much they already have, cheapest win first. The first reorganization slice lands in 0.3.83: `js/sim/career.js` owns
+career defaults and the career tick, with explicit dependencies supplied by `sim.js`.
+Existing imports of `applyCareerDefaults` continue through the simulation facade.
+Payroll, training, crew updates, persistence timing and all sixteen career choices
+retain their existing behavior. Future career arcs extend this cluster.
+
+The earlier release assignments were superseded: 0.3.81 restored career access
+and 0.3.82 repaired live-console and landscape panels. Hygiene, the shared-state
+cycle reduction, the remaining simulation clusters and render closure split are
+still pending; this slice does not claim those milestones are complete.
 
 | arc | name | careers | slices (one .PP each, in order) |
 |---|---|---|---|

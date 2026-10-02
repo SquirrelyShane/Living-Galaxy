@@ -159,7 +159,6 @@ Hull points a second the fitted drone welds, 0 when none is fitted.
 function · **exported** · L59–81
 
 - calls: [`droneRate`](#s-droneRate) · [`hullMaxOf`](#s-hullMaxOf) ×2 · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:tickPatchDrone -->
 Called from the sim tick. Decides whether the drone is out, and bills the bus

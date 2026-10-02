@@ -111,7 +111,7 @@ function · **exported** · L30–33
 
 function · **exported** · L35–41
 
-- called by: [`stepShip`](../sim/sim.js.md#s-stepShip) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
+- called by: [`stepShip`](../sim/sim.js.md#s-stepShip) _js/sim/sim.js_
 
 <!-- note:consumeLook -->
 <!-- /note -->

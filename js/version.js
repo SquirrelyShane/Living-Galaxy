@@ -1,6 +1,6 @@
 export const NAME = "Living Galaxy";
 export const SUBTITLE = "Ad Astrum";
-export const VERSION = "0.3.82";
+export const VERSION = "0.3.83";
 
 export const FULL_NAME = `${NAME} — ${SUBTITLE}`;
 

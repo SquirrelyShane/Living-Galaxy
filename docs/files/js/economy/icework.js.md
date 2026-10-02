@@ -153,7 +153,6 @@ function · **exported** · L64–106
 
 - calls: [`iceworkFit`](#s-iceworkFit) · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_ ×2 · [`addCargo`](../flight/ship.js.md#s-addCargo) _js/flight/ship.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_
 - via [js/economy/materials.js](materials.js.md): `goodName.toUpperCase`
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:stepIcework -->
 Called from the sim tick (sim seconds).

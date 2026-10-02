@@ -104,7 +104,7 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `lgaa.attract`
 
-- storage.get — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L171
+- storage.get — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L170
 
 ### `lgaa.dockcine`
 
@@ -121,4 +121,4 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `lgaa.rocks`
 
-- storage.get — [js/render/engine.js › mountGame>rockQuality](../files/js/render/engine.js.md#s-mountGame-rockQuality) L1515
+- storage.get — [js/render/engine.js › mountGame>rockQuality](../files/js/render/engine.js.md#s-mountGame-rockQuality) L1514

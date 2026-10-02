@@ -317,7 +317,6 @@ Applies race traits to a fresh ship. Called once, at launch.
 function · **exported** · L178–185
 
 - calls: [`traitsOf`](../crew/races.js.md#s-traitsOf) _js/crew/races.js_
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:syncMods -->
 Called by the sim each tick: keeps the hull's modifier bag and hold in step with the pilot.
@@ -348,7 +347,7 @@ function · **exported** · L193–195
 function · **exported** · L197–208
 
 - calls: [`trainSkill`](../careers/careerEngine.js.md#s-trainSkill) _js/careers/careerEngine.js_
-- called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ ×2 · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ ×2 · [`finishDock`](../sim/sim.js.md#s-finishDock) _js/sim/sim.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ ×4 · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_ ×13 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_ ×2 · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_ ×3 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ ×2 · [`warpDropout`](../sim/sim.js.md#s-warpDropout) _js/sim/sim.js_ · [`stepAtmoWorks`](../world/events/atmoworks.js.md#s-stepAtmoWorks) _js/world/events/atmoworks.js_ ×2
+- called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ ×2 · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ ×2 · [`finishDock`](../sim/sim.js.md#s-finishDock) _js/sim/sim.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ ×4 · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_ ×2 · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_ ×3 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ ×2 · [`warpDropout`](../sim/sim.js.md#s-warpDropout) _js/sim/sim.js_ · [`stepAtmoWorks`](../world/events/atmoworks.js.md#s-stepAtmoWorks) _js/world/events/atmoworks.js_ ×2
 
 <!-- note:work -->
 ---- skill drip ----------------------------------------------------------
@@ -381,7 +380,6 @@ const · **exported** · L211–211
 function · **exported** · L213–227
 
 - calls: [`tickCycle`](../careers/careerEngine.js.md#s-tickCycle) _js/careers/careerEngine.js_
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:serveTime -->
 Time in grade. Ranks want cycles as well as skill. A cycle only trains if
@@ -395,8 +393,6 @@ half pace. Idling in the dark serves time and pays, and teaches nothing.
 
 function · **exported** · L229–234
 
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
-
 <!-- note:takePayout -->
 Drains earned scrip; the sim credits it to the ship.
 
@@ -408,7 +404,7 @@ Drains earned scrip; the sim credits it to the ship.
 function · **exported** · L236–256
 
 - calls: [`promotionCheck`](../careers/careerEngine.js.md#s-promotionCheck) _js/careers/careerEngine.js_ · [`getComplex`](../careers/complexes.js.md#s-getComplex) _js/careers/complexes.js_
-- called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_ · [`issuedHullId`](../sim/sim.js.md#s-issuedHullId) _js/sim/sim.js_ · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_ · [`PANELS.shipyard`](../station/stationdeck.js.md#s-PANELS-shipyard) _js/station/stationdeck.js_
+- called by: [`mountPilot`](../console/panels/corp.js.md#s-mountPilot) _js/console/panels/corp.js_ · [`issuedHullId`](../sim/sim.js.md#s-issuedHullId) _js/sim/sim.js_ · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`PANELS.shipyard`](../station/stationdeck.js.md#s-PANELS-shipyard) _js/station/stationdeck.js_
 
 <!-- note:rankStatus -->
 ---- rank ----------------------------------------------------------------

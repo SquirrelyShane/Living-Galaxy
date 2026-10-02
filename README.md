@@ -1,14 +1,6 @@
-# 0.3.64 — persistent Sol sync fix
-
-Apply this changed-files-only patch over 0.3.63. See [PATCH-0.3.64.md](PATCH-0.3.64.md) for deployment and tests.
-
-# Persistent Sol update — 0.3.63
-
-Read [PERSISTENT-SOL.md](PERSISTENT-SOL.md) to install the dedicated Node host and matching website 0.2.3. This package updates your supplied 0.3.62 source.
-
 # Living Galaxy — Ad Astrum
 
-**Version 0.3**
+**Version 0.3.83**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -22,6 +14,10 @@ on it. What changed between releases lives in
 [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
+
+Current patch: [0.3.83](PATCH-0.3.83.md). Career roadmap:
+[docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Project housekeeping:
+[docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
 
 ## Contents
 

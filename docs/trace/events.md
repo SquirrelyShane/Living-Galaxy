@@ -28,7 +28,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `‹paint›`
 
-- bus.on on `store` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L1185
+- bus.on on `store` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L1186
 
 ### `‹rig›`
 
@@ -132,40 +132,40 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `b` → `fn` — [js/ui/hangar.js › mountHangar>btn](../files/js/ui/hangar.js.md#s-mountHangar-btn) L27
 - event.listen on `sell` → `(inline)` — [js/ui/holdview.js › renderHold](../files/js/ui/holdview.js.md#s-renderHold) L113
 - event.listen on `drop` → `(inline)` — [js/ui/holdview.js › renderHold](../files/js/ui/holdview.js.md#s-renderHold) L118
-- event.listen on `b` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L371
-- event.listen on `contBtn` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L587
-- event.listen on `createBtn` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L597
-- event.listen on `b` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L731
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L735
-- event.listen on `el` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L741
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L743
+- event.listen on `b` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L372
+- event.listen on `contBtn` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L588
+- event.listen on `createBtn` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L598
+- event.listen on `b` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L732
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L736
+- event.listen on `el` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L742
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L744
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L746
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L745
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L747
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L748
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L749
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L750
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L754
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L756
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L751
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L755
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L757
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L758
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L759
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L760
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L763
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L767
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L761
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L764
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L768
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L772
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L778
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L785
-- event.listen on `$()` → `toggleHold` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L787
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L769
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L773
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L779
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L786
 - event.listen on `$()` → `toggleHold` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L788
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L789
+- event.listen on `$()` → `toggleHold` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L789
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L790
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L791
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L800
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L792
 - event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L801
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L828
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L895
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L802
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L829
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L896
 - event.listen on `menu.querySelector()` → `closeMenu` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L262
 - event.listen on `b` → `(inline)` — [js/ui/map.js › mountMap>openMenu](../files/js/ui/map.js.md#s-mountMap-openMenu) L333
 - event.listen on `b` → `(inline)` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L374
@@ -201,7 +201,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `dblclick`
 
-- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1419
+- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1418
 
 ### `error`
 
@@ -222,8 +222,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `input` → `(inline)` — [js/console/panels/crew-gdb.js › mountGdb](../files/js/console/panels/crew-gdb.js.md#s-mountGdb) L72
 - event.listen on `f` → `(inline)` — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L389
 - event.dispatch on `c` — [js/ui/creation.js › mountCreation.show](../files/js/ui/creation.js.md#s-mountCreation-show) L392
-- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L557
-- event.listen on `r` → `(inline)` — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L822
+- event.listen on `$()` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L558
+- event.listen on `r` → `(inline)` — [js/ui/hud.js › mountHud>paintRow](../files/js/ui/hud.js.md#s-mountHud-paintRow) L823
 
 ### `keydown`
 
@@ -245,7 +245,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 ### `lg-account`
 
 - event.dispatch on `globalThis.document` — [js/net/account.js › emitReady](../files/js/net/account.js.md#s-emitReady) L438
-- event.listen on `globalThis.document` → `onAccount` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L668
+- event.listen on `globalThis.document` → `onAccount` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L669
 
 ### `line`
 
@@ -276,7 +276,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `orientationchange`
 
-- event.listen on `window` → `go` — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L221
+- event.listen on `window` → `go` — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L222
 
 ### `pagehide`
 
@@ -287,12 +287,12 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 ### `pointercancel`
 
 - event.listen on `input` → `release` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L100
-- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1508
-- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2708
+- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1507
+- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2707
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L268
-- event.listen on `el` → `end` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L320
-- event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L339
-- event.listen on `track` → `end` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L373
+- event.listen on `el` → `end` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L321
+- event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L340
+- event.listen on `track` → `end` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L374
 - event.listen on `svg` → `release` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L197
 
 ### `pointerdown`
@@ -301,17 +301,17 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `input` → `(inline)` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L93
 - event.listen on `DOC` → `onPointerDown` — [js/flight/recorder.js › wireRecorder](../files/js/flight/recorder.js.md#s-wireRecorder) L222
 - event.listen on `interior.canvas` → `(inline)` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L428
-- event.listen on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1505
-- event.unlisten on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2705
+- event.listen on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1504
+- event.unlisten on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2704
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L264
 - event.listen on `root` → `(inline)` — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L386
 - event.listen on `root` → `(inline)` — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L116
 - event.unlisten on `DOC` → `once` — [js/ui/fullscreen.js › mountFullscreen>once](../files/js/ui/fullscreen.js.md#s-mountFullscreen-once) L143
 - event.listen on `DOC` → `once` — [js/ui/fullscreen.js › mountFullscreen](../files/js/ui/fullscreen.js.md#s-mountFullscreen) L146
-- event.listen on `el` → `(inline)` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L308
-- event.listen on `el` → `d` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L337
-- event.listen on `track` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L354
-- event.listen on `document` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L839
+- event.listen on `el` → `(inline)` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L309
+- event.listen on `el` → `d` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L338
+- event.listen on `track` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L355
+- event.listen on `document` → `(inline)` — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L840
 - event.listen on `svg` → `(inline)` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L156
 - event.listen on `menu` → `(inline)` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L263
 - event.listen on `b` → `(inline)` — [js/ui/secbadge.js › mountSecBadge>makeBadge](../files/js/ui/secbadge.js.md#s-mountSecBadge-makeBadge) L24
@@ -319,26 +319,26 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `pointerleave`
 
-- event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L340
+- event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L341
 
 ### `pointermove`
 
-- event.listen on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1506
-- event.unlisten on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2706
+- event.listen on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1505
+- event.unlisten on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2705
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L270
-- event.listen on `el` → `move` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L318
-- event.listen on `track` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L359
+- event.listen on `el` → `move` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L319
+- event.listen on `track` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L360
 - event.listen on `svg` → `(inline)` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L168
 
 ### `pointerup`
 
 - event.listen on `input` → `release` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L99
-- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1507
-- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2707
+- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1506
+- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2706
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L277
-- event.listen on `el` → `end` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L319
-- event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L338
-- event.listen on `track` → `end` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L372
+- event.listen on `el` → `end` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L320
+- event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L339
+- event.listen on `track` → `end` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L373
 - event.listen on `svg` → `release` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L196
 
 ### `release`
@@ -352,8 +352,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 ### `resize`
 
 - event.dispatch on `WIN` — [js/ui/fullscreen.js › relayout>fire](../files/js/ui/fullscreen.js.md#s-relayout-fire) L96
-- event.listen on `window` → `go` — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L220
-- event.listen on `window.visualViewport` → `go` — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L222
+- event.listen on `window` → `go` — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L221
+- event.listen on `window.visualViewport` → `go` — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L223
 
 ### `ring`
 
@@ -407,7 +407,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `wheel`
 
-- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1414
+- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1413
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L290
 - event.listen on `svg` → `(inline)` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L198
 

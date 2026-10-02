@@ -397,7 +397,7 @@ function · **exported** · L76–150
 
 - calls: [`addContact`](#s-addContact) ×3 · [`d3`](#s-d3) ×3 · [`fire`](#s-fire) · [`stepDrones`](#s-stepDrones) · [`stepPirates`](#s-stepPirates)
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
-- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×2
+- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
 - effects: bus.emit `‹c›`
 
 <!-- note:syncContacts -->
@@ -594,7 +594,7 @@ Closest approach of the segment travelled this tick to a point.
 function · **exported** · L332–386
 
 - calls: [`applyDamage`](ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`sweptMiss`](#s-sweptMiss) ×3
-- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×2
+- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
 
 <!-- note:stepShots -->
 - L349 · `if (s.faction.startsWith("npc")) {` — An NPC round with no target is theatre (something still firing tracers);
@@ -646,7 +646,7 @@ Impact debris the cutter can reach, shaped like a belt rock so one loop mines bo
 function · **exported** · L435–505
 
 - calls: [`handsOff`](../aria/aria.js.md#s-handsOff) _js/aria/aria.js_ · [`notePlayerChoice`](../aria/aria.js.md#s-notePlayerChoice) _js/aria/aria.js_ · [`addCargo`](ship.js.md#s-addCargo) _js/flight/ship.js_ ×2 · [`holdRoom`](ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`minableDebris`](#s-minableDebris) · [`removeChunk`](../world/debris.js.md#s-removeChunk) _js/world/debris.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`wearRock`](../world/field.js.md#s-wearRock) _js/world/field.js_
-- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×2
+- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
 
 <!-- note:stepMining -->
 The cutter works whatever is in reach: belt rocks and impact debris alike.

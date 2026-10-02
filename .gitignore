@@ -11,3 +11,37 @@ gdb.json.*
 
 # smoke screenshots
 _scratch/
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+# Relay state belongs to the running installation, not source control.
+/cradle.json
+/cradle.json.*
+/gdb.json
+/gdb.json.*
+/sol-state.sqlite3*
+/sol-host-status.json
+/logs/
+# Dependencies, caches, generated output and local archives
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+/dist/
+/build/
+/coverage/
+/_scratch/
+/archives/
+/backups/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.bak
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db

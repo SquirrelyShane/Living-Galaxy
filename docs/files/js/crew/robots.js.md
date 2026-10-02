@@ -290,7 +290,6 @@ function · **exported** · L153–172
 
 - calls: [`robotsAboard`](#s-robotsAboard) · [`saveRobots`](#s-saveRobots) · [`fx`](../economy/upgrades.js.md#s-fx) _js/economy/upgrades.js_ ×2
 - via [js/crew/ledger.js](ledger.js.md): `crew.aboard.filter`
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:tickRobots -->
 Called from the sim's career step beside tickCrew, with scaled seconds.

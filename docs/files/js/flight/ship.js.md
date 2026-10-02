@@ -399,7 +399,7 @@ const · L223–223
 
 function · **exported** · L225–228
 
-- called by: [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_ · [`broadcastShip`](../sim/sim.js.md#s-broadcastShip) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`sampleTelemetry`](../sim/sim.js.md#s-sampleTelemetry) _js/sim/sim.js_ · [`stepCollisions`](../sim/sim.js.md#s-stepCollisions) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×2 · [`wireControlsTest.getSpeed`](../sim/sim.js.md#s-wireControlsTest-getSpeed) _js/sim/sim.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
+- called by: [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_ · [`broadcastShip`](../sim/sim.js.md#s-broadcastShip) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`sampleTelemetry`](../sim/sim.js.md#s-sampleTelemetry) _js/sim/sim.js_ · [`stepCollisions`](../sim/sim.js.md#s-stepCollisions) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ · [`wireControlsTest.getSpeed`](../sim/sim.js.md#s-wireControlsTest-getSpeed) _js/sim/sim.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
 
 <!-- note:speedOf -->
 Speed relative to the local frame — the world whose well you are in, which

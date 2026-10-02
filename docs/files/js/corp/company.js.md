@@ -355,7 +355,6 @@ function · **exported** · L195–207
 function · **exported** · L209–236
 
 - calls: [`boardBrief`](#s-boardBrief) · [`book`](#s-book) ×2 · [`inThisSky`](#s-inThisSky) · [`cyclePay`](../station/stafflife.js.md#s-cyclePay) _js/station/stafflife.js_ · [`housingCost`](../station/stafflife.js.md#s-housingCost) _js/station/stafflife.js_ · [`takeWorked`](../station/stafflife.js.md#s-takeWorked) _js/station/stafflife.js_ · [`tickStaffHour`](../station/stafflife.js.md#s-tickStaffHour) _js/station/stafflife.js_ · [`cutOf`](../station/staffline.js.md#s-cutOf) _js/station/staffline.js_ · [`tickLine`](../station/staffline.js.md#s-tickLine) _js/station/staffline.js_ · [`incomeOf`](../station/stationlife.js.md#s-incomeOf) _js/station/stationlife.js_ · [`tickStationLife`](../station/stationlife.js.md#s-tickStationLife) _js/station/stationlife.js_
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:tickCompany -->
 Every cycle: staff earn, dependants draw, the board re-reads the record.

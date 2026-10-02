@@ -210,7 +210,7 @@ function · async · L66–71
 - called by: [`enterFullscreen`](#s-enterFullscreen) ×2
 
 <!-- note:afterEnter -->
-- L70 · `try { await globalThis.screen?.orientation?.lock?.("portrait"); } catch {` — desktop / iOS
+- L? · `try { await globalThis.screen?.orientation?.lock?.("portrait"); } catch {` — desktop / iOS
 <!-- /note -->
 
 ### <a id="s-exitFullscreen"></a>`exitFullscreen({…}=)`

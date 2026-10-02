@@ -483,7 +483,6 @@ Someone leaving takes a piece of whoever they were with.
 function · **exported** · L257–290
 
 - calls: [`crewWageTotal`](#s-crewWageTotal) · [`fileDeparture`](#s-fileDeparture) · [`note`](#s-note) ×2 · [`stepBonds`](#s-stepBonds)
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:tickCrew -->
 Called from the sim tick with scaled seconds. Pays wages every cycle.

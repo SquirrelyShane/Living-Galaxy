@@ -486,8 +486,6 @@ Dump impact heat on a body (delta kelvin).
 
 function · **exported** · L472–478
 
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
-
 <!-- note:coolBodies -->
 Radiative cooling, called from the sim tick.
 <!-- /note -->

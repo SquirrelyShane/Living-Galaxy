@@ -372,7 +372,7 @@ function · **exported** · L181–183
 The call a hull is flying to, if any.
 <!-- /note -->
 
-### <a id="s-nearestCall"></a>`nearestCall(pos, maxR=)`
+### <a id="s-nearestCall"></a>`nearestCall(pos, maxR=, include=)`
 
 function · **exported** · L185–193
 

@@ -8,7 +8,7 @@ Written against 0.3.77 (323 files, 89k code lines after comment migration). **0.
 - **`sim.js` is the hub**: 4,062 lines, 251 top-level symbols, 124 exports, **86 importers**, 64 imports. It sits inside a **37-file import cycle** (see `trace/imports.md › Cycles`), so top-level evaluation order across those 37 is load-bearing.
 - **Two single-closure giants**: `engine.js › mountGame` is one 2,564-line function; `hud.js › mountHud` is 728 lines. Neither can be split by moving files — they need closure state lifted out first.
 - **Hygiene backlog** (`trace/hygiene.md`): 109 unused imports, 29 top-level symbols never referenced, 9 files nothing in `js/` imports (some are entry points — confirm against index.html/tests before deleting).
-- `controls-test.js` is `export {};` — kept alive by a bare side-effect import in engine.js.
+- `controls-test.js` was `export {};` — removed with its renderer import and preload in 0.3.83.
 
 ## Rules for the move
 
@@ -21,7 +21,7 @@ Written against 0.3.77 (323 files, 89k code lines after comment migration). **0.
 
 | domain | files |
 |---|---|
-| `core/` boot, save, frame | boot, store, profile, perf, input, addon-loader, controls-test (empty side-effect import from engine.js — delete in 0.3.80) |
+| `core/` boot, save, frame | boot, store, profile, perf, input, addon-loader |
 | `sim/` | sim → `sim/sim.js` (split in 0.3.80+) |
 | `net/` | net, worldsync, account |
 | `world/` sky, bodies, rocks | bodies, archetypes, generate, scale, anchors, names, naming, field, rockgen, debris, textures |
@@ -49,9 +49,10 @@ Result: `js/` root keeps only `main.js` (entry, loaded by index.html) and `versi
 | **0.3.78** (done) | `tools/codedocs/move.mjs` (plan-file driven, dry run by default) + the table executed; `tools/prune/<ver>.txt` + lg-patch.sh prune so a zip can delete | — |
 | 0.3.79 | addon path fix (`move.mjs --after`) + addon-loader reports a broken pack as broken | — |
 | 0.3.80 | (taken) career gate: only Mining selectable, `docs/CAREER_ROADMAP.md` | — |
-| 0.3.81 | hygiene: unused imports, unreferenced symbols, dead files confirmed against tests; `tools/codedocs/build.mjs` stops scanning `addon/` for importers | — |
-| 0.3.82 | break the 37-file cycle: lift `sim` state object + constants into `sim/state.js`, leave behaviour in `sim.js`; target ≤10-file cycle | — |
-| 0.3.83+ | split `sim.js` along its symbol clusters (warp/route, dock/tractor, career, cataclysm, HUD publish) into `sim/*.js`; then lift `mountGame` closure state into `render/scene.js` so its 2.5k lines can split by layer | — |
+| pending | hygiene: unused imports, unreferenced symbols, dead files confirmed against tests; `tools/codedocs/build.mjs` stops scanning `addon/` for importers | — |
+| pending | break the 37-file cycle: lift `sim` state object + constants into `sim/state.js`, leave behaviour in `sim.js`; target ≤10-file cycle | — |
+| **0.3.83** (done) | extract career defaults and tick to `sim/career.js`; remove empty controls-test; stop tracking runtime artifacts and exclude backend/development files from static uploads | — |
+| later | split `sim.js` along its symbol clusters (warp/route, dock/tractor, career, cataclysm, HUD publish) into `sim/*.js`; then lift `mountGame` closure state into `render/scene.js` so its 2.5k lines can split by layer | — |
 
 ## Forward-looking upgrades in line with this
 

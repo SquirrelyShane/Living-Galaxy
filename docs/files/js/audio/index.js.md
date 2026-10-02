@@ -140,7 +140,7 @@ const · L24–24 · **never referenced**
 function · **exported** · L26–39
 
 - calls: [`ensureAudio`](graph.js.md#s-ensureAudio) _js/audio/graph.js_ · [`heldDrone`](voices.js.md#s-heldDrone) _js/audio/voices.js_
-- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×3
+- called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×2
 
 <!-- note:setEngineLevel -->
 <!-- /note -->

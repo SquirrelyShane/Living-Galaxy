@@ -156,7 +156,7 @@ function · **exported** · L45–82
 
 - calls: [`defaultMods`](../careers/effects.js.md#s-defaultMods) _js/careers/effects.js_ · [`bondFactor`](../crew/bonds.js.md#s-bondFactor) _js/crew/bonds.js_ · [`hullPlan`](../interior/deckplan.js.md#s-hullPlan) _js/interior/deckplan.js_ · [`stationRoomFor`](../interior/deckplan.js.md#s-stationRoomFor) _js/interior/deckplan.js_ · [`shiftPhase`](#s-shiftPhase) · [`strengthOf`](#s-strengthOf) · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ ×2
 - via [js/careers/effects.js](../careers/effects.js.md): `MOD_KEYS.includes`
-- called by: [`paintRail`](../interior/interior.js.md#s-paintRail) _js/interior/interior.js_ · [`updateCrewMods`](#s-updateCrewMods) · [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
+- called by: [`paintRail`](../interior/interior.js.md#s-paintRail) _js/interior/interior.js_ · [`updateCrewMods`](#s-updateCrewMods)
 
 <!-- note:crewEffects -->
 The composed crew bag, plus a manning report for the deck rail. Cached ~2 s.
@@ -177,7 +177,6 @@ beside them — a friend on the same watch is worth more, a rival less.
 function · **exported** · L84–91
 
 - calls: [`dutyBag`](../crew/duties.js.md#s-dutyBag) _js/crew/duties.js_ · [`tickDuties`](../crew/duties.js.md#s-tickDuties) _js/crew/duties.js_ · [`setCrewMods`](../flight/pilot.js.md#s-setCrewMods) _js/flight/pilot.js_ · [`crewEffects`](#s-crewEffects)
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:updateCrewMods -->
 Called from the sim's career step (~every 2 s). Runs the duty model, then

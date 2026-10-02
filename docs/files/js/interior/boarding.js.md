@@ -179,7 +179,6 @@ function · **exported** · L69–129
 
 - calls: [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`defensePower`](#s-defensePower) · [`note`](#s-note) ×5 · [`startBoarding`](#s-startBoarding) · [`syncSensors`](#s-syncSensors)
 - via [js/npc/cradle.js](../npc/cradle.js.md): `cradle.get`, `cradle.note`, `cradle.put`
-- called by: [`stepCareer`](../sim/sim.js.md#s-stepCareer) _js/sim/sim.js_
 
 <!-- note:tickBoarding -->
 Called from the sim tick (sim seconds).
