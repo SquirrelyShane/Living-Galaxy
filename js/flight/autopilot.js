@@ -67,7 +67,7 @@ export function sustainableThrottle(ship) {
 }
 
 const BUS_SWITCH = [
-  ["shields", "SHLD"], ["cutter", "MINER"], ["turrets", "TURR"], ["gravity", "GRAV"], ["ops", "FLOOD/SENTRY/SALVG"], ["bench", "ICE WORKS"],
+  ["shields", "SHLD"], ["cutter", "MINER"], ["rig", "RIG"], ["turrets", "TURR"], ["gravity", "GRAV"], ["ops", "FLOOD/SENTRY/SALVG"], ["bench", "ICE WORKS"],
 ];
 
 export function busIdle(ship) {
@@ -75,6 +75,7 @@ export function busIdle(ship) {
   const on = {
     shields: ship.shields ? d.shields : 0,
     cutter: d.cutter,
+    rig: d.rig ?? 0,
     bench: d.bench,
     turrets: ship.turretsArmed && ship.turretMode !== "off" ? d.turrets : 0,
     gravity: ship.localGravity ? DRAW.gravity : 0,

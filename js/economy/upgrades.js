@@ -49,7 +49,11 @@ export const UPGRADES = [
   { id: "ore_sorter",    name: "Inline ore sorter",      price: 6100, sector: ["industrial"],                 fx: { smelt: 1.18 },
     blurb: "Grades and pre-concentrates at the intake, so a smelter gives you eighteen percent more back." },
   { id: "winch",         name: "Salvage winch",          price: 3300, sector: ["industrial"],                 mods: { salvage: 1.2 },
-    blurb: "A heavier winch on the salvage tractor." },
+    blurb: "A heavier winch on the salvage tractor, and a steadier hand on the rig." },
+  { id: "rig_coil",      name: "Rig focusing coil",      price: 5200, sector: ["industrial"],                 mods: { salvage: 1.1 }, fx: { rigRange: 150 },
+    blurb: "A tighter arc on the salvage rig: ten percent quicker through plate and 150 u more reach." },
+  { id: "rig_gantry",    name: "Twin-arm rig gantry",    price: 11200, sector: ["industrial"], tier: "C",     mods: { salvage: 1.3, heat: 1.15 }, fx: { rigRange: 260 }, excludes: ["rig_coil"],
+    blurb: "Two arcs off one gantry. Nearly a third quicker through a hull and far more reach — and it runs hot." },
 
   { id: "plating",       name: "Hardened plating",       price: 5600, sector: ["military", "industrial"],     mods: { hull: 1.15, gTol: 0.9 }, fx: { thrust: 0.97 },
     resist: { kinetic: 0.12, thermal: 0.03 },
@@ -103,7 +107,7 @@ export const upgrades = { owned: [] };
 
 export const UPGRADES_KEY = () => `lgaa.upgrades.v1:${sim.skySeed}:${sim.callsign}`;
 
-const ADDITIVE = new Set(["battery", "minerRange", "turretRange", "berths", "moralePerCycle", "robotSlots", "repair", "patchDrone"]);
+const ADDITIVE = new Set(["battery", "minerRange", "rigRange", "turretRange", "berths", "moralePerCycle", "robotSlots", "repair", "patchDrone"]);
 const TIER_ORDER = "ABCDEFG";
 
 export function hasUpgrade(id) {
@@ -197,6 +201,7 @@ const FX_LINE = {
   battery: (v) => `battery +${v}`,
   shieldRegen: (v) => `shield regen ${pctOf(v)}`,
   minerRange: (v) => `cutter reach +${v} u`,
+  rigRange: (v) => `rig reach +${v} u`,
   thrust: (v) => `thrust ${pctOf(v)}`,
   missions: () => "mission plans",
   berths: (v) => `berths +${v}`,

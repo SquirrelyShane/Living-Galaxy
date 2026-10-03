@@ -1,6 +1,6 @@
 const GAME_CODES = new Set([
   "KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "KeyR", "KeyF", "KeyG",
-  "KeyM", "KeyC", "KeyV", "KeyX", "KeyZ", "KeyT", "KeyY", "KeyB",
+  "KeyM", "KeyC", "KeyV", "KeyX", "KeyZ", "KeyT", "KeyY", "KeyU", "KeyB",
   "Space", "Tab", "ShiftLeft", "ShiftRight", "ControlLeft", "ControlRight",
   "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Escape",
   "BracketLeft", "BracketRight",
@@ -65,6 +65,7 @@ function emptyActions() {
     tAssist: false,
     cycleTurret: false,
     cycleMining: false,
+    cycleRig: false,
     terminal: false,
     select: null,
   };
@@ -196,6 +197,7 @@ export function sampleInput() {
   curr.tAssist = has("Digit6");
   curr.cycleTurret = has("KeyT");
   curr.cycleMining = has("KeyY");
+  curr.cycleRig = has("KeyU");
   curr.terminal = has("KeyB") || has("Tab") || touch.terminal;
   curr.select = null;
   for (let n = 7; n <= 9; n++) if (has(`Digit${n}`)) curr.select = n - 6;

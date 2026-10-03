@@ -1,6 +1,6 @@
 # js/ships/shipdb.js
 
-[index](../../../README.md) · 518 lines · 16 symbols · 1 imports · 33 importers
+[index](../../../README.md) · 519 lines · 16 symbols · 1 imports · 34 importers
 
 ## About
 
@@ -83,6 +83,7 @@ stats:
 - test/hullspec.test.mjs _(outside js/)_ — `SHIP_DB`, `SIZE_BANDS`
 - test/insurance.test.mjs _(outside js/)_ — `SHIP_DB`, `shipById`, `DEFAULT_SHIP_ID`
 - test/portdrones.test.mjs _(outside js/)_ — `SHIP_DB`
+- test/rig.test.mjs _(outside js/)_ — `hullTuneFor`, `shipById`
 - test/sky.test.mjs _(outside js/)_ — `SHIP_DB`, `shipById`, `hullTuneFor`, `DEFAULT_SHIP_ID`
 - test/stafflife.test.mjs _(outside js/)_ — `SHIP_DB`, `hullTuneFor`
 - test/systems.test.mjs _(outside js/)_ — `shipById`
@@ -93,12 +94,12 @@ stats:
 - [`SIZE_BANDS`](#s-SIZE_BANDS) · const — used by test/hullspec.test.mjs
 - [`sizeBand`](#s-sizeBand) · function — used by [js/station/stationdeck.js](../station/stationdeck.js.md)
 - [`SHIP_DB`](#s-SHIP_DB) · const — used by [js/corp/fleet.js](../corp/fleet.js.md), [js/render/attract.js](../render/attract.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), test/balance.test.mjs, test/defence.test.mjs, test/experimental.test.mjs, test/forge.test.mjs, test/hulks.test.mjs, test/hullspec.test.mjs, test/insurance.test.mjs, test/portdrones.test.mjs, test/sky.test.mjs, test/stafflife.test.mjs
-- [`shipById`](#s-shipById) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/corp/fleet.js](../corp/fleet.js.md), [js/crew/roster.js](../crew/roster.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/economy/icework.js](../economy/icework.js.md), [js/economy/upgrades.js](../economy/upgrades.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/npc/crewfx.js](../npc/crewfx.js.md), [js/npc/flight.js](../npc/flight.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/npccrew.js](../npc/npccrew.js.md), [js/npc/speech.js](../npc/speech.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/render/attract.js](../render/attract.js.md), [js/render/engine.js](../render/engine.js.md), [js/render/hullpool.js](../render/hullpool.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/refityard.js](../station/refityard.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/world/events/atmoworks.js](../world/events/atmoworks.js.md), [js/world/hulks.js](../world/hulks.js.md), test/defence.test.mjs, test/hulks.test.mjs, test/insurance.test.mjs, test/sky.test.mjs, test/systems.test.mjs, test/upgrades.test.mjs
+- [`shipById`](#s-shipById) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/corp/fleet.js](../corp/fleet.js.md), [js/crew/roster.js](../crew/roster.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/economy/icework.js](../economy/icework.js.md), [js/economy/upgrades.js](../economy/upgrades.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/npc/crewfx.js](../npc/crewfx.js.md), [js/npc/flight.js](../npc/flight.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/npccrew.js](../npc/npccrew.js.md), [js/npc/speech.js](../npc/speech.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/render/attract.js](../render/attract.js.md), [js/render/engine.js](../render/engine.js.md), [js/render/hullpool.js](../render/hullpool.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/refityard.js](../station/refityard.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/world/events/atmoworks.js](../world/events/atmoworks.js.md), [js/world/hulks.js](../world/hulks.js.md), test/defence.test.mjs, test/hulks.test.mjs, test/insurance.test.mjs, test/rig.test.mjs, test/sky.test.mjs, test/systems.test.mjs, test/upgrades.test.mjs
 - [`shipsForComplex`](#s-shipsForComplex) · function — **no importer in scanned roots**
 - [`issuedShips`](#s-issuedShips) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`complexesInDb`](#s-complexesInDb) · function — **no importer in scanned roots**
 - [`DEFAULT_SHIP_ID`](#s-DEFAULT_SHIP_ID) · const — used by [js/render/attract.js](../render/attract.js.md), [js/render/engine.js](../render/engine.js.md), [js/render/hullpool.js](../render/hullpool.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/world/hulks.js](../world/hulks.js.md), test/defence.test.mjs, test/insurance.test.mjs, test/sky.test.mjs
-- [`hullTuneFor`](#s-hullTuneFor) · function — used by [js/corp/fleet.js](../corp/fleet.js.md), [js/sim/sim.js](../sim/sim.js.md), test/sky.test.mjs, test/stafflife.test.mjs
+- [`hullTuneFor`](#s-hullTuneFor) · function — used by [js/corp/fleet.js](../corp/fleet.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs, test/sky.test.mjs, test/stafflife.test.mjs
 
 ## Effects
 
@@ -224,7 +225,7 @@ yard at the issue rate as rank allows — see shipcost.js yardQuote.
 
 ### <a id="s-hullTuneFor"></a>`hullTuneFor(def)`
 
-function · **exported** · L507–518
+function · **exported** · L507–519
 
 - calls: [`holdForCargoRating`](../economy/materials.js.md#s-holdForCargoRating) _js/economy/materials.js_ · [`hullTuneFor>clamp`](#s-hullTuneFor-clamp) ×3
 - called by: [`_hullTune`](../sim/sim.js.md#s-_hullTune) _js/sim/sim.js_ · [`syncHullTune`](../sim/sim.js.md#s-syncHullTune) _js/sim/sim.js_

@@ -506,7 +506,7 @@ export const DEFAULT_SHIP_ID = "general_a";
 
 export function hullTuneFor(def) {
   const s = def?.stats;
-  if (!s) return { thrust: 1, turn: 1, reactor: 1, cargo: 1, id: null };
+  if (!s) return { thrust: 1, turn: 1, reactor: 1, cargo: 1, rig: 1, id: null };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   return {
     id: def.id,
@@ -514,5 +514,6 @@ export function hullTuneFor(def) {
     turn: clamp(s.turn, 0.18, 1.8),
     reactor: clamp((s.reactor / 130) ** 0.35, 1, 2.2),
     cargo: holdForCargoRating(s.cargo) / HOLD.base,
+    rig: def.complex === "salvage" ? 1.1 + 0.1 * Math.max(0, "ABCDEFG".indexOf(def.tier)) : 1,
   };
 }

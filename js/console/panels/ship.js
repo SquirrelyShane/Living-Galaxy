@@ -1,8 +1,9 @@
 import { button, el, group, note, pct, row, section, setBar, slider, fmtDist, fmtTime, clockOf } from "../kit.js";
 import { mining, turretAim } from "../../flight/turrets.js";
+import { rig } from "../../flight/rig.js";
 import { ring, sparkline } from "../../ui/charts.js";
-import { MINING_MODES, SHED_LABEL, TUNE_SPEC, TURRET_MODES, batteryCap } from "../../flight/ship.js";
-import { moveShed, resetTune, setMiningMode, setTune, setTurretMode, sim, stationStatus, toggleSystem } from "../../sim/sim.js";
+import { MINING_MODES, RIG_MODES, SHED_LABEL, TUNE_SPEC, TURRET_MODES, batteryCap } from "../../flight/ship.js";
+import { moveShed, resetTune, setMiningMode, setRigMode, setTune, setTurretMode, sim, stationStatus, toggleSystem } from "../../sim/sim.js";
 import { useGameStore } from "../../core/store.js";
 import { autopilot, sustainableThrottle } from "../../flight/autopilot.js";
 import { duties, dutyReport } from "../../crew/duties.js";
@@ -196,6 +197,7 @@ function mountPower(root, push) {
     ["Shields", dr("shields"), () => ship.powered.shields],
     ["Turrets", dr("turrets"), () => ship.powered.turrets],
     ["Mining laser", dr("cutter"), () => ship.powered.mining && ship.miningMode !== "off"],
+    ["Salvage rig", dr("rig"), () => ship.powered.rig !== false && (ship.rigMode ?? "off") !== "off"],
     ["Ice works", dr("bench"), () => (ship.draws?.bench ?? 0) > 0],
     ["Local gravity", dr("gravity"), () => ship.powered.gravity],
     ["Ops board", dr("ops"), () => ship.powered.ops && (ship.draws?.ops ?? 0) > 0],
@@ -318,6 +320,23 @@ function mountSystems(root, push) {
   const mineState = row(mine, "Beam");
   root.append(mine);
 
+  const rigSec = section("Industrial hardpoint — salvage rig");
+  note(rigSec, "Works a hulk in reach, the locked one first, outer sections before the bridge. What it cuts loose drifts until the salvage tractor reels it in.");
+  const rigGrid = el("div", "tmodes");
+  const rigBtns = RIG_MODES.map((m) => {
+    const b = el("button", "tmode");
+    b.type = "button";
+    b.dataset.focus = `rig-${m.id}`;
+    b.append(el("b", null, m.label), el("small", null, m.hint));
+    b.addEventListener("click", () => setRigMode(m.id));
+    rigGrid.append(b);
+    return { id: m.id, b };
+  });
+  rigSec.append(rigGrid);
+  const rigState = row(rigSec, "Arc");
+  const rigBox = row(rigSec, "Recorders aboard");
+  root.append(rigSec);
+
   const fl = section("Flight");
   const lvl = row(fl, "Level trim", { hint: "Square the nose to the ecliptic." });
   lvl.value.replaceChildren(button("TRIM", () => DOC?.getElementById("op-level")?.click(), "tiny"));
@@ -354,6 +373,12 @@ function mountSystems(root, push) {
       m.b.classList.toggle("hot", m.id === "overdrive");
     }
     mineState.value.textContent = mining.active ? `cutting — ${pct(mining.progress)}` : "idle";
+    for (const m of rigBtns) {
+      m.b.classList.toggle("on", (ship.rigMode ?? "off") === m.id);
+      m.b.classList.toggle("hot", m.id === "cut");
+    }
+    rigState.value.textContent = rig.active ? `${rig.section} of the ${rig.name} — ${pct(rig.progress)} of the hull cut` : (ship.rigMode ?? "off") === "off" ? "stowed" : ship.powered.rig === false ? "no power" : "standing by — no hulk in reach";
+    rigBox.value.textContent = String(sim.recorders?.length ?? 0);
     camBtn.textContent = sim.cameraMode ? "EXTERNAL" : "SEAT";
     tmBtn.textContent = `${S().timeScale}×`;
     pulseBtn.textContent = DOC?.getElementById("op-pulse-st")?.textContent || "PULSE";
@@ -418,6 +443,7 @@ export default {
       out.push({ label, hint: "master switch", sub: "systems", focus: `sys-${k}`, keywords: "switch system", status: () => (sysState(k) ? "ON" : "OFF") });
     }
     for (const m of TURRET_MODES) out.push({ label: `Turret rule: ${m.label}`, hint: m.hint ?? "", sub: "systems", focus: `turret-${m.id}`, keywords: "turret engagement rule guns", run: () => setTurretMode(m.id), status: () => (sim.ship?.turretMode === m.id ? "● SET" : "") });
+    for (const m of RIG_MODES) out.push({ label: `Salvage rig: ${m.label}`, hint: m.hint ?? "", sub: "systems", focus: `rig-${m.id}`, keywords: "salvage rig hulk wreck cut strip", run: () => setRigMode(m.id), status: () => ((sim.ship?.rigMode ?? "off") === m.id ? "● SET" : "") });
     for (const m of MINING_MODES) out.push({ label: `Mining cutter: ${m.label}`, hint: m.hint ?? "", sub: "systems", focus: `miner-${m.id}`, keywords: "miner laser cutter", run: () => setMiningMode(m.id), status: () => (sim.ship?.miningMode === m.id ? "● SET" : "") });
     out.push({ label: "Load shed priority", hint: "what the bus cuts first", sub: "power", keywords: "power battery reactor" });
     out.push({ label: "Reactor trim", hint: "core output slider", sub: "power", keywords: "power" });

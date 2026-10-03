@@ -24,7 +24,7 @@ export const CAREER_ARCS = [
 
 export const CAREER_STATUS = {
   mining: { state: "open", has: [...OPEN_GATE] },
-  salvage: { state: "planned", has: ["site", "board", "feeds", "tutorial", "hull"], verb: "cut a dead hull apart for plate, parts and its black box" },
+  salvage: { state: "planned", has: ["verb", "site", "board", "feeds", "tutorial", "hull"], verb: "cut a dead hull apart for plate, parts and its black box" },
   security: { state: "planned", has: ["board", "feeds", "hull"], verb: "fly a picket wing, disable a mark and board it" },
   commerce: { state: "planned", has: ["board", "feeds"], verb: "post and fill orders on a port's book" },
   logistics: { state: "planned", has: ["board", "feeds"], verb: "run bonded freight on a manifest with a clock and a convoy" },

@@ -32,3 +32,22 @@ console.log('careerstep: defaults, payroll, persistence order, training and crew
 sim.ship.salvage = true; sim.ship.powered.ops = true;
 training.length = 0; step(1);
 assert.ok(!training.some(([skill]) => skill === 'salvage'), 'idle tractor earns no salvage training');
+
+{
+  const hull = {};
+  applyCareerDefaults(hull, { complexId: 'salvage' });
+  assert.equal(hull.rigMode, 'strip', 'a salvage hull is issued with the rig on STRIP');
+  assert.equal(applyCareerDefaults({}, { complexId: 'mining' }).rigMode, undefined, 'and nobody else is');
+  const rig = { active: false };
+  const withRig = createCareerStepper({ ...deps, mining: { active: false, assay: null }, rig });
+  sim.ship.dockedAt = null; sim.ship.rigMode = 'cut';
+  training.length = 0; withRig(1);
+  assert.ok(!training.some(([skill]) => skill === 'hullcraft'), 'a rig standing by trains nothing');
+  rig.active = true;
+  training.length = 0; withRig(1);
+  assert.deepEqual(training, [['salvage', 0.5], ['hullcraft', 0.45]], 'the rig cutting trains salvage and hullcraft');
+  sim.ship.rigMode = 'strip';
+  training.length = 0; withRig(1);
+  assert.deepEqual(training, [['salvage', 0.5], ['hullcraft', 0.6]], 'stripping trains hullcraft harder');
+  console.log('careerstep: rig defaults and training passed');
+}

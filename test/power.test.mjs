@@ -87,7 +87,7 @@ const port = stations.find((s) => !s.hostile)?.id;
   ok(scaleMin < 1.2 && scaleMin > 0.12, `derate multiplies the hull's own thrust (low ${scaleMin.toFixed(2)})`);
   ok(flips < 30, `a brownout latches instead of strobing (${flips} shield flips in 30 s; 0.3 did ~1000)`);
   const t = s.draws;
-  const sum = t.life + t.avionics + t.engines + t.shields + t.turrets + t.cutter + t.bench + t.gravity + t.ops + t.robots + t.warp;
+  const sum = t.life + t.avionics + t.engines + t.shields + t.turrets + t.cutter + t.bench + t.rig + t.gravity + t.ops + t.robots + t.warp;
   ok(Math.abs(sum - s.load) < 0.01, `ship.draws adds up to the load (${sum.toFixed(2)} vs ${s.load.toFixed(2)})`);
   s.mods = { ...(s.mods ?? {}), life: 1.5 }; s.o2 = 100;
   stepPower(s, 1 / 60, buildDemand(s, 0, false, 0));

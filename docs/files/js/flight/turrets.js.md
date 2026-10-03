@@ -1,6 +1,6 @@
 # js/flight/turrets.js
 
-[index](../../../README.md) · 505 lines · 52 symbols · 10 imports · 23 importers
+[index](../../../README.md) · 506 lines · 52 symbols · 10 imports · 24 importers
 
 ## About
 
@@ -71,6 +71,7 @@ drones already did.
 - test/portdrones.test.mjs _(outside js/)_ — `contacts`, `shots`, `stepShots`, `syncContacts`
 - test/qrf.test.mjs _(outside js/)_ — `contacts`, `shots`, `stepShots`, `syncContacts`
 - test/reactive.test.mjs _(outside js/)_ — `contacts`, `syncContacts`, `shots`, `stepShots`, `CONTACT_R`
+- test/rig.test.mjs _(outside js/)_ — `mining`, `stepMining`
 - test/seclevel.test.mjs _(outside js/)_ — `syncContacts`, `contacts`
 - test/sky.test.mjs _(outside js/)_ — `contacts`, `shots`, `syncContacts`, `stepShots`, `npcTracer`, `CONTACT_R`
 
@@ -85,7 +86,7 @@ drones already did.
 - [`contacts`](#s-contacts) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/hulks.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
 - [`shots`](#s-shots) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`combatHooks`](#s-combatHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`mining`](#s-mining) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md)
+- [`mining`](#s-mining) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
 - [`turretAim`](#s-turretAim) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`resetCombat`](#s-resetCombat) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`contactById`](#s-contactById) · function — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/npc/combat.js](../npc/combat.js.md)
@@ -96,7 +97,7 @@ drones already did.
 - [`fireRound`](#s-fireRound) · function — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), test/hulks.test.mjs
 - [`stepShots`](#s-stepShots) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`stepTurrets`](#s-stepTurrets) · function — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`stepMining`](#s-stepMining) · function — used by [js/sim/sim.js](../sim/sim.js.md)
+- [`stepMining`](#s-stepMining) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
 
 ## Effects
 
@@ -631,7 +632,7 @@ function · **exported** · L388–418
 
 ### <a id="s-minableDebris"></a>`minableDebris(ship, range)`
 
-function · L420–433
+function · L420–434
 
 - calls: [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_
 - called by: [`stepMining`](#s-stepMining)
@@ -644,7 +645,7 @@ Impact debris the cutter can reach, shaped like a belt rock so one loop mines bo
 
 ### <a id="s-stepMining"></a>`stepMining(ship, dt, time, lock=, want=)`
 
-function · **exported** · L435–505
+function · **exported** · L436–506
 
 - calls: [`handsOff`](../aria/aria.js.md#s-handsOff) _js/aria/aria.js_ · [`notePlayerChoice`](../aria/aria.js.md#s-notePlayerChoice) _js/aria/aria.js_ · [`addCargo`](ship.js.md#s-addCargo) _js/flight/ship.js_ ×2 · [`holdRoom`](ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`minableDebris`](#s-minableDebris) · [`removeChunk`](../world/debris.js.md#s-removeChunk) _js/world/debris.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`wearRock`](../world/field.js.md#s-wearRock) _js/world/field.js_
 - called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
@@ -654,28 +655,28 @@ The cutter works whatever is in reach: belt rocks and impact debris alike.
 A locked rock or chunk is preferred over the merely nearest one, so P-LOCK
 picks the cut. `lock` is the sim's lock record ({kind, id, locked}).
 
-- L449 · `const hasWant = want ? rocks.some((r) => r.ore === want && Math.hypot(r.x - ship.pos.x, r.` — 0.3.22: `want` is an ore the pilot is under contract for, passed only while
+- L450 · `const hasWant = want ? rocks.some((r) => r.ore === want && Math.hypot(r.x - ship.pos.x, r.` — 0.3.22: `want` is an ore the pilot is under contract for, passed only while
   something else is flying (the mining loop). A rock of that ore inside the
   cutter's reach wins over a nearer rock of anything else — otherwise a loop
   sent to cut nickel comes home with a hold of whatever it brushed past. It
   is a preference, not a filter: with none in reach the cutter works the
   belt as it always has, and a locked rock still overrides everything.
-- L477 · `const cut = (od ? 0.075 : 0.032) * dt;` — 0.3.11 halved the pull. A hold used to fill faster than anything downstream
+- L478 · `const cut = (od ? 0.075 : 0.032) * dt;` — 0.3.11 halved the pull. A hold used to fill faster than anything downstream
   of it could consume — and now that ore is the input to a fabrication chain
   rather than just a thing to sell, the cut rate is the tap on the whole
   economy. One named constant, because this is the number to reach for when
   the belt feels too generous or too mean.
-- L480 · `const c = best.debris;` — a chunk is finite: the cutter eats it down and it is gone
-- L487 · `const boiloff = best.ice && od ? 0.75 : 1;` — Bigger rock, richer pull — same exponential logic as the worlds.
+- L481 · `const c = best.debris;` — a chunk is finite: the cutter eats it down and it is gone
+- L488 · `const boiloff = best.ice && od ? 0.75 : 1;` — Bigger rock, richer pull — same exponential logic as the worlds.
   An overdriven cutter boils volatiles off an ice rock — faster, wasteful.
-- L492 · `if (!handsOff() && Math.floor(time) !== lastCutNote) { lastCutNote = Math.floor(time); not` — what you actually point the cutter at, sampled rather than counted every
+- L493 · `if (!handsOff() && Math.floor(time) !== lastCutNote) { lastCutNote = Math.floor(time); not` — what you actually point the cutter at, sampled rather than counted every
   frame — one example a second is plenty and keeps the tally honest
-- L493 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — the odd rock carries something better than what it looks like
-- L493 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — 0.3.58: one rock in twenty, a fortieth of the pull (was one in seven, an eighth)
-- L496 · `mining.fullSince = time;` — The hold is full and the cutter is still burning: power into a beam that
+- L494 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — the odd rock carries something better than what it looks like
+- L494 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — 0.3.58: one rock in twenty, a fortieth of the pull (was one in seven, an eighth)
+- L497 · `mining.fullSince = time;` — The hold is full and the cutter is still burning: power into a beam that
   lands nothing. Stow it and say so, once per fill — the latch matters
   because this runs every frame and a notice per frame is a strobe.
   turrets.js is a leaf and may not import sim.js, so the actual stow goes
   through the hook, which sim.js owns.
-- L500 · `if (best.rich && mining.assayed !== best.key) {` — the assay call every prospector lives for — sim picks this up and logs it
+- L501 · `if (best.rich && mining.assayed !== best.key) {` — the assay call every prospector lives for — sim picks this up and logs it
 <!-- /note -->

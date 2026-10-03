@@ -3,7 +3,7 @@ import { clockAt } from "../station/stationclock.js";
 import { BUILD_LINE } from "../version.js";
 import { describeSystem, generateSystem } from "../world/generate.js";
 import { touch } from "../core/input.js";
-import { autoLevel, cycleMiningMode, cycleTimeScale, cycleTurretMode, launchSim, loadSky, requestJump, requestScan, resumePlay, claimPort, sensorPulse, toggleDock, togglePointerLock, returnToMenu, dismissNotice, setThrottle, setMiningMode, sim, toggleSystem } from "../sim/sim.js";
+import { autoLevel, cycleMiningMode, cycleTimeScale, cycleTurretMode, launchSim, loadSky, requestJump, requestScan, resumePlay, claimPort, sensorPulse, toggleDock, togglePointerLock, returnToMenu, dismissNotice, setThrottle, setMiningMode, setRigMode, rigWanted, sim, toggleSystem } from "../sim/sim.js";
 import { mountConsole, toggleConsole } from "../console/console.js";
 import { mountStationDeck } from "../station/stationdeck.js";
 import { mountSecBadge } from "./secbadge.js";
@@ -733,9 +733,14 @@ export function mountHud() {
   setPage(1);
 
   let lastCut = "closest";
+  let lastRig = "strip";
   $("sw-cut")?.addEventListener("click", () => {
     const ship = sim.ship;
-    if (ship.miningMode !== "off") { lastCut = ship.miningMode; setMiningMode("off"); }
+    const rigOn = (ship.rigMode ?? "off") !== "off";
+    if (rigOn && !rigWanted() && ship.miningMode === "off") { lastRig = ship.rigMode; setMiningMode(lastCut === "off" ? "closest" : lastCut); }
+    else if (rigOn) { lastRig = ship.rigMode; setRigMode("off"); }
+    else if (ship.miningMode !== "off") { lastCut = ship.miningMode; setMiningMode("off"); }
+    else if (rigWanted()) setRigMode(lastRig);
     else setMiningMode(lastCut === "off" ? "closest" : lastCut);
   });
   document.querySelectorAll(".sw[data-sys]").forEach((el) => {
@@ -1110,12 +1115,19 @@ export function mountHud() {
       const b = $("sw-cut");
       if (b) {
         const mode = sim.ship?.miningMode ?? "off";
-        const on = mode !== "off";
+        const rigMode = sim.ship?.rigMode ?? "off";
+        const rigOn = rigMode !== "off" && (s.rigActive || mode === "off" && rigWanted());
+        const on = mode !== "off" || rigOn;
         b.classList.toggle("on", on);
         const st = b.querySelector(".st");
-        const label = mode === "overdrive" ? "O/DRIVE" : on ? "CUTTING" : "OFF";
+        const nm = b.querySelector(".nm");
+        const name = rigOn ? "RIG" : "CUT";
+        if (nm && nm.textContent !== name) nm.textContent = name;
+        const label = rigOn
+          ? (s.rigActive ? `${rigMode === "strip" ? "STRIP" : "CUT"} ${Math.round((s.rigProgress ?? 0) * 100)}%` : rigMode === "strip" ? "STRIP" : "CUT")
+          : mode === "overdrive" ? "O/DRIVE" : on ? "CUTTING" : "OFF";
         if (st && st.textContent !== label) st.textContent = label;
-        b.title = on ? "Stow the mining laser" : "Run the mining laser on the nearest rock";
+        b.title = rigOn ? "Stow the salvage rig" : on ? "Stow the mining laser" : "Run the mining laser on the nearest rock, or the salvage rig on a hulk in reach";
       }
     }
     const tm = TURRET_MODES.find((m) => m.id === s.turretMode);

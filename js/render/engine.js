@@ -49,6 +49,7 @@ import { traffic, HOSTILE_ROLES, LAW_ROLES } from "../npc/traffic.js";
 import { tickWorldSync, wireWorldSyncTest } from "../net/worldsync.js";
 import { chunks } from "../world/debris.js";
 import { hulks } from "../world/hulks.js";
+import { rig } from "../flight/rig.js";
 import { dirFbm, dirNoise, kelvinHex } from "../world/events/cataclysm.js";
 import { tickTutorial, wireTutorialTest } from "../ui/tutorial.js";
 import { impactors } from "../world/events/impactors.js";
@@ -1974,6 +1975,63 @@ export function mountGame(canvas) {
     }
   }
 
+  const rigOuterMat = new THREE.MeshBasicMaterial({ color: 0x58c8ff, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  const rigCoreMat = new THREE.MeshBasicMaterial({ color: 0xf2fbff, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide });
+  const rigGeo = new THREE.CylinderGeometry(1, 0.14, 1, 6, 1, true);
+  rigGeo.rotateX(Math.PI / 2);
+  rigGeo.userData.keep = true;
+  const rigBeam = new THREE.Mesh(rigGeo, rigOuterMat);
+  const rigCore = new THREE.Mesh(rigGeo, rigCoreMat);
+  rigCore.scale.set(0.3, 0.3, 1.001);
+  rigBeam.add(rigCore);
+  rigBeam.frustumCulled = false;
+  rigCore.frustumCulled = false;
+  rigBeam.visible = false;
+  scene.add(rigBeam);
+  const rigFlash = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xbfe9ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  rigFlash.visible = false;
+  scene.add(rigFlash);
+  const rigFx = { on: false, t: 0, fade: 0, strip: false, fx: 0, fy: 0, fz: 0, tx: 0, ty: 0, tz: 0 };
+  const RIG_FADE = 0.35;
+  function updateRigFX(dt) {
+    const s = sim.ship;
+    rigFx.t += dt;
+    if (rig.active && sim.phase === "play") {
+      const f = forwardOf(s.yaw, s.pitch);
+      const u = upOf(s.yaw, s.pitch);
+      const r = rightOf(s.yaw);
+      rigFx.fx = s.pos.x + f.x * 1.6 - r.x * 1.6 - u.x * 1.2;
+      rigFx.fy = s.pos.y + f.y * 1.6 - r.y * 1.6 - u.y * 1.2;
+      rigFx.fz = s.pos.z + f.z * 1.6 - r.z * 1.6 - u.z * 1.2;
+      rigFx.tx = rig.x; rigFx.ty = rig.y; rigFx.tz = rig.z;
+      rigFx.strip = rig.mode === "strip";
+      rigFx.on = true;
+      rigFx.fade = 0;
+    } else if (rigFx.on) {
+      rigFx.fade += dt;
+      if (rigFx.fade > RIG_FADE) rigFx.on = false;
+    }
+    rigBeam.visible = rigFx.on;
+    rigFlash.visible = rigFx.on;
+    if (!rigFx.on) return;
+    let dx = rigFx.tx - rigFx.fx, dy = rigFx.ty - rigFx.fy, dz = rigFx.tz - rigFx.fz;
+    const len = Math.hypot(dx, dy, dz) || 1;
+    dx /= len; dy /= len; dz /= len;
+    const keep = 1 - Math.min(1, rigFx.fade / RIG_FADE);
+    const flicker = 0.7 + 0.3 * Math.sin(rigFx.t * 61) * Math.sin(rigFx.t * 11.7);
+    const rad = (rigFx.strip ? 0.35 : 0.7) * (0.8 + (rig.heat ?? 0) * 0.5) * flicker + Math.min(1.6, len * 0.0016);
+    rigOuterMat.color.setHex(rigFx.strip ? 0x6affc8 : 0x58c8ff);
+    rigOuterMat.opacity = 0.5 * keep * flicker;
+    rigCoreMat.opacity = 0.95 * keep;
+    rigBeam.position.set(rigFx.fx + dx * len * 0.5 - origin.x, rigFx.fy + dy * len * 0.5 - origin.y, rigFx.fz + dz * len * 0.5 - origin.z);
+    rigBeam.lookAt(rigBeam.position.x + dx, rigBeam.position.y + dy, rigBeam.position.z + dz);
+    rigBeam.scale.set(rad, rad, len);
+    rigFlash.position.set(rigFx.tx - origin.x, rigFx.ty - origin.y, rigFx.tz - origin.z);
+    const sz = (rigFx.strip ? 5 : 9) * (0.7 + 0.6 * flicker) + len * 0.004;
+    rigFlash.scale.set(sz, sz, 1);
+    rigFlash.material.opacity = 0.9 * keep * flicker;
+  }
+
   const sdroneGlow = new THREE.SpriteMaterial({ map: glowTex, color: 0x7df0ff, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending });
   sdroneGlow.userData.keep = true;
   const beamMat = new THREE.MeshBasicMaterial({ color: 0x7fe0ff, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
@@ -2442,6 +2500,7 @@ export function mountGame(canvas) {
     updateImpactors(sim.time);
     updateShots();
     updateMiningFX(dt);
+    updateRigFX(dt);
     syncContactMeshes();
     updateTractorBeam(sim.time);
     hullBudget = 1;

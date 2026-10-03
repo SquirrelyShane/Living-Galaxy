@@ -250,7 +250,7 @@ always a fresh read, and it takes the stale open records with it.
 function · **exported** · L49–68
 
 - calls: [`onRecord`](#s-onRecord) · [`snapshot`](#s-snapshot) · [`whoNow`](#s-whoNow)
-- called by: [`onPointerDown`](#s-onPointerDown) · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ · [`setTurretMode`](../sim/sim.js.md#s-setTurretMode) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×2
+- called by: [`onPointerDown`](#s-onPointerDown) · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ · [`setRigMode`](../sim/sim.js.md#s-setRigMode) _js/sim/sim.js_ · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ · [`setTurretMode`](../sim/sim.js.md#s-setTurretMode) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×2
 
 <!-- note:record -->
 ---- recording ------------------------------------------------------------

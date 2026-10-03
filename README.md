@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.86**
+**Version 0.3.87**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.86](PATCH-0.3.86.md). Career roadmap:
+Current patch: [0.3.87](PATCH-0.3.87.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -255,6 +255,7 @@ updated with `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.js
 | `js/world/hulks.js` | 0.3.86: what a destroyed hull leaves — a hulk in sections (plate, parts, recorder, surviving cargo), in the frame of the world it died over; bound to the sim like debris, never importing it |
 | `js/world/events/cataclysm.js` | What a world does when something big enough hits it, and what a star does when it stops being one — pure maths, headless-testable |
 | `js/flight/turrets.js` | Engagement rules, drones, ordnance, mining yield |
+| `js/flight/rig.js` | 0.3.87: the salvage rig — CUT and STRIP on a hulk's sections, shedding what it frees as salvage chunks for the tractor; pure, hooks out, never imports the sim |
 | `js/flight/avoid.js` | The collision solver both the autopilot and the flight assist fly through |
 | `js/flight/autopilot.js` | The autopilot primitives, the belt clear, the watchdog |
 | `js/flight/contacts.js` | The contact register — what is on the chart and how it got there |
@@ -3775,6 +3776,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `dockwork` | 0.3.25: handling grows with the lot and with tonnage rather than crates, is capped, and is faster with a better rig; the till is instant and the clamps are not; a second lot queues behind the first; the sim's clock works it off and then releases; leaving the berth ends it; a contract's cargo books the crane too |
 | `sites` | 0.3.20: a spot is deterministic, in the belt, named, with a bearing and a range; a site's rocks are in the field at it, carry the job's ore, cut and deplete like any other, and the belt's own ores are still there; every rock job posts a place; accept opens the seam and points the loop at it, deliver and abandon close it |
 | `hulks` | 0.3.86: a dead hull leaves one seeded hulk — sections by tier, one recorder, real parts, a share of the hold; one death is one hulk, the sky caps at 48, a hulk expires unless pinned; it rides the sphere of influence the ship rides (not the wider well), is cut loose when its world breaks and removed inside one; in the sky, the pilot's kill, a hull-on-hull kill and a staged ambush each leave one, and it takes P-LOCK, MATCH, an anchored waypoint and SCAN |
+| `rig` | 0.3.87: the salvage rig — what stops it, what it picks (nearest in reach, the locked one first, bridge last), CUT at speed keeping 85% of the plate and losing parts and recorder, STRIP slowly bringing everything out, the salvage mod and a salvage-line hull making it quicker, loose plate leaving at the hulk's velocity; the mining laser cannot cut what the rig shed; the rig is its own line on the bus, idles, sheds after the laser; and the loop in a sky: laser and rig never together, cut, reel, hold, recorder, and all three Salvage primaries trained |
 | `trade` | 0.3.19: routes buy at one port's price and sell at another's for more, sized to hold/purse/shelf, ranked by cr/min; BUY with no good picks a route from here; SELL never sells a consignment; the port lean; TRADE RUN flown end to end buys at one port, sells at another and makes money; FLY IT builds exactly the route |
 | `desk` | 0.3.18: thirty offers a port across nine departments, every career's department worked at three ports in four, a floor under yours; landlord and tenant issuers; the nested view; cargo sized to hold and purse, combat gated on guns; sector shapes the mix; picket sweep, survey, drone cull, procurement and cargo pod end to end |
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
@@ -3832,6 +3834,7 @@ node test/smoke-<name>.mjs "$(npm root -g)/playwright/index.mjs"
 | `smoke-economy` | named boats and strobes on the board, PORT LEDGER on the deck |
 | `smoke-mining` | the cutter's shutoff, watched across the whole event rather than sampled at one instant |
 | `smoke-hulks` | 0.3.86: a hulk off the nose draws as a dead hull with no plume, tumbles, strobes its recorder beacon, takes P-LOCK, answers SCAN with its manifest, and leaves the scene when removed |
+| `smoke-rig` | 0.3.87: with a hulk in reach the quick CUT switch runs the rig, reads RIG STRIP, the arc and flash draw, plate comes aboard through the tractor, a second tap stows it — and with no hulk about the same switch is the mining laser again |
 | `smoke-impact` | a strike drawn as the rock's fractured body with a blast, its pieces held as chunks and let go, a rock-on-rock collision with both bodies drawn, a cut-out rock going up as a shatter field |
 | `smoke-blackhole` | the lens picked and run over scene depth, a shadow and a lit disk read back from the composer, the stand-in under a low tier, a belt tunnel with infall, a rogue torn apart, the chart and the canopy label |
 | `smoke-freeze` | a live mission plus every console panel: the canopy keeps drawing, and a refresher that throws is dropped rather than taking the frame loop with it |

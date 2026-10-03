@@ -4,37 +4,37 @@
 
 KeyboardEvent.code strings referenced in code.
 
-46 distinct values across 12 files.
+47 distinct values across 12 files.
 
 ### `ArrowDown`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L5
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L140
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L141
 
 ### `ArrowLeft`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L5
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L135
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L136
 
 ### `ArrowRight`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L5
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L136
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L137
 
 ### `ArrowUp`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L5
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L139
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L140
 
 ### `BracketLeft`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L6
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L190
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L191
 
 ### `BracketRight`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L6
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L189
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L190
 
 ### `Control`
 
@@ -44,12 +44,12 @@ KeyboardEvent.code strings referenced in code.
 ### `ControlLeft`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L4
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L146
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L147
 
 ### `ControlRight`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L4
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L146
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L147
 
 ### `Digit0`
 
@@ -58,32 +58,32 @@ KeyboardEvent.code strings referenced in code.
 ### `Digit1`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L7
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L191
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L192
 
 ### `Digit2`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L7
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L192
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L193
 
 ### `Digit3`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L7
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L193
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L194
 
 ### `Digit4`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L7
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L194
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L195
 
 ### `Digit5`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L7
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L195
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L196
 
 ### `Digit6`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L7
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L196
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L197
 
 ### `Digit7`
 
@@ -108,43 +108,43 @@ KeyboardEvent.code strings referenced in code.
 
 - input.key — [js/console/console.js › mountConsole](../files/js/console/console.js.md#s-mountConsole) L288
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L5
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L187
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L188
 - input.key — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L438
 
 ### `KeyA`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L135
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L136
 
 ### `KeyB`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L199
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L201
 
 ### `KeyC`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L188
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L189
 
 ### `KeyD`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L136
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L137
 
 ### `KeyE`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L142
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L143
 
 ### `KeyF`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L144
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L145
 
 ### `KeyG`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L185
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L186
 
 ### `KeyH`
 
@@ -157,52 +157,57 @@ KeyboardEvent.code strings referenced in code.
 ### `KeyM`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L186
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L187
 
 ### `KeyQ`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L141
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L142
 
 ### `KeyR`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L143
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L144
 
 ### `KeyS`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L138
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L139
 
 ### `KeyT`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L197
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L198
+
+### `KeyU`
+
+- input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L200
 
 ### `KeyV`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L184
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L185
 
 ### `KeyW`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L2
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L137
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L138
 
 ### `KeyX`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L179
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L180
 
 ### `KeyY`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L198
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L199
 
 ### `KeyZ`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L3
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L183
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L184
 
 ### `Meta`
 
@@ -216,20 +221,20 @@ KeyboardEvent.code strings referenced in code.
 ### `ShiftLeft`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L4
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L145
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L146
 
 ### `ShiftRight`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L4
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L145
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L146
 
 ### `Space`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L4
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L182
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L183
 - input.key — [js/vendor/stellar-names/classified-names.js › CLASSIFIED_NAMES](../files/js/vendor/stellar-names/classified-names.js.md#s-CLASSIFIED_NAMES) L27
 
 ### `Tab`
 
 - input.key — [js/core/input.js › GAME_CODES](../files/js/core/input.js.md#s-GAME_CODES) L4
-- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L199
+- input.key — [js/core/input.js › sampleInput](../files/js/core/input.js.md#s-sampleInput) L201

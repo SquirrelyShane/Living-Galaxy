@@ -1,6 +1,6 @@
 # js/world/debris.js
 
-[index](../../../README.md) · 210 lines · 19 symbols · 1 imports · 8 importers
+[index](../../../README.md) · 210 lines · 19 symbols · 1 imports · 10 importers
 
 ## About
 
@@ -24,26 +24,28 @@ off a planet either rains back down, settles into a ring, or leaves.
 ## Imported by
 
 - [js/drones/ops.js](../drones/ops.js.md) — `chunks`, `removeChunk`, `chunkMass`, `burst`
+- [js/flight/rig.js](../flight/rig.js.md) — `addChunk`
 - [js/flight/turrets.js](../flight/turrets.js.md) — `chunks`, `removeChunk`
 - [js/npc/battles.js](../npc/battles.js.md) — `burst`
 - [js/render/engine.js](../render/engine.js.md) — `chunks`
 - [js/sim/sim.js](../sim/sim.js.md) — `addChunk`, `bindDebris`, `burst`, `chunkMass`, `chunks`, `nearDebris`, `removeChunk`, `resetDebris`, `rubbleRing`, `stepDebris`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `chunks`
 - test/asteroids.test.mjs _(outside js/)_ — `chunks`, `addChunk`, `resetDebris`
+- test/rig.test.mjs _(outside js/)_ — `chunks`, `resetDebris`, `addChunk`, `chunkMass`
 - test/salvage.test.mjs _(outside js/)_ — `chunkMass`
 
 ## Exports
 
-- [`chunks`](#s-chunks) · const — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/asteroids.test.mjs
-- [`resetDebris`](#s-resetDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/asteroids.test.mjs
+- [`chunks`](#s-chunks) · const — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/asteroids.test.mjs, test/rig.test.mjs
+- [`resetDebris`](#s-resetDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/asteroids.test.mjs, test/rig.test.mjs
 - [`burst`](#s-burst) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`rubbleRing`](#s-rubbleRing) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`bindDebris`](#s-bindDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`stepDebris`](#s-stepDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`nearDebris`](#s-nearDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`removeChunk`](#s-removeChunk) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/sim/sim.js](../sim/sim.js.md)
-- [`addChunk`](#s-addChunk) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/asteroids.test.mjs
-- [`chunkMass`](#s-chunkMass) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md), test/salvage.test.mjs
+- [`addChunk`](#s-addChunk) · function — used by [js/flight/rig.js](../flight/rig.js.md), [js/sim/sim.js](../sim/sim.js.md), test/asteroids.test.mjs, test/rig.test.mjs
+- [`chunkMass`](#s-chunkMass) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs, test/salvage.test.mjs
 - [`debrisCount`](#s-debrisCount) · function — **no importer in scanned roots**
 - `bodyById` — **no importer in scanned roots**
 
@@ -220,6 +222,7 @@ may still be holding it (js/world/events/impacts.js checks `dead`).
 function · **exported** · L191–200
 
 - calls: [`dropOldest`](#s-dropOldest)
+- called by: [`shed`](../flight/rig.js.md#s-shed) _js/flight/rig.js_
 
 <!-- note:addChunk -->
 Add one chunk as built by the caller (impacts hand over their pieces this way).

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.87 — 2026-10-03 — Dead Hulls: The Rig
+
+- Adds the salvage rig: CUT (fast, plate only) and STRIP (slow, everything out whole) on a hulk's sections.
+- Freed plate, parts and cargo drift as salvage until the tractor reels them in.
+- The quick CUT switch runs the rig when a hulk is locked or in reach; U cycles it; the console SHIP panel has its modes.
+- The rig has its own power line, never runs with the mining laser, and sheds after it.
+- Cutting trains Salvage and Hullcraft; a recovered recorder trains Law. Salvage hulls and two new yard upgrades speed it up.
+- The mining laser no longer works chunks the rig has shed.
+
+No Sol reset or save migration is required. Recorders are session state with no
+payout yet. Hulk-bound contracts, salvage rights, ARIA automation, the tutorial
+branch and the Mining parity benchmark remain future work. Salvage readiness:
+`verb` earned; `aria`, `bench` and `smoke` open.
+
+
 ## 0.3.86 — 2026-10-03 — Dead Hulls: Hulks
 
 - A destroyed NPC hull leaves a hulk where it died: its own hull in sections, each holding plate and parts.

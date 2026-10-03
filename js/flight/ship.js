@@ -39,6 +39,9 @@ export const DRAW = {
   turretFire: 34,
   miningClosest: 24,
   miningOverdrive: 58,
+  rigIdle: 3,
+  rigCut: 26,
+  rigStrip: 40,
   lifeSupport: 9,
   lifeSupportIdle: 1.5,
   gravity: 12,
@@ -49,11 +52,12 @@ export const DRAW = {
   pulseCharge: 120,
 };
 
-export const SHED_ORDER = ["ops", "mining", "overdrive", "shields", "turrets", "gravity", "lifeSupport"];
+export const SHED_ORDER = ["ops", "mining", "rig", "overdrive", "shields", "turrets", "gravity", "lifeSupport"];
 
 export const SHED_LABEL = {
   ops: "Ops board",
   mining: "Mining laser",
+  rig: "Salvage rig",
   overdrive: "Overdrive",
   shields: "Shields",
   turrets: "Turrets",
@@ -74,6 +78,7 @@ export function defaultTune() {
     turretRate: 1,
     retaliateFor: 22,
     minerRange: 1100,
+    rigRange: 600,
     o2Target: 100,
   };
 }
@@ -101,6 +106,8 @@ export const TUNE_SPEC = [
     hint: "How long CASTLE keeps answering something that hit you." },
   { key: "minerRange", label: "Mining reach", min: 500, max: 1600, step: 50, unit: " u",
     hint: "Overdrive adds 800 on top." },
+  { key: "rigRange", label: "Rig reach", min: 300, max: 900, step: 50, unit: " u",
+    hint: "How far the salvage rig's arc carries to a hulk." },
   { key: "o2Target", label: "O2 setpoint", min: 40, max: 100, step: 5, unit: "%",
     hint: "Life support stops topping up here. Lower setpoint, lower draw." },
 ];
@@ -119,6 +126,12 @@ export const MINING_MODES = [
   { id: "off", label: "OFF", hint: "Laser stowed." },
   { id: "closest", label: "CLOSEST", hint: "Lock and cut the nearest rock in range." },
   { id: "overdrive", label: "OVERDRIVE", hint: "Longer reach, faster cut, heavy draw." },
+];
+
+export const RIG_MODES = [
+  { id: "off", label: "OFF", hint: "Rig stowed." },
+  { id: "cut", label: "CUT", hint: "Fast. Plate only — parts and the recorder in that section are lost." },
+  { id: "strip", label: "STRIP", hint: "Slow and hungry. Plate, parts and the recorder come out whole." },
 ];
 
 export function makeShip() {
@@ -142,6 +155,8 @@ export function makeShip() {
     turretsArmed: true,
     turretMode: "castle",
     miningMode: "off",
+    rigMode: "off",
+    rigLive: false,
     pressurized: true,
     localGravity: true,
     assist: true,
@@ -184,6 +199,7 @@ export function makeShip() {
       shields: true,
       turrets: true,
       mining: true,
+      rig: true,
       gravity: true,
       lifeSupport: true,
       overdrive: true,
@@ -312,6 +328,7 @@ export function buildDemand(ship, rcsMag, brakeOn, warpDraw = 0) {
   const ops =
     (ship.lights ? DRAW.lights : 0) + (ship.sentry ? DRAW.sentry : 0) + (ship.salvage ? DRAW.salvage : 0) + (ship.atmoDraw ?? 0) + (ship.patchDraw ?? 0);
   const cutter = ship.miningMode === "overdrive" ? DRAW.miningOverdrive : ship.miningMode === "closest" ? DRAW.miningClosest : 0;
+  const rig = !ship.rigMode || ship.rigMode === "off" ? 0 : !ship.rigLive ? DRAW.rigIdle : ship.rigMode === "strip" ? DRAW.rigStrip : DRAW.rigCut;
   return {
     base: 6 + warpDraw + (ship.extraDraw ?? 0),
     warp: warpDraw,
@@ -324,6 +341,7 @@ export function buildDemand(ship, rcsMag, brakeOn, warpDraw = 0) {
     mining: cutter + (ship.benchDraw ?? 0),
     cutter,
     bench: ship.benchDraw ?? 0,
+    rig,
   };
 }
 
@@ -346,6 +364,7 @@ export function stepPower(ship, dt, demand) {
   p.shields = ship.shields;
   p.turrets = ship.turretsArmed && ship.turretMode !== "off";
   p.mining = demand.mining > 0 || ship.miningMode !== "off";
+  p.rig = Boolean(ship.rigMode) && ship.rigMode !== "off";
   p.gravity = ship.localGravity;
   p.lifeSupport = true;
   p.overdrive = true;
@@ -356,6 +375,7 @@ export function stepPower(ship, dt, demand) {
     let l = demand.base + engines;
     if (p.ops) l += demand.ops;
     if (p.mining) l += demand.mining;
+    if (p.rig) l += demand.rig ?? 0;
     if (p.shields) l += demand.shields;
     if (p.turrets) l += demand.turrets;
     if (p.gravity) l += DRAW.gravity;
@@ -392,6 +412,10 @@ export function stepPower(ship, dt, demand) {
         p.mining = false;
         over -= demand.mining;
         pushDebuff(d, "mining", "MINING LASER OFFLINE");
+      } else if (sys === "rig" && p.rig) {
+        p.rig = false;
+        over -= demand.rig ?? 0;
+        pushDebuff(d, "rig", "SALVAGE RIG OFFLINE");
       } else if (sys === "overdrive" && ship.throttle > THROTTLE_RATED) {
         p.overdrive = false;
         over -= demand.engines - demand.enginesRated;
@@ -429,6 +453,7 @@ export function stepPower(ship, dt, demand) {
     turrets: p.turrets ? demand.turrets : 0,
     cutter: p.mining ? demand.cutter : 0,
     bench: p.mining ? demand.bench : 0,
+    rig: p.rig ? demand.rig ?? 0 : 0,
     gravity: p.gravity ? DRAW.gravity : 0,
     ops: p.ops ? demand.ops : 0,
     robots: demand.robots,

@@ -99,7 +99,27 @@ Shipped as planned, with these differences:
 | EDIT | `js/core/store.js` | `hulks: 0` beside `debris` (`:98`) |
 | TEST | `test/hulks.test.mjs` | spawn, cap, sections, lock candidate, anchor resolves, reset |
 
-### 0.3.87 — The Rig (`verb`)
+### 0.3.87 — The Rig (`verb`) — shipped
+
+Shipped, with these differences:
+
+- No new HUD control. The dash switch pages are hidden in the live layouts
+  (`css/glass.css`), so the quick CUT switch is context-aware instead: rig when a
+  hulk is locked or in reach, mining laser otherwise. `index.html` changed only
+  for the key help line and the preload list; no CSS, no `hudlayout` change.
+- `rigBlocker` lives in `js/flight/rig.js`; `js/sim/salvage.js` is untouched.
+- Rig draws `rigIdle` when on with nothing to cut, so a salvage hull can carry
+  it on STRIP by default without browning out.
+- Feeds pulled forward from 0.3.88: cutting trains `salvage` and `hullcraft`,
+  a recovered recorder trains `law`.
+- The recorder is `sim.recorders` (session list), not a good. 0.3.89 turns it
+  into something that pays.
+- Also edited: `js/flight/turrets.js` (the mining laser skips `salvage`
+  chunks), `js/flight/autopilot.js` (bus report), `js/core/input.js` (U),
+  `js/ships/shipdb.js` (`hullTune.rig`).
+- Found, not fixed: `fx.minerRange` and `fx.turretRange` on upgrades are never
+  read, so Cutter lens / Turret servos add no reach. `fx.rigRange` is applied.
+
 
 | | file | what |
 |---|---|---|

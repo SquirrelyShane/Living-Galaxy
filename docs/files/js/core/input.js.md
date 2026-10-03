@@ -1,6 +1,6 @@
 # js/core/input.js
 
-[index](../../../README.md) · 219 lines · 24 symbols · 0 imports · 12 importers
+[index](../../../README.md) · 221 lines · 24 symbols · 0 imports · 12 importers
 
 ## About
 
@@ -42,9 +42,9 @@ _none_
 
 ## Effects
 
-- **event.listen** — `keydown on window → onDown` (bindInput:110) · `keyup on window → onUp` (bindInput:111) · `blur on window → clear` (bindInput:112) · `visibilitychange on document → (inline)` (bindInput:113)
-- **event.unlisten** — `keydown on window → onDown` (bindInput:117) · `keyup on window → onUp` (bindInput:118) · `blur on window → clear` (bindInput:119)
-- **input.key** — `KeyW` (GAME_CODES:2, sampleInput:137) · `KeyA` (GAME_CODES:2, sampleInput:135) · `KeyS` (GAME_CODES:2, sampleInput:138) · `KeyD` (GAME_CODES:2, sampleInput:136) · `KeyQ` (GAME_CODES:2, sampleInput:141) · `KeyE` (GAME_CODES:2, sampleInput:142) · `KeyR` (GAME_CODES:2, sampleInput:143) · `KeyF` (GAME_CODES:2, sampleInput:144) · `KeyG` (GAME_CODES:2, sampleInput:185) · `KeyM` (GAME_CODES:3, sampleInput:186) · `KeyC` (GAME_CODES:3, sampleInput:188) · `KeyV` (GAME_CODES:3, sampleInput:184) · `KeyX` (GAME_CODES:3, sampleInput:179) · `KeyZ` (GAME_CODES:3, sampleInput:183) · `KeyT` (GAME_CODES:3, sampleInput:197) · `KeyY` (GAME_CODES:3, sampleInput:198) · `KeyB` (GAME_CODES:3, sampleInput:199) · `Space` (GAME_CODES:4, sampleInput:182) · `Tab` (GAME_CODES:4, sampleInput:199) · `ShiftLeft` (GAME_CODES:4, sampleInput:145) · `ShiftRight` (GAME_CODES:4, sampleInput:145) · `ControlLeft` (GAME_CODES:4, sampleInput:146) · `ControlRight` (GAME_CODES:4, sampleInput:146) · `ArrowUp` (GAME_CODES:5, sampleInput:139) · `ArrowDown` (GAME_CODES:5, sampleInput:140) · `ArrowLeft` (GAME_CODES:5, sampleInput:135) · `ArrowRight` (GAME_CODES:5, sampleInput:136) · `Escape` (GAME_CODES:5, sampleInput:187) · `BracketLeft` (GAME_CODES:6, sampleInput:190) · `BracketRight` (GAME_CODES:6, sampleInput:189) · `Digit1` (GAME_CODES:7, sampleInput:191) · `Digit2` (GAME_CODES:7, sampleInput:192) · `Digit3` (GAME_CODES:7, sampleInput:193) · `Digit4` (GAME_CODES:7, sampleInput:194) · `Digit5` (GAME_CODES:7, sampleInput:195) · `Digit6` (GAME_CODES:7, sampleInput:196) · `Digit7` (GAME_CODES:7) · `Digit8` (GAME_CODES:7) · `Digit9` (GAME_CODES:7) · `Digit0` (GAME_CODES:7)
+- **event.listen** — `keydown on window → onDown` (bindInput:111) · `keyup on window → onUp` (bindInput:112) · `blur on window → clear` (bindInput:113) · `visibilitychange on document → (inline)` (bindInput:114)
+- **event.unlisten** — `keydown on window → onDown` (bindInput:118) · `keyup on window → onUp` (bindInput:119) · `blur on window → clear` (bindInput:120)
+- **input.key** — `KeyW` (GAME_CODES:2, sampleInput:138) · `KeyA` (GAME_CODES:2, sampleInput:136) · `KeyS` (GAME_CODES:2, sampleInput:139) · `KeyD` (GAME_CODES:2, sampleInput:137) · `KeyQ` (GAME_CODES:2, sampleInput:142) · `KeyE` (GAME_CODES:2, sampleInput:143) · `KeyR` (GAME_CODES:2, sampleInput:144) · `KeyF` (GAME_CODES:2, sampleInput:145) · `KeyG` (GAME_CODES:2, sampleInput:186) · `KeyM` (GAME_CODES:3, sampleInput:187) · `KeyC` (GAME_CODES:3, sampleInput:189) · `KeyV` (GAME_CODES:3, sampleInput:185) · `KeyX` (GAME_CODES:3, sampleInput:180) · `KeyZ` (GAME_CODES:3, sampleInput:184) · `KeyT` (GAME_CODES:3, sampleInput:198) · `KeyY` (GAME_CODES:3, sampleInput:199) · `KeyU` (GAME_CODES:3, sampleInput:200) · `KeyB` (GAME_CODES:3, sampleInput:201) · `Space` (GAME_CODES:4, sampleInput:183) · `Tab` (GAME_CODES:4, sampleInput:201) · `ShiftLeft` (GAME_CODES:4, sampleInput:146) · `ShiftRight` (GAME_CODES:4, sampleInput:146) · `ControlLeft` (GAME_CODES:4, sampleInput:147) · `ControlRight` (GAME_CODES:4, sampleInput:147) · `ArrowUp` (GAME_CODES:5, sampleInput:140) · `ArrowDown` (GAME_CODES:5, sampleInput:141) · `ArrowLeft` (GAME_CODES:5, sampleInput:136) · `ArrowRight` (GAME_CODES:5, sampleInput:137) · `Escape` (GAME_CODES:5, sampleInput:188) · `BracketLeft` (GAME_CODES:6, sampleInput:191) · `BracketRight` (GAME_CODES:6, sampleInput:190) · `Digit1` (GAME_CODES:7, sampleInput:192) · `Digit2` (GAME_CODES:7, sampleInput:193) · `Digit3` (GAME_CODES:7, sampleInput:194) · `Digit4` (GAME_CODES:7, sampleInput:195) · `Digit5` (GAME_CODES:7, sampleInput:196) · `Digit6` (GAME_CODES:7, sampleInput:197) · `Digit7` (GAME_CODES:7) · `Digit8` (GAME_CODES:7) · `Digit9` (GAME_CODES:7) · `Digit0` (GAME_CODES:7)
 
 ## Symbols
 
@@ -52,7 +52,7 @@ _none_
 
 const · L1–8
 
-- effects: input.key `KeyW` · input.key `KeyA` · input.key `KeyS` · input.key `KeyD` · input.key `KeyQ` · input.key `KeyE` · input.key `KeyR` · input.key `KeyF` · input.key `KeyG` · input.key `KeyM` · input.key `KeyC` · input.key `KeyV` · input.key `KeyX` · input.key `KeyZ` · input.key `KeyT` · input.key `KeyY` · input.key `KeyB` · input.key `Space` · input.key `Tab` · input.key `ShiftLeft` · input.key `ShiftRight` · input.key `ControlLeft` · input.key `ControlRight` · input.key `ArrowUp` · input.key `ArrowDown` · input.key `ArrowLeft` · input.key `ArrowRight` · input.key `Escape` · input.key `BracketLeft` · input.key `BracketRight` · input.key `Digit1` · input.key `Digit2` · input.key `Digit3` · input.key `Digit4` · input.key `Digit5` · input.key `Digit6` · input.key `Digit7` · input.key `Digit8` · input.key `Digit9` · input.key `Digit0`
+- effects: input.key `KeyW` · input.key `KeyA` · input.key `KeyS` · input.key `KeyD` · input.key `KeyQ` · input.key `KeyE` · input.key `KeyR` · input.key `KeyF` · input.key `KeyG` · input.key `KeyM` · input.key `KeyC` · input.key `KeyV` · input.key `KeyX` · input.key `KeyZ` · input.key `KeyT` · input.key `KeyY` · input.key `KeyU` · input.key `KeyB` · input.key `Space` · input.key `Tab` · input.key `ShiftLeft` · input.key `ShiftRight` · input.key `ControlLeft` · input.key `ControlRight` · input.key `ArrowUp` · input.key `ArrowDown` · input.key `ArrowLeft` · input.key `ArrowRight` · input.key `Escape` · input.key `BracketLeft` · input.key `BracketRight` · input.key `Digit1` · input.key `Digit2` · input.key `Digit3` · input.key `Digit4` · input.key `Digit5` · input.key `Digit6` · input.key `Digit7` · input.key `Digit8` · input.key `Digit9` · input.key `Digit0`
 
 <!-- note:GAME_CODES -->
 <!-- /note -->
@@ -118,7 +118,7 @@ function · **exported** · L35–41
 
 ### <a id="s-emptyActions"></a>`emptyActions()`
 
-function · L43–71
+function · L43–72
 
 - called by: [`curr`](#s-curr) · [`prev`](#s-prev)
 
@@ -127,7 +127,7 @@ function · L43–71
 
 ### <a id="s-prev"></a>`prev`
 
-const · L73–73
+const · L74–74
 
 - calls: [`emptyActions`](#s-emptyActions)
 
@@ -136,7 +136,7 @@ const · L73–73
 
 ### <a id="s-curr"></a>`curr`
 
-const · L74–74
+const · L75–75
 
 - calls: [`emptyActions`](#s-emptyActions)
 
@@ -145,16 +145,16 @@ const · L74–74
 
 ### <a id="s-has"></a>`has(code)`
 
-function · L76–79
+function · L77–80
 
-- called by: [`sampleInput`](#s-sampleInput) ×37
+- called by: [`sampleInput`](#s-sampleInput) ×38
 
 <!-- note:has -->
 <!-- /note -->
 
 ### <a id="s-radialDeadzone"></a>`radialDeadzone(x, y, dz=)`
 
-function · L81–86
+function · L82–87
 
 - called by: [`sampleInput`](#s-sampleInput) ×2
 
@@ -163,7 +163,7 @@ function · L81–86
 
 ### <a id="s-clamp"></a>`clamp(v, lo, hi)`
 
-function · L88–90
+function · L89–91
 
 - called by: [`sampleInput`](#s-sampleInput) ×6
 
@@ -172,7 +172,7 @@ function · L88–90
 
 ### <a id="s-bindInput"></a>`bindInput(_target)`
 
-function · **exported** · L92–121
+function · **exported** · L93–122
 
 - calls: [`bindInput>clear`](#s-bindInput-clear)
 - called by: [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
@@ -183,7 +183,7 @@ function · **exported** · L92–121
 
 #### <a id="s-bindInput-typing"></a>`bindInput>typing(e)`
 
-function · L93–96
+function · L94–97
 
 - called by: [`bindInput>onDown`](#s-bindInput-onDown)
 
@@ -192,7 +192,7 @@ function · L93–96
 
 #### <a id="s-bindInput-onDown"></a>`bindInput>onDown(e)`
 
-function · L97–105
+function · L98–106
 
 - calls: [`bindInput>typing`](#s-bindInput-typing)
 
@@ -201,7 +201,7 @@ function · L97–105
 
 #### <a id="s-bindInput-onUp"></a>`bindInput>onUp(e)`
 
-function · L106–108
+function · L107–109
 
 <!-- note:bindInput>onUp -->
 a key pressed on the canvas and released in a text field must still let go
@@ -209,7 +209,7 @@ a key pressed on the canvas and released in a text field must still let go
 
 #### <a id="s-bindInput-clear"></a>`bindInput>clear()`
 
-function · L109–109
+function · L110–110
 
 - called by: [`bindInput`](#s-bindInput)
 
@@ -218,30 +218,30 @@ function · L109–109
 
 ### <a id="s-sampleInput"></a>`sampleInput()`
 
-function · **exported** · L123–203
+function · **exported** · L124–205
 
-- calls: [`clamp`](#s-clamp) ×6 · [`has`](#s-has) ×37 · [`radialDeadzone`](#s-radialDeadzone) ×2
+- calls: [`clamp`](#s-clamp) ×6 · [`has`](#s-has) ×38 · [`radialDeadzone`](#s-radialDeadzone) ×2
 - called by: [`pauseTick`](../sim/sim.js.md#s-pauseTick) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
-- effects: input.key `KeyA` · input.key `ArrowLeft` · input.key `KeyD` · input.key `ArrowRight` · input.key `KeyW` · input.key `KeyS` · input.key `ArrowUp` · input.key `ArrowDown` · input.key `KeyQ` · input.key `KeyE` · input.key `KeyR` · input.key `KeyF` · input.key `ShiftLeft` · input.key `ShiftRight` · input.key `ControlLeft` · input.key `ControlRight` · input.key `KeyX` · input.key `Space` · input.key `KeyZ` · input.key `KeyV` · input.key `KeyG` · input.key `KeyM` · input.key `Escape` · input.key `KeyC` · input.key `BracketRight` · input.key `BracketLeft` · input.key `Digit1` · input.key `Digit2` · input.key `Digit3` · input.key `Digit4` · input.key `Digit5` · input.key `Digit6` · input.key `KeyT` · input.key `KeyY` · input.key `KeyB` · input.key `Tab`
+- effects: input.key `KeyA` · input.key `ArrowLeft` · input.key `KeyD` · input.key `ArrowRight` · input.key `KeyW` · input.key `KeyS` · input.key `ArrowUp` · input.key `ArrowDown` · input.key `KeyQ` · input.key `KeyE` · input.key `KeyR` · input.key `KeyF` · input.key `ShiftLeft` · input.key `ShiftRight` · input.key `ControlLeft` · input.key `ControlRight` · input.key `KeyX` · input.key `Space` · input.key `KeyZ` · input.key `KeyV` · input.key `KeyG` · input.key `KeyM` · input.key `Escape` · input.key `KeyC` · input.key `BracketRight` · input.key `BracketLeft` · input.key `Digit1` · input.key `Digit2` · input.key `Digit3` · input.key `Digit4` · input.key `Digit5` · input.key `Digit6` · input.key `KeyT` · input.key `KeyY` · input.key `KeyU` · input.key `KeyB` · input.key `Tab`
 
 <!-- note:sampleInput -->
-- L135 · `if (has("KeyA") || has("ArrowLeft")) panX -= 1;` — WASD is the camera/nose: W up, S down, A left, D right. Arrows up/down
+- L136 · `if (has("KeyA") || has("ArrowLeft")) panX -= 1;` — WASD is the camera/nose: W up, S down, A left, D right. Arrows up/down
   step the mains; R/F are the vertical thrusters; Q/E strafe. Shift is the
   boost, Shift+Ctrl sets cruise (sim.js reads those).
 <!-- /note -->
 
 ### <a id="s-justPressed"></a>`justPressed(action)`
 
-function · **exported** · L205–207
+function · **exported** · L207–209
 
-- called by: [`pauseTick`](../sim/sim.js.md#s-pauseTick) _js/sim/sim.js_ · [`stepShip`](../sim/sim.js.md#s-stepShip) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×16
+- called by: [`pauseTick`](../sim/sim.js.md#s-pauseTick) _js/sim/sim.js_ · [`stepShip`](../sim/sim.js.md#s-stepShip) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ ×17
 
 <!-- note:justPressed -->
 <!-- /note -->
 
 ### <a id="s-setInjectedKeys"></a>`setInjectedKeys(codes)`
 
-function · **exported** · L209–211
+function · **exported** · L211–213
 
 - called by: [`closeInterior`](../interior/interior.js.md#s-closeInterior) _js/interior/interior.js_ · [`openInterior`](../interior/interior.js.md#s-openInterior) _js/interior/interior.js_ · [`wireControlsTest.setKeys`](../sim/sim.js.md#s-wireControlsTest-setKeys) _js/sim/sim.js_
 
@@ -250,7 +250,7 @@ function · **exported** · L209–211
 
 ### <a id="s-setInjectedPan"></a>`setInjectedPan(v)`
 
-function · **exported** · L213–215
+function · **exported** · L215–217
 
 - called by: [`apHold`](../flight/autopilot.js.md#s-apHold) _js/flight/autopilot.js_ · [`apSteer`](../flight/autopilot.js.md#s-apSteer) _js/flight/autopilot.js_ · [`releaseControls`](../flight/autopilot.js.md#s-releaseControls) _js/flight/autopilot.js_ · [`closeInterior`](../interior/interior.js.md#s-closeInterior) _js/interior/interior.js_ · [`openInterior`](../interior/interior.js.md#s-openInterior) _js/interior/interior.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ ×2 · [`retakeCommand`](../npc/captain.js.md#s-retakeCommand) _js/npc/captain.js_ · [`steerToward`](../npc/captain.js.md#s-steerToward) _js/npc/captain.js_ · [`wireControlsTest.setPan`](../sim/sim.js.md#s-wireControlsTest-setPan) _js/sim/sim.js_
 
@@ -259,7 +259,7 @@ function · **exported** · L213–215
 
 ### <a id="s-setInjectedSteer"></a>`setInjectedSteer(v)`
 
-function · **exported** · L217–219
+function · **exported** · L219–221
 
 <!-- note:setInjectedSteer -->
 legacy test hook

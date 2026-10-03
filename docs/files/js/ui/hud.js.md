@@ -1,6 +1,6 @@
 # js/ui/hud.js
 
-[index](../../../README.md) · 1201 lines · 110 symbols · 44 imports · 1 importers
+[index](../../../README.md) · 1213 lines · 110 symbols · 44 imports · 1 importers
 
 ## About
 
@@ -21,7 +21,7 @@
 | 3 | `../version.js` | `BUILD_LINE` | [js/version.js](../version.js.md) |
 | 4 | `../world/generate.js` | `describeSystem`, `generateSystem` | [js/world/generate.js](../world/generate.js.md) |
 | 5 | `../core/input.js` | `touch` | [js/core/input.js](../core/input.js.md) |
-| 6 | `../sim/sim.js` | `autoLevel`, `cycleMiningMode`, `cycleTimeScale`, `cycleTurretMode`, `launchSim`, `loadSky`, `requestJump`, `requestScan`, `resumePlay`, `claimPort`, `sensorPulse`, `toggleDock`, `togglePointerLock`, `returnToMenu`, `dismissNotice`, `setThrottle`, `setMiningMode`, `sim`, `toggleSystem` | [js/sim/sim.js](../sim/sim.js.md) |
+| 6 | `../sim/sim.js` | `autoLevel`, `cycleMiningMode`, `cycleTimeScale`, `cycleTurretMode`, `launchSim`, `loadSky`, `requestJump`, `requestScan`, `resumePlay`, `claimPort`, `sensorPulse`, `toggleDock`, `togglePointerLock`, `returnToMenu`, `dismissNotice`, `setThrottle`, `setMiningMode`, `setRigMode`, `rigWanted`, `sim`, `toggleSystem` | [js/sim/sim.js](../sim/sim.js.md) |
 | 7 | `../console/console.js` | `mountConsole`, `toggleConsole` | [js/console/console.js](../console/console.js.md) |
 | 8 | `../station/stationdeck.js` | `mountStationDeck` | [js/station/stationdeck.js](../station/stationdeck.js.md) |
 | 9 | `./secbadge.js` | `mountSecBadge` | [js/ui/secbadge.js](secbadge.js.md) |
@@ -72,11 +72,11 @@
 
 ## Effects
 
-- **bus.on** — `‹paint› on store` (mountHud:1186)
-- **dom.create** — `div` (mountHud>paintRow:813, mountHud>rowEl:906) · `label` (mountHud>paintRow:815) · `input` (mountHud>paintRow:817) · `b` (mountHud>paintRow:821)
-- **dom.id** — `‹id›` (stackLeftColumn:176, $:238) · `gauges` (stackRightColumn:190) · `sys-strip` (stackRightColumn:190) · `dash` (stackRightColumn:190) · `hold-body` (paintHold:467) · `callsign` (mountHud:495, mountHud:558, mountHud:592, mountHud:610, mountHud>setMode.onFly:639) · `sys-line` (mountHud>refreshPreview:512) · `stat-survey` (mountHud>refreshPreview:513) · `stat-probes` (mountHud>refreshPreview:514) · `build-line` (mountHud:555) · `btn-continue` (mountHud:573) · `btn-create` (mountHud:574) · `hangar` (mountHud:609) · `stick` (mountHud:675) · `stick-knob` (mountHud:676) · `btn-brake` (mountHud:708) · `thr-track` (mountHud:717, mountHud>paintAll:1095) · `thr-fill` (mountHud:717) · `thr-thumb` (mountHud:717) · `dash-page-${…}` (mountHud>setPage:724) · `dash-tabs` (mountHud>setPage:725, mountHud:730) · `dash-page-name` (mountHud>setPage:728) · `sw-cut` (mountHud:736, mountHud>paintAll:1110) · `mode-turret` (mountHud:744, mountHud>paintAll:1123, mountHud>paintAll:1124) · `mode-mining` (mountHud:745, mountHud>paintAll:1163, mountHud>paintAll:1164) · `op-pulse` (mountHud:747, mountHud>paintAll:1135) · `op-level` (mountHud:748) · `op-time` (mountHud:749, mountHud>paintAll:1150) · `op-dock` (mountHud:750, mountHud>paintAll:1147) · `op-claim` (mountHud:751, mountHud>paintAll:1149) · `op-threat` (mountHud:755, mountHud>paintAll:1159) · `btn-survey` (mountHud:757) · `btn-plock` (mountHud:758) · `btn-warp` (mountHud:759, mountHud:901) · `btn-con` (mountHud:760, mountHud>paintAll:1042) · `btn-cam` (mountHud:761, mountHud>paintAll:958) · `btn-pause` (mountHud:764) · `btn-resume` (mountHud:768) · `btn-tutor` (mountHud:769) · `btn-watch` (mountHud:773, mountHud>paintAll:948) · `btn-menu` (mountHud:779) · `btn-map` (mountHud:786) · `btn-hold` (mountHud:788, mountHud>paintAll:951, mountHud>paintAll:952) · `g-cgo-btn` (mountHud:789) · `hold-close` (mountHud:790) · `hold` (mountHud:791, mountHud>paintAll:950) · `btn-aria` (mountHud:792, mountHud>paintAll:959) · `btn-full` (mountHud:798) · `btn-map-close` (mountHud:801) · `btn-mute` (mountHud:802, mountHud>paintAll:1041) · `mix-rows` (mountHud:810) · `btn-mix-reset` (mountHud:829) · `notice-card` (mountHud:896, mountHud:900) · `canopy` (mountHud:898) · `markers` (mountHud:899) · `impact-flash` (mountHud:902) · `sky-glare` (mountHud:903) · `warp-fill` (mountHud:911) · `warp-state` (mountHud:912) · `hud-clock` (mountHud>paintClock:922) · `hud` (mountHud>paintClock:927, mountHud>paintAll:945) · `start` (mountHud>paintAll:944) · `pause` (mountHud>paintAll:947) · `map` (mountHud>paintAll:949) · `hud-sky` (mountHud>paintAll:963) · `i-vel` (mountHud>paintAll:966) · `i-cls` (mountHud>paintAll:967) · `i-alt` (mountHud>paintAll:968) · `hazline` (mountHud>paintAll:971) · `haz-text` (mountHud>paintAll:977) · `respline` (mountHud>paintAll:982) · `resp-text` (mountHud>paintAll:990) · `i-g` (mountHud>paintAll:998) · `instruments` (mountHud>paintAll:999) · `g-pwr` (mountHud>paintAll:1001) · `g-pwr-n` (mountHud>paintAll:1001) · `g-hull` (mountHud>paintAll:1004) · `g-hull-n` (mountHud>paintAll:1004) · `g-shld` (mountHud>paintAll:1005) · `g-shld-n` (mountHud>paintAll:1005) · `g-o2` (mountHud>paintAll:1006) · `g-o2-n` (mountHud>paintAll:1006) · `g-cgo` (mountHud>paintAll:1007) · `g-cgo-n` (mountHud>paintAll:1007) · `alarms` (mountHud>paintAll:1015) · `lock-name` (mountHud>paintAll:1022) · `notice` (mountHud>paintAll:1023) · `status` (mountHud>paintAll:1039) · `route-card` (mountHud>paintAll:1066) · `route-target` (mountHud>paintAll:1076) · `route-eta` (mountHud>paintAll:1077) · `route-hazards` (mountHud>paintAll:1078) · `thr-num` (mountHud>paintAll:1096) · `thr-draw` (mountHud>paintAll:1097, mountHud>paintAll:1098) · `mode-turret-st` (mountHud>paintAll:1122) · `lockbar` (mountHud>paintAll:1125) · `lock-fill` (mountHud>paintAll:1127) · `lock-text` (mountHud>paintAll:1128) · `op-pulse-st` (mountHud>paintAll:1134) · `op-time-st` (mountHud>paintAll:1136) · `op-dock-st` (mountHud>paintAll:1138) · `op-claim-st` (mountHud>paintAll:1148) · `op-threat-st` (mountHud>paintAll:1152) · `mode-mining-st` (mountHud>paintAll:1162) · `labels` (mountHud>paintAll:1166) · `heat-wash` (mountHud>paintAll:1174) · `toast` (mountHud>paintAll:1177, mountHud>paintAll:1178, mountHud>paintAll:1180)
-- **dom.query** — `.hud-tools` (measureDock:58) · `‹PUCK_AVOID›` (boxesToAvoid:74) · `.cx` (boxesToAvoid:75) · `.sys-strip` (measureRail:100) · `link[href*="cockpit.css"]` (stackRightColumn:189) · `‹sel›` (bindOrient:226) · `#thr-presets [data-thr]` (bindThrottle:371) · `label` (mountHud:610) · `[data-rcs]` (mountHud:695) · `button` (mountHud>setPage:725) · `button[data-page]` (mountHud:730) · `.sw[data-sys]` (mountHud:741, mountHud:886) · `button, .btn, .tbtn, .pick, .chip` (mountHud:841) · `.st` (mountHud:887, mountHud>paintAll:1115)
-- **event.listen** — `resize on window → go` (bindOrient:221) · `orientationchange on window → go` (bindOrient:222) · `resize on window.visualViewport → go` (bindOrient:223) · `pointerdown on el → (inline)` (bindPad:309) · `pointermove on el → move` (bindPad:319) · `pointerup on el → end` (bindPad:320) · `pointercancel on el → end` (bindPad:321) · `pointerdown on el → d` (bindHold:338) · `pointerup on el → u` (bindHold:339) · `pointercancel on el → u` (bindHold:340) · `pointerleave on el → u` (bindHold:341) · `pointerdown on track → (inline)` (bindThrottle:355) · `pointermove on track → (inline)` (bindThrottle:360) · `click on b → (inline)` (bindThrottle:372, mountHud:732) · `pointerup on track → end` (bindThrottle:373) · `pointercancel on track → end` (bindThrottle:374) · `input on $() → (inline)` (mountHud:558) · `click on contBtn → (inline)` (mountHud:588) · `click on createBtn → (inline)` (mountHud:598) · `lg-account on globalThis.document → onAccount` (mountHud:669) · `click on $() → (inline)` (mountHud:736, mountHud:744, mountHud:745, mountHud:747, mountHud:748, mountHud:749 +21) · `click on el → (inline)` (mountHud:742) · `click on $() → toggleHold` (mountHud:788, mountHud:789) · `input on r → (inline)` (mountHud>paintRow:823) · `pointerdown on document → (inline)` (mountHud:840)
+- **bus.on** — `‹paint› on store` (mountHud:1198)
+- **dom.create** — `div` (mountHud>paintRow:818, mountHud>rowEl:911) · `label` (mountHud>paintRow:820) · `input` (mountHud>paintRow:822) · `b` (mountHud>paintRow:826)
+- **dom.id** — `‹id›` (stackLeftColumn:176, $:238) · `gauges` (stackRightColumn:190) · `sys-strip` (stackRightColumn:190) · `dash` (stackRightColumn:190) · `hold-body` (paintHold:467) · `callsign` (mountHud:495, mountHud:558, mountHud:592, mountHud:610, mountHud>setMode.onFly:639) · `sys-line` (mountHud>refreshPreview:512) · `stat-survey` (mountHud>refreshPreview:513) · `stat-probes` (mountHud>refreshPreview:514) · `build-line` (mountHud:555) · `btn-continue` (mountHud:573) · `btn-create` (mountHud:574) · `hangar` (mountHud:609) · `stick` (mountHud:675) · `stick-knob` (mountHud:676) · `btn-brake` (mountHud:708) · `thr-track` (mountHud:717, mountHud>paintAll:1100) · `thr-fill` (mountHud:717) · `thr-thumb` (mountHud:717) · `dash-page-${…}` (mountHud>setPage:724) · `dash-tabs` (mountHud>setPage:725, mountHud:730) · `dash-page-name` (mountHud>setPage:728) · `sw-cut` (mountHud:737, mountHud>paintAll:1115) · `mode-turret` (mountHud:749, mountHud>paintAll:1135, mountHud>paintAll:1136) · `mode-mining` (mountHud:750, mountHud>paintAll:1175, mountHud>paintAll:1176) · `op-pulse` (mountHud:752, mountHud>paintAll:1147) · `op-level` (mountHud:753) · `op-time` (mountHud:754, mountHud>paintAll:1162) · `op-dock` (mountHud:755, mountHud>paintAll:1159) · `op-claim` (mountHud:756, mountHud>paintAll:1161) · `op-threat` (mountHud:760, mountHud>paintAll:1171) · `btn-survey` (mountHud:762) · `btn-plock` (mountHud:763) · `btn-warp` (mountHud:764, mountHud:906) · `btn-con` (mountHud:765, mountHud>paintAll:1047) · `btn-cam` (mountHud:766, mountHud>paintAll:963) · `btn-pause` (mountHud:769) · `btn-resume` (mountHud:773) · `btn-tutor` (mountHud:774) · `btn-watch` (mountHud:778, mountHud>paintAll:953) · `btn-menu` (mountHud:784) · `btn-map` (mountHud:791) · `btn-hold` (mountHud:793, mountHud>paintAll:956, mountHud>paintAll:957) · `g-cgo-btn` (mountHud:794) · `hold-close` (mountHud:795) · `hold` (mountHud:796, mountHud>paintAll:955) · `btn-aria` (mountHud:797, mountHud>paintAll:964) · `btn-full` (mountHud:803) · `btn-map-close` (mountHud:806) · `btn-mute` (mountHud:807, mountHud>paintAll:1046) · `mix-rows` (mountHud:815) · `btn-mix-reset` (mountHud:834) · `notice-card` (mountHud:901, mountHud:905) · `canopy` (mountHud:903) · `markers` (mountHud:904) · `impact-flash` (mountHud:907) · `sky-glare` (mountHud:908) · `warp-fill` (mountHud:916) · `warp-state` (mountHud:917) · `hud-clock` (mountHud>paintClock:927) · `hud` (mountHud>paintClock:932, mountHud>paintAll:950) · `start` (mountHud>paintAll:949) · `pause` (mountHud>paintAll:952) · `map` (mountHud>paintAll:954) · `hud-sky` (mountHud>paintAll:968) · `i-vel` (mountHud>paintAll:971) · `i-cls` (mountHud>paintAll:972) · `i-alt` (mountHud>paintAll:973) · `hazline` (mountHud>paintAll:976) · `haz-text` (mountHud>paintAll:982) · `respline` (mountHud>paintAll:987) · `resp-text` (mountHud>paintAll:995) · `i-g` (mountHud>paintAll:1003) · `instruments` (mountHud>paintAll:1004) · `g-pwr` (mountHud>paintAll:1006) · `g-pwr-n` (mountHud>paintAll:1006) · `g-hull` (mountHud>paintAll:1009) · `g-hull-n` (mountHud>paintAll:1009) · `g-shld` (mountHud>paintAll:1010) · `g-shld-n` (mountHud>paintAll:1010) · `g-o2` (mountHud>paintAll:1011) · `g-o2-n` (mountHud>paintAll:1011) · `g-cgo` (mountHud>paintAll:1012) · `g-cgo-n` (mountHud>paintAll:1012) · `alarms` (mountHud>paintAll:1020) · `lock-name` (mountHud>paintAll:1027) · `notice` (mountHud>paintAll:1028) · `status` (mountHud>paintAll:1044) · `route-card` (mountHud>paintAll:1071) · `route-target` (mountHud>paintAll:1081) · `route-eta` (mountHud>paintAll:1082) · `route-hazards` (mountHud>paintAll:1083) · `thr-num` (mountHud>paintAll:1101) · `thr-draw` (mountHud>paintAll:1102, mountHud>paintAll:1103) · `mode-turret-st` (mountHud>paintAll:1134) · `lockbar` (mountHud>paintAll:1137) · `lock-fill` (mountHud>paintAll:1139) · `lock-text` (mountHud>paintAll:1140) · `op-pulse-st` (mountHud>paintAll:1146) · `op-time-st` (mountHud>paintAll:1148) · `op-dock-st` (mountHud>paintAll:1150) · `op-claim-st` (mountHud>paintAll:1160) · `op-threat-st` (mountHud>paintAll:1164) · `mode-mining-st` (mountHud>paintAll:1174) · `labels` (mountHud>paintAll:1178) · `heat-wash` (mountHud>paintAll:1186) · `toast` (mountHud>paintAll:1189, mountHud>paintAll:1190, mountHud>paintAll:1192)
+- **dom.query** — `.hud-tools` (measureDock:58) · `‹PUCK_AVOID›` (boxesToAvoid:74) · `.cx` (boxesToAvoid:75) · `.sys-strip` (measureRail:100) · `link[href*="cockpit.css"]` (stackRightColumn:189) · `‹sel›` (bindOrient:226) · `#thr-presets [data-thr]` (bindThrottle:371) · `label` (mountHud:610) · `[data-rcs]` (mountHud:695) · `button` (mountHud>setPage:725) · `button[data-page]` (mountHud:730) · `.sw[data-sys]` (mountHud:746, mountHud:891) · `button, .btn, .tbtn, .pick, .chip` (mountHud:846) · `.st` (mountHud:892, mountHud>paintAll:1122) · `.nm` (mountHud>paintAll:1123)
+- **event.listen** — `resize on window → go` (bindOrient:221) · `orientationchange on window → go` (bindOrient:222) · `resize on window.visualViewport → go` (bindOrient:223) · `pointerdown on el → (inline)` (bindPad:309) · `pointermove on el → move` (bindPad:319) · `pointerup on el → end` (bindPad:320) · `pointercancel on el → end` (bindPad:321) · `pointerdown on el → d` (bindHold:338) · `pointerup on el → u` (bindHold:339) · `pointercancel on el → u` (bindHold:340) · `pointerleave on el → u` (bindHold:341) · `pointerdown on track → (inline)` (bindThrottle:355) · `pointermove on track → (inline)` (bindThrottle:360) · `click on b → (inline)` (bindThrottle:372, mountHud:732) · `pointerup on track → end` (bindThrottle:373) · `pointercancel on track → end` (bindThrottle:374) · `input on $() → (inline)` (mountHud:558) · `click on contBtn → (inline)` (mountHud:588) · `click on createBtn → (inline)` (mountHud:598) · `lg-account on globalThis.document → onAccount` (mountHud:669) · `click on $() → (inline)` (mountHud:737, mountHud:749, mountHud:750, mountHud:752, mountHud:753, mountHud:754 +21) · `click on el → (inline)` (mountHud:747) · `click on $() → toggleHold` (mountHud:793, mountHud:794) · `input on r → (inline)` (mountHud>paintRow:828) · `pointerdown on document → (inline)` (mountHud:845)
 - **global.write** — `window.__lgFlyQueued` (mountHud>setMode:664)
 - **timer** — `setTimeout` (bindOrient:229, mountHud>queueSky:528, mountHud:671)
 
@@ -752,9 +752,9 @@ prop · L470–470
 
 ### <a id="s-mountHud"></a>`mountHud()`
 
-function · **exported** · L473–1201
+function · **exported** · L473–1213
 
-- calls: [`ariaHasConn`](../aria/aria.js.md#s-ariaHasConn) _js/aria/aria.js_ ×2 · [`ariaRelease`](../aria/aria.js.md#s-ariaRelease) _js/aria/aria.js_ · [`ariaTakeConn`](../aria/aria.js.md#s-ariaTakeConn) _js/aria/aria.js_ · [`busLevels`](../audio/graph.js.md#s-busLevels) _js/audio/graph.js_ ×2 · [`resetMix`](../audio/graph.js.md#s-resetMix) _js/audio/graph.js_ · [`setAudioMuted`](../audio/index.js.md#s-setAudioMuted) _js/audio/index.js_ · [`unlockAudio`](../audio/index.js.md#s-unlockAudio) _js/audio/index.js_ ×2 · [`mountComms`](../comms/comms.js.md#s-mountComms) _js/comms/comms.js_ · [`wireCommsTest`](../comms/comms.js.md#s-wireCommsTest) _js/comms/comms.js_ · [`mountConsole`](../console/console.js.md#s-mountConsole) _js/console/console.js_ · [`toggleConsole`](../console/console.js.md#s-toggleConsole) _js/console/console.js_ · [`loadSave`](../core/store.js.md#s-loadSave) _js/core/store.js_ ×4 · [`randomCallsign`](../core/store.js.md#s-randomCallsign) _js/core/store.js_ · [`wireCompany`](../corp/company.js.md#s-wireCompany) _js/corp/company.js_ · [`wireFleet`](../corp/fleet.js.md#s-wireFleet) _js/corp/fleet.js_ · [`disconnectGdb`](../corp/gdb.js.md#s-disconnectGdb) _js/corp/gdb.js_ · [`wireFamily`](../crew/family.js.md#s-wireFamily) _js/crew/family.js_ · [`wireContracts`](../economy/contracts.js.md#s-wireContracts) _js/economy/contracts.js_ · [`wireIcework`](../economy/icework.js.md#s-wireIcework) _js/economy/icework.js_ · [`wireAutopilot`](../flight/autopilot.js.md#s-wireAutopilot) _js/flight/autopilot.js_ · [`loadPilot`](../flight/pilot.js.md#s-loadPilot) _js/flight/pilot.js_ ×3 · [`restorePilot`](../flight/pilot.js.md#s-restorePilot) _js/flight/pilot.js_ · [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ ×2 · [`wireRecorder`](../flight/recorder.js.md#s-wireRecorder) _js/flight/recorder.js_ · [`mountInterior`](../interior/interior.js.md#s-mountInterior) _js/interior/interior.js_ · [`eraseGuest`](../net/account.js.md#s-eraseGuest) _js/net/account.js_ · [`disconnectNet`](../net/net.js.md#s-disconnectNet) _js/net/net.js_ · [`wireCaptainTest`](../npc/captain.js.md#s-wireCaptainTest) _js/npc/captain.js_ · [`wireNpcChat`](../npc/chat.js.md#s-wireNpcChat) _js/npc/chat.js_ · [`disconnectCradle`](../npc/cradle.js.md#s-disconnectCradle) _js/npc/cradle.js_ · [`autoLevel`](../sim/sim.js.md#s-autoLevel) _js/sim/sim.js_ · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ · [`cycleMiningMode`](../sim/sim.js.md#s-cycleMiningMode) _js/sim/sim.js_ · [`cycleTimeScale`](../sim/sim.js.md#s-cycleTimeScale) _js/sim/sim.js_ · [`cycleTurretMode`](../sim/sim.js.md#s-cycleTurretMode) _js/sim/sim.js_ · [`dismissNotice`](../sim/sim.js.md#s-dismissNotice) _js/sim/sim.js_ · [`requestJump`](../sim/sim.js.md#s-requestJump) _js/sim/sim.js_ · [`requestScan`](../sim/sim.js.md#s-requestScan) _js/sim/sim.js_ · [`resumePlay`](../sim/sim.js.md#s-resumePlay) _js/sim/sim.js_ ×3 · [`returnToMenu`](../sim/sim.js.md#s-returnToMenu) _js/sim/sim.js_ · [`sensorPulse`](../sim/sim.js.md#s-sensorPulse) _js/sim/sim.js_ · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ ×2 · [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_ · [`togglePointerLock`](../sim/sim.js.md#s-togglePointerLock) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ ×2 · [`mountStationDeck`](../station/stationdeck.js.md#s-mountStationDeck) _js/station/stationdeck.js_ · [`mountChatbox`](chatbox.js.md#s-mountChatbox) _js/ui/chatbox.js_ · [`mountCreation`](creation.js.md#s-mountCreation) _js/ui/creation.js_ · [`mountDockBoot`](dockboot.js.md#s-mountDockBoot) _js/ui/dockboot.js_ · [`mountFullscreen`](fullscreen.js.md#s-mountFullscreen) _js/ui/fullscreen.js_ · [`$`](#s-S) ×54 · [`bindHold`](#s-bindHold) ×2 · [`bindOrient`](#s-bindOrient) · [`bindPad`](#s-bindPad) · [`bindThrottle`](#s-bindThrottle) · [`mountHud>go`](#s-mountHud-go) · [`mountHud>onAccount`](#s-mountHud-onAccount) · [`mountHud>paint`](#s-mountHud-paint) · [`mountHud>paintRow`](#s-mountHud-paintRow) · [`mountHud>paintStart`](#s-mountHud-paintStart) ×2 · [`mountHud>queueSky`](#s-mountHud-queueSky) ×2 · [`mountHud>refreshPreview`](#s-mountHud-refreshPreview) · [`mountHud>setMode`](#s-mountHud-setMode) · [`mountHud>setPage`](#s-mountHud-setPage) ×2 · [`sanitizeRoom`](#s-sanitizeRoom) ×2 · [`mountMap`](map.js.md#s-mountMap) _js/ui/map.js_ · [`mountSecBadge`](secbadge.js.md#s-mountSecBadge) _js/ui/secbadge.js_ · [`startTutorial`](tutorial.js.md#s-startTutorial) _js/ui/tutorial.js_ · [`wireAtmoWorks`](../world/events/atmoworks.js.md#s-wireAtmoWorks) _js/world/events/atmoworks.js_
+- calls: [`ariaHasConn`](../aria/aria.js.md#s-ariaHasConn) _js/aria/aria.js_ ×2 · [`ariaRelease`](../aria/aria.js.md#s-ariaRelease) _js/aria/aria.js_ · [`ariaTakeConn`](../aria/aria.js.md#s-ariaTakeConn) _js/aria/aria.js_ · [`busLevels`](../audio/graph.js.md#s-busLevels) _js/audio/graph.js_ ×2 · [`resetMix`](../audio/graph.js.md#s-resetMix) _js/audio/graph.js_ · [`setAudioMuted`](../audio/index.js.md#s-setAudioMuted) _js/audio/index.js_ · [`unlockAudio`](../audio/index.js.md#s-unlockAudio) _js/audio/index.js_ ×2 · [`mountComms`](../comms/comms.js.md#s-mountComms) _js/comms/comms.js_ · [`wireCommsTest`](../comms/comms.js.md#s-wireCommsTest) _js/comms/comms.js_ · [`mountConsole`](../console/console.js.md#s-mountConsole) _js/console/console.js_ · [`toggleConsole`](../console/console.js.md#s-toggleConsole) _js/console/console.js_ · [`loadSave`](../core/store.js.md#s-loadSave) _js/core/store.js_ ×4 · [`randomCallsign`](../core/store.js.md#s-randomCallsign) _js/core/store.js_ · [`wireCompany`](../corp/company.js.md#s-wireCompany) _js/corp/company.js_ · [`wireFleet`](../corp/fleet.js.md#s-wireFleet) _js/corp/fleet.js_ · [`disconnectGdb`](../corp/gdb.js.md#s-disconnectGdb) _js/corp/gdb.js_ · [`wireFamily`](../crew/family.js.md#s-wireFamily) _js/crew/family.js_ · [`wireContracts`](../economy/contracts.js.md#s-wireContracts) _js/economy/contracts.js_ · [`wireIcework`](../economy/icework.js.md#s-wireIcework) _js/economy/icework.js_ · [`wireAutopilot`](../flight/autopilot.js.md#s-wireAutopilot) _js/flight/autopilot.js_ · [`loadPilot`](../flight/pilot.js.md#s-loadPilot) _js/flight/pilot.js_ ×3 · [`restorePilot`](../flight/pilot.js.md#s-restorePilot) _js/flight/pilot.js_ · [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ ×2 · [`wireRecorder`](../flight/recorder.js.md#s-wireRecorder) _js/flight/recorder.js_ · [`mountInterior`](../interior/interior.js.md#s-mountInterior) _js/interior/interior.js_ · [`eraseGuest`](../net/account.js.md#s-eraseGuest) _js/net/account.js_ · [`disconnectNet`](../net/net.js.md#s-disconnectNet) _js/net/net.js_ · [`wireCaptainTest`](../npc/captain.js.md#s-wireCaptainTest) _js/npc/captain.js_ · [`wireNpcChat`](../npc/chat.js.md#s-wireNpcChat) _js/npc/chat.js_ · [`disconnectCradle`](../npc/cradle.js.md#s-disconnectCradle) _js/npc/cradle.js_ · [`autoLevel`](../sim/sim.js.md#s-autoLevel) _js/sim/sim.js_ · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ · [`cycleMiningMode`](../sim/sim.js.md#s-cycleMiningMode) _js/sim/sim.js_ · [`cycleTimeScale`](../sim/sim.js.md#s-cycleTimeScale) _js/sim/sim.js_ · [`cycleTurretMode`](../sim/sim.js.md#s-cycleTurretMode) _js/sim/sim.js_ · [`dismissNotice`](../sim/sim.js.md#s-dismissNotice) _js/sim/sim.js_ · [`requestJump`](../sim/sim.js.md#s-requestJump) _js/sim/sim.js_ · [`requestScan`](../sim/sim.js.md#s-requestScan) _js/sim/sim.js_ · [`resumePlay`](../sim/sim.js.md#s-resumePlay) _js/sim/sim.js_ ×3 · [`returnToMenu`](../sim/sim.js.md#s-returnToMenu) _js/sim/sim.js_ · [`rigWanted`](../sim/sim.js.md#s-rigWanted) _js/sim/sim.js_ ×2 · [`sensorPulse`](../sim/sim.js.md#s-sensorPulse) _js/sim/sim.js_ · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ ×3 · [`setRigMode`](../sim/sim.js.md#s-setRigMode) _js/sim/sim.js_ ×2 · [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_ · [`togglePointerLock`](../sim/sim.js.md#s-togglePointerLock) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ ×2 · [`mountStationDeck`](../station/stationdeck.js.md#s-mountStationDeck) _js/station/stationdeck.js_ · [`mountChatbox`](chatbox.js.md#s-mountChatbox) _js/ui/chatbox.js_ · [`mountCreation`](creation.js.md#s-mountCreation) _js/ui/creation.js_ · [`mountDockBoot`](dockboot.js.md#s-mountDockBoot) _js/ui/dockboot.js_ · [`mountFullscreen`](fullscreen.js.md#s-mountFullscreen) _js/ui/fullscreen.js_ · [`$`](#s-S) ×54 · [`bindHold`](#s-bindHold) ×2 · [`bindOrient`](#s-bindOrient) · [`bindPad`](#s-bindPad) · [`bindThrottle`](#s-bindThrottle) · [`mountHud>go`](#s-mountHud-go) · [`mountHud>onAccount`](#s-mountHud-onAccount) · [`mountHud>paint`](#s-mountHud-paint) · [`mountHud>paintRow`](#s-mountHud-paintRow) · [`mountHud>paintStart`](#s-mountHud-paintStart) ×2 · [`mountHud>queueSky`](#s-mountHud-queueSky) ×2 · [`mountHud>refreshPreview`](#s-mountHud-refreshPreview) · [`mountHud>setMode`](#s-mountHud-setMode) · [`mountHud>setPage`](#s-mountHud-setPage) ×2 · [`sanitizeRoom`](#s-sanitizeRoom) ×2 · [`mountMap`](map.js.md#s-mountMap) _js/ui/map.js_ · [`mountSecBadge`](secbadge.js.md#s-mountSecBadge) _js/ui/secbadge.js_ · [`startTutorial`](tutorial.js.md#s-startTutorial) _js/ui/tutorial.js_ · [`wireAtmoWorks`](../world/events/atmoworks.js.md#s-wireAtmoWorks) _js/world/events/atmoworks.js_
 - via [js/audio/index.js](../audio/index.js.md): `UI.press`, `UI.tap`, `UI.toggleOn`
 - called by: [`@file`](../main.js.md#) _js/main.js_
 - effects: dom.id `callsign` · dom.id `build-line` · event.listen `input` · dom.id `btn-continue` · dom.id `btn-create` · event.listen `click` · dom.id `hangar` · dom.query `label` · event.listen `lg-account` · timer `setTimeout` · dom.id `stick` · dom.id `stick-knob` · dom.query `[data-rcs]` · dom.id `btn-brake` · dom.id `thr-track` · dom.id `thr-fill` · dom.id `thr-thumb` · dom.query `button[data-page]` · dom.id `dash-tabs` · dom.id `sw-cut` · dom.query `.sw[data-sys]` · dom.id `mode-turret` · dom.id `mode-mining` · dom.id `op-pulse` · dom.id `op-level` · dom.id `op-time` · dom.id `op-dock` · dom.id `op-claim` · dom.id `op-threat` · dom.id `btn-survey` · dom.id `btn-plock` · dom.id `btn-warp` · dom.id `btn-con` · dom.id `btn-cam` · dom.id `btn-pause` · dom.id `btn-resume` · dom.id `btn-tutor` · dom.id `btn-watch` · dom.id `btn-menu` · dom.id `btn-map` · dom.id `btn-hold` · dom.id `g-cgo-btn` · dom.id `hold-close` · dom.id `hold` · dom.id `btn-aria` · dom.id `btn-full` · dom.id `btn-map-close` · dom.id `btn-mute` · dom.id `mix-rows` · dom.id `btn-mix-reset` · event.listen `pointerdown` · dom.query `button, .btn, .tbtn, .pick, .chip` · dom.query `.st` · dom.id `notice-card` · dom.id `canopy` · dom.id `markers` · dom.id `impact-flash` · dom.id `sky-glare` · dom.id `warp-fill` · dom.id `warp-state` · bus.on `‹paint›`
@@ -805,32 +805,32 @@ function · **exported** · L473–1201
   the switch toggles between off and whatever it was last set to, and
   OVERDRIVE stays where it always was (the CON, and the existing cycle) for
   when you actually want it.
-- L747 · `$("op-pulse").addEventListener("click", () => sensorPulse());` — --- ops board ---
-- L757 · `$("btn-survey").addEventListener("click", () => requestScan());` — --- actions ---
-- L769 · `$("btn-tutor").addEventListener("click", () => {` — farm the neural core: while an NPC holds the conn, let them fly at 40×
-- L792 · `$("btn-aria").addEventListener("click", () => {` — ARIA: one tap hands it the ship, one tap (or the stick) takes it back
-- L797 · `mountFullscreen({` — Fullscreen: the phone's own bars off the canopy. The request has to come
+- L752 · `$("op-pulse").addEventListener("click", () => sensorPulse());` — --- ops board ---
+- L762 · `$("btn-survey").addEventListener("click", () => requestScan());` — --- actions ---
+- L774 · `$("btn-tutor").addEventListener("click", () => {` — farm the neural core: while an NPC holds the conn, let them fly at 40×
+- L797 · `$("btn-aria").addEventListener("click", () => {` — ARIA: one tap hands it the ship, one tap (or the stick) takes it back
+- L802 · `mountFullscreen({` — Fullscreen: the phone's own bars off the canopy. The request has to come
   from this tap — the module refuses to ask any other way — and if the
   browser turns it down the reason goes on the HUD rather than nowhere.
-- L809 · `{` — ---- the mixer ----
+- L814 · `{` — ---- the mixer ----
   Five named buses and a master, saved to localStorage. The reason it
   exists rather than one volume: an engine bed you cannot turn down
   without also turning down the collision alarm is an engine bed the
   player mutes, and then they lose the alarm too.
-- L840 · `document.addEventListener("pointerdown", (e) => {` — One delegated listener instead of a cue on every button in the game.
+- L845 · `document.addEventListener("pointerdown", (e) => {` — One delegated listener instead of a cue on every button in the game.
   Anything that wants a different sound fires its own and marks itself
   data-quiet, so this never doubles up.
-- L850 · `const SW_LABEL = {` — --- switch labels ---
-- L850 · `const SW_LABEL = {` — Short enough to survive a 60px switch cap on a small phone.
-- L916 · `let clockKey = "";` — 0.3.52 — port standard time on the title bar: the day, the hour, and a
+- L855 · `const SW_LABEL = {` — --- switch labels ---
+- L855 · `const SW_LABEL = {` — Short enough to survive a 60px switch cap on a small phone.
+- L921 · `let clockKey = "";` — 0.3.52 — port standard time on the title bar: the day, the hour, and a
   glyph for the part of it. The whole HUD carries the part as data-part so
   the night can dim it. Repaints only when the minute turns.
-- L933 · `let paintFailed = 0;` — The HUD paints from the ENGINE's frame tick (sim.publishHud → store → here),
+- L938 · `let paintFailed = 0;` — The HUD paints from the ENGINE's frame tick (sim.publishHud → store → here),
   so anything that throws in a panel, the chart or a readout used to take the
   tick with it — before the renderer ran. One bad line froze the canopy every
   frame until the page was reloaded. The HUD is allowed to be wrong for a
   frame; the game is not allowed to stop drawing.
-- L1189 · `mountComms();` — the channel overlay lives on the HUD and ticks itself off sim time
+- L1201 · `mountComms();` — the channel overlay lives on the HUD and ticks itself off sim time
 <!-- /note -->
 
 #### <a id="s-mountHud-who"></a>`mountHud.who()`
@@ -1107,7 +1107,7 @@ function · L722–729
 
 #### <a id="s-mountHud-toggleHold"></a>`mountHud>toggleHold()`
 
-function · L787–787
+function · L792–792
 
 - calls: [`paintHold`](#s-paintHold)
 
@@ -1119,14 +1119,14 @@ is how the game is actually held).
 
 #### <a id="s-mountHud-onChange"></a>`mountHud.onChange(on, why)`
 
-prop · L799–799
+prop · L804–804
 
 <!-- note:mountHud.onChange -->
 <!-- /note -->
 
 #### <a id="s-mountHud-paintRow"></a>`mountHud>paintRow(name)`
 
-function · L812–827
+function · L817–832
 
 - calls: [`setBusLevel`](../audio/graph.js.md#s-setBusLevel) _js/audio/graph.js_
 - called by: [`mountHud`](#s-mountHud)
@@ -1137,147 +1137,147 @@ function · L812–827
 
 #### <a id="s-mountHud-shields"></a>`mountHud.shields(on)`
 
-prop · L851–851
+prop · L856–856
 
 <!-- note:mountHud.shields -->
 <!-- /note -->
 
 #### <a id="s-mountHud-turretsArmed"></a>`mountHud.turretsArmed(on)`
 
-prop · L852–852
+prop · L857–857
 
 <!-- note:mountHud.turretsArmed -->
 <!-- /note -->
 
 #### <a id="s-mountHud-engines"></a>`mountHud.engines(on)`
 
-prop · L853–853
+prop · L858–858
 
 <!-- note:mountHud.engines -->
 <!-- /note -->
 
 #### <a id="s-mountHud-pressurized"></a>`mountHud.pressurized(on)`
 
-prop · L854–854
+prop · L859–859
 
 <!-- note:mountHud.pressurized -->
 <!-- /note -->
 
 #### <a id="s-mountHud-localGravity"></a>`mountHud.localGravity(on)`
 
-prop · L855–855
+prop · L860–860
 
 <!-- note:mountHud.localGravity -->
 <!-- /note -->
 
 #### <a id="s-mountHud-assist"></a>`mountHud.assist(on)`
 
-prop · L856–856
+prop · L861–861
 
 <!-- note:mountHud.assist -->
 <!-- /note -->
 
 #### <a id="s-mountHud-lights"></a>`mountHud.lights(on)`
 
-prop · L857–857
+prop · L862–862
 
 <!-- note:mountHud.lights -->
 <!-- /note -->
 
 #### <a id="s-mountHud-sentry"></a>`mountHud.sentry(on)`
 
-prop · L858–858
+prop · L863–863
 
 <!-- note:mountHud.sentry -->
 <!-- /note -->
 
 #### <a id="s-mountHud-salvage"></a>`mountHud.salvage(on)`
 
-prop · L859–859
+prop · L864–864
 
 <!-- note:mountHud.salvage -->
 <!-- /note -->
 
 #### <a id="s-mountHud-matchLock"></a>`mountHud.matchLock(on)`
 
-prop · L860–860
+prop · L865–865
 
 <!-- note:mountHud.matchLock -->
 <!-- /note -->
 
 #### <a id="s-mountHud-shields-2"></a>`mountHud.shields~2(s)`
 
-prop · L875–875
+prop · L880–880
 
 <!-- note:mountHud.shields~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-turretsArmed-2"></a>`mountHud.turretsArmed~2(s)`
 
-prop · L876–876
+prop · L881–881
 
 <!-- note:mountHud.turretsArmed~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-engines-2"></a>`mountHud.engines~2(s)`
 
-prop · L877–877
+prop · L882–882
 
 <!-- note:mountHud.engines~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-pressurized-2"></a>`mountHud.pressurized~2(s)`
 
-prop · L878–878
+prop · L883–883
 
 <!-- note:mountHud.pressurized~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-localGravity-2"></a>`mountHud.localGravity~2(s)`
 
-prop · L879–879
+prop · L884–884
 
 <!-- note:mountHud.localGravity~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-assist-2"></a>`mountHud.assist~2(s)`
 
-prop · L880–880
+prop · L885–885
 
 <!-- note:mountHud.assist~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-lights-2"></a>`mountHud.lights~2(s)`
 
-prop · L881–881
+prop · L886–886
 
 <!-- note:mountHud.lights~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-sentry-2"></a>`mountHud.sentry~2(s)`
 
-prop · L882–882
+prop · L887–887
 
 <!-- note:mountHud.sentry~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-salvage-2"></a>`mountHud.salvage~2(s)`
 
-prop · L883–883
+prop · L888–888
 
 <!-- note:mountHud.salvage~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-matchLock-2"></a>`mountHud.matchLock~2(s)`
 
-prop · L884–884
+prop · L889–889
 
 <!-- note:mountHud.matchLock~2 -->
 <!-- /note -->
 
 #### <a id="s-mountHud-setGauge"></a>`mountHud>setGauge(bar, num, pct, text, low)`
 
-function · L890–894
+function · L895–899
 
 - called by: [`mountHud>paintAll`](#s-mountHud-paintAll) ×5
 
@@ -1286,7 +1286,7 @@ function · L890–894
 
 #### <a id="s-mountHud-rowEl"></a>`mountHud>rowEl(kind, text, cls)`
 
-function · L905–910
+function · L910–915
 
 - called by: [`mountHud>paintAll`](#s-mountHud-paintAll) ×4
 - effects: dom.create `div`
@@ -1296,7 +1296,7 @@ function · L905–910
 
 #### <a id="s-mountHud-paintClock"></a>`mountHud>paintClock()`
 
-function · L917–929
+function · L922–934
 
 - calls: [`clockAt`](../station/stationclock.js.md#s-clockAt) _js/station/stationclock.js_ · [`$`](#s-S)
 - called by: [`mountHud>paintAll`](#s-mountHud-paintAll)
@@ -1307,7 +1307,7 @@ function · L917–929
 
 #### <a id="s-mountHud-paint"></a>`mountHud>paint(...args)`
 
-function · L934–938
+function · L939–943
 
 - calls: [`mountHud>paintAll`](#s-mountHud-paintAll)
 - called by: [`mountHud`](#s-mountHud)
@@ -1317,50 +1317,50 @@ function · L934–938
 
 #### <a id="s-mountHud-paintAll"></a>`mountHud>paintAll()`
 
-function · L939–1184
+function · L944–1196
 
-- calls: [`ariaHasConn`](../aria/aria.js.md#s-ariaHasConn) _js/aria/aria.js_ · [`settle`](../flight/recorder.js.md#s-settle) _js/flight/recorder.js_ · [`$`](#s-S) ×69 · [`esc`](#s-esc) ×5 · [`fmtDist`](#s-fmtDist) ×5 · [`fmtNum`](#s-fmtNum) ×2 · [`mountHud>paintClock`](#s-mountHud-paintClock) · [`mountHud>rowEl`](#s-mountHud-rowEl) ×4 · [`mountHud>setGauge`](#s-mountHud-setGauge) ×5 · [`paintHold`](#s-paintHold) · [`paintMarkers`](#s-paintMarkers) · [`stackLeftColumn`](#s-stackLeftColumn) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ ×2
+- calls: [`ariaHasConn`](../aria/aria.js.md#s-ariaHasConn) _js/aria/aria.js_ · [`settle`](../flight/recorder.js.md#s-settle) _js/flight/recorder.js_ · [`rigWanted`](../sim/sim.js.md#s-rigWanted) _js/sim/sim.js_ · [`$`](#s-S) ×69 · [`esc`](#s-esc) ×5 · [`fmtDist`](#s-fmtDist) ×5 · [`fmtNum`](#s-fmtNum) ×2 · [`mountHud>paintClock`](#s-mountHud-paintClock) · [`mountHud>rowEl`](#s-mountHud-rowEl) ×4 · [`mountHud>setGauge`](#s-mountHud-setGauge) ×5 · [`paintHold`](#s-paintHold) · [`paintMarkers`](#s-paintMarkers) · [`stackLeftColumn`](#s-stackLeftColumn) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ ×2
 - via [js/flight/ship.js](../flight/ship.js.md): `MINING_MODES.find`, `TURRET_MODES.find`
 - called by: [`mountHud>paint`](#s-mountHud-paint)
-- effects: dom.id `start` · dom.id `hud` · dom.id `pause` · dom.id `btn-watch` · dom.id `map` · dom.id `hold` · dom.id `btn-hold` · dom.id `btn-cam` · dom.id `btn-aria` · dom.id `hud-sky` · dom.id `i-vel` · dom.id `i-cls` · dom.id `i-alt` · dom.id `hazline` · dom.id `haz-text` · dom.id `respline` · dom.id `resp-text` · dom.id `i-g` · dom.id `instruments` · dom.id `g-pwr` · dom.id `g-pwr-n` · dom.id `g-hull` · dom.id `g-hull-n` · dom.id `g-shld` · dom.id `g-shld-n` · dom.id `g-o2` · dom.id `g-o2-n` · dom.id `g-cgo` · dom.id `g-cgo-n` · dom.id `alarms` · dom.id `lock-name` · dom.id `notice` · dom.id `status` · dom.id `btn-mute` · dom.id `btn-con` · dom.id `route-card` · dom.id `route-target` · dom.id `route-eta` · dom.id `route-hazards` · dom.id `thr-track` · dom.id `thr-num` · dom.id `thr-draw` · dom.id `sw-cut` · dom.query `.st` · dom.id `mode-turret-st` · dom.id `mode-turret` · dom.id `lockbar` · dom.id `lock-fill` · dom.id `lock-text` · dom.id `op-pulse-st` · dom.id `op-pulse` · dom.id `op-time-st` · dom.id `op-dock-st` · dom.id `op-dock` · dom.id `op-claim-st` · dom.id `op-claim` · dom.id `op-time` · dom.id `op-threat-st` · dom.id `op-threat` · dom.id `mode-mining-st` · dom.id `mode-mining` · dom.id `labels` · dom.id `heat-wash` · dom.id `toast`
+- effects: dom.id `start` · dom.id `hud` · dom.id `pause` · dom.id `btn-watch` · dom.id `map` · dom.id `hold` · dom.id `btn-hold` · dom.id `btn-cam` · dom.id `btn-aria` · dom.id `hud-sky` · dom.id `i-vel` · dom.id `i-cls` · dom.id `i-alt` · dom.id `hazline` · dom.id `haz-text` · dom.id `respline` · dom.id `resp-text` · dom.id `i-g` · dom.id `instruments` · dom.id `g-pwr` · dom.id `g-pwr-n` · dom.id `g-hull` · dom.id `g-hull-n` · dom.id `g-shld` · dom.id `g-shld-n` · dom.id `g-o2` · dom.id `g-o2-n` · dom.id `g-cgo` · dom.id `g-cgo-n` · dom.id `alarms` · dom.id `lock-name` · dom.id `notice` · dom.id `status` · dom.id `btn-mute` · dom.id `btn-con` · dom.id `route-card` · dom.id `route-target` · dom.id `route-eta` · dom.id `route-hazards` · dom.id `thr-track` · dom.id `thr-num` · dom.id `thr-draw` · dom.id `sw-cut` · dom.query `.st` · dom.query `.nm` · dom.id `mode-turret-st` · dom.id `mode-turret` · dom.id `lockbar` · dom.id `lock-fill` · dom.id `lock-text` · dom.id `op-pulse-st` · dom.id `op-pulse` · dom.id `op-time-st` · dom.id `op-dock-st` · dom.id `op-dock` · dom.id `op-claim-st` · dom.id `op-claim` · dom.id `op-time` · dom.id `op-threat-st` · dom.id `op-threat` · dom.id `mode-mining-st` · dom.id `mode-mining` · dom.id `labels` · dom.id `heat-wash` · dom.id `toast`
 
 <!-- note:mountHud>paintAll -->
-- L942 · `if (playing) settleTape();` — Close out any tape record whose outcome window has run (js/flight/recorder.js).
+- L947 · `if (playing) settleTape();` — Close out any tape record whose outcome window has run (js/flight/recorder.js).
   Cheap: it only touches records whose window has already closed.
-- L943 · `if (creation.isOpen()) creation.progress(sim.texLoad?.done ?? 0, sim.texLoad?.total ?? 0);` — surface loader on the creation screen
-- L966 · `$("i-vel").textContent = fmtNum(s.speed, s.speed < 100 ? 1 : 0);` — instruments
-- L970 · `const hz = s.hazard;` — Collision warning. Level 1 is the ship telling you; 2 and 3 are the
+- L948 · `if (creation.isOpen()) creation.progress(sim.texLoad?.done ?? 0, sim.texLoad?.total ?? 0);` — surface loader on the creation screen
+- L971 · `$("i-vel").textContent = fmtNum(s.speed, s.speed < 100 ? 1 : 0);` — instruments
+- L975 · `const hz = s.hazard;` — Collision warning. Level 1 is the ship telling you; 2 and 3 are the
   ship doing something about it, so the line says which — a hull that
   turns on its own without saying why reads as a bug.
-- L981 · `const rp = s.response;` — The response clock beneath the hazard line. `RESPONSE 41s` is a number
+- L986 · `const rp = s.response;` — The response clock beneath the hazard line. `RESPONSE 41s` is a number
   you can act on; `NO RESPONSE` is the same information and the reason to
   act differently.
-- L1001 · `` setGauge($("g-pwr"), $("g-pwr-n"), s.chargePct, `${Math.round(s.chargePct * 100)}%`, s.cha `` — gauges
-- L1002 · `const hMax = Math.max(1, s.hullMax ?? 100);` — 0.3.34: the pools come off the flown hull, so these are fractions of
+- L1006 · `` setGauge($("g-pwr"), $("g-pwr-n"), s.chargePct, `${Math.round(s.chargePct * 100)}%`, s.cha `` — gauges
+- L1007 · `const hMax = Math.max(1, s.hullMax ?? 100);` — 0.3.34: the pools come off the flown hull, so these are fractions of
   THIS ship's maximum, not of a universal hundred. A 920-point G frame
   used to peg the bar at 9x full and read "920" with no scale on it.
-- L1010 · `const alarms = [...s.debuffs];` — alarms
-- L1018 · `stackLeftColumn();` — 0.3.49: the left column stacks itself (see stackLeftColumn)
-- L1020 · `const about = s.noticeAbout && s.noticeAbout.text === s.notice ? s.noticeAbout.name : null` — transient message card
-- L1020 · `const about = s.noticeAbout && s.noticeAbout.text === s.notice ? s.noticeAbout.name : null` — the card is titled by what the message is ABOUT when it says so — "Undocked." reads as the port
-- L1021 · `const named = [sel?.name, s.reticleName, near?.name].find((n) => n && s.notice?.includes(n` — … else by the lock, else by what the reticle is on, else by the nearest
+- L1015 · `const alarms = [...s.debuffs];` — alarms
+- L1023 · `stackLeftColumn();` — 0.3.49: the left column stacks itself (see stackLeftColumn)
+- L1025 · `const about = s.noticeAbout && s.noticeAbout.text === s.notice ? s.noticeAbout.name : null` — transient message card
+- L1025 · `const about = s.noticeAbout && s.noticeAbout.text === s.notice ? s.noticeAbout.name : null` — the card is titled by what the message is ABOUT when it says so — "Undocked." reads as the port
+- L1026 · `const named = [sel?.name, s.reticleName, near?.name].find((n) => n && s.notice?.includes(n` — … else by the lock, else by what the reticle is on, else by the nearest
   world — but only when the message is about it. 0.3.49: tapping TURR or
   ENG printed "EARTH" over "Turrets armed", because a message about the
   ship took its title from whatever planet was closest. A name the text
   does not mention is not what it is about: those are the ship's.
-- L1028 · `` const dom = s.dominantName ? `${s.dominantName} ${fmtDist(s.altitude)}` : "deep space"; `` — always-on one-liner
-- L1044 · `flashEl.style.opacity = s.flash > 0.01 ? Math.min(1, s.flash) : 0;` — a nearby cataclysm whites the canopy out
-- L1045 · `const gl = sim.glare;` — the glare of something enormous happening off the side of the canopy
-- L1055 · `const ws = s.warpState;` — warp core
-- L1066 · `const rc = $("route-card");` — route card: the plot only resolves once the nose is on the lane
-- L1094 · `paintThrottle(s.throttle);` — throttle
-- L1095 · `$("thr-track").classList.toggle("capped", s.throttleCap < 1.001);` — Grey the overdrive band out when the limiter rules it out.
-- L1100 · `for (const el of swEls) {` — switchboard
-- L1109 · `{` — the cutter switch, painted from the MODE rather than a boolean
-- L1125 · `const lb = $("lockbar");` — pointer lock
-- L1134 · `` $("op-pulse-st").textContent = s.pulse ? `${Math.ceil(s.pulseLeft)}s` : s.charge < 140 ? " `` — ops readouts
-- L1166 · `$("labels").innerHTML = s.labels` — world labels + flight markers
-- L1166 · `$("labels").innerHTML = s.labels` — Two optional extras on a label, both presentational:
+- L1033 · `` const dom = s.dominantName ? `${s.dominantName} ${fmtDist(s.altitude)}` : "deep space"; `` — always-on one-liner
+- L1049 · `flashEl.style.opacity = s.flash > 0.01 ? Math.min(1, s.flash) : 0;` — a nearby cataclysm whites the canopy out
+- L1050 · `const gl = sim.glare;` — the glare of something enormous happening off the side of the canopy
+- L1060 · `const ws = s.warpState;` — warp core
+- L1071 · `const rc = $("route-card");` — route card: the plot only resolves once the nose is on the lane
+- L1099 · `paintThrottle(s.throttle);` — throttle
+- L1100 · `$("thr-track").classList.toggle("capped", s.throttleCap < 1.001);` — Grey the overdrive band out when the limiter rules it out.
+- L1105 · `for (const el of swEls) {` — switchboard
+- L1114 · `{` — the cutter switch, painted from the MODE rather than a boolean
+- L1137 · `const lb = $("lockbar");` — pointer lock
+- L1146 · `` $("op-pulse-st").textContent = s.pulse ? `${Math.ceil(s.pulseLeft)}s` : s.charge < 140 ? " `` — ops readouts
+- L1178 · `$("labels").innerHTML = s.labels` — world labels + flight markers
+- L1178 · `$("labels").innerHTML = s.labels` — Two optional extras on a label, both presentational:
     a    an off-screen marker's bearing, handed to CSS as a custom
          property so the arrow rotates without the painter needing to
          know what an arrow looks like

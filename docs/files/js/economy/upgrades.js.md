@@ -1,6 +1,6 @@
 # js/economy/upgrades.js
 
-[index](../../../README.md) · 255 lines · 46 symbols · 5 imports · 18 importers
+[index](../../../README.md) · 260 lines · 47 symbols · 5 imports · 19 importers
 
 ## About
 
@@ -15,7 +15,7 @@ land — ship.js (reactor, battery, shield regen, thrust), sim.js (berths),
 crew/robots.js (robot draw and wear), crew/duties.js (galley morale),
 mission/run.js (the mission core). Contract: PLAN.md §4.8.
 
-- L255 · `shipFx.fx = fx;` — ship.js reads its fx through this hook so it never has to import the sim
+- L260 · `shipFx.fx = fx;` — ship.js reads its fx through this hook so it never has to import the sim
 <!-- /note -->
 
 ## Imports
@@ -45,14 +45,15 @@ mission/run.js (the mission core). Contract: PLAN.md §4.8.
 - [js/ui/tutorial-core.js](../ui/tutorial-core.js.md) — `UPGRADES`, `hasUpgrade`
 - test/defence.test.mjs _(outside js/)_ — `UPGRADES`
 - test/mission.test.mjs _(outside js/)_ — `upgrades`
+- test/rig.test.mjs _(outside js/)_ — `UPGRADES`, `upgrades`
 - test/robots.test.mjs _(outside js/)_ — `buyUpgrade`, `upgrades`
 - test/systems.test.mjs _(outside js/)_ — `UPGRADES`, `buyUpgrade`, `fx`, `upgrades`
 - test/upgrades.test.mjs _(outside js/)_ — `UPGRADES`, `upgrades`, `UPGRADES_KEY`, `hasUpgrade`, `fx`, `upgradeOptions`, `buyUpgrade`, `sellUpgrade`, `upgradeMods`, `upgradeLines`, `saveUpgrades`, `loadUpgrades`
 
 ## Exports
 
-- [`UPGRADES`](#s-UPGRADES) · const — used by [js/ui/tutorial-core.js](../ui/tutorial-core.js.md), test/defence.test.mjs, test/systems.test.mjs, test/upgrades.test.mjs
-- [`upgrades`](#s-upgrades) · const — used by [js/station/refityard.js](../station/refityard.js.md), test/mission.test.mjs, test/robots.test.mjs, test/systems.test.mjs, test/upgrades.test.mjs
+- [`UPGRADES`](#s-UPGRADES) · const — used by [js/ui/tutorial-core.js](../ui/tutorial-core.js.md), test/defence.test.mjs, test/rig.test.mjs, test/systems.test.mjs, test/upgrades.test.mjs
+- [`upgrades`](#s-upgrades) · const — used by [js/station/refityard.js](../station/refityard.js.md), test/mission.test.mjs, test/rig.test.mjs, test/robots.test.mjs, test/systems.test.mjs, test/upgrades.test.mjs
 - [`UPGRADES_KEY`](#s-UPGRADES_KEY) · function — used by test/upgrades.test.mjs
 - [`hasUpgrade`](#s-hasUpgrade) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/console/panels/work.js](../console/panels/work.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/ui/tutorial-core.js](../ui/tutorial-core.js.md), test/upgrades.test.mjs
 - [`fx`](#s-fx) · function — used by [js/crew/duties.js](../crew/duties.js.md), [js/crew/robots.js](../crew/robots.js.md), [js/flight/repair.js](../flight/repair.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md), test/systems.test.mjs, test/upgrades.test.mjs
@@ -69,14 +70,14 @@ mission/run.js (the mission core). Contract: PLAN.md §4.8.
 
 ## Effects
 
-- **storage.get** — `‹UPGRADES_KEY()›` (loadUpgrades:246)
-- **storage.set** — `‹UPGRADES_KEY()›` (saveUpgrades:239)
+- **storage.get** — `‹UPGRADES_KEY()›` (loadUpgrades:251)
+- **storage.set** — `‹UPGRADES_KEY()›` (saveUpgrades:244)
 
 ## Symbols
 
 ### <a id="s-UPGRADES"></a>`UPGRADES`
 
-const · **exported** · L7–100
+const · **exported** · L7–104
 
 <!-- note:UPGRADES -->
 { id, name, blurb, price, sector: [...], tier?: "A".."G", mods?: {…MOD_KEYS}, fx?: {...non-mod}, excludes?: [id] }
@@ -85,27 +86,27 @@ const · **exported** · L7–100
 - L21 · `{ id: "warp_tuning",   name: "Warp coil tuning",       price: 6400, sector: ["industrial",` — ---- flight and nav -----------------------------------------------------
 - L32 · `{ id: "sensor_mast",   name: "Long-range mast",        price: 3900, sector: ["civilian", "` — ---- sensors and survey -------------------------------------------------
 - L41 · `{ id: "cutter_lens",   name: "Cutter lens",            price: 4800, sector: ["industrial"]` — ---- the cutter and the hold --------------------------------------------
-- L54 · `{ id: "plating",       name: "Hardened plating",       price: 5600, sector: ["military", "` — ---- the hull ------------------------------------------------------------
-- L54 · `{ id: "plating",       name: "Hardened plating",       price: 5600, sector: ["military", "` — 0.3.34 — the hull refits carry RESISTANCES now (js/flight/defence.js), which is
+- L58 · `{ id: "plating",       name: "Hardened plating",       price: 5600, sector: ["military", "` — ---- the hull ------------------------------------------------------------
+- L58 · `{ id: "plating",       name: "Hardened plating",       price: 5600, sector: ["military", "` — 0.3.34 — the hull refits carry RESISTANCES now (js/flight/defence.js), which is
   additive percentage against a damage KIND rather than another multiplier
   on the pool. Before this, the best armour in the game bought 0.9 seconds
   against seven drones; plate is supposed to be the answer to being shot,
   and now it is. Each of these is deliberately good at one thing and no
   help at another, so a refit is a decision about what you expect to meet.
-- L73 · `{ id: "quarters",      name: "Quarters refit",         price: 5000, sector: ["civilian", "` — ---- the people ----------------------------------------------------------
-- L90 · `{ id: "trade_uplink",  name: "Trade uplink",           price: 4500, sector: ["logistic", "` — ---- the ledger ----------------------------------------------------------
+- L77 · `{ id: "quarters",      name: "Quarters refit",         price: 5000, sector: ["civilian", "` — ---- the people ----------------------------------------------------------
+- L94 · `{ id: "trade_uplink",  name: "Trade uplink",           price: 4500, sector: ["logistic", "` — ---- the ledger ----------------------------------------------------------
 <!-- /note -->
 
 ### <a id="s-upgrades"></a>`upgrades`
 
-const · **exported** · L102–102
+const · **exported** · L106–106
 
 <!-- note:upgrades -->
 <!-- /note -->
 
 ### <a id="s-UPGRADES_KEY"></a>`UPGRADES_KEY()`
 
-function · **exported** · L104–104
+function · **exported** · L108–108
 
 - called by: [`loadUpgrades`](#s-loadUpgrades) · [`saveUpgrades`](#s-saveUpgrades)
 
@@ -114,7 +115,7 @@ function · **exported** · L104–104
 
 ### <a id="s-ADDITIVE"></a>`ADDITIVE`
 
-const · L106–106
+const · L110–110
 
 <!-- note:ADDITIVE -->
 fx keys that add up in units; every other numeric fx is a factor
@@ -122,14 +123,14 @@ fx keys that add up in units; every other numeric fx is a factor
 
 ### <a id="s-TIER_ORDER"></a>`TIER_ORDER`
 
-const · L107–107
+const · L111–111
 
 <!-- note:TIER_ORDER -->
 <!-- /note -->
 
 ### <a id="s-hasUpgrade"></a>`hasUpgrade(id)`
 
-function · **exported** · L109–111
+function · **exported** · L113–115
 
 - called by: [`refitPlan`](../aria/pilot.js.md#s-refitPlan) _js/aria/pilot.js_ · [`registerRefitOp`](../aria/pilot.js.md#s-registerRefitOp) _js/aria/pilot.js_ · [`sellUpgrade`](#s-sellUpgrade) · [`upgradeOptions`](#s-upgradeOptions) ×3 · [`missionCore`](../mission/script.js.md#s-missionCore) _js/mission/script.js_ · [`hasFit`](../ui/tutorial-core.js.md#s-hasFit) _js/ui/tutorial-core.js_
 
@@ -138,7 +139,7 @@ function · **exported** · L109–111
 
 ### <a id="s-byId"></a>`byId(id)`
 
-function · L113–115
+function · L117–119
 
 - called by: [`buyUpgrade`](#s-buyUpgrade) · [`fx`](#s-fx) · [`loadUpgrades`](#s-loadUpgrades) · [`sellUpgrade`](#s-sellUpgrade) · [`upgradeMods`](#s-upgradeMods) · [`upgradeOptions`](#s-upgradeOptions) · [`upgradeResists`](#s-upgradeResists)
 
@@ -147,7 +148,7 @@ function · L113–115
 
 ### <a id="s-fx"></a>`fx(key, dflt)`
 
-function · **exported** · L117–127
+function · **exported** · L121–131
 
 - calls: [`byId`](#s-byId)
 - called by: [`tickDutiesCycle`](../crew/duties.js.md#s-tickDutiesCycle) _js/crew/duties.js_ · [`robotsSummary`](../crew/robots.js.md#s-robotsSummary) _js/crew/robots.js_ · [`tickRobots`](../crew/robots.js.md#s-tickRobots) _js/crew/robots.js_ ×2 · [`droneRate`](../flight/repair.js.md#s-droneRate) _js/flight/repair.js_ · [`missionCore`](../mission/script.js.md#s-missionCore) _js/mission/script.js_ · [`crewCapacity`](../sim/sim.js.md#s-crewCapacity) _js/sim/sim.js_ · [`robotCapacity`](../sim/sim.js.md#s-robotCapacity) _js/sim/sim.js_ · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stepWarp`](../sim/sim.js.md#s-stepWarp) _js/sim/sim.js_ · [`tickHullRepair`](../sim/sim.js.md#s-tickHullRepair) _js/sim/sim.js_
@@ -158,7 +159,7 @@ function · **exported** · L117–127
 
 ### <a id="s-hullTier"></a>`hullTier()`
 
-function · L129–131
+function · L133–135
 
 - calls: [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`currentShipId`](../sim/sim.js.md#s-currentShipId) _js/sim/sim.js_
 - called by: [`upgradeOptions`](#s-upgradeOptions)
@@ -169,7 +170,7 @@ The hull's tier letter, for the tier gate; the trainer everyone starts in is an 
 
 ### <a id="s-upgradeOptions"></a>`upgradeOptions(st)`
 
-function · **exported** · L133–146
+function · **exported** · L137–150
 
 - calls: [`byId`](#s-byId) · [`hasUpgrade`](#s-hasUpgrade) ×3 · [`hullTier`](#s-hullTier)
 - called by: [`refitPlan`](../aria/pilot.js.md#s-refitPlan) _js/aria/pilot.js_ · [`registerRefitOp`](../aria/pilot.js.md#s-registerRefitOp) _js/aria/pilot.js_ · [`buyUpgrade`](#s-buyUpgrade) · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_
@@ -180,7 +181,7 @@ function · **exported** · L133–146
 
 ### <a id="s-buyUpgrade"></a>`buyUpgrade(id, st)`
 
-function · **exported** · L148–159
+function · **exported** · L152–163
 
 - calls: [`applyMods`](#s-applyMods) · [`byId`](#s-byId) · [`saveUpgrades`](#s-saveUpgrades) · [`upgradeOptions`](#s-upgradeOptions)
 - called by: [`registerRefitOp`](../aria/pilot.js.md#s-registerRefitOp) _js/aria/pilot.js_ · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_
@@ -191,7 +192,7 @@ function · **exported** · L148–159
 
 ### <a id="s-sellUpgrade"></a>`sellUpgrade(id)`
 
-function · **exported** · L161–169
+function · **exported** · L165–173
 
 - calls: [`applyMods`](#s-applyMods) · [`byId`](#s-byId) · [`hasUpgrade`](#s-hasUpgrade) · [`saveUpgrades`](#s-saveUpgrades)
 - called by: [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_
@@ -202,7 +203,7 @@ function · **exported** · L161–169
 
 ### <a id="s-upgradeMods"></a>`upgradeMods()`
 
-function · **exported** · L171–177
+function · **exported** · L175–181
 
 - calls: [`defaultMods`](../careers/effects.js.md#s-defaultMods) _js/careers/effects.js_ · [`byId`](#s-byId)
 - via [js/careers/effects.js](../careers/effects.js.md): `MOD_KEYS.includes`
@@ -214,7 +215,7 @@ function · **exported** · L171–177
 
 ### <a id="s-upgradeResists"></a>`upgradeResists()`
 
-function · **exported** · L179–185
+function · **exported** · L183–189
 
 - calls: [`byId`](#s-byId)
 - called by: [`resistKey`](#s-resistKey) · [`syncHullDefence`](../sim/sim.js.md#s-syncHullDefence) _js/sim/sim.js_ · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_
@@ -233,7 +234,7 @@ straight by js/sim/sim.js when it sets the hull's defence.
 
 ### <a id="s-resistKey"></a>`resistKey()`
 
-function · **exported** · L187–189
+function · **exported** · L191–193
 
 - calls: [`upgradeResists`](#s-upgradeResists)
 - called by: [`syncHullDefence`](../sim/sim.js.md#s-syncHullDefence) _js/sim/sim.js_
@@ -244,7 +245,7 @@ A stable string for the fitted resist set, so the sim can tell when it changed.
 
 ### <a id="s-applyMods"></a>`applyMods()`
 
-function · L191–193
+function · L195–197
 
 - calls: [`upgradeMods`](#s-upgradeMods) · [`setUpgradeMods`](../flight/pilot.js.md#s-setUpgradeMods) _js/flight/pilot.js_
 - called by: [`buyUpgrade`](#s-buyUpgrade) · [`loadUpgrades`](#s-loadUpgrades) · [`sellUpgrade`](#s-sellUpgrade)
@@ -254,14 +255,14 @@ function · L191–193
 
 ### <a id="s-FX_LINE"></a>`FX_LINE`
 
-const · L195–220
+const · L199–225
 
 <!-- note:FX_LINE -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-reactor"></a>`FX_LINE.reactor(v)`
 
-prop · L196–196
+prop · L200–200
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -270,14 +271,14 @@ prop · L196–196
 
 #### <a id="s-FX_LINE-battery"></a>`FX_LINE.battery(v)`
 
-prop · L197–197
+prop · L201–201
 
 <!-- note:FX_LINE.battery -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-shieldRegen"></a>`FX_LINE.shieldRegen(v)`
 
-prop · L198–198
+prop · L202–202
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -286,14 +287,21 @@ prop · L198–198
 
 #### <a id="s-FX_LINE-minerRange"></a>`FX_LINE.minerRange(v)`
 
-prop · L199–199
+prop · L203–203
 
 <!-- note:FX_LINE.minerRange -->
 <!-- /note -->
 
+#### <a id="s-FX_LINE-rigRange"></a>`FX_LINE.rigRange(v)`
+
+prop · L204–204
+
+<!-- note:FX_LINE.rigRange -->
+<!-- /note -->
+
 #### <a id="s-FX_LINE-thrust"></a>`FX_LINE.thrust(v)`
 
-prop · L200–200
+prop · L205–205
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -302,21 +310,21 @@ prop · L200–200
 
 #### <a id="s-FX_LINE-missions"></a>`FX_LINE.missions()`
 
-prop · L201–201
+prop · L206–206
 
 <!-- note:FX_LINE.missions -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-berths"></a>`FX_LINE.berths(v)`
 
-prop · L202–202
+prop · L207–207
 
 <!-- note:FX_LINE.berths -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-robotDraw"></a>`FX_LINE.robotDraw(v)`
 
-prop · L203–203
+prop · L208–208
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -325,7 +333,7 @@ prop · L203–203
 
 #### <a id="s-FX_LINE-robotWear"></a>`FX_LINE.robotWear(v)`
 
-prop · L204–204
+prop · L209–209
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -334,42 +342,42 @@ prop · L204–204
 
 #### <a id="s-FX_LINE-moralePerCycle"></a>`FX_LINE.moralePerCycle(v)`
 
-prop · L205–205
+prop · L210–210
 
 <!-- note:FX_LINE.moralePerCycle -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-turretRange"></a>`FX_LINE.turretRange(v)`
 
-prop · L206–206
+prop · L211–211
 
 <!-- note:FX_LINE.turretRange -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-robotSlots"></a>`FX_LINE.robotSlots(v)`
 
-prop · L207–207
+prop · L212–212
 
 <!-- note:FX_LINE.robotSlots -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-repair"></a>`FX_LINE.repair(v)`
 
-prop · L208–208
+prop · L213–213
 
 <!-- note:FX_LINE.repair -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-patchDrone"></a>`FX_LINE.patchDrone(v)`
 
-prop · L209–209
+prop · L214–214
 
 <!-- note:FX_LINE.patchDrone -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-dropout"></a>`FX_LINE.dropout(v)`
 
-prop · L210–210
+prop · L215–215
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -378,7 +386,7 @@ prop · L210–210
 
 #### <a id="s-FX_LINE-assist"></a>`FX_LINE.assist(v)`
 
-prop · L211–211
+prop · L216–216
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -387,7 +395,7 @@ prop · L211–211
 
 #### <a id="s-FX_LINE-resolve"></a>`FX_LINE.resolve(v)`
 
-prop · L212–212
+prop · L217–217
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -396,7 +404,7 @@ prop · L212–212
 
 #### <a id="s-FX_LINE-probeRange"></a>`FX_LINE.probeRange(v)`
 
-prop · L213–213
+prop · L218–218
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -405,7 +413,7 @@ prop · L213–213
 
 #### <a id="s-FX_LINE-smelt"></a>`FX_LINE.smelt(v)`
 
-prop · L214–214
+prop · L219–219
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -414,7 +422,7 @@ prop · L214–214
 
 #### <a id="s-FX_LINE-crewWage"></a>`FX_LINE.crewWage(v)`
 
-prop · L215–215
+prop · L220–220
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -423,7 +431,7 @@ prop · L215–215
 
 #### <a id="s-FX_LINE-social"></a>`FX_LINE.social(v)`
 
-prop · L216–216
+prop · L221–221
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -432,7 +440,7 @@ prop · L216–216
 
 #### <a id="s-FX_LINE-learn"></a>`FX_LINE.learn(v)`
 
-prop · L217–217
+prop · L222–222
 
 - calls: [`pctOf`](#s-pctOf)
 
@@ -441,21 +449,21 @@ prop · L217–217
 
 #### <a id="s-FX_LINE-assay"></a>`FX_LINE.assay()`
 
-prop · L218–218
+prop · L223–223
 
 <!-- note:FX_LINE.assay -->
 <!-- /note -->
 
 #### <a id="s-FX_LINE-medbay"></a>`FX_LINE.medbay()`
 
-prop · L219–219
+prop · L224–224
 
 <!-- note:FX_LINE.medbay -->
 <!-- /note -->
 
 ### <a id="s-pctOf"></a>`pctOf(v)`
 
-function · L222–225
+function · L227–230
 
 - called by: [`FX_LINE.assist`](#s-FX_LINE-assist) · [`FX_LINE.crewWage`](#s-FX_LINE-crewWage) · [`FX_LINE.dropout`](#s-FX_LINE-dropout) · [`FX_LINE.learn`](#s-FX_LINE-learn) · [`FX_LINE.probeRange`](#s-FX_LINE-probeRange) · [`FX_LINE.reactor`](#s-FX_LINE-reactor) · [`FX_LINE.resolve`](#s-FX_LINE-resolve) · [`FX_LINE.robotDraw`](#s-FX_LINE-robotDraw) · [`FX_LINE.robotWear`](#s-FX_LINE-robotWear) · [`FX_LINE.shieldRegen`](#s-FX_LINE-shieldRegen) · [`FX_LINE.smelt`](#s-FX_LINE-smelt) · [`FX_LINE.social`](#s-FX_LINE-social) · [`FX_LINE.thrust`](#s-FX_LINE-thrust) · [`effectOf`](#s-effectOf)
 
@@ -464,7 +472,7 @@ function · L222–225
 
 ### <a id="s-effectOf"></a>`effectOf(u)`
 
-function · **exported** · L227–232
+function · **exported** · L232–237
 
 - calls: [`pctOf`](#s-pctOf)
 - called by: [`registerRefitOp`](../aria/pilot.js.md#s-registerRefitOp) _js/aria/pilot.js_ · [`upgradeLines`](#s-upgradeLines) · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_ ×2
@@ -475,7 +483,7 @@ function · **exported** · L227–232
 
 ### <a id="s-upgradeLines"></a>`upgradeLines()`
 
-function · **exported** · L234–236
+function · **exported** · L239–241
 
 - calls: [`effectOf`](#s-effectOf)
 - called by: [`mountRefit`](../console/panels/market.js.md#s-mountRefit) _js/console/panels/market.js_ · [`mountTrim`](../console/panels/ship.js.md#s-mountTrim) _js/console/panels/ship.js_ · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_
@@ -486,19 +494,19 @@ function · **exported** · L234–236
 
 ### <a id="s-saveUpgrades"></a>`saveUpgrades()`
 
-function · **exported** · L238–241
+function · **exported** · L243–246
 
 - calls: [`UPGRADES_KEY`](#s-UPGRADES_KEY)
 - called by: [`buyUpgrade`](#s-buyUpgrade) · [`sellUpgrade`](#s-sellUpgrade)
 - effects: storage.set `‹UPGRADES_KEY()›`
 
 <!-- note:saveUpgrades -->
-- L239 · `try { globalThis.localStorage?.setItem(UPGRADES_KEY(), JSON.stringify(upgrades.owned)); }` — quota, or no window
+- L244 · `try { globalThis.localStorage?.setItem(UPGRADES_KEY(), JSON.stringify(upgrades.owned)); }` — quota, or no window
 <!-- /note -->
 
 ### <a id="s-loadUpgrades"></a>`loadUpgrades()`
 
-function · **exported** · L243–253
+function · **exported** · L248–258
 
 - calls: [`applyMods`](#s-applyMods) · [`byId`](#s-byId) · [`UPGRADES_KEY`](#s-UPGRADES_KEY)
 - called by: [`launchSim`](../sim/sim.js.md#s-launchSim) _js/sim/sim.js_

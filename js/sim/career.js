@@ -1,7 +1,7 @@
 export function applyCareerDefaults(ship, pilot) {
   const cx = pilot.complexId;
   if (cx === "mining") ship.miningMode = "closest";
-  if (cx === "salvage") ship.salvage = true;
+  if (cx === "salvage") { ship.salvage = true; ship.rigMode = "strip"; }
   if (cx === "security") ship.turretMode = "enemies";
   return ship;
 }
@@ -11,7 +11,7 @@ export function createCareerStepper({
   boarding, tickBoarding, stepContract, stepIcework,
   stepAtmoWorks, pilot, WALLET_EVERY, persistProgress,
   stepMarket, coolBodies, syncMods, serveTime,
-  takePayout, logEvent, rankStatus, mining,
+  takePayout, logEvent, rankStatus, mining, rig,
   work, turretAim, crewCapacity, robotCapacity,
   tickHullRepair, tickPatchDrone, tickCrew, tickRobots,
   tickCompany
@@ -61,6 +61,10 @@ export function createCareerStepper({
       work("geology", d * 0.6);
       work("heavyOps", d * 0.45);
       if (ship.miningMode === "overdrive") work("hazardOps", d * 0.25);
+    }
+    if (rig?.active) {
+      work("salvage", d * 0.5);
+      work("hullcraft", d * (ship.rigMode === "strip" ? 0.6 : 0.45));
     }
     if (Math.abs(ship.throttle) > 0.05) work("piloting", d * 0.22);
     if (sim.warp.state === "spool" || sim.warp.state === "run") work("navigation", d * 0.8);

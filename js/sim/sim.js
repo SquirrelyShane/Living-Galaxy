@@ -8,6 +8,7 @@ import { loadSave, skyProgress, useGameStore } from "../core/store.js";
 import {
   batteryCap,
   MINING_MODES,
+  RIG_MODES,
   SHED_ORDER,
   THROTTLE_MAX,
   THROTTLE_MIN,
@@ -122,6 +123,7 @@ import {
   stepTurrets,
   syncContacts,
   turretAim, miningHooks } from "../flight/turrets.js";
+import { resetRig, rig, rigHooks, rigTarget, stepRig } from "../flight/rig.js";
 
 const WALLET_EVERY = 30;
 const LOOK_GAIN = 1;
@@ -211,6 +213,7 @@ export const sim = {
   activeWaypoint: null,
   dominant: null,
   ui: { lanesDrawn: false },
+  recorders: [],
   domDist: 0,
   altitude: 0,
   frameVel: { x: 0, y: 0, z: 0 },
@@ -477,6 +480,34 @@ wireFab({
 
   log: (text) => { logEvent(text, "port"); post({ channel: "drones", from: "Works", text }); },
 });
+
+function wireRigHooks() {
+  rigHooks.onSection = (h, s, out) => {
+    const bits = [`${out.plate} ${goodName(HULK.plate).toLowerCase()} scrap`];
+    if (out.parts) bits.push(`${out.parts} parts`);
+    if (out.lost) bits.push(`${out.lost} parts lost to the cut`);
+    if (out.cargo) bits.push(`${out.cargo.qty} ${goodName(out.cargo.id)}`);
+    logEvent(`Rig: ${s.name} off the ${h.name} — ${bits.join(", ")}`, "cargo");
+    if (!sim.ship.salvage) setNoticeAbout(`The ${s.name} is cut loose and drifting. SALVG reels it in.`, "RIG");
+  };
+  rigHooks.onRecorder = (h, kept) => {
+    if (kept) {
+      sim.recorders.push({ vessel: h.vessel, name: h.vesselName, owner: h.owner ?? null, at: sim.time });
+      work("law", 2);
+      setNoticeAbout(`Flight recorder off the ${h.vesselName} is aboard, intact.`, "RIG");
+      logEvent(`Recovered the ${h.vesselName}'s flight recorder`, "cargo");
+    } else {
+      setNoticeAbout(`The ${h.vesselName}'s flight recorder went with the bridge. CUT does not spare it — STRIP does.`, "RIG");
+      logEvent(`The ${h.vesselName}'s flight recorder was destroyed in the cut`, "cargo");
+    }
+  };
+  rigHooks.onDone = (h) => {
+    sim.toast = `${h.vesselName} is cut up — nothing left to work`;
+    sim.lastToastAt = sim.time;
+    logEvent(`The ${h.name} is cut up`, "cargo");
+    SHIP.collect();
+  };
+}
 
 function wireMiningHooks() {
   miningHooks.onHoldFull = (what) => {
@@ -908,6 +939,8 @@ export function loadSky(seed) {
   resetCombat(seed);
   resetDebris();
   resetHulks();
+  resetRig();
+  sim.recorders.length = 0;
   resetImpactors(rngFromSeed(`${seed}:rocks`));
   resetHoles();
   resetImpacts();
@@ -1175,6 +1208,7 @@ export function launchSim(callsign, seed) {
   resetFab();
   loadFab();
   wireMiningHooks();
+  wireRigHooks();
   sim.selected = home;
   applyRaceToShip(ship);
   applyCareerDefaults(ship);
@@ -3155,6 +3189,7 @@ export function setMiningMode(id, { quiet = false } = {}) {
   const m = MINING_MODES.find((x) => x.id === id);
   if (!m) return;
   sim.ship.miningMode = m.id;
+  if (m.id !== "off") sim.ship.rigMode = "off";
   tapeRecord("order", "cutter", m.id);
   if (quiet) return m;
   sim.notice = `Mining laser: ${m.label}. ${m.hint}`;
@@ -3167,9 +3202,31 @@ export function cycleMiningMode(dir = 1) {
   const i = MINING_MODES.findIndex((m) => m.id === ship.miningMode);
   const next = MINING_MODES[(i + dir + MINING_MODES.length) % MINING_MODES.length];
   ship.miningMode = next.id;
+  if (next.id !== "off") ship.rigMode = "off";
   sim.notice = `Mining laser: ${next.label}. ${next.hint}`;
   logEvent(`Mining laser set to ${next.label}`, "system");
   return next;
+}
+
+export function setRigMode(id, { quiet = false } = {}) {
+  const m = RIG_MODES.find((x) => x.id === id);
+  if (!m) return;
+  sim.ship.rigMode = m.id;
+  if (m.id !== "off") sim.ship.miningMode = "off";
+  tapeRecord("order", "rig", m.id);
+  if (quiet) return m;
+  sim.notice = `Salvage rig: ${m.label}. ${m.hint}`;
+  logEvent(`Salvage rig set to ${m.label}`, "system");
+  return m;
+}
+
+export function cycleRigMode(dir = 1) {
+  const i = RIG_MODES.findIndex((m) => m.id === (sim.ship.rigMode ?? "off"));
+  return setRigMode(RIG_MODES[(i + dir + RIG_MODES.length) % RIG_MODES.length].id);
+}
+
+export function rigWanted() {
+  return sim.lock.kind === "hulk" || Boolean(rigTarget(sim.ship, null));
 }
 
 const TOGGLE_TEXT = {
@@ -3428,6 +3485,7 @@ export function tickSim(dt) {
   if (justPressed("tAssist")) toggleSystem("assist");
   if (justPressed("cycleTurret")) cycleTurretMode(1);
   if (justPressed("cycleMining")) cycleMiningMode(1);
+  if (justPressed("cycleRig")) cycleRigMode(1);
 
   stepWarp(d);
   if (sim.warp.state !== "run") {
@@ -3447,6 +3505,8 @@ export function tickSim(dt) {
   syncContacts(sim.ship, sim.remotes, relationOf, sim.time, d);
   stepShots(sim.ship, d, sim.time, onKill);
   stepMining(sim.ship, d, sim.time, sim.lock);
+  if (sim.ship.rigMode !== "off" && sim.ship.miningMode !== "off") sim.ship.rigMode = "off";
+  stepRig(sim.ship, d, sim.time, sim.lock);
   stepWorld(d);
 
   collectBeaconsNear();
@@ -3536,7 +3596,7 @@ function stepCareer(d) {
     boarding, tickBoarding, stepContract, stepIcework,
     stepAtmoWorks, pilot, WALLET_EVERY, persistProgress,
     stepMarket, coolBodies, syncMods, serveTime,
-    takePayout, logEvent, rankStatus, mining,
+    takePayout, logEvent, rankStatus, mining, rig,
     work, turretAim, crewCapacity, robotCapacity,
     tickHullRepair, tickPatchDrone, tickCrew, tickRobots,
     tickCompany
@@ -3875,6 +3935,9 @@ export function publishHud(labels, plots) {
     powered: { ...ship.powered },
     turretMode: ship.turretMode,
     miningMode: ship.miningMode,
+    rigMode: ship.rigMode ?? "off",
+    rigActive: rig.active,
+    rigProgress: rig.progress,
     targetName: turretAim.combat?.name ?? null,
     targetHostile: turretAim.hasTarget,
     contacts: contacts.length,
@@ -4002,6 +4065,7 @@ export function wireControlsTest() {
     toggleSystem,
     cycleTurretMode,
     cycleMiningMode,
+    cycleRigMode,
     setTurretMode,
     setMiningMode,
     contacts,

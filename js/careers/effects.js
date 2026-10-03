@@ -23,7 +23,7 @@ export const MOD_LABELS = {
   buy: { label: "Buy prices", up: false },
   cargo: { label: "Cargo capacity", up: true },
   warp: { label: "Warp spool time", up: false },
-  salvage: { label: "Salvage tractor", up: true },
+  salvage: { label: "Salvage rig and tractor", up: true },
   standing: { label: "Standing gains", up: true },
   blame: { label: "Standing losses", up: false },
   menace: { label: "Pirate demand range", up: false },

@@ -1,6 +1,6 @@
 # js/world/hulks.js
 
-[index](../../../README.md) · 238 lines · 22 symbols · 4 imports · 5 importers
+[index](../../../README.md) · 238 lines · 22 symbols · 4 imports · 7 importers
 
 ## About
 
@@ -29,27 +29,29 @@ A hulk is plain JSON-able data so a later slice can put it on the wire.
 ## Imported by
 
 - [js/drones/ops.js](../drones/ops.js.md) — `spawnHulk`
+- [js/flight/rig.js](../flight/rig.js.md) — `HULK`, `hulkVelocity`, `nearHulks`, `removeHulk`
 - [js/npc/battles.js](../npc/battles.js.md) — `spawnHulk`
 - [js/render/engine.js](../render/engine.js.md) — `hulks`
 - [js/sim/sim.js](../sim/sim.js.md) — `HULK`, `bindHulks`, `hulkById`, `hulkManifest`, `hulkVelocity`, `hulks`, `nearHulks`, `resetHulks`, `spawnHulk`, `stepHulks`
 - test/hulks.test.mjs _(outside js/)_ — `HULK`, `HULK_PARTS`, `HULK_SECTIONS`, `hulks`, `spawnHulk`, `stepHulks`, `resetHulks`, `bindHulks`, `hulkById`, `nearHulks`, `removeHulk`, `hulkManifest`, `hulkVelocity`, `sectionCount`
+- test/rig.test.mjs _(outside js/)_ — `HULK`, `hulks`, `spawnHulk`, `resetHulks`, `bindHulks`, `hulkManifest`
 
 ## Exports
 
-- [`HULK`](#s-HULK) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
+- [`HULK`](#s-HULK) · const — used by [js/flight/rig.js](../flight/rig.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
 - [`HULK_SECTIONS`](#s-HULK_SECTIONS) · const — used by test/hulks.test.mjs
 - [`HULK_PARTS`](#s-HULK_PARTS) · const — used by test/hulks.test.mjs
-- [`hulks`](#s-hulks) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
-- [`resetHulks`](#s-resetHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
-- [`bindHulks`](#s-bindHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
+- [`hulks`](#s-hulks) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
+- [`resetHulks`](#s-resetHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
+- [`bindHulks`](#s-bindHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
 - [`hulkById`](#s-hulkById) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
 - [`sectionCount`](#s-sectionCount) · function — used by test/hulks.test.mjs
-- [`spawnHulk`](#s-spawnHulk) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
-- [`removeHulk`](#s-removeHulk) · function — used by test/hulks.test.mjs
+- [`spawnHulk`](#s-spawnHulk) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
+- [`removeHulk`](#s-removeHulk) · function — used by [js/flight/rig.js](../flight/rig.js.md), test/hulks.test.mjs
 - [`stepHulks`](#s-stepHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
-- [`hulkVelocity`](#s-hulkVelocity) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
-- [`nearHulks`](#s-nearHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
-- [`hulkManifest`](#s-hulkManifest) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
+- [`hulkVelocity`](#s-hulkVelocity) · function — used by [js/flight/rig.js](../flight/rig.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
+- [`nearHulks`](#s-nearHulks) · function — used by [js/flight/rig.js](../flight/rig.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
+- [`hulkManifest`](#s-hulkManifest) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
 
 ## Effects
 
@@ -228,6 +230,8 @@ or null for a hull with no position.
 
 function · **exported** · L164–169
 
+- called by: [`stepRig`](../flight/rig.js.md#s-stepRig) _js/flight/rig.js_
+
 <!-- note:removeHulk -->
 <!-- /note -->
 
@@ -249,7 +253,7 @@ seconds anything inside a world's radius is removed.
 function · **exported** · L207–213
 
 - calls: [`bodyVelocity`](bodies.js.md#s-bodyVelocity) _js/world/bodies.js_
-- called by: [`targetVelocity`](../sim/sim.js.md#s-targetVelocity) _js/sim/sim.js_
+- called by: [`shed`](../flight/rig.js.md#s-shed) _js/flight/rig.js_ · [`stepRig`](../flight/rig.js.md#s-stepRig) _js/flight/rig.js_ · [`targetVelocity`](../sim/sim.js.md#s-targetVelocity) _js/sim/sim.js_
 
 <!-- note:hulkVelocity -->
 <!-- /note -->
@@ -258,7 +262,7 @@ function · **exported** · L207–213
 
 function · **exported** · L215–223
 
-- called by: [`lockCandidates`](../sim/sim.js.md#s-lockCandidates) _js/sim/sim.js_ · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_
+- called by: [`rigTarget`](../flight/rig.js.md#s-rigTarget) _js/flight/rig.js_ · [`lockCandidates`](../sim/sim.js.md#s-lockCandidates) _js/sim/sim.js_ · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_
 
 <!-- note:nearHulks -->
 <!-- /note -->

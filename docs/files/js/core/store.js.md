@@ -1,6 +1,6 @@
 # js/core/store.js
 
-[index](../../../README.md) · 223 lines · 20 symbols · 1 imports · 8 importers
+[index](../../../README.md) · 226 lines · 20 symbols · 1 imports · 9 importers
 
 ## About
 
@@ -23,18 +23,19 @@
 - [js/sim/sim.js](../sim/sim.js.md) — `loadSave`, `skyProgress`, `useGameStore`
 - [js/ui/hud.js](../ui/hud.js.md) — `loadSave`, `randomCallsign`, `skyProgress`, `useGameStore`
 - test/hulks.test.mjs _(outside js/)_ — `useGameStore`
+- test/rig.test.mjs _(outside js/)_ — `useGameStore`
 
 ## Exports
 
 - [`loadSave`](#s-loadSave) · function — used by [js/main.js](../main.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md)
 - [`skyProgress`](#s-skyProgress) · function — used by [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md)
 - [`randomCallsign`](#s-randomCallsign) · function — used by [js/main.js](../main.js.md), [js/ui/hud.js](../ui/hud.js.md)
-- [`useGameStore`](#s-useGameStore) · const — used by [js/console/console.js](../console/console.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/main.js](../main.js.md), [js/net/account.js](../net/account.js.md), [js/net/net.js](../net/net.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/hulks.test.mjs
+- [`useGameStore`](#s-useGameStore) · const — used by [js/console/console.js](../console/console.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/main.js](../main.js.md), [js/net/account.js](../net/account.js.md), [js/net/net.js](../net/net.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/hulks.test.mjs, test/rig.test.mjs
 
 ## Effects
 
 - **storage.get** — `‹SAVE_KEY›` (loadSave:9) · `‹SAVE_KEY_V1›` (loadSave:22)
-- **storage.set** — `‹SAVE_KEY›` (state.persist:203)
+- **storage.set** — `‹SAVE_KEY›` (state.persist:206)
 
 ## Symbols
 
@@ -103,18 +104,18 @@ function · L50–52
 
 ### <a id="s-state"></a>`state`
 
-const · L54–207
+const · L54–210
 
 - calls: [`surveyIds`](../world/bodies.js.md#s-surveyIds) _js/world/bodies.js_
 
 <!-- note:state -->
 - L64 · `charge: 1600,` — cockpit instrumentation
-- L137 · `response: null,` — the live distress clock (npc/security.js)
+- L140 · `response: null,` — the live distress clock (npc/security.js)
 <!-- /note -->
 
 #### <a id="s-state-setCallsign"></a>`state.setCallsign(v)`
 
-prop · L159–162
+prop · L162–165
 
 - calls: [`notify`](#s-notify)
 
@@ -123,7 +124,7 @@ prop · L159–162
 
 #### <a id="s-state-setRoom"></a>`state.setRoom(v, isPublic)`
 
-prop · L163–167
+prop · L166–170
 
 - calls: [`notify`](#s-notify)
 
@@ -132,7 +133,7 @@ prop · L163–167
 
 #### <a id="s-state-setPhase"></a>`state.setPhase(phase)`
 
-prop · L168–171
+prop · L171–174
 
 - calls: [`notify`](#s-notify)
 
@@ -141,7 +142,7 @@ prop · L168–171
 
 #### <a id="s-state-setMuted"></a>`state.setMuted(muted)`
 
-prop · L172–176
+prop · L175–179
 
 - calls: [`notify`](#s-notify)
 
@@ -150,7 +151,7 @@ prop · L172–176
 
 #### <a id="s-state-setMapOpen"></a>`state.setMapOpen(mapOpen)`
 
-prop · L177–180
+prop · L180–183
 
 - calls: [`notify`](#s-notify)
 
@@ -159,7 +160,7 @@ prop · L177–180
 
 #### <a id="s-state-setToast"></a>`state.setToast(toast)`
 
-prop · L181–184
+prop · L184–187
 
 - calls: [`notify`](#s-notify)
 
@@ -168,7 +169,7 @@ prop · L181–184
 
 #### <a id="s-state-patchHud"></a>`state.patchHud(p)`
 
-prop · L185–188
+prop · L188–191
 
 - calls: [`notify`](#s-notify)
 
@@ -177,32 +178,32 @@ prop · L185–188
 
 #### <a id="s-state-persist"></a>`state.persist()`
 
-prop · L189–206
+prop · L192–209
 
 - calls: [`loadSave`](#s-loadSave)
 - effects: storage.set `‹SAVE_KEY›`
 
 <!-- note:state.persist -->
-- L200 · `}` — quota
+- L203 · `}` — quota
 <!-- /note -->
 
 ### <a id="s-useGameStore"></a>`useGameStore`
 
-const · **exported** · L209–223
+const · **exported** · L212–226
 
 <!-- note:useGameStore -->
 <!-- /note -->
 
 #### <a id="s-useGameStore-getState"></a>`useGameStore.getState()`
 
-prop · L212–212
+prop · L215–215
 
 <!-- note:useGameStore.getState -->
 <!-- /note -->
 
 #### <a id="s-useGameStore-setState"></a>`useGameStore.setState(partial)`
 
-prop · L213–217
+prop · L216–220
 
 - calls: [`notify`](#s-notify)
 
@@ -211,7 +212,7 @@ prop · L213–217
 
 #### <a id="s-useGameStore-subscribe"></a>`useGameStore.subscribe(fn)`
 
-prop · L218–221
+prop · L221–224
 
 <!-- note:useGameStore.subscribe -->
 <!-- /note -->

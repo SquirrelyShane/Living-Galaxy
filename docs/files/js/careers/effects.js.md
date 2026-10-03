@@ -1,6 +1,6 @@
 # js/careers/effects.js
 
-[index](../../../README.md) · 110 lines · 7 symbols · 0 imports · 7 importers
+[index](../../../README.md) · 110 lines · 7 symbols · 0 imports · 8 importers
 
 ## About
 
@@ -43,12 +43,13 @@ _none_
 - [js/flight/ship.js](../flight/ship.js.md) — `defaultMods`
 - [js/npc/crewfx.js](../npc/crewfx.js.md) — `MOD_KEYS`, `defaultMods`
 - test/careers.test.mjs _(outside js/)_ — `MOD_KEYS`, `SPEC_EFFECTS`, `RACE_EFFECTS`, `composeMods`
+- test/rig.test.mjs _(outside js/)_ — `MOD_LABELS`
 
 ## Exports
 
 - [`MOD_KEYS`](#s-MOD_KEYS) · const — used by [js/economy/upgrades.js](../economy/upgrades.js.md), [js/npc/crewfx.js](../npc/crewfx.js.md), test/careers.test.mjs
 - [`defaultMods`](#s-defaultMods) · function — used by [js/economy/upgrades.js](../economy/upgrades.js.md), [js/flight/ship.js](../flight/ship.js.md), [js/npc/crewfx.js](../npc/crewfx.js.md)
-- [`MOD_LABELS`](#s-MOD_LABELS) · const — used by [js/console/panels/corp.js](../console/panels/corp.js.md), [js/economy/upgrades.js](../economy/upgrades.js.md)
+- [`MOD_LABELS`](#s-MOD_LABELS) · const — used by [js/console/panels/corp.js](../console/panels/corp.js.md), [js/economy/upgrades.js](../economy/upgrades.js.md), test/rig.test.mjs
 - [`SPEC_EFFECTS`](#s-SPEC_EFFECTS) · const — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careers.test.mjs
 - [`RACE_EFFECTS`](#s-RACE_EFFECTS) · const — used by [js/crew/races.js](../crew/races.js.md), test/careers.test.mjs
 - [`composeMods`](#s-composeMods) · function — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careers.test.mjs

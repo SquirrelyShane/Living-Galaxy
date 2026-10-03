@@ -420,6 +420,7 @@ export function stepTurrets(ship, dt, time) {
 function minableDebris(ship, range) {
   const out = [];
   for (const c of chunks) {
+    if (c.salvage) continue;
     const d = Math.hypot(c.x - ship.pos.x, c.y - ship.pos.y, c.z - ship.pos.z) - c.r;
     if (d > range) continue;
     if (c.r0 == null) c.r0 = c.r;

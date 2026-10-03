@@ -1,6 +1,6 @@
 # js/careers/status.js
 
-[index](../../../README.md) · 55 lines · 7 symbols · 1 imports · 2 importers
+[index](../../../README.md) · 55 lines · 7 symbols · 1 imports · 3 importers
 
 ## About
 
@@ -42,14 +42,15 @@ check, so tools/aria-play.mjs and aria-bench.mjs still run every career.
 
 - [js/flight/pilot.js](../flight/pilot.js.md) — `careerStatus`
 - test/careerstatus.test.mjs _(outside js/)_ — `CAREER_STATUS`, `OPEN_GATE`, `careerStatus`, `isCareerOpen`, `openCareers`
+- test/rig.test.mjs _(outside js/)_ — `careerStatus`, `isCareerOpen`
 
 ## Exports
 
 - [`OPEN_GATE`](#s-OPEN_GATE) · const — used by test/careerstatus.test.mjs
 - [`CAREER_ARCS`](#s-CAREER_ARCS) · const — **no importer in scanned roots**
 - [`CAREER_STATUS`](#s-CAREER_STATUS) · const — used by test/careerstatus.test.mjs
-- [`careerStatus`](#s-careerStatus) · function — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careerstatus.test.mjs
-- [`isCareerOpen`](#s-isCareerOpen) · function — used by test/careerstatus.test.mjs
+- [`careerStatus`](#s-careerStatus) · function — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careerstatus.test.mjs, test/rig.test.mjs
+- [`isCareerOpen`](#s-isCareerOpen) · function — used by test/careerstatus.test.mjs, test/rig.test.mjs
 - [`openCareers`](#s-openCareers) · function — used by test/careerstatus.test.mjs
 
 ## Effects
