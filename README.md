@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.84**
+**Version 0.3.85**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.84](PATCH-0.3.84.md). Career roadmap:
+Current patch: [0.3.85](PATCH-0.3.85.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
 

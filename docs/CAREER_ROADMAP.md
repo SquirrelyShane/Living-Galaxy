@@ -1,15 +1,16 @@
 # Career roadmap
 
-From 0.3.81, a new pilot can enrol in any of the sixteen careers. The roadmap
-still records which career loops need more work and what their future updates
-will add. It does not restrict creation or lateral transfer.
+From 0.3.85, only careers with an open state and all nine readiness items
+can be selected for new pilots or new transfers. Unfinished careers remain
+visible but greyed out. Existing pilots and previously held careers are retained.
+Mining is currently the only completed career; Salvage recovery is in development.
 
 The switch is `js/careers/status.js`, and `test/careerstatus.test.mjs` guards it.
 
 ## Readiness: what "fleshed out" means
 
 A career has a complete loop when it has all nine items that Mining has. These
-items track planned work and do not gate access.
+items gate new enrollment as of 0.3.85.
 
 | item | means | Mining's version |
 |---|---|---|
@@ -49,7 +50,7 @@ pass. Each arc re-audits its own careers when it starts.
 
 ## 0.3.83 project state
 
-- All sixteen careers remain available; readiness metadata does not restrict access.
+- At 0.3.83 all sixteen careers were available; 0.3.85 gates new enrollment.
 - Career defaults and the career tick now live in `js/sim/career.js`. The
   public `sim.js` facade and training/payroll behavior are retained.
 - The empty controls-test module, renderer import and preload are removed.
@@ -95,7 +96,7 @@ and operations power required. Site progress survives leaving and returning duri
 the active session. This release does not add contract persistence across reloads
 or shared persistent hulks. Existing saves and live Sol require no reset.
 Readiness stays planned: visible hull cutting, ARIA parity and browser smoke are
-not complete. All sixteen careers remain selectable.
+not complete. All sixteen careers remain visible; only completed careers allow new enrollment.
 
 ## How to complete a career loop
 
@@ -103,7 +104,7 @@ not complete. All sixteen careers remain selectable.
 2. In `js/careers/status.js`, add the new item to that career's `has`. When all nine are
    there, set `state: "open"`.
 3. Update `test/careerstatus.test.mjs` to check the new readiness metadata while
-   keeping all sixteen careers selectable.
+   keeping unfinished careers visible and existing pilots usable.
 4. Add a CHANGELOG entry describing the completed loop.
 
 ## Things to watch

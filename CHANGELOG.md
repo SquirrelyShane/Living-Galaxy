@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.85 — 2026-10-02 — Career readiness hotfix
+
+- Grey out unfinished careers in character creation and block new transfers into them.
+- Only Mining currently meets every readiness requirement; Salvage remains in development.
+- Default new characters to an available career.
+- Retain existing pilots and allow resuming careers already held.
+- Replace retired career version promises with In development labels.
+
+No Sol reset or save migration is required.
+
+
 ## 0.3.84 — 2026-10-02 — Dead Hulls: Recovery
 
 - Starts Salvage career gameplay in the main release sequence; retires separate career version assignments.

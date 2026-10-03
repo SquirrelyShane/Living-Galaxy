@@ -107,7 +107,7 @@ function · L37–37
 
 function · L38–38
 
-- called by: [`mountCreation>finish`](#s-mountCreation-finish)
+- called by: [`mountCreation.show`](#s-mountCreation-show) · [`mountCreation>finish`](#s-mountCreation-finish)
 
 <!-- note:mountCreation>firstOpen -->
 <!-- /note -->
@@ -312,7 +312,7 @@ function · L366–370
 
 prop · L373–403
 
-- calls: [`buildCorps`](../corp/corps.js.md#s-buildCorps) _js/corp/corps.js_ · [`$`](#s-S) ×4 · [`mountCreation>isOpenCareer`](#s-mountCreation-isOpenCareer) · [`mountCreation>setStep`](#s-mountCreation-setStep)
+- calls: [`buildCorps`](../corp/corps.js.md#s-buildCorps) _js/corp/corps.js_ · [`$`](#s-S) ×4 · [`mountCreation>firstOpen`](#s-mountCreation-firstOpen) · [`mountCreation>isOpenCareer`](#s-mountCreation-isOpenCareer) · [`mountCreation>setStep`](#s-mountCreation-setStep)
 - effects: dom.id `create-title` · dom.create `input` · dom.id `callsign` · event.listen `input` · event.dispatch `input` · timer `setTimeout`
 
 <!-- note:mountCreation.show -->

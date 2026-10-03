@@ -10371,7 +10371,9 @@
      "line": 53,
      "end": 53,
      "exported": true,
-     "calls": []
+     "calls": [
+      "js/careers/status.js#careerStatus"
+     ]
     },
     {
      "key": "openCareers",
@@ -104104,6 +104106,7 @@
       "js/ui/creation.js#$",
       "js/corp/corps.js#buildCorps",
       "js/ui/creation.js#mountCreation>isOpenCareer",
+      "js/ui/creation.js#mountCreation>firstOpen",
       "js/ui/creation.js#mountCreation>setStep"
      ]
     },

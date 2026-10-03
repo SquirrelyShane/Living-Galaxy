@@ -13,13 +13,13 @@ export const OPEN_GATE = [
 ];
 
 export const CAREER_ARCS = [
-  { minor: "0.4", name: "Dead Hulls", careers: ["salvage"] },
-  { minor: "0.5", name: "The Watch", careers: ["security"] },
-  { minor: "0.6", name: "The Floor", careers: ["commerce", "logistics"] },
-  { minor: "0.7", name: "The Line", careers: ["manufacturing", "construction", "shipyard"] },
-  { minor: "0.8", name: "Heat and Weather", careers: ["energy", "terraforming"] },
-  { minor: "0.9", name: "Charted", careers: ["research", "navigation"] },
-  { minor: "0.10", name: "The Town", careers: ["healthcare", "agriculture", "education", "communications"] },
+  { minor: "", name: "Dead Hulls", careers: ["salvage"] },
+  { minor: "", name: "The Watch", careers: ["security"] },
+  { minor: "", name: "The Floor", careers: ["commerce", "logistics"] },
+  { minor: "", name: "The Line", careers: ["manufacturing", "construction", "shipyard"] },
+  { minor: "", name: "Heat and Weather", careers: ["energy", "terraforming"] },
+  { minor: "", name: "Charted", careers: ["research", "navigation"] },
+  { minor: "", name: "The Town", careers: ["healthcare", "agriculture", "education", "communications"] },
 ];
 
 export const CAREER_STATUS = {
@@ -47,9 +47,9 @@ export function careerStatus(id) {
   const s = CAREER_STATUS[id];
   if (!s) return { id, state: "planned", open: false, has: [], verb: "", arc: null, eta: "", missing: [...OPEN_GATE] };
   const arc = arcOf.get(id) ?? null;
-  return { id, ...s, open: true, arc, eta: arc ? arc.minor : "", missing: OPEN_GATE.filter((g) => !s.has.includes(g)) };
+  return { id, ...s, open: s.state === "open" && OPEN_GATE.every((g) => s.has.includes(g)), arc, eta: "", missing: OPEN_GATE.filter((g) => !s.has.includes(g)) };
 }
 
-export const isCareerOpen = (id) => Boolean(CAREER_STATUS[id]);
+export const isCareerOpen = (id) => careerStatus(id).open;
 
 export const openCareers = () => COMPLEX_IDS.filter(isCareerOpen);

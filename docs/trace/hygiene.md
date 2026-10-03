@@ -148,7 +148,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
 
-## Exports with no importer (922)
+## Exports with no importer (923)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `aria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
@@ -293,6 +293,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/careers/index.js](../files/js/careers/index.js.md) `ladderSummary`
 - [js/careers/index.js](../files/js/careers/index.js.md) `allLaddersText`
 - [js/careers/index.js](../files/js/careers/index.js.md) `catalog`
+- [js/careers/status.js](../files/js/careers/status.js.md) `CAREER_ARCS`
 - [js/comms/call-scripts.js](../files/js/comms/call-scripts.js.md) `llamaProvider`
 - [js/comms/call-session.js](../files/js/comms/call-session.js.md) `Emitter`
 - [js/comms/call-session.js](../files/js/comms/call-session.js.md) `default`

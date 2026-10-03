@@ -274,7 +274,7 @@ export function transferOptions() {
     const held = pilot.character.careers?.[id];
     if (held) return { id, name: c.name ?? id, related: true, start: held.rank, note: "resume where you left it", ok: true, resume: true };
     const st = careerStatus(id);
-    if (!st.open) return { id, name: c.name ?? id, related: false, start: "A", note: `opens in ${st.eta}`, ok: false, resume: false, shut: true, eta: st.eta };
+    if (!st.open) return { id, name: c.name ?? id, related: false, start: "A", note: "In development", ok: false, resume: false, shut: true, eta: st.eta };
     const e = transferEligibility(pilot.character, pilot.complexId, id);
     return { id, name: c.name ?? id, related: Boolean(e.related), start: e.recommendedStart ?? "A", note: e.note ?? e.error ?? "", ok: Boolean(e.ok), resume: false };
   });
@@ -287,7 +287,7 @@ export function tryTransfer(toId) {
   let e = { ok: true, recommendedStart: pilot.character.careers?.[toId]?.rank, related: true };
   if (!pilot.character.careers?.[toId]) {
     const st = careerStatus(toId);
-    if (!st.open) return { ok: false, error: `${getComplex(toId).name ?? toId} opens in ${st.eta}` };
+    if (!st.open) return { ok: false, error: `${getComplex(toId).name ?? toId} is in development` };
     e = transferEligibility(pilot.character, pilot.complexId, toId);
     if (!e.ok) return e;
     const r = enroll(pilot.character, toId, { force: true, startLetter: e.recommendedStart });

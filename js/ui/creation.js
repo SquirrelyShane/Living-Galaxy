@@ -112,7 +112,7 @@ export function mountCreation(opts) {
       b.dataset.career = c.id;
       b.style.setProperty("--dot", "#7fb8c9");
       if (!c.open) b.setAttribute("aria-disabled", "true");
-      b.append(el("b", null, c.name.replace(/ Complex$/, "")), el("small", null, c.open ? c.primary.slice(0, 2).join(" · ") : `PLANNED · ${c.eta}`));
+      b.append(el("b", null, c.name.replace(/ Complex$/, "")), el("small", null, c.open ? c.primary.slice(0, 2).join(" · ") : "IN DEVELOPMENT"));
       b.addEventListener("click", () => {
         if (c.open) { choice.complexId = c.id; peekId = null; }
         else peekId = c.id;
@@ -127,7 +127,7 @@ export function mountCreation(opts) {
       const c = careers.find((x) => x.id === shownId);
       const d = el("div", `detail ${c.open ? "" : "shut"}`);
       d.append(el("h4", null, c.name));
-      if (!c.open) d.append(el("p", "soon", `Not open yet — arrives in ${c.eta} "${c.arc}", when you will ${c.verb}. Mining is the career with its full loop today.`));
+      if (!c.open) d.append(el("p", "soon", `In development — ${c.arc}: ${c.verb}. Select a completed career to begin.`));
       if (c.blurb) d.append(el("p", "lede", c.blurb));
       if (c.entry) {
         d.append(el("p", null, `You start at ${c.entry.letter} — ${c.entry.title}. ${c.entry.duties ?? ""}`));
@@ -396,7 +396,7 @@ export function mountCreation(opts) {
       } else title.textContent = $("callsign").value.trim() || "New pilot";
       if (!corps.length) buildCorps(Math.random);
       if (!choice.raceId) choice.raceId = "terran";
-      if (!isOpenCareer(choice.complexId)) choice.complexId = "navigation";
+      if (!isOpenCareer(choice.complexId)) choice.complexId = firstOpen();
       peekId = null;
       if (choice.corpId === null) choice.corpId = "";
       setStep(0);

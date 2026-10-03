@@ -41,12 +41,12 @@ check, so tools/aria-play.mjs and aria-bench.mjs still run every career.
 ## Imported by
 
 - [js/flight/pilot.js](../flight/pilot.js.md) — `careerStatus`
-- test/careerstatus.test.mjs _(outside js/)_ — `CAREER_ARCS`, `CAREER_STATUS`, `OPEN_GATE`, `careerStatus`, `isCareerOpen`, `openCareers`
+- test/careerstatus.test.mjs _(outside js/)_ — `CAREER_STATUS`, `OPEN_GATE`, `careerStatus`, `isCareerOpen`, `openCareers`
 
 ## Exports
 
 - [`OPEN_GATE`](#s-OPEN_GATE) · const — used by test/careerstatus.test.mjs
-- [`CAREER_ARCS`](#s-CAREER_ARCS) · const — used by test/careerstatus.test.mjs
+- [`CAREER_ARCS`](#s-CAREER_ARCS) · const — **no importer in scanned roots**
 - [`CAREER_STATUS`](#s-CAREER_STATUS) · const — used by test/careerstatus.test.mjs
 - [`careerStatus`](#s-careerStatus) · function — used by [js/flight/pilot.js](../flight/pilot.js.md), test/careerstatus.test.mjs
 - [`isCareerOpen`](#s-isCareerOpen) · function — used by test/careerstatus.test.mjs
@@ -90,16 +90,18 @@ const · L44–44
 
 function · **exported** · L46–51
 
-- called by: [`careerCatalog`](../flight/pilot.js.md#s-careerCatalog) _js/flight/pilot.js_ · [`transferOptions`](../flight/pilot.js.md#s-transferOptions) _js/flight/pilot.js_ · [`tryTransfer`](../flight/pilot.js.md#s-tryTransfer) _js/flight/pilot.js_
+- called by: [`isCareerOpen`](#s-isCareerOpen) · [`careerCatalog`](../flight/pilot.js.md#s-careerCatalog) _js/flight/pilot.js_ · [`transferOptions`](../flight/pilot.js.md#s-transferOptions) _js/flight/pilot.js_ · [`tryTransfer`](../flight/pilot.js.md#s-tryTransfer) _js/flight/pilot.js_
 
 <!-- note:careerStatus -->
-- L50 · `return { id, ...s, open: true, arc, eta: arc ? arc.minor : "", missing: OPEN_GATE.filter((` — A planned feature loop is still a selectable career. `state` and `missing`
+- L? · `return { id, ...s, open: true, arc, eta: arc ? arc.minor : "", missing: OPEN_GATE.filter((` — A planned feature loop is still a selectable career. `state` and `missing`
   describe its roadmap, while `open` describes pilot access.
 <!-- /note -->
 
 ### <a id="s-isCareerOpen"></a>`isCareerOpen(id)`
 
 function · **exported** · L53–53
+
+- calls: [`careerStatus`](#s-careerStatus)
 
 <!-- note:isCareerOpen -->
 <!-- /note -->
