@@ -109,10 +109,10 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `PREFABS` from `../prefabs/index.js`
 - [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
 - [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `fpArea` from `../prefabs/index.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L71 `stockMult` from `../economy/economy.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L73 `clearDockwork` from `../station/dockwork.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L73 `handlingProgress` from `../station/dockwork.js`
-- [js/sim/sim.js](../files/js/sim/sim.js.md) L96 `notePerf` from `../core/perf.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L72 `stockMult` from `../economy/economy.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L74 `clearDockwork` from `../station/dockwork.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L74 `handlingProgress` from `../station/dockwork.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L97 `notePerf` from `../core/perf.js`
 - [js/ui/hud.js](../files/js/ui/hud.js.md) L12 `recorder` from `../flight/recorder.js`
 - [js/world/events/impacts.js](../files/js/world/events/impacts.js.md) L1 `DETAIL` from `../../bodygen/body.js`
 
@@ -121,15 +121,15 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/audio/index.js › engineAir](../files/js/audio/index.js.md#s-engineAir) L24
 - [js/console/panels/work.js › capLabel](../files/js/console/panels/work.js.md#s-capLabel) L37
 - [js/crew/beats.js › roll](../files/js/crew/beats.js.md#s-roll) L12
-- [js/npc/battles.js › _p](../files/js/npc/battles.js.md#s-_p) L29
-- [js/npc/battles.js › _route](../files/js/npc/battles.js.md#s-_route) L105
+- [js/npc/battles.js › _p](../files/js/npc/battles.js.md#s-_p) L30
+- [js/npc/battles.js › _route](../files/js/npc/battles.js.md#s-_route) L106
 - [js/npc/flight.js › clamp](../files/js/npc/flight.js.md#s-clamp) L105
 - [js/npc/security.js › d3](../files/js/npc/security.js.md#s-d3) L59
 - [js/npc/speech.js › nearestPortName](../files/js/npc/speech.js.md#s-nearestPortName) L136
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
-- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L75
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2097
+- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L76
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2113
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33

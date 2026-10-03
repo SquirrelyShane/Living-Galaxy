@@ -1291,7 +1291,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `warp-flash`
 
-- dom.id — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1369
+- dom.id — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1370
 
 ### `warp-state`
 

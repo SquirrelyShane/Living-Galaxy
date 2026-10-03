@@ -81,6 +81,7 @@ when their scope is ready.
 | main release / order | theme | careers | work |
 |---|---|---|---|
 | **0.3.84** | **Dead Hulls: Recovery** | Salvage | Powered wreck/pod recovery at contract waypoints; capacity-safe partial collection; training from actual recovered material; tutorial guidance |
+| **0.3.86** | **Dead Hulls: Hulks** | Salvage | Destroyed hulls leave sectioned hulks (plate, parts, recorder, surviving cargo); lock, match, anchor and assay; no cutting yet |
 | Next Salvage slices | Dead Hulls | Salvage | Persistent shared combat/cataclysm hulks; visible cutting into plate, parts and black boxes; ownership and salvage rights; ARIA recovery planning; Mining parity benchmark and browser smoke |
 | Then | The Watch | Security | Picket wings; disable and board; brig; nests; tutorial; ARIA; benchmark and smoke |
 | Then | The Floor | Commerce, Logistics | Order book; bonded manifests; convoys; insurance; hulls; tutorials; ARIA; benchmarks and smokes |
@@ -97,6 +98,14 @@ the active session. This release does not add contract persistence across reload
 or shared persistent hulks. Existing saves and live Sol require no reset.
 Readiness stays planned: visible hull cutting, ARIA parity and browser smoke are
 not complete. All sixteen careers remain visible; only completed careers allow new enrollment.
+
+### 0.3.86 limits
+
+Hulks exist as world objects (`js/world/hulks.js`) and can be found, locked and
+assayed, but nothing cuts them. They are session state: not saved, and not yet
+shared between players. Wreck and pod contracts still use the 0.3.84 recovery
+rules and are not bound to hulks. Readiness is unchanged — Salvage still lacks
+`verb`, `aria`, `bench` and `smoke`. The slice order is in `docs/SALVAGE_PLAN.md`.
 
 ## How to complete a career loop
 

@@ -2,6 +2,7 @@ import { corpOfVessel, corpRelation } from "../corp/corps.js";
 import { rngFromSeed } from "../world/generate.js";
 import { traffic, trafficDown, trafficHooks, routePose, markVesselDown, vesselById, eventAt, HOSTILE_ROLES, LAW_ROLES } from "./traffic.js";
 import { burst } from "../world/debris.js";
+import { spawnHulk } from "../world/hulks.js";
 import { stations as liveStations } from "../station/stations.js";
 import { currentSystem } from "../world/bodies.js";
 
@@ -219,6 +220,7 @@ export function stepBattles(t, dt, shipPos, fireNpc, stationList = liveStations,
         const w = vesselById(e.downId);
         markVesselDown(e.downId, t);
         if (w) burst({ x: w.x, y: w.y, z: w.z, vx: (w.vx ?? 0) * 0.3, vy: (w.vy ?? 0) * 0.3, vz: (w.vz ?? 0) * 0.3, count: 16, speed: 22, size: 9, good: "iron_ore", tint: 0.35 });
+        if (w) spawnHulk(w, { source: "battle", owner: corpOfVessel(w)?.id ?? null, at: t });
       }
       battleHooks.onEnd?.(e);
     }

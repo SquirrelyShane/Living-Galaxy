@@ -1,6 +1,6 @@
 # js/world/generate.js
 
-[index](../../../README.md) · 268 lines · 24 symbols · 3 imports · 15 importers
+[index](../../../README.md) · 268 lines · 24 symbols · 3 imports · 16 importers
 
 ## About
 
@@ -27,6 +27,7 @@
 - [js/npc/traffic.js](../npc/traffic.js.md) — `rngFromSeed`
 - [js/sim/sim.js](../sim/sim.js.md) — `generateSystem`, `rngFromSeed`, `spawnBodyId`
 - [js/ui/hud.js](../ui/hud.js.md) — `describeSystem`, `generateSystem`
+- [js/world/hulks.js](hulks.js.md) — `rngFromSeed`
 - test/ariaplay.test.mjs _(outside js/)_ — `rngFromSeed`
 - test/economy.test.mjs _(outside js/)_ — `rngFromSeed`
 - test/nav.test.mjs _(outside js/)_ — `generateSystem`
@@ -35,7 +36,7 @@
 
 ## Exports
 
-- [`rngFromSeed`](#s-rngFromSeed) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/rogues.js](../npc/rogues.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/sim/sim.js](../sim/sim.js.md), test/ariaplay.test.mjs, test/economy.test.mjs, test/npcchat.test.mjs, test/spacing.test.mjs
+- [`rngFromSeed`](#s-rngFromSeed) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/rogues.js](../npc/rogues.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/world/hulks.js](hulks.js.md), test/ariaplay.test.mjs, test/economy.test.mjs, test/npcchat.test.mjs, test/spacing.test.mjs
 - [`generateSystem`](#s-generateSystem) · function — used by [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/nav.test.mjs, test/spacing.test.mjs
 - [`spawnBodyId`](#s-spawnBodyId) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/spacing.test.mjs
 - [`describeSystem`](#s-describeSystem) · function — used by [js/ui/hud.js](../ui/hud.js.md)
@@ -69,7 +70,7 @@ function · L16–23
 function · **exported** · L24–26
 
 - calls: [`mulberry32`](#s-mulberry32) · [`xmur3`](#s-xmur3)
-- called by: [`step`](../comms/comms.js.md#s-step) _js/comms/comms.js_ · [`populateNpcDrones`](../drones/npcdrones.js.md#s-populateNpcDrones) _js/drones/npcdrones.js_ · [`boardFor`](../economy/contracts.js.md#s-boardFor) _js/economy/contracts.js_ · [`issuersAt`](../economy/contracts.js.md#s-issuersAt) _js/economy/contracts.js_ · [`resetCombat`](../flight/turrets.js.md#s-resetCombat) _js/flight/turrets.js_ · [`engagementFor`](../npc/battles.js.md#s-engagementFor) _js/npc/battles.js_ · [`populateFlow`](../npc/flow.js.md#s-populateFlow) _js/npc/flow.js_ · [`resetRogues`](../npc/rogues.js.md#s-resetRogues) _js/npc/rogues.js_ · [`buildRoster`](../npc/traffic.js.md#s-buildRoster) _js/npc/traffic.js_ · [`eventAt`](../npc/traffic.js.md#s-eventAt) _js/npc/traffic.js_ · [`spawnVessel`](../npc/traffic.js.md#s-spawnVessel) _js/npc/traffic.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ ×3 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ · [`generateSystem`](#s-generateSystem)
+- called by: [`step`](../comms/comms.js.md#s-step) _js/comms/comms.js_ · [`populateNpcDrones`](../drones/npcdrones.js.md#s-populateNpcDrones) _js/drones/npcdrones.js_ · [`boardFor`](../economy/contracts.js.md#s-boardFor) _js/economy/contracts.js_ · [`issuersAt`](../economy/contracts.js.md#s-issuersAt) _js/economy/contracts.js_ · [`resetCombat`](../flight/turrets.js.md#s-resetCombat) _js/flight/turrets.js_ · [`engagementFor`](../npc/battles.js.md#s-engagementFor) _js/npc/battles.js_ · [`populateFlow`](../npc/flow.js.md#s-populateFlow) _js/npc/flow.js_ · [`resetRogues`](../npc/rogues.js.md#s-resetRogues) _js/npc/rogues.js_ · [`buildRoster`](../npc/traffic.js.md#s-buildRoster) _js/npc/traffic.js_ · [`eventAt`](../npc/traffic.js.md#s-eventAt) _js/npc/traffic.js_ · [`spawnVessel`](../npc/traffic.js.md#s-spawnVessel) _js/npc/traffic.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ ×3 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ · [`generateSystem`](#s-generateSystem) · [`spawnHulk`](hulks.js.md#s-spawnHulk) _js/world/hulks.js_
 
 <!-- note:rngFromSeed -->
 <!-- /note -->

@@ -1,6 +1,6 @@
 # js/npc/combat.js
 
-[index](../../../README.md) · 290 lines · 37 symbols · 6 imports · 3 importers
+[index](../../../README.md) · 290 lines · 37 symbols · 6 imports · 4 importers
 
 ## About
 
@@ -72,6 +72,7 @@ damage already done still on the hulls.
 ## Imported by
 
 - [js/sim/sim.js](../sim/sim.js.md) — `resetNpcCombat`, `stepNpcCombat`, `mountNpcCombat`, `combatHooksOut`, `combatReport`, `combatLog`, `damageHull`
+- test/hulks.test.mjs _(outside js/)_ — `damageHull`
 - test/reactive.test.mjs _(outside js/)_ — `stepNpcCombat`, `hostileTo`, `acquire`, `setHunt`, `damageHull`, `combatLog`, `combatReport`, `HUNT_R`
 - test/rogues.test.mjs _(outside js/)_ — `stepNpcCombat`
 
@@ -96,7 +97,7 @@ damage already done still on the hulls.
 - [`acquire`](#s-acquire) · function — used by test/reactive.test.mjs
 - [`setHunt`](#s-setHunt) · function — used by test/reactive.test.mjs
 - [`clearHunt`](#s-clearHunt) · function — **no importer in scanned roots**
-- [`damageHull`](#s-damageHull) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs
+- [`damageHull`](#s-damageHull) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/reactive.test.mjs
 - [`combatHooksOut`](#s-combatHooksOut) · const — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`combatFly`](#s-combatFly) · function — **no importer in scanned roots**
 - [`stepNpcCombat`](#s-stepNpcCombat) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs

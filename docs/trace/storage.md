@@ -39,8 +39,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 - storage.set — [js/aria/aria.js › saveAria](../files/js/aria/aria.js.md#s-saveAria) L152
 - storage.get — [js/aria/aria.js › loadAria](../files/js/aria/aria.js.md#s-loadAria) L158
-- storage.set — [js/drones/ops.js › save](../files/js/drones/ops.js.md#s-save) L908
-- storage.get — [js/drones/ops.js › loadDroneOps](../files/js/drones/ops.js.md#s-loadDroneOps) L928
+- storage.set — [js/drones/ops.js › save](../files/js/drones/ops.js.md#s-save) L910
+- storage.get — [js/drones/ops.js › loadDroneOps](../files/js/drones/ops.js.md#s-loadDroneOps) L930
 
 ### `‹LS_KEY›`
 
@@ -85,7 +85,7 @@ Every localStorage/sessionStorage key read, written or removed.
 ### `‹SAVE_KEY›`
 
 - storage.get — [js/core/store.js › loadSave](../files/js/core/store.js.md#s-loadSave) L9
-- storage.set — [js/core/store.js › state.persist](../files/js/core/store.js.md#s-state-persist) L202
+- storage.set — [js/core/store.js › state.persist](../files/js/core/store.js.md#s-state-persist) L203
 - storage.set — [js/corp/company.js › flushSave](../files/js/corp/company.js.md#s-flushSave) L253
 - storage.get — [js/corp/company.js › loadCompany](../files/js/corp/company.js.md#s-loadCompany) L267
 - storage.remove — [js/corp/company.js › resetCompany](../files/js/corp/company.js.md#s-resetCompany) L274
@@ -104,7 +104,7 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `lgaa.attract`
 
-- storage.get — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L170
+- storage.get — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L171
 
 ### `lgaa.dockcine`
 
@@ -121,4 +121,4 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `lgaa.rocks`
 
-- storage.get — [js/render/engine.js › mountGame>rockQuality](../files/js/render/engine.js.md#s-mountGame-rockQuality) L1514
+- storage.get — [js/render/engine.js › mountGame>rockQuality](../files/js/render/engine.js.md#s-mountGame-rockQuality) L1515

@@ -1,6 +1,6 @@
 # js/flight/ship.js
 
-[index](../../../README.md) · 670 lines · 53 symbols · 5 imports · 44 importers
+[index](../../../README.md) · 670 lines · 53 symbols · 5 imports · 45 importers
 
 ## About
 
@@ -72,6 +72,7 @@ angular inertia. Everything you switch on competes for the same reactor.
 - test/ariabiz.test.mjs _(outside js/)_ — `holdRoom`
 - test/autopilot.test.mjs _(outside js/)_ — `BATTERY`, `cargoTotal`
 - test/defence.test.mjs _(outside js/)_ — `makeShip`, `applyDamage`
+- test/hulks.test.mjs _(outside js/)_ — `forwardOf`
 - test/mission.test.mjs _(outside js/)_ — `BATTERY`
 - test/nose.test.mjs _(outside js/)_ — `forwardOf`
 - test/salvage.test.mjs _(outside js/)_ — `roomFor`
@@ -106,7 +107,7 @@ angular inertia. Everything you switch on competes for the same reactor.
 - [`TURRET_MODES`](#s-TURRET_MODES) · const — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md)
 - [`MINING_MODES`](#s-MINING_MODES) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md)
 - [`makeShip`](#s-makeShip) · function — used by [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md), test/defence.test.mjs
-- [`forwardOf`](#s-forwardOf) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/flight/contacts.js](contacts.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), test/nose.test.mjs
+- [`forwardOf`](#s-forwardOf) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/flight/contacts.js](contacts.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), test/hulks.test.mjs, test/nose.test.mjs
 - [`rightOf`](#s-rightOf) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/render/engine.js](../render/engine.js.md)
 - [`upOf`](#s-upOf) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/render/engine.js](../render/engine.js.md)
 - [`speedOf`](#s-speedOf) · function — used by [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md)

@@ -96,6 +96,7 @@ const state = {
   pulse: false,
   pulseLeft: 0,
   debris: 0,
+  hulks: 0,
   impactors: 0,
   threat: null,
   lockName: null,

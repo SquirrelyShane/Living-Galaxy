@@ -201,7 +201,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `dblclick`
 
-- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1418
+- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1419
 
 ### `error`
 
@@ -287,8 +287,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 ### `pointercancel`
 
 - event.listen on `input` → `release` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L100
-- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1507
-- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2707
+- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1508
+- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2759
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L268
 - event.listen on `el` → `end` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L321
 - event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L340
@@ -301,8 +301,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `input` → `(inline)` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L93
 - event.listen on `DOC` → `onPointerDown` — [js/flight/recorder.js › wireRecorder](../files/js/flight/recorder.js.md#s-wireRecorder) L222
 - event.listen on `interior.canvas` → `(inline)` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L428
-- event.listen on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1504
-- event.unlisten on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2704
+- event.listen on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1505
+- event.unlisten on `canvas` → `onPointerDown` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2756
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L264
 - event.listen on `root` → `(inline)` — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L386
 - event.listen on `root` → `(inline)` — [js/ui/chatbox.js › mountChatbox](../files/js/ui/chatbox.js.md#s-mountChatbox) L116
@@ -323,8 +323,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `pointermove`
 
-- event.listen on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1505
-- event.unlisten on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2705
+- event.listen on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1506
+- event.unlisten on `canvas` → `onPointerMove` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2757
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L270
 - event.listen on `el` → `move` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L319
 - event.listen on `track` → `(inline)` — [js/ui/hud.js › bindThrottle](../files/js/ui/hud.js.md#s-bindThrottle) L360
@@ -333,8 +333,8 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 ### `pointerup`
 
 - event.listen on `input` → `release` — [js/console/kit.js › slider](../files/js/console/kit.js.md#s-slider) L99
-- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1506
-- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2706
+- event.listen on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1507
+- event.unlisten on `canvas` → `onPointerUp` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2758
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L277
 - event.listen on `el` → `end` — [js/ui/hud.js › bindPad](../files/js/ui/hud.js.md#s-bindPad) L320
 - event.listen on `el` → `u` — [js/ui/hud.js › bindHold](../files/js/ui/hud.js.md#s-bindHold) L339
@@ -407,7 +407,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `wheel`
 
-- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1413
+- event.listen on `canvas` → `(inline)` — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1414
 - event.listen on `canvas` → `(inline)` — [js/station/stationdeck.js › PANELS.blueprint](../files/js/station/stationdeck.js.md#s-PANELS-blueprint) L290
 - event.listen on `svg` → `(inline)` — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L198
 

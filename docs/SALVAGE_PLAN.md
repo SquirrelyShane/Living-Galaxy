@@ -76,7 +76,19 @@ Each line needs the ones above it.
 One patch per version. Version numbers are proposals; the roadmap assigns them
 when scope is ready. NEW = create, EDIT = change, TEST = add/extend.
 
-### 0.3.86 — Hulks (entity only, no verb)
+### 0.3.86 — Hulks (entity only, no verb) — shipped
+
+Shipped as planned, with these differences:
+
+- Also edited: `js/drones/ops.js` (a company combat drone's kill leaves a hulk).
+- Added early: SCAN assay of a hulk in `tryAssay` (planned for 0.3.88). It reads
+  the manifest and trains `salvage` once per hulk.
+- Hull-against-hull kills (`combatHooksOut.onDown`) leave a hulk too.
+- Plate good decided: `steel` (`HULK.plate`). No new good, so `VALUE_RULE` is untouched.
+- Hulk meshes use `makeShipGroup`, not `render/hullpool.js`.
+- Not done here: `v.derelict` hulls (still 0.3.89), ship-vs-hulk collision.
+- Line anchors below are 0.3.85 lines; `sim.js` and `engine.js` have shifted since.
+
 
 | | file | what |
 |---|---|---|

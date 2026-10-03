@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.86 — 2026-10-03 — Dead Hulls: Hulks
+
+- A destroyed NPC hull leaves a hulk where it died: its own hull in sections, each holding plate and parts.
+- The bridge section holds the flight recorder; the hold keeps a share of the cargo aboard.
+- Kills by the pilot, port guns, guard and company drones, other hulls and staged ambushes all leave one.
+- Hulks can be locked, matched, anchored to a waypoint and assayed with SCAN.
+- Hulks near a world keep station with it; a hulk lasts 90 minutes and the sky keeps at most 48.
+- Adds `docs/SALVAGE_PLAN.md`, the slice plan for completing the Salvage career.
+
+No Sol reset or save migration is required. Hulks are not saved or shared between
+players yet. Cutting, hulk-bound contracts, salvage rights and derelicts remain
+future work; Salvage readiness is unchanged.
+
+
 ## 0.3.85 — 2026-10-02 — Career readiness hotfix
 
 - Grey out unfinished careers in character creation and block new transfers into them.

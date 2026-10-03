@@ -42,6 +42,7 @@ import { chat, post, resetChat } from "../comms/chat.js";
 import { gnn, gnnPost, resetGnn } from "../comms/gnn.js";
 import { benchValue } from "../economy/icework.js";
 import { addChunk, bindDebris, burst, chunkMass, chunks, nearDebris, removeChunk, resetDebris, rubbleRing, stepDebris } from "../world/debris.js";
+import { HULK, bindHulks, hulkById, hulkManifest, hulkVelocity, hulks, nearHulks, resetHulks, spawnHulk, stepHulks } from "../world/hulks.js";
 import { addRogue, adoptImpactors, impactorWire, impactors, resetImpactors, rogueHooks as rockHooks, setImpactorAuthority, stepImpactors, threatBoard, emptyThreatBoard } from "../world/events/impactors.js";
 import { HOLE, adoptHoles, collapseStar, holeRadii, holeWarpBlock, holeWire, holes, nearestHole, resetHoles, spawnTransit, stepHoles } from "../world/events/holes.js";
 import {
@@ -388,6 +389,7 @@ registerAnchor("nest", (a, t, out) => { const n = nests.find((x) => x.id === a.i
 registerAnchor("beacon", (a, t, out) => { const d = BEACONS.find((b) => b.id === a.id); return d ? put(out, beaconPosition(d, t)) : null; });
 registerAnchor("rock", (a, t, out) => { const m = impactors.find((x) => x.id === a.id); return m ? put(out, m) : null; });
 registerAnchor("debris", (a, t, out) => { const c = chunks.find((x) => x.id === a.id); return c ? put(out, c) : null; });
+registerAnchor("hulk", (a, t, out) => { const h = hulkById(a.id); if (!h) return null; a.label = h.name; return put(out, h); });
 
 export function activeWaypoint() {
   return sim.waypoints.find((w) => w.id === sim.activeWaypoint) ?? null;
@@ -905,6 +907,7 @@ export function loadSky(seed) {
   resetField();
   resetCombat(seed);
   resetDebris();
+  resetHulks();
   resetImpactors(rngFromSeed(`${seed}:rocks`));
   resetHoles();
   resetImpacts();
@@ -914,6 +917,7 @@ export function loadSky(seed) {
   sim.impactFX.length = 0;
   for (const b of BODIES) { b.event = null; b.ring = null; b.nova = false; b.collapsed = false; b.tidal = 0; b.moltenGlow = 0; }
   bindDebris(sim);
+  bindHulks(sim);
   resetStations();
   buildStations(sys, rngFromSeed(`${seed}:ports`), String(seed));
   dropCarried();
@@ -968,6 +972,7 @@ function wireReactiveSky() {
   };
 
   combatHooksOut.onDown = (n, byId, t) => {
+    leaveHulk(n, "combat");
     const by = byId && byId !== "self" ? vesselById(byId) : null;
     if (HOSTILE_ROLES.has(n.role) || n.rogue) {
       if (by && LAW_ROLES.has(by.role)) {
@@ -1427,6 +1432,17 @@ function tryAssay() {
   const f = forwardOf(ship.yaw, ship.pitch);
   const inCone = (x, y, z, d) => d > 1 && ((x - ship.pos.x) * f.x + (y - ship.pos.y) * f.y + (z - ship.pos.z) * f.z) / d > 0.35;
   const reach = 2600 * (ship.mods?.scan ?? 1);
+
+  for (const { h, d } of nearHulks(ship.pos, reach)) {
+    if (!inCone(h.x, h.y, h.z, d)) continue;
+    const m = hulkManifest(h);
+    const hold = Object.entries(m.cargo).map(([id, q]) => `${q} ${goodName(id)}`).join(", ");
+    setNoticeAbout(`Hulk assay — ${h.vesselName}, ${h.hullName}: ${m.left}/${m.sections} sections uncut, ~${m.plate} ${goodName(HULK.plate).toLowerCase()} scrap, ${m.partCount} parts${hold ? `, hold ${hold}` : ""}${m.box ? ", recorder aboard" : ""}.`, "HULK");
+    logEvent(`Assayed the ${h.name} at ${Math.round(d)} u — ${m.sections} sections, ${m.plate} scrap, ${m.partCount} parts`, "survey");
+    if (!h.assayed) { h.assayed = true; work("salvage", 1); }
+    SHIP.collect();
+    return true;
+  }
 
   let bestChunk = null;
   for (const { c, d } of nearDebris(ship.pos, reach)) {
@@ -2118,10 +2134,15 @@ export function lockCandidates() {
   for (const { c } of nearDebris(ship.pos, LOCK_DEBRIS_RANGE)) {
     out.push({ kind: "debris", id: c.id, name: `Debris (${goodName(c.good ?? "iron_ore")})`, x: c.x, y: c.y, z: c.z, sig: Math.max(6, c.r) });
   }
+  for (const { h } of nearHulks(ship.pos, LOCK_HULK_RANGE)) {
+    out.push({ kind: "hulk", id: h.id, name: h.name, x: h.x, y: h.y, z: h.z, sig: hulkSig(h) });
+  }
   return out;
 }
 
 const LOCK_DEBRIS_RANGE = 9000;
+const LOCK_HULK_RANGE = 40000;
+const hulkSig = (h) => Math.max(14, (h?.r ?? 7) * 2);
 
 function candidateSig(kind, id) {
   if (kind === "body") return bodyById(id)?.radius ?? 12;
@@ -2129,6 +2150,7 @@ function candidateSig(kind, id) {
   if (kind === "rock") return impactors.find((m) => m.id === id)?.r ?? 12;
   if (kind === "asteroid") return nearbyRocks(sim.ship.pos, sim.time, 1).find((r) => r.key === id)?.r ?? 12;
   if (kind === "debris") return Math.max(6, chunks.find((c) => c.id === id)?.r ?? 6);
+  if (kind === "hulk") return hulkSig(hulkById(id));
   if (kind === "waypoint") return 400;
   return 14;
 }
@@ -2152,9 +2174,11 @@ export function targetPosition(kind, id, out) {
           ? stations.find((s) => s.id === id)
           : kind === "debris"
             ? chunks.find((c) => c.id === id)
-            : kind === "asteroid"
-              ? nearbyRocks(sim.ship.pos, sim.time, 2).find((r) => r.key === id && (r.worn ?? 0) < 1)
-              : null;
+            : kind === "hulk"
+              ? hulkById(id)
+              : kind === "asteroid"
+                ? nearbyRocks(sim.ship.pos, sim.time, 2).find((r) => r.key === id && (r.worn ?? 0) < 1)
+                : null;
   if (!src) return null;
   o.x = src.x;
   o.y = src.y;
@@ -2180,6 +2204,7 @@ export function targetVelocity(kind, id, out) {
       return o;
     }
   }
+  if (kind === "hulk") return hulkVelocity(hulkById(id), o);
   const src =
     kind === "contact" ? contacts.find((c) => c.id === id)
       : kind === "rock" ? impactors.find((m) => m.id === id)
@@ -3567,10 +3592,18 @@ function stepWorld(d) {
   stepImpacts(d, _impactCtx);
   stepCataclysms(d);
   stepDebris(d, gravityAt, _gImp);
+  stepHulks(d);
   stepSalvage(d);
   sim.threats = sim.ship.sentry && sim.ship.powered.ops
     ? threatBoard(sim.ship, BODIES, bodyPosition, sim.time)
     : emptyThreatBoard();
+}
+
+export function leaveHulk(c, source = "kill") {
+  if (!c || (c.kind && c.kind !== "npc")) return null;
+  const n = vesselById(c.id);
+  if (!n) return null;
+  return spawnHulk({ id: n.id, name: n.name, ship: n.ship, role: n.role, cargo: n.cargo, radius: n.radius, yaw: n.yaw, x: c.x ?? n.x, y: c.y ?? n.y, z: c.z ?? n.z, vx: c.vx ?? n.vx, vy: c.vy ?? n.vy, vz: c.vz ?? n.vz }, { source, owner: corpOfVessel(n)?.id ?? null, at: sim.time });
 }
 
 function onKill(c, shot = null) {
@@ -3581,6 +3614,7 @@ function onKill(c, shot = null) {
     sim.lastToastAt = sim.time;
     logEvent(`${u?.name ?? "A port guard"} destroyed ${c.name}`, "combat");
     burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ?? 0) * 0.3, count: 6, speed: 24, size: 8, good: "iron_ore", tint: 0.35 });
+    leaveHulk(c, "guard");
     if (c.kind === "npc") { const until = markVesselDown(c.id, sim.time); const n = traffic.find((x) => x.id === c.id); if (n && HOSTILE_ROLES.has(n.role)) pirateKilled(c.id, sim.time); sim.send({ t: "vdown", id: c.id, until }); }
     return;
   }
@@ -3601,6 +3635,7 @@ function onKill(c, shot = null) {
     sim.lastToastAt = sim.time;
     logEvent(`${st?.name ?? "Port"} guns destroyed ${c.name}`, "combat");
     burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ?? 0) * 0.3, count: c.kind === "npc" ? 14 : 6, speed: 24, size: 8, good: "iron_ore", tint: 0.35 });
+    leaveHulk(c, "port");
     if (c.kind === "npc") { const until = markVesselDown(c.id, sim.time); const n = traffic.find((x) => x.id === c.id); if (n && HOSTILE_ROLES.has(n.role)) pirateKilled(c.id, sim.time); sim.send({ t: "vdown", id: c.id, until }); }
     return;
   }
@@ -3608,6 +3643,7 @@ function onKill(c, shot = null) {
   sim.lastToastAt = sim.time;
   logEvent(`${c.name} destroyed`, "combat");
   burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ?? 0) * 0.3, count: c.kind === "npc" ? 14 : 6, speed: 24, size: 8, good: "iron_ore", tint: 0.35 });
+  leaveHulk(c, "kill");
   work("security", 4);
   work("command", 1);
   if (c.kind === "npc") {
@@ -3875,6 +3911,7 @@ export function publishHud(labels, plots) {
     pulse: pulseActive(),
     pulseLeft: Math.max(0, sim.pulseUntil - sim.time),
     debris: chunks.length,
+    hulks: hulks.length,
     impactors: impactors.length,
     threat: sim.threats[0] ?? null,
     pilotTitle: title(),

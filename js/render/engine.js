@@ -48,6 +48,7 @@ import { fightCentre } from "../npc/battles.js";
 import { traffic, HOSTILE_ROLES, LAW_ROLES } from "../npc/traffic.js";
 import { tickWorldSync, wireWorldSyncTest } from "../net/worldsync.js";
 import { chunks } from "../world/debris.js";
+import { hulks } from "../world/hulks.js";
 import { dirFbm, dirNoise, kelvinHex } from "../world/events/cataclysm.js";
 import { tickTutorial, wireTutorialTest } from "../ui/tutorial.js";
 import { impactors } from "../world/events/impactors.js";
@@ -2234,6 +2235,56 @@ export function mountGame(canvas) {
     }
   }
 
+  const hulkMeshes = new Map();
+  const _liveHulk = new Set();
+  const HULK_PAINT = "#4b4138";
+  const HULK_BEACON = "#ff8a2a";
+  function syncHulks() {
+    const live = _liveHulk;
+    live.clear();
+    const near = meshRange();
+    const far = drawRange() * 1.3;
+    for (const h of hulks) {
+      const d = dist3(sim.ship.pos, h);
+      if (d > far) continue;
+      const key = `hulk:${h.id}`;
+      live.add(key);
+      if (h.sections[0]?.box) placeNavLight(navLightFor(key, HULK_BEACON), h.x, h.y, h.z, sim.time * 0.3, d);
+      else dropNavLight(key);
+      let obj = hulkMeshes.get(key);
+      if (obj && obj.ship !== h.ship) {
+        scene.remove(obj.group);
+        disposeObject(obj.group);
+        hulkMeshes.delete(key);
+        obj = null;
+      }
+      if (d > near) {
+        if (obj) obj.group.visible = false;
+        continue;
+      }
+      if (!obj) {
+        if (hullBudget <= 0) continue;
+        hullBudget--;
+        const group = makeShipGroup(HULK_PAINT, 1, h.ship, h.vessel ?? h.id, "lite");
+        group.traverse((o) => { if (o.userData?.plume) o.visible = false; });
+        scene.add(group);
+        obj = { group, ship: h.ship };
+        hulkMeshes.set(key, obj);
+      }
+      obj.group.visible = true;
+      rel(h.x, h.y, h.z, obj.group);
+      orientCraft(obj.group, h.yaw + h.tumble, h.pitch, h.roll + h.tumble * 0.6);
+    }
+    for (const [key, obj] of hulkMeshes) {
+      if (!live.has(key)) {
+        scene.remove(obj.group);
+        disposeObject(obj.group);
+        hulkMeshes.delete(key);
+      }
+    }
+    for (const [id] of navLights) if (id.startsWith("hulk:") && !live.has(id)) dropNavLight(id);
+  }
+
   const edgeBuf = [];
   const _relById = new Map();
   const EDGE_M = 7;
@@ -2398,6 +2449,7 @@ export function mountGame(canvas) {
     syncRemotes();
     syncTraffic();
     syncFlow();
+    syncHulks();
 
     stars.position.set(0, 0, 0);
 

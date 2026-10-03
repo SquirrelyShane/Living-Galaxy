@@ -1,6 +1,6 @@
 # js/flight/turrets.js
 
-[index](../../../README.md) · 505 lines · 52 symbols · 10 imports · 22 importers
+[index](../../../README.md) · 505 lines · 52 symbols · 10 imports · 23 importers
 
 ## About
 
@@ -67,6 +67,7 @@ drones already did.
 - [js/ui/chatbox.js](../ui/chatbox.js.md) — `contacts`
 - [js/ui/hud.js](../ui/hud.js.md) — `contacts`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `MINE_RANGE`
+- test/hulks.test.mjs _(outside js/)_ — `contacts`, `fireRound`
 - test/portdrones.test.mjs _(outside js/)_ — `contacts`, `shots`, `stepShots`, `syncContacts`
 - test/qrf.test.mjs _(outside js/)_ — `contacts`, `shots`, `stepShots`, `syncContacts`
 - test/reactive.test.mjs _(outside js/)_ — `contacts`, `syncContacts`, `shots`, `stepShots`, `CONTACT_R`
@@ -81,7 +82,7 @@ drones already did.
 - [`COMBAT_RANGE`](#s-COMBAT_RANGE) · const — **no importer in scanned roots**
 - [`MINE_RANGE`](#s-MINE_RANGE) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md)
 - [`MINE_RANGE_OD`](#s-MINE_RANGE_OD) · const — **no importer in scanned roots**
-- [`contacts`](#s-contacts) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
+- [`contacts`](#s-contacts) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/hulks.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
 - [`shots`](#s-shots) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`combatHooks`](#s-combatHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`mining`](#s-mining) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md)
@@ -92,7 +93,7 @@ drones already did.
 - [`npcTracer`](#s-npcTracer) · function — used by [js/npc/combat.js](../npc/combat.js.md), [js/sim/sim.js](../sim/sim.js.md), test/sky.test.mjs
 - [`pickCombatTarget`](#s-pickCombatTarget) · function — **no importer in scanned roots**
 - [`nearestContact`](#s-nearestContact) · function — **no importer in scanned roots**
-- [`fireRound`](#s-fireRound) · function — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md)
+- [`fireRound`](#s-fireRound) · function — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), test/hulks.test.mjs
 - [`stepShots`](#s-stepShots) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`stepTurrets`](#s-stepTurrets) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`stepMining`](#s-stepMining) · function — used by [js/sim/sim.js](../sim/sim.js.md)

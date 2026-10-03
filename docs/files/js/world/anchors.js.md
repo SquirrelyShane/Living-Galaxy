@@ -1,6 +1,6 @@
 # js/world/anchors.js
 
-[index](../../../README.md) · 26 lines · 4 symbols · 0 imports · 4 importers
+[index](../../../README.md) · 26 lines · 4 symbols · 0 imports · 5 importers
 
 ## About
 
@@ -34,13 +34,14 @@ _none_
 - [js/console/panels/nav.js](../console/panels/nav.js.md) — `anchorHint`
 - [js/drones/ops.js](../drones/ops.js.md) — `registerAnchor`
 - [js/sim/sim.js](../sim/sim.js.md) — `registerAnchor`, `resolveAnchor`
+- test/hulks.test.mjs _(outside js/)_ — `resolveAnchor`
 - test/marks.test.mjs _(outside js/)_ — `resolveAnchor`, `anchorHint`
 
 ## Exports
 
 - [`anchorKinds`](#s-anchorKinds) · const — **no importer in scanned roots**
 - [`registerAnchor`](#s-registerAnchor) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/sim/sim.js](../sim/sim.js.md)
-- [`resolveAnchor`](#s-resolveAnchor) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/marks.test.mjs
+- [`resolveAnchor`](#s-resolveAnchor) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/marks.test.mjs
 - [`anchorHint`](#s-anchorHint) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), test/marks.test.mjs
 
 ## Effects
@@ -60,7 +61,7 @@ const · **exported** · L1–1
 
 function · **exported** · L3–5
 
-- called by: [`@file`](../drones/ops.js.md#) _js/drones/ops.js_ · [`@file`](../sim/sim.js.md#) _js/sim/sim.js_ ×10
+- called by: [`@file`](../drones/ops.js.md#) _js/drones/ops.js_ · [`@file`](../sim/sim.js.md#) _js/sim/sim.js_ ×11
 
 <!-- note:registerAnchor -->
 Register how to find a kind of thing. Last registration wins.

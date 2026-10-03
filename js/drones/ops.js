@@ -5,6 +5,7 @@ import { stations, stationById } from "../station/stations.js";
 import { nearbyRocks, wearRock, depleted, CELL } from "../world/field.js";
 import { BODIES, bodyPosition, currentSystem } from "../world/bodies.js";
 import { chunks, removeChunk, chunkMass, burst } from "../world/debris.js";
+import { spawnHulk } from "../world/hulks.js";
 import { traffic, HOSTILE_ROLES, markVesselDown } from "../npc/traffic.js";
 import { pirateKilled } from "../npc/battles.js";
 import { contacts, contactById, fireRound } from "../flight/turrets.js";
@@ -642,6 +643,7 @@ const ROLE_STEP = {
     droneOps.foes.set(foe.id, hp);
     if (hp > 0) return;
     droneOps.foes.delete(foe.id);
+    spawnHulk(foe, { source: "drone", at: sim.time });
     markVesselDown(foe.id, sim.time);
     pirateKilled(foe.id, sim.time);
     treasuryEarn(BOUNTY_DRONE, `${u.name}: bounty on ${foe.name}`, "bounty");
