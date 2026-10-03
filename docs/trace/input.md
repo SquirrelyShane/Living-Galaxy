@@ -39,7 +39,7 @@ KeyboardEvent.code strings referenced in code.
 ### `Control`
 
 - input.key — [js/careers/complexes.js › COMPLEXES](../files/js/careers/complexes.js.md#s-COMPLEXES) L1337
-- input.key — [js/console/panels/nav.js › mountAutopilot](../files/js/console/panels/nav.js.md#s-mountAutopilot) L104
+- input.key — [js/console/panels/nav.js › mountAutopilot](../files/js/console/panels/nav.js.md#s-mountAutopilot) L105
 
 ### `ControlLeft`
 

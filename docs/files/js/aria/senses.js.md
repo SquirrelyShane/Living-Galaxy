@@ -58,7 +58,7 @@ it, which is a fact and not an error.
 
 ## Imported by
 
-- [js/aria/play.js](play.js.md) — `sense`, `senseLine`, `forgetSenses`, `unpostedWork`
+- [js/aria/play.js](play.js.md) — `sense`, `senseSpace`, `senseLine`, `forgetSenses`, `unpostedWork`
 - test/ariasense.test.mjs _(outside js/)_ — `SENSE`, `sense`, `senseHull`, `senseSpace`, `sensePorts`, `senseBoard`, `senseRoutes`, `senseLine`, `forgetSenses`, `unpostedWork`, `nearestReachablePort`
 
 ## Exports
@@ -66,7 +66,7 @@ it, which is a fact and not an error.
 - [`SENSE`](#s-SENSE) · const — used by test/ariasense.test.mjs
 - [`forgetSenses`](#s-forgetSenses) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`senseHull`](#s-senseHull) · function — used by test/ariasense.test.mjs
-- [`senseSpace`](#s-senseSpace) · function — used by test/ariasense.test.mjs
+- [`senseSpace`](#s-senseSpace) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`sensePorts`](#s-sensePorts) · function — used by test/ariasense.test.mjs
 - [`senseBoard`](#s-senseBoard) · function — used by test/ariasense.test.mjs
 - [`senseRoutes`](#s-senseRoutes) · function — used by test/ariasense.test.mjs
@@ -165,7 +165,7 @@ function · **exported** · L69–109
 - via [js/npc/rogues.js](../npc/rogues.js.md): `nests.filter`, `nests.filter.map`, `nests.filter.map.sort`
 - via [js/economy/sites.js](../economy/sites.js.md): `sitesNear.map`
 - via [js/npc/flow.js](../npc/flow.js.md): `flow.filter`
-- called by: [`sense`](#s-sense)
+- called by: [`hostilesClose`](play.js.md#s-hostilesClose) _js/aria/play.js_ · [`sense`](#s-sense)
 
 <!-- note:senseSpace -->
 ---- the space around it ----------------------------------------------------------

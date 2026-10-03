@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.87**
+**Version 0.3.88**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.87](PATCH-0.3.87.md). Career roadmap:
+Current patch: [0.3.88](PATCH-0.3.88.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -238,6 +238,9 @@ updated with `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.js
 | `js/economy/materials.js` | Ores, minerals, tier-0 components, sector price tables; bulk per good and the hold curve (0.3.52) |
 | `js/world/field.js` | Asteroid field density, rock size distribution, band names, taxonomic class per rock |
 | `js/aria/pilot.js` | ARIA at the conn: plans your jobs (repair, sell, mine, survey, and — 0.3.06 — refit and build) off your own habits and hands them to the mission runner |
+| `js/aria/mind.js` | 0.3.88: the one mind both ARIAs share — captain's standing orders (reserve, purchase ceiling, repair line, avoid hostiles, mode), authority by domain (all granted until unticked), the outcome book, Tape contexts, episodic memory; `authorize()` and `spendCap()` are the only spending gate; no sim imports |
+| `js/console/panels/aria-core.js` | 0.3.88: NAV › ARIA CORE — goals, the current decision and why, withheld-action notices, standing orders and authority ticks |
+| `js/mission/detour.js` | 0.3.88: the leg and the dogleg — an ARIA mission whose lane has a world across it marks a point clear of it, hops there and resumes; a factory beside `run.js`, so hand-started missions are untouched |
 | `js/economy/fabricate.js` | The fabrication solver and job queue: resolves a part down the whole recipe tree to raw ore, runs it on sim time at a port, delivers to the locker (leaf — no game imports) |
 | `js/station/fabyard.js` | The deck's fabrication desk: the menu with margins, the bill before you commit, the one tap-through quantity button |
 | `js/station/deckworks.js` | The whole DECK › WORKS tab — your fabrication desk, then the port's own defences, magazines and lines |
@@ -3762,6 +3765,10 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `relay` | a static host is asked once, not forever: 404/405/501 on either endpoint writes the relay off, a burst coalesces by id, a dropped packet is still just a dropped packet |
 | `dock` | berthing at fast and tethered ports by hand and by APPROACH, the clock chase carrying the hull, avoidance in the hazard's frame, lateral drift |
 | `aria-repair` | yard repair pricing and limits, the patch drone, ARIA's job planner off your habits, ARIA at the conn through the autopilot and the stick taking it back, the covered berth pull |
+| `aria-loop` | 0.3.88: every authority starts granted; a nav target taken away while lining up does not stall the jump; a world across the lane fails a hand-flown mission and is flown round by ARIA's, and the dogleg mark is taken up; at the conn and in the terminal player rogue drones inside 6,000 u for most of a minute do not end a mining job; hull at 40% with contacts close breaks off once for a yard with a REPAIR step; the terminal player pauses the job, keeps the contract, is patched and goes back onto the same job with none broken; the bus sheds deck gravity before a stand-down, puts it back, and a flat battery takes no new work; a purchase over the ceiling is trimmed |
+| `ariamind` | 0.3.88: authority defaults and withholding, the reserve guarding investments only, repairs and treasury transfers uncapped, the working floor, Tape settlement, source isolation, bounded contexts and episodes, people by id, goals, persistence, and a v1 mind dropping its withheld defaults once |
+| `ariamind-integration` | the mind is one object across aria.js and play.js, switches with the captain, and purchase and repair limits hold at execution |
+| `aria-mining-loop` | low battery outside the belt pauses MINE rather than finishing it, recharge resumes, a bus that cannot recharge fails by name; a drone alongside a whole hull is not a break-off, a hurt hull with contacts close is, and a docked hull undocks to work with no hold timer |
 | `bake` | every asteroid is the generator's: the bake lattice is its cube-sphere (vertex ids, winding), the atlas carries the fine surface, the drawn mesh subsamples the grown one, tiers divide, worker transfer, the grower's main-thread path |
 | `power` | the bus: the starter carries its loadout, a fresh overload verdict and a re-engage after shedding, the stand-down naming switches in kW, no power from nothing on a flat battery, mains derate before life support, the brownout latch, `ship.draws` adding up to the load, the bench on the mining bus, a relaunch keeping its hull tune, the pilot's cutter handed back, retaking the conn at zero throttle |
 | `hunt` | 0.3.01 outside the bus: the impact cap, zero-size guards, a stood-down spool, a lane through a hole refused, a hull lost at the horizon recovered at a port |

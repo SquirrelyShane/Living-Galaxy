@@ -67,7 +67,7 @@ const { sim, launchSim, tickSim, shiftClock, applyWorldSnapshot } = await import
 const { makePilot, pilot } = await import("../js/flight/pilot.js");
 const { shipsForComplex, shipById, DEFAULT_SHIP_ID } = await import("../js/ships/shipdb.js");
 const { speedOf } = await import("../js/flight/ship.js");
-const { beginPlay, stepPlay, endPlay, playReport, brainReport, play, CAREER_DEPT } = await import("../js/aria/play.js");
+const { beginPlay, stepPlay, endPlay, playReport, brainReport, brainOut, play, CAREER_DEPT } = await import("../js/aria/play.js");
 const { makeRelay } = await import("./aria-net.mjs");
 const { makeScreen, colourFor, paint, dim, bold, bar, money } = await import("./aria-tty.mjs");
 
@@ -140,7 +140,10 @@ async function tick() {
     relay.pushShip(sim.ship, { hull: sim.activeHullId, speed: speedOf(sim.ship, sim.frameVel) });
   }
   if (relay && wall - lastNet2 > 3000) { lastNet2 = wall; relay.poll().then(() => { peers = relay.state.peers; }); }
-  if (wall - lastSave > 20000) { lastSave = wall; saveBrain({ ...play.brain, career: CAREER, sky: ROOM }); }
+  /* 0.3.88: the periodic save wrote play.brain raw, which carries no build
+   * signature — so a run that was killed rather than Ctrl-C'd left a brain the
+   * next run threw away as "learned under an older build". */
+  if (wall - lastSave > 20000) { lastSave = wall; saveBrain({ ...brainOut(), career: CAREER, sky: ROOM }); }
   if (stop || wall >= until) return finish();
   setTimeout(tick, 1000 / 30);
 }

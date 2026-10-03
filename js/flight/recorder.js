@@ -1,3 +1,4 @@
+import { ariaMind, saveMind, learnTape } from "../aria/mind.js";
 export const RECORDER_KEY = "lgaa.tape.v1";
 
 export const TAPE_CAP = 4000;
@@ -75,6 +76,7 @@ export function settle() {
   while (recorder.pending.length && recorder.pending[0].until <= s.t) {
     const p = recorder.pending.shift();
     p.r.d = { cr: num(s.cr - p.cr0), hull: num(s.hull - p.hull0), hold: num(s.hold - p.hold0), dt: num(s.t - p.r.s.t) };
+    learnTape(p.r);
     done++;
   }
   return done;
@@ -143,6 +145,7 @@ export function neighbours(now = snapshot(), n = 12, { by = "player", scan = 150
 }
 
 export function saveTape() {
+  if (ariaMind.identity) saveMind(ariaMind.identity);
   try {
     const slice = recorder.tape.slice(-SAVE_CAP);
     globalThis.localStorage?.setItem(RECORDER_KEY, JSON.stringify({ v: 1, session: recorder.session, seq: recorder.seq, tape: slice }));

@@ -1,0 +1,4 @@
+# 0.3.88 — the two loose notes that came with the ARIA Core zips. What they
+# said is in CHANGELOG.md (0.3.88) and PATCH-0.3.88.md.
+PATCH-ARIA-Core-0.3.87.md
+PATCH-ARIA-Mining-Loop-Fix.md

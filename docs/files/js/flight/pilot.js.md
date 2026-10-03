@@ -1,6 +1,6 @@
 # js/flight/pilot.js
 
-[index](../../../README.md) · 369 lines · 38 symbols · 5 imports · 69 importers
+[index](../../../README.md) · 369 lines · 38 symbols · 5 imports · 71 importers
 
 ## About
 
@@ -41,7 +41,9 @@ actually do out there, not off a menu.
 - [js/ui/hud.js](../ui/hud.js.md) — `loadPilot`, `restorePilot`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `pilot`
 - [js/world/events/atmoworks.js](../world/events/atmoworks.js.md) — `work`
+- test/aria-mining-loop.test.mjs _(outside js/)_ — `makePilot`
 - test/ariabiz.test.mjs _(outside js/)_ — `makePilot`
+- test/ariamind-integration.test.mjs _(outside js/)_ — `makePilot`
 - test/ariaplay.test.mjs _(outside js/)_ — `makePilot`, `pilot`
 - test/ariasense.test.mjs _(outside js/)_ — `makePilot`
 - test/autopilot.test.mjs _(outside js/)_ — `makePilot`
@@ -100,7 +102,7 @@ actually do out there, not off a menu.
 - [`setCrewMods`](#s-setCrewMods) · function — used by [js/npc/crewfx.js](../npc/crewfx.js.md)
 - [`setUpgradeMods`](#s-setUpgradeMods) · function — used by [js/economy/upgrades.js](../economy/upgrades.js.md)
 - [`careerCatalog`](#s-careerCatalog) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/careerstatus.test.mjs
-- [`makePilot`](#s-makePilot) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/ariabiz.test.mjs, test/ariaplay.test.mjs, test/ariasense.test.mjs, test/autopilot.test.mjs, test/avoid.test.mjs, test/balance.test.mjs, test/bay.test.mjs, test/beats.test.mjs, test/board.test.mjs, test/bounty.test.mjs, test/careerstatus.test.mjs, test/chains.test.mjs, test/chart.test.mjs, test/chartquiet.test.mjs, test/childtalk.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/economy.test.mjs, test/gdb.test.mjs, test/genome.test.mjs, test/ground.test.mjs, test/hold.test.mjs, test/hulks.test.mjs, test/jobloop.test.mjs, test/line.test.mjs, test/marks.test.mjs, test/mission.test.mjs, test/nose.test.mjs, test/npcchat.test.mjs, test/orders.test.mjs, test/people.test.mjs, test/portcontrol.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/rig.test.mjs, test/robots.test.mjs, test/rogues.test.mjs, test/salvage.test.mjs, test/seclevel.test.mjs, test/sites.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/solprime.test.mjs, test/speech.test.mjs, test/stafflife.test.mjs, test/systems.test.mjs, test/trade.test.mjs, test/undock.test.mjs, test/upgrades.test.mjs
+- [`makePilot`](#s-makePilot) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/aria-mining-loop.test.mjs, test/ariabiz.test.mjs, test/ariamind-integration.test.mjs, test/ariaplay.test.mjs, test/ariasense.test.mjs, test/autopilot.test.mjs, test/avoid.test.mjs, test/balance.test.mjs, test/bay.test.mjs, test/beats.test.mjs, test/board.test.mjs, test/bounty.test.mjs, test/careerstatus.test.mjs, test/chains.test.mjs, test/chart.test.mjs, test/chartquiet.test.mjs, test/childtalk.test.mjs, test/converse.test.mjs, test/crew-life.test.mjs, test/desk.test.mjs, test/dockwork.test.mjs, test/economy.test.mjs, test/gdb.test.mjs, test/genome.test.mjs, test/ground.test.mjs, test/hold.test.mjs, test/hulks.test.mjs, test/jobloop.test.mjs, test/line.test.mjs, test/marks.test.mjs, test/mission.test.mjs, test/nose.test.mjs, test/npcchat.test.mjs, test/orders.test.mjs, test/people.test.mjs, test/portcontrol.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/rig.test.mjs, test/robots.test.mjs, test/rogues.test.mjs, test/salvage.test.mjs, test/seclevel.test.mjs, test/sites.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/solprime.test.mjs, test/speech.test.mjs, test/stafflife.test.mjs, test/systems.test.mjs, test/trade.test.mjs, test/undock.test.mjs, test/upgrades.test.mjs
 - [`PILOT_KEY`](#s-PILOT_KEY) · const — **no importer in scanned roots**
 - [`PILOT_RECORD_VERSION`](#s-PILOT_RECORD_VERSION) · const — **no importer in scanned roots**
 - [`serializePilot`](#s-serializePilot) · function — used by test/seclevel.test.mjs

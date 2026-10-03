@@ -19,7 +19,7 @@ setInterval / setTimeout / requestAnimationFrame / requestIdleCallback call site
 ### `setInterval`
 
 - timer — [js/economy/icework.js › wireIcework](../files/js/economy/icework.js.md#s-wireIcework) L133
-- timer — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L744
+- timer — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L745
 - timer — [js/net/account.js › mountAccount](../files/js/net/account.js.md#s-mountAccount) L470
 - timer — [js/world/events/atmoworks.js › wireAtmoWorks](../files/js/world/events/atmoworks.js.md#s-wireAtmoWorks) L141
 
@@ -34,7 +34,7 @@ setInterval / setTimeout / requestAnimationFrame / requestIdleCallback call site
 - timer — [js/corp/gdb.js › save](../files/js/corp/gdb.js.md#s-save) L47
 - timer — [js/corp/gdb.js › queuePush](../files/js/corp/gdb.js.md#s-queuePush) L282
 - timer — [js/corp/gdb.js › flushGdb](../files/js/corp/gdb.js.md#s-flushGdb) L296
-- timer — [js/flight/recorder.js › downloadTape](../files/js/flight/recorder.js.md#s-downloadTape) L185
+- timer — [js/flight/recorder.js › downloadTape](../files/js/flight/recorder.js.md#s-downloadTape) L188
 - timer — [js/interior/interior.js › closeInterior](../files/js/interior/interior.js.md#s-closeInterior) L180
 - timer — [js/net/account.js › mountAccount](../files/js/net/account.js.md#s-mountAccount) L475
 - timer — [js/net/net.js › primeSol](../files/js/net/net.js.md#s-primeSol) L98

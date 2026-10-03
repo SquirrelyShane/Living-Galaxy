@@ -53,7 +53,7 @@ While you hold the conn, the core watches you and learns.
 - [js/flight/autopilot.js](../flight/autopilot.js.md) — `captain`, `ariaHooks`
 - [js/interior/interior.js](../interior/interior.js.md) — `captain`, `transferCommand`, `retakeCommand`, `holderName`, `interiorReport`
 - [js/mission/run.js](../mission/run.js.md) — `captain`
-- [js/sim/sim.js](../sim/sim.js.md) — `captain`, `retakeCommand`, `tickCaptain`
+- [js/sim/sim.js](../sim/sim.js.md) — `ariaHooks`, `captain`, `retakeCommand`, `tickCaptain`
 - [js/ui/hud.js](../ui/hud.js.md) — `captain`, `wireCaptainTest`
 - test/chart.test.mjs _(outside js/)_ — `captain`
 - test/robots.test.mjs _(outside js/)_ — `transferCommand`, `captain`
@@ -61,7 +61,7 @@ While you hold the conn, the core watches you and learns.
 
 ## Exports
 
-- [`ariaHooks`](#s-ariaHooks) · const — used by [js/aria/aria.js](../aria/aria.js.md), [js/aria/pilot.js](../aria/pilot.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md)
+- [`ariaHooks`](#s-ariaHooks) · const — used by [js/aria/aria.js](../aria/aria.js.md), [js/aria/pilot.js](../aria/pilot.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`captain`](#s-captain) · const — used by [js/aria/aria.js](../aria/aria.js.md), [js/aria/pilot.js](../aria/pilot.js.md), [js/console/panels/crew.js](../console/panels/crew.js.md), [js/crew/deckmind.js](../crew/deckmind.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/mission/run.js](../mission/run.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/chart.test.mjs, test/robots.test.mjs, test/systems.test.mjs
 - [`holderName`](#s-holderName) · function — used by [js/interior/interior.js](../interior/interior.js.md)
 - [`transferCommand`](#s-transferCommand) · function — used by [js/console/panels/crew.js](../console/panels/crew.js.md), [js/interior/interior.js](../interior/interior.js.md), test/robots.test.mjs

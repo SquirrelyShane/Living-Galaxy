@@ -1,7 +1,7 @@
 import {
   plotRoute, requestJump, selectBody, setNoticeAbout, sim, stationStatus, toggleDock,
   warpDestination, warpNodeById, logEvent, setThrottle, WARP, spoolTime, setMiningMode, canSmeltAt,
-  sellPriceAt, warpBlock, toggleWarp,
+  sellPriceAt, warpBlock, toggleWarp, setNavTarget,
 } from "../sim/sim.js";
 import { threatTo, avoidAim, avoidLevel, deliberate, surfaceOnly, clearAvoidCommit, avoidCommit, blind, AVOID } from "./avoid.js";
 import { setInjectedPan, touch } from "../core/input.js";
@@ -574,6 +574,7 @@ export function apLeg(node, { cap = 1, warp = "auto", farLeg = null, graze = "ho
       if (risky) { autopilot.why = "well graze in the lane — holding for a cleaner plot"; return "flying"; }
       if (warp === "ask" && autopilot.warpAllowed !== node.id) { autopilot.phase = "ask"; autopilot.task = `jump? · ${node.name}`; apHold(); return "asking"; }
       autopilot.phase = "warp";
+      if (sim.selected !== node.id) setNavTarget(node.id);
       if (!sim.wantJump) requestJump();
     }
     return "flying";

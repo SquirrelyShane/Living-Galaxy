@@ -199,7 +199,7 @@ What a good is worth as raw ore, against what it sells for. > 1 is worth making.
 function · **exported** · L50–105
 
 - calls: [`fabMargin`](#s-fabMargin) · [`planJob>produce`](#s-planJob-produce) · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_
-- called by: [`fabStop`](../aria/pilot.js.md#s-fabStop) _js/aria/pilot.js_ ×2 · [`maxRunnable`](#s-maxRunnable) ×3 · [`orderFab`](#s-orderFab) · [`build`](../station/fabyard.js.md#s-build) _js/station/fabyard.js_
+- called by: [`fabStop`](../aria/pilot.js.md#s-fabStop) _js/aria/pilot.js_ ×2 · [`registerFabOp`](../aria/pilot.js.md#s-registerFabOp) _js/aria/pilot.js_ · [`maxRunnable`](#s-maxRunnable) ×3 · [`orderFab`](#s-orderFab) · [`build`](../station/fabyard.js.md#s-build) _js/station/fabyard.js_
 
 <!-- note:planJob -->
 ---- planning a job --------------------------------------------------------

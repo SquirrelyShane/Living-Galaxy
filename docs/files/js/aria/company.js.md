@@ -1,6 +1,6 @@
 # js/aria/company.js
 
-[index](../../../README.md) · 218 lines · 20 symbols · 8 imports · 2 importers
+[index](../../../README.md) · 227 lines · 20 symbols · 9 imports · 2 importers
 
 ## About
 
@@ -48,14 +48,15 @@ The rules she works to, in order:
 
 | line | from | names | target |
 |---|---|---|---|
-| 1 | `../sim/sim.js` | `sim`, `crewCapacity`, `logEvent` | [js/sim/sim.js](../sim/sim.js.md) |
-| 2 | `../station/stations.js` | `stationById` | [js/station/stations.js](../station/stations.js.md) |
-| 3 | `../crew/ledger.js` | `crew`, `stationRoster`, `hireCrew`, `hireTerms`, `dismissCrew`, `crewWageTotal`, `wageFor`, `CYCLE_SECONDS` | [js/crew/ledger.js](../crew/ledger.js.md) |
-| 4 | `../crew/roster.js` | `dutyOptions`, `setDuty`, `dutyOf`, `postKind`, `currentPlan` | [js/crew/roster.js](../crew/roster.js.md) |
-| 5 | `../corp/company.js` | `company`, `hasCompany`, `foundCompany`, `transfer`, `settleAsStaff`, `staffIncome`, `suggestName`, `boardBrief`, `CHARTERS`, `COMPANY` | [js/corp/company.js](../corp/company.js.md) |
-| 6 | `../economy/contracts.js` | `CATEGORIES` | [js/economy/contracts.js](../economy/contracts.js.md) |
-| 7 | `../economy/traderoutes.js` | `bestRoute` | [js/economy/traderoutes.js](../economy/traderoutes.js.md) |
-| 8 | `../flight/ship.js` | `holdRoom` | [js/flight/ship.js](../flight/ship.js.md) |
+| 1 | `./mind.js` | `authorize`, `remember` | [js/aria/mind.js](mind.js.md) |
+| 2 | `../sim/sim.js` | `sim`, `crewCapacity`, `logEvent` | [js/sim/sim.js](../sim/sim.js.md) |
+| 3 | `../station/stations.js` | `stationById` | [js/station/stations.js](../station/stations.js.md) |
+| 4 | `../crew/ledger.js` | `crew`, `stationRoster`, `hireCrew`, `hireTerms`, `dismissCrew`, `crewWageTotal`, `wageFor`, `CYCLE_SECONDS` | [js/crew/ledger.js](../crew/ledger.js.md) |
+| 5 | `../crew/roster.js` | `dutyOptions`, `setDuty`, `dutyOf`, `postKind`, `currentPlan` | [js/crew/roster.js](../crew/roster.js.md) |
+| 6 | `../corp/company.js` | `company`, `hasCompany`, `foundCompany`, `transfer`, `settleAsStaff`, `staffIncome`, `suggestName`, `boardBrief`, `CHARTERS`, `COMPANY` | [js/corp/company.js](../corp/company.js.md) |
+| 7 | `../economy/contracts.js` | `CATEGORIES` | [js/economy/contracts.js](../economy/contracts.js.md) |
+| 8 | `../economy/traderoutes.js` | `bestRoute` | [js/economy/traderoutes.js](../economy/traderoutes.js.md) |
+| 9 | `../flight/ship.js` | `holdRoom` | [js/flight/ship.js](../flight/ship.js.md) |
 
 ## Imported by
 
@@ -92,21 +93,21 @@ _none detected_
 
 ### <a id="s-RUN"></a>`RUN`
 
-const · **exported** · L10–18
+const · **exported** · L11–19
 
 <!-- note:RUN -->
-- L11 · `cover: 8,` — cycles of payroll she keeps in hand before signing anybody
-- L12 · `float: 6000,` — credits that stay aboard whatever the treasury wants
-- L13 · `foundAt: 12000,` — purse at which a charter starts to look like a good idea
-- L14 · `settleMorale: 42,` — a hand this unhappy is better off ashore than aboard
-- L15 · `settleAfter: 6,` — cycles aboard before settling one is anything but churn
-- L16 · `maxCrew: 6,` — she will not out-hire a hull she has to fly herself
-- L17 · `tickEvery: 20,` — s of sky between looks at the business
+- L12 · `cover: 8,` — cycles of payroll she keeps in hand before signing anybody
+- L13 · `float: 6000,` — credits that stay aboard whatever the treasury wants
+- L14 · `foundAt: 12000,` — purse at which a charter starts to look like a good idea
+- L15 · `settleMorale: 42,` — a hand this unhappy is better off ashore than aboard
+- L16 · `settleAfter: 6,` — cycles aboard before settling one is anything but churn
+- L17 · `maxCrew: 6,` — she will not out-hire a hull she has to fly herself
+- L18 · `tickEvery: 20,` — s of sky between looks at the business
 <!-- /note -->
 
 ### <a id="s-WANTED"></a>`WANTED`
 
-const · **exported** · L20–30
+const · **exported** · L21–31
 
 <!-- note:WANTED -->
 Which trades are worth a berth, by department. The first entry is the
@@ -115,7 +116,7 @@ career's own; the rest are the posts every hull needs standing.
 
 ### <a id="s-CHARTER_FOR"></a>`CHARTER_FOR`
 
-const · **exported** · L32–36
+const · **exported** · L33–37
 
 <!-- note:CHARTER_FOR -->
 The charter that matches what a department actually earns from.
@@ -123,14 +124,14 @@ The charter that matches what a department actually earns from.
 
 ### <a id="s-biz"></a>`biz`
 
-const · **exported** · L38–38
+const · **exported** · L39–39
 
 <!-- note:biz -->
 <!-- /note -->
 
 ### <a id="s-note"></a>`note(text)`
 
-function · L40–40
+function · L41–41
 
 - called by: [`considerFound`](#s-considerFound) · [`considerHire`](#s-considerHire) · [`considerLayoff`](#s-considerLayoff) · [`considerSettle`](#s-considerSettle) · [`considerTreasury`](#s-considerTreasury) ×2
 
@@ -139,7 +140,7 @@ function · L40–40
 
 ### <a id="s-payrollPerMin"></a>`payrollPerMin()`
 
-function · **exported** · L42–42
+function · **exported** · L43–43
 
 - calls: [`crewWageTotal`](../crew/ledger.js.md#s-crewWageTotal) _js/crew/ledger.js_
 - called by: [`bizReport`](#s-bizReport) · [`considerLayoff`](#s-considerLayoff)
@@ -150,7 +151,7 @@ Payroll as a bill: credits a minute, not credits a cycle.
 
 ### <a id="s-wageOf"></a>`wageOf(c)`
 
-function · **exported** · L44–44
+function · **exported** · L45–45
 
 - calls: [`hireTerms`](../crew/ledger.js.md#s-hireTerms) _js/crew/ledger.js_
 
@@ -160,7 +161,7 @@ What one more hand at this wage would add to the bill, per cycle.
 
 ### <a id="s-hasPostFor"></a>`hasPostFor(c)`
 
-function · **exported** · L46–50
+function · **exported** · L47–51
 
 - calls: [`dutyOptions`](../crew/roster.js.md#s-dutyOptions) _js/crew/roster.js_
 - via [js/crew/roster.js](../crew/roster.js.md): `dutyOptions.map`
@@ -173,7 +174,7 @@ worth a wage; a hand who cannot is a passenger with an opinion.
 
 ### <a id="s-wantScore"></a>`wantScore(c, dept)`
 
-function · **exported** · L52–60
+function · **exported** · L53–61
 
 - calls: [`hasPostFor`](#s-hasPostFor)
 - via [js/crew/ledger.js](../crew/ledger.js.md): `crew.aboard.some`
@@ -182,14 +183,14 @@ function · **exported** · L52–60
 <!-- note:wantScore -->
 How much she wants this candidate, 0 and up. Career first, then the watch.
 
-- L57 · `if (crew.aboard.some((m) => m.complexId === c.complexId)) s -= 1.2;` — a second engineer is worth less than a first
+- L58 · `if (crew.aboard.some((m) => m.complexId === c.complexId)) s -= 1.2;` — a second engineer is worth less than a first
 <!-- /note -->
 
 ### <a id="s-considerHire"></a>`considerHire(st, dept, earnPerMin=)`
 
-function · **exported** · L62–85
+function · **exported** · L63–88
 
-- calls: [`note`](#s-note) · [`postThem`](#s-postThem) · [`wantScore`](#s-wantScore) · [`crewWageTotal`](../crew/ledger.js.md#s-crewWageTotal) _js/crew/ledger.js_ · [`hireCrew`](../crew/ledger.js.md#s-hireCrew) _js/crew/ledger.js_ · [`hireTerms`](../crew/ledger.js.md#s-hireTerms) _js/crew/ledger.js_ · [`stationRoster`](../crew/ledger.js.md#s-stationRoster) _js/crew/ledger.js_ · [`crewCapacity`](../sim/sim.js.md#s-crewCapacity) _js/sim/sim.js_
+- calls: [`note`](#s-note) · [`postThem`](#s-postThem) · [`wantScore`](#s-wantScore) · [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`remember`](mind.js.md#s-remember) _js/aria/mind.js_ · [`crewWageTotal`](../crew/ledger.js.md#s-crewWageTotal) _js/crew/ledger.js_ · [`hireCrew`](../crew/ledger.js.md#s-hireCrew) _js/crew/ledger.js_ · [`hireTerms`](../crew/ledger.js.md#s-hireTerms) _js/crew/ledger.js_ · [`stationRoster`](../crew/ledger.js.md#s-stationRoster) _js/crew/ledger.js_ · [`crewCapacity`](../sim/sim.js.md#s-crewCapacity) _js/sim/sim.js_
 - called by: [`runBusiness`](#s-runBusiness)
 
 <!-- note:considerHire -->
@@ -199,13 +200,13 @@ Sign the best hand this port has, if the run can carry the wage.
 `earnPerMin` is what ARIA is actually making, which is the only honest test
 of whether another wage is affordable.
 
-- L74 · `if (perMin > Math.max(120, earnPerMin * 0.45)) continue;` — the bill has to be covered by what the run earns, and the bonus paid out
+- L75 · `if (perMin > Math.max(120, earnPerMin * 0.45)) continue;` — the bill has to be covered by what the run earns, and the bonus paid out
   of money she does not need to buy cargo with
 <!-- /note -->
 
 ### <a id="s-postThem"></a>`postThem(m)`
 
-function · **exported** · L87–95
+function · **exported** · L90–98
 
 - calls: [`dutyOf`](../crew/roster.js.md#s-dutyOf) _js/crew/roster.js_ · [`dutyOptions`](../crew/roster.js.md#s-dutyOptions) _js/crew/roster.js_ · [`postKind`](../crew/roster.js.md#s-postKind) _js/crew/roster.js_ · [`setDuty`](../crew/roster.js.md#s-setDuty) _js/crew/roster.js_
 - via [js/crew/roster.js](../crew/roster.js.md): `dutyOptions.map`
@@ -215,27 +216,27 @@ function · **exported** · L87–95
 <!-- note:postThem -->
 Put a new hand where the hull needs one, not where the roster defaults them.
 
-- L90 · `for (const k of ["eng", "cargo", "med", "sensor", "sec", "office"]) {` — the posts that pay for themselves, in the order a short-handed ship fills them
+- L93 · `for (const k of ["eng", "cargo", "med", "sensor", "sec", "office"]) {` — the posts that pay for themselves, in the order a short-handed ship fills them
 <!-- /note -->
 
 ### <a id="s-considerLayoff"></a>`considerLayoff(earnPerMin=)`
 
-function · **exported** · L97–108
+function · **exported** · L100–113
 
-- calls: [`hasPostFor`](#s-hasPostFor) ×2 · [`note`](#s-note) · [`payrollPerMin`](#s-payrollPerMin) · [`crewWageTotal`](../crew/ledger.js.md#s-crewWageTotal) _js/crew/ledger.js_ · [`dismissCrew`](../crew/ledger.js.md#s-dismissCrew) _js/crew/ledger.js_
+- calls: [`hasPostFor`](#s-hasPostFor) ×2 · [`note`](#s-note) · [`payrollPerMin`](#s-payrollPerMin) · [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`remember`](mind.js.md#s-remember) _js/aria/mind.js_ · [`crewWageTotal`](../crew/ledger.js.md#s-crewWageTotal) _js/crew/ledger.js_ · [`dismissCrew`](../crew/ledger.js.md#s-dismissCrew) _js/crew/ledger.js_
 - called by: [`runBusiness`](#s-runBusiness)
 
 <!-- note:considerLayoff -->
 Let one go when the purse cannot carry them. Returns who, or null.
 
-- L102 · `const order = [...crew.aboard].sort((a, b) => (hasPostFor(a) ? 1 : 0) - (hasPostFor(b) ? 1` — the most expensive hand with no post is the one that goes
+- L105 · `const order = [...crew.aboard].sort((a, b) => (hasPostFor(a) ? 1 : 0) - (hasPostFor(b) ? 1` — the most expensive hand with no post is the one that goes
 <!-- /note -->
 
 ### <a id="s-considerFound"></a>`considerFound(st, dept)`
 
-function · **exported** · L110–120
+function · **exported** · L115–126
 
-- calls: [`note`](#s-note) · [`workingCapital`](#s-workingCapital) · [`foundCompany`](../corp/company.js.md#s-foundCompany) _js/corp/company.js_ · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`suggestName`](../corp/company.js.md#s-suggestName) _js/corp/company.js_
+- calls: [`note`](#s-note) · [`workingCapital`](#s-workingCapital) · [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`foundCompany`](../corp/company.js.md#s-foundCompany) _js/corp/company.js_ · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`suggestName`](../corp/company.js.md#s-suggestName) _js/corp/company.js_
 - called by: [`runBusiness`](#s-runBusiness)
 
 <!-- note:considerFound -->
@@ -246,7 +247,7 @@ Register when there is something to register. Returns the charter, or null.
 
 ### <a id="s-workingCapital"></a>`workingCapital()`
 
-function · **exported** · L122–127
+function · **exported** · L128–133
 
 - calls: [`bestRoute`](../economy/traderoutes.js.md#s-bestRoute) _js/economy/traderoutes.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_
 - called by: [`considerFound`](#s-considerFound) · [`considerTreasury`](#s-considerTreasury)
@@ -257,16 +258,16 @@ has swallowed the money the next run was going to buy cargo with is not a
 treasury, it is a mistake — the first version of this banked everything
 above six thousand and left her unable to afford a single route.
 
-- L123 · `const r = bestRoute({ credits: sim.ship.credits ?? 0 });` — what she could actually buy with the purse she has, not with an imaginary
+- L129 · `const r = bestRoute({ credits: sim.ship.credits ?? 0 });` — what she could actually buy with the purse she has, not with an imaginary
   one — priced off an infinite purse this came out at half a million and she
   never registered a charter in her life
 <!-- /note -->
 
 ### <a id="s-considerTreasury"></a>`considerTreasury()`
 
-function · **exported** · L129–141
+function · **exported** · L135–148
 
-- calls: [`note`](#s-note) ×2 · [`workingCapital`](#s-workingCapital) · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`transfer`](../corp/company.js.md#s-transfer) _js/corp/company.js_ ×2
+- calls: [`note`](#s-note) ×2 · [`workingCapital`](#s-workingCapital) · [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`transfer`](../corp/company.js.md#s-transfer) _js/corp/company.js_ ×2
 - called by: [`runBusiness`](#s-runBusiness)
 
 <!-- note:considerTreasury -->
@@ -278,9 +279,9 @@ treasury and the Expansion seat reads the staff, so this is not bookkeeping
 
 ### <a id="s-considerSettle"></a>`considerSettle(st)`
 
-function · **exported** · L143–161
+function · **exported** · L150–170
 
-- calls: [`hasPostFor`](#s-hasPostFor) · [`note`](#s-note) · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`settleAsStaff`](../corp/company.js.md#s-settleAsStaff) _js/corp/company.js_ · [`staffIncome`](../corp/company.js.md#s-staffIncome) _js/corp/company.js_ · [`crewCapacity`](../sim/sim.js.md#s-crewCapacity) _js/sim/sim.js_
+- calls: [`hasPostFor`](#s-hasPostFor) · [`note`](#s-note) · [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`remember`](mind.js.md#s-remember) _js/aria/mind.js_ · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`settleAsStaff`](../corp/company.js.md#s-settleAsStaff) _js/corp/company.js_ · [`staffIncome`](../corp/company.js.md#s-staffIncome) _js/corp/company.js_ · [`crewCapacity`](../sim/sim.js.md#s-crewCapacity) _js/sim/sim.js_
 - via [js/crew/ledger.js](../crew/ledger.js.md): `crew.aboard.filter`, `crew.aboard.filter.map`, `crew.aboard.indexOf`, `crew.aboard.splice`, `….filter.map.filter`, `….map.filter.sort`
 - called by: [`runBusiness`](#s-runBusiness)
 
@@ -292,7 +293,7 @@ worth settling are the unhappy, the unpostable and the surplus.
 
 ### <a id="s-runBusiness"></a>`runBusiness(dept, earnPerMin=)`
 
-function · **exported** · L163–176
+function · **exported** · L172–185
 
 - calls: [`considerFound`](#s-considerFound) · [`considerHire`](#s-considerHire) · [`considerLayoff`](#s-considerLayoff) · [`considerSettle`](#s-considerSettle) · [`considerTreasury`](#s-considerTreasury) · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`stepPlay`](play.js.md#s-stepPlay) _js/aria/play.js_
@@ -307,7 +308,7 @@ and none of them are anywhere else.
 
 ### <a id="s-bizReport"></a>`bizReport()`
 
-function · **exported** · L178–196
+function · **exported** · L187–205
 
 - calls: [`payrollPerMin`](#s-payrollPerMin) · [`boardBrief`](../corp/company.js.md#s-boardBrief) _js/corp/company.js_ · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ ×5 · [`crewWageTotal`](../crew/ledger.js.md#s-crewWageTotal) _js/crew/ledger.js_ · [`dutyOf`](../crew/roster.js.md#s-dutyOf) _js/crew/roster.js_ · [`postKind`](../crew/roster.js.md#s-postKind) _js/crew/roster.js_ · [`crewCapacity`](../sim/sim.js.md#s-crewCapacity) _js/sim/sim.js_
 - via [js/crew/ledger.js](../crew/ledger.js.md): `crew.aboard.filter`, `crew.aboard.reduce`
@@ -319,7 +320,7 @@ Where the business stands, for a screen or a test.
 
 ### <a id="s-bizLine"></a>`bizLine()`
 
-function · **exported** · L198–207
+function · **exported** · L207–216
 
 - calls: [`bizReport`](#s-bizReport)
 - called by: [`playReport`](play.js.md#s-playReport) _js/aria/play.js_
@@ -330,7 +331,7 @@ One line: "4 crew · 3 posted · 420 cr/cycle · Kestrel Holdings · 2 ashore ·
 
 ### <a id="s-resetBusiness"></a>`resetBusiness()`
 
-function · **exported** · L209–216
+function · **exported** · L218–225
 
 - called by: [`beginPlay`](play.js.md#s-beginPlay) _js/aria/play.js_
 

@@ -1,6 +1,6 @@
 # js/core/profile.js
 
-[index](../../../README.md) · 131 lines · 17 symbols · 0 imports · 2 importers
+[index](../../../README.md) · 132 lines · 17 symbols · 0 imports · 2 importers
 
 ## About
 
@@ -112,33 +112,33 @@ const · **exported** · L6–17
 
 ### <a id="s-LEARNED_KEYS"></a>`LEARNED_KEYS`
 
-const · **exported** · L19–23
+const · **exported** · L19–24
 
 <!-- note:LEARNED_KEYS -->
 - L20 · `"lgaa.aria.v1",` — js/aria/aria.js — the preference net, learned from how you fly
-- L21 · `"lgaa.housebrain.v1",` — js/npc/captain.js — the NPC captain's neural core
-- L22 · `"lgaa.tape.v1",` — js/flight/recorder.js — the (state, action, outcome) tape the pilot leaves behind
+- L22 · `"lgaa.housebrain.v1",` — js/npc/captain.js — the NPC captain's neural core
+- L23 · `"lgaa.tape.v1",` — js/flight/recorder.js — the (state, action, outcome) tape the pilot leaves behind
 <!-- /note -->
 
 ### <a id="s-RUN_KEYS"></a>`RUN_KEYS`
 
-const · **exported** · L25–35
+const · **exported** · L26–36
 
 <!-- note:RUN_KEYS -->
-- L26 · `"lgaa-company",` — js/corp/company.js — the corporation, its name, book and board
-- L27 · `"lgaa-fleet",` — js/corp/fleet.js — owned hulls
-- L28 · `"lgaa-social",` — js/crew/family.js — the household: partners, children, standing
-- L29 · `"lgaa-save-v1",` — js/core/store.js — callsign, per-sky scanned/beacons/terraform
-- L30 · `"lgaa-save-v0",` — js/core/store.js — the legacy save it upgrades from
-- L31 · `"lgaa.con.recents.v1",` — js/console/console.js — command history
-- L32 · `"lgaa.tutorial.v1",` — js/ui/tutorial.js — which lessons are done
-- L33 · `"lgaa.tutorial.core.v1",` — js/ui/tutorial.js — the MISSION CORE walkthrough, shown once
-- L34 · `"lgaa.pilot.v1",` — js/flight/pilot.js — the pilot record: race, career, rank, skills, hulls, cover (0.3.42)
+- L27 · `"lgaa-company",` — js/corp/company.js — the corporation, its name, book and board
+- L28 · `"lgaa-fleet",` — js/corp/fleet.js — owned hulls
+- L29 · `"lgaa-social",` — js/crew/family.js — the household: partners, children, standing
+- L30 · `"lgaa-save-v1",` — js/core/store.js — callsign, per-sky scanned/beacons/terraform
+- L31 · `"lgaa-save-v0",` — js/core/store.js — the legacy save it upgrades from
+- L32 · `"lgaa.con.recents.v1",` — js/console/console.js — command history
+- L33 · `"lgaa.tutorial.v1",` — js/ui/tutorial.js — which lessons are done
+- L34 · `"lgaa.tutorial.core.v1",` — js/ui/tutorial.js — the MISSION CORE walkthrough, shown once
+- L35 · `"lgaa.pilot.v1",` — js/flight/pilot.js — the pilot record: race, career, rank, skills, hulls, cover (0.3.42)
 <!-- /note -->
 
 ### <a id="s-RUN_PREFIXES"></a>`RUN_PREFIXES`
 
-const · **exported** · L37–44
+const · **exported** · L38–45
 
 <!-- note:RUN_PREFIXES -->
 The other half, and the half that made this bug so hard to see.
@@ -159,24 +159,24 @@ So these are cleared by PREFIX, over the whole of localStorage. The trailing
 colon is deliberate: it matches `lgaa.missions.v1:Vex` and never some
 future `lgaa.missions.v1b`.
 
-- L38 · `"lgaa.upgrades.v1:",` — js/economy/upgrades.js — refits fitted
-- L39 · `"lgaa.robots.v1:",` — js/crew/robots.js — the robot roster
-- L40 · `"lgaa.missions.v1:",` — js/mission/script.js — mission board state
-- L41 · `"lgaa.mission.run.v1:",` — js/mission/run.js — a mission part-flown
-- L42 · `"lgaa.drones.v1:",` — js/drones/ops.js — drone standing orders
-- L43 · `"lgaa.fab.v1:",` — js/economy/fabricate.js — jobs on the ports' fabrication lines
+- L39 · `"lgaa.upgrades.v1:",` — js/economy/upgrades.js — refits fitted
+- L40 · `"lgaa.robots.v1:",` — js/crew/robots.js — the robot roster
+- L41 · `"lgaa.missions.v1:",` — js/mission/script.js — mission board state
+- L42 · `"lgaa.mission.run.v1:",` — js/mission/run.js — a mission part-flown
+- L43 · `"lgaa.drones.v1:",` — js/drones/ops.js — drone standing orders
+- L44 · `"lgaa.fab.v1:",` — js/economy/fabricate.js — jobs on the ports' fabrication lines
 <!-- /note -->
 
 ### <a id="s-PROFILE_KEY"></a>`PROFILE_KEY`
 
-const · **exported** · L46–46
+const · **exported** · L47–47
 
 <!-- note:PROFILE_KEY -->
 <!-- /note -->
 
 ### <a id="s-store"></a>`store()`
 
-function · L48–50
+function · L49–51
 
 - called by: [`clearRun`](#s-clearRun) · [`forgetRun`](#s-forgetRun) · [`read`](#s-read) · [`write`](#s-write)
 
@@ -185,29 +185,29 @@ function · L48–50
 
 ### <a id="s-read"></a>`read()`
 
-function · L52–58
+function · L53–59
 
 - calls: [`store`](#s-store)
 - called by: [`profile`](#s-profile) · [`renameRun`](#s-renameRun) · [`runCallsign`](#s-runCallsign) · [`runId`](#s-runId) · [`startRun`](#s-startRun)
 
 <!-- note:read -->
-- L56 · `} catch {` — corrupt or absent
+- L57 · `} catch {` — corrupt or absent
 <!-- /note -->
 
 ### <a id="s-write"></a>`write(p)`
 
-function · L60–62
+function · L61–63
 
 - calls: [`store`](#s-store)
 - called by: [`renameRun`](#s-renameRun) · [`startRun`](#s-startRun)
 
 <!-- note:write -->
-- L61 · `try { store()?.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {` — quota, or no window
+- L62 · `try { store()?.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {` — quota, or no window
 <!-- /note -->
 
 ### <a id="s-mintId"></a>`mintId()`
 
-function · L64–68
+function · L65–69
 
 - called by: [`startRun`](#s-startRun)
 
@@ -217,7 +217,7 @@ A short, sortable, collision-proof id. Not a seed — nothing is rolled off it.
 
 ### <a id="s-profile"></a>`profile()`
 
-function · **exported** · L70–72
+function · **exported** · L71–73
 
 - calls: [`read`](#s-read)
 
@@ -227,7 +227,7 @@ The run in progress, or null before a pilot has ever been made on this device.
 
 ### <a id="s-runId"></a>`runId()`
 
-function · **exported** · L74–76
+function · **exported** · L75–77
 
 - calls: [`read`](#s-read)
 
@@ -237,7 +237,7 @@ The current run's id, or "" if there is not one yet.
 
 ### <a id="s-runCallsign"></a>`runCallsign()`
 
-function · **exported** · L78–80
+function · **exported** · L79–81
 
 - calls: [`read`](#s-read)
 
@@ -247,7 +247,7 @@ The callsign the current run was created under.
 
 ### <a id="s-clearRun"></a>`clearRun()`
 
-function · **exported** · L82–103
+function · **exported** · L83–104
 
 - calls: [`store`](#s-store)
 - called by: [`forgetRun`](#s-forgetRun) · [`startRun`](#s-startRun)
@@ -258,17 +258,17 @@ learned nets are left alone; so is the CRADLE, which is the sky's, not
 the pilot's. Returns the keys that were actually holding something, which
 is what makes this testable rather than hopeful.
 
-- L90 · `} catch {` — ignore one bad key rather than abandon the sweep
-- L92 · `const doomed = [];` — the callsign-suffixed families: enumerate rather than guess the suffix.
+- L91 · `} catch {` — ignore one bad key rather than abandon the sweep
+- L93 · `const doomed = [];` — the callsign-suffixed families: enumerate rather than guess the suffix.
   Collect first, delete after — removing while iterating an index-based
   Storage renumbers it underneath you and skips every other key.
-- L98 · `} catch {` — a Storage without length/key: the fixed keys above are still swept
-- L100 · `try { ls.removeItem(k); had.push(k); } catch {` — ignore
+- L99 · `} catch {` — a Storage without length/key: the fixed keys above are still swept
+- L101 · `try { ls.removeItem(k); had.push(k); } catch {` — ignore
 <!-- /note -->
 
 ### <a id="s-startRun"></a>`startRun(callsign)`
 
-function · **exported** · L105–117
+function · **exported** · L106–118
 
 - calls: [`clearRun`](#s-clearRun) · [`mintId`](#s-mintId) · [`read`](#s-read) · [`write`](#s-write)
 - called by: [`renameRun`](#s-renameRun) · [`mountCreation>finish`](../ui/creation.js.md#s-mountCreation-finish) _js/ui/creation.js_
@@ -284,7 +284,7 @@ creation is swept away behind it.
 
 ### <a id="s-renameRun"></a>`renameRun(callsign)`
 
-function · **exported** · L119–125
+function · **exported** · L120–126
 
 - calls: [`read`](#s-read) · [`startRun`](#s-startRun) · [`write`](#s-write)
 
@@ -294,12 +294,12 @@ Rename the run in place — the pilot is the same person, the name changed.
 
 ### <a id="s-forgetRun"></a>`forgetRun()`
 
-function · **exported** · L127–131
+function · **exported** · L128–132
 
 - calls: [`clearRun`](#s-clearRun) · [`store`](#s-store)
 
 <!-- note:forgetRun -->
 Console/testing: forget the run entirely, profile record and all.
 
-- L129 · `try { store()?.removeItem(PROFILE_KEY); } catch {` — ignore
+- L130 · `try { store()?.removeItem(PROFILE_KEY); } catch {` — ignore
 <!-- /note -->

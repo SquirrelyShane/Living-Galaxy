@@ -1,6 +1,6 @@
 # js/aria/nav.js
 
-[index](../../../README.md) · 130 lines · 14 symbols · 3 imports · 2 importers
+[index](../../../README.md) · 130 lines · 14 symbols · 3 imports · 3 importers
 
 ## About
 
@@ -46,6 +46,7 @@ The old estimate divided distance by a flat cruise number and came out with
 ## Imported by
 
 - [js/aria/play.js](play.js.md) — `planRoute`, `legSeconds`, `tripSeconds`, `aimAt`, `lockOn`, `markPlace`, `routeLine`, `NAV`
+- [js/mission/detour.js](../mission/detour.js.md) — `doglegAround`
 - test/ariasense.test.mjs _(outside js/)_ — `NAV`, `planRoute`, `legSeconds`, `tripSeconds`, `corridorBlocker`, `doglegAround`, `climbOut`, `lockOn`, `markPlace`, `aimAt`, `placeOf`, `routeLine`
 
 ## Exports
@@ -53,7 +54,7 @@ The old estimate divided distance by a flat cruise number and came out with
 - [`NAV`](#s-NAV) · const — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`placeOf`](#s-placeOf) · function — used by test/ariasense.test.mjs
 - [`corridorBlocker`](#s-corridorBlocker) · function — used by test/ariasense.test.mjs
-- [`doglegAround`](#s-doglegAround) · function — used by test/ariasense.test.mjs
+- [`doglegAround`](#s-doglegAround) · function — used by [js/mission/detour.js](../mission/detour.js.md), test/ariasense.test.mjs
 - [`planRoute`](#s-planRoute) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`climbOut`](#s-climbOut) · function — used by test/ariasense.test.mjs
 - [`legSeconds`](#s-legSeconds) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
@@ -130,7 +131,7 @@ The body sitting across a leg, or null. Same test the core uses.
 function · **exported** · L37–57
 
 - calls: [`losBlocker`](../sim/sim.js.md#s-losBlocker) _js/sim/sim.js_ ×2 · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
-- called by: [`planRoute`](#s-planRoute)
+- called by: [`planRoute`](#s-planRoute) · [`makeLegs>legTo`](../mission/detour.js.md#s-makeLegs-legTo) _js/mission/detour.js_
 
 <!-- note:doglegAround -->
 A point to fly to first so BOTH halves of the trip are clear of `b`.

@@ -1,6 +1,6 @@
 # js/mission/script.js
 
-[index](../../../README.md) · 287 lines · 43 symbols · 3 imports · 13 importers
+[index](../../../README.md) · 287 lines · 43 symbols · 3 imports · 15 importers
 
 ## About
 
@@ -48,6 +48,8 @@ Mission { id, name, steps: Step[], loop: { mode: "none"|"count"|"until", count?,
 - [js/flight/autopilot.js](../flight/autopilot.js.md) — `oneStep`, `makeMission`, `makeStep`
 - [js/mission/run.js](run.js.md) — `validate`, `evalCond`, `snapshot`, `describeRef`, `deserialize`, `serialize`, `makeStep`, `missionCore`
 - [js/ui/tutorial-core.js](../ui/tutorial-core.js.md) — `missionCore`, `oneStep`
+- test/aria-mining-loop.test.mjs _(outside js/)_ — `makeMission`, `makeStep`
+- test/ariamind-integration.test.mjs _(outside js/)_ — `makeMission`, `makeStep`
 - test/ariaplay.test.mjs _(outside js/)_ — `validate`
 - test/ariasense.test.mjs _(outside js/)_ — `validate`
 - test/jobloop.test.mjs _(outside js/)_ — `validate`
@@ -63,8 +65,8 @@ Mission { id, name, steps: Step[], loop: { mode: "none"|"count"|"until", count?,
 - [`COND_OPS`](#s-COND_OPS) · const — used by [js/console/panels/work.js](../console/panels/work.js.md)
 - [`WARP_POLICIES`](#s-WARP_POLICIES) · const — used by [js/console/panels/work.js](../console/panels/work.js.md)
 - [`ON_FAIL`](#s-ON_FAIL) · const — used by [js/console/panels/work.js](../console/panels/work.js.md)
-- [`makeMission`](#s-makeMission) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/market.js](../console/panels/market.js.md), [js/console/panels/work.js](../console/panels/work.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), test/mission.test.mjs
-- [`makeStep`](#s-makeStep) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/market.js](../console/panels/market.js.md), [js/console/panels/work.js](../console/panels/work.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/mission/run.js](run.js.md), test/mission.test.mjs
+- [`makeMission`](#s-makeMission) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/market.js](../console/panels/market.js.md), [js/console/panels/work.js](../console/panels/work.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), test/aria-mining-loop.test.mjs, test/ariamind-integration.test.mjs, test/mission.test.mjs
+- [`makeStep`](#s-makeStep) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/market.js](../console/panels/market.js.md), [js/console/panels/work.js](../console/panels/work.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/mission/run.js](run.js.md), test/aria-mining-loop.test.mjs, test/ariamind-integration.test.mjs, test/mission.test.mjs
 - [`oneStep`](#s-oneStep) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/ui/tutorial-core.js](../ui/tutorial-core.js.md), test/mission.test.mjs
 - [`validate`](#s-validate) · function — used by [js/console/panels/work.js](../console/panels/work.js.md), [js/mission/run.js](run.js.md), test/ariaplay.test.mjs, test/ariasense.test.mjs, test/jobloop.test.mjs, test/mission.test.mjs, test/trade.test.mjs
 - [`snapshot`](#s-snapshot) · function — used by [js/mission/run.js](run.js.md)
@@ -236,7 +238,7 @@ ids and defaults filled
 function · **exported** · L68–74
 
 - calls: [`clone`](#s-clone) ×2 · [`uid`](#s-uid)
-- called by: [`deskSteps`](../aria/pilot.js.md#s-deskSteps) _js/aria/pilot.js_ ×4 · [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ ×14 · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ ×12 · [`legsTo`](../aria/play.js.md#s-legsTo) _js/aria/play.js_ ×2 · [`startFreeMine`](../aria/play.js.md#s-startFreeMine) _js/aria/play.js_ ×3 · [`startRoute`](../aria/play.js.md#s-startRoute) _js/aria/play.js_ ×2 · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ ×2 · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ ×2 · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`flyRoute`](../console/panels/market.js.md#s-flyRoute) _js/console/panels/market.js_ ×4 · [`editor>render.onPick~3`](../console/panels/work.js.md#s-editor-render-onPick-3) _js/console/panels/work.js_ · [`engageJobLoop`](../flight/autopilot.js.md#s-engageJobLoop) _js/flight/autopilot.js_ ×5 · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ ×7 · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_ · [`oneStep`](#s-oneStep) · [`presets`](#s-presets) ×14
+- called by: [`deskSteps`](../aria/pilot.js.md#s-deskSteps) _js/aria/pilot.js_ ×4 · [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ ×14 · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ ×17 · [`legsTo`](../aria/play.js.md#s-legsTo) _js/aria/play.js_ ×2 · [`startFreeMine`](../aria/play.js.md#s-startFreeMine) _js/aria/play.js_ ×3 · [`startRoute`](../aria/play.js.md#s-startRoute) _js/aria/play.js_ ×2 · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ ×2 · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ ×2 · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`flyRoute`](../console/panels/market.js.md#s-flyRoute) _js/console/panels/market.js_ ×4 · [`editor>render.onPick~3`](../console/panels/work.js.md#s-editor-render-onPick-3) _js/console/panels/work.js_ · [`engageJobLoop`](../flight/autopilot.js.md#s-engageJobLoop) _js/flight/autopilot.js_ ×5 · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ ×7 · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_ · [`oneStep`](#s-oneStep) · [`presets`](#s-presets) ×14
 
 <!-- note:makeStep -->
 <!-- /note -->

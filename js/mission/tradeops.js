@@ -1,4 +1,5 @@
-import { sim, sellAllOre, tradeBuy, tradeSell, logEvent } from "../sim/sim.js";
+import { authorize, spendCap } from "../aria/mind.js";
+import { sim, sellAllOre, tradeBuy, tradeSell, logEvent, buyPriceAt } from "../sim/sim.js";
 import { holdRoom, roomFor } from "../flight/ship.js";
 import { stationById } from "../station/stations.js";
 import { bestRoute, sellable, routeLine } from "../economy/traderoutes.js";
@@ -29,7 +30,7 @@ export function makeTradeOps({ mission, note, ap }) {
       const before = ship.credits;
       let refused = null;
       if (what === "ore") sellAllOre();
-      else if (what === "all") { for (const [k, q] of Object.entries(sellable(ship))) refused = tradeSell(k, q) ?? refused; }
+      else if (what === "all") { const keep = s.args?.keep ?? null; for (const [k, q] of Object.entries(sellable(ship))) if (k !== keep) refused = tradeSell(k, q) ?? refused; }
       else if (what === "route") {
         const t = mission.trade;
         if (!t) return "fail:no route cargo to sell";
@@ -103,6 +104,13 @@ export function makeTradeOps({ mission, note, ap }) {
       if (good && good !== "route") qty = Math.min(qty, Math.floor(roomFor(ship, good)));
       if (qty <= 0) return "fail:hold full";
       const c0 = ship.credits, h0 = ship.hold[good] ?? 0;
+      if (mission.active?.mode === "aria" || mission.active?.aria) {
+        const cap = spendCap(ship.credits, "trading");
+        const unit = buyPriceAt(st, { id: good }, qty);
+        if (unit * qty > cap) qty = Math.max(1, Math.floor(cap / Math.max(1, unit)));
+        const a = authorize("trading", { cost: buyPriceAt(st, { id: good }, qty) * qty, credits: ship.credits, at: sim.time });
+        if (!a.ok) return `fail:${a.why}`;
+      }
       const e = tradeBuy(good, qty);
       if (e) return `fail:${e.toLowerCase()}`;
       const got = (ship.hold[good] ?? 0) - h0;

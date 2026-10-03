@@ -87,7 +87,7 @@ import { bookRevenue, loadCompany, tickCompany, treasuryPay } from "../corp/comp
 import { resetHousehold } from "../crew/family.js";
 import { noteKill, noteDestroyed, resetContracts, tickContracts, owedCargo } from "../economy/contracts.js";
 import { resetFleet, tickFleet } from "../corp/fleet.js";
-import { captain, retakeCommand, tickCaptain } from "../npc/captain.js";
+import { ariaHooks, captain, retakeCommand, tickCaptain } from "../npc/captain.js";
 import { crewEffects, updateCrewMods } from "../npc/crewfx.js";
 import { eventAt, eventLine, markVesselDown, populateTraffic, resetTraffic, stepTraffic, traffic, trafficCensus, trafficDown, trafficHooks, vesselById, HOSTILE_ROLES, LAW_ROLES, SLOT_S } from "../npc/traffic.js";
 import { battleHooks, fightCentre, pirateKilled, resetBattles, stepBattles } from "../npc/battles.js";
@@ -1120,6 +1120,7 @@ function seedOrbit(ship, body, time) {
 }
 
 export function launchSim(callsign, seed) {
+  ariaHooks.onBeforeLaunch?.();
   loadCompany();
   const sky = skyProgress(seed);
   sim.scanned = new Set(sky.scanned);
@@ -1184,6 +1185,7 @@ export function launchSim(callsign, seed) {
   sim.contract = null;
   if (captain.holder !== "player") retakeCommand();
   sim.callsign = callsign;
+  ariaHooks.onLaunch?.();
   loadRobots();
   loadUpgrades();
   sim.color = hashHue(callsign);

@@ -4,7 +4,7 @@
 
 Every localStorage/sessionStorage key read, written or removed.
 
-22 distinct values across 24 files.
+23 distinct values across 25 files.
 
 ### `‹(conditional)›`
 
@@ -30,6 +30,11 @@ Every localStorage/sessionStorage key read, written or removed.
 - storage.set — [js/ui/fullscreen.js › save](../files/js/ui/fullscreen.js.md#s-save) L87
 - storage.get — [js/ui/fullscreen.js › load](../files/js/ui/fullscreen.js.md#s-load) L91
 
+### `‹key›`
+
+- storage.set — [js/aria/mind.js › saveMind](../files/js/aria/mind.js.md#s-saveMind) L15
+- storage.get — [js/aria/mind.js › loadMind](../files/js/aria/mind.js.md#s-loadMind) L19
+
 ### `‹KEY›`
 
 - storage.set — [js/npc/chat.js › persist](../files/js/npc/chat.js.md#s-persist) L17
@@ -37,8 +42,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹KEY()›`
 
-- storage.set — [js/aria/aria.js › saveAria](../files/js/aria/aria.js.md#s-saveAria) L152
-- storage.get — [js/aria/aria.js › loadAria](../files/js/aria/aria.js.md#s-loadAria) L158
+- storage.set — [js/aria/aria.js › saveAria](../files/js/aria/aria.js.md#s-saveAria) L157
+- storage.get — [js/aria/aria.js › loadAria](../files/js/aria/aria.js.md#s-loadAria) L166
 - storage.set — [js/drones/ops.js › save](../files/js/drones/ops.js.md#s-save) L910
 - storage.get — [js/drones/ops.js › loadDroneOps](../files/js/drones/ops.js.md#s-loadDroneOps) L930
 
@@ -64,9 +69,9 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹RECORDER_KEY›`
 
-- storage.set — [js/flight/recorder.js › saveTape](../files/js/flight/recorder.js.md#s-saveTape) L148
-- storage.get — [js/flight/recorder.js › loadTape](../files/js/flight/recorder.js.md#s-loadTape) L155
-- storage.remove — [js/flight/recorder.js › clearTape](../files/js/flight/recorder.js.md#s-clearTape) L170
+- storage.set — [js/flight/recorder.js › saveTape](../files/js/flight/recorder.js.md#s-saveTape) L151
+- storage.get — [js/flight/recorder.js › loadTape](../files/js/flight/recorder.js.md#s-loadTape) L158
+- storage.remove — [js/flight/recorder.js › clearTape](../files/js/flight/recorder.js.md#s-clearTape) L173
 
 ### `‹ROBOTS_KEY()›`
 
@@ -75,8 +80,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹RUN_KEY()›`
 
-- storage.remove — [js/mission/run.js › clearRun](../files/js/mission/run.js.md#s-clearRun) L517
-- storage.get — [js/mission/run.js › restoreRun](../files/js/mission/run.js.md#s-restoreRun) L526
+- storage.remove — [js/mission/run.js › clearRun](../files/js/mission/run.js.md#s-clearRun) L534
+- storage.get — [js/mission/run.js › restoreRun](../files/js/mission/run.js.md#s-restoreRun) L543
 
 ### `‹SAVE_KEY_V1›`
 

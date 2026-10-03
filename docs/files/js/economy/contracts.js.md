@@ -270,7 +270,7 @@ function · L86–86
 function · **exported** · L88–94
 
 - calls: [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`currentShipId`](../sim/sim.js.md#s-currentShipId) _js/sim/sim.js_
-- called by: [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`acceptBlocker`](#s-acceptBlocker) · [`boardFor`](#s-boardFor) · [`renderDesk`](../ui/boardview.js.md#s-renderDesk) _js/ui/boardview.js_
+- called by: [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`heldFlyable`](../aria/play.js.md#s-heldFlyable) _js/aria/play.js_ · [`acceptBlocker`](#s-acceptBlocker) · [`boardFor`](#s-boardFor) · [`renderDesk`](../ui/boardview.js.md#s-renderDesk) _js/ui/boardview.js_
 
 <!-- note:hullFit -->
 ---- the hull you are flying ------------------------------------------------
@@ -954,7 +954,7 @@ function · L555–602
 function · **exported** · L604–609
 
 - calls: [`settle`](#s-settle) · [`takeCargo`](../flight/ship.js.md#s-takeCargo) _js/flight/ship.js_
-- called by: [`startJob`](../aria/play.js.md#s-startJob) _js/aria/play.js_ · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ ×4 · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
+- called by: [`resumeHeld>drop`](../aria/play.js.md#s-resumeHeld-drop) _js/aria/play.js_ · [`startJob`](../aria/play.js.md#s-startJob) _js/aria/play.js_ · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ ×4 · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
 
 <!-- note:abandonContract -->
 <!-- /note -->
@@ -1090,7 +1090,7 @@ Every tick: escorts on station, waypoints flown, surveys filed, deadlines.
 
 function · **exported** · L728–728
 
-- called by: [`playReport`](../aria/play.js.md#s-playReport) _js/aria/play.js_ ×2 · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ · [`mountBoard`](../console/panels/corp.js.md#s-mountBoard) _js/console/panels/corp.js_ · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
+- called by: [`playReport`](../aria/play.js.md#s-playReport) _js/aria/play.js_ ×2 · [`resumeHeld`](../aria/play.js.md#s-resumeHeld) _js/aria/play.js_ ×2 · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ ×2 · [`mountBoard`](../console/panels/corp.js.md#s-mountBoard) _js/console/panels/corp.js_ · [`renderHeld`](../ui/boardview.js.md#s-renderHeld) _js/ui/boardview.js_
 
 <!-- note:timeLeft -->
 <!-- /note -->

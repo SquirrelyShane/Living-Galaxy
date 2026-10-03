@@ -6,21 +6,21 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 
 ## Unused imports (109)
 
-- [js/aria/play.js](../files/js/aria/play.js.md) L18 `legSeconds` from `./nav.js`
-- [js/aria/play.js](../files/js/aria/play.js.md) L18 `tripSeconds` from `./nav.js`
-- [js/aria/play.js](../files/js/aria/play.js.md) L18 `navLine` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L19 `legSeconds` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L19 `tripSeconds` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L19 `navLine` from `./nav.js`
 - [js/aria/senses.js](../files/js/aria/senses.js.md) L5 `stockOf` from `../economy/economy.js`
 - [js/aria/senses.js](../files/js/aria/senses.js.md) L5 `shortagesOf` from `../economy/economy.js`
 - [js/console/panels/work.js](../files/js/console/panels/work.js.md) L5 `hasUpgrade` from `../../economy/upgrades.js`
 - [js/corp/fleet.js](../files/js/corp/fleet.js.md) L6 `hullTuneFor` from `../ships/shipdb.js`
 - [js/crew/deckmind.js](../files/js/crew/deckmind.js.md) L6 `social` from `./family.js`
 - [js/crew/talk.js](../files/js/crew/talk.js.md) L13 `voiceWrap` from `./voice.js`
-- [js/mission/run.js](../files/js/mission/run.js.md) L1 `sellAllOre` from `../sim/sim.js`
-- [js/mission/run.js](../files/js/mission/run.js.md) L1 `tradeBuy` from `../sim/sim.js`
-- [js/mission/run.js](../files/js/mission/run.js.md) L1 `tradeSell` from `../sim/sim.js`
-- [js/mission/run.js](../files/js/mission/run.js.md) L1 `sellPriceAt` from `../sim/sim.js`
-- [js/mission/run.js](../files/js/mission/run.js.md) L1 `buyPriceAt` from `../sim/sim.js`
-- [js/mission/run.js](../files/js/mission/run.js.md) L11 `hasUpgrade` from `../economy/upgrades.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `sellAllOre` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `tradeBuy` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `tradeSell` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `sellPriceAt` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `buyPriceAt` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L12 `hasUpgrade` from `../economy/upgrades.js`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) L3 `contacts` from `../flight/turrets.js`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) L3 `contactById` from `../flight/turrets.js`
 - [js/npc/npccrew.js](../files/js/npc/npccrew.js.md) L8 `crew` from `../crew/ledger.js`
@@ -129,7 +129,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
 - [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L77
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2147
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2149
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33
@@ -148,17 +148,17 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
 
-## Exports with no importer (923)
+## Exports with no importer (926)
 
-- [js/aria/aria.js](../files/js/aria/aria.js.md) `aria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `noteAdvice`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `answerAdvice`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `ariaNoteDecision`
-- [js/aria/aria.js](../files/js/aria/aria.js.md) `saveAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `wireAriaHooks`
 - [js/aria/company.js](../files/js/aria/company.js.md) `wageOf`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `domainOf`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `reserveFor`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `ARIA_JOBS`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `INVEST_JOBS`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `bestRepairPort`
@@ -166,10 +166,14 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `fabStop`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `refitPlan`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `buildPlan`
+- [js/aria/play.js](../files/js/aria/play.js.md) `purse`
 - [js/aria/play.js](../files/js/aria/play.js.md) `moveKeyFor`
 - [js/aria/play.js](../files/js/aria/play.js.md) `readyForTrouble`
 - [js/aria/play.js](../files/js/aria/play.js.md) `hullFrac`
 - [js/aria/play.js](../files/js/aria/play.js.md) `bestYard`
+- [js/aria/play.js](../files/js/aria/play.js.md) `hostilesClose`
+- [js/aria/play.js](../files/js/aria/play.js.md) `shouldBreakOff`
+- [js/aria/play.js](../files/js/aria/play.js.md) `tendBus`
 - [js/aria/play.js](../files/js/aria/play.js.md) `brainSig`
 - [js/aria/play.js](../files/js/aria/play.js.md) `brainOut`
 - [js/aria/play.js](../files/js/aria/play.js.md) `adoptBrain`
@@ -472,11 +476,9 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `RECORDER_KEY`
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `TAPE_CAP`
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `STATE_KEYS`
-- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `flushPending`
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `tapeJSONL`
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `loadTape`
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `describeTarget`
-- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `resetRecorder`
 - [js/flight/recorder.js](../files/js/flight/recorder.js.md) `default`
 - [js/flight/repair.js](../files/js/flight/repair.js.md) `REPAIR`
 - [js/flight/repair.js](../files/js/flight/repair.js.md) `patchDrone`
@@ -516,6 +518,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/interior/deckplan.js](../files/js/interior/deckplan.js.md) `COMPLEXES`
 - [js/interior/interior.js](../files/js/interior/interior.js.md) `openInterior`
 - [js/interior/interior.js](../files/js/interior/interior.js.md) `closeInterior`
+- [js/mission/detour.js](../files/js/mission/detour.js.md) `LEG`
 - [js/mission/run.js](../files/js/mission/run.js.md) `clearRun`
 - [js/mission/script.js](../files/js/mission/script.js.md) `REF_KINDS`
 - [js/net/account.js](../files/js/net/account.js.md) `SNAP_VERSION`

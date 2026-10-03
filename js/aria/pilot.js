@@ -1,3 +1,4 @@
+import { ariaMind, authorize, contextualScore, decideMind, policyScore, learnOutcome } from "./mind.js";
 import { sim, logEvent, setTurretMode, setMiningMode, toggleSystem } from "../sim/sim.js";
 import { cargoTotal, holdRoom } from "../flight/ship.js";
 import { stations, stationById } from "../station/stations.js";
@@ -7,7 +8,7 @@ import { captain, ariaHooks as hooks } from "../npc/captain.js";
 import { autopilot, nearestSeam, busOverload, pilotInput } from "../flight/autopilot.js";
 import { mission, startMission, stopMission, EXEC } from "../mission/run.js";
 import { makeMission, makeStep } from "../mission/script.js";
-import { repairsAt, pricePerPoint, yardRepair, hullMaxOf } from "../flight/repair.js";
+import { repairsAt, pricePerPoint, yardRepair, repairQuote, hullMaxOf } from "../flight/repair.js";
 import { upgradeOptions, buyUpgrade, hasUpgrade, effectOf } from "../economy/upgrades.js";
 import { buildOptions, orderBuild } from "../drones/ops.js";
 import { orderFab, planJob as planFab, canFabAt, fabMenuAt, maxRunnable, fabQueueAt, FAB } from "../economy/fabricate.js";
@@ -29,6 +30,7 @@ export const ariaPilot = {
   investAt: 0,
   fabAt: 0,
   bought: [],
+  brokeOff: 0,
 };
 
 let prefs = null;
@@ -70,7 +72,7 @@ function unsurveyed() {
 export function bestRepairPort(ship = sim.ship) {
   let best = null, score = -Infinity;
   for (const st of stations) {
-    if (!repairsAt(st) || !st.hangars?.length) continue;
+    if (st.hostile || st.sector === "pirate" || !repairsAt(st) || !st.hangars?.length) continue;
     const s = -dist3(ship.pos, st) / 100000 - pricePerPoint(st) / 20;
     if (s > score) { score = s; best = st; }
   }
@@ -166,7 +168,7 @@ export function fabStop(ship = sim.ship) {
 }
 
 export function refitPlan(ship = sim.ship, job = "mine") {
-  const spend = ship.credits - INVEST.reserve;
+  const spend = Math.min(ariaMind.orders.maxPurchase, ship.credits - ariaMind.orders.reserve);
   if (spend <= 0) return null;
   const want = [...ALWAYS_REFITS.filter((id) => !hasUpgrade(id)), ...(JOB_REFITS[job] ?? [])];
   if (!want.length) return null;
@@ -204,18 +206,18 @@ export function buildPlan(ship = sim.ship, job = "mine") {
 
 const MISSION = (name, steps) => makeMission({ name: `ARIA · ${name}`, builtin: true, mode: "aria", steps, loop: { mode: "none" }, defaults: { thrustCap: 1, warp: "auto" } });
 
-export function planJob() {
+function rawPlanJob() {
   const ship = sim.ship;
   const hullFrac = ship.hull / hullMaxOf(ship);
   const fill = cargoTotal(ship) / Math.max(1, ship.cargoCap);
   const { share, total } = jobHabits();
   const fails = ariaPilot.fails;
 
-  if (hullFrac < 0.45 && (fails.repair ?? 0) < 2) {
+  if (ariaMind.authority.repairs && hullFrac < ariaMind.orders.repairBelow && (fails.repair ?? 0) < 2) {
     const st = bestRepairPort(ship);
-    if (st) return { job: "repair", why: `hull at ${Math.round(hullFrac * 100)}% — ${st.name} has a yard`, mission: MISSION(`repair at ${st.name}`, [makeStep("DOCK", { kind: "station", id: st.id, name: st.name }), makeStep("REPAIR")]) };
+    if (st && !st.hostile && st.sector !== "pirate") return { job: "repair", why: `hull at ${Math.round(hullFrac * 100)}% — ${st.name} has a yard`, mission: MISSION(`repair at ${st.name}`, [makeStep("DOCK", { kind: "station", id: st.id, name: st.name }), makeStep("REPAIR")]) };
   }
-  if (fill >= FABRULE.holdMin && sim.time >= (ariaPilot.fabAt ?? 0) && (fails.fabricate ?? 0) < 2 && !hostileNear()) {
+  if (ariaMind.authority.fabricate && fill >= FABRULE.holdMin && sim.time >= (ariaPilot.fabAt ?? 0) && (fails.fabricate ?? 0) < 2 && !hostileNear()) {
     const f = fabStop(ship);
     if (f) {
       const lean = fabLeaning();
@@ -233,7 +235,7 @@ export function planJob() {
 
   const topJob = ARIA_JOBS.filter((j) => !INVEST_JOBS.includes(j)).sort((a, b) => (share[b] ?? 0) - (share[a] ?? 0))[0] ?? "mine";
   if (sim.time >= ariaPilot.investAt && hullFrac >= INVEST.minHull && !hostileNear()) {
-    if ((fails.build ?? 0) < 2) {
+    if (ariaMind.authority.build && (fails.build ?? 0) < 2) {
       const b = buildPlan(ship, topJob);
       if (b) {
         return { job: "build", why: `${company.name || "the company"} can stand a ${b.opt.label.toLowerCase()} drone — ${b.opt.price.toLocaleString()} cr at ${b.st.name}`,
@@ -243,10 +245,10 @@ export function planJob() {
           ]) };
       }
     }
-    if ((fails.refit ?? 0) < 2) {
+    if (ariaMind.authority.refit && (fails.refit ?? 0) < 2) {
       const r = refitPlan(ship, topJob);
       if (r) {
-        return { job: "refit", why: `${r.opt.name} at ${r.st.name} — ${r.opt.price.toLocaleString()} cr, and ${ship.credits.toLocaleString()} in hand`,
+        return { job: "refit", why: `${r.opt.name} at ${r.st.name} — ${r.opt.price.toLocaleString()} cr, and ${Math.round(ship.credits).toLocaleString()} in hand`,
           mission: MISSION(`refit ${r.opt.name} at ${r.st.name}`, [
             makeStep("DOCK", { kind: "station", id: r.st.id, name: r.st.name }),
             makeStep("REFIT", null, { args: { id: r.opt.id } }),
@@ -259,7 +261,7 @@ export function planJob() {
   const world = unsurveyed();
   const can = { mine: Boolean(seam), survey: Boolean(world), sell: fill > 0.15 };
   const learned = total >= 3;
-  const weight = (j) => (can[j] ? (learned ? share[j] : j === "mine" ? 0.6 : j === "survey" ? 0.4 : 0.1) + 0.05 : -1) - (fails[j] ?? 0) * 0.35 + (ariaPilot.job === j ? 0.05 : 0);
+  const weight = (j) => policyScore(j, (can[j] ? (learned && ariaMind.orders.mode !== "optimize" ? share[j] : j === "mine" ? 0.6 : j === "survey" ? 0.4 : 0.1) + 0.05 : -1) - (fails[j] ?? 0) * 0.35 + (ariaPilot.job === j ? 0.05 : 0), snapshot());
   const pick = ["mine", "survey", "sell"].sort((a, b) => weight(b) - weight(a))[0];
   if (weight(pick) < 0) return { job: null, why: "nothing this ship can do here" };
   const habit = learned ? `you ${pick === "mine" ? "mine" : pick === "survey" ? "survey" : "run cargo"} ${Math.round(share[pick] * 100)}% of the time` : "I have not watched you long — my best guess";
@@ -278,8 +280,27 @@ export function planJob() {
   return { job: "sell", why: `${habit}; ${Math.round(fill * 100)}% in the hold`, mission: MISSION("to the desk", [makeStep("DOCK", { kind: "best-buyer" }), ...deskSteps()]) };
 }
 
+export function planJob() {
+  const state = { ...(snapshot() ?? {}), hull: sim.ship.hull / hullMaxOf(sim.ship), hold: cargoTotal(sim.ship) / Math.max(1, sim.ship.cargoCap), hz: hostileNear() ? 1 : 0 };
+  let plan = rawPlanJob();
+  const permission = plan.job ? authorize(plan.job, { at: sim.time }) : { ok: true };
+  if (!permission.ok) plan = { job: null, why: permission.why };
+  decideMind({ action: plan.job, why: plan.why, state, steps: plan.mission?.steps.map(s => s.op) ?? [], alternatives: ["mine", "survey", "sell"].map(action => ({ action, ...contextualScore(action, state) })), at: sim.time });
+  return plan;
+}
+
+export function shouldBreakOff(ship = sim.ship) {
+  if (!ariaMind.orders.avoidHostiles || !ariaMind.authority.repairs) return null;
+  if (ship.dockedAt || ship.hull / hullMaxOf(ship) >= ariaMind.orders.repairBelow) return null;
+  if ((ariaPilot.fails.repair ?? 0) >= 2 || !hostileNear()) return null;
+  const st = bestRepairPort(ship);
+  if (!st || ship.credits < pricePerPoint(st)) return null;
+  return st;
+}
+
 export function beginAriaWatch() {
   ariaPilot.job = null;
+  ariaPilot.brokeOff = 0;
   ariaPilot.why = "";
   ariaPilot.planAt = 0;
   ariaPilot.fails = {};
@@ -317,9 +338,20 @@ export function tickAriaPilot() {
     if (!ship.localGravity) toggleSystem("localGravity");
   }
 
+  if (ariaPilot.job && ariaPilot.job !== "repair" && mission.active?.mode === "aria") {
+    const yard = shouldBreakOff(ship);
+    if (yard) {
+      ariaPilot.brokeOff++;
+      say?.(`Hull at ${Math.round((ship.hull / hullMaxOf(ship)) * 100)}% with contacts close — breaking off for the yard at ${yard.name}.`);
+      stopMission("breaking off for the yard", { quiet: true });
+      ariaPilot.job = null;
+      ariaPilot.planAt = sim.time;
+    }
+  }
   const running = mission.active && (mission.state === "running" || mission.state === "asking");
   if (running) return ship.credits - ariaPilot.creditsAt;
 
+  if (ariaPilot.job && ["done", "failed"].includes(mission.state)) learnOutcome(ariaPilot.job, sim.time - (ariaPilot.jobSince ?? sim.time), ship.credits - (ariaPilot.jobCredits ?? ship.credits), mission.state === "done", sim.time);
   if (ariaPilot.job && mission.state === "failed") ariaPilot.fails[ariaPilot.job] = (ariaPilot.fails[ariaPilot.job] ?? 0) + 1;
   else if (ariaPilot.job && mission.state === "done") ariaPilot.fails[ariaPilot.job] = 0;
   if (ariaPilot.job) { mission.state = "idle"; ariaPilot.job = null; ariaPilot.planAt = sim.time + 2; }
@@ -328,7 +360,8 @@ export function tickAriaPilot() {
   if (ship.dockedAt) {
     const st = stationById(ship.dockedAt);
     if (st && ship.hull < hullMaxOf(ship) - 1 && repairsAt(st)) {
-      const r = yardRepair();
+      const q = repairQuote(st, ship);
+      const r = authorize("repair", { cost: q.affordable * q.per, credits: ship.credits, at: sim.time }).ok ? yardRepair() : { ok: false };
       if (r.ok) say?.(`Bought ${r.points} hull at ${st.name} for ${r.cost.toLocaleString()} cr.`);
     }
   }
@@ -341,6 +374,8 @@ export function tickAriaPilot() {
     return ship.credits - ariaPilot.creditsAt;
   }
   if (startMission(plan.mission)) {
+    ariaPilot.jobSince = sim.time;
+    ariaPilot.jobCredits = ship.credits;
     ariaPilot.job = plan.job;
     ariaPilot.why = plan.why;
     ariaPilot.jobs++;
@@ -362,6 +397,9 @@ function registerAriaOps() {
     if (!st) return "fail:not docked";
     autopilot.phase = "trade"; autopilot.task = `repair · ${st.name}`;
     if (sim.ship.hull >= hullMaxOf(sim.ship) - 0.5) { mission.run.why = "hull whole"; return "done"; }
+    const q = repairQuote(st, sim.ship);
+    const a = (mission.active?.mode === "aria" || mission.active?.aria) ? authorize("repair", { cost: q.affordable * q.per, credits: sim.ship.credits, at: sim.time }) : { ok: true };
+    if (!a.ok) return `fail:${a.why}`;
     const r = yardRepair();
     if (!r.ok) return `fail:${r.why.toLowerCase()}`;
     mission.run.why = `${r.points} hull for ${r.cost.toLocaleString()} cr at ${st.name}`;
@@ -381,6 +419,8 @@ function registerRefitOp() {
     const opt = upgradeOptions(st).find((o) => o.id === id);
     if (!opt) return "fail:this yard does not fit that";
     if (opt.blocker) return `fail:${opt.blocker.toLowerCase()}`;
+    const a = (mission.active?.mode === "aria" || mission.active?.aria) ? authorize("refit", { cost: opt.price, credits: sim.ship.credits, at: sim.time }) : { ok: true };
+    if (!a.ok) return `fail:${a.why}`;
     const err = buyUpgrade(id, st);
     if (err) return `fail:${String(err).toLowerCase()}`;
     ariaPilot.investAt = sim.time + INVEST.cooldown;
@@ -401,6 +441,8 @@ function registerBuildOp() {
     const opt = buildOptions(st).find((o) => o.role === role);
     if (!opt) return "fail:this port has no line for that drone";
     if (opt.blocker) return `fail:${opt.blocker.toLowerCase()}`;
+    const a = (mission.active?.mode === "aria" || mission.active?.aria) ? authorize("build", { cost: opt.price, at: sim.time }) : { ok: true };
+    if (!a.ok) return `fail:${a.why}`;
     const r = orderBuild(role, st);
     if (!r.ok) return `fail:${String(r.why).toLowerCase()}`;
     ariaPilot.investAt = sim.time + INVEST.cooldown;
@@ -421,6 +463,11 @@ function registerFabOp() {
     if (!good) return "fail:no part named";
     autopilot.phase = "trade"; autopilot.task = `works · ${st.name}`;
     if (!canFabAt(st, good)) return "fail:this port has no line for that";
+    const stock = { ...(sim.ship.hold ?? {}) };
+    for (const [k, n] of Object.entries(sim.stash?.[st.id] ?? {})) stock[k] = (stock[k] ?? 0) + n;
+    const quote = planFab(good, qty, stock);
+    const a = (mission.active?.mode === "aria" || mission.active?.aria) ? authorize("fabricate", { cost: quote.fee, credits: sim.ship.credits, at: sim.time }) : { ok: true };
+    if (!a.ok) return `fail:${a.why}`;
     const r = orderFab({ st, id: good, qty, by: "player" });
     if (!r.ok) return `fail:${String(r.why).toLowerCase()}`;
     ariaPilot.fabAt = sim.time + 90;

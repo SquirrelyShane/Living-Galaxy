@@ -1,6 +1,6 @@
 # js/corp/gdb.js
 
-[index](../../../README.md) · 350 lines · 46 symbols · 4 imports · 11 importers
+[index](../../../README.md) · 350 lines · 46 symbols · 4 imports · 12 importers
 
 ## About
 
@@ -66,6 +66,7 @@ CON › CREW › GDB reads it (js/console/panels/crew-gdb.js).
 
 ## Imported by
 
+- [js/aria/aria.js](../aria/aria.js.md) — `entryOf`
 - [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md) — `census`, `search`, `entryOf`, `chronicle`, `raceName`
 - [js/crew/family.js](../crew/family.js.md) — `file`
 - [js/crew/ledger.js](../crew/ledger.js.md) — `file`
@@ -89,7 +90,7 @@ CON › CREW › GDB reads it (js/console/panels/crew-gdb.js).
 - [`markDead`](#s-markDead) · function — used by [js/station/stationlife.js](../station/stationlife.js.md)
 - [`sighted`](#s-sighted) · function — **no importer in scanned roots**
 - [`everyone`](#s-everyone) · function — **no importer in scanned roots**
-- [`entryOf`](#s-entryOf) · function — used by [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md)
+- [`entryOf`](#s-entryOf) · function — used by [js/aria/aria.js](../aria/aria.js.md), [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md)
 - [`census`](#s-census) · function — used by [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md)
 - [`search`](#s-search) · function — used by [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md)
 - [`chronicle`](#s-chronicle) · function — used by [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md)

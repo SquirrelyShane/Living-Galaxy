@@ -1,3 +1,6 @@
+import { flushPending } from "../flight/recorder.js";
+import { ariaMind, resetMind, saveMind, loadMind, mindKey, bindPeopleLookup, explanationPacket } from "./mind.js";
+import { entryOf } from "../corp/gdb.js";
 import { sim, logEvent } from "../sim/sim.js";
 import { captain, houseBrain, retakeCommand, ariaHooks } from "../npc/captain.js";
 import { post } from "../comms/chat.js";
@@ -7,14 +10,15 @@ const KEY = () => `lgaa.aria.v1:${sim.skySeed}:${sim.callsign}`;
 const SAVE_EVERY = 20;
 
 export const aria = {
-  prefs: { port: {}, ore: {}, plan: {}, lane: {}, job: {} },
+  prefs: ariaMind.prefs,
   advice: {},
   conn: { held: false, since: 0, decisions: 0, earned: 0, hullAt: 100, log: [] },
   dirty: 0,
 };
 
 export function resetAria() {
-  aria.prefs = { port: {}, ore: {}, plan: {}, lane: {}, job: {} };
+  resetMind(mindKey(sim.skySeed, sim.callsign));
+  aria.prefs = ariaMind.prefs;
   bindAriaPrefs(aria.prefs);
   aria.advice = {};
   aria.conn = { held: false, since: 0, decisions: 0, earned: 0, hullAt: 100, log: [] };
@@ -148,27 +152,34 @@ export function ariaWatchReport() {
 
 export function saveAria() {
   aria.dirty = 0;
+  saveMind(mindKey(sim.skySeed, sim.callsign));
   try {
     globalThis.localStorage?.setItem(KEY(), JSON.stringify({ prefs: aria.prefs, advice: aria.advice }));
   } catch {}
 }
 
 export function loadAria() {
+  const loaded = loadMind(mindKey(sim.skySeed, sim.callsign));
+  aria.prefs = ariaMind.prefs;
+  bindAriaPrefs(aria.prefs);
   try {
     const raw = globalThis.localStorage?.getItem(KEY());
-    if (!raw) return false;
+    if (!raw) return loaded;
     const o = JSON.parse(raw);
-    if (o?.prefs) { aria.prefs = { port: {}, ore: {}, plan: {}, lane: {}, job: {}, ...o.prefs }; bindAriaPrefs(aria.prefs); }
+    if (!loaded && o?.prefs) { Object.assign(ariaMind.prefs, o.prefs); aria.prefs = ariaMind.prefs; bindAriaPrefs(aria.prefs); }
     if (o?.advice) aria.advice = o.advice;
     return true;
   } catch { return false; }
 }
 
 export function wireAriaHooks() {
+  ariaHooks.onBeforeLaunch = () => { flushPending(); saveAria(); };
+  ariaHooks.onLaunch = () => { loadAria(); aria.lastMindSave = -1e9; };
   ariaHooks.onDecision = (action, rationale) => ariaNoteDecision(action, rationale);
   wireAriaPilot(aria, (text) => post({ channel: "local", from: "ARIA", text, tone: "neutral" }));
   ariaHooks.pilot = () => {
     const earned = tickAriaPilot();
+    if (sim.time - (aria.lastMindSave ?? -1e9) >= 20) { aria.lastMindSave = sim.time; saveAria(); }
     aria.conn.earned = earned;
     if (ariaPilot.job && aria.conn.log[0]?.action !== ariaPilot.job) ariaNoteDecision(ariaPilot.job, ariaPilot.why);
   };
@@ -178,8 +189,9 @@ export function wireAriaHooks() {
 }
 
 export function wireAria() {
+  bindPeopleLookup(entryOf);
   wireAriaHooks();
   if (globalThis.window?.__lg) {
-    window.__lg.aria = { aria, ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceFor, preferenceReport, notePlayerChoice, adviceReport, shouldAdvise, answerAdvice, ariaPilot, planJob, notePlayerJob };
+    window.__lg.aria = { ariaMind, explanationPacket, aria, ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceFor, preferenceReport, notePlayerChoice, adviceReport, shouldAdvise, answerAdvice, ariaPilot, planJob, notePlayerJob };
   }
 }

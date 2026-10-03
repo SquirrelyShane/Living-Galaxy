@@ -1,6 +1,6 @@
 # js/flight/repair.js
 
-[index](../../../README.md) · 87 lines · 10 symbols · 5 imports · 7 importers
+[index](../../../README.md) · 87 lines · 10 symbols · 5 imports · 8 importers
 
 ## About
 
@@ -41,22 +41,23 @@ beating in the belt stayed beaten. Two ways now, both honest about cost:
 
 ## Imported by
 
-- [js/aria/pilot.js](../aria/pilot.js.md) — `repairsAt`, `pricePerPoint`, `yardRepair`, `hullMaxOf`
+- [js/aria/pilot.js](../aria/pilot.js.md) — `repairsAt`, `pricePerPoint`, `yardRepair`, `repairQuote`, `hullMaxOf`
 - [js/aria/play.js](../aria/play.js.md) — `yardRepair`, `repairsAt`, `repairQuote`, `hullMaxOf`
 - [js/aria/senses.js](../aria/senses.js.md) — `hullMaxOf`, `repairsAt`, `pricePerPoint`
 - [js/sim/sim.js](../sim/sim.js.md) — `tickPatchDrone`, `hullMaxOf`
 - [js/station/refityard.js](../station/refityard.js.md) — `repairQuote`, `yardRepair`, `repairsAt`, `hullMaxOf`, `droneRate`
 - [js/ui/hud.js](../ui/hud.js.md) — `hullMaxOf`
+- test/aria-mining-loop.test.mjs _(outside js/)_ — `hullMaxOf`
 - test/portdrones.test.mjs _(outside js/)_ — `hullMaxOf`
 
 ## Exports
 
 - [`REPAIR`](#s-REPAIR) · const — **no importer in scanned roots**
 - [`patchDrone`](#s-patchDrone) · const — **no importer in scanned roots**
-- [`hullMaxOf`](#s-hullMaxOf) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/refityard.js](../station/refityard.js.md), [js/ui/hud.js](../ui/hud.js.md), test/portdrones.test.mjs
+- [`hullMaxOf`](#s-hullMaxOf) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/refityard.js](../station/refityard.js.md), [js/ui/hud.js](../ui/hud.js.md), test/aria-mining-loop.test.mjs, test/portdrones.test.mjs
 - [`repairsAt`](#s-repairsAt) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/station/refityard.js](../station/refityard.js.md)
 - [`pricePerPoint`](#s-pricePerPoint) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md)
-- [`repairQuote`](#s-repairQuote) · function — used by [js/aria/play.js](../aria/play.js.md), [js/station/refityard.js](../station/refityard.js.md)
+- [`repairQuote`](#s-repairQuote) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/station/refityard.js](../station/refityard.js.md)
 - [`yardRepair`](#s-yardRepair) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/station/refityard.js](../station/refityard.js.md)
 - [`droneRate`](#s-droneRate) · function — used by [js/station/refityard.js](../station/refityard.js.md)
 - [`tickPatchDrone`](#s-tickPatchDrone) · function — used by [js/sim/sim.js](../sim/sim.js.md)
@@ -90,7 +91,7 @@ const · **exported** · L15–15
 
 function · **exported** · L17–17
 
-- called by: [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`registerAriaOps`](../aria/pilot.js.md#s-registerAriaOps) _js/aria/pilot.js_ · [`tickAriaPilot`](../aria/pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`hullFrac`](../aria/play.js.md#s-hullFrac) _js/aria/play.js_ · [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`repairQuote`](#s-repairQuote) · [`tickPatchDrone`](#s-tickPatchDrone) ×2 · [`yardRepair`](#s-yardRepair) ×2 · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`wireReactiveSky`](../sim/sim.js.md#s-wireReactiveSky) _js/sim/sim.js_ · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_ · [`sampleWorld`](../ui/hud.js.md#s-sampleWorld) _js/ui/hud.js_
+- called by: [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ · [`registerAriaOps`](../aria/pilot.js.md#s-registerAriaOps) _js/aria/pilot.js_ · [`shouldBreakOff`](../aria/pilot.js.md#s-shouldBreakOff) _js/aria/pilot.js_ · [`tickAriaPilot`](../aria/pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ ×2 · [`hullFrac`](../aria/play.js.md#s-hullFrac) _js/aria/play.js_ · [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`repairQuote`](#s-repairQuote) · [`tickPatchDrone`](#s-tickPatchDrone) ×2 · [`yardRepair`](#s-yardRepair) ×2 · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`wireReactiveSky`](../sim/sim.js.md#s-wireReactiveSky) _js/sim/sim.js_ · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_ · [`sampleWorld`](../ui/hud.js.md#s-sampleWorld) _js/ui/hud.js_
 
 <!-- note:hullMaxOf -->
 <!-- /note -->
@@ -110,7 +111,7 @@ Does this port fix hulls?
 function · **exported** · L25–30
 
 - calls: [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_
-- called by: [`bestRepairPort`](../aria/pilot.js.md#s-bestRepairPort) _js/aria/pilot.js_ · [`sensePorts`](../aria/senses.js.md#s-sensePorts) _js/aria/senses.js_ · [`repairQuote`](#s-repairQuote) ×2
+- called by: [`bestRepairPort`](../aria/pilot.js.md#s-bestRepairPort) _js/aria/pilot.js_ · [`shouldBreakOff`](../aria/pilot.js.md#s-shouldBreakOff) _js/aria/pilot.js_ · [`sensePorts`](../aria/senses.js.md#s-sensePorts) _js/aria/senses.js_ · [`repairQuote`](#s-repairQuote) ×2
 
 <!-- note:pricePerPoint -->
 cr a point here, after the sector and your standing with the port's operator.
@@ -123,7 +124,7 @@ cr a point here, after the sector and your standing with the port's operator.
 function · **exported** · L32–41
 
 - calls: [`hullMaxOf`](#s-hullMaxOf) · [`pricePerPoint`](#s-pricePerPoint) ×2 · [`repairsAt`](#s-repairsAt)
-- called by: [`bestYard`](../aria/play.js.md#s-bestYard) _js/aria/play.js_ · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ · [`yardRepair`](#s-yardRepair) · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_ · [`build>act`](../station/refityard.js.md#s-build-act) _js/station/refityard.js_ · [`paintDeckRepair`](../station/refityard.js.md#s-paintDeckRepair) _js/station/refityard.js_
+- called by: [`registerAriaOps`](../aria/pilot.js.md#s-registerAriaOps) _js/aria/pilot.js_ · [`tickAriaPilot`](../aria/pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`bestYard`](../aria/play.js.md#s-bestYard) _js/aria/play.js_ · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`stepPlay`](../aria/play.js.md#s-stepPlay) _js/aria/play.js_ ×2 · [`yardRepair`](#s-yardRepair) · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_ · [`build>act`](../station/refityard.js.md#s-build-act) _js/station/refityard.js_ · [`paintDeckRepair`](../station/refityard.js.md#s-paintDeckRepair) _js/station/refityard.js_
 
 <!-- note:repairQuote -->
 What a repair here would cost. `points` defaults to the whole shortfall.

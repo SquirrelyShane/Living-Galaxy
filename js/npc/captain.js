@@ -14,7 +14,7 @@ import { crew } from "../crew/ledger.js";
 import { cradle } from "./cradle.js";
 import { ACTIONS, N_FEATURES, createBrain, features, labelFromPlay, learnImitation, learnOutcome, think } from "./brain.js";
 
-export const ariaHooks = { onDecision: null, pilot: null, onPlayLabel: null, onStick: null, onPlayerJob: null };
+export const ariaHooks = { onLaunch: null, onBeforeLaunch: null, onDecision: null, pilot: null, onPlayLabel: null, onStick: null, onPlayerJob: null };
 
 export const captain = {
   holder: "player",

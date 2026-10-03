@@ -1,20 +1,21 @@
-import { sim, sellPriceAt, setTurretMode } from "../sim/sim.js";
+import { ariaMind, authorize, decideMind, policyScore, learnOutcome, spendCap } from "./mind.js";
+import { sim, sellPriceAt, setTurretMode, setMiningMode, toggleSystem } from "../sim/sim.js";
 import { stations, stationById } from "../station/stations.js";
 import { holdRoom, batteryCap, roomFor, cargoTotal } from "../flight/ship.js";
 import { pilot } from "../flight/pilot.js";
-import { goodName } from "../economy/materials.js";
+import { goodName, bulkOf } from "../economy/materials.js";
 import { boardFor, acceptContract, acceptBlocker, abandonContract, deliverContracts, deliverableAt, contracts, CATEGORIES, CATEGORY_ORDER, categoryOf, hullFit, jobStatus, targetPos, timeLeft, BOARD } from "../economy/contracts.js";
 import { bestRoute, sellable, tradeRoutes } from "../economy/traderoutes.js";
 import { stockOf, askPrice } from "../economy/economy.js";
 import { makeMission, makeStep } from "../mission/script.js";
 import { mission, startMission, stopMission } from "../mission/run.js";
-import { autopilot } from "../flight/autopilot.js";
+import { autopilot, busIdle, AP_POWER } from "../flight/autopilot.js";
 import { chainReport } from "../economy/chains.js";
 import { VERSION } from "../version.js";
 import { PRICE_CEIL, PRICE_FLOOR } from "../economy/economy.js";
 import { nests } from "../npc/rogues.js";
 import { traffic } from "../npc/traffic.js";
-import { sense, senseLine, forgetSenses, unpostedWork } from "./senses.js";
+import { sense, senseSpace, senseLine, forgetSenses, unpostedWork } from "./senses.js";
 import { planRoute, legSeconds, tripSeconds, aimAt, lockOn, markPlace, routeLine as navLine, NAV } from "./nav.js";
 import { handlingLeft, handlingLine } from "../station/dockwork.js";
 import { runBusiness, bizReport, bizLine, resetBusiness, biz } from "./company.js";
@@ -37,6 +38,12 @@ export const PLAY = {
   yardCool: 240,
   runAt: 0.3,
   chainBias: 1.35,
+  threatR: 6000,
+  resumes: 2,
+  shedAt: 0.45,
+  shedSpare: 6,
+  restoreAt: 0.8,
+  restoreSpare: 25,
 };
 
 export const play = {
@@ -47,8 +54,12 @@ export const play = {
   started: 0,
   credits0: 0,
   move: null,
+  paused: null,
+  shed: [],
+  flatAt: -1e9,
   yardAt: -1e9,
-  brain: { career: null, moves: {}, runs: 0, sky: null },
+  get brain() { return ariaMind.experience; },
+  set brain(value) { ariaMind.experience = value; },
   stats: { decisions: 0, jobs: 0, done: 0, failed: 0, earned: 0, spent: 0 },
   log: [],
   think: 0,
@@ -71,12 +82,7 @@ export function scoreOf(key) {
 }
 
 export function brainNote(key, secs, cr, ok) {
-  const m = (play.brain.moves[key] ??= { runs: 0, secs: 0, cr: 0, fails: 0 });
-  m.runs++;
-  m.secs += Math.max(0, secs);
-  m.cr += cr;
-  if (!ok) m.fails++;
-  play.brain.runs++;
+  learnOutcome(key, secs, cr, ok, now());
 }
 
 export function brainReport() {
@@ -147,6 +153,7 @@ export function sourceFor(good, qty, except = null) {
 
 export function canFly(o) {
   if (o.mech === "escort") return false;
+  if ((o.armed || o.mech === "kill") && !ariaMind.authority.combat) return false;
   if (o.mech === "kill") {
     if (!hullFit().armed) return false;
     if (hullFrac() < 0.6) return false;
@@ -158,11 +165,13 @@ export function canFly(o) {
   if (o.mech === "deliver" && !o.spot && !o.salvage && o.good) {
     const src = o.sourceId && stockOf(stationById(o.sourceId), o.good) >= o.qty ? stationById(o.sourceId) : sourceFor(o.good, o.qty, o.stationId);
     if (!src) return false;
-    if (askPrice(src, o.good) * o.qty > sim.ship.credits - PLAY.minCredits) return false;
+    if (askPrice(src, o.good) * o.qty > purse()) return false;
     if (askPrice(src, o.good) * o.qty >= o.pay) return false;
   }
   return true;
 }
+
+export const purse = () => Math.max(0, Math.min(spendCap(sim.ship.credits, "route"), sim.ship.credits - PLAY.minCredits));
 
 const C = (k, op, v) => ({ k, op, v });
 
@@ -181,11 +190,27 @@ export function jobPlan(a) {
   if (a.mech === "haul") {
     go(a.destId, a.destName);
   } else if (a.mech === "visit") {
+    if (a.recovery) {
+      const id = a.grant?.good ?? a.good;
+      const want = (a.grant?.qty ?? a.qty ?? 0) - (a.recovered ?? 0);
+      if (id && roomFor(sim.ship, id) < want) {
+        steps.push(makeStep("DOCK", { kind: "best-buyer" }));
+        steps.push(makeStep("SELL", null, { args: { what: "all", keep: id } }));
+      }
+    }
     for (const t of a.targets ?? []) {
       const w = t.kind === "body" ? null : targetPos(t, sim.time, {});
       if (w) go({ x: w.x, y: w.y, z: w.z, name: t.name, kind: "point" }, t.name);
       else steps.push(makeStep("GOTO", { kind: "body", id: t.id, name: t.name }));
-      steps.push(makeStep("HOLD", null, { until: C("time", ">=", Math.max(8, (t.dwell ?? 10) + 6)) }));
+      if (a.recovery) {
+        const id = a.grant?.good ?? a.good;
+        const want = (a.grant?.qty ?? a.qty ?? 0) - (a.recovered ?? 0);
+        const rate = Math.max(0.1, Math.min(4, sim.ship.mods?.salvage ?? 1));
+        const was = Boolean(sim.ship.salvage);
+        if (!was) steps.push(makeStep("SET", null, { args: { system: { key: "salvage", on: true } } }));
+        steps.push(makeStep("HOLD", null, { until: C("time", ">=", Math.round(((t.dwell ?? 20) / rate) * Math.max(0.2, want / Math.max(1, a.grant?.qty ?? a.qty ?? 1)) * 1.4 + 10)) }));
+        if (!was) steps.push(makeStep("SET", null, { args: { system: { key: "salvage", on: false } } }));
+      } else steps.push(makeStep("HOLD", null, { until: C("time", ">=", Math.max(8, (t.dwell ?? 10) + 6)) }));
     }
     go(a.stationId, a.stationName);
   } else if (a.mech === "survey") {
@@ -204,9 +229,10 @@ export function jobPlan(a) {
     at = sim.ship.pos;
     go(a.stationId, a.stationName);
   } else if (a.spot || (a.salvage && a.good)) {
-    if (holdUsed() > 0.12) {
+    const mine = a.good ? ((sim.ship.hold[a.good] ?? 0) * bulkOf(a.good)) / Math.max(1, sim.ship.cargoCap ?? 1) : 0;
+    if (holdUsed() - mine > (holdUsed() > 0.95 ? 0.01 : 0.12)) {
       steps.push(makeStep("DOCK", { kind: "best-buyer" }));
-      steps.push(makeStep("SELL", null, { args: { what: "all" } }));
+      steps.push(makeStep("SELL", null, { args: { what: "all", ...(a.good ? { keep: a.good } : {}) } }));
     }
     const seam = a.spot ? { kind: "seam", x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name } : { kind: "seam" };
     if (a.spot) { const L = legsTo({ x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name, kind: "point" }, at, a.spot.name); if (L && L.steps.length > 1) { steps.push(...L.steps.slice(0, -1)); at = L.steps.length > 1 ? L.end : at; } }
@@ -245,6 +271,7 @@ function legsTo(target, from, label = null) {
 }
 
 function startJob(o) {
+  if (!authorize("navigation", { at: now() }).ok || ((o.armed || o.mech === "kill") && !ariaMind.authority.combat)) return false;
   const why = acceptContract(o);
   if (why) return false;
   if (o.armed || o.mech === "kill" || play.dept === "security") readyForTrouble();
@@ -265,9 +292,8 @@ function startJob(o) {
 export const moveKeyFor = (o) => (o.chain ? `chain:${o.cat}` : `board:${o.cat}:${o.type}`);
 
 function startRoute() {
-  const purse = Math.max(0, sim.ship.credits - PLAY.minCredits);
   let r = null;
-  for (const c of tradeRoutes({ credits: purse, n: 6 })) {
+  for (const c of tradeRoutes({ credits: purse(), n: 6 })) {
     if (planRoute(c.from.id).blocked) continue;
     if (planRoute(c.to.id, c.from).blocked) continue;
     r = c;
@@ -345,7 +371,7 @@ export function bestYard(pos = sim.ship.pos) {
 
 function startSupply() {
   const s = sense();
-  const jobs = unpostedWork(s, holdRoom(sim.ship), Math.max(0, sim.ship.credits - PLAY.minCredits));
+  const jobs = unpostedWork(s, holdRoom(sim.ship), purse());
   const pick = jobs.find((j) => !planRoute(j.fromId).blocked && !planRoute(j.toId, stationById(j.fromId)).blocked);
   if (!pick) return false;
   const steps = [];
@@ -388,7 +414,7 @@ export function movesNow() {
   if (sim.ship.credits > PLAY.minCredits * 2 && holdRoom(sim.ship) > 5) out.push({ key: "supply", start: startSupply, what: "supply a stalled line" });
   if (play.dept === "mining" || play.brain.moves.mine) out.push({ key: "mine", start: startFreeMine, what: "free mining" });
   if (Object.keys(sellable()).length) out.push({ key: "sell", start: startSell, what: "sell the hold" });
-  if (hullFrac() < PLAY.patchAt && now() - (play.yardAt ?? -1e9) > PLAY.yardCool && bestYard()) out.push({ key: "yard", start: startYard, what: "patch the hull" });
+  if (hullFrac() < ariaMind.orders.repairBelow && now() - (play.yardAt ?? -1e9) > PLAY.yardCool && bestYard()) out.push({ key: "yard", start: startYard, what: "patch the hull" });
   const seen = new Set();
   return out.filter((m) => (seen.has(m.key) ? false : seen.add(m.key)));
 }
@@ -401,17 +427,51 @@ export function weightOf(key) {
   const mine = key.startsWith(`board:${play.dept}`) || key === `chain:${play.dept}`
     || (key === "mine" && play.dept === "mining")
     || ((key === "route" || key === "supply") && (play.dept === "trade" || play.dept === "logistics"));
-  return scoreOf(key) * (mine ? PLAY.deptBias : 1);
+  return policyScore(key, scoreOf(key) * (mine ? PLAY.deptBias : 1), { hull: hullFrac(), hold: holdUsed(), dk: sim.ship.dockedAt ? 1 : 0 }) ;
+}
+
+export const hostilesClose = () => senseSpace().threat < PLAY.threatR;
+export function shouldBreakOff() {
+  const h = hullFrac();
+  return h < PLAY.runAt || (ariaMind.orders.avoidHostiles && h < ariaMind.orders.repairBelow && hostilesClose());
+}
+
+const heldFlyable = (a) => a.mech !== "escort" && (!(a.armed || a.mech === "kill") || (ariaMind.authority.combat && hullFit().armed));
+
+function resumeHeld() {
+  const p = play.paused;
+  play.paused = null;
+  const a = (p && contracts.active.find((x) => x.id === p.jobId))
+    ?? contracts.active.find((x) => heldFlyable(x) && (x.ariaTries ?? 0) < PLAY.resumes);
+  if (!a) return false;
+  a.ariaTries = (a.ariaTries ?? 0) + 1;
+  const secs = jobSeconds(a);
+  const drop = (why) => {
+    if (!p) return false;
+    abandonContract(a.id);
+    brainNote(p.key, Math.max(1, now() - p.since), netWorth() - p.cr0, false);
+    play.stats.failed++;
+    note(`dropped (${why}): ${p.note}`);
+    return false;
+  };
+  if (!authorize("navigation", { at: now() }).ok) return drop("navigation withheld");
+  if (!Number.isFinite(secs) || secs >= timeLeft(a)) return drop("no time left to finish it");
+  if (!startMission(jobPlan(a))) return drop("no way to fly it from here");
+  play.move = { key: p?.key ?? moveKeyFor(a), kind: "job", jobId: a.id, since: p?.since ?? now(), cr0: p?.cr0 ?? netWorth(), note: a.title, replans: p?.replans ?? 0 };
+  note(`${p ? "back on" : "picking up"} "${a.title}" — ${Math.round(timeLeft(a) / 60)} min left on it`);
+  return true;
 }
 
 function decide() {
-  const opts = movesNow();
+  if (resumeHeld()) return true;
+  const opts = movesNow().filter(o => authorize(o.key, { at: now() }).ok);
   if (!opts.length) return false;
-  const yard = hullFrac() < PLAY.patchAt ? opts.find((o) => o.key === "yard") : null;
+  const yard = hullFrac() < ariaMind.orders.repairBelow ? opts.find((o) => o.key === "yard") : null;
   if (yard) { play.stats.decisions++; if (yard.start()) return true; }
-  const explore = rand() < PLAY.explore;
+  const explore = ariaMind.orders.mode !== "directive" && rand() < PLAY.explore;
   const pick = explore ? opts[Math.floor(rand() * opts.length)] : opts.reduce((a, b) => (weightOf(a.key) >= weightOf(b.key) ? a : b));
   play.stats.decisions++;
+  decideMind({ action: pick.key, why: pick.what, state: { hull: hullFrac(), hold: holdUsed(), hz: hostilesClose() ? 1 : 0 }, alternatives: opts.map(o => ({ action: o.key, score: weightOf(o.key) })), at: now() });
   return pick.start();
 }
 
@@ -436,20 +496,45 @@ export function beginPlay({ career = pilot?.complexId ?? "mining", name = "ARIA"
   play.started = now();
   play.credits0 = netWorth();
   play.move = null;
+  play.paused = null;
+  play.shed = [];
+  play.flatAt = -1e9;
   play.yardAt = -1e9;
   play.log = [];
   forgetSenses();
   resetBusiness();
   bizSeen = 0;
   play.stats = { decisions: 0, jobs: 0, done: 0, failed: 0, earned: 0, spent: 0 };
-  const taken = adoptBrain(brain);
+  const taken = adoptBrain(brain ?? (ariaMind.experience.sky === sim.skySeed ? brainOut() : null));
   play.brain = { career, sky: sim.skySeed, runs: taken.runs, moves: taken.moves, why: taken.why };
   note(`${name} takes the conn — ${career} (${CATEGORIES[play.dept]?.name ?? play.dept})`);
   return play;
 }
 
+const COMFORT = [["localGravity", "deck gravity"], ["lights", "the floods"], ["sentry", "the sentry"]];
+
+export function tendBus() {
+  const ship = sim.ship;
+  const frac = (ship.charge ?? 0) / Math.max(1, batteryCap(ship));
+  const spare = (ship.reactor ?? 130) - busIdle(ship).load;
+  if (!ship.dockedAt && frac < PLAY.shedAt && spare < PLAY.shedSpare) {
+    const hit = COMFORT.find(([k]) => ship[k]);
+    if (hit) { toggleSystem(hit[0]); play.shed.push(hit[0]); note(`battery at ${Math.round(frac * 100)}% and nothing spare on the bus — ${hit[1]} off`); }
+    else if (!mission.active && ship.miningMode !== "off") setMiningMode("off", { quiet: true });
+  } else if (play.shed.length && (ship.dockedAt || (frac > PLAY.restoreAt && spare > PLAY.restoreSpare))) {
+    const k = play.shed.pop();
+    if (!ship[k]) toggleSystem(k);
+  }
+  return !ship.dockedAt && frac <= AP_POWER.floor + 0.04;
+}
+
 export function stepPlay(dt) {
   if (!play.on) return;
+  const flat = tendBus();
+  if (flat && !mission.active) {
+    if (now() - play.flatAt > 60) { play.flatAt = now(); note("battery flat — holding here until it comes back"); }
+    if (!play.move || now() - play.move.since < PLAY.stuck) return;
+  }
   if (sim.ship.dockedAt && deliverableAt(sim.ship.dockedAt).length) {
     const got = deliverContracts(sim.ship.dockedAt);
     if (got > 0 && play.move?.kind === "job") { finishMove(true, "delivered"); stopMission("done"); }
@@ -460,16 +545,25 @@ export function stepPlay(dt) {
     if (did) for (; bizSeen < biz.log.length; bizSeen++) note(biz.log[bizSeen].text);
   }
   if (sim.ship.dockedAt && hullFrac() < 0.995 && repairsAt(stationById(sim.ship.dockedAt)) && sim.ship.credits > PLAY.minCredits) {
-    const r = yardRepair(null);
+    const q = repairQuote(stationById(sim.ship.dockedAt), sim.ship);
+    const r = authorize("repair", { cost: q.affordable * q.per, credits: sim.ship.credits, at: now() }).ok ? yardRepair(null) : { ok: false };
     if (r.ok) note(`patched ${r.points} hull point${r.points === 1 ? "" : "s"} for ${Math.round(r.cost).toLocaleString("en-US")} cr`);
     play.yardAt = now();
     if (play.move?.kind === "yard") { finishMove(true, "patched"); stopMission("done"); return; }
   }
-  if (play.move && play.move.kind !== "yard" && hullFrac() < PLAY.runAt && now() - (play.yardAt ?? -1e9) > PLAY.yardCool && repairQuote(bestYard() ?? null, sim.ship).ok) {
-    const a0 = play.move.jobId ? contracts.active.find((x) => x.id === play.move.jobId) : null;
-    if (a0) abandonContract(a0.id);
+  if (play.move && play.move.kind !== "yard" && shouldBreakOff() && sim.ship.credits > PLAY.minCredits && now() - (play.yardAt ?? -1e9) > PLAY.yardCool && authorize("yard", { at: now() }).ok && repairQuote(bestYard() ?? null, sim.ship).ok) {
+    const mv = play.move;
+    const a0 = mv.jobId ? contracts.active.find((x) => x.id === mv.jobId) : null;
+    const pct = Math.round(hullFrac() * 100);
     stopMission("breaking off");
-    finishMove(false, `hull at ${Math.round(hullFrac() * 100)}%`);
+    if (a0 && timeLeft(a0) > 0) {
+      play.paused = { jobId: a0.id, key: mv.key, since: mv.since, cr0: mv.cr0, note: mv.note, replans: mv.replans ?? 0 };
+      play.move = null;
+      note(`hull at ${pct}% — breaking off "${a0.title}" for the yard, the contract is kept`);
+    } else {
+      if (a0) abandonContract(a0.id);
+      finishMove(false, `hull at ${pct}%`);
+    }
     startYard();
     return;
   }

@@ -156,7 +156,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-cid]`
 
-- dom.query — [js/console/panels/nav.js › mountContacts](../files/js/console/panels/nav.js.md#s-mountContacts) L254
+- dom.query — [js/console/panels/nav.js › mountContacts](../files/js/console/panels/nav.js.md#s-mountContacts) L255
 
 ### `[data-focus="${…}"]`
 
@@ -170,11 +170,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-panel]`
 
-- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L196
+- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L199
 
 ### `[data-posture="${…}"]`
 
-- dom.query — [js/mission/run.js › EXEC.SET](../files/js/mission/run.js.md#s-EXEC-SET) L454
+- dom.query — [js/mission/run.js › EXEC.SET](../files/js/mission/run.js.md#s-EXEC-SET) L466
 
 ### `[data-proxy]`
 
@@ -186,7 +186,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-wp]`
 
-- dom.query — [js/console/panels/nav.js › mountMarks](../files/js/console/panels/nav.js.md#s-mountMarks) L205
+- dom.query — [js/console/panels/nav.js › mountMarks](../files/js/console/panels/nav.js.md#s-mountMarks) L206
 
 ### `#cm-acts`
 
@@ -206,11 +206,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `#console`
 
-- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L197
+- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L200
 
 ### `#hud`
 
-- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L197
+- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L200
 
 ### `#hud .hud-brand`
 
@@ -230,7 +230,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `#map`
 
-- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L197
+- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L200
 
 ### `#plan-edit`
 
@@ -248,7 +248,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `#station-deck`
 
-- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L197
+- dom.query — [js/flight/recorder.js › describeTarget](../files/js/flight/recorder.js.md#s-describeTarget) L200
 
 ### `#station-deck .sd-head > div`
 
@@ -295,7 +295,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `a`
 
-- dom.create — [js/flight/recorder.js › downloadTape](../files/js/flight/recorder.js.md#s-downloadTape) L179
+- dom.create — [js/flight/recorder.js › downloadTape](../files/js/flight/recorder.js.md#s-downloadTape) L182
 - dom.create — [js/net/account.js › paintStartLine](../files/js/net/account.js.md#s-paintStartLine) L451
 
 ### `account-line`
@@ -316,11 +316,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `aux-auto`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L740
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L741
 
 ### `aux-auto-st`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L741
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L742
 
 ### `aux-comms`
 
@@ -473,7 +473,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 ### `button`
 
 - dom.query — [js/console/panels/crew.js › mountHouse>paintDrawn](../files/js/console/panels/crew.js.md#s-mountHouse-paintDrawn) L292
-- dom.query — [js/console/panels/nav.js › mountAutopilot](../files/js/console/panels/nav.js.md#s-mountAutopilot) L157
+- dom.query — [js/console/panels/nav.js › mountAutopilot](../files/js/console/panels/nav.js.md#s-mountAutopilot) L158
 - dom.query — [js/station/stationdeck.js](../files/js/station/stationdeck.js.md) L302
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L369
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L403

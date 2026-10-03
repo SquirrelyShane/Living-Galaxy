@@ -1,5 +1,111 @@
 # Changelog
 
+## 0.3.88 — 2026-10-03 — ARIA Keeps the Loop
+
+Reported: ARIA warps to a station and docks, undocks at once, warps to the belt,
+locks back onto the station, warps home and docks, for ever. No mining loop, no
+board work, no hiring, no charter. Reproduced headless in both ARIAs — at the
+conn and in the terminal player — and traced to the ARIA Core patch that had
+been laid over 0.3.87, plus two faults 0.3.87 already had. This release carries
+ARIA Core and the earlier mining-loop hotfix with them fixed, so it applies to a
+clean 0.3.87 or over either of those zips.
+
+**The loop.** Core's "avoid hostiles" order broke work off whenever a hostile
+contact was inside 6,000 u. The belt spawns rogue drones 4,200 u from any hull
+near it, so in a belt the test was always true: drop the job, run for a yard,
+dock, the 30 s hold already spent on the flight home, undock, fly back, drop
+it again. The order is now a line on the hull — contacts close AND the hull
+under the captain's repair line AND a yard she can reach and pay — and with a
+whole hull she keeps working with the guns on CASTLE, as she did before Core.
+
+**Board work.** In the terminal player every "threat" drop left its contract on
+the books; five idle contracts lock the desk. A job broken off for the yard is
+now PAUSED: the contract is kept, she patches, and picks it up again if the
+clock allows. A contract she holds and is not flying is flown before anything
+new is taken. A resumed job no longer sells the ore it had already cut.
+
+**Hiring, charter, treasury, combat, drones.** Core shipped those authorities
+withheld. Every authority now starts granted; the Core panel is where a captain
+takes one away. A mind saved by the Core patch drops its authority block once,
+since it could not tell a captain's choice from the withheld defaults.
+
+**The reserve.** Core's 15,000 cr reserve was applied to everything, repairs
+included: a pilot with less than that could never patch a hull, buy a load or
+pay a hiring bonus. It now guards investments only (refits, a charter, settling
+crew). Repairs are never held back, cargo and hiring keep 800 cr aboard, a
+treasury transfer is not a purchase, and a load over the purchase ceiling is
+trimmed to it rather than refused after the flight to the shelf.
+
+**Two faults 0.3.87 already had.**
+- The signature lock breaks when the nose swings 60° off the target and takes
+  the jump target with it. The jump key reads that target, so a leg could ask
+  for a jump for ever — "warp unavailable, no target" — while it drifted. The
+  autopilot now puts the target back before it asks. This is the autopilot's
+  fix, so a hand-started mining loop gets it too.
+- A world across the corridor ended the step ("jupiter in lane") and with it
+  the mission. An ARIA mission now flies the dogleg itself. Hand-started
+  missions still stop, as before.
+
+**Also.**
+- The terminal player tends the bus: comfort loads go off as the battery runs
+  down with nothing spare, and with a flat battery she waits for charge. Before,
+  a stood-down mission was replaced every think tick by a fresh contract that
+  was stood down a second later, until the hull was gone.
+- Wreck and pod recoveries switch the SALVAGE system on over the site (they
+  have needed it since 0.3.84) and clear the hold first when it cannot take the
+  load.
+- `tools/aria-play.mjs` wrote its 20 s brain save without a build signature, so
+  a killed run's brain was thrown away by the next one.
+- The Core panel rebuilt its readout every frame; it now redraws on change.
+- MINE's recharge pause no longer cuts in while the core is spooling.
+
+**Measured** (headless, mining, 40 sky-minutes, 20,000 cr purse, three seeds):
+
+| seed | 0.3.87 | 0.3.87 + Core | 0.3.88 |
+|---|---|---|---|
+| 1 | +36,112 · 5 done, 1 dropped | +34,220 · 5/5 · no hires, no charter | +79,138 · 10/0 |
+| 2 | +26,169 · 3/1 | +24,982 · 6/4 · none | +161,454 · 11/0 |
+| 3 | +88,531 · 8/0 | +72,309 · 8/6 · none | +79,370 · 10/0 |
+
+Every 0.3.88 run registered a company and hired; no Core run did.
+
+At the conn, 30 sky-minutes from the 3,100 cr start, two seeds: 0.3.87 +25,847
+and +27,798; Core +5,400 and +5,400 (11–12 dockings, nothing mined); 0.3.88
++20,216 and +34,148, flying mine → dock → sell → repair → refit.
+
+Salvage career in the terminal player, 25 sky-minutes: 0.3.87 +10,545 with 42
+autopilot stand-downs and the hull lost; 0.3.88 +49,132 with none.
+
+**Verified:** 104 of 106 node suites green — the two that are not, `desk` (the
+pod recovery case, stale since 0.3.84) and `lgpatch`, fail the same way on
+0.3.87. `aria-loop` (new, 43) fails 18 ways on the Core tree and passes here.
+`aria-repair`, `aria-invest`, `ariabiz` and `ariaplay` are back to their 0.3.87
+text and pass on the stock defaults; Core had edited all four to grant itself
+authority or to accept a safety dock in place of mining. In headless Chromium
+at 412×915: the HUD's ARIA button takes the conn, she flies four mine → dock →
+sell loops with one break-off at 54% hull and a refit, NAV › ARIA CORE draws
+with every authority ticked, and unticking one withholds it and saves it.
+**Not verified:** not flown on a phone or in Brave; `aria-play` was not run
+against a relay; the browser smoke scripts were not run.
+
+**Open.** A break-off at the default 55% line can be late for a hull with a
+flat battery climbing out of a belt under fire: one conn run reached 18% hull
+before the yard and the salvage hull reached 2%. Raising the repair line in
+ARIA CORE moves it. Drone-cull contracts do not count the belt's own drones.
+ARIA does not fly the salvage rig. ARIA's learned keys are suffixed by sky and
+callsign and so do not travel with the account. `desk` needs its pod case
+brought up to the 0.3.84 recovery rules.
+
+Files: `js/aria/mind.js` `js/aria/pilot.js` `js/aria/play.js` `js/aria/company.js`
+`js/aria/aria.js` `js/console/panels/aria-core.js` `js/console/panels/nav.js`
+`js/flight/autopilot.js` `js/flight/recorder.js` `js/mission/run.js`
+`js/mission/tradeops.js` `js/npc/captain.js` `js/sim/sim.js` `js/version.js`
+`js/mission/detour.js` (new) `js/core/profile.js` `index.html` (preload block)
+`tools/aria-play.mjs` `tools/prune/0.3.88.txt`; `test/aria-loop.test.mjs` (new),
+`test/ariamind.test.mjs`, `test/ariamind-integration.test.mjs`,
+`test/aria-mining-loop.test.mjs`; `README.md`, `PATCH-0.3.88.md`, regenerated
+`docs/`.
+
 ## 0.3.87 — 2026-10-03 — Dead Hulls: The Rig
 
 - Adds the salvage rig: CUT (fast, plate only) and STRIP (slow, everything out whole) on a hulk's sections.

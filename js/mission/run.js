@@ -1,3 +1,4 @@
+import { authorize } from "../aria/mind.js";
 import { sim, losBlocker, warpNodeById, toggleDock, sellAllOre, stashDeposit, smeltAll, canSmeltAt, tradeBuy, tradeSell, addWaypointAt, addAnchoredWaypoint, removeWaypoint, selectBody, logEvent, requestScan, throttleCap, setTurretMode, setMiningMode, toggleSystem, sellPriceAt, buyPriceAt } from "../sim/sim.js";
 import * as shipMod from "../flight/ship.js";
 import { holdRoom, BATTERY } from "../flight/ship.js";
@@ -10,6 +11,7 @@ import { captain } from "../npc/captain.js";
 import { post } from "../comms/chat.js";
 import { hasUpgrade } from "../economy/upgrades.js";
 import { makeTradeOps } from "./tradeops.js";
+import { makeLegs } from "./detour.js";
 import { validate, evalCond, snapshot, describeRef, deserialize, serialize, makeStep, missionCore } from "./script.js";
 import {
   autopilot, apLeg, apPark, apDock, apMine, apHold, bestPortFor, nearestSeam, releaseControls, resetProgress, jumpEndedShort, warpReserve, AP_POWER, busIdle,
@@ -162,6 +164,7 @@ function beginStep() {
 function cleanupStep() {
   const r = mission.run;
   if (r?.wpId) { removeWaypoint(r.wpId); r.wpId = null; }
+  if (r?.detour) { removeWaypoint(r.detour.wpId); r.detour = null; }
   autopilot.portId = null;
 }
 
@@ -301,11 +304,7 @@ function untilMet(s) {
 
 const legOpts = (s, extra = {}) => ({ cap: stepThrustCap(s), warp: stepWarpPolicy(s), ...extra });
 
-function legTo(s, node, extra) {
-  const r = apLeg(node, legOpts(s, extra));
-  if (r === "flying" || r === "near" || r === "asking") return r;
-  return `fail:${r.replace(/^blocked:/, "")}`;
-}
+const { legTo } = makeLegs({ mission, ap: () => autopilot, apLeg, resetProgress, legOpts });
 
 export const EXEC = {
   GOTO(s) {
@@ -377,7 +376,20 @@ export const EXEC = {
   MINE(s) {
     const ship = sim.ship;
     if (untilMet(s) || holdRoom(ship) < 1) { apHold(); mission.run.why = "hold full"; return "done"; }
-    if (ship.charge / batteryCap(ship) <= AP_POWER.floor && !inBelt(ship.pos) && sim.time - mission.stepStartedAt > 5) { apHold(); mission.run.why = "battery flat"; return "done"; }
+    if (!ship.dockedAt && sim.warp.state === "idle" && !inBelt(ship.pos)) {
+      const charge = ship.charge / batteryCap(ship);
+      if (charge <= AP_POWER.floor || (mission.run.mineCharging && charge < AP_POWER.band)) {
+        mission.run.mineCharging ??= { since: sim.time, peak: charge, progressAt: sim.time };
+        const recovery = mission.run.mineCharging;
+        if (charge > recovery.peak + 0.01) { recovery.peak = charge; recovery.progressAt = sim.time; }
+        if (ship.miningMode !== "off") setMiningMode("off", { quiet: true });
+        apHold(); autopilot.phase = "charge"; autopilot.task = "recharge · mining leg paused";
+        mission.run.why = "Recharging before continuing to the seam";
+        if (sim.time - recovery.progressAt > 120) return "fail:battery cannot recharge — reduce the ship's power load";
+        return "flying";
+      }
+      delete mission.run.mineCharging;
+    }
     const node = resolve(s);
     const seam = mission.run.seam;
     if (!node || !seam) return "fail:no seam to work";
@@ -483,6 +495,11 @@ export function tickMission(dt) {
   autopilot.capNow = stepThrustCap(s);
   const exec = EXEC[s.op];
   if (!exec) { fail(`unknown op ${s.op}`); return null; }
+  if (m.mode === "aria" || m.aria) {
+    const action = ({ SELL: "sell", BUY: "trading", REPAIR: "repair", REFIT: "refit", BUILD: "build", FAB: "fabricate" })[s.op] ?? "navigation";
+    const a = authorize(action, { at: sim.time });
+    if (!a.ok) { fail(a.why); return null; }
+  }
   const r = exec(s);
   if (r === "asking") { beginAsk(mission.run.node); return null; }
   if (mission.state === "asking") { mission.state = "running"; mission.ask = null; }

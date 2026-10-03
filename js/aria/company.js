@@ -1,3 +1,4 @@
+import { authorize, remember } from "./mind.js";
 import { sim, crewCapacity, logEvent } from "../sim/sim.js";
 import { stationById } from "../station/stations.js";
 import { crew, stationRoster, hireCrew, hireTerms, dismissCrew, crewWageTotal, wageFor, CYCLE_SECONDS } from "../crew/ledger.js";
@@ -74,8 +75,10 @@ export function considerHire(st, dept, earnPerMin = 0) {
     if (perMin > Math.max(120, earnPerMin * 0.45)) continue;
     if (sim.ship.credits - p.terms.bonus < RUN.float * 0.5) continue;
     if (billAfter * RUN.cover > sim.ship.credits - p.terms.bonus) continue;
+    if (!authorize("hiring", { cost: p.terms.bonus, credits: sim.ship.credits, at: sim.time }).ok) continue;
     const why = hireCrew(p.c, sim.ship, cap);
     if (why) continue;
+    remember({ at: sim.time, kind: "crew", summary: `Hired ${p.c.name}`, actors: [p.c.id], place: st.id });
     biz.hires++;
     postThem(p.c);
     note(`signed ${p.c.name} — ${p.c.title}, ${p.terms.wage} cr/cycle${p.terms.firstHand ? " (first hand, half rate)" : ""}`);
@@ -102,6 +105,8 @@ export function considerLayoff(earnPerMin = 0) {
   const order = [...crew.aboard].sort((a, b) => (hasPostFor(a) ? 1 : 0) - (hasPostFor(b) ? 1 : 0) || b.wage - a.wage);
   const m = order[0];
   if (!m) return null;
+  if (!authorize("dismissal", { at: sim.time }).ok) return null;
+  remember({ at: sim.time, kind: "crew", summary: `Dismissed ${m.name}`, actors: [m.id] });
   dismissCrew(m.id);
   note(`let ${m.name} go — payroll ${bill} cr/min against ${Math.round(earnPerMin)} cr/min earned`);
   return m;
@@ -112,6 +117,7 @@ export function considerFound(st, dept) {
   if (st.hostile && !st.claimed) return null;
   if (sim.ship.credits < Math.max(RUN.foundAt, workingCapital() + COMPANY.registration)) return null;
   const charter = CHARTER_FOR[dept] ?? "industrial";
+  if (!authorize("founding", { cost: COMPANY.registration, credits: sim.ship.credits, at: sim.time }).ok) return null;
   const why = foundCompany(suggestName(), charter);
   if (why) return null;
   biz.founded = true;
@@ -128,6 +134,7 @@ export function workingCapital() {
 
 export function considerTreasury() {
   if (!hasCompany()) return 0;
+  if (!authorize("treasury", { at: sim.time }).ok) return 0;
   const purse = sim.ship.credits;
   const need = workingCapital();
   if (purse > need * 1.8) {
@@ -151,8 +158,10 @@ export function considerSettle(st) {
     .filter((p) => p.why)
     .sort((a, b) => b.worth - a.worth)[0];
   if (!pick) return null;
+  if (!authorize("settlement", { cost: COMPANY.settleFee, credits: sim.ship.credits, at: sim.time }).ok) return null;
   const why = settleAsStaff(pick.m, [], st);
   if (why) return null;
+  remember({ at: sim.time, kind: "crew", summary: `Settled ${pick.m.name} ashore`, actors: [pick.m.id], place: st.id });
   const i = crew.aboard.indexOf(pick.m);
   if (i >= 0) crew.aboard.splice(i, 1);
   biz.settled++;

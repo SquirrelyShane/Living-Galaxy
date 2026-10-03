@@ -1,6 +1,6 @@
 # js/mission/tradeops.js
 
-[index](../../../README.md) · 115 lines · 5 symbols · 5 imports · 1 importers
+[index](../../../README.md) · 123 lines · 5 symbols · 6 imports · 1 importers
 
 ## About
 
@@ -23,11 +23,12 @@ asks for the best route whose source is this port.
 
 | line | from | names | target |
 |---|---|---|---|
-| 1 | `../sim/sim.js` | `sim`, `sellAllOre`, `tradeBuy`, `tradeSell`, `logEvent` | [js/sim/sim.js](../sim/sim.js.md) |
-| 2 | `../flight/ship.js` | `holdRoom`, `roomFor` | [js/flight/ship.js](../flight/ship.js.md) |
-| 3 | `../station/stations.js` | `stationById` | [js/station/stations.js](../station/stations.js.md) |
-| 4 | `../economy/traderoutes.js` | `bestRoute`, `sellable`, `routeLine` | [js/economy/traderoutes.js](../economy/traderoutes.js.md) |
-| 5 | `../economy/contracts.js` | `deliverContracts`, `deliverableAt`, `jobForSite` | [js/economy/contracts.js](../economy/contracts.js.md) |
+| 1 | `../aria/mind.js` | `authorize`, `spendCap` | [js/aria/mind.js](../aria/mind.js.md) |
+| 2 | `../sim/sim.js` | `sim`, `sellAllOre`, `tradeBuy`, `tradeSell`, `logEvent`, `buyPriceAt` | [js/sim/sim.js](../sim/sim.js.md) |
+| 3 | `../flight/ship.js` | `holdRoom`, `roomFor` | [js/flight/ship.js](../flight/ship.js.md) |
+| 4 | `../station/stations.js` | `stationById` | [js/station/stations.js](../station/stations.js.md) |
+| 5 | `../economy/traderoutes.js` | `bestRoute`, `sellable`, `routeLine` | [js/economy/traderoutes.js](../economy/traderoutes.js.md) |
+| 6 | `../economy/contracts.js` | `deliverContracts`, `deliverableAt`, `jobForSite` | [js/economy/contracts.js](../economy/contracts.js.md) |
 
 ## Imported by
 
@@ -45,7 +46,7 @@ _none detected_
 
 ### <a id="s-makeTradeOps"></a>`makeTradeOps({…})`
 
-function · **exported** · L7–115
+function · **exported** · L8–123
 
 - called by: [`T`](run.js.md#s-T) _js/mission/run.js_
 
@@ -54,7 +55,7 @@ function · **exported** · L7–115
 
 #### <a id="s-makeTradeOps-pickRoute"></a>`makeTradeOps>pickRoute(peek=)`
 
-function · L8–19
+function · L9–20
 
 - calls: [`bestRoute`](../economy/traderoutes.js.md#s-bestRoute) _js/economy/traderoutes.js_ · [`routeLine`](../economy/traderoutes.js.md#s-routeLine) _js/economy/traderoutes.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_
 
@@ -67,17 +68,17 @@ was bought FOR, not whichever port scores best for a half-empty hold.
 
 #### <a id="s-makeTradeOps-SELL"></a>`makeTradeOps.SELL(s)`
 
-prop · L23–57
+prop · L24–58
 
 - calls: [`sellable`](../economy/traderoutes.js.md#s-sellable) _js/economy/traderoutes.js_ ×3 · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ ×2 · [`sellAllOre`](../sim/sim.js.md#s-sellAllOre) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_ ×3 · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 
 <!-- note:makeTradeOps.SELL -->
-- L32 · `else if (what === "all") { for (const [k, q] of Object.entries(sellable(ship))) refused =` — "all" is everything that is OURS: a haul contract's consignment is somebody else's cargo (0.3.19)
+- L? · `else if (what === "all") { for (const [k, q] of Object.entries(sellable(ship))) refused =` — "all" is everything that is OURS: a haul contract's consignment is somebody else's cargo (0.3.19)
 <!-- /note -->
 
 #### <a id="s-makeTradeOps-DELIVER"></a>`makeTradeOps.DELIVER(s)`
 
-prop · L58–83
+prop · L59–84
 
 - calls: [`deliverableAt`](../economy/contracts.js.md#s-deliverableAt) _js/economy/contracts.js_ · [`deliverContracts`](../economy/contracts.js.md#s-deliverContracts) _js/economy/contracts.js_ · [`jobForSite`](../economy/contracts.js.md#s-jobForSite) _js/economy/contracts.js_ ×2 · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 
@@ -89,13 +90,16 @@ short of cargo, it goes round again for the rest.
 
 #### <a id="s-makeTradeOps-BUY"></a>`makeTradeOps.BUY(s)`
 
-prop · L84–112
+prop · L85–120
 
-- calls: [`bestRoute`](../economy/traderoutes.js.md#s-bestRoute) _js/economy/traderoutes.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_ ×2 · [`roomFor`](../flight/ship.js.md#s-roomFor) _js/flight/ship.js_ ×2 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
+- calls: [`authorize`](../aria/mind.js.md#s-authorize) _js/aria/mind.js_ · [`spendCap`](../aria/mind.js.md#s-spendCap) _js/aria/mind.js_ · [`bestRoute`](../economy/traderoutes.js.md#s-bestRoute) _js/economy/traderoutes.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_ ×2 · [`roomFor`](../flight/ship.js.md#s-roomFor) _js/flight/ship.js_ ×2 · [`buyPriceAt`](../sim/sim.js.md#s-buyPriceAt) _js/sim/sim.js_ ×2 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 
 <!-- note:makeTradeOps.BUY -->
-- L92 · `const t = mission.trade;` — the route's cargo, as much as the hold, the purse and the shelf allow
-- L98 · `const r = bestRoute({ only: { from: st.id }, pos: st, room: holdRoom(ship) });` — best margin FROM HERE: the best route whose source is this port (0.3.19 — it used to ask one
+- L93 · `const t = mission.trade;` — the route's cargo, as much as the hold, the purse and the shelf allow
+- L99 · `const r = bestRoute({ only: { from: st.id }, pos: st, room: holdRoom(ship) });` — best margin FROM HERE: the best route whose source is this port (0.3.19 — it used to ask one
   "best buyer" port chosen for the hold as it was before buying, which was nearly always this one)
-- L103 · `if (good && good !== "route") qty = Math.min(qty, Math.floor(roomFor(ship, good)));` — 0.3.52: what fits of this good
+- L104 · `if (good && good !== "route") qty = Math.min(qty, Math.floor(roomFor(ship, good)));` — 0.3.52: what fits of this good
+
+- L108 · `const cap = spendCap(ship.credits, "trading");` — The shelf price moved since the plan was made: buy what the
+  captain's limits still allow rather than refuse the whole load.
 <!-- /note -->

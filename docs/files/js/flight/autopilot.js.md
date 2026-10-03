@@ -1,6 +1,6 @@
 # js/flight/autopilot.js
 
-[index](../../../README.md) · 751 lines · 61 symbols · 17 imports · 18 importers
+[index](../../../README.md) · 752 lines · 61 symbols · 17 imports · 19 importers
 
 ## About
 
@@ -51,7 +51,7 @@ moment the pilot touches the stick. It never flies while an NPC holds the conn.
 
 | line | from | names | target |
 |---|---|---|---|
-| 1 | `../sim/sim.js` | `plotRoute`, `requestJump`, `selectBody`, `setNoticeAbout`, `sim`, `stationStatus`, `toggleDock`, `warpDestination`, `warpNodeById`, `logEvent`, `setThrottle`, `WARP`, `spoolTime`, `setMiningMode`, `canSmeltAt`, `sellPriceAt`, `warpBlock`, `toggleWarp` | [js/sim/sim.js](../sim/sim.js.md) |
+| 1 | `../sim/sim.js` | `plotRoute`, `requestJump`, `selectBody`, `setNoticeAbout`, `sim`, `stationStatus`, `toggleDock`, `warpDestination`, `warpNodeById`, `logEvent`, `setThrottle`, `WARP`, `spoolTime`, `setMiningMode`, `canSmeltAt`, `sellPriceAt`, `warpBlock`, `toggleWarp`, `setNavTarget` | [js/sim/sim.js](../sim/sim.js.md) |
 | 6 | `./avoid.js` | `threatTo`, `avoidAim`, `avoidLevel`, `deliberate`, `surfaceOnly`, `clearAvoidCommit`, `avoidCommit`, `blind`, `AVOID` | [js/flight/avoid.js](avoid.js.md) |
 | 7 | `../core/input.js` | `setInjectedPan`, `touch` | [js/core/input.js](../core/input.js.md) |
 | 8 | `./ship.js` | `*` as `shipMod` | [js/flight/ship.js](ship.js.md) |
@@ -72,7 +72,7 @@ moment the pilot touches the stick. It never flies while an NPC holds the conn.
 ## Imported by
 
 - [js/aria/pilot.js](../aria/pilot.js.md) — `autopilot`, `nearestSeam`, `busOverload`, `pilotInput`
-- [js/aria/play.js](../aria/play.js.md) — `autopilot`
+- [js/aria/play.js](../aria/play.js.md) — `autopilot`, `busIdle`, `AP_POWER`
 - [js/console/panels/nav.js](../console/panels/nav.js.md) — `*`
 - [js/console/panels/ship.js](../console/panels/ship.js.md) — `autopilot`, `sustainableThrottle`
 - [js/mission/run.js](../mission/run.js.md) — `autopilot`, `apLeg`, `apPark`, `apDock`, `apMine`, `apHold`, `bestPortFor`, `nearestSeam`, `releaseControls`, `resetProgress`, `jumpEndedShort`, `warpReserve`, `AP_POWER`, `busIdle`
@@ -80,6 +80,7 @@ moment the pilot touches the stick. It never flies while an NPC holds the conn.
 - [js/ui/boardview.js](../ui/boardview.js.md) — `engageMiningLoop`
 - [js/ui/hud.js](../ui/hud.js.md) — `wireAutopilot`, `nearestSeam`, `busOverload`, `autopilot`
 - [js/ui/map.js](../ui/map.js.md) — `autopilot`, `disengageAutopilot`, `engageAutopilot`, `engageAutoWarp`, `engageMiningLoop`
+- test/aria-mining-loop.test.mjs _(outside js/)_ — `AP_POWER`, `autopilot`
 - test/autopilot.test.mjs _(outside js/)_ — `autopilot`, `engageMiningLoop`, `engageAutopilot`, `powerThrottle`, `sustainableThrottle`, `warpReserve`, `AP_POWER`, `bestPortFor`, `cycleAutoPlan`
 - test/avoid.test.mjs _(outside js/)_ — `autopilot`, `engageAutopilot`, `apProgress`, `resetProgress`, `beginUnstick`, `AP_STUCK`
 - test/chart.test.mjs _(outside js/)_ — `autopilot`, `engageAutoWarp`, `engageAutopilot`, `disengageAutopilot`, `tickAutopilot`
@@ -92,11 +93,11 @@ moment the pilot touches the stick. It never flies while an NPC holds the conn.
 
 ## Exports
 
-- [`autopilot`](#s-autopilot) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/mission/run.js](../mission/run.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), [js/ui/map.js](../ui/map.js.md), test/autopilot.test.mjs, test/avoid.test.mjs, test/chart.test.mjs, test/marks.test.mjs, test/mission.test.mjs, test/portcontrol.test.mjs, test/trade.test.mjs
+- [`autopilot`](#s-autopilot) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/mission/run.js](../mission/run.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), [js/ui/map.js](../ui/map.js.md), test/aria-mining-loop.test.mjs, test/autopilot.test.mjs, test/avoid.test.mjs, test/chart.test.mjs, test/marks.test.mjs, test/mission.test.mjs, test/portcontrol.test.mjs, test/trade.test.mjs
 - [`AP_STUCK`](#s-AP_STUCK) · const — used by [js/console/panels/nav.js](../console/panels/nav.js.md), test/avoid.test.mjs
-- [`AP_POWER`](#s-AP_POWER) · const — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/mission/run.js](../mission/run.js.md), test/autopilot.test.mjs, test/mission.test.mjs
+- [`AP_POWER`](#s-AP_POWER) · const — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/mission/run.js](../mission/run.js.md), test/aria-mining-loop.test.mjs, test/autopilot.test.mjs, test/mission.test.mjs
 - [`sustainableThrottle`](#s-sustainableThrottle) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), test/autopilot.test.mjs
-- [`busIdle`](#s-busIdle) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/mission/run.js](../mission/run.js.md)
+- [`busIdle`](#s-busIdle) · function — used by [js/aria/play.js](../aria/play.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/mission/run.js](../mission/run.js.md)
 - [`busOverload`](#s-busOverload) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/ui/hud.js](../ui/hud.js.md)
 - [`warpReserve`](#s-warpReserve) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/mission/run.js](../mission/run.js.md), test/autopilot.test.mjs
 - [`powerThrottle`](#s-powerThrottle) · function — used by [js/console/panels/nav.js](../console/panels/nav.js.md), test/autopilot.test.mjs
@@ -134,9 +135,9 @@ moment the pilot touches the stick. It never flies while an NPC holds the conn.
 
 ## Effects
 
-- **dom.id** — `aux-auto` (wireAutopilot:740) · `aux-auto-st` (wireAutopilot:741)
-- **event.listen** — `click on btn → (inline)` (wireAutopilot:742)
-- **timer** — `setInterval` (wireAutopilot:744)
+- **dom.id** — `aux-auto` (wireAutopilot:741) · `aux-auto-st` (wireAutopilot:742)
+- **event.listen** — `click on btn → (inline)` (wireAutopilot:743)
+- **timer** — `setInterval` (wireAutopilot:745)
 
 ## Symbols
 
@@ -223,7 +224,7 @@ the consumers a pilot can switch off, as the switchboard labels them
 function · **exported** · L73–87
 
 - calls: [`buildDemand`](ship.js.md#s-buildDemand) _js/flight/ship.js_ · [`lifeDraw`](ship.js.md#s-lifeDraw) _js/flight/ship.js_
-- called by: [`busOverload`](#s-busOverload) · [`sustainableThrottle`](#s-sustainableThrottle) · [`EXEC.CHARGE`](../mission/run.js.md#s-EXEC-CHARGE) _js/mission/run.js_
+- called by: [`tendBus`](../aria/play.js.md#s-tendBus) _js/aria/play.js_ · [`busOverload`](#s-busOverload) · [`sustainableThrottle`](#s-sustainableThrottle) · [`EXEC.CHARGE`](../mission/run.js.md#s-EXEC-CHARGE) _js/mission/run.js_
 
 <!-- note:busIdle -->
 The bus at zero throttle as the pilot has it SWITCHED — not as a brownout
@@ -501,7 +502,7 @@ Cycle what the loop does with a full hold.
 function · **exported** · L285–296
 
 - calls: [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2
-- called by: [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`mountAutopilot`](../console/panels/nav.js.md#s-mountAutopilot) _js/console/panels/nav.js_ · [`engageMiningLoop`](#s-engageMiningLoop) · [`resolve`](../mission/run.js.md#s-resolve) _js/mission/run.js_ · [`sampleWorld`](../ui/hud.js.md#s-sampleWorld) _js/ui/hud.js_
+- called by: [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ · [`mountAutopilot`](../console/panels/nav.js.md#s-mountAutopilot) _js/console/panels/nav.js_ · [`engageMiningLoop`](#s-engageMiningLoop) · [`resolve`](../mission/run.js.md#s-resolve) _js/mission/run.js_ · [`sampleWorld`](../ui/hud.js.md#s-sampleWorld) _js/ui/hud.js_
 
 <!-- note:nearestSeam -->
 ---- helpers -------------------------------------------------------------
@@ -761,10 +762,9 @@ function · **exported** · L477–504
 
 ### <a id="s-apLeg"></a>`apLeg(node, {…}=)`
 
-function · **exported** · L506–595
+function · **exported** · L506–596
 
-- calls: [`apHold`](#s-apHold) ×4 · [`apProgress`](#s-apProgress) ×2 · [`apSteer`](#s-apSteer) ×3 · [`apUnstick`](#s-apUnstick) · [`beginUnstick`](#s-beginUnstick) ×2 · [`drifting`](#s-drifting) · [`flyTheLane`](#s-flyTheLane) ×2 · [`parkDistance`](#s-parkDistance) · [`relSpeedTo`](#s-relSpeedTo) · [`resetProgress`](#s-resetProgress) · [`warpReserve`](#s-warpReserve) ×2 · [`plotRoute`](../sim/sim.js.md#s-plotRoute) _js/sim/sim.js_ · [`requestJump`](../sim/sim.js.md#s-requestJump) _js/sim/sim.js_ · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ ×2 · [`warpBlock`](../sim/sim.js.md#s-warpBlock) _js/sim/sim.js_ · [`warpDestination`](../sim/sim.js.md#s-warpDestination) _js/sim/sim.js_ ×2 · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`beltExit`](../world/field.js.md#s-beltExit) _js/world/field.js_
-- called by: [`legTo`](../mission/run.js.md#s-legTo) _js/mission/run.js_
+- calls: [`apHold`](#s-apHold) ×4 · [`apProgress`](#s-apProgress) ×2 · [`apSteer`](#s-apSteer) ×3 · [`apUnstick`](#s-apUnstick) · [`beginUnstick`](#s-beginUnstick) ×2 · [`drifting`](#s-drifting) · [`flyTheLane`](#s-flyTheLane) ×2 · [`parkDistance`](#s-parkDistance) · [`relSpeedTo`](#s-relSpeedTo) · [`resetProgress`](#s-resetProgress) · [`warpReserve`](#s-warpReserve) ×2 · [`plotRoute`](../sim/sim.js.md#s-plotRoute) _js/sim/sim.js_ · [`requestJump`](../sim/sim.js.md#s-requestJump) _js/sim/sim.js_ · [`setNavTarget`](../sim/sim.js.md#s-setNavTarget) _js/sim/sim.js_ · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ ×2 · [`warpBlock`](../sim/sim.js.md#s-warpBlock) _js/sim/sim.js_ · [`warpDestination`](../sim/sim.js.md#s-warpDestination) _js/sim/sim.js_ ×2 · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`beltExit`](../world/field.js.md#s-beltExit) _js/world/field.js_
 
 <!-- note:apLeg -->
 A leg: climb out of a well, wait for charge, align and jump (per the warp
@@ -814,17 +814,22 @@ the core cannot be used and the leg cannot go on.
   0.3.51: and coming about sheds the drift the climb left, rather than
   carrying it sideways into the spool.
 - L571 · `` if (drift > LANE_DRIFT * 2) { autopilot.task = `align · ${node.name} · trimming ${Math.rou `` — and the core is not lit until the hull is moving where it points
-- L582 · `node.vel(_v);` — the fall down the well
-- L590 · `if (rel > allowed * (wasBraking ? 0.9 : 1.05) || drifting(_p, _v, allowed, wasBraking)) {` — a deadband, or the HUD flickers cruise/brake every other frame on the
+- L583 · `node.vel(_v);` — the fall down the well
+- L591 · `if (rel > allowed * (wasBraking ? 0.9 : 1.05) || drifting(_p, _v, allowed, wasBraking)) {` — a deadband, or the HUD flickers cruise/brake every other frame on the
   approach and the throttle chatters with it. (It never worked: the phase
   had already been overwritten with "cruise" two lines up.)
-- L591 · `` if (apProgress(dist, Math.max(park * 4, 2000))) beginUnstick(autopilot.avoiding ? `${autop `` — this is the only part of a leg that is supposed to close the range, so
+- L592 · `` if (apProgress(dist, Math.max(park * 4, 2000))) beginUnstick(autopilot.avoiding ? `${autop `` — this is the only part of a leg that is supposed to close the range, so
   it is the only part the watchdog judges
+
+- L577 · `if (sim.selected !== node.id) setNavTarget(node.id);` — 0.3.88: the signature lock breaks when the nose swings 60° off the
+  target (a belt climb, an avoid, a breakout) and takes the jump target
+  with it. The jump key reads sim.selected, so without this the leg asked
+  for a jump forever — "warp unavailable, no target" — and drifted.
 <!-- /note -->
 
 ### <a id="s-apPark"></a>`apPark(node)`
 
-function · **exported** · L597–615
+function · **exported** · L598–616
 
 - calls: [`apHold`](#s-apHold) · [`apSteer`](#s-apSteer) · [`parkDistance`](#s-parkDistance) · [`relSpeedTo`](#s-relSpeedTo) · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`EXEC.APPROACH`](../mission/run.js.md#s-EXEC-APPROACH) _js/mission/run.js_ · [`EXEC.GOTO`](../mission/run.js.md#s-EXEC-GOTO) _js/mission/run.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ · [`EXEC.SURVEY`](../mission/run.js.md#s-EXEC-SURVEY) _js/mission/run.js_
@@ -835,7 +840,7 @@ The doorstep: kill the drift and sit off the node. Returns "flying" | "parked".
 
 ### <a id="s-apDock"></a>`apDock(st)`
 
-function · **exported** · L617–660
+function · **exported** · L618–661
 
 - calls: [`apHold`](#s-apHold) · [`apProgress`](#s-apProgress) · [`apSteer`](#s-apSteer) ×3 · [`apUnstick`](#s-apUnstick) · [`beginUnstick`](#s-beginUnstick) · [`drifting`](#s-drifting) ×2 · [`relSpeedTo`](#s-relSpeedTo) · [`resetProgress`](#s-resetProgress) · [`lanePoint`](../npc/lanes.js.md#s-lanePoint) _js/npc/lanes.js_ ×2 · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ ×3 · [`stationStatus`](../sim/sim.js.md#s-stationStatus) _js/sim/sim.js_ · [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_ · [`requestDock`](../station/stationworks.js.md#s-requestDock) _js/station/stationworks.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2
 - called by: [`EXEC.APPROACH`](../mission/run.js.md#s-EXEC-APPROACH) _js/mission/run.js_ · [`EXEC.DOCK`](../mission/run.js.md#s-EXEC-DOCK) _js/mission/run.js_
@@ -843,15 +848,15 @@ function · **exported** · L617–660
 <!-- note:apDock -->
 A port approach: file the berth, ride the entry lane in, let the tractor take the hull.
 
-- L629 · `if (!sim.dockRequestFor || sim.dockRequestFor !== st.id) {` — the lane: far gate first, then down it to the mouth under the tractor's speed limit
-- L629 · `if (!sim.dockRequestFor || sim.dockRequestFor !== st.id) {` — file the berth directly: toggleDock() would read an approach already flying as a wave-off
-- L641 · `return "flying";` — inside the funnel under speed, port control's own tractor (autoTractor) takes the hull
-- L651 · `if (mine && mine.ok) { touch.brake = false; toggleDock(); return ship.dockedAt === st.id ?` — an old-style pad: close, dead slow, request
+- L630 · `if (!sim.dockRequestFor || sim.dockRequestFor !== st.id) {` — the lane: far gate first, then down it to the mouth under the tractor's speed limit
+- L630 · `if (!sim.dockRequestFor || sim.dockRequestFor !== st.id) {` — file the berth directly: toggleDock() would read an approach already flying as a wave-off
+- L642 · `return "flying";` — inside the funnel under speed, port control's own tractor (autoTractor) takes the hull
+- L652 · `if (mine && mine.ok) { touch.brake = false; toggleDock(); return ship.dockedAt === st.id ?` — an old-style pad: close, dead slow, request
 <!-- /note -->
 
 ### <a id="s-MINE_STANDOFF"></a>`MINE_STANDOFF()`
 
-function · L662–662
+function · L663–663
 
 - called by: [`apMine`](#s-apMine)
 
@@ -861,14 +866,14 @@ function · L662–662
 
 ### <a id="s-_rock"></a>`_rock`
 
-const · L663–663
+const · L664–664
 
 <!-- note:_rock -->
 <!-- /note -->
 
 ### <a id="s-atSeam"></a>`atSeam(seam)`
 
-function · **exported** · L665–667
+function · **exported** · L666–668
 
 - calls: [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_
 - called by: [`apMine`](#s-apMine)
@@ -879,7 +884,7 @@ True when the ship is on the seam: in a belt and within reach of the point.
 
 ### <a id="s-apMine"></a>`apMine(seam)`
 
-function · **exported** · L669–730
+function · **exported** · L670–731
 
 - calls: [`preferenceFor`](../aria/aria.js.md#s-preferenceFor) _js/aria/aria.js_ · [`apProgress`](#s-apProgress) · [`apSteer`](#s-apSteer) ×3 · [`apUnstick`](#s-apUnstick) · [`atSeam`](#s-atSeam) · [`beginUnstick`](#s-beginUnstick) · [`MINE_STANDOFF`](#s-MINE_STANDOFF) · [`resetProgress`](#s-resetProgress) ×2 · [`holdRoom`](ship.js.md#s-holdRoom) _js/flight/ship.js_ ×2 · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ ×3 · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2 · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`siteMarkRock`](../world/field.js.md#s-siteMarkRock) _js/world/field.js_ ×2 · [`skipMarkRock`](../world/field.js.md#s-skipMarkRock) _js/world/field.js_
 - called by: [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_
@@ -889,30 +894,30 @@ A rock under the cutter. Returns "offSeam" (fly there first), "cutting",
 "seeking" (thin cell — drifting to the next) or "noRock". The cutter only
 runs when there is something to cut and room to keep it.
 
-- L679 · `const want = sim.autoPlan.seamOre;` — 0.3.22: on a job that named an ore, cut THAT ore. The hold is the scarce
+- L680 · `const want = sim.autoPlan.seamOre;` — 0.3.22: on a job that named an ore, cut THAT ore. The hold is the scarce
   thing, not the rock — a loop that fills it with whatever was nearest docks
   with an unfinished order and a hold full of somebody else's cargo. Other
   rock is still cut when there is none of the wanted ore in reach.
-- L682 · `const marked = seam.site ? siteMarkRock(seam.site, sim.time, autopilot.siteRock)?.key ?? n` — 0.3.67: a job seam has ONE marked rock (field.js siteMarkRock — the same
+- L683 · `const marked = seam.site ? siteMarkRock(seam.site, sim.time, autopilot.siteRock)?.key ?? n` — 0.3.67: a job seam has ONE marked rock (field.js siteMarkRock — the same
   pick the mark on the chart shows); the cutter goes to that one first
-- L689 · `const wanted = sim.autoPlan.seamOre && r.ore === sim.autoPlan.seamOre ? 6 : 0;` — same idea at the cutter: you cut the ores you cut
-- L689 · `const wanted = sim.autoPlan.seamOre && r.ore === sim.autoPlan.seamOre ? 6 : 0;` — 0.3.22: a job that named an ore is a job about THAT ore. A belt vein of
+- L690 · `const wanted = sim.autoPlan.seamOre && r.ore === sim.autoPlan.seamOre ? 6 : 0;` — same idea at the cutter: you cut the ores you cut
+- L690 · `const wanted = sim.autoPlan.seamOre && r.ore === sim.autoPlan.seamOre ? 6 : 0;` — 0.3.22: a job that named an ore is a job about THAT ore. A belt vein of
   something else is worth cutting on a free run and worth nothing on a
   contract — the loop used to wander off onto whatever was richest nearby
   and dock with a full hold and an unfilled order.
-- L694 · `autopilot.phase = "seek";` — thin cell: drift along the belt to the next one
-- L703 · `autopilot.ignore.set(best.key, sim.time + 3);` — The rock we are flying AT is not a hazard. `deliberate()` only exempts it
+- L695 · `autopilot.phase = "seek";` — thin cell: drift along the belt to the next one
+- L704 · `autopilot.ignore.set(best.key, sim.time + 3);` — The rock we are flying AT is not a hazard. `deliberate()` only exempts it
   once the cutter has actually latched, which left the approach dodging the
   very rock it was sent to mine — it would sidle up to within cutter range,
   flinch, and start again. The blind window closes on its own.
-- L716 · `apSteer(_rock.x, _rock.y, _rock.z, 0);` — on station: keep the nose on it and kill the drift
-- L719 · `if (sim.time - autopilot.rockSince > 240 && !mining.active) {` — a rock that the cutter cannot reach for a long while is skipped
-- L721 · `if (autopilot.rockKey === marked) {` — 0.3.68: the seam's mark moves with the cutter, for the same 900 s
+- L717 · `apSteer(_rock.x, _rock.y, _rock.z, 0);` — on station: keep the nose on it and kill the drift
+- L720 · `if (sim.time - autopilot.rockSince > 240 && !mining.active) {` — a rock that the cutter cannot reach for a long while is skipped
+- L722 · `if (autopilot.rockKey === marked) {` — 0.3.68: the seam's mark moves with the cutter, for the same 900 s
 <!-- /note -->
 
 ### <a id="s-jumpEndedShort"></a>`jumpEndedShort(node, dist)`
 
-function · **exported** · L732–736
+function · **exported** · L733–737
 
 - called by: [`EXEC.GOTO`](../mission/run.js.md#s-EXEC-GOTO) _js/mission/run.js_
 
@@ -928,7 +933,7 @@ dropout worth going again for, or null when the jump really is over.
 
 ### <a id="s-wireAutopilot"></a>`wireAutopilot()`
 
-function · **exported** · L738–751
+function · **exported** · L739–752
 
 - calls: [`toggleAutopilot`](#s-toggleAutopilot) · [`missionStatusLine`](../mission/run.js.md#s-missionStatusLine) _js/mission/run.js_
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_

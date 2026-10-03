@@ -1,3 +1,4 @@
+import { mountCore } from "./aria-core.js";
 import { button, el, group, note, row, section, fmtDist } from "../kit.js";
 import { BODIES, bodyById, bodyPosition, dist3, tempLabel } from "../../world/bodies.js";
 import { contacts } from "../../flight/turrets.js";
@@ -345,18 +346,18 @@ function mountSurvey(root) {
   root.append(t);
 }
 
-const SUBS = { targets: mountTargets, survey: mountSurvey, autopilot: mountAutopilot, aria: mountAria, marks: mountMarks, contacts: mountContacts };
+const SUBS = { targets: mountTargets, survey: mountSurvey, autopilot: mountAutopilot, aria: mountAria, core: mountCore, marks: mountMarks, contacts: mountContacts };
 
 export default {
   id: "nav",
   title: "NAV",
   order: 20,
-  subtabs: [{ id: "targets", label: "TARGETS" }, { id: "survey", label: "SURVEY" }, { id: "autopilot", label: "AUTOPILOT" }, { id: "aria", label: "ARIA" }, { id: "marks", label: "MARKS" }, { id: "contacts", label: "CONTACTS" }],
-  mount(root, ctx) { (SUBS[ctx.sub] ?? mountTargets)(root, ctx.push, ctx); },
-  paint() {},
-  unmount() {},
+  subtabs: [{ id: "targets", label: "TARGETS" }, { id: "survey", label: "SURVEY" }, { id: "autopilot", label: "AUTOPILOT" }, { id: "aria", label: "ARIA" }, { id: "core", label: "ARIA CORE" }, { id: "marks", label: "MARKS" }, { id: "contacts", label: "CONTACTS" }],
+  mount(root, ctx) { this.coreView = ctx.sub === "core" ? mountCore(root) : null; if (!this.coreView) (SUBS[ctx.sub] ?? mountTargets)(root, ctx.push, ctx); },
+  paint() { this.coreView?.draw(); },
+  unmount() { this.coreView = null; },
   search() {
-    const out = [];
+    const out = [{ label: "ARIA Core", sub: "core", hint: "Goals, confidence, memory and captain authority", keywords: "aria mind orders permissions memory" }];
     for (const b of BODIES) out.push({ label: b.name, hint: `${b.stats.tierName} · lock or mark`, sub: "targets", focus: `body-${b.id}`, keywords: `body world ${b.stats.deposits?.join(" ") ?? ""}`, status: () => (sim.selected === b.id ? "● LOCKED" : "") });
     for (const w of sim.waypoints ?? []) out.push({ label: `Mark: ${w.name}`, hint: markHint(w), sub: "marks", focus: `wp-${w.id}`, keywords: "waypoint mark", status: () => (sim.activeWaypoint === w.id ? "● ACTIVE" : "") });
     for (const c of contacts) out.push({ label: c.name, hint: `${c.kind} · ${c.relation}`, sub: "contacts", focus: `contact-${c.id}`, keywords: "contact sensor" });

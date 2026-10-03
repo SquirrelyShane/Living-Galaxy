@@ -1,6 +1,6 @@
 # js/flight/ship.js
 
-[index](../../../README.md) · 695 lines · 54 symbols · 5 imports · 47 importers
+[index](../../../README.md) · 695 lines · 54 symbols · 5 imports · 48 importers
 
 ## About
 
@@ -70,6 +70,7 @@ angular inertia. Everything you switch on competes for the same reactor.
 - [js/ui/hud.js](../ui/hud.js.md) — `MINING_MODES`, `THROTTLE_MAX`, `THROTTLE_MIN`, `TURRET_MODES`, `cargoTotal`
 - [js/ui/map.js](../ui/map.js.md) — `forwardOf`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `cargoTotal`, `speedOf`
+- test/aria-mining-loop.test.mjs _(outside js/)_ — `batteryCap`
 - test/ariabiz.test.mjs _(outside js/)_ — `holdRoom`
 - test/autopilot.test.mjs _(outside js/)_ — `BATTERY`, `cargoTotal`
 - test/defence.test.mjs _(outside js/)_ — `makeShip`, `applyDamage`
@@ -100,7 +101,7 @@ angular inertia. Everything you switch on competes for the same reactor.
 - [`REACTOR_OUTPUT`](#s-REACTOR_OUTPUT) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md)
 - [`BATTERY`](#s-BATTERY) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), test/autopilot.test.mjs, test/mission.test.mjs, test/trade.test.mjs, test/upgrades.test.mjs
 - [`shipFx`](#s-shipFx) · const — used by [js/console/panels/nav.js](../console/panels/nav.js.md), [js/crew/ledger.js](../crew/ledger.js.md), [js/economy/upgrades.js](../economy/upgrades.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/flight/contacts.js](contacts.js.md), [js/flight/probes.js](probes.js.md), [js/flight/rig.js](rig.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md)
-- [`batteryCap`](#s-batteryCap) · function — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/upgrades.test.mjs
+- [`batteryCap`](#s-batteryCap) · function — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/aria-mining-loop.test.mjs, test/upgrades.test.mjs
 - [`DRAW`](#s-DRAW) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/flight/turrets.js](turrets.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), test/rig.test.mjs
 - [`SHED_ORDER`](#s-SHED_ORDER) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
 - [`SHED_LABEL`](#s-SHED_LABEL) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), test/rig.test.mjs
@@ -257,7 +258,7 @@ prop · L24–24
 
 function · **exported** · L26–29
 
-- called by: [`playReport`](../aria/play.js.md#s-playReport) _js/aria/play.js_ · [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`mountPower`](../console/panels/ship.js.md#s-mountPower) _js/console/panels/ship.js_ ×3 · [`telemetryBlock`](../console/panels/ship.js.md#s-telemetryBlock) _js/console/panels/ship.js_ · [`batteryCap`](autopilot.js.md#s-batteryCap) _js/flight/autopilot.js_ · [`stepPower`](#s-stepPower) ×2 · [`batteryCap`](../mission/run.js.md#s-batteryCap) _js/mission/run.js_ · [`batteryCap`](../mission/script.js.md#s-batteryCap) _js/mission/script.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_
+- called by: [`playReport`](../aria/play.js.md#s-playReport) _js/aria/play.js_ · [`tendBus`](../aria/play.js.md#s-tendBus) _js/aria/play.js_ · [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`mountPower`](../console/panels/ship.js.md#s-mountPower) _js/console/panels/ship.js_ ×3 · [`telemetryBlock`](../console/panels/ship.js.md#s-telemetryBlock) _js/console/panels/ship.js_ · [`batteryCap`](autopilot.js.md#s-batteryCap) _js/flight/autopilot.js_ · [`stepPower`](#s-stepPower) ×2 · [`batteryCap`](../mission/run.js.md#s-batteryCap) _js/mission/run.js_ · [`batteryCap`](../mission/script.js.md#s-batteryCap) _js/mission/script.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_
 
 <!-- note:batteryCap -->
 The battery's true capacity: the base cells plus any bank bolted on at a yard.
@@ -664,7 +665,7 @@ why the answer to a heavily plated hull is EM.
 function · **exported** · L661–665
 
 - calls: [`bulkOf`](../economy/materials.js.md#s-bulkOf) _js/economy/materials.js_
-- called by: [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`holdUsed`](../aria/play.js.md#s-holdUsed) _js/aria/play.js_ · [`mountHold`](../console/panels/market.js.md#s-mountHold) _js/console/panels/market.js_ · [`mountRoutes`](../console/panels/market.js.md#s-mountRoutes) _js/console/panels/market.js_ ×2 · [`holdFrac`](../drones/ops.js.md#s-holdFrac) _js/drones/ops.js_ · [`holdRoom`](#s-holdRoom) · [`snapshot`](../mission/script.js.md#s-snapshot) _js/mission/script.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`tickCaptain`](../npc/captain.js.md#s-tickCaptain) _js/npc/captain.js_ ×2 · [`holeRescue`](../sim/sim.js.md#s-holeRescue) _js/sim/sim.js_ · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`sampleTelemetry`](../sim/sim.js.md#s-sampleTelemetry) _js/sim/sim.js_ · [`stepSalvage`](../sim/sim.js.md#s-stepSalvage) _js/sim/sim.js_ · [`holdSlots`](../ui/holdview.js.md#s-holdSlots) _js/ui/holdview.js_ · [`sampleWorld`](../ui/hud.js.md#s-sampleWorld) _js/ui/hud.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
+- called by: [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ · [`holdUsed`](../aria/play.js.md#s-holdUsed) _js/aria/play.js_ · [`mountHold`](../console/panels/market.js.md#s-mountHold) _js/console/panels/market.js_ · [`mountRoutes`](../console/panels/market.js.md#s-mountRoutes) _js/console/panels/market.js_ ×2 · [`holdFrac`](../drones/ops.js.md#s-holdFrac) _js/drones/ops.js_ · [`holdRoom`](#s-holdRoom) · [`snapshot`](../mission/script.js.md#s-snapshot) _js/mission/script.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`tickCaptain`](../npc/captain.js.md#s-tickCaptain) _js/npc/captain.js_ ×2 · [`holeRescue`](../sim/sim.js.md#s-holeRescue) _js/sim/sim.js_ · [`loseHull`](../sim/sim.js.md#s-loseHull) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`sampleTelemetry`](../sim/sim.js.md#s-sampleTelemetry) _js/sim/sim.js_ · [`stepSalvage`](../sim/sim.js.md#s-stepSalvage) _js/sim/sim.js_ · [`holdSlots`](../ui/holdview.js.md#s-holdSlots) _js/ui/holdview.js_ · [`sampleWorld`](../ui/hud.js.md#s-sampleWorld) _js/ui/hud.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
 
 <!-- note:cargoTotal -->
 Hold units in use (0.3.52: each good by its bulk — materials.js bulkOf).
@@ -683,7 +684,7 @@ How many ITEMS are aboard, whatever they take up.
 function · **exported** · L673–675
 
 - calls: [`cargoTotal`](#s-cargoTotal)
-- called by: [`workingCapital`](../aria/company.js.md#s-workingCapital) _js/aria/company.js_ · [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`movesNow`](../aria/play.js.md#s-movesNow) _js/aria/play.js_ · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ · [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`unpostedWork`](../aria/senses.js.md#s-unpostedWork) _js/aria/senses.js_ · [`tradeRoutes`](../economy/traderoutes.js.md#s-tradeRoutes) _js/economy/traderoutes.js_ · [`apMine`](autopilot.js.md#s-apMine) _js/flight/autopilot.js_ ×2 · [`roomFor`](#s-roomFor) · [`stepMining`](turrets.js.md#s-stepMining) _js/flight/turrets.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ · [`makeTradeOps.BUY`](../mission/tradeops.js.md#s-makeTradeOps-BUY) _js/mission/tradeops.js_ ×2 · [`makeTradeOps>pickRoute`](../mission/tradeops.js.md#s-makeTradeOps-pickRoute) _js/mission/tradeops.js_ · [`stashWithdraw`](../sim/sim.js.md#s-stashWithdraw) _js/sim/sim.js_ · [`holdSlots`](../ui/holdview.js.md#s-holdSlots) _js/ui/holdview.js_
+- called by: [`workingCapital`](../aria/company.js.md#s-workingCapital) _js/aria/company.js_ · [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ · [`movesNow`](../aria/play.js.md#s-movesNow) _js/aria/play.js_ · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ · [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`unpostedWork`](../aria/senses.js.md#s-unpostedWork) _js/aria/senses.js_ · [`tradeRoutes`](../economy/traderoutes.js.md#s-tradeRoutes) _js/economy/traderoutes.js_ · [`apMine`](autopilot.js.md#s-apMine) _js/flight/autopilot.js_ ×2 · [`roomFor`](#s-roomFor) · [`stepMining`](turrets.js.md#s-stepMining) _js/flight/turrets.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ · [`makeTradeOps.BUY`](../mission/tradeops.js.md#s-makeTradeOps-BUY) _js/mission/tradeops.js_ ×2 · [`makeTradeOps>pickRoute`](../mission/tradeops.js.md#s-makeTradeOps-pickRoute) _js/mission/tradeops.js_ · [`stashWithdraw`](../sim/sim.js.md#s-stashWithdraw) _js/sim/sim.js_ · [`holdSlots`](../ui/holdview.js.md#s-holdSlots) _js/ui/holdview.js_
 
 <!-- note:holdRoom -->
 Hold units still free.
@@ -694,7 +695,7 @@ Hold units still free.
 function · **exported** · L677–679
 
 - calls: [`bulkOf`](../economy/materials.js.md#s-bulkOf) _js/economy/materials.js_ · [`holdRoom`](#s-holdRoom)
-- called by: [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`acceptBlocker`](../economy/contracts.js.md#s-acceptBlocker) _js/economy/contracts.js_ · [`addCargo`](#s-addCargo) · [`makeTradeOps.BUY`](../mission/tradeops.js.md#s-makeTradeOps-BUY) _js/mission/tradeops.js_ ×2 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ ×2
+- called by: [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`acceptBlocker`](../economy/contracts.js.md#s-acceptBlocker) _js/economy/contracts.js_ · [`addCargo`](#s-addCargo) · [`makeTradeOps.BUY`](../mission/tradeops.js.md#s-makeTradeOps-BUY) _js/mission/tradeops.js_ ×2 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ ×2
 
 <!-- note:roomFor -->
 How many units of `id` still fit. Use this, not holdRoom, to size a buy or a job.

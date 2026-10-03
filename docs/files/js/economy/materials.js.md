@@ -24,7 +24,7 @@ _none_
 
 ## Imported by
 
-- [js/aria/play.js](../aria/play.js.md) — `goodName`
+- [js/aria/play.js](../aria/play.js.md) — `goodName`, `bulkOf`
 - [js/aria/senses.js](../aria/senses.js.md) — `goodName`, `bulkOf`
 - [js/aria/senses.js](../aria/senses.js.md) — `SECTORS`
 - [js/asteroidgen/ores.js](../asteroidgen/ores.js.md) — `ORES`, `MINERALS`
@@ -90,7 +90,7 @@ _none_
 - [`derivedValue`](#s-derivedValue) · function — used by test/balance.test.mjs
 - [`goodMass`](#s-goodMass) · function — **no importer in scanned roots**
 - [`BULK`](#s-BULK) · const — **no importer in scanned roots**
-- [`bulkOf`](#s-bulkOf) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/economy/contracts.js](contracts.js.md), [js/economy/traderoutes.js](traderoutes.js.md), [js/flight/ship.js](../flight/ship.js.md), [js/ui/holdview.js](../ui/holdview.js.md), test/desk.test.mjs, test/hold.test.mjs, test/sky.test.mjs, test/stafflife.test.mjs
+- [`bulkOf`](#s-bulkOf) · function — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/economy/contracts.js](contracts.js.md), [js/economy/traderoutes.js](traderoutes.js.md), [js/flight/ship.js](../flight/ship.js.md), [js/ui/holdview.js](../ui/holdview.js.md), test/desk.test.mjs, test/hold.test.mjs, test/sky.test.mjs, test/stafflife.test.mjs
 - [`HOLD`](#s-HOLD) · const — used by [js/ships/shipdb.js](../ships/shipdb.js.md)
 - [`holdForCargoRating`](#s-holdForCargoRating) · function — used by [js/ships/shipdb.js](../ships/shipdb.js.md), test/sky.test.mjs, test/stafflife.test.mjs
 - [`oresFor`](#s-oresFor) · function — **no importer in scanned roots**
@@ -259,7 +259,7 @@ treasury can pay for, which is what keeps a hold of 200,000 honest.
 
 function · **exported** · L149–154
 
-- called by: [`unpostedWork`](../aria/senses.js.md#s-unpostedWork) _js/aria/senses.js_ · [`hullFit.capFor`](contracts.js.md#s-hullFit-capFor) _js/economy/contracts.js_ · [`tradeRoutes`](traderoutes.js.md#s-tradeRoutes) _js/economy/traderoutes.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`roomFor`](../flight/ship.js.md#s-roomFor) _js/flight/ship.js_ · [`holdSlots`](../ui/holdview.js.md#s-holdSlots) _js/ui/holdview.js_ ×2
+- called by: [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`unpostedWork`](../aria/senses.js.md#s-unpostedWork) _js/aria/senses.js_ · [`hullFit.capFor`](contracts.js.md#s-hullFit-capFor) _js/economy/contracts.js_ · [`tradeRoutes`](traderoutes.js.md#s-tradeRoutes) _js/economy/traderoutes.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`roomFor`](../flight/ship.js.md#s-roomFor) _js/flight/ship.js_ · [`holdSlots`](../ui/holdview.js.md#s-holdSlots) _js/ui/holdview.js_ ×2
 
 <!-- note:bulkOf -->
 <!-- /note -->

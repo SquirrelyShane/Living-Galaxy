@@ -18,6 +18,7 @@ export const DEVICE_KEYS = [
 
 export const LEARNED_KEYS = [
   "lgaa.aria.v1",
+  "lgaa.aria.mind.v1",
   "lgaa.housebrain.v1",
   "lgaa.tape.v1",
 ];

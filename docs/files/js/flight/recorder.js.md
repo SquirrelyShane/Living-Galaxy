@@ -1,6 +1,6 @@
 # js/flight/recorder.js
 
-[index](../../../README.md) · 236 lines · 29 symbols · 0 imports · 4 importers
+[index](../../../README.md) · 239 lines · 29 symbols · 1 imports · 6 importers
 
 ## About
 
@@ -49,25 +49,29 @@ Three decisions worth keeping straight:
 
 The tape is a ring: it never grows without bound and it never needs sweeping.
 
-- L3 · `export const TAPE_CAP = 4000;` — records held in memory
-- L4 · `const SAVE_CAP = 1200;` — the newest slice that goes to storage
-- L5 · `const SETTLE_SECS = 30;` — how long an action's outcome is watched
-- L6 · `const SNAP_MIN_GAP = 0.35;` — reuse a state read younger than this
-- L21 · `let sampler = null;` — () => raw world read
-- L22 · `let whoNow = () => "player";` — () => "player" | "aria" | "auto"
-- L23 · `let onRecord = null;` — optional hook (aria.js leans on it)
+- L4 · `export const TAPE_CAP = 4000;` — records held in memory
+- L5 · `const SAVE_CAP = 1200;` — the newest slice that goes to storage
+- L6 · `const SETTLE_SECS = 30;` — how long an action's outcome is watched
+- L7 · `const SNAP_MIN_GAP = 0.35;` — reuse a state read younger than this
+- L22 · `let sampler = null;` — () => raw world read
+- L23 · `let whoNow = () => "player";` — () => "player" | "aria" | "auto"
+- L24 · `let onRecord = null;` — optional hook (aria.js leans on it)
 <!-- /note -->
 
 ## Imports
 
-_none_
+| line | from | names | target |
+|---|---|---|---|
+| 1 | `../aria/mind.js` | `ariaMind`, `saveMind`, `learnTape` | [js/aria/mind.js](../aria/mind.js.md) |
 
 ## Imported by
 
+- [js/aria/aria.js](../aria/aria.js.md) — `flushPending`
 - [js/aria/pilot.js](../aria/pilot.js.md) — `neighbours`, `snapshot`
 - [js/console/panels/work-tape.js](../console/panels/work-tape.js.md) — `recorder`, `recorderReport`, `neighbours`, `snapshot`, `downloadTape`, `clearTape`, `saveTape`, `tape`
 - [js/sim/sim.js](../sim/sim.js.md) — `record`
 - [js/ui/hud.js](../ui/hud.js.md) — `wireRecorder`, `settle`, `record`, `recorder`
+- test/ariamind.test.mjs _(outside js/)_ — `wireRecorder`, `record`, `settle`, `resetRecorder`
 
 ## Exports
 
@@ -76,9 +80,9 @@ _none_
 - [`recorder`](#s-recorder) · const — used by [js/console/panels/work-tape.js](../console/panels/work-tape.js.md), [js/ui/hud.js](../ui/hud.js.md)
 - [`STATE_KEYS`](#s-STATE_KEYS) · const — **no importer in scanned roots**
 - [`snapshot`](#s-snapshot) · function — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/console/panels/work-tape.js](../console/panels/work-tape.js.md)
-- [`record`](#s-record) · function — used by [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md)
-- [`settle`](#s-settle) · function — used by [js/ui/hud.js](../ui/hud.js.md)
-- [`flushPending`](#s-flushPending) · function — **no importer in scanned roots**
+- [`record`](#s-record) · function — used by [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/ariamind.test.mjs
+- [`settle`](#s-settle) · function — used by [js/ui/hud.js](../ui/hud.js.md), test/ariamind.test.mjs
+- [`flushPending`](#s-flushPending) · function — used by [js/aria/aria.js](../aria/aria.js.md)
 - [`tape`](#s-tape) · function — used by [js/console/panels/work-tape.js](../console/panels/work-tape.js.md)
 - [`tapeJSONL`](#s-tapeJSONL) · function — **no importer in scanned roots**
 - [`recorderReport`](#s-recorderReport) · function — used by [js/console/panels/work-tape.js](../console/panels/work-tape.js.md)
@@ -88,25 +92,25 @@ _none_
 - [`clearTape`](#s-clearTape) · function — used by [js/console/panels/work-tape.js](../console/panels/work-tape.js.md)
 - [`downloadTape`](#s-downloadTape) · function — used by [js/console/panels/work-tape.js](../console/panels/work-tape.js.md)
 - [`describeTarget`](#s-describeTarget) · function — **no importer in scanned roots**
-- [`wireRecorder`](#s-wireRecorder) · function — used by [js/ui/hud.js](../ui/hud.js.md)
-- [`resetRecorder`](#s-resetRecorder) · function — **no importer in scanned roots**
+- [`wireRecorder`](#s-wireRecorder) · function — used by [js/ui/hud.js](../ui/hud.js.md), test/ariamind.test.mjs
+- [`resetRecorder`](#s-resetRecorder) · function — used by test/ariamind.test.mjs
 - `default` · Identifier — **no importer in scanned roots**
 
 ## Effects
 
-- **dom.create** — `a` (downloadTape:179)
-- **dom.query** — `[data-panel]` (describeTarget:196) · `#map` (describeTarget:197) · `#console` (describeTarget:197) · `#station-deck` (describeTarget:197) · `#hud` (describeTarget:197)
-- **event.listen** — `pointerdown on DOC → onPointerDown` (wireRecorder:222) · `visibilitychange on DOC → (inline)` (wireRecorder:223)
-- **storage.get** — `‹RECORDER_KEY›` (loadTape:155)
-- **storage.remove** — `‹RECORDER_KEY›` (clearTape:170)
-- **storage.set** — `‹RECORDER_KEY›` (saveTape:148)
-- **timer** — `setTimeout` (downloadTape:185)
+- **dom.create** — `a` (downloadTape:182)
+- **dom.query** — `[data-panel]` (describeTarget:199) · `#map` (describeTarget:200) · `#console` (describeTarget:200) · `#station-deck` (describeTarget:200) · `#hud` (describeTarget:200)
+- **event.listen** — `pointerdown on DOC → onPointerDown` (wireRecorder:225) · `visibilitychange on DOC → (inline)` (wireRecorder:226)
+- **storage.get** — `‹RECORDER_KEY›` (loadTape:158)
+- **storage.remove** — `‹RECORDER_KEY›` (clearTape:173)
+- **storage.set** — `‹RECORDER_KEY›` (saveTape:151)
+- **timer** — `setTimeout` (downloadTape:188)
 
 ## Symbols
 
 ### <a id="s-RECORDER_KEY"></a>`RECORDER_KEY`
 
-const · **exported** · L1–1
+const · **exported** · L2–2
 
 <!-- note:RECORDER_KEY -->
 Learned key — about the human at the controls, not the character. Filed in js/core/profile.js.
@@ -114,47 +118,47 @@ Learned key — about the human at the controls, not the character. Filed in js/
 
 ### <a id="s-TAPE_CAP"></a>`TAPE_CAP`
 
-const · **exported** · L3–3
+const · **exported** · L4–4
 
 <!-- note:TAPE_CAP -->
 <!-- /note -->
 
 ### <a id="s-SAVE_CAP"></a>`SAVE_CAP`
 
-const · L4–4
+const · L5–5
 
 <!-- note:SAVE_CAP -->
 <!-- /note -->
 
 ### <a id="s-SETTLE_SECS"></a>`SETTLE_SECS`
 
-const · L5–5
+const · L6–6
 
 <!-- note:SETTLE_SECS -->
 <!-- /note -->
 
 ### <a id="s-SNAP_MIN_GAP"></a>`SNAP_MIN_GAP`
 
-const · L6–6
+const · L7–7
 
 <!-- note:SNAP_MIN_GAP -->
 <!-- /note -->
 
 ### <a id="s-recorder"></a>`recorder`
 
-const · **exported** · L8–19
+const · **exported** · L9–20
 
 <!-- note:recorder -->
-- L10 · `tape: [],` — the ring, oldest first
-- L12 · `dropped: 0,` — rolled off the end
-- L13 · `pending: [],` — records still collecting their outcome
-- L17 · `resets: 0,` — times the clock went backwards under us (a sky launch)
-- L18 · `session: null,` — a new id every load, so runs can be told apart
+- L11 · `tape: [],` — the ring, oldest first
+- L13 · `dropped: 0,` — rolled off the end
+- L14 · `pending: [],` — records still collecting their outcome
+- L18 · `resets: 0,` — times the clock went backwards under us (a sky launch)
+- L19 · `session: null,` — a new id every load, so runs can be told apart
 <!-- /note -->
 
 ### <a id="s-sampler"></a>`sampler`
 
-const · L21–21
+const · L22–22
 
 - called by: [`snapshot`](#s-snapshot)
 
@@ -163,7 +167,7 @@ const · L21–21
 
 ### <a id="s-whoNow"></a>`whoNow()`
 
-function · L22–22
+function · L23–23
 
 - called by: [`record`](#s-record)
 
@@ -172,7 +176,7 @@ function · L22–22
 
 ### <a id="s-onRecord"></a>`onRecord`
 
-const · L23–23
+const · L24–24
 
 - called by: [`record`](#s-record)
 
@@ -181,7 +185,7 @@ const · L23–23
 
 ### <a id="s-STATE_KEYS"></a>`STATE_KEYS`
 
-const · **exported** · L25–25
+const · **exported** · L26–26
 
 <!-- note:STATE_KEYS -->
 ---- the state read -------------------------------------------------------
@@ -201,7 +205,7 @@ thousands of these and they go to localStorage.
 
 ### <a id="s-num"></a>`num(v, d=)`
 
-function · L27–27
+function · L28–28
 
 - called by: [`flushPending`](#s-flushPending) ×4 · [`settle`](#s-settle) ×4 · [`snapshot`](#s-snapshot) ×2
 
@@ -210,7 +214,7 @@ function · L27–27
 
 ### <a id="s-dropPending"></a>`dropPending()`
 
-function · L29–32
+function · L30–33
 
 - called by: [`snapshot`](#s-snapshot)
 
@@ -226,10 +230,10 @@ was never observed", which is a different thing from "its outcome was zero".
 
 ### <a id="s-snapshot"></a>`snapshot(force=)`
 
-function · **exported** · L34–47
+function · **exported** · L35–48
 
 - calls: [`dropPending`](#s-dropPending) · [`num`](#s-num) ×2 · [`sampler`](#s-sampler)
-- called by: [`fabLeaning`](../aria/pilot.js.md#s-fabLeaning) _js/aria/pilot.js_ · [`neighbourSection`](../console/panels/work-tape.js.md#s-neighbourSection) _js/console/panels/work-tape.js_ · [`flushPending`](#s-flushPending) · [`neighbours`](#s-neighbours) · [`record`](#s-record) · [`settle`](#s-settle)
+- called by: [`fabLeaning`](../aria/pilot.js.md#s-fabLeaning) _js/aria/pilot.js_ · [`planJob`](../aria/pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`rawPlanJob>weight`](../aria/pilot.js.md#s-rawPlanJob-weight) _js/aria/pilot.js_ · [`neighbourSection`](../console/panels/work-tape.js.md#s-neighbourSection) _js/console/panels/work-tape.js_ · [`flushPending`](#s-flushPending) · [`neighbours`](#s-neighbours) · [`record`](#s-record) · [`settle`](#s-settle)
 
 <!-- note:snapshot -->
 Read the world, or reuse the last read if it is fresh enough to be the same
@@ -247,7 +251,7 @@ always a fresh read, and it takes the stale open records with it.
 
 ### <a id="s-record"></a>`record(kind, act, arg=, extra=)`
 
-function · **exported** · L49–68
+function · **exported** · L50–69
 
 - calls: [`onRecord`](#s-onRecord) · [`snapshot`](#s-snapshot) · [`whoNow`](#s-whoNow)
 - called by: [`onPointerDown`](#s-onPointerDown) · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ · [`setRigMode`](../sim/sim.js.md#s-setRigMode) _js/sim/sim.js_ · [`setThrottle`](../sim/sim.js.md#s-setThrottle) _js/sim/sim.js_ · [`setTurretMode`](../sim/sim.js.md#s-setTurretMode) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×2
@@ -266,9 +270,9 @@ File an action.
 
 ### <a id="s-settle"></a>`settle()`
 
-function · **exported** · L70–81
+function · **exported** · L71–83
 
-- calls: [`num`](#s-num) ×4 · [`snapshot`](#s-snapshot)
+- calls: [`learnTape`](../aria/mind.js.md#s-learnTape) _js/aria/mind.js_ · [`num`](#s-num) ×4 · [`snapshot`](#s-snapshot)
 - called by: [`mountHud>paintAll`](../ui/hud.js.md#s-mountHud-paintAll) _js/ui/hud.js_
 
 <!-- note:settle -->
@@ -282,10 +286,10 @@ and a logger that tries to be clever about it produces data you cannot trust.
 
 ### <a id="s-flushPending"></a>`flushPending()`
 
-function · **exported** · L83–90
+function · **exported** · L85–92
 
 - calls: [`num`](#s-num) ×4 · [`snapshot`](#s-snapshot)
-- called by: [`downloadTape`](#s-downloadTape) · [`wireRecorder`](#s-wireRecorder)
+- called by: [`wireAriaHooks`](../aria/aria.js.md#s-wireAriaHooks) _js/aria/aria.js_ · [`downloadTape`](#s-downloadTape) · [`wireRecorder`](#s-wireRecorder)
 
 <!-- note:flushPending -->
 Close every open record where it stands — on a save, a menu exit, a reload.
@@ -293,7 +297,7 @@ Close every open record where it stands — on a save, a menu exit, a reload.
 
 ### <a id="s-tape"></a>`tape({…}=)`
 
-function · **exported** · L92–98
+function · **exported** · L94–100
 
 - called by: [`search`](../console/panels/work-tape.js.md#s-search) _js/console/panels/work-tape.js_ · [`neighbours`](#s-neighbours) · [`recorderReport`](#s-recorderReport) ×2 · [`tapeJSONL`](#s-tapeJSONL)
 
@@ -305,7 +309,7 @@ The tape, newest last. `by` defaults to the player's own hands.
 
 ### <a id="s-tapeJSONL"></a>`tapeJSONL(opts=)`
 
-function · **exported** · L100–103
+function · **exported** · L102–105
 
 - calls: [`tape`](#s-tape)
 - called by: [`downloadTape`](#s-downloadTape)
@@ -316,7 +320,7 @@ One JSON object per line — what every training pipeline reads without help.
 
 ### <a id="s-recorderReport"></a>`recorderReport()`
 
-function · **exported** · L105–126
+function · **exported** · L107–128
 
 - calls: [`tape`](#s-tape) ×2
 - called by: [`exportSection`](../console/panels/work-tape.js.md#s-exportSection) _js/console/panels/work-tape.js_ ×2 · [`statusSection`](../console/panels/work-tape.js.md#s-statusSection) _js/console/panels/work-tape.js_
@@ -327,7 +331,7 @@ What the panel says out loud.
 
 ### <a id="s-neighbours"></a>`neighbours(now=, n=, {…}=)`
 
-function · **exported** · L128–143
+function · **exported** · L130–145
 
 - calls: [`neighbours>near`](#s-neighbours-near) · [`snapshot`](#s-snapshot) · [`tape`](#s-tape)
 - called by: [`fabLeaning`](../aria/pilot.js.md#s-fabLeaning) _js/aria/pilot.js_ · [`neighbourSection`](../console/panels/work-tape.js.md#s-neighbourSection) _js/console/panels/work-tape.js_
@@ -340,7 +344,7 @@ whose state is nearest to now and report what was done from there.
 Distance is over the handful of features that actually separate decisions,
 each scaled to roughly 0..1 so no one of them dominates by unit alone.
 
-- L139 · `return tape({ by, limit: scan })` — Only the newest `scan` records are considered. The ring holds 4,000 and
+- L141 · `return tape({ by, limit: scan })` — Only the newest `scan` records are considered. The ring holds 4,000 and
   this runs on a phone: sorting all of them to show eight rows is work the
   pilot pays for in frames, and the older half of a long tape is the pilot
   they were several refits ago anyway.
@@ -348,7 +352,7 @@ each scaled to roughly 0..1 so no one of them dominates by unit alone.
 
 #### <a id="s-neighbours-near"></a>`neighbours>near(a, b, k)`
 
-function · L131–138
+function · L133–140
 
 - called by: [`neighbours`](#s-neighbours)
 
@@ -357,20 +361,21 @@ function · L131–138
 
 ### <a id="s-saveTape"></a>`saveTape()`
 
-function · **exported** · L145–151
+function · **exported** · L147–154
 
+- calls: [`saveMind`](../aria/mind.js.md#s-saveMind) _js/aria/mind.js_
 - called by: [`exportSection`](../console/panels/work-tape.js.md#s-exportSection) _js/console/panels/work-tape.js_ · [`wireRecorder`](#s-wireRecorder)
 - effects: storage.set `‹RECORDER_KEY›`
 
 <!-- note:saveTape -->
 ---- storage ---------------------------------------------------------------
 
-- L150 · `} catch { return 0;` — quota or private mode — the tape is best-effort
+- L153 · `} catch { return 0;` — quota or private mode — the tape is best-effort
 <!-- /note -->
 
 ### <a id="s-loadTape"></a>`loadTape()`
 
-function · **exported** · L153–163
+function · **exported** · L156–166
 
 - called by: [`wireRecorder`](#s-wireRecorder)
 - effects: storage.get `‹RECORDER_KEY›`
@@ -380,18 +385,18 @@ function · **exported** · L153–163
 
 ### <a id="s-clearTape"></a>`clearTape()`
 
-function · **exported** · L165–171
+function · **exported** · L168–174
 
 - called by: [`exportSection`](../console/panels/work-tape.js.md#s-exportSection) _js/console/panels/work-tape.js_ · [`resetRecorder`](#s-resetRecorder)
 - effects: storage.remove `‹RECORDER_KEY›`
 
 <!-- note:clearTape -->
-- L170 · `try { globalThis.localStorage?.removeItem(RECORDER_KEY); } catch {` — fine
+- L173 · `try { globalThis.localStorage?.removeItem(RECORDER_KEY); } catch {` — fine
 <!-- /note -->
 
 ### <a id="s-downloadTape"></a>`downloadTape()`
 
-function · **exported** · L173–187
+function · **exported** · L176–190
 
 - calls: [`flushPending`](#s-flushPending) · [`tapeJSONL`](#s-tapeJSONL)
 - called by: [`exportSection`](../console/panels/work-tape.js.md#s-exportSection) _js/console/panels/work-tape.js_ · [`search.run`](../console/panels/work-tape.js.md#s-search-run) _js/console/panels/work-tape.js_
@@ -403,7 +408,7 @@ Hand the pilot the file. Phone-safe: a Blob and an anchor, no server.
 
 ### <a id="s-describeTarget"></a>`describeTarget(node)`
 
-function · **exported** · L189–203
+function · **exported** · L192–206
 
 - called by: [`onPointerDown`](#s-onPointerDown)
 - effects: dom.query `[data-panel]` · dom.query `#map` · dom.query `#console` · dom.query `#station-deck` · dom.query `#hud`
@@ -420,7 +425,7 @@ yard.
 
 ### <a id="s-onPointerDown"></a>`onPointerDown(e)`
 
-function · L205–210
+function · L208–213
 
 - calls: [`describeTarget`](#s-describeTarget) · [`record`](#s-record)
 
@@ -429,7 +434,7 @@ function · L205–210
 
 ### <a id="s-wireRecorder"></a>`wireRecorder({…}=)`
 
-function · **exported** · L212–226
+function · **exported** · L215–229
 
 - calls: [`flushPending`](#s-flushPending) · [`loadTape`](#s-loadTape) · [`saveTape`](#s-saveTape)
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
@@ -442,12 +447,12 @@ function · **exported** · L212–226
 `who()` returns who is flying right now.
 `hook(record)` is called for every record, if given.
 
-- L223 · `DOC.addEventListener("visibilitychange", () => { if (DOC.visibilityState === "hidden") { f` — A tab that is going away still has a tape worth keeping.
+- L226 · `DOC.addEventListener("visibilitychange", () => { if (DOC.visibilityState === "hidden") { f` — A tab that is going away still has a tape worth keeping.
 <!-- /note -->
 
 ### <a id="s-resetRecorder"></a>`resetRecorder()`
 
-function · **exported** · L228–234
+function · **exported** · L231–237
 
 - calls: [`clearTape`](#s-clearTape)
 
