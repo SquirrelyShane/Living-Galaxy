@@ -20,7 +20,7 @@ the version numbers in section 4 from 0.3.88 on are the plan's, not history's.
 | planned slice | what happened |
 |---|---|
 | 0.3.88 jobs on hulks, goods, feeds | **0.3.90.** Wreck orders spawn and pin a hulk; plate orders take steel off any hulk; both count plate at the tractor (`noteSalvaged`), which closes the `iron_ore` leak; recorder payout; CUT IT. **Not done:** contract state across a reload. |
-| 0.3.89 rights, black boxes, shared hulks | **Not done.** No owner, claim, prize law, wire sync, or `v.derelict` hulks. The recorder pays (350 + 240 per tier) but is still `sim.recorders`, not a good. |
+| 0.3.89 rights, black boxes, shared hulks | **Shared hulks: 0.3.91** — host-authoritative `hstate` / `hcut` in `js/net/worldsync.js`, wire and adopt in `js/world/hulks.js`, in the Sol host's checkpoint. The wire name is `hulks` beside `hulls`; it has not bitten. **Not done:** owner, claim, prize law, `v.derelict` hulks; partial cuts are not shared until a section finishes. The recorder pays (350 + 240 per tier) but is still `sim.recorders`, not a good. |
 | 0.3.90 ARIA flies the rig, tutorial | **0.3.90.** `SALVAGE` op in a factory of its own (`js/mission/salvage.js`, not inline in `run.js`, which is at its line limit); both planners; RIG tutorial branch. **Not done:** salvager drones on hulk sections, the `ui/map.js` button. |
 | 0.3.91 parity, smoke, open | **0.3.90.** `--parity`; `test/smoke-salvage.mjs`; rig 1.0 / 2.5 plate a second; orders sized to half the hold at 3.6× / 3.2× base. 0.87×. |
 

@@ -16,6 +16,7 @@ import { neighbours, snapshot } from "../flight/recorder.js";
 import { company, hasCompany } from "../corp/company.js";
 import { pilot } from "../flight/pilot.js";
 import { bestHulk, SALV } from "../mission/salvage.js";
+import { hulks } from "../world/hulks.js";
 
 export const ARIA_JOBS = ["mine", "sell", "survey", "repair", "refit", "build", "fabricate", "salvage"];
 export const INVEST_JOBS = ["refit", "build"];
@@ -26,6 +27,7 @@ export const ariaPilot = {
   why: "",
   planAt: 0,
   fails: {},
+  failAt: {},
   jobs: 0,
   creditsAt: 0,
   shed: false,
@@ -106,6 +108,7 @@ const GUESS = {
   other: { mine: 0.6, survey: 0.4, salvage: 0.2, sell: 0.1 },
 };
 const WORK = ["mine", "survey", "sell", "salvage"];
+const SALVOR = { mines: 0.15, forgive: 240 };
 
 const JOB_REFITS = {
   mine: ["cutter_array", "cutter_lens", "hold_expansion", "cargo_racks", "assay_deck", "ore_sorter"],
@@ -221,6 +224,7 @@ function rawPlanJob() {
   const fill = cargoTotal(ship) / Math.max(1, ship.cargoCap);
   const { share, total } = jobHabits();
   const fails = ariaPilot.fails;
+  for (const k of Object.keys(fails)) if (fails[k] > 0 && sim.time - (ariaPilot.failAt[k] ??= sim.time) > SALVOR.forgive) fails[k] = 0;
 
   const yardRun = ariaPilot.yardRun;
   ariaPilot.yardRun = false;
@@ -271,12 +275,13 @@ function rawPlanJob() {
   const seam = nearestSeam();
   const world = unsurveyed();
   const hulk = (fails.salvage ?? 0) < 2 ? bestHulk() : null;
-  const can = { mine: Boolean(seam), survey: Boolean(world), sell: fill > 0.15, salvage: Boolean(hulk) };
   const learned = total >= 3;
+  const salvor = pilot?.complexId === "salvage" || (learned && (share.salvage ?? 0) >= 0.5);
+  const can = { mine: Boolean(seam) && !(salvor && (share.mine ?? 0) < SALVOR.mines), survey: Boolean(world), sell: fill > 0.15, salvage: Boolean(hulk) };
   const guess = GUESS[pilot?.complexId === "salvage" ? "salvor" : "other"];
   const weight = (j) => policyScore(j, (can[j] ? (learned && ariaMind.orders.mode !== "optimize" ? share[j] : guess[j]) + 0.05 : -1) - (fails[j] ?? 0) * 0.35 + (ariaPilot.job === j ? 0.05 : 0), snapshot());
   const pick = [...WORK].sort((a, b) => weight(b) - weight(a))[0];
-  if (weight(pick) < 0) return { job: null, why: "nothing this ship can do here" };
+  if (weight(pick) < 0) return { job: null, why: salvor && !hulk ? ((fails.salvage ?? 0) >= 2 ? "two salvage runs failed — I am not sending her at a third" : `no hulk worth the trip in this sky yet (${hulks.length} adrift) — they come with the fighting`) : "nothing this ship can do here" };
   const habit = learned ? `you ${pick === "mine" ? "mine" : pick === "survey" ? "survey" : pick === "salvage" ? "work hulks" : "run cargo"} ${Math.round(share[pick] * 100)}% of the time` : "I have not watched you long — my best guess";
 
   if (pick === "salvage") {
@@ -327,6 +332,7 @@ export function beginAriaWatch() {
   ariaPilot.why = "";
   ariaPilot.planAt = 0;
   ariaPilot.fails = {};
+  ariaPilot.failAt = {};
   ariaPilot.jobs = 0;
   ariaPilot.shed = false;
   ariaPilot.bought = [];
@@ -350,13 +356,15 @@ export function tickAriaPilot() {
   if (hostileNear() && (ship.turretMode === "off" || ship.turretMode === "passive")) { setTurretMode("castle"); say?.("Contacts close — guns on CASTLE."); }
 
   const bus = busOverload(ship);
-  if (bus.over && !ariaPilot.shed) {
+  const rigRest = Boolean(mission.run?.resting) && mission.active?.steps[mission.stepIx]?.op === "SALVAGE";
+  if ((bus.over || rigRest) && !ariaPilot.shed) {
     ariaPilot.shed = true;
     if (ship.localGravity) toggleSystem("localGravity");
     if (ship.lights) toggleSystem("lights");
-    say?.(`The bus is over the core — I have cut deck gravity${ship.miningMode !== "off" ? " and the cutter" : ""} until the battery comes back.`);
-    if (ship.miningMode !== "off") setMiningMode("off", { quiet: true });
-  } else if (!bus.over && ariaPilot.shed && bus.spare > 30) {
+    if (bus.over) say?.(`The bus is over the core — I have cut deck gravity${ship.miningMode !== "off" ? " and the cutter" : ""} until the battery comes back.`);
+    else say?.("The rig is drinking the battery — deck gravity and the floods are off while she cuts.");
+    if (bus.over && ship.miningMode !== "off") setMiningMode("off", { quiet: true });
+  } else if (!bus.over && ariaPilot.shed && bus.spare > 30 && mission.active?.steps[mission.stepIx]?.op !== "SALVAGE") {
     ariaPilot.shed = false;
     if (!ship.localGravity) toggleSystem("localGravity");
   }
@@ -376,7 +384,7 @@ export function tickAriaPilot() {
   if (running) return ship.credits - ariaPilot.creditsAt;
 
   if (ariaPilot.job && ["done", "failed"].includes(mission.state)) learnOutcome(ariaPilot.job, sim.time - (ariaPilot.jobSince ?? sim.time), ship.credits - (ariaPilot.jobCredits ?? ship.credits), mission.state === "done", sim.time);
-  if (ariaPilot.job && mission.state === "failed") ariaPilot.fails[ariaPilot.job] = (ariaPilot.fails[ariaPilot.job] ?? 0) + 1;
+  if (ariaPilot.job && mission.state === "failed") { ariaPilot.fails[ariaPilot.job] = (ariaPilot.fails[ariaPilot.job] ?? 0) + 1; ariaPilot.failAt[ariaPilot.job] = sim.time; }
   else if (ariaPilot.job && mission.state === "done") ariaPilot.fails[ariaPilot.job] = 0;
   if (ariaPilot.job) { mission.state = "idle"; ariaPilot.job = null; ariaPilot.planAt = sim.time + 2; }
   if (sim.time < ariaPilot.planAt) return ship.credits - ariaPilot.creditsAt;
@@ -407,6 +415,7 @@ export function tickAriaPilot() {
     logEvent(`ARIA: ${plan.job} — ${plan.why}`, "nav");
   } else {
     ariaPilot.fails[plan.job] = (ariaPilot.fails[plan.job] ?? 0) + 1;
+    ariaPilot.failAt[plan.job] = sim.time;
   }
   return ship.credits - ariaPilot.creditsAt;
 }

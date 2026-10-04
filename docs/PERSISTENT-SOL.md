@@ -69,6 +69,19 @@ Reload players' game tabs after deployment. The relay returns `__sol_authority__
 - The host's token protects reserved host messages/checkpoints. The existing peer relay and player-reported vessel-down messages retain their previous trust model.
 - Node runs as `lgsite` with a 1 GiB service memory limit. Actual long-running CPU/memory behavior must be monitored on mpcbb; a short integration test is not a production load test.
 
+## 0.3.91 — which build, and the hulks
+
+The host's ready line and status file name the game version it loaded and how
+many hulks it holds:
+
+```
+Sol host ready: version=0.3.91 restored=true time=… stations=… hulks=…
+```
+
+so `journalctl -u lg-sol -n 5` answers "is Sol on the new build" without
+reading the service's folder. Hulks are part of the checkpoint (`hostState.hulks`)
+and are sent to every pilot in Sol every 8 seconds.
+
 ## Operations
 State: `/srv/living-galaxy/relay/sol-state.sqlite3`.
 Health summary: `/srv/living-galaxy/relay/sol-host-status.json`.

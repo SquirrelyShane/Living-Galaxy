@@ -413,6 +413,10 @@ the mission editor, so a job ARIA can fly is a job you can automate.
 - L241 · `if (roomFor(sim.ship, a.good) < a.qty - (a.cut ?? 0)) {` — 0.3.90: salvage work is flown with the rig. The wreck's own hulk if the
   job has one, else the best in the sky; the op ends when the job's count
   is cut, and whatever else came off the hulk is sold after delivery.
+
+- L219 · `steps.push(makeStep("SET", null, { args: { system: { key: "salvage", on: true } } }));` — always asked for, not only when it was off at the desk: the bus
+  tender stows the tractor on the leg out (0.3.90), and a pod hauled
+  with the tractor stowed came home short, three passes running
 <!-- /note -->
 
 #### <a id="s-jobPlan-go"></a>`jobPlan>go(target, label)`

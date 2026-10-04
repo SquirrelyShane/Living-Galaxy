@@ -1,5 +1,148 @@
 # Changelog
 
+## 0.3.91 — 2026-10-04 — Dead Hulls: A Shared Field
+
+Reported: ARIA still does not reach a full salvage run. Reproduced by doing
+what a player does — a persistent Sol host and relay on one side, a browser
+joined to it on the other, ARIA at the conn of a new salvor. Headless and solo
+she had been fine; in a held sky she was not.
+
+### Players
+
+Hulks in Sol are now shared between pilots, and ARIA flies full salvage runs there.
+
+- The wrecks GNN reports are now in your sky when you join, in the same place for every pilot, and a hulk somebody has cut up is gone for everyone.
+- ARIA flies full salvage runs in Sol: she picks a hulk as soon as she has the conn, works several, docks, sells and goes again.
+- A salvage pilot's ARIA no longer goes mining when there is nothing to cut. She waits for a hulk and says so. If you mine as well as salvage, she still will.
+- The rig starts cutting as she arrives at a hulk instead of half a minute later.
+- A salvage loop asked to CUT makes its first cut in CUT.
+- A hulk she cannot get to is passed over for another instead of ending the run.
+- One failed run no longer puts ARIA off a job for the rest of the watch; she tries again a few minutes later.
+- ARIA takes deck gravity and the floodlights off the bus while the rig is drawing the battery down, so the rig rests less.
+- Selling at the port you are already docked at no longer casts off and docks again first. This applies to your own loops too.
+- Cargo pod recoveries no longer come home short because the tractor was stowed on the way out.
+- A ship you destroy leaves its hulk for other pilots as well.
+
+No save migration is required.
+
+Tested in a desktop browser against a private copy of Sol; not yet flown on a phone, and not with two pilots working the same hulk. Hulks still have no owner: anyone may cut anything.
+
+### Why she could not
+
+A hulk was session state: made where a kill was simulated, seen by the process
+that simulated it. In a held sky the kills are the host's. A mirror only made
+hulks out of the fighting it happened to simulate near its own ship. Measured
+against a local persistent Sol: twenty seconds after joining, no hulks; five
+minutes later, none, with the pilot in the belt; ten minutes after joining near
+a port, two. With no hulk, the conn planner's only possible job for a salvor
+with a full survey log was `mine` — "you mine 0% of the time; the belt" — on a
+hull with a rig and no power to spare: flat battery, 64% hull, a yard run.
+
+### Hulks on the wire (`js/world/hulks.js`, `js/net/worldsync.js`, `host/sol-host.mjs`)
+
+- `hulkWire()` / `adoptHulkWire()`. A row is the whole hulk — vessel, hull
+  class, frame and offset, born, life, attitude, and every section's plate,
+  parts, hold and recorder — so a mirror never has to agree with the host about
+  dice. The key is the dead vessel and when it died. Contract wrecks are the
+  signing pilot's and are not sent.
+- The host sends `hstate` every 8 s (`HULK_EVERY`): the Sol host from its own
+  loop, a player who holds a room from `tickWorldSync`. 48 hulks is a 15 KB
+  packet; the hull packet is 9 KB every 2 s.
+- A mirror keeps the host's list: new rows are built, rows no longer named are
+  removed unless somebody here is flying to one or has a rig on it.
+- Cutting only takes away. A finished section of a shared hulk is reported
+  (`hcut`); the host cuts it for everyone and retires a hulk with nothing left.
+  A section the wire says is cut is cut here; a section cut here stays cut
+  whatever a stale packet says; a hulk cut up here is not brought back by the
+  packet already on its way (a 180 s tombstone).
+- A mirror that saw the same hull die keeps one hulk, not two: it is matched on
+  the vessel and takes the host's metal and place, unless the pilot already has
+  a rig on it.
+- A reported kill (`vdown`) leaves its hulk on the host before the vessel is
+  marked down, so a pilot's kill is in everybody's sky.
+- The cap of 48 does not evict a hulk that is the host's.
+- The Sol host keeps its hulks in the checkpoint and takes them back on a
+  restart.
+- The Sol host's ready line and status file carry the game version and the
+  hulk count: `Sol host ready: version=0.3.91 restored=… hulks=…`.
+
+### ARIA and the autopilot
+
+- *No hulk, no mining.* A pilot whose career is Salvage, or who works hulks half
+  the time or more, is not planned a mining run unless at least 15% of what
+  they do is mining. With nothing else to do ARIA holds: "no hulk worth the
+  trip in this sky yet (N adrift) — they come with the fighting".
+- *Forgiveness.* Two failures benched a job until the pilot took the conn back.
+  A failure is now forgiven 240 s on.
+- *The park.* A point's park is 500 u and the leg ends at 800; the rig reaches
+  600. She arrived and crept the last 200 u at a quarter throttle — 30 s a
+  hulk, measured. A hulk's park is 55% of the rig's reach, so the leg ends
+  inside it.
+- *The mode.* With the leg ending inside the rig's reach, the rig is put in the
+  step's mode before the hulk comes into it; the rest-for-charge line is read
+  on the way in as well.
+- *Unreachable.* A leg that fails toward a hulk the step chose skips that hulk
+  (three times a run at most). A wreck she was sent to by name still fails.
+- *Rig rest.* ARIA at the conn sheds deck gravity and the floods the first time
+  the rig rests, and keeps them off while she is on the SALVAGE step.
+- *Already here.* A mission whose first step is DOCK at the best buyer, the
+  best smelter or the nearest port, started from that port's clamps, no longer
+  gets an UNDOCK put in front of it. 50 s a sale in the terminal player.
+- *Pods.* 0.3.90's bus tender stows the tractor on the leg out; the pod plan
+  only switched it on if it had been off at the desk. It now always asks.
+
+**Measured.** Local persistent Sol, headless Chromium at 412 × 915, a new
+salvor, ARIA given the conn 14 s after joining:
+
+| | 0.3.90 | 0.3.91 |
+|---|---|---|
+| hulks in the sky at the conn | 0 | 14 |
+| first job | mine | salvage |
+| rig on a hulk | never | 87 s after the conn, a warp away |
+| first salvage run | none in 7.5 min | docked and sold 4.5 min after the conn: 10,604 cr and a 590 cr recorder, then out again |
+
+An earlier build of the same change, same setup: three hulks in one run, 577 in
+the hold, sold for 45,667 cr — 31,360 of it 28 shield coils out of one hold.
+
+Headless, ARIA at the conn, 30 sky-minutes, 20,000 cr: salvor +83,022 (0.3.90:
++81,553), miner +30,703 (unchanged).
+
+Parity bench, 5 seeds: salvage 2,976 cr/min (2,165–3,492), mining 2,251
+(1,076–3,760) — 1.32×, over the band, on a low mining draw. Mining alone, six
+seeds, same build: 3,324; 0.3.90's code beside it: 4,485 (1,415–4,811). The
+runs are not seeded below the exploration coin and five of them do not fix a
+median. Pooled over 27 mining runs on code that does not differ for mining:
+3,513. Salvage over its last ten: 3,056. 0.87×, as at 0.3.90.
+
+**Verified.** The zip applied to a clean clone of 0.3.90 with `tools/lg-patch.sh apply 0.3.90 0.3.91`, which ran the three suites it carries. All 108 node suites pass on that tree (`lgpatch` aside on some runs: it fails a varying handful of its assertions on a git push negotiation error in the sandbox this was built in, as it did at 0.3.88 and 0.3.90). Python suites pass. `codedocs --check` clean. Browser
+smokes on a plain server: `smoke-salvage`, `smoke-rig`, `smoke-mining`,
+`smoke-coretutorial` pass; `smoke-hulks` fails on its SCAN line as it does on
+0.3.88 and 0.3.90. End to end on the local Sol: the three hulks ARIA cut were
+gone from the host's next packet; a host restart came back with its hulks.
+
+**Not verified.** Not flown on a phone. Not against living-galaxy.com. One
+client at a time: two pilots on one hulk is untested.
+
+**Still open.**
+- A section two pilots are both cutting pays both; only a finished section is
+  reported.
+- No ownership, claims or prize law.
+- A wreck order's hulk is local and does not survive a reload.
+- ARIA at the conn does not take board orders; the terminal player does.
+- Free salvage out-earns free mining by a wide margin: surviving cargo is most
+  of a rich hulk's worth.
+- A 0.3.90 client in a 0.3.91 sky ignores the hulk packet and behaves as before.
+- The parity bench needs seeding before it can gate another career.
+- Salvager drones do not work hulks.
+
+**Files.** NEW `test/hulkwire.test.mjs`, `docs/PATCH-0.3.91.md`. EDIT
+`js/world/hulks.js`, `js/net/worldsync.js`, `js/sim/sim.js`,
+`js/mission/salvage.js`, `js/mission/run.js`, `js/flight/autopilot.js`,
+`js/aria/pilot.js`, `js/aria/play.js`, `js/version.js`, `host/sol-host.mjs`,
+`test/salvageloop.test.mjs`, `test/worldsync-revision.test.mjs`, `README.md`,
+`docs/SALVAGE_PLAN.md`, `docs/CAREER_ROADMAP.md`, `docs/PERSISTENT-SOL.md` and
+the regenerated `docs/`.
+
 ## 0.3.90 — 2026-10-03 — Dead Hulls: The Loop
 
 Salvage is open. It had its verb (the rig, 0.3.87) and nothing that flew it:

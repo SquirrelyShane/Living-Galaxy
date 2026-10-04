@@ -8,12 +8,13 @@ const net={room:'sol',hostId:'__sol_authority__'};
 globalThis.__worldsyncTest={
   gnn:{gnnBroadcastWire:()=>[]},
   net:{net,fetchWorld:async()=>{ctx.calls++;return ctx.fetch?ctx.fetch():structuredClone(ctx.response)},lonely:()=>false,onRoom:fn=>ctx.room=fn,onMessage:fn=>ctx.message=fn,pushWorld:async()=>({})},
-  sim:{sim,applyRemoteRockHit:()=>{},applyRemoteStrike:()=>{},worldSnapshot:()=>({}),logEvent:msg=>ctx.logs.push(msg),applyWorldSnapshot:(snap,options)=>{ctx.applies.push({snap,options});if(options.includeLive)ctx.live=snap.impactors;return true}},
+  sim:{sim,applyRemoteRockHit:()=>{},applyRemoteStrike:()=>{},leaveHulk:()=>null,shiftClock:()=>{},worldSnapshot:()=>({}),logEvent:msg=>ctx.logs.push(msg),applyWorldSnapshot:(snap,options)=>{ctx.applies.push({snap,options});if(options.includeLive)ctx.live=snap.impactors;return true}},
   holes:{adoptHoles:()=>{},holeWire:()=>[]},
   impactors:{adoptImpactors:wire=>ctx.live=wire,impactorWire:()=>ctx.live,setImpactorAuthority:()=>{}},
-  traffic:{markVesselDown:()=>{},trafficDown:ctx.trafficDown,traffic:[],vesselById:()=>null}
+  traffic:{markVesselDown:()=>{},trafficDown:ctx.trafficDown,traffic:[],vesselById:()=>null},
+  hulks:{adoptHulkWire:rows=>{ctx.hulks=rows;return {added:0,kept:0,removed:0}},applyHulkCut:()=>false,hulkWire:()=>[]}
 };
-const groups={'../comms/gnn.js':'gnn','./net.js':'net','../sim/sim.js':'sim','../world/events/holes.js':'holes','../world/events/impactors.js':'impactors','../npc/traffic.js':'traffic'};
+const groups={'../comms/gnn.js':'gnn','./net.js':'net','../sim/sim.js':'sim','../world/events/holes.js':'holes','../world/events/impactors.js':'impactors','../npc/traffic.js':'traffic','../world/hulks.js':'hulks'};
 let source=await readFile(new URL('../js/net/worldsync.js',import.meta.url),'utf8');
 source=source.replace(/import \{([^}]+)\} from "([^"]+)";/g,(_,names,path)=>{
   const group=groups[path];assert.ok(group,`dependency mapped: ${path}`);

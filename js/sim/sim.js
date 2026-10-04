@@ -43,7 +43,7 @@ import { chat, post, resetChat } from "../comms/chat.js";
 import { gnn, gnnPost, resetGnn } from "../comms/gnn.js";
 import { benchValue } from "../economy/icework.js";
 import { addChunk, bindDebris, burst, chunkMass, chunks, nearDebris, removeChunk, resetDebris, rubbleRing, stepDebris } from "../world/debris.js";
-import { HULK, bindHulks, hulkById, hulkManifest, hulkVelocity, hulks, nearHulks, resetHulks, spawnHulk, stepHulks } from "../world/hulks.js";
+import { HULK, bindHulks, hulkById, hulkManifest, hulkVelocity, hulks, nearHulks, resetHulks, spawnHulk, stepHulks, hulkKey } from "../world/hulks.js";
 import { addRogue, adoptImpactors, impactorWire, impactors, resetImpactors, rogueHooks as rockHooks, setImpactorAuthority, stepImpactors, threatBoard, emptyThreatBoard } from "../world/events/impactors.js";
 import { HOLE, adoptHoles, collapseStar, holeRadii, holeWarpBlock, holeWire, holes, nearestHole, resetHoles, spawnTransit, stepHoles } from "../world/events/holes.js";
 import {
@@ -489,6 +489,7 @@ function wireRigHooks() {
     if (out.lost) bits.push(`${out.lost} parts lost to the cut`);
     if (out.cargo) bits.push(`${out.cargo.qty} ${goodName(out.cargo.id)}`);
     logEvent(`Rig: ${s.name} off the ${h.name} — ${bits.join(", ")}`, "cargo");
+    if (h.shared) sim.send({ t: "hcut", k: hulkKey(h), i: s.i });
     if (captain.holder === "player" && !sim.handsOff) ariaHooks.onPlayerJob?.("salvage", 1);
     if (!sim.ship.salvage) setNoticeAbout(`The ${s.name} is cut loose and drifting. SALVG reels it in.`, "RIG");
   };

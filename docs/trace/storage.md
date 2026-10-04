@@ -80,8 +80,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹RUN_KEY()›`
 
-- storage.remove — [js/mission/run.js › clearRun](../files/js/mission/run.js.md#s-clearRun) L538
-- storage.get — [js/mission/run.js › restoreRun](../files/js/mission/run.js.md#s-restoreRun) L547
+- storage.remove — [js/mission/run.js › clearRun](../files/js/mission/run.js.md#s-clearRun) L540
+- storage.get — [js/mission/run.js › restoreRun](../files/js/mission/run.js.md#s-restoreRun) L549
 
 ### `‹SAVE_KEY_V1›`
 

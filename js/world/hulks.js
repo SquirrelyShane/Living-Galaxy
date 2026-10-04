@@ -19,6 +19,8 @@ export const HULK = {
   again: 30,
   sweep: 2,
   afterJob: 600,
+  same: 600,
+  goneFor: 180,
 };
 
 export const HULK_SECTIONS = ["bridge", "engine block", "hold", "spine", "reactor deck", "bow", "port quarter", "starboard quarter"];
@@ -43,8 +45,11 @@ let seq = 1;
 let sweepT = 0;
 let sim0 = { time: 0 };
 
+const gone = new Map();
+
 export function resetHulks() {
   hulks.length = 0;
+  gone.clear();
   seq = 1;
   sweepT = 0;
 }
@@ -125,8 +130,8 @@ const busy = (h, time) => (h.busyUntil ?? -Infinity) > time;
 
 function dropOldest() {
   const time = sim0.time ?? 0;
-  let i = hulks.findIndex((h) => !h.pinned && !busy(h, time));
-  if (i < 0) i = hulks.findIndex((h) => !h.pinned);
+  let i = hulks.findIndex((h) => !h.pinned && !h.shared && !busy(h, time));
+  if (i < 0) i = hulks.findIndex((h) => !h.pinned && !h.shared);
   if (i < 0) return false;
   hulks[i].dead = true;
   hulks.splice(i, 1);
@@ -185,6 +190,7 @@ export function spawnHulk(v, { source = "kill", owner = null, at = null, pinned 
 
 export function removeHulk(h) {
   if (!h) return;
+  if (h.key) gone.set(h.key, (sim0.time ?? 0) + HULK.goneFor);
   h.dead = true;
   const i = hulks.indexOf(h);
   if (i >= 0) hulks.splice(i, 1);
@@ -224,6 +230,145 @@ export function stepHulks(dt) {
       if (dx * dx + dy * dy + dz * dz < r2) { h.dead = true; hulks.splice(i, 1); }
     }
   }
+}
+
+export const hulkKey = (h) => (h.key ??= `${h.vessel ?? h.id}@${Math.round(h.born)}`);
+
+const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
+const partsOut = (p) => Object.entries(p ?? {}).map(([k, q]) => `${k}:${q}`).join(",");
+function partsIn(t) {
+  const o = {};
+  for (const kv of String(t ?? "").split(",")) {
+    const [k, q] = kv.split(":");
+    if (k && Number(q) > 0) o[k] = Math.floor(Number(q));
+  }
+  return o;
+}
+
+export function hulkWire(cap = HULK.max) {
+  const out = [];
+  for (const h of hulks) {
+    if (h.dead || h.source === "contract") continue;
+    out.push([
+      hulkKey(h), h.vessel ?? "", h.vesselName ?? "", h.ship, h.role ?? "", h.owner ?? "", h.source ?? "kill", h.parent ?? "",
+      Math.round(h.ox), Math.round(h.oy), Math.round(h.oz), Math.round(h.born), Math.round(h.life),
+      r2(h.yaw), r2(h.pitch), r2(h.roll), r2(h.spin), Math.round(h.r),
+      h.sections.map((s) => [r2(s.plate), s.plate0, s.cut >= 1 ? 1 : 0, s.box ? 1 : 0, s.cargo?.id ?? "", s.cargo?.qty ?? 0, partsOut(s.parts), r2(s.intact)]),
+    ]);
+    if (out.length >= cap) break;
+  }
+  return out;
+}
+
+function sectionsIn(rows) {
+  const out = [];
+  for (let i = 0; i < rows.length && i < HULK_SECTIONS.length; i++) {
+    const w = rows[i];
+    if (!Array.isArray(w)) return null;
+    const plate0 = Math.max(0, Number(w[1]) || 0);
+    const done = Boolean(w[2]);
+    const plate = done ? 0 : Math.max(0, Math.min(plate0, Number(w[0]) || 0));
+    out.push({
+      i, name: HULK_SECTIONS[i], plate, plate0,
+      parts: done ? {} : partsIn(w[6]),
+      cargo: !done && w[4] && Number(w[5]) > 0 ? { id: String(w[4]), qty: Math.floor(Number(w[5])) } : null,
+      box: !done && Boolean(w[3]),
+      intact: Number(w[7]) || 0,
+      cut: done ? 1 : plate0 > 0 ? Math.min(1, 1 - plate / plate0) : 1,
+    });
+  }
+  return out.length ? out : null;
+}
+
+const cutOut = (s) => { s.plate = 0; s.cut = 1; s.parts = {}; s.cargo = null; s.box = false; };
+const spent = (h) => h.sections.every((s) => s.cut >= 1);
+const touched = (h) => h.sections.some((s) => s.cut > 0);
+
+function place(h, time) {
+  if (h.parent && bodyById(h.parent) && bodyPosition(h.parent, time, _bp)) { h.x = _bp.x + h.ox; h.y = _bp.y + h.oy; h.z = _bp.z + h.oz; }
+  else { h.parent = null; h.x = h.ox; h.y = h.oy; h.z = h.oz; }
+}
+
+export function adoptHulkWire(rows, { time = sim0.time ?? 0, mirror = true } = {}) {
+  const stats = { added: 0, kept: 0, removed: 0 };
+  if (!Array.isArray(rows)) return stats;
+  const named = new Set();
+  for (const row of rows) {
+    if (!Array.isArray(row) || typeof row[0] !== "string" || !Array.isArray(row[18])) continue;
+    const [key, vessel, vesselName, ship, role, owner, source, parent, ox, oy, oz, born, life, yaw, pitch, roll, spin, rad] = row;
+    if (![ox, oy, oz, born, life].every(Number.isFinite)) continue;
+    named.add(key);
+    if ((gone.get(key) ?? -Infinity) > time) continue;
+    const secs = sectionsIn(row[18]);
+    if (!secs) continue;
+    let h = hulks.find((x) => x.key === key)
+      ?? (vessel ? hulks.find((x) => !x.key && x.vessel === vessel && x.source !== "contract" && Math.abs(x.born - born) < HULK.same) : null);
+    if (h) {
+      const mine = busy(h, time);
+      if (!h.shared && !touched(h) && !mine) h.sections = secs;
+      else for (let i = 0; i < h.sections.length && i < secs.length; i++) if (secs[i].cut >= 1 && h.sections[i].cut < 1) cutOut(h.sections[i]);
+      h.key = key;
+      h.shared = mirror;
+      h.born = born; h.life = life; h.age = Math.max(0, time - born);
+      if (!mine) { h.parent = parent || null; h.ox = ox; h.oy = oy; h.oz = oz; h.vx = 0; h.vy = 0; h.vz = 0; place(h, time); }
+      if (spent(h)) { removeHulk(h); stats.removed++; } else stats.kept++;
+      continue;
+    }
+    if (secs.every((x) => x.cut >= 1)) continue;
+    const def = shipById(ship) ?? shipById(DEFAULT_SHIP_ID);
+    h = {
+      id: `hk${seq++}`,
+      name: `${vesselName || def.name} hulk`,
+      vessel: vessel || null,
+      vesselName: vesselName || def.name,
+      ship: def.id,
+      hullName: def.name,
+      tier: def.tier,
+      massT: def.stats?.massT ?? 12,
+      role: role || null,
+      owner: owner || null,
+      source: source || "kill",
+      x: 0, y: 0, z: 0,
+      vx: 0, vy: 0, vz: 0,
+      parent: parent || null,
+      ox, oy, oz,
+      r: Math.max(6, Number(rad) || 7),
+      yaw: Number(yaw) || 0, pitch: Number(pitch) || 0, roll: Number(roll) || 0, spin: Number(spin) || 0,
+      tumble: 0,
+      sections: secs,
+      born,
+      age: Math.max(0, time - born),
+      life,
+      pinned: false,
+      assayed: false,
+      dead: false,
+      key,
+      shared: mirror,
+    };
+    place(h, time);
+    hulks.push(h);
+    stats.added++;
+  }
+  if (mirror) {
+    for (let i = hulks.length - 1; i >= 0; i--) {
+      const h = hulks[i];
+      if (!h.shared || named.has(h.key) || busy(h, time)) continue;
+      h.dead = true;
+      hulks.splice(i, 1);
+      stats.removed++;
+    }
+  }
+  for (const [k, until] of gone) if (until <= time) gone.delete(k);
+  return stats;
+}
+
+export function applyHulkCut(key, i) {
+  const h = hulks.find((x) => x.key === key);
+  const s = h?.sections[i];
+  if (!s) return false;
+  if (s.cut < 1) cutOut(s);
+  if (spent(h)) removeHulk(h);
+  return true;
 }
 
 export function hulkVelocity(h, out) {

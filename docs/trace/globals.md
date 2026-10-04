@@ -12,7 +12,7 @@ Assignments onto window / globalThis / self.
 
 ### `window.__lg`
 
-- global.write — [js/sim/sim.js › wireControlsTest](../files/js/sim/sim.js.md#s-wireControlsTest) L4040
+- global.write — [js/sim/sim.js › wireControlsTest](../files/js/sim/sim.js.md#s-wireControlsTest) L4041
 
 ### `window.__lgAttract`
 

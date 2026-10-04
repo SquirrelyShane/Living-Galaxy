@@ -24,7 +24,13 @@
  *      rest against what it is flying to, not against the nearest world; a
  *      hulk with a raider still over it is not picked; AUTO cuts for an order
  *      and strips a wreck with no plate to spare; and a hull waiting on the
- *      core's reserve sheds load instead of sitting there.
+ *      core's reserve sheds load instead of sitting there;
+ *  10. 0.3.91, the run a pilot in a held sky could not get: a salvor with no
+ *      hulk to work waits for one instead of taking up mining; a failed run is
+ *      forgiven four minutes on rather than ending salvage for the watch; the
+ *      hulk's park is inside the rig's reach, so the arc lights as she
+ *      arrives; a hulk she cannot reach is passed over, not the end of the
+ *      run; and the rig's rest sheds deck gravity and the floods.
  */
 import { readFileSync } from "node:fs";
 
@@ -269,6 +275,7 @@ const hulkAt = (dx, opts = {}, v = {}) => spawnHulk({ id: `t:${Math.random()}`, 
   clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); tick(1);
   startTutorial(true);
   tutorial.step = 3;
+  resetHulks();
   let e = tutorialEvaluate();
   ok(e.title === "RIG" && /Salvage board/.test(e.text) && e.action === null, "with no hulk about, the salvage step is RIG and points at the board");
   const far = hulkAt(400000, {}, { name: "Far One" });
@@ -373,6 +380,114 @@ const hulkAt = (dx, opts = {}, v = {}) => spawnHulk({ id: `t:${Math.random()}`, 
   ok(!ship.localGravity && !ship.salvage, "ten seconds short of the core's reserve, gravity and the tractor come off the bus");
   autopilot.on = false; autopilot.phase = "idle"; autopilot.chargeSince = null;
   endPlay();
+}
+
+/* ---- 10. 0.3.91: the run a pilot in a held sky could not get ------------------------ */
+{
+  const { parkDistance } = await import("../js/flight/autopilot.js");
+  const { rigRange } = await import("../js/flight/rig.js");
+  const { notePlayerJob, tickAriaPilot } = await import("../js/aria/pilot.js");
+  const { makeSalvage } = await import("../js/mission/salvage.js");
+  const { captain } = await import("../js/npc/captain.js");
+
+  /* nothing to cut: she waits */
+  clearSky(); contracts.active.length = 0; park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.hold = {}; ship.credits = 1500; ship.dockedAt = null; tick(1);
+  const scanned = new Set(sim.scanned);
+  for (const b of BODIES) sim.scanned.add(b.id);
+  resetMind(); aria.prefs.job = {}; beginAriaWatch(); pilot.complexId = "salvage";
+  let p = planJob();
+  ok(p.job === null && !p.mission && /no hulk worth the trip/.test(p.why), `a salvor with an empty sky holds for a hulk (${p.job} — ${p.why})`);
+  pilot.complexId = "mining";
+  p = planJob();
+  ok(p.job === "mine", `a miner in the same sky mines (${p.job})`);
+  for (let i = 0; i < 6; i++) notePlayerJob("salvage");
+  p = planJob();
+  ok(p.job === null && /no hulk/.test(p.why), "a pilot of any career who works hulks and never mines is not sent mining either");
+  for (let i = 0; i < 3; i++) notePlayerJob("mine");
+  p = planJob();
+  ok(p.job === "mine", `one who does mine a third of the time is (${p.job} — ${p.why})`);
+  pilot.complexId = "salvage"; aria.prefs.job = {};
+  sim.scanned = scanned;
+
+  /* a failure is forgiven */
+  for (const b of BODIES) sim.scanned.add(b.id);
+  const h0 = hulkAt(4000, {}, { ship: "general_c", name: "Forgive Test" });
+  beginAriaWatch();
+  ariaPilot.fails.salvage = 2; ariaPilot.failAt.salvage = sim.time;
+  p = planJob();
+  ok(p.job !== "salvage" && /two salvage runs failed/.test(p.why), `two failed runs bench salvage (${p.why})`);
+  ariaPilot.failAt.salvage = sim.time - 241;
+  p = planJob();
+  ok(p.job === "salvage" && ariaPilot.fails.salvage === 0, "for four minutes, not for the watch");
+  sim.scanned = scanned;
+  void h0;
+
+  /* the park is inside the rig's reach */
+  clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.hold = {}; tick(1);
+  const h = hulkAt(5000, {}, { ship: "general_b", name: "Park Test" });
+  ok(engageSalvageLoop({ hulkId: h.id, mode: "strip" }), "a loop on one hulk");
+  tick(1);
+  const node = mission.run.node;
+  ok(node && node.park === Math.max(150, rigRange(ship) * SALV.standoff) && parkDistance(node) === node.park && node.park * 1.6 < rigRange(ship), `the hulk's park is ${Math.round(node?.park)} u, so the leg ends inside the rig's ${rigRange(ship)} u`);
+  let nearAt = null, litAt = null;
+  for (let i = 0; i < 240 * HZ && litAt == null; i++) {
+    tickSim(1 / HZ);
+    if (nearAt == null && autopilot.phase === "salvage") nearAt = sim.time;
+    if (rig.active && rig.key === h.id) litAt = sim.time;
+  }
+  ok(litAt != null && (nearAt == null || litAt - nearAt < 4), `the arc lights no later than she arrives (${litAt == null ? "never" : nearAt == null ? "on the way in" : (litAt - nearAt).toFixed(1) + " s after"})`);
+  ok(ship.rigMode === "strip" && rig.mode === "strip", "in the mode the step asked for");
+  stopMission("test", { quiet: true });
+  clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); tick(1);
+  const hc = hulkAt(5000, {}, { ship: "general_b", name: "Mode Test" });
+  ok(engageSalvageLoop({ hulkId: hc.id, mode: "cut" }), "a loop asked to CUT");
+  let firstMode = null;
+  for (let i = 0; i < 240 * HZ && firstMode == null; i++) { tickSim(1 / HZ); if (rig.active && rig.key === hc.id) firstMode = ship.rigMode; }
+  ok(firstMode === "cut", `makes its first cut in CUT, not in the mode the hull was left in (${firstMode})`);
+  stopMission("test", { quiet: true });
+  stopMission("test", { quiet: true });
+
+  /* a hulk she cannot reach is passed over */
+  clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.hold = {};
+  const best = hulkAt(3000, {}, { ship: "general_b", name: "Unreachable", cargo: { id: "battery", qty: 400 } });
+  const other = hulkAt(-6000, {}, { ship: "general_b", name: "Reachable" });
+  const fake = { active: { name: "TEST RUN" }, run: {} };
+  const apState = { unstuckCount: 0 };
+  const legs = [];
+  const SV = makeSalvage({
+    mission: fake, ap: () => apState, apPark: () => "parked", apHold: () => {}, untilMet: () => false, ensureUndocked: () => "ok", resetProgress: () => {},
+    legTo: (s, n) => { legs.push(fake.run.hulkId); return fake.run.hulkId === best.id ? "fail:earth in lane" : "flying"; },
+  });
+  const step = { op: "SALVAGE", target: { kind: "best-hulk" }, args: { mode: "strip" } };
+  ok(bestHulk()?.h === best, `the richer hulk is the first pick (${bestHulk()?.h?.name}, ${hulks.length} adrift)`);
+  const r1 = SV(step);
+  ok(r1 === "flying" && fake.run.hulkId === null && fake.run.skips === 1, `its leg failing does not fail the step (${r1})`);
+  const r2 = SV(step);
+  ok(r2 === "flying" && fake.run.hulkId === other.id, "the next tick she is on her way to another");
+  fake.run = {};
+  const named = { op: "SALVAGE", target: { kind: "hulk", id: other.id }, args: { mode: "strip" } };
+  const SV2 = makeSalvage({ mission: fake, ap: () => apState, apPark: () => "parked", apHold: () => {}, untilMet: () => false, ensureUndocked: () => "ok", resetProgress: () => {}, legTo: () => "fail:earth in lane" });
+  ok(SV2(named) === "fail:earth in lane", "a wreck she was sent to by name still fails honestly");
+  forgetSkipped(); clearSky();
+  void legs;
+
+  /* the rig's rest sheds comfort loads */
+  park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.dockedAt = null;
+  beginAriaWatch();
+  const holder = captain.holder;
+  captain.holder = "aria";
+  if (!ship.localGravity) ship.localGravity = true;
+  mission.active = { name: "ARIA · salvage test", mode: "aria", steps: [{ op: "SALVAGE" }] };
+  mission.stepIx = 0; mission.state = "running"; mission.run = { resting: true };
+  ariaPilot.shed = false;
+  tickAriaPilot();
+  ok(ship.localGravity === false && ariaPilot.shed === true, "with the rig rested for charge, ARIA takes deck gravity off the bus");
+  mission.run.resting = false;
+  tickAriaPilot();
+  ok(ship.localGravity === false, "and leaves it off while she is still on the hulk");
+  mission.active = null; mission.state = "idle"; mission.run = {};
+  captain.holder = holder;
+  if (!ship.localGravity) ship.localGravity = true;
 }
 
 console.log(`salvageloop: ${pass} passed, ${fail} failed`);

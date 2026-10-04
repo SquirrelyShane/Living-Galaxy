@@ -141,6 +141,14 @@ shared), so a wreck order does not survive a reload; no ownership or claims;
 salvager drones do not work hulks; with no orders, a salvage loop out-earns a
 mine loop about 2.7× with ARIA at the conn.
 
+### 0.3.91 — hulks shared
+
+Salvage was open at 0.3.90 and unplayable with ARIA in Sol: a mirror of the
+persistent host had no hulks, because hulks were made only where a kill was
+simulated. 0.3.91 puts the host's hulks on the wire. Any later career whose
+`site` is a world object should be checked in a held sky before its `aria` and
+`smoke` items are claimed — both of Salvage's were earned solo.
+
 ## How to complete a career loop
 
 1. Build the missing gate items, in successive main-game releases.

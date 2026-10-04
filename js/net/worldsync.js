@@ -1,6 +1,7 @@
 import { gnnBroadcastWire } from "../comms/gnn.js";
 import { fetchWorld, lonely, net, onMessage, onRoom, pushWorld } from "./net.js";
-import { applyRemoteRockHit, applyRemoteStrike, applyWorldSnapshot, logEvent, shiftClock, sim, worldSnapshot } from "../sim/sim.js";
+import { applyRemoteRockHit, applyRemoteStrike, applyWorldSnapshot, leaveHulk, logEvent, shiftClock, sim, worldSnapshot } from "../sim/sim.js";
+import { adoptHulkWire, applyHulkCut, hulkWire } from "../world/hulks.js";
 import { adoptHoles, holeWire } from "../world/events/holes.js";
 import { adoptImpactors, impactorWire, setImpactorAuthority } from "../world/events/impactors.js";
 import { markVesselDown, trafficDown, traffic, vesselById } from "../npc/traffic.js";
@@ -18,8 +19,16 @@ export const worldsync = {
   lastPush: 0,
   lastImpactAt: -1,
   hostSeenAt: 0,
-  stats: { strikesIn: 0, statesIn: 0, pushes: 0, pulls: 0, hullsIn: 0, hullsOut: 0 },
+  lastHulks: 0,
+  stats: { strikesIn: 0, statesIn: 0, pushes: 0, pulls: 0, hullsIn: 0, hullsOut: 0, hulksIn: 0, hulksOut: 0, hulkCuts: 0 },
 };
+
+export const HULK_EVERY = 8000;
+
+export function hostVesselDown(id) {
+  const n = vesselById(id);
+  if (n && n.job !== "down") leaveHulk({ id, kind: "npc" }, "kill");
+}
 
 export function hullWire(pos, cap = HULL_CAP) {
   const out = [];
@@ -161,6 +170,7 @@ export function resetWorldSync() {
   worldsync.wseqSeen = 0;
   worldsync.lastState = 0;
   worldsync.lastPush = 0;
+  worldsync.lastHulks = 0;
   worldsync.lastImpactAt = -1;
   worldsync.hostSeenAt = 0;
   sim.worldAuthority = true;
@@ -244,7 +254,15 @@ function handleMessage(from, d) {
     if (Array.isArray(d.holes)) adoptHoles(d.holes);
     if (d.trafficDown) for (const [id, until] of Object.entries(d.trafficDown)) trafficDown[id] = until;
     if (Array.isArray(d.hulls)) worldsync.stats.hullsIn = adoptHulls(d.hulls, { at: d.at });
+  } else if (d.t === "hstate") {
+    if (worldsync.host) return;
+    const r = adoptHulkWire(d.hulks, { time: sim.time });
+    worldsync.stats.hulksIn = r.added + r.kept;
+  } else if (d.t === "hcut") {
+    if (!worldsync.host) return;
+    if (typeof d.k === "string" && applyHulkCut(d.k, d.i | 0)) worldsync.stats.hulkCuts++;
   } else if (d.t === "vdown") {
+    if (worldsync.host) hostVesselDown(d.id);
     markVesselDown(d.id, sim.time);
     if (Number.isFinite(d.until)) trafficDown[d.id] = d.until;
   }
@@ -265,6 +283,12 @@ export function tickWorldSync() {
     worldsync.stats.hullsOut = hulls.length;
     sim.send({ t: "wstate", at: sim.time, impactors: impactorWire(), holes: holeWire(), trafficDown, hulls });
   }
+  if (!alone && now - worldsync.lastHulks > HULK_EVERY) {
+    worldsync.lastHulks = now;
+    const rows = hulkWire();
+    worldsync.stats.hulksOut = rows.length;
+    sim.send({ t: "hstate", at: sim.time, hulks: rows });
+  }
   const impactAt = sim.lastImpact?.at ?? -1;
   const changed = impactAt !== worldsync.lastImpactAt;
   if (changed || now - worldsync.lastPush > (alone ? 60000 : 20000)) {
@@ -275,7 +299,7 @@ export function tickWorldSync() {
 }
 
 export function wireWorldSyncTest() {
-  if (globalThis.window?.__lg) window.__lg.worldsync = { worldsync, worldSnapshot, applyWorldSnapshot, tickWorldSync, hullWire, adoptHulls, blendHulls };
+  if (globalThis.window?.__lg) window.__lg.worldsync = { worldsync, worldSnapshot, applyWorldSnapshot, tickWorldSync, hullWire, adoptHulls, blendHulls, hulkWire, adoptHulkWire };
 }
 
 export function mirrorMode() { return !worldsync.host; }

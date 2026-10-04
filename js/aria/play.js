@@ -216,7 +216,7 @@ export function jobPlan(a) {
         const want = (a.grant?.qty ?? a.qty ?? 0) - (a.recovered ?? 0);
         const rate = Math.max(0.1, Math.min(4, sim.ship.mods?.salvage ?? 1));
         const was = Boolean(sim.ship.salvage);
-        if (!was) steps.push(makeStep("SET", null, { args: { system: { key: "salvage", on: true } } }));
+        steps.push(makeStep("SET", null, { args: { system: { key: "salvage", on: true } } }));
         steps.push(makeStep("HOLD", null, { until: C("time", ">=", Math.round(((t.dwell ?? 20) / rate) * Math.max(0.2, want / Math.max(1, a.grant?.qty ?? a.qty ?? 1)) * 1.4 + 10)) }));
         if (!was) steps.push(makeStep("SET", null, { args: { system: { key: "salvage", on: false } } }));
       } else steps.push(makeStep("HOLD", null, { until: C("time", ">=", Math.max(8, (t.dwell ?? 10) + 6)) }));

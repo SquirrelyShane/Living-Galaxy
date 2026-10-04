@@ -1,6 +1,6 @@
 # js/net/worldsync.js
 
-[index](../../../README.md) · 281 lines · 30 symbols · 6 imports · 3 importers
+[index](../../../README.md) · 305 lines · 32 symbols · 7 imports · 3 importers
 
 ## About
 
@@ -57,10 +57,11 @@ is exactly what `routePose` is still for.
 |---|---|---|---|
 | 1 | `../comms/gnn.js` | `gnnBroadcastWire` | [js/comms/gnn.js](../comms/gnn.js.md) |
 | 2 | `./net.js` | `fetchWorld`, `lonely`, `net`, `onMessage`, `onRoom`, `pushWorld` | [js/net/net.js](net.js.md) |
-| 3 | `../sim/sim.js` | `applyRemoteRockHit`, `applyRemoteStrike`, `applyWorldSnapshot`, `logEvent`, `shiftClock`, `sim`, `worldSnapshot` | [js/sim/sim.js](../sim/sim.js.md) |
-| 4 | `../world/events/holes.js` | `adoptHoles`, `holeWire` | [js/world/events/holes.js](../world/events/holes.js.md) |
-| 5 | `../world/events/impactors.js` | `adoptImpactors`, `impactorWire`, `setImpactorAuthority` | [js/world/events/impactors.js](../world/events/impactors.js.md) |
-| 6 | `../npc/traffic.js` | `markVesselDown`, `trafficDown`, `traffic`, `vesselById` | [js/npc/traffic.js](../npc/traffic.js.md) |
+| 3 | `../sim/sim.js` | `applyRemoteRockHit`, `applyRemoteStrike`, `applyWorldSnapshot`, `leaveHulk`, `logEvent`, `shiftClock`, `sim`, `worldSnapshot` | [js/sim/sim.js](../sim/sim.js.md) |
+| 4 | `../world/hulks.js` | `adoptHulkWire`, `applyHulkCut`, `hulkWire` | [js/world/hulks.js](../world/hulks.js.md) |
+| 5 | `../world/events/holes.js` | `adoptHoles`, `holeWire` | [js/world/events/holes.js](../world/events/holes.js.md) |
+| 6 | `../world/events/impactors.js` | `adoptImpactors`, `impactorWire`, `setImpactorAuthority` | [js/world/events/impactors.js](../world/events/impactors.js.md) |
+| 7 | `../npc/traffic.js` | `markVesselDown`, `trafficDown`, `traffic`, `vesselById` | [js/npc/traffic.js](../npc/traffic.js.md) |
 
 ## Imported by
 
@@ -73,6 +74,8 @@ is exactly what `routePose` is still for.
 - [`HULL_CAP`](#s-HULL_CAP) · const — **no importer in scanned roots**
 - [`HULL_SNAP`](#s-HULL_SNAP) · const — **no importer in scanned roots**
 - [`worldsync`](#s-worldsync) · const — used by test/solprime.test.mjs
+- [`HULK_EVERY`](#s-HULK_EVERY) · const — **no importer in scanned roots**
+- [`hostVesselDown`](#s-hostVesselDown) · function — **no importer in scanned roots**
 - [`hullWire`](#s-hullWire) · function — **no importer in scanned roots**
 - [`HULL_DEAD`](#s-HULL_DEAD) · const — **no importer in scanned roots**
 - [`HULL_BLEND`](#s-HULL_BLEND) · const — **no importer in scanned roots**
@@ -94,7 +97,7 @@ _none detected_
 
 ### <a id="s-HULL_CAP"></a>`HULL_CAP`
 
-const · **exported** · L8–8
+const · **exported** · L9–9
 
 <!-- note:HULL_CAP -->
 How many hulls ride in a wstate packet, and how far a mirror lets a hull
@@ -103,35 +106,56 @@ drift from where the host last put it before it simply jumps.
 
 ### <a id="s-HULL_SNAP"></a>`HULL_SNAP`
 
-const · **exported** · L9–9
+const · **exported** · L10–10
 
 <!-- note:HULL_SNAP -->
 <!-- /note -->
 
 ### <a id="s-worldsync"></a>`worldsync`
 
-const · **exported** · L11–22
+const · **exported** · L12–24
 
 <!-- note:worldsync -->
-- L13 · `applied: false,` — have we applied the host's snapshot this join
+- L14 · `applied: false,` — have we applied the host's snapshot this join
+<!-- /note -->
+
+### <a id="s-HULK_EVERY"></a>`HULK_EVERY`
+
+const · **exported** · L26–26
+
+<!-- note:HULK_EVERY -->
+0.3.91: hulks ride their own packet. They change when something dies or a
+section comes off, not every two seconds, and they are bulkier than hulls.
+<!-- /note -->
+
+### <a id="s-hostVesselDown"></a>`hostVesselDown(id)`
+
+function · **exported** · L28–31
+
+- calls: [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_ · [`leaveHulk`](../sim/sim.js.md#s-leaveHulk) _js/sim/sim.js_
+- called by: [`handleMessage`](#s-handleMessage)
+
+<!-- note:hostVesselDown -->
+A kill a pilot reports is a kill: the host puts the hulk there, so the next
+pilot along finds it too. Before, only the pilot who made it ever saw it.
 <!-- /note -->
 
 ### <a id="s-hullWire"></a>`hullWire(pos, cap=)`
 
-function · **exported** · L24–52
+function · **exported** · L33–61
 
 - called by: [`tickWorldSync`](#s-tickWorldSync)
 
 <!-- note:hullWire -->
 The hull state a mirror cannot work out for itself, nearest the host first.
 
-- L38 · `wire.push([` — rounded: this is a position on a screen, not a ledger entry, and the
+- L47 · `wire.push([` — rounded: this is a position on a screen, not a ledger entry, and the
   packet goes out five times a minute over a phone's wifi
 <!-- /note -->
 
 ### <a id="s-HULL_DEAD"></a>`HULL_DEAD`
 
-const · **exported** · L54–54
+const · **exported** · L63–63
 
 <!-- note:HULL_DEAD -->
 0.3.65 — how a mirror takes the host's word without juddering.
@@ -170,21 +194,21 @@ goes quiet the hold lapses after HULL_HOLD seconds and the timetable resumes.
 
 ### <a id="s-HULL_BLEND"></a>`HULL_BLEND`
 
-const · **exported** · L55–55
+const · **exported** · L64–64
 
 <!-- note:HULL_BLEND -->
 <!-- /note -->
 
 ### <a id="s-HULL_HOLD"></a>`HULL_HOLD`
 
-const · **exported** · L56–56
+const · **exported** · L65–65
 
 <!-- note:HULL_HOLD -->
 <!-- /note -->
 
 ### <a id="s-BLEND_RATE_FLOOR"></a>`BLEND_RATE_FLOOR`
 
-const · L57–57
+const · L66–66
 
 <!-- note:BLEND_RATE_FLOOR -->
 how fast a blend may move a hull beyond its own motion: a correction reads as
@@ -193,28 +217,28 @@ drift only while it is slower than the hull (or this floor, for the slow ones)
 
 ### <a id="s-BLEND_RATE_K"></a>`BLEND_RATE_K`
 
-const · L57–57
+const · L66–66
 
 <!-- note:BLEND_RATE_K -->
 <!-- /note -->
 
 ### <a id="s-MAX_AGE"></a>`MAX_AGE`
 
-const · L58–58
+const · L67–67
 
 <!-- note:MAX_AGE -->
 <!-- /note -->
 
 ### <a id="s-POSED"></a>`POSED`
 
-const · L59–59
+const · L68–68
 
 <!-- note:POSED -->
 <!-- /note -->
 
 ### <a id="s-wrapPi"></a>`wrapPi(a)`
 
-function · L61–61
+function · L70–70
 
 - called by: [`adoptHulls`](#s-adoptHulls)
 
@@ -223,7 +247,7 @@ function · L61–61
 
 ### <a id="s-adoptHulls"></a>`adoptHulls(wire, {…}=)`
 
-function · **exported** · L63–96
+function · **exported** · L72–105
 
 - calls: [`wrapPi`](#s-wrapPi) · [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_
 - called by: [`handleMessage`](#s-handleMessage)
@@ -233,17 +257,17 @@ Apply a host's hull packet. Anything not in it keeps flying its timetable.
  `at` is the host's sky time when it read the hulls; `snap` places them
  exactly (a host restoring its own checkpoint has no render loop to blend).
 
-- L72 · `const x = x0 + vx * age, y = y0 + vy * age, z = z0 + vz * age;` — where the host's hull is NOW, not where it was when the packet left
-- L78 · `n.x = x; n.y = y; n.z = z;` — too far wrong to reconcile, or nobody can see it: take the host's word outright
-- L82 · `n.sync = { x: ex, y: ey, z: ez, yaw: wrapPi(yaw - (n.yaw ?? 0)), pitch: pitch - (n.pitch ?` — close enough to ease onto: the residual is spent a little each frame
-- L84 · `if (snap || diverged || held || n.visible === false) { n.vx = vx; n.vy = vy; n.vz = vz; n.` — a held hull flies the host's velocity; one on its own timetable keeps its own
-- L90 · `n.hunt = null;` — a mirror never runs the directors: the host decides who is hunting whom,
+- L81 · `const x = x0 + vx * age, y = y0 + vy * age, z = z0 + vz * age;` — where the host's hull is NOW, not where it was when the packet left
+- L87 · `n.x = x; n.y = y; n.z = z;` — too far wrong to reconcile, or nobody can see it: take the host's word outright
+- L91 · `n.sync = { x: ex, y: ey, z: ez, yaw: wrapPi(yaw - (n.yaw ?? 0)), pitch: pitch - (n.pitch ?` — close enough to ease onto: the residual is spent a little each frame
+- L93 · `if (snap || diverged || held || n.visible === false) { n.vx = vx; n.vy = vy; n.vz = vz; n.` — a held hull flies the host's velocity; one on its own timetable keeps its own
+- L99 · `n.hunt = null;` — a mirror never runs the directors: the host decides who is hunting whom,
   and a mirror that made its own mind up would fight a different war
 <!-- /note -->
 
 ### <a id="s-blendHulls"></a>`blendHulls(dt)`
 
-function · **exported** · L98–117
+function · **exported** · L107–126
 
 - called by: [`tickWorldSync`](#s-tickWorldSync)
 
@@ -254,35 +278,35 @@ Mirror, every frame: spend each hull's held correction. Exponential, so a
 
 ### <a id="s-mounted"></a>`mounted`
 
-const · L119–119
+const · L128–128
 
 <!-- note:mounted -->
 <!-- /note -->
 
 ### <a id="s-joinGeneration"></a>`joinGeneration`
 
-const · L120–120
+const · L129–129
 
 <!-- note:joinGeneration -->
 <!-- /note -->
 
 ### <a id="s-liveStateSeen"></a>`liveStateSeen`
 
-const · L121–121
+const · L130–130
 
 <!-- note:liveStateSeen -->
 <!-- /note -->
 
 ### <a id="s-bodySignatures"></a>`bodySignatures`
 
-const · L122–122
+const · L131–131
 
 <!-- note:bodySignatures -->
 <!-- /note -->
 
 ### <a id="s-bodySignature"></a>`bodySignature(body)`
 
-function · L124–129
+function · L133–138
 
 - called by: [`applySolPrime`](#s-applySolPrime) · [`pull`](#s-pull)
 
@@ -291,7 +315,7 @@ function · L124–129
 
 ### <a id="s-applySolPrime"></a>`applySolPrime(prime)`
 
-function · **exported** · L131–144
+function · **exported** · L140–153
 
 - calls: [`bodySignature`](#s-bodySignature) · [`applyWorldSnapshot`](../sim/sim.js.md#s-applyWorldSnapshot) _js/sim/sim.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`shiftClock`](../sim/sim.js.md#s-shiftClock) _js/sim/sim.js_
 - called by: [`mountHud>go`](../ui/hud.js.md#s-mountHud-go) _js/ui/hud.js_
@@ -305,7 +329,7 @@ find nothing to change. Call after resetWorldSync(), before connectNet().
 
 ### <a id="s-mountWorldSync"></a>`mountWorldSync()`
 
-function · **exported** · L146–151
+function · **exported** · L155–160
 
 - calls: [`onMessage`](net.js.md#s-onMessage) _js/net/net.js_ · [`onRoom`](net.js.md#s-onRoom) _js/net/net.js_
 - called by: [`mountHud>go`](../ui/hud.js.md#s-mountHud-go) _js/ui/hud.js_
@@ -315,7 +339,7 @@ function · **exported** · L146–151
 
 ### <a id="s-resetWorldSync"></a>`resetWorldSync()`
 
-function · **exported** · L153–168
+function · **exported** · L162–178
 
 - calls: [`setImpactorAuthority`](../world/events/impactors.js.md#s-setImpactorAuthority) _js/world/events/impactors.js_
 - called by: [`mountHud>go`](../ui/hud.js.md#s-mountHud-go) _js/ui/hud.js_
@@ -326,18 +350,18 @@ Call before connectNet on each launch.
 
 ### <a id="s-setHost"></a>`setHost(on)`
 
-function · L170–182
+function · L180–192
 
 - calls: [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ ×2 · [`setImpactorAuthority`](../world/events/impactors.js.md#s-setImpactorAuthority) _js/world/events/impactors.js_
 - called by: [`handleRoom`](#s-handleRoom) ×3
 
 <!-- note:setHost -->
-- L176 · `worldsync.lastPush = 0;` — publish the sky as soon as we hold it
+- L186 · `worldsync.lastPush = 0;` — publish the sky as soon as we hold it
 <!-- /note -->
 
 ### <a id="s-handleRoom"></a>`handleRoom(info)`
 
-function · L184–193
+function · L194–203
 
 - calls: [`pull`](#s-pull) · [`setHost`](#s-setHost) ×3
 
@@ -346,29 +370,29 @@ function · L184–193
 
 ### <a id="s-pull"></a>`pull()`
 
-function · async · L195–226
+function · async · L205–236
 
 - calls: [`fetchWorld`](net.js.md#s-fetchWorld) _js/net/net.js_ · [`bodySignature`](#s-bodySignature) · [`applyWorldSnapshot`](../sim/sim.js.md#s-applyWorldSnapshot) _js/sim/sim.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_
 - called by: [`handleRoom`](#s-handleRoom)
 
 <!-- note:pull -->
-- L202 · `const bodies = {};` — Later snapshots repair durable changes only. Never rewind the two-second live stream.
-- L223 · `} finally {` — next poll retries the unacknowledged revision
+- L212 · `const bodies = {};` — Later snapshots repair durable changes only. Never rewind the two-second live stream.
+- L233 · `} finally {` — next poll retries the unacknowledged revision
 <!-- /note -->
 
 ### <a id="s-handleMessage"></a>`handleMessage(from, d)`
 
-function · L228–251
+function · L238–269
 
-- calls: [`adoptHulls`](#s-adoptHulls) · [`markVesselDown`](../npc/traffic.js.md#s-markVesselDown) _js/npc/traffic.js_ · [`applyRemoteRockHit`](../sim/sim.js.md#s-applyRemoteRockHit) _js/sim/sim.js_ · [`applyRemoteStrike`](../sim/sim.js.md#s-applyRemoteStrike) _js/sim/sim.js_ · [`adoptHoles`](../world/events/holes.js.md#s-adoptHoles) _js/world/events/holes.js_ · [`adoptImpactors`](../world/events/impactors.js.md#s-adoptImpactors) _js/world/events/impactors.js_
+- calls: [`adoptHulls`](#s-adoptHulls) · [`hostVesselDown`](#s-hostVesselDown) · [`markVesselDown`](../npc/traffic.js.md#s-markVesselDown) _js/npc/traffic.js_ · [`applyRemoteRockHit`](../sim/sim.js.md#s-applyRemoteRockHit) _js/sim/sim.js_ · [`applyRemoteStrike`](../sim/sim.js.md#s-applyRemoteStrike) _js/sim/sim.js_ · [`adoptHoles`](../world/events/holes.js.md#s-adoptHoles) _js/world/events/holes.js_ · [`adoptImpactors`](../world/events/impactors.js.md#s-adoptImpactors) _js/world/events/impactors.js_ · [`adoptHulkWire`](../world/hulks.js.md#s-adoptHulkWire) _js/world/hulks.js_ · [`applyHulkCut`](../world/hulks.js.md#s-applyHulkCut) _js/world/hulks.js_
 
 <!-- note:handleMessage -->
-- L231 · `if (worldsync.host) return;` — our own strikes are already on the ground
+- L241 · `if (worldsync.host) return;` — our own strikes are already on the ground
 <!-- /note -->
 
 ### <a id="s-lastBlend"></a>`lastBlend`
 
-const · L253–253
+const · L271–271
 
 <!-- note:lastBlend -->
 From the render loop. Host duties live here.
@@ -376,9 +400,9 @@ From the render loop. Host duties live here.
 
 ### <a id="s-tickWorldSync"></a>`tickWorldSync()`
 
-function · **exported** · L254–275
+function · **exported** · L272–299
 
-- calls: [`gnnBroadcastWire`](../comms/gnn.js.md#s-gnnBroadcastWire) _js/comms/gnn.js_ · [`lonely`](net.js.md#s-lonely) _js/net/net.js_ · [`pushWorld`](net.js.md#s-pushWorld) _js/net/net.js_ · [`blendHulls`](#s-blendHulls) · [`hullWire`](#s-hullWire) · [`worldSnapshot`](../sim/sim.js.md#s-worldSnapshot) _js/sim/sim.js_ · [`holeWire`](../world/events/holes.js.md#s-holeWire) _js/world/events/holes.js_ · [`impactorWire`](../world/events/impactors.js.md#s-impactorWire) _js/world/events/impactors.js_
+- calls: [`gnnBroadcastWire`](../comms/gnn.js.md#s-gnnBroadcastWire) _js/comms/gnn.js_ · [`lonely`](net.js.md#s-lonely) _js/net/net.js_ · [`pushWorld`](net.js.md#s-pushWorld) _js/net/net.js_ · [`blendHulls`](#s-blendHulls) · [`hullWire`](#s-hullWire) · [`worldSnapshot`](../sim/sim.js.md#s-worldSnapshot) _js/sim/sim.js_ · [`holeWire`](../world/events/holes.js.md#s-holeWire) _js/world/events/holes.js_ · [`impactorWire`](../world/events/impactors.js.md#s-impactorWire) _js/world/events/impactors.js_ · [`hulkWire`](../world/hulks.js.md#s-hulkWire) _js/world/hulks.js_
 - via [js/sim/sim.js](../sim/sim.js.md): `sim.send`
 - via [js/net/net.js](net.js.md): `pushWorld.then`, `pushWorld.then.catch`
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
@@ -388,7 +412,7 @@ function · **exported** · L254–275
 
 ### <a id="s-wireWorldSyncTest"></a>`wireWorldSyncTest()`
 
-function · **exported** · L277–279
+function · **exported** · L301–303
 
 - called by: [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
 
@@ -397,7 +421,7 @@ function · **exported** · L277–279
 
 ### <a id="s-mirrorMode"></a>`mirrorMode()`
 
-function · **exported** · L281–281
+function · **exported** · L305–305
 
 <!-- note:mirrorMode -->
 A mirror steps the sky too — it has to, or hulls would freeze between

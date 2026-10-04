@@ -28,7 +28,7 @@ HUD read, a pure `stepRig`, and hooks the sim fills in. It never imports the sim
 ## Imported by
 
 - [js/console/panels/ship.js](../console/panels/ship.js.md) — `rig`
-- [js/mission/salvage.js](../mission/salvage.js.md) — `RIG`, `rig`, `rigBlocker`, `nextSection`
+- [js/mission/salvage.js](../mission/salvage.js.md) — `RIG`, `rig`, `rigBlocker`, `nextSection`, `rigRange`
 - [js/render/engine.js](../render/engine.js.md) — `rig`
 - [js/sim/sim.js](../sim/sim.js.md) — `resetRig`, `rig`, `rigHooks`, `rigTarget`, `stepRig`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `nextSection`, `rigRange`
@@ -40,7 +40,7 @@ HUD read, a pure `stepRig`, and hooks the sim fills in. It never imports the sim
 - [`rig`](#s-rig) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
 - [`rigHooks`](#s-rigHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
 - [`resetRig`](#s-resetRig) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
-- [`rigRange`](#s-rigRange) · function — used by [js/ui/tutorial.js](../ui/tutorial.js.md), test/rig.test.mjs
+- [`rigRange`](#s-rigRange) · function — used by [js/mission/salvage.js](../mission/salvage.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/rig.test.mjs
 - [`rigBlocker`](#s-rigBlocker) · function — used by [js/mission/salvage.js](../mission/salvage.js.md), test/rig.test.mjs
 - [`hulkCut`](#s-hulkCut) · function — used by test/rig.test.mjs
 - [`nextSection`](#s-nextSection) · function — used by [js/mission/salvage.js](../mission/salvage.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/rig.test.mjs
@@ -103,7 +103,7 @@ function · **exported** · L24–32
 function · **exported** · L34–36
 
 - via [js/flight/ship.js](ship.js.md): `shipFx.fx`
-- called by: [`rigTarget`](#s-rigTarget) · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
+- called by: [`rigTarget`](#s-rigTarget) · [`makeSalvage>mark`](../mission/salvage.js.md#s-makeSalvage-mark) _js/mission/salvage.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
 
 <!-- note:rigRange -->
 <!-- /note -->

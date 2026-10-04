@@ -174,7 +174,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-posture="${…}"]`
 
-- dom.query — [js/mission/run.js › EXEC.SET](../files/js/mission/run.js.md#s-EXEC-SET) L470
+- dom.query — [js/mission/run.js › EXEC.SET](../files/js/mission/run.js.md#s-EXEC-SET) L472
 
 ### `[data-proxy]`
 
@@ -316,11 +316,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `aux-auto`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L789
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L790
 
 ### `aux-auto-st`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L790
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L791
 
 ### `aux-comms`
 

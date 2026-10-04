@@ -1,7 +1,7 @@
 import { sim, addAnchoredWaypoint, removeWaypoint, warpNodeById, selectBody, setRigMode, toggleSystem, logEvent, losBlocker } from "../sim/sim.js";
 import { holdRoom, batteryCap } from "../flight/ship.js";
 import { hulks, hulkById, hulkManifest, HULK } from "../world/hulks.js";
-import { RIG, rig, rigBlocker, nextSection } from "../flight/rig.js";
+import { RIG, rig, rigBlocker, nextSection, rigRange } from "../flight/rig.js";
 import { chunks } from "../world/debris.js";
 import { contacts } from "../flight/turrets.js";
 import { stations, stationById } from "../station/stations.js";
@@ -27,10 +27,12 @@ export const SALV = {
   trip: 4,
   threatR: 6000,
   jobMargin: 1.08,
+  standoff: 0.55,
   beltK: 0.4,
   hotR: 9000,
   nestR: 16000,
   stuck: 2,
+  skips: 3,
 };
 
 export function rigModeFor(want = "strip", pos = sim.ship.pos, { job = null, h = null } = {}) {
@@ -133,6 +135,7 @@ export function makeSalvage({ mission, ap, apPark, apHold, legTo, untilMet, ensu
     wp.transient = true;
     run.wpId = wp.id;
     run.node = warpNodeById(wp.id);
+    if (run.node) run.node.park = Math.max(150, rigRange(sim.ship) * SALV.standoff);
     run.hulkId = h.id;
     run.idleSince = null;
     run.stuck0 = ap().unstuckCount ?? 0;
@@ -203,21 +206,29 @@ export function makeSalvage({ mission, ap, apPark, apHold, legTo, untilMet, ensu
       drop(run);
       return "flying";
     }
-    const leg = legTo(s, run.node);
-    if (leg !== "near") return leg;
-    apPark(run.node);
-    if (!ship.salvage) toggleSystem("salvage");
     const charge = (ship.charge ?? 0) / Math.max(1, batteryCap(ship));
     if (charge <= SALV.restAt) run.resting = true;
     else if (charge >= SALV.resumeAt) run.resting = false;
+    const want = run.resting ? "off" : mode;
+    if ((ship.rigMode ?? "off") !== want) setRigMode(want, { quiet: true });
+    const leg = legTo(s, run.node);
+    if (typeof leg === "string" && leg.startsWith("fail:") && s.target?.kind !== "hulk" && (run.skips ?? 0) < SALV.skips) {
+      run.skips = (run.skips ?? 0) + 1;
+      logEvent(`${mission.active.name}: cannot reach the ${h.name} (${leg.slice(5)}) — taking another`, "nav");
+      skipHulk(h.id);
+      drop(run);
+      apHold();
+      return "flying";
+    }
+    if (leg !== "near") return leg;
+    apPark(run.node);
+    if (!ship.salvage) toggleSystem("salvage");
     if (run.resting) {
-      if ((ship.rigMode ?? "off") !== "off") setRigMode("off", { quiet: true });
       ap().phase = "charge";
       ap().task = `rig rested · ${Math.round(charge * 100)}% → ${Math.round(SALV.resumeAt * 100)}%`;
       run.idleSince = null;
       return "flying";
     }
-    if (ship.rigMode !== mode) setRigMode(mode, { quiet: true });
     ap().phase = "salvage";
     ap().task = `${mode} · ${h.vesselName}${rig.active && rig.key === h.id ? ` · ${rig.section}` : ""} · ${Math.round(holdRoom(ship))} room`;
 

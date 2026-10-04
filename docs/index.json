@@ -1467,7 +1467,7 @@
   },
   {
    "file": "js/aria/pilot.js",
-   "lines": 509,
+   "lines": 518,
    "vendor": false,
    "summary": "ARIA at the conn, flying your jobs the way you fly them.",
    "imports": [
@@ -1806,6 +1806,16 @@
        "imported": "SALV"
       }
      ]
+    },
+    {
+     "spec": "../world/hulks.js",
+     "target": "js/world/hulks.js",
+     "names": [
+      {
+       "local": "hulks",
+       "imported": "hulks"
+      }
+     ]
     }
    ],
    "dynamic": [],
@@ -1837,64 +1847,64 @@
     {
      "key": "ARIA_JOBS",
      "kind": "const",
-     "line": 20,
-     "end": 20,
-     "exported": true,
-     "calls": []
-    },
-    {
-     "key": "INVEST_JOBS",
-     "kind": "const",
      "line": 21,
      "end": 21,
      "exported": true,
      "calls": []
     },
     {
-     "key": "LABEL_JOB",
+     "key": "INVEST_JOBS",
      "kind": "const",
      "line": 22,
      "end": 22,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "LABEL_JOB",
+     "kind": "const",
+     "line": 23,
+     "end": 23,
      "exported": false,
      "calls": []
     },
     {
      "key": "ariaPilot",
      "kind": "const",
-     "line": 24,
-     "end": 37,
+     "line": 25,
+     "end": 39,
      "exported": true,
      "calls": []
     },
     {
      "key": "prefs",
      "kind": "const",
-     "line": 39,
-     "end": 39,
+     "line": 41,
+     "end": 41,
      "exported": false,
      "calls": []
     },
     {
      "key": "say",
      "kind": "const",
-     "line": 40,
-     "end": 40,
+     "line": 42,
+     "end": 42,
      "exported": false,
      "calls": []
     },
     {
      "key": "notePlayerJob",
      "kind": "function",
-     "line": 42,
-     "end": 48,
+     "line": 44,
+     "end": 50,
      "exported": true,
      "calls": []
     },
     {
      "key": "notePlayLabel",
      "kind": "function",
-     "line": 50,
-     "end": 53,
+     "line": 52,
+     "end": 55,
      "exported": true,
      "calls": [
       "js/aria/pilot.js#notePlayerJob"
@@ -1903,24 +1913,24 @@
     {
      "key": "jobHabits",
      "kind": "function",
-     "line": 55,
-     "end": 61,
+     "line": 57,
+     "end": 63,
      "exported": true,
      "calls": []
     },
     {
      "key": "unsurveyed",
      "kind": "function",
-     "line": 63,
-     "end": 73,
+     "line": 65,
+     "end": 75,
      "exported": false,
      "calls": []
     },
     {
      "key": "bestRepairPort",
      "kind": "function",
-     "line": 75,
-     "end": 83,
+     "line": 77,
+     "end": 85,
      "exported": true,
      "calls": [
       "js/flight/repair.js#repairsAt",
@@ -1931,16 +1941,16 @@
     {
      "key": "hostileNear",
      "kind": "function",
-     "line": 85,
-     "end": 88,
+     "line": 87,
+     "end": 90,
      "exported": false,
      "calls": []
     },
     {
      "key": "deskSteps",
      "kind": "function",
-     "line": 90,
-     "end": 95,
+     "line": 92,
+     "end": 97,
      "exported": false,
      "calls": [
       "js/mission/script.js#makeStep"
@@ -1949,56 +1959,64 @@
     {
      "key": "INVEST",
      "kind": "const",
-     "line": 97,
-     "end": 102,
+     "line": 99,
+     "end": 104,
      "exported": false,
      "calls": []
     },
     {
      "key": "GUESS",
      "kind": "const",
-     "line": 104,
-     "end": 107,
+     "line": 106,
+     "end": 109,
      "exported": false,
      "calls": []
     },
     {
      "key": "WORK",
      "kind": "const",
-     "line": 108,
-     "end": 108,
+     "line": 110,
+     "end": 110,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "SALVOR",
+     "kind": "const",
+     "line": 111,
+     "end": 111,
      "exported": false,
      "calls": []
     },
     {
      "key": "JOB_REFITS",
      "kind": "const",
-     "line": 110,
-     "end": 115,
+     "line": 113,
+     "end": 118,
      "exported": false,
      "calls": []
     },
     {
      "key": "ALWAYS_REFITS",
      "kind": "const",
-     "line": 116,
-     "end": 116,
+     "line": 119,
+     "end": 119,
      "exported": false,
      "calls": []
     },
     {
      "key": "JOB_DRONES",
      "kind": "const",
-     "line": 118,
-     "end": 123,
+     "line": 121,
+     "end": 126,
      "exported": false,
      "calls": []
     },
     {
      "key": "inRange",
      "kind": "function",
-     "line": 125,
-     "end": 125,
+     "line": 128,
+     "end": 128,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3"
@@ -2007,16 +2025,16 @@
     {
      "key": "FABRULE",
      "kind": "const",
-     "line": 127,
-     "end": 132,
+     "line": 130,
+     "end": 135,
      "exported": false,
      "calls": []
     },
     {
      "key": "fabLeaning",
      "kind": "function",
-     "line": 134,
-     "end": 150,
+     "line": 137,
+     "end": 153,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#snapshot",
@@ -2026,8 +2044,8 @@
     {
      "key": "fabStop",
      "kind": "function",
-     "line": 152,
-     "end": 177,
+     "line": 155,
+     "end": 180,
      "exported": true,
      "calls": [
       "js/aria/pilot.js#fabLeaning",
@@ -2043,8 +2061,8 @@
     {
      "key": "refitPlan",
      "kind": "function",
-     "line": 179,
-     "end": 196,
+     "line": 182,
+     "end": 199,
      "exported": true,
      "calls": [
       "js/economy/upgrades.js#hasUpgrade",
@@ -2056,8 +2074,8 @@
     {
      "key": "buildPlan",
      "kind": "function",
-     "line": 198,
-     "end": 214,
+     "line": 201,
+     "end": 217,
      "exported": true,
      "calls": [
       "js/corp/company.js#hasCompany",
@@ -2069,8 +2087,8 @@
     {
      "key": "MISSION",
      "kind": "function",
-     "line": 216,
-     "end": 216,
+     "line": 219,
+     "end": 219,
      "exported": false,
      "calls": [
       "js/mission/script.js#makeMission"
@@ -2079,8 +2097,8 @@
     {
      "key": "rawPlanJob",
      "kind": "function",
-     "line": 218,
-     "end": 303,
+     "line": 221,
+     "end": 308,
      "exported": false,
      "calls": [
       "js/flight/repair.js#hullMaxOf",
@@ -2105,8 +2123,8 @@
     {
      "key": "rawPlanJob>weight",
      "kind": "function",
-     "line": 277,
-     "end": 277,
+     "line": 282,
+     "end": 282,
      "exported": false,
      "calls": [
       "js/aria/mind.js#policyScore",
@@ -2116,8 +2134,8 @@
     {
      "key": "planJob",
      "kind": "function",
-     "line": 305,
-     "end": 312,
+     "line": 310,
+     "end": 317,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#snapshot",
@@ -2133,8 +2151,8 @@
     {
      "key": "shouldBreakOff",
      "kind": "function",
-     "line": 314,
-     "end": 321,
+     "line": 319,
+     "end": 326,
      "exported": true,
      "calls": [
       "js/flight/repair.js#hullMaxOf",
@@ -2148,8 +2166,8 @@
     {
      "key": "beginAriaWatch",
      "kind": "function",
-     "line": 323,
-     "end": 337,
+     "line": 328,
+     "end": 343,
      "exported": true,
      "calls": [
       "js/mission/run.js#stopMission"
@@ -2158,8 +2176,8 @@
     {
      "key": "endAriaWatch",
      "kind": "function",
-     "line": 339,
-     "end": 342,
+     "line": 345,
+     "end": 348,
      "exported": true,
      "calls": [
       "js/mission/run.js#stopMission"
@@ -2168,8 +2186,8 @@
     {
      "key": "tickAriaPilot",
      "kind": "function",
-     "line": 344,
-     "end": 412,
+     "line": 350,
+     "end": 421,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#pilotInput",
@@ -2196,8 +2214,8 @@
     {
      "key": "registerAriaOps",
      "kind": "function",
-     "line": 414,
-     "end": 432,
+     "line": 423,
+     "end": 441,
      "exported": false,
      "calls": [
       "js/aria/pilot.js#registerRefitOp",
@@ -2213,8 +2231,8 @@
     {
      "key": "registerRefitOp",
      "kind": "function",
-     "line": 434,
-     "end": 455,
+     "line": 443,
+     "end": 464,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -2228,8 +2246,8 @@
     {
      "key": "registerBuildOp",
      "kind": "function",
-     "line": 457,
-     "end": 477,
+     "line": 466,
+     "end": 486,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -2241,8 +2259,8 @@
     {
      "key": "registerFabOp",
      "kind": "function",
-     "line": 479,
-     "end": 501,
+     "line": 488,
+     "end": 510,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -2255,8 +2273,8 @@
     {
      "key": "wireAriaPilot",
      "kind": "function",
-     "line": 503,
-     "end": 507,
+     "line": 512,
+     "end": 516,
      "exported": true,
      "calls": [
       "js/aria/pilot.js#registerAriaOps"
@@ -2265,8 +2283,8 @@
     {
      "key": "bindAriaPrefs",
      "kind": "function",
-     "line": 509,
-     "end": 509,
+     "line": 518,
+     "end": 518,
      "exported": true,
      "calls": []
     }
@@ -48077,7 +48095,7 @@
   },
   {
    "file": "js/flight/autopilot.js",
-   "lines": 800,
+   "lines": 801,
    "vendor": false,
    "summary": "the autopilot: flight primitives under a mission script.",
    "imports": [
@@ -49062,15 +49080,15 @@
      "key": "parkDistance",
      "kind": "function",
      "line": 518,
-     "end": 520,
+     "end": 521,
      "exported": true,
      "calls": []
     },
     {
      "key": "tickAutopilot",
      "kind": "function",
-     "line": 522,
-     "end": 550,
+     "line": 523,
+     "end": 551,
      "exported": true,
      "calls": [
       "js/mission/run.js#restoreRun",
@@ -49086,8 +49104,8 @@
     {
      "key": "apLeg",
      "kind": "function",
-     "line": 552,
-     "end": 643,
+     "line": 553,
+     "end": 644,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#parkDistance",
@@ -49116,8 +49134,8 @@
     {
      "key": "apPark",
      "kind": "function",
-     "line": 645,
-     "end": 664,
+     "line": 646,
+     "end": 665,
      "exported": true,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -49132,8 +49150,8 @@
     {
      "key": "apDock",
      "kind": "function",
-     "line": 666,
-     "end": 709,
+     "line": 667,
+     "end": 710,
      "exported": true,
      "calls": [
       "js/sim/sim.js#stationStatus",
@@ -49155,24 +49173,24 @@
     {
      "key": "MINE_STANDOFF",
      "kind": "function",
-     "line": 711,
-     "end": 711,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_rock",
-     "kind": "const",
      "line": 712,
      "end": 712,
      "exported": false,
      "calls": []
     },
     {
+     "key": "_rock",
+     "kind": "const",
+     "line": 713,
+     "end": 713,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "atSeam",
      "kind": "function",
-     "line": 714,
-     "end": 716,
+     "line": 715,
+     "end": 717,
      "exported": true,
      "calls": [
       "js/world/field.js#inBelt",
@@ -49182,8 +49200,8 @@
     {
      "key": "apMine",
      "kind": "function",
-     "line": 718,
-     "end": 779,
+     "line": 719,
+     "end": 780,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#apUnstick",
@@ -49207,16 +49225,16 @@
     {
      "key": "jumpEndedShort",
      "kind": "function",
-     "line": 781,
-     "end": 785,
+     "line": 782,
+     "end": 786,
      "exported": true,
      "calls": []
     },
     {
      "key": "wireAutopilot",
      "kind": "function",
-     "line": 787,
-     "end": 800,
+     "line": 788,
+     "end": 801,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#toggleAutopilot",
@@ -49229,19 +49247,19 @@
      "kind": "dom.id",
      "value": "aux-auto",
      "at": "wireAutopilot",
-     "line": 789
+     "line": 790
     },
     {
      "kind": "dom.id",
      "value": "aux-auto-st",
      "at": "wireAutopilot",
-     "line": 790
+     "line": 791
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "wireAutopilot",
-     "line": 791,
+     "line": 792,
      "target": "btn",
      "handler": "(inline)"
     },
@@ -49249,7 +49267,7 @@
      "kind": "timer",
      "value": "setInterval",
      "at": "wireAutopilot",
-     "line": 793
+     "line": 794
     }
    ]
   },
@@ -55873,7 +55891,7 @@
   },
   {
    "file": "js/mission/run.js",
-   "lines": 565,
+   "lines": 567,
    "vendor": false,
    "summary": "the mission executor: walks a script's steps on the autopilot primitives.",
    "imports": [
@@ -56344,7 +56362,7 @@
      "key": "startMission",
      "kind": "function",
      "line": 47,
-     "end": 90,
+     "end": 92,
      "exported": true,
      "calls": [
       "js/mission/run.js#note",
@@ -56354,6 +56372,7 @@
       "js/mission/script.js#deserialize",
       "js/mission/script.js#serialize",
       "js/mission/run.js#pickRoute",
+      "js/flight/autopilot.js#bestPortFor",
       "js/mission/script.js#makeStep",
       "js/mission/run.js#mirror",
       "js/mission/run.js#beginStep",
@@ -56363,8 +56382,8 @@
     {
      "key": "stopMission",
      "kind": "function",
-     "line": 92,
-     "end": 110,
+     "line": 94,
+     "end": 112,
      "exported": true,
      "calls": [
       "js/mission/run.js#cleanupStep",
@@ -56377,8 +56396,8 @@
     {
      "key": "pauseMission",
      "kind": "function",
-     "line": 112,
-     "end": 121,
+     "line": 114,
+     "end": 123,
      "exported": true,
      "calls": [
       "js/mission/run.js#cleanupStep",
@@ -56390,8 +56409,8 @@
     {
      "key": "resumeMission",
      "kind": "function",
-     "line": 123,
-     "end": 136,
+     "line": 125,
+     "end": 138,
      "exported": true,
      "calls": [
       "js/mission/run.js#note",
@@ -56402,8 +56421,8 @@
     {
      "key": "answerAsk",
      "kind": "function",
-     "line": 138,
-     "end": 149,
+     "line": 140,
+     "end": 151,
      "exported": true,
      "calls": [
       "js/mission/run.js#stopMission",
@@ -56413,16 +56432,16 @@
     {
      "key": "step",
      "kind": "function",
-     "line": 151,
-     "end": 151,
+     "line": 153,
+     "end": 153,
      "exported": false,
      "calls": []
     },
     {
      "key": "beginStep",
      "kind": "function",
-     "line": 153,
-     "end": 164,
+     "line": 155,
+     "end": 166,
      "exported": false,
      "calls": [
       "js/mission/run.js#step",
@@ -56432,8 +56451,8 @@
     {
      "key": "cleanupStep",
      "kind": "function",
-     "line": 166,
-     "end": 171,
+     "line": 168,
+     "end": 173,
      "exported": false,
      "calls": [
       "js/sim/sim.js#removeWaypoint"
@@ -56442,8 +56461,8 @@
     {
      "key": "advance",
      "kind": "function",
-     "line": 173,
-     "end": 195,
+     "line": 175,
+     "end": 197,
      "exported": false,
      "calls": [
       "js/mission/run.js#cleanupStep",
@@ -56458,8 +56477,8 @@
     {
      "key": "fail",
      "kind": "function",
-     "line": 197,
-     "end": 204,
+     "line": 199,
+     "end": 206,
      "exported": false,
      "calls": [
       "js/mission/run.js#step",
@@ -56473,16 +56492,16 @@
     {
      "key": "mirror",
      "kind": "function",
-     "line": 206,
-     "end": 212,
+     "line": 208,
+     "end": 214,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepThrustCap",
      "kind": "function",
-     "line": 214,
-     "end": 217,
+     "line": 216,
+     "end": 219,
      "exported": true,
      "calls": [
       "js/mission/run.js#step",
@@ -56492,8 +56511,8 @@
     {
      "key": "stepWarpPolicy",
      "kind": "function",
-     "line": 219,
-     "end": 222,
+     "line": 221,
+     "end": 224,
      "exported": true,
      "calls": [
       "js/mission/run.js#step"
@@ -56502,8 +56521,8 @@
     {
      "key": "markAt",
      "kind": "function",
-     "line": 224,
-     "end": 229,
+     "line": 226,
+     "end": 231,
      "exported": false,
      "calls": [
       "js/sim/sim.js#addAnchoredWaypoint",
@@ -56514,8 +56533,8 @@
     {
      "key": "nearestUnsurveyed",
      "kind": "function",
-     "line": 231,
-     "end": 241,
+     "line": 233,
+     "end": 243,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyPosition",
@@ -56525,8 +56544,8 @@
     {
      "key": "resolve",
      "kind": "function",
-     "line": 243,
-     "end": 287,
+     "line": 245,
+     "end": 289,
      "exported": false,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -56543,8 +56562,8 @@
     {
      "key": "ensureUndocked",
      "kind": "function",
-     "line": 289,
-     "end": 301,
+     "line": 291,
+     "end": 303,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -56555,8 +56574,8 @@
     {
      "key": "untilMet",
      "kind": "function",
-     "line": 303,
-     "end": 305,
+     "line": 305,
+     "end": 307,
      "exported": false,
      "calls": [
       "js/mission/script.js#evalCond",
@@ -56566,8 +56585,8 @@
     {
      "key": "legOpts",
      "kind": "function",
-     "line": 307,
-     "end": 307,
+     "line": 309,
+     "end": 309,
      "exported": false,
      "calls": [
       "js/mission/run.js#stepThrustCap",
@@ -56577,16 +56596,16 @@
     {
      "key": "ap",
      "kind": "prop",
-     "line": 309,
-     "end": 309,
+     "line": 311,
+     "end": 311,
      "exported": false,
      "calls": []
     },
     {
      "key": "SALVAGE",
      "kind": "const",
-     "line": 310,
-     "end": 310,
+     "line": 312,
+     "end": 312,
      "exported": false,
      "calls": [
       "js/mission/salvage.js#makeSalvage"
@@ -56595,24 +56614,24 @@
     {
      "key": "SALVAGE.ap",
      "kind": "prop",
-     "line": 310,
-     "end": 310,
+     "line": 312,
+     "end": 312,
      "exported": false,
      "calls": []
     },
     {
      "key": "EXEC",
      "kind": "const",
-     "line": 312,
-     "end": 474,
+     "line": 314,
+     "end": 476,
      "exported": true,
      "calls": []
     },
     {
      "key": "EXEC.GOTO",
      "kind": "prop",
-     "line": 313,
-     "end": 340,
+     "line": 315,
+     "end": 342,
      "exported": false,
      "calls": [
       "js/mission/run.js#resolve",
@@ -56628,8 +56647,8 @@
     {
      "key": "EXEC.APPROACH",
      "kind": "prop",
-     "line": 341,
-     "end": 357,
+     "line": 343,
+     "end": 359,
      "exported": false,
      "calls": [
       "js/mission/run.js#resolve",
@@ -56641,8 +56660,8 @@
     {
      "key": "EXEC.DOCK",
      "kind": "prop",
-     "line": 358,
-     "end": 373,
+     "line": 360,
+     "end": 375,
      "exported": false,
      "calls": [
       "js/mission/run.js#resolve",
@@ -56654,8 +56673,8 @@
     {
      "key": "EXEC.UNDOCK",
      "kind": "prop",
-     "line": 374,
-     "end": 378,
+     "line": 376,
+     "end": 380,
      "exported": false,
      "calls": [
       "js/mission/run.js#ensureUndocked"
@@ -56664,8 +56683,8 @@
     {
      "key": "EXEC.MINE",
      "kind": "prop",
-     "line": 379,
-     "end": 408,
+     "line": 381,
+     "end": 410,
      "exported": false,
      "calls": [
       "js/mission/run.js#untilMet",
@@ -56683,24 +56702,24 @@
     {
      "key": "EXEC.SELL",
      "kind": "prop",
-     "line": 410,
-     "end": 410,
+     "line": 412,
+     "end": 412,
      "exported": false,
      "calls": []
     },
     {
      "key": "EXEC.DELIVER",
      "kind": "prop",
-     "line": 410,
-     "end": 410,
+     "line": 412,
+     "end": 412,
      "exported": false,
      "calls": []
     },
     {
      "key": "EXEC.STASH",
      "kind": "prop",
-     "line": 411,
-     "end": 419,
+     "line": 413,
+     "end": 421,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -56710,8 +56729,8 @@
     {
      "key": "EXEC.SMELT",
      "kind": "prop",
-     "line": 420,
-     "end": 429,
+     "line": 422,
+     "end": 431,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -56722,16 +56741,16 @@
     {
      "key": "EXEC.BUY",
      "kind": "prop",
-     "line": 430,
-     "end": 430,
+     "line": 432,
+     "end": 432,
      "exported": false,
      "calls": []
     },
     {
      "key": "EXEC.CHARGE",
      "kind": "prop",
-     "line": 431,
-     "end": 441,
+     "line": 433,
+     "end": 443,
      "exported": false,
      "calls": [
       "js/mission/run.js#batteryCap",
@@ -56743,8 +56762,8 @@
     {
      "key": "EXEC.WAIT",
      "kind": "prop",
-     "line": 442,
-     "end": 446,
+     "line": 444,
+     "end": 448,
      "exported": false,
      "calls": [
       "js/flight/autopilot.js#apHold",
@@ -56754,8 +56773,8 @@
     {
      "key": "EXEC.HOLD",
      "kind": "prop",
-     "line": 447,
-     "end": 451,
+     "line": 449,
+     "end": 453,
      "exported": false,
      "calls": [
       "js/flight/autopilot.js#apHold",
@@ -56765,8 +56784,8 @@
     {
      "key": "EXEC.SURVEY",
      "kind": "prop",
-     "line": 452,
-     "end": 464,
+     "line": 454,
+     "end": 466,
      "exported": false,
      "calls": [
       "js/mission/run.js#resolve",
@@ -56778,8 +56797,8 @@
     {
      "key": "EXEC.SET",
      "kind": "prop",
-     "line": 465,
-     "end": 473,
+     "line": 467,
+     "end": 475,
      "exported": false,
      "calls": [
       "js/sim/sim.js#setTurretMode",
@@ -56790,8 +56809,8 @@
     {
      "key": "beginAsk",
      "kind": "function",
-     "line": 476,
-     "end": 490,
+     "line": 478,
+     "end": 492,
      "exported": false,
      "calls": [
       "js/flight/autopilot.js#warpReserve",
@@ -56801,26 +56820,6 @@
     {
      "key": "beginAsk.run",
      "kind": "prop",
-     "line": 484,
-     "end": 484,
-     "exported": false,
-     "calls": [
-      "js/mission/run.js#answerAsk"
-     ]
-    },
-    {
-     "key": "beginAsk.run~2",
-     "kind": "prop",
-     "line": 485,
-     "end": 485,
-     "exported": false,
-     "calls": [
-      "js/mission/run.js#answerAsk"
-     ]
-    },
-    {
-     "key": "beginAsk.run~3",
-     "kind": "prop",
      "line": 486,
      "end": 486,
      "exported": false,
@@ -56829,10 +56828,30 @@
      ]
     },
     {
+     "key": "beginAsk.run~2",
+     "kind": "prop",
+     "line": 487,
+     "end": 487,
+     "exported": false,
+     "calls": [
+      "js/mission/run.js#answerAsk"
+     ]
+    },
+    {
+     "key": "beginAsk.run~3",
+     "kind": "prop",
+     "line": 488,
+     "end": 488,
+     "exported": false,
+     "calls": [
+      "js/mission/run.js#answerAsk"
+     ]
+    },
+    {
      "key": "tickMission",
      "kind": "function",
-     "line": 492,
-     "end": 513,
+     "line": 494,
+     "end": 515,
      "exported": true,
      "calls": [
       "js/mission/run.js#step",
@@ -56847,8 +56866,8 @@
     {
      "key": "missionStatusLine",
      "kind": "function",
-     "line": 515,
-     "end": 527,
+     "line": 517,
+     "end": 529,
      "exported": true,
      "calls": [
       "js/mission/run.js#step",
@@ -56858,8 +56877,8 @@
     {
      "key": "saveRun",
      "kind": "function",
-     "line": 529,
-     "end": 535,
+     "line": 531,
+     "end": 537,
      "exported": true,
      "calls": [
       "js/mission/run.js#RUN_KEY",
@@ -56869,8 +56888,8 @@
     {
      "key": "clearRun",
      "kind": "function",
-     "line": 537,
-     "end": 539,
+     "line": 539,
+     "end": 541,
      "exported": true,
      "calls": [
       "js/mission/run.js#RUN_KEY"
@@ -56879,8 +56898,8 @@
     {
      "key": "restoreRun",
      "kind": "function",
-     "line": 541,
-     "end": 565,
+     "line": 543,
+     "end": 567,
      "exported": true,
      "calls": [
       "js/mission/run.js#RUN_KEY",
@@ -56894,27 +56913,27 @@
      "kind": "dom.query",
      "value": "[data-posture=\"${…}\"]",
      "at": "EXEC.SET",
-     "line": 470
+     "line": 472
     },
     {
      "kind": "storage.remove",
      "value": "‹RUN_KEY()›",
      "at": "clearRun",
-     "line": 538,
+     "line": 540,
      "store": "local"
     },
     {
      "kind": "storage.get",
      "value": "‹RUN_KEY()›",
      "at": "restoreRun",
-     "line": 547,
+     "line": 549,
      "store": "local"
     }
    ]
   },
   {
    "file": "js/mission/salvage.js",
-   "lines": 238,
+   "lines": 249,
    "vendor": false,
    "summary": "0.3.90 — SALVAGE, the mission op, and the eye that picks a hulk.",
    "imports": [
@@ -57015,6 +57034,10 @@
       {
        "local": "nextSection",
        "imported": "nextSection"
+      },
+      {
+       "local": "rigRange",
+       "imported": "rigRange"
       }
      ]
     },
@@ -57142,15 +57165,15 @@
      "key": "SALV",
      "kind": "const",
      "line": 15,
-     "end": 34,
+     "end": 36,
      "exported": true,
      "calls": []
     },
     {
      "key": "rigModeFor",
      "kind": "function",
-     "line": 36,
-     "end": 46,
+     "line": 38,
+     "end": 48,
      "exported": true,
      "calls": [
       "js/mission/salvage.js#d3"
@@ -57159,48 +57182,48 @@
     {
      "key": "skipped",
      "kind": "const",
-     "line": 48,
-     "end": 48,
+     "line": 50,
+     "end": 50,
      "exported": false,
      "calls": []
     },
     {
      "key": "d3",
      "kind": "function",
-     "line": 49,
-     "end": 49,
+     "line": 51,
+     "end": 51,
      "exported": false,
      "calls": []
     },
     {
      "key": "forgetSkipped",
      "kind": "function",
-     "line": 51,
-     "end": 53,
+     "line": 53,
+     "end": 55,
      "exported": true,
      "calls": []
     },
     {
      "key": "skipHulk",
      "kind": "function",
-     "line": 55,
-     "end": 57,
+     "line": 57,
+     "end": 59,
      "exported": true,
      "calls": []
     },
     {
      "key": "rigRate",
      "kind": "function",
-     "line": 59,
-     "end": 61,
+     "line": 61,
+     "end": 63,
      "exported": true,
      "calls": []
     },
     {
      "key": "cutSeconds",
      "kind": "function",
-     "line": 63,
-     "end": 67,
+     "line": 65,
+     "end": 69,
      "exported": true,
      "calls": [
       "js/mission/salvage.js#rigRate"
@@ -57209,8 +57232,8 @@
     {
      "key": "hulkWorth",
      "kind": "function",
-     "line": 69,
-     "end": 75,
+     "line": 71,
+     "end": 77,
      "exported": true,
      "calls": [
       "js/world/hulks.js#hulkManifest",
@@ -57220,8 +57243,8 @@
     {
      "key": "underGuns",
      "kind": "function",
-     "line": 77,
-     "end": 77,
+     "line": 79,
+     "end": 79,
      "exported": false,
      "calls": [
       "js/mission/salvage.js#d3"
@@ -57230,8 +57253,8 @@
     {
      "key": "hotHulk",
      "kind": "function",
-     "line": 79,
-     "end": 84,
+     "line": 81,
+     "end": 86,
      "exported": true,
      "calls": [
       "js/mission/salvage.js#d3"
@@ -57240,8 +57263,8 @@
     {
      "key": "bestHulk",
      "kind": "function",
-     "line": 86,
-     "end": 112,
+     "line": 88,
+     "end": 114,
      "exported": true,
      "calls": [
       "js/flight/rig.js#nextSection",
@@ -57259,8 +57282,8 @@
     {
      "key": "salvageReport",
      "kind": "function",
-     "line": 114,
-     "end": 117,
+     "line": 116,
+     "end": 119,
      "exported": true,
      "calls": [
       "js/mission/salvage.js#bestHulk"
@@ -57269,24 +57292,24 @@
     {
      "key": "jobOf",
      "kind": "function",
-     "line": 119,
-     "end": 119,
+     "line": 121,
+     "end": 121,
      "exported": false,
      "calls": []
     },
     {
      "key": "jobFilled",
      "kind": "function",
-     "line": 120,
-     "end": 120,
+     "line": 122,
+     "end": 122,
      "exported": false,
      "calls": []
     },
     {
      "key": "makeSalvage",
      "kind": "function",
-     "line": 122,
-     "end": 238,
+     "line": 124,
+     "end": 249,
      "exported": true,
      "calls": [
       "js/mission/salvage.js#jobOf",
@@ -57310,8 +57333,8 @@
     {
      "key": "makeSalvage>drop",
      "kind": "function",
-     "line": 123,
-     "end": 128,
+     "line": 125,
+     "end": 130,
      "exported": false,
      "calls": [
       "js/sim/sim.js#removeWaypoint"
@@ -57320,13 +57343,14 @@
     {
      "key": "makeSalvage>mark",
      "kind": "function",
-     "line": 130,
-     "end": 144,
+     "line": 132,
+     "end": 147,
      "exported": false,
      "calls": [
       "js/sim/sim.js#removeWaypoint",
       "js/sim/sim.js#addAnchoredWaypoint",
       "js/sim/sim.js#warpNodeById",
+      "js/flight/rig.js#rigRange",
       "js/sim/sim.js#selectBody",
       "js/sim/sim.js#logEvent"
      ]
@@ -57334,8 +57358,8 @@
     {
      "key": "makeSalvage>pick",
      "kind": "function",
-     "line": 146,
-     "end": 153,
+     "line": 149,
+     "end": 156,
      "exported": false,
      "calls": [
       "js/world/hulks.js#hulkById",
@@ -57348,8 +57372,8 @@
     {
      "key": "makeSalvage>looseNear",
      "kind": "function",
-     "line": 155,
-     "end": 160,
+     "line": 158,
+     "end": 163,
      "exported": false,
      "calls": [
       "js/mission/salvage.js#d3"
@@ -59235,7 +59259,7 @@
   },
   {
    "file": "js/net/worldsync.js",
-   "lines": 281,
+   "lines": 305,
    "vendor": false,
    "summary": "LIVING GALAXY experimental — one sky for everyone in the room.",
    "imports": [
@@ -59296,6 +59320,10 @@
        "imported": "applyWorldSnapshot"
       },
       {
+       "local": "leaveHulk",
+       "imported": "leaveHulk"
+      },
+      {
        "local": "logEvent",
        "imported": "logEvent"
       },
@@ -59310,6 +59338,24 @@
       {
        "local": "worldSnapshot",
        "imported": "worldSnapshot"
+      }
+     ]
+    },
+    {
+     "spec": "../world/hulks.js",
+     "target": "js/world/hulks.js",
+     "names": [
+      {
+       "local": "adoptHulkWire",
+       "imported": "adoptHulkWire"
+      },
+      {
+       "local": "applyHulkCut",
+       "imported": "applyHulkCut"
+      },
+      {
+       "local": "hulkWire",
+       "imported": "hulkWire"
       }
      ]
     },
@@ -59377,6 +59423,8 @@
     "HULL_CAP",
     "HULL_SNAP",
     "worldsync",
+    "HULK_EVERY",
+    "hostVesselDown",
     "hullWire",
     "HULL_DEAD",
     "HULL_BLEND",
@@ -59394,104 +59442,123 @@
     {
      "key": "HULL_CAP",
      "kind": "const",
-     "line": 8,
-     "end": 8,
-     "exported": true,
-     "calls": []
-    },
-    {
-     "key": "HULL_SNAP",
-     "kind": "const",
      "line": 9,
      "end": 9,
      "exported": true,
      "calls": []
     },
     {
-     "key": "worldsync",
+     "key": "HULL_SNAP",
      "kind": "const",
-     "line": 11,
-     "end": 22,
+     "line": 10,
+     "end": 10,
      "exported": true,
      "calls": []
     },
     {
+     "key": "worldsync",
+     "kind": "const",
+     "line": 12,
+     "end": 24,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "HULK_EVERY",
+     "kind": "const",
+     "line": 26,
+     "end": 26,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "hostVesselDown",
+     "kind": "function",
+     "line": 28,
+     "end": 31,
+     "exported": true,
+     "calls": [
+      "js/npc/traffic.js#vesselById",
+      "js/sim/sim.js#leaveHulk"
+     ]
+    },
+    {
      "key": "hullWire",
      "kind": "function",
-     "line": 24,
-     "end": 52,
+     "line": 33,
+     "end": 61,
      "exported": true,
      "calls": []
     },
     {
      "key": "HULL_DEAD",
      "kind": "const",
-     "line": 54,
-     "end": 54,
+     "line": 63,
+     "end": 63,
      "exported": true,
      "calls": []
     },
     {
      "key": "HULL_BLEND",
      "kind": "const",
-     "line": 55,
-     "end": 55,
+     "line": 64,
+     "end": 64,
      "exported": true,
      "calls": []
     },
     {
      "key": "HULL_HOLD",
      "kind": "const",
-     "line": 56,
-     "end": 56,
+     "line": 65,
+     "end": 65,
      "exported": true,
      "calls": []
     },
     {
      "key": "BLEND_RATE_FLOOR",
      "kind": "const",
-     "line": 57,
-     "end": 57,
+     "line": 66,
+     "end": 66,
      "exported": false,
      "calls": []
     },
     {
      "key": "BLEND_RATE_K",
      "kind": "const",
-     "line": 57,
-     "end": 57,
+     "line": 66,
+     "end": 66,
      "exported": false,
      "calls": []
     },
     {
      "key": "MAX_AGE",
      "kind": "const",
-     "line": 58,
-     "end": 58,
+     "line": 67,
+     "end": 67,
      "exported": false,
      "calls": []
     },
     {
      "key": "POSED",
      "kind": "const",
-     "line": 59,
-     "end": 59,
+     "line": 68,
+     "end": 68,
      "exported": false,
      "calls": []
     },
     {
      "key": "wrapPi",
      "kind": "function",
-     "line": 61,
-     "end": 61,
+     "line": 70,
+     "end": 70,
      "exported": false,
      "calls": []
     },
     {
      "key": "adoptHulls",
      "kind": "function",
-     "line": 63,
-     "end": 96,
+     "line": 72,
+     "end": 105,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#vesselById",
@@ -59501,56 +59568,56 @@
     {
      "key": "blendHulls",
      "kind": "function",
-     "line": 98,
-     "end": 117,
+     "line": 107,
+     "end": 126,
      "exported": true,
      "calls": []
     },
     {
      "key": "mounted",
      "kind": "const",
-     "line": 119,
-     "end": 119,
+     "line": 128,
+     "end": 128,
      "exported": false,
      "calls": []
     },
     {
      "key": "joinGeneration",
      "kind": "const",
-     "line": 120,
-     "end": 120,
+     "line": 129,
+     "end": 129,
      "exported": false,
      "calls": []
     },
     {
      "key": "liveStateSeen",
      "kind": "const",
-     "line": 121,
-     "end": 121,
+     "line": 130,
+     "end": 130,
      "exported": false,
      "calls": []
     },
     {
      "key": "bodySignatures",
      "kind": "const",
-     "line": 122,
-     "end": 122,
+     "line": 131,
+     "end": 131,
      "exported": false,
      "calls": []
     },
     {
      "key": "bodySignature",
      "kind": "function",
-     "line": 124,
-     "end": 129,
+     "line": 133,
+     "end": 138,
      "exported": false,
      "calls": []
     },
     {
      "key": "applySolPrime",
      "kind": "function",
-     "line": 131,
-     "end": 144,
+     "line": 140,
+     "end": 153,
      "exported": true,
      "calls": [
       "js/sim/sim.js#shiftClock",
@@ -59562,8 +59629,8 @@
     {
      "key": "mountWorldSync",
      "kind": "function",
-     "line": 146,
-     "end": 151,
+     "line": 155,
+     "end": 160,
      "exported": true,
      "calls": [
       "js/net/net.js#onRoom",
@@ -59573,8 +59640,8 @@
     {
      "key": "resetWorldSync",
      "kind": "function",
-     "line": 153,
-     "end": 168,
+     "line": 162,
+     "end": 178,
      "exported": true,
      "calls": [
       "js/world/events/impactors.js#setImpactorAuthority"
@@ -59583,8 +59650,8 @@
     {
      "key": "setHost",
      "kind": "function",
-     "line": 170,
-     "end": 182,
+     "line": 180,
+     "end": 192,
      "exported": false,
      "calls": [
       "js/world/events/impactors.js#setImpactorAuthority",
@@ -59594,8 +59661,8 @@
     {
      "key": "handleRoom",
      "kind": "function",
-     "line": 184,
-     "end": 193,
+     "line": 194,
+     "end": 203,
      "exported": false,
      "calls": [
       "js/net/worldsync.js#setHost",
@@ -59605,8 +59672,8 @@
     {
      "key": "pull",
      "kind": "function",
-     "line": 195,
-     "end": 226,
+     "line": 205,
+     "end": 236,
      "exported": false,
      "calls": [
       "js/net/net.js#fetchWorld",
@@ -59618,8 +59685,8 @@
     {
      "key": "handleMessage",
      "kind": "function",
-     "line": 228,
-     "end": 251,
+     "line": 238,
+     "end": 269,
      "exported": false,
      "calls": [
       "js/sim/sim.js#applyRemoteStrike",
@@ -59627,22 +59694,25 @@
       "js/world/events/impactors.js#adoptImpactors",
       "js/world/events/holes.js#adoptHoles",
       "js/net/worldsync.js#adoptHulls",
+      "js/world/hulks.js#adoptHulkWire",
+      "js/world/hulks.js#applyHulkCut",
+      "js/net/worldsync.js#hostVesselDown",
       "js/npc/traffic.js#markVesselDown"
      ]
     },
     {
      "key": "lastBlend",
      "kind": "const",
-     "line": 253,
-     "end": 253,
+     "line": 271,
+     "end": 271,
      "exported": false,
      "calls": []
     },
     {
      "key": "tickWorldSync",
      "kind": "function",
-     "line": 254,
-     "end": 275,
+     "line": 272,
+     "end": 299,
      "exported": true,
      "calls": [
       "js/net/worldsync.js#blendHulls",
@@ -59650,6 +59720,7 @@
       "js/net/worldsync.js#hullWire",
       "js/world/events/impactors.js#impactorWire",
       "js/world/events/holes.js#holeWire",
+      "js/world/hulks.js#hulkWire",
       "js/net/net.js#pushWorld",
       "js/sim/sim.js#worldSnapshot",
       "js/comms/gnn.js#gnnBroadcastWire"
@@ -59658,16 +59729,16 @@
     {
      "key": "wireWorldSyncTest",
      "kind": "function",
-     "line": 277,
-     "end": 279,
+     "line": 301,
+     "end": 303,
      "exported": true,
      "calls": []
     },
     {
      "key": "mirrorMode",
      "kind": "function",
-     "line": 281,
-     "end": 281,
+     "line": 305,
+     "end": 305,
      "exported": true,
      "calls": []
     }
@@ -83522,7 +83593,7 @@
   },
   {
    "file": "js/sim/sim.js",
-   "lines": 4116,
+   "lines": 4117,
    "vendor": false,
    "summary": "simulation loop.",
    "imports": [
@@ -84093,6 +84164,10 @@
       {
        "local": "stepHulks",
        "imported": "stepHulks"
+      },
+      {
+       "local": "hulkKey",
+       "imported": "hulkKey"
       }
      ]
     },
@@ -86180,11 +86255,12 @@
      "key": "wireRigHooks",
      "kind": "function",
      "line": 485,
-     "end": 512,
+     "end": 513,
      "exported": false,
      "calls": [
       "js/economy/materials.js#goodName",
       "js/sim/sim.js#logEvent",
+      "js/world/hulks.js#hulkKey",
       "js/sim/sim.js#setNoticeAbout",
       "js/flight/pilot.js#work"
      ]
@@ -86192,8 +86268,8 @@
     {
      "key": "wireMiningHooks",
      "kind": "function",
-     "line": 514,
-     "end": 522,
+     "line": 515,
+     "end": 523,
      "exported": false,
      "calls": [
       "js/sim/sim.js#setMiningMode",
@@ -86203,16 +86279,16 @@
     {
      "key": "canSmeltAt",
      "kind": "function",
-     "line": 524,
-     "end": 526,
+     "line": 525,
+     "end": 527,
      "exported": true,
      "calls": []
     },
     {
      "key": "smeltAll",
      "kind": "function",
-     "line": 528,
-     "end": 555,
+     "line": 529,
+     "end": 556,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -86229,8 +86305,8 @@
     {
      "key": "sellAllOre",
      "kind": "function",
-     "line": 557,
-     "end": 576,
+     "line": 558,
+     "end": 577,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -86243,8 +86319,8 @@
     {
      "key": "jettison",
      "kind": "function",
-     "line": 578,
-     "end": 581,
+     "line": 579,
+     "end": 582,
      "exported": true,
      "calls": [
       "js/flight/ship.js#takeCargo",
@@ -86255,8 +86331,8 @@
     {
      "key": "stationStatus",
      "kind": "function",
-     "line": 583,
-     "end": 600,
+     "line": 584,
+     "end": 601,
      "exported": true,
      "calls": [
       "js/station/stations.js#nearestStation",
@@ -86268,24 +86344,24 @@
     {
      "key": "setNoticeAbout",
      "kind": "function",
-     "line": 602,
-     "end": 605,
+     "line": 603,
+     "end": 606,
      "exported": true,
      "calls": []
     },
     {
      "key": "fmtKm",
      "kind": "function",
-     "line": 607,
-     "end": 607,
+     "line": 608,
+     "end": 608,
      "exported": false,
      "calls": []
     },
     {
      "key": "toggleDock",
      "kind": "function",
-     "line": 609,
-     "end": 702,
+     "line": 610,
+     "end": 703,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -86309,8 +86385,8 @@
     {
      "key": "finishDock",
      "kind": "function",
-     "line": 704,
-     "end": 718,
+     "line": 705,
+     "end": 719,
      "exported": false,
      "calls": [
       "js/station/stations.js#describeStation",
@@ -86324,8 +86400,8 @@
     {
      "key": "stepTractorTick",
      "kind": "function",
-     "line": 720,
-     "end": 746,
+     "line": 721,
+     "end": 747,
      "exported": false,
      "calls": [
       "js/station/stationworks.js#stepTractor",
@@ -86342,8 +86418,8 @@
     {
      "key": "tradeBuy",
      "kind": "function",
-     "line": 748,
-     "end": 768,
+     "line": 749,
+     "end": 769,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -86361,8 +86437,8 @@
     {
      "key": "sellPriceAt",
      "kind": "function",
-     "line": 770,
-     "end": 772,
+     "line": 771,
+     "end": 773,
      "exported": true,
      "calls": [
       "js/economy/materials.js#priceAt",
@@ -86375,16 +86451,16 @@
     {
      "key": "marketMult",
      "kind": "function",
-     "line": 774,
-     "end": 786,
+     "line": 775,
+     "end": 787,
      "exported": true,
      "calls": []
     },
     {
      "key": "applySkyEvent",
      "kind": "function",
-     "line": 788,
-     "end": 827,
+     "line": 789,
+     "end": 828,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent",
@@ -86394,24 +86470,24 @@
     {
      "key": "marketSlot",
      "kind": "const",
-     "line": 829,
-     "end": 829,
+     "line": 830,
+     "end": 830,
      "exported": false,
      "calls": []
     },
     {
      "key": "marketSeed",
      "kind": "const",
-     "line": 829,
-     "end": 829,
+     "line": 830,
+     "end": 830,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepMarket",
      "kind": "function",
-     "line": 830,
-     "end": 842,
+     "line": 831,
+     "end": 843,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent",
@@ -86422,8 +86498,8 @@
     {
      "key": "buyPriceAt",
      "kind": "function",
-     "line": 844,
-     "end": 846,
+     "line": 845,
+     "end": 847,
      "exported": true,
      "calls": [
       "js/economy/economy.js#askPrice"
@@ -86432,8 +86508,8 @@
     {
      "key": "portLedger",
      "kind": "function",
-     "line": 848,
-     "end": 848,
+     "line": 849,
+     "end": 849,
      "exported": true,
      "calls": [
       "js/economy/economy.js#econReport"
@@ -86442,8 +86518,8 @@
     {
      "key": "portWants",
      "kind": "function",
-     "line": 849,
-     "end": 849,
+     "line": 850,
+     "end": 850,
      "exported": true,
      "calls": [
       "js/economy/economy.js#wantsOf"
@@ -86452,8 +86528,8 @@
     {
      "key": "tradeSell",
      "kind": "function",
-     "line": 851,
-     "end": 873,
+     "line": 852,
+     "end": 874,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -86473,8 +86549,8 @@
     {
      "key": "claimPort",
      "kind": "function",
-     "line": 875,
-     "end": 889,
+     "line": 876,
+     "end": 890,
      "exported": true,
      "calls": [
       "js/sim/sim.js#stationStatus",
@@ -86486,24 +86562,24 @@
     {
      "key": "setTerminal",
      "kind": "function",
-     "line": 891,
-     "end": 895,
+     "line": 892,
+     "end": 896,
      "exported": true,
      "calls": []
     },
     {
      "key": "setTermHold",
      "kind": "function",
-     "line": 897,
-     "end": 900,
+     "line": 898,
+     "end": 901,
      "exported": true,
      "calls": []
     },
     {
      "key": "resetTune",
      "kind": "function",
-     "line": 902,
-     "end": 907,
+     "line": 903,
+     "end": 908,
      "exported": true,
      "calls": [
       "js/flight/ship.js#defaultTune",
@@ -86514,8 +86590,8 @@
     {
      "key": "setTune",
      "kind": "function",
-     "line": 909,
-     "end": 914,
+     "line": 910,
+     "end": 915,
      "exported": true,
      "calls": [
       "js/sim/sim.js#setThrottle"
@@ -86524,8 +86600,8 @@
     {
      "key": "moveShed",
      "kind": "function",
-     "line": 916,
-     "end": 923,
+     "line": 917,
+     "end": 924,
      "exported": true,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -86534,16 +86610,16 @@
     {
      "key": "hydrateProgress",
      "kind": "function",
-     "line": 925,
-     "end": 929,
+     "line": 926,
+     "end": 930,
      "exported": true,
      "calls": []
     },
     {
      "key": "loadSky",
      "kind": "function",
-     "line": 931,
-     "end": 991,
+     "line": 932,
+     "end": 992,
      "exported": true,
      "calls": [
       "js/station/stationyard.js#carryBuilt",
@@ -86588,8 +86664,8 @@
     {
      "key": "wireReactiveSky",
      "kind": "function",
-     "line": 993,
-     "end": 1102,
+     "line": 994,
+     "end": 1103,
      "exported": false,
      "calls": [
       "js/npc/traffic.js#vesselById",
@@ -86615,24 +86691,24 @@
     {
      "key": "wireReactiveSky>fam",
      "kind": "function",
-     "line": 1061,
-     "end": 1061,
+     "line": 1062,
+     "end": 1062,
      "exported": false,
      "calls": []
     },
     {
      "key": "wireReactiveSky.heal",
      "kind": "prop",
-     "line": 1078,
-     "end": 1078,
+     "line": 1079,
+     "end": 1079,
      "exported": false,
      "calls": []
     },
     {
      "key": "seedOrbit",
      "kind": "function",
-     "line": 1104,
-     "end": 1122,
+     "line": 1105,
+     "end": 1123,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyPosition",
@@ -86643,8 +86719,8 @@
     {
      "key": "launchSim",
      "kind": "function",
-     "line": 1124,
-     "end": 1251,
+     "line": 1125,
+     "end": 1252,
      "exported": true,
      "calls": [
       "js/corp/company.js#loadCompany",
@@ -86697,8 +86773,8 @@
     {
      "key": "applyCareerDefaults",
      "kind": "function",
-     "line": 1253,
-     "end": 1255,
+     "line": 1254,
+     "end": 1256,
      "exported": true,
      "calls": [
       "js/sim/career.js#applyCareerDefaults"
@@ -86707,16 +86783,16 @@
     {
      "key": "TELEMETRY_KEEP",
      "kind": "const",
-     "line": 1257,
-     "end": 1257,
+     "line": 1258,
+     "end": 1258,
      "exported": false,
      "calls": []
     },
     {
      "key": "sampleTelemetry",
      "kind": "function",
-     "line": 1258,
-     "end": 1269,
+     "line": 1259,
+     "end": 1270,
      "exported": false,
      "calls": [
       "js/sim/sim.js#sampleTelemetry>push",
@@ -86727,24 +86803,24 @@
     {
      "key": "sampleTelemetry>push",
      "kind": "function",
-     "line": 1262,
-     "end": 1262,
+     "line": 1263,
+     "end": 1263,
      "exported": false,
      "calls": []
     },
     {
      "key": "resetTelemetry",
      "kind": "function",
-     "line": 1271,
-     "end": 1273,
+     "line": 1272,
+     "end": 1274,
      "exported": true,
      "calls": []
     },
     {
      "key": "returnToMenu",
      "kind": "function",
-     "line": 1275,
-     "end": 1292,
+     "line": 1276,
+     "end": 1293,
      "exported": true,
      "calls": [
       "js/station/stationworks.js#releaseTractor",
@@ -86756,8 +86832,8 @@
     {
      "key": "currentShipId",
      "kind": "function",
-     "line": 1294,
-     "end": 1297,
+     "line": 1295,
+     "end": 1298,
      "exported": true,
      "calls": [
       "js/ships/shipdb.js#shipById"
@@ -86766,8 +86842,8 @@
     {
      "key": "issuedHullId",
      "kind": "function",
-     "line": 1299,
-     "end": 1305,
+     "line": 1300,
+     "end": 1306,
      "exported": true,
      "calls": [
       "js/ships/shipdb.js#issuedShips",
@@ -86777,8 +86853,8 @@
     {
      "key": "_hullTune",
      "kind": "const",
-     "line": 1307,
-     "end": 1307,
+     "line": 1308,
+     "end": 1308,
      "exported": false,
      "calls": [
       "js/ships/shipdb.js#hullTuneFor"
@@ -86787,8 +86863,8 @@
     {
      "key": "syncHullTune",
      "kind": "function",
-     "line": 1308,
-     "end": 1317,
+     "line": 1309,
+     "end": 1318,
      "exported": false,
      "calls": [
       "js/sim/sim.js#currentShipId",
@@ -86800,16 +86876,16 @@
     {
      "key": "_defenceFor",
      "kind": "const",
-     "line": 1319,
-     "end": 1319,
+     "line": 1320,
+     "end": 1320,
      "exported": false,
      "calls": []
     },
     {
      "key": "syncHullDefence",
      "kind": "function",
-     "line": 1320,
-     "end": 1336,
+     "line": 1321,
+     "end": 1337,
      "exported": false,
      "calls": [
       "js/economy/upgrades.js#resistKey",
@@ -86823,16 +86899,16 @@
     {
      "key": "WRONG_WAY_GRACE",
      "kind": "const",
-     "line": 1338,
-     "end": 1338,
+     "line": 1339,
+     "end": 1339,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepLaneDiscipline",
      "kind": "function",
-     "line": 1339,
-     "end": 1368,
+     "line": 1340,
+     "end": 1369,
      "exported": false,
      "calls": [
       "js/station/stations.js#nearestStation",
@@ -86848,8 +86924,8 @@
     {
      "key": "laneCredit",
      "kind": "function",
-     "line": 1370,
-     "end": 1378,
+     "line": 1371,
+     "end": 1379,
      "exported": true,
      "calls": [
       "js/corp/corps.js#corpOfStation",
@@ -86860,8 +86936,8 @@
     {
      "key": "applyRemoteState",
      "kind": "function",
-     "line": 1380,
-     "end": 1406,
+     "line": 1381,
+     "end": 1407,
      "exported": true,
      "calls": [
       "js/world/bodies.js#hashHue"
@@ -86870,8 +86946,8 @@
     {
      "key": "applyReliable",
      "kind": "function",
-     "line": 1408,
-     "end": 1415,
+     "line": 1409,
+     "end": 1416,
      "exported": true,
      "calls": [
       "js/sim/sim.js#collectBeacon",
@@ -86882,16 +86958,16 @@
     {
      "key": "dropRemote",
      "kind": "function",
-     "line": 1417,
-     "end": 1419,
+     "line": 1418,
+     "end": 1420,
      "exported": true,
      "calls": []
     },
     {
      "key": "collectBeacon",
      "kind": "function",
-     "line": 1421,
-     "end": 1437,
+     "line": 1422,
+     "end": 1438,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent",
@@ -86903,8 +86979,8 @@
     {
      "key": "savePilotRecord",
      "kind": "function",
-     "line": 1439,
-     "end": 1445,
+     "line": 1440,
+     "end": 1446,
      "exported": false,
      "calls": [
       "js/flight/pilot.js#loadPilot",
@@ -86914,8 +86990,8 @@
     {
      "key": "persistNow",
      "kind": "function",
-     "line": 1447,
-     "end": 1451,
+     "line": 1448,
+     "end": 1452,
      "exported": true,
      "calls": [
       "js/sim/sim.js#persistProgress"
@@ -86924,8 +87000,8 @@
     {
      "key": "persistProgress",
      "kind": "function",
-     "line": 1453,
-     "end": 1467,
+     "line": 1454,
+     "end": 1468,
      "exported": false,
      "calls": [
       "js/world/events/atmoworks.js#terraformSnapshot",
@@ -86936,8 +87012,8 @@
     {
      "key": "tryAssay",
      "kind": "function",
-     "line": 1469,
-     "end": 1524,
+     "line": 1470,
+     "end": 1525,
      "exported": false,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -86958,16 +87034,16 @@
     {
      "key": "tryAssay>inCone",
      "kind": "function",
-     "line": 1472,
-     "end": 1472,
+     "line": 1473,
+     "end": 1473,
      "exported": false,
      "calls": []
     },
     {
      "key": "tryScan",
      "kind": "function",
-     "line": 1526,
-     "end": 1574,
+     "line": 1527,
+     "end": 1575,
      "exported": false,
      "calls": [
       "js/sim/sim.js#tryAssay",
@@ -86988,8 +87064,8 @@
     {
      "key": "wellEdge",
      "kind": "function",
-     "line": 1576,
-     "end": 1581,
+     "line": 1577,
+     "end": 1582,
      "exported": true,
      "calls": [
       "js/world/scale.js#remnantRadius"
@@ -86998,37 +87074,29 @@
     {
      "key": "wellG",
      "kind": "function",
-     "line": 1583,
-     "end": 1586,
+     "line": 1584,
+     "end": 1587,
      "exported": true,
      "calls": []
     },
     {
      "key": "WARP",
      "kind": "const",
-     "line": 1588,
-     "end": 1599,
+     "line": 1589,
+     "end": 1600,
      "exported": true,
      "calls": []
     },
     {
      "key": "segmentMiss",
      "kind": "function",
-     "line": 1601,
-     "end": 1609,
+     "line": 1602,
+     "end": 1610,
      "exported": false,
      "calls": []
     },
     {
      "key": "_dest",
-     "kind": "const",
-     "line": 1611,
-     "end": 1611,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_obs",
      "kind": "const",
      "line": 1612,
      "end": 1612,
@@ -87036,10 +87104,18 @@
      "calls": []
     },
     {
+     "key": "_obs",
+     "kind": "const",
+     "line": 1613,
+     "end": 1613,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "warpNodeById",
      "kind": "function",
-     "line": 1614,
-     "end": 1641,
+     "line": 1615,
+     "end": 1642,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87050,8 +87126,8 @@
     {
      "key": "warpNodeById.pos",
      "kind": "prop",
-     "line": 1619,
-     "end": 1619,
+     "line": 1620,
+     "end": 1620,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyPosition"
@@ -87060,8 +87136,8 @@
     {
      "key": "warpNodeById.vel",
      "kind": "prop",
-     "line": 1620,
-     "end": 1620,
+     "line": 1621,
+     "end": 1621,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyVelocity"
@@ -87070,24 +87146,24 @@
     {
      "key": "warpNodeById.pos~2",
      "kind": "prop",
-     "line": 1627,
-     "end": 1627,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "warpNodeById.vel~2",
-     "kind": "prop",
      "line": 1628,
      "end": 1628,
      "exported": false,
      "calls": []
     },
     {
+     "key": "warpNodeById.vel~2",
+     "kind": "prop",
+     "line": 1629,
+     "end": 1629,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "warpNodeById.pos~3",
      "kind": "prop",
-     "line": 1636,
-     "end": 1636,
+     "line": 1637,
+     "end": 1637,
      "exported": false,
      "calls": [
       "js/sim/sim.js#waypointPosition"
@@ -87096,8 +87172,8 @@
     {
      "key": "warpNodeById.vel~3",
      "kind": "prop",
-     "line": 1637,
-     "end": 1637,
+     "line": 1638,
+     "end": 1638,
      "exported": false,
      "calls": [
       "js/sim/sim.js#waypointVelocity"
@@ -87106,16 +87182,16 @@
     {
      "key": "POINT_ARRIVE_R",
      "kind": "const",
-     "line": 1643,
-     "end": 1643,
+     "line": 1644,
+     "end": 1644,
      "exported": true,
      "calls": []
     },
     {
      "key": "warpDestination",
      "kind": "function",
-     "line": 1645,
-     "end": 1658,
+     "line": 1646,
+     "end": 1659,
      "exported": true,
      "calls": [
       "js/sim/sim.js#warpNodeById"
@@ -87124,8 +87200,8 @@
     {
      "key": "losBlocker",
      "kind": "function",
-     "line": 1660,
-     "end": 1668,
+     "line": 1661,
+     "end": 1669,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyPosition",
@@ -87135,8 +87211,8 @@
     {
      "key": "warpBlock",
      "kind": "function",
-     "line": 1670,
-     "end": 1705,
+     "line": 1671,
+     "end": 1706,
      "exported": true,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -87152,8 +87228,8 @@
     {
      "key": "warpStatus",
      "kind": "function",
-     "line": 1707,
-     "end": 1717,
+     "line": 1708,
+     "end": 1718,
      "exported": true,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -87163,37 +87239,29 @@
     {
      "key": "spoolTime",
      "kind": "function",
-     "line": 1719,
-     "end": 1721,
+     "line": 1720,
+     "end": 1722,
      "exported": true,
      "calls": []
     },
     {
      "key": "ALIGN_DEG",
      "kind": "const",
-     "line": 1723,
-     "end": 1723,
+     "line": 1724,
+     "end": 1724,
      "exported": true,
      "calls": []
     },
     {
      "key": "DROPOUT_ODDS",
      "kind": "const",
-     "line": 1725,
-     "end": 1725,
+     "line": 1726,
+     "end": 1726,
      "exported": true,
      "calls": []
     },
     {
      "key": "_routeCache",
-     "kind": "const",
-     "line": 1727,
-     "end": 1727,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_rp",
      "kind": "const",
      "line": 1728,
      "end": 1728,
@@ -87201,10 +87269,18 @@
      "calls": []
     },
     {
+     "key": "_rp",
+     "kind": "const",
+     "line": 1729,
+     "end": 1729,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "alignmentTo",
      "kind": "function",
-     "line": 1730,
-     "end": 1736,
+     "line": 1731,
+     "end": 1737,
      "exported": true,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -87214,8 +87290,8 @@
     {
      "key": "plotRoute",
      "kind": "function",
-     "line": 1738,
-     "end": 1813,
+     "line": 1739,
+     "end": 1814,
      "exported": true,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -87232,8 +87308,8 @@
     {
      "key": "toggleWarp",
      "kind": "function",
-     "line": 1815,
-     "end": 1852,
+     "line": 1816,
+     "end": 1853,
      "exported": true,
      "calls": [
       "js/sim/sim.js#warpBlock",
@@ -87245,8 +87321,8 @@
     {
      "key": "abortSpool",
      "kind": "function",
-     "line": 1854,
-     "end": 1862,
+     "line": 1855,
+     "end": 1863,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -87255,8 +87331,8 @@
     {
      "key": "warpBlockDuringSpool",
      "kind": "function",
-     "line": 1864,
-     "end": 1884,
+     "line": 1865,
+     "end": 1885,
      "exported": false,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -87271,8 +87347,8 @@
     {
      "key": "warpDropout",
      "kind": "function",
-     "line": 1886,
-     "end": 1907,
+     "line": 1887,
+     "end": 1908,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -87284,24 +87360,24 @@
     {
      "key": "WARP_TURN_IN",
      "kind": "const",
-     "line": 1909,
-     "end": 1909,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "WARP_TURN_OUT",
-     "kind": "const",
      "line": 1910,
      "end": 1910,
      "exported": false,
      "calls": []
     },
     {
+     "key": "WARP_TURN_OUT",
+     "kind": "const",
+     "line": 1911,
+     "end": 1911,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "engageWarp",
      "kind": "function",
-     "line": 1912,
-     "end": 1946,
+     "line": 1913,
+     "end": 1947,
      "exported": false,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -87315,8 +87391,8 @@
     {
      "key": "clearArrival",
      "kind": "function",
-     "line": 1948,
-     "end": 1970,
+     "line": 1949,
+     "end": 1971,
      "exported": true,
      "calls": [
       "js/world/field.js#inBelt",
@@ -87326,45 +87402,13 @@
     {
      "key": "ARRIVE_CLEAR",
      "kind": "const",
-     "line": 1971,
-     "end": 1971,
+     "line": 1972,
+     "end": 1972,
      "exported": false,
      "calls": []
     },
     {
      "key": "blockAt",
-     "kind": "const",
-     "line": 1972,
-     "end": 1972,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "blockFor",
-     "kind": "const",
-     "line": 1972,
-     "end": 1972,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "blockCool",
-     "kind": "const",
-     "line": 1972,
-     "end": 1972,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "blockDom",
-     "kind": "const",
-     "line": 1972,
-     "end": 1972,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_blockAtPos",
      "kind": "const",
      "line": 1973,
      "end": 1973,
@@ -87372,10 +87416,42 @@
      "calls": []
     },
     {
+     "key": "blockFor",
+     "kind": "const",
+     "line": 1973,
+     "end": 1973,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "blockCool",
+     "kind": "const",
+     "line": 1973,
+     "end": 1973,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "blockDom",
+     "kind": "const",
+     "line": 1973,
+     "end": 1973,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "_blockAtPos",
+     "kind": "const",
+     "line": 1974,
+     "end": 1974,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "stepWarp",
      "kind": "function",
-     "line": 1975,
-     "end": 2061,
+     "line": 1976,
+     "end": 2062,
      "exported": true,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -87404,8 +87480,8 @@
     {
      "key": "impact",
      "kind": "function",
-     "line": 2063,
-     "end": 2091,
+     "line": 2064,
+     "end": 2092,
      "exported": false,
      "calls": [
       "js/flight/ship.js#applyDamage",
@@ -87415,8 +87491,8 @@
     {
      "key": "stepCollisions",
      "kind": "function",
-     "line": 2093,
-     "end": 2147,
+     "line": 2094,
+     "end": 2148,
      "exported": false,
      "calls": [
       "js/world/bodies.js#starBody",
@@ -87431,21 +87507,13 @@
     {
      "key": "LOCK_CONE",
      "kind": "const",
-     "line": 2149,
-     "end": 2149,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "LOCK_BREAK",
-     "kind": "const",
      "line": 2150,
      "end": 2150,
      "exported": false,
      "calls": []
     },
     {
-     "key": "_lp",
+     "key": "LOCK_BREAK",
      "kind": "const",
      "line": 2151,
      "end": 2151,
@@ -87453,7 +87521,7 @@
      "calls": []
     },
     {
-     "key": "_lv",
+     "key": "_lp",
      "kind": "const",
      "line": 2152,
      "end": 2152,
@@ -87461,10 +87529,18 @@
      "calls": []
     },
     {
+     "key": "_lv",
+     "kind": "const",
+     "line": 2153,
+     "end": 2153,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "lockCandidates",
      "kind": "function",
-     "line": 2154,
-     "end": 2180,
+     "line": 2155,
+     "end": 2181,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyPosition",
@@ -87478,32 +87554,32 @@
     {
      "key": "LOCK_DEBRIS_RANGE",
      "kind": "const",
-     "line": 2182,
-     "end": 2182,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "LOCK_HULK_RANGE",
-     "kind": "const",
      "line": 2183,
      "end": 2183,
      "exported": false,
      "calls": []
     },
     {
-     "key": "hulkSig",
-     "kind": "function",
+     "key": "LOCK_HULK_RANGE",
+     "kind": "const",
      "line": 2184,
      "end": 2184,
      "exported": false,
      "calls": []
     },
     {
+     "key": "hulkSig",
+     "kind": "function",
+     "line": 2185,
+     "end": 2185,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "candidateSig",
      "kind": "function",
-     "line": 2186,
-     "end": 2195,
+     "line": 2187,
+     "end": 2196,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87515,8 +87591,8 @@
     {
      "key": "targetPosition",
      "kind": "function",
-     "line": 2197,
-     "end": 2226,
+     "line": 2198,
+     "end": 2227,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87529,8 +87605,8 @@
     {
      "key": "targetVelocity",
      "kind": "function",
-     "line": 2228,
-     "end": 2256,
+     "line": 2229,
+     "end": 2257,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyVelocity",
@@ -87542,8 +87618,8 @@
     {
      "key": "setNavTarget",
      "kind": "function",
-     "line": 2258,
-     "end": 2272,
+     "line": 2259,
+     "end": 2273,
      "exported": true,
      "calls": [
       "js/sim/sim.js#warpNodeById",
@@ -87553,8 +87629,8 @@
     {
      "key": "clearLock",
      "kind": "function",
-     "line": 2274,
-     "end": 2284,
+     "line": 2275,
+     "end": 2285,
      "exported": true,
      "calls": [
       "js/sim/sim.js#setNavTarget"
@@ -87563,8 +87639,8 @@
     {
      "key": "togglePointerLock",
      "kind": "function",
-     "line": 2286,
-     "end": 2316,
+     "line": 2287,
+     "end": 2317,
      "exported": true,
      "calls": [
       "js/sim/sim.js#clearLock",
@@ -87578,8 +87654,8 @@
     {
      "key": "acquireLock",
      "kind": "function",
-     "line": 2318,
-     "end": 2329,
+     "line": 2319,
+     "end": 2330,
      "exported": true,
      "calls": [
       "js/sim/sim.js#lockCandidates",
@@ -87590,8 +87666,8 @@
     {
      "key": "stepLock",
      "kind": "function",
-     "line": 2331,
-     "end": 2368,
+     "line": 2332,
+     "end": 2369,
      "exported": false,
      "calls": [
       "js/sim/sim.js#targetPosition",
@@ -87605,16 +87681,16 @@
     {
      "key": "_anchorPos",
      "kind": "const",
-     "line": 2370,
-     "end": 2370,
+     "line": 2371,
+     "end": 2371,
      "exported": false,
      "calls": []
     },
     {
      "key": "updateHold",
      "kind": "function",
-     "line": 2372,
-     "end": 2405,
+     "line": 2373,
+     "end": 2406,
      "exported": false,
      "calls": [
       "js/sim/sim.js#targetPosition"
@@ -87623,8 +87699,8 @@
     {
      "key": "impactSeverity",
      "kind": "function",
-     "line": 2407,
-     "end": 2410,
+     "line": 2408,
+     "end": 2411,
      "exported": false,
      "calls": [
       "js/sim/sim.js#clamp"
@@ -87633,8 +87709,8 @@
     {
      "key": "damageBody",
      "kind": "function",
-     "line": 2412,
-     "end": 2452,
+     "line": 2413,
+     "end": 2453,
      "exported": true,
      "calls": [
       "js/sim/sim.js#clamp",
@@ -87648,16 +87724,16 @@
     {
      "key": "eventSeq",
      "kind": "const",
-     "line": 2454,
-     "end": 2454,
+     "line": 2455,
+     "end": 2455,
      "exported": false,
      "calls": []
     },
     {
      "key": "startCataclysm",
      "kind": "function",
-     "line": 2456,
-     "end": 2473,
+     "line": 2457,
+     "end": 2474,
      "exported": true,
      "calls": [
       "js/world/events/cataclysm.js#eventDuration"
@@ -87666,8 +87742,8 @@
     {
      "key": "goSupernova",
      "kind": "function",
-     "line": 2475,
-     "end": 2499,
+     "line": 2476,
+     "end": 2500,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87679,8 +87755,8 @@
     {
      "key": "layRing",
      "kind": "function",
-     "line": 2501,
-     "end": 2535,
+     "line": 2502,
+     "end": 2536,
      "exported": false,
      "calls": [
       "js/world/events/cataclysm.js#ringPlan",
@@ -87690,8 +87766,8 @@
     {
      "key": "stepCataclysms",
      "kind": "function",
-     "line": 2537,
-     "end": 2594,
+     "line": 2538,
+     "end": 2595,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87710,16 +87786,16 @@
     {
      "key": "SN_COLLAPSE_AT",
      "kind": "const",
-     "line": 2596,
-     "end": 2596,
+     "line": 2597,
+     "end": 2597,
      "exported": false,
      "calls": []
     },
     {
      "key": "collapseToHole",
      "kind": "function",
-     "line": 2598,
-     "end": 2609,
+     "line": 2599,
+     "end": 2610,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyPosition",
@@ -87730,8 +87806,8 @@
     {
      "key": "summonHole",
      "kind": "function",
-     "line": 2611,
-     "end": 2626,
+     "line": 2612,
+     "end": 2627,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87743,16 +87819,16 @@
     {
      "key": "_holeCtx",
      "kind": "const",
-     "line": 2628,
-     "end": 2635,
+     "line": 2629,
+     "end": 2636,
      "exported": false,
      "calls": []
     },
     {
      "key": "_holeCtx.damageBody",
      "kind": "prop",
-     "line": 2631,
-     "end": 2631,
+     "line": 2632,
+     "end": 2632,
      "exported": false,
      "calls": [
       "js/sim/sim.js#_holeCtx.damageBody"
@@ -87761,8 +87837,8 @@
     {
      "key": "_holeCtx.log",
      "kind": "prop",
-     "line": 2633,
-     "end": 2633,
+     "line": 2634,
+     "end": 2634,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -87771,8 +87847,8 @@
     {
      "key": "holeLoseStation",
      "kind": "function",
-     "line": 2637,
-     "end": 2645,
+     "line": 2638,
+     "end": 2646,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent",
@@ -87782,8 +87858,8 @@
     {
      "key": "holeRakeStation",
      "kind": "function",
-     "line": 2647,
-     "end": 2652,
+     "line": 2648,
+     "end": 2653,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -87792,8 +87868,8 @@
     {
      "key": "holeOnShip",
      "kind": "function",
-     "line": 2654,
-     "end": 2678,
+     "line": 2655,
+     "end": 2679,
      "exported": false,
      "calls": [
       "js/sim/sim.js#logEvent",
@@ -87804,8 +87880,8 @@
     {
      "key": "holeRescue",
      "kind": "function",
-     "line": 2680,
-     "end": 2704,
+     "line": 2681,
+     "end": 2705,
      "exported": false,
      "calls": [
       "js/flight/ship.js#cargoTotal",
@@ -87815,8 +87891,8 @@
     {
      "key": "loseHull",
      "kind": "function",
-     "line": 2706,
-     "end": 2757,
+     "line": 2707,
+     "end": 2758,
      "exported": true,
      "calls": [
       "js/sim/sim.js#currentShipId",
@@ -87834,16 +87910,16 @@
     {
      "key": "HOLE_WARN",
      "kind": "const",
-     "line": 2759,
-     "end": 2759,
+     "line": 2760,
+     "end": 2760,
      "exported": false,
      "calls": []
     },
     {
      "key": "watchHoles",
      "kind": "function",
-     "line": 2760,
-     "end": 2787,
+     "line": 2761,
+     "end": 2788,
      "exported": false,
      "calls": [
       "js/comms/gnn.js#gnnPost",
@@ -87855,16 +87931,16 @@
     {
      "key": "holeClosing",
      "kind": "function",
-     "line": 2789,
-     "end": 2794,
+     "line": 2790,
+     "end": 2795,
      "exported": false,
      "calls": []
     },
     {
      "key": "shatterBody",
      "kind": "function",
-     "line": 2796,
-     "end": 2804,
+     "line": 2797,
+     "end": 2805,
      "exported": false,
      "calls": [
       "js/world/bodies.js#refreshBody",
@@ -87875,8 +87951,8 @@
     {
      "key": "applyRemoteStrike",
      "kind": "function",
-     "line": 2806,
-     "end": 2813,
+     "line": 2807,
+     "end": 2814,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87888,8 +87964,8 @@
     {
      "key": "worldSnapshot",
      "kind": "function",
-     "line": 2815,
-     "end": 2835,
+     "line": 2816,
+     "end": 2836,
      "exported": true,
      "calls": [
       "js/world/events/impactors.js#impactorWire",
@@ -87899,8 +87975,8 @@
     {
      "key": "applyWorldSnapshot",
      "kind": "function",
-     "line": 2837,
-     "end": 2874,
+     "line": 2838,
+     "end": 2875,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87915,8 +87991,8 @@
     {
      "key": "dropStation",
      "kind": "function",
-     "line": 2876,
-     "end": 2881,
+     "line": 2877,
+     "end": 2882,
      "exported": false,
      "calls": [
       "js/station/stationyard.js#releaseBuilt",
@@ -87926,16 +88002,16 @@
     {
      "key": "impactTier",
      "kind": "function",
-     "line": 2883,
-     "end": 2887,
+     "line": 2884,
+     "end": 2888,
      "exported": true,
      "calls": []
     },
     {
      "key": "strikeBody",
      "kind": "function",
-     "line": 2889,
-     "end": 2897,
+     "line": 2890,
+     "end": 2898,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -87948,8 +88024,8 @@
     {
      "key": "onImpact",
      "kind": "function",
-     "line": 2899,
-     "end": 2984,
+     "line": 2900,
+     "end": 2985,
      "exported": false,
      "calls": [
       "js/sim/sim.js#impactSeverity",
@@ -87974,16 +88050,16 @@
     {
      "key": "CRUST_TINT",
      "kind": "const",
-     "line": 2986,
-     "end": 2989,
+     "line": 2987,
+     "end": 2990,
      "exported": false,
      "calls": []
     },
     {
      "key": "onRogueCollision",
      "kind": "function",
-     "line": 2991,
-     "end": 3015,
+     "line": 2992,
+     "end": 3016,
      "exported": false,
      "calls": [
       "js/world/events/impacts.js#startCollision",
@@ -87996,16 +88072,16 @@
     {
      "key": "onRogueCollision>wire",
      "kind": "function",
-     "line": 3012,
-     "end": 3012,
+     "line": 3013,
+     "end": 3013,
      "exported": false,
      "calls": []
     },
     {
      "key": "applyRemoteRockHit",
      "kind": "function",
-     "line": 3017,
-     "end": 3025,
+     "line": 3018,
+     "end": 3026,
      "exported": true,
      "calls": [
       "js/sim/sim.js#onRogueCollision"
@@ -88014,8 +88090,8 @@
     {
      "key": "fragmentRogue",
      "kind": "function",
-     "line": 3027,
-     "end": 3030,
+     "line": 3028,
+     "end": 3031,
      "exported": false,
      "calls": [
       "js/world/events/impactors.js#addRogue",
@@ -88025,16 +88101,16 @@
     {
      "key": "_impactCtx",
      "kind": "const",
-     "line": 3031,
-     "end": 3031,
+     "line": 3032,
+     "end": 3032,
      "exported": false,
      "calls": []
     },
     {
      "key": "onShipHit",
      "kind": "function",
-     "line": 3033,
-     "end": 3048,
+     "line": 3034,
+     "end": 3049,
      "exported": false,
      "calls": [
       "js/flight/ship.js#applyDamage",
@@ -88045,16 +88121,16 @@
     {
      "key": "SENSOR_R",
      "kind": "const",
-     "line": 3050,
-     "end": 3050,
+     "line": 3051,
+     "end": 3051,
      "exported": true,
      "calls": []
     },
     {
      "key": "crewCapacity",
      "kind": "function",
-     "line": 3051,
-     "end": 3053,
+     "line": 3052,
+     "end": 3054,
      "exported": true,
      "calls": [
       "js/ships/shipdb.js#shipById",
@@ -88065,8 +88141,8 @@
     {
      "key": "robotCapacity",
      "kind": "function",
-     "line": 3055,
-     "end": 3057,
+     "line": 3056,
+     "end": 3058,
      "exported": true,
      "calls": [
       "js/sim/sim.js#crewCapacity",
@@ -88076,16 +88152,16 @@
     {
      "key": "repairAt",
      "kind": "const",
-     "line": 3059,
-     "end": 3059,
+     "line": 3060,
+     "end": 3060,
      "exported": false,
      "calls": []
     },
     {
      "key": "tickHullRepair",
      "kind": "function",
-     "line": 3060,
-     "end": 3070,
+     "line": 3061,
+     "end": 3071,
      "exported": false,
      "calls": [
       "js/economy/upgrades.js#fx"
@@ -88094,16 +88170,16 @@
     {
      "key": "sensorRange",
      "kind": "function",
-     "line": 3072,
-     "end": 3075,
+     "line": 3073,
+     "end": 3076,
      "exported": true,
      "calls": []
     },
     {
      "key": "sensorPulse",
      "kind": "function",
-     "line": 3077,
-     "end": 3090,
+     "line": 3078,
+     "end": 3091,
      "exported": true,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -88112,32 +88188,32 @@
     {
      "key": "pulseActive",
      "kind": "function",
-     "line": 3092,
-     "end": 3094,
+     "line": 3093,
+     "end": 3095,
      "exported": true,
      "calls": []
     },
     {
      "key": "autoLevel",
      "kind": "function",
-     "line": 3096,
-     "end": 3101,
+     "line": 3097,
+     "end": 3102,
      "exported": true,
      "calls": []
     },
     {
      "key": "cycleTimeScale",
      "kind": "function",
-     "line": 3103,
-     "end": 3111,
+     "line": 3104,
+     "end": 3112,
      "exported": true,
      "calls": []
     },
     {
      "key": "takeSalvageContract",
      "kind": "function",
-     "line": 3113,
-     "end": 3119,
+     "line": 3114,
+     "end": 3120,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -88147,24 +88223,24 @@
     {
      "key": "RECORDER",
      "kind": "const",
-     "line": 3121,
-     "end": 3121,
-     "exported": true,
-     "calls": []
-    },
-    {
-     "key": "recorderValue",
-     "kind": "function",
      "line": 3122,
      "end": 3122,
      "exported": true,
      "calls": []
     },
     {
+     "key": "recorderValue",
+     "kind": "function",
+     "line": 3123,
+     "end": 3123,
+     "exported": true,
+     "calls": []
+    },
+    {
      "key": "handInRecorders",
      "kind": "function",
-     "line": 3124,
-     "end": 3138,
+     "line": 3125,
+     "end": 3139,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -88177,8 +88253,8 @@
     {
      "key": "stepContract",
      "kind": "function",
-     "line": 3140,
-     "end": 3160,
+     "line": 3141,
+     "end": 3161,
      "exported": true,
      "calls": [
       "js/sim/sim.js#handInRecorders",
@@ -88188,8 +88264,8 @@
     {
      "key": "stepSalvage",
      "kind": "function",
-     "line": 3162,
-     "end": 3190,
+     "line": 3163,
+     "end": 3191,
      "exported": false,
      "calls": [
       "js/sim/salvage.js#recoveryBlocker",
@@ -88208,8 +88284,8 @@
     {
      "key": "cycleTurretMode",
      "kind": "function",
-     "line": 3192,
-     "end": 3201,
+     "line": 3193,
+     "end": 3202,
      "exported": true,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -88218,8 +88294,8 @@
     {
      "key": "setTurretMode",
      "kind": "function",
-     "line": 3203,
-     "end": 3212,
+     "line": 3204,
+     "end": 3213,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#record",
@@ -88229,8 +88305,8 @@
     {
      "key": "setMiningMode",
      "kind": "function",
-     "line": 3214,
-     "end": 3224,
+     "line": 3215,
+     "end": 3225,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#record",
@@ -88240,8 +88316,8 @@
     {
      "key": "cycleMiningMode",
      "kind": "function",
-     "line": 3226,
-     "end": 3235,
+     "line": 3227,
+     "end": 3236,
      "exported": true,
      "calls": [
       "js/sim/sim.js#logEvent"
@@ -88250,8 +88326,8 @@
     {
      "key": "setRigMode",
      "kind": "function",
-     "line": 3237,
-     "end": 3247,
+     "line": 3238,
+     "end": 3248,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#record",
@@ -88261,8 +88337,8 @@
     {
      "key": "cycleRigMode",
      "kind": "function",
-     "line": 3249,
-     "end": 3252,
+     "line": 3250,
+     "end": 3253,
      "exported": true,
      "calls": [
       "js/sim/sim.js#setRigMode"
@@ -88271,8 +88347,8 @@
     {
      "key": "rigWanted",
      "kind": "function",
-     "line": 3254,
-     "end": 3256,
+     "line": 3255,
+     "end": 3257,
      "exported": true,
      "calls": [
       "js/flight/rig.js#rigTarget"
@@ -88281,21 +88357,13 @@
     {
      "key": "TOGGLE_TEXT",
      "kind": "const",
-     "line": 3258,
-     "end": 3271,
+     "line": 3259,
+     "end": 3272,
      "exported": false,
      "calls": []
     },
     {
      "key": "TOGGLE_TEXT.shields",
-     "kind": "prop",
-     "line": 3259,
-     "end": 3259,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "TOGGLE_TEXT.turretsArmed",
      "kind": "prop",
      "line": 3260,
      "end": 3260,
@@ -88303,7 +88371,7 @@
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.engines",
+     "key": "TOGGLE_TEXT.turretsArmed",
      "kind": "prop",
      "line": 3261,
      "end": 3261,
@@ -88311,23 +88379,23 @@
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.pressurized",
+     "key": "TOGGLE_TEXT.engines",
      "kind": "prop",
      "line": 3262,
-     "end": 3263,
+     "end": 3262,
      "exported": false,
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.localGravity",
+     "key": "TOGGLE_TEXT.pressurized",
      "kind": "prop",
-     "line": 3264,
+     "line": 3263,
      "end": 3264,
      "exported": false,
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.assist",
+     "key": "TOGGLE_TEXT.localGravity",
      "kind": "prop",
      "line": 3265,
      "end": 3265,
@@ -88335,7 +88403,7 @@
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.lights",
+     "key": "TOGGLE_TEXT.assist",
      "kind": "prop",
      "line": 3266,
      "end": 3266,
@@ -88343,7 +88411,7 @@
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.sentry",
+     "key": "TOGGLE_TEXT.lights",
      "kind": "prop",
      "line": 3267,
      "end": 3267,
@@ -88351,7 +88419,7 @@
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.salvage",
+     "key": "TOGGLE_TEXT.sentry",
      "kind": "prop",
      "line": 3268,
      "end": 3268,
@@ -88359,18 +88427,26 @@
      "calls": []
     },
     {
-     "key": "TOGGLE_TEXT.matchLock",
+     "key": "TOGGLE_TEXT.salvage",
      "kind": "prop",
      "line": 3269,
-     "end": 3270,
+     "end": 3269,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "TOGGLE_TEXT.matchLock",
+     "kind": "prop",
+     "line": 3270,
+     "end": 3271,
      "exported": false,
      "calls": []
     },
     {
      "key": "toggleSystem",
      "kind": "function",
-     "line": 3273,
-     "end": 3292,
+     "line": 3274,
+     "end": 3293,
      "exported": true,
      "calls": [
       "js/sim/sim.js#logEvent",
@@ -88380,8 +88456,8 @@
     {
      "key": "setThrottle",
      "kind": "function",
-     "line": 3294,
-     "end": 3300,
+     "line": 3295,
+     "end": 3301,
      "exported": true,
      "calls": [
       "js/sim/sim.js#clamp",
@@ -88391,16 +88467,16 @@
     {
      "key": "throttleCap",
      "kind": "function",
-     "line": 3302,
-     "end": 3304,
+     "line": 3303,
+     "end": 3305,
      "exported": true,
      "calls": []
     },
     {
      "key": "stepShip",
      "kind": "function",
-     "line": 3306,
-     "end": 3398,
+     "line": 3307,
+     "end": 3399,
      "exported": false,
      "calls": [
       "js/core/input.js#consumeLook",
@@ -88431,8 +88507,8 @@
     {
      "key": "shiftClock",
      "kind": "function",
-     "line": 3400,
-     "end": 3418,
+     "line": 3401,
+     "end": 3419,
      "exported": true,
      "calls": [
       "js/sim/sim.js#dockPortFor",
@@ -88444,21 +88520,13 @@
     {
      "key": "_clockA",
      "kind": "const",
-     "line": 3419,
-     "end": 3419,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_clockB",
-     "kind": "const",
      "line": 3420,
      "end": 3420,
      "exported": false,
      "calls": []
     },
     {
-     "key": "_clockG",
+     "key": "_clockB",
      "kind": "const",
      "line": 3421,
      "end": 3421,
@@ -88466,18 +88534,26 @@
      "calls": []
     },
     {
+     "key": "_clockG",
+     "kind": "const",
+     "line": 3422,
+     "end": 3422,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "DOCK_FRAME_R",
      "kind": "const",
-     "line": 3423,
-     "end": 3423,
+     "line": 3424,
+     "end": 3424,
      "exported": false,
      "calls": []
     },
     {
      "key": "dockPortFor",
      "kind": "function",
-     "line": 3424,
-     "end": 3432,
+     "line": 3425,
+     "end": 3433,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -88487,24 +88563,24 @@
     {
      "key": "_avoidDir",
      "kind": "const",
-     "line": 3434,
-     "end": 3434,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "avoidAt",
-     "kind": "const",
      "line": 3435,
      "end": 3435,
      "exported": false,
      "calls": []
     },
     {
+     "key": "avoidAt",
+     "kind": "const",
+     "line": 3436,
+     "end": 3436,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "updateAvoidance",
      "kind": "function",
-     "line": 3437,
-     "end": 3459,
+     "line": 3438,
+     "end": 3460,
      "exported": false,
      "calls": [
       "js/sim/sim.js#updateAvoidance>off",
@@ -88518,16 +88594,16 @@
     {
      "key": "updateAvoidance>off",
      "kind": "function",
-     "line": 3438,
-     "end": 3438,
+     "line": 3439,
+     "end": 3439,
      "exported": false,
      "calls": []
     },
     {
      "key": "tickSim",
      "kind": "function",
-     "line": 3461,
-     "end": 3543,
+     "line": 3462,
+     "end": 3544,
      "exported": true,
      "calls": [
       "js/sim/sim.js#sampleTelemetry",
@@ -88563,8 +88639,8 @@
     {
      "key": "collectBeaconsNear",
      "kind": "function",
-     "line": 3545,
-     "end": 3550,
+     "line": 3546,
+     "end": 3551,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -88575,8 +88651,8 @@
     {
      "key": "broadcastShip",
      "kind": "function",
-     "line": 3552,
-     "end": 3569,
+     "line": 3553,
+     "end": 3570,
      "exported": false,
      "calls": [
       "js/sim/sim.js#currentShipId",
@@ -88586,32 +88662,32 @@
     {
      "key": "_gImp",
      "kind": "const",
-     "line": 3571,
-     "end": 3571,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_bv",
-     "kind": "const",
      "line": 3572,
      "end": 3572,
      "exported": false,
      "calls": []
     },
     {
+     "key": "_bv",
+     "kind": "const",
+     "line": 3573,
+     "end": 3573,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "stepPorts",
      "kind": "function",
-     "line": 3574,
-     "end": 3600,
+     "line": 3575,
+     "end": 3601,
      "exported": false,
      "calls": []
     },
     {
      "key": "clampDocked",
      "kind": "function",
-     "line": 3602,
-     "end": 3617,
+     "line": 3603,
+     "end": 3618,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById"
@@ -88620,8 +88696,8 @@
     {
      "key": "stepCareer",
      "kind": "function",
-     "line": 3620,
-     "end": 3632,
+     "line": 3621,
+     "end": 3633,
      "exported": false,
      "calls": [
       "js/sim/career.js#createCareerStepper"
@@ -88630,8 +88706,8 @@
     {
      "key": "stepWorld",
      "kind": "function",
-     "line": 3634,
-     "end": 3687,
+     "line": 3635,
+     "end": 3688,
      "exported": false,
      "calls": [
       "js/station/stations.js#stepStations",
@@ -88670,8 +88746,8 @@
     {
      "key": "leaveHulk",
      "kind": "function",
-     "line": 3689,
-     "end": 3694,
+     "line": 3690,
+     "end": 3695,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#vesselById",
@@ -88682,8 +88758,8 @@
     {
      "key": "onKill",
      "kind": "function",
-     "line": 3696,
-     "end": 3787,
+     "line": 3697,
+     "end": 3788,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -88709,8 +88785,8 @@
     {
      "key": "pauseTick",
      "kind": "function",
-     "line": 3789,
-     "end": 3792,
+     "line": 3790,
+     "end": 3793,
      "exported": true,
      "calls": [
       "js/core/input.js#sampleInput",
@@ -88721,16 +88797,16 @@
     {
      "key": "resumePlay",
      "kind": "function",
-     "line": 3794,
-     "end": 3797,
+     "line": 3795,
+     "end": 3798,
      "exported": true,
      "calls": []
     },
     {
      "key": "selectBody",
      "kind": "function",
-     "line": 3799,
-     "end": 3823,
+     "line": 3800,
+     "end": 3824,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -88744,40 +88820,40 @@
     {
      "key": "requestJump",
      "kind": "function",
-     "line": 3825,
-     "end": 3827,
+     "line": 3826,
+     "end": 3828,
      "exported": true,
      "calls": []
     },
     {
      "key": "requestScan",
      "kind": "function",
-     "line": 3828,
-     "end": 3830,
+     "line": 3829,
+     "end": 3831,
      "exported": true,
      "calls": []
     },
     {
      "key": "dismissNotice",
      "kind": "function",
-     "line": 3832,
-     "end": 3834,
+     "line": 3833,
+     "end": 3835,
      "exported": true,
      "calls": []
     },
     {
      "key": "requestWarp",
      "kind": "const",
-     "line": 3835,
-     "end": 3835,
+     "line": 3836,
+     "end": 3836,
      "exported": true,
      "calls": []
     },
     {
      "key": "bodyUnderReticle",
      "kind": "function",
-     "line": 3837,
-     "end": 3851,
+     "line": 3838,
+     "end": 3852,
      "exported": true,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -88788,8 +88864,8 @@
     {
      "key": "nearestBody",
      "kind": "function",
-     "line": 3853,
-     "end": 3864,
+     "line": 3854,
+     "end": 3865,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -88799,8 +88875,8 @@
     {
      "key": "publishHud",
      "kind": "function",
-     "line": 3866,
-     "end": 4037,
+     "line": 3867,
+     "end": 4038,
      "exported": true,
      "calls": [
       "js/sim/sim.js#nearestBody",
@@ -88831,29 +88907,21 @@
     {
      "key": "wireControlsTest",
      "kind": "function",
-     "line": 4039,
-     "end": 4103,
+     "line": 4040,
+     "end": 4104,
      "exported": true,
      "calls": []
     },
     {
      "key": "wireControlsTest.threats",
      "kind": "prop",
-     "line": 4077,
-     "end": 4077,
+     "line": 4078,
+     "end": 4078,
      "exported": false,
      "calls": []
     },
     {
      "key": "wireControlsTest.ship",
-     "kind": "prop",
-     "line": 4087,
-     "end": 4087,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "wireControlsTest.getYaw",
      "kind": "prop",
      "line": 4088,
      "end": 4088,
@@ -88861,10 +88929,18 @@
      "calls": []
     },
     {
-     "key": "wireControlsTest.getSpeed",
+     "key": "wireControlsTest.getYaw",
      "kind": "prop",
      "line": 4089,
      "end": 4089,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "wireControlsTest.getSpeed",
+     "kind": "prop",
+     "line": 4090,
+     "end": 4090,
      "exported": false,
      "calls": [
       "js/flight/ship.js#speedOf"
@@ -88873,8 +88949,8 @@
     {
      "key": "wireControlsTest.setKeys",
      "kind": "prop",
-     "line": 4091,
-     "end": 4091,
+     "line": 4092,
+     "end": 4092,
      "exported": false,
      "calls": [
       "js/core/input.js#setInjectedKeys"
@@ -88883,8 +88959,8 @@
     {
      "key": "wireControlsTest.setPan",
      "kind": "prop",
-     "line": 4092,
-     "end": 4092,
+     "line": 4093,
+     "end": 4093,
      "exported": false,
      "calls": [
       "js/core/input.js#setInjectedPan"
@@ -88893,8 +88969,8 @@
     {
      "key": "tickSolHost",
      "kind": "function",
-     "line": 4107,
-     "end": 4116,
+     "line": 4108,
+     "end": 4117,
      "exported": true,
      "calls": [
       "js/sim/sim.js#stepWorld"
@@ -88906,7 +88982,7 @@
      "kind": "global.write",
      "value": "window.__lg",
      "at": "wireControlsTest",
-     "line": 4040
+     "line": 4041
     }
    ]
   },
@@ -117528,7 +117604,7 @@
   },
   {
    "file": "js/world/hulks.js",
-   "lines": 260,
+   "lines": 405,
    "vendor": false,
    "summary": "hulks.",
    "imports": [
@@ -117595,12 +117671,14 @@
    ],
    "dynamic": [],
    "importedBy": [
+    "js/aria/pilot.js",
     "js/aria/play.js",
     "js/drones/ops.js",
     "js/economy/contracts.js",
     "js/flight/autopilot.js",
     "js/flight/rig.js",
     "js/mission/salvage.js",
+    "js/net/worldsync.js",
     "js/npc/battles.js",
     "js/render/engine.js",
     "js/sim/sim.js",
@@ -117620,6 +117698,10 @@
     "spawnHulk",
     "removeHulk",
     "stepHulks",
+    "hulkKey",
+    "hulkWire",
+    "adoptHulkWire",
+    "applyHulkCut",
     "hulkVelocity",
     "nearHulks",
     "hulkManifest"
@@ -117629,60 +117711,44 @@
      "key": "HULK",
      "kind": "const",
      "line": 6,
-     "end": 22,
+     "end": 24,
      "exported": true,
      "calls": []
     },
     {
      "key": "HULK_SECTIONS",
      "kind": "const",
-     "line": 24,
-     "end": 24,
+     "line": 26,
+     "end": 26,
      "exported": true,
      "calls": []
     },
     {
      "key": "HULK_PARTS",
      "kind": "const",
-     "line": 26,
-     "end": 35,
+     "line": 28,
+     "end": 37,
      "exported": true,
      "calls": []
     },
     {
      "key": "TIERS",
      "kind": "const",
-     "line": 37,
-     "end": 37,
+     "line": 39,
+     "end": 39,
      "exported": false,
      "calls": []
     },
     {
      "key": "hulks",
      "kind": "const",
-     "line": 39,
-     "end": 39,
+     "line": 41,
+     "end": 41,
      "exported": true,
      "calls": []
     },
     {
      "key": "_bp",
-     "kind": "const",
-     "line": 41,
-     "end": 41,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "seq",
-     "kind": "const",
-     "line": 42,
-     "end": 42,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "sweepT",
      "kind": "const",
      "line": 43,
      "end": 43,
@@ -117690,7 +117756,7 @@
      "calls": []
     },
     {
-     "key": "sim0",
+     "key": "seq",
      "kind": "const",
      "line": 44,
      "end": 44,
@@ -117698,42 +117764,66 @@
      "calls": []
     },
     {
+     "key": "sweepT",
+     "kind": "const",
+     "line": 45,
+     "end": 45,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "sim0",
+     "kind": "const",
+     "line": 46,
+     "end": 46,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "gone",
+     "kind": "const",
+     "line": 48,
+     "end": 48,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "resetHulks",
      "kind": "function",
-     "line": 46,
-     "end": 50,
+     "line": 50,
+     "end": 55,
      "exported": true,
      "calls": []
     },
     {
      "key": "bindHulks",
      "kind": "function",
-     "line": 52,
-     "end": 54,
+     "line": 57,
+     "end": 59,
      "exported": true,
      "calls": []
     },
     {
      "key": "hulkById",
      "kind": "function",
-     "line": 56,
-     "end": 59,
+     "line": 61,
+     "end": 64,
      "exported": true,
      "calls": []
     },
     {
      "key": "plateOf",
      "kind": "function",
-     "line": 61,
-     "end": 61,
+     "line": 66,
+     "end": 66,
      "exported": true,
      "calls": []
     },
     {
      "key": "hullForPlate",
      "kind": "function",
-     "line": 63,
-     "end": 71,
+     "line": 68,
+     "end": 76,
      "exported": true,
      "calls": [
       "js/world/hulks.js#plateOf",
@@ -117743,16 +117833,16 @@
     {
      "key": "sectionCount",
      "kind": "function",
-     "line": 73,
-     "end": 76,
+     "line": 78,
+     "end": 81,
      "exported": true,
      "calls": []
     },
     {
      "key": "buildSections",
      "kind": "function",
-     "line": 78,
-     "end": 105,
+     "line": 83,
+     "end": 110,
      "exported": false,
      "calls": [
       "js/world/hulks.js#sectionCount"
@@ -117761,8 +117851,8 @@
     {
      "key": "frameFor",
      "kind": "function",
-     "line": 107,
-     "end": 122,
+     "line": 112,
+     "end": 127,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -117772,16 +117862,16 @@
     {
      "key": "busy",
      "kind": "function",
-     "line": 124,
-     "end": 124,
+     "line": 129,
+     "end": 129,
      "exported": false,
      "calls": []
     },
     {
      "key": "dropOldest",
      "kind": "function",
-     "line": 126,
-     "end": 134,
+     "line": 131,
+     "end": 139,
      "exported": false,
      "calls": [
       "js/world/hulks.js#busy"
@@ -117790,8 +117880,8 @@
     {
      "key": "spawnHulk",
      "kind": "function",
-     "line": 136,
-     "end": 184,
+     "line": 141,
+     "end": 189,
      "exported": true,
      "calls": [
       "js/ships/shipdb.js#shipById",
@@ -117804,16 +117894,16 @@
     {
      "key": "removeHulk",
      "kind": "function",
-     "line": 186,
-     "end": 191,
+     "line": 191,
+     "end": 197,
      "exported": true,
      "calls": []
     },
     {
      "key": "stepHulks",
      "kind": "function",
-     "line": 193,
-     "end": 227,
+     "line": 199,
+     "end": 233,
      "exported": true,
      "calls": [
       "js/world/hulks.js#busy",
@@ -117822,10 +117912,128 @@
      ]
     },
     {
+     "key": "hulkKey",
+     "kind": "function",
+     "line": 235,
+     "end": 235,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "r2",
+     "kind": "function",
+     "line": 237,
+     "end": 237,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "partsOut",
+     "kind": "function",
+     "line": 238,
+     "end": 238,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "partsIn",
+     "kind": "function",
+     "line": 239,
+     "end": 246,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "hulkWire",
+     "kind": "function",
+     "line": 248,
+     "end": 261,
+     "exported": true,
+     "calls": [
+      "js/world/hulks.js#hulkKey",
+      "js/world/hulks.js#r2",
+      "js/world/hulks.js#partsOut"
+     ]
+    },
+    {
+     "key": "sectionsIn",
+     "kind": "function",
+     "line": 263,
+     "end": 281,
+     "exported": false,
+     "calls": [
+      "js/world/hulks.js#partsIn"
+     ]
+    },
+    {
+     "key": "cutOut",
+     "kind": "function",
+     "line": 283,
+     "end": 283,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "spent",
+     "kind": "function",
+     "line": 284,
+     "end": 284,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "touched",
+     "kind": "function",
+     "line": 285,
+     "end": 285,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "place",
+     "kind": "function",
+     "line": 287,
+     "end": 290,
+     "exported": false,
+     "calls": [
+      "js/world/bodies.js#bodyById",
+      "js/world/bodies.js#bodyPosition"
+     ]
+    },
+    {
+     "key": "adoptHulkWire",
+     "kind": "function",
+     "line": 292,
+     "end": 363,
+     "exported": true,
+     "calls": [
+      "js/world/hulks.js#sectionsIn",
+      "js/world/hulks.js#busy",
+      "js/world/hulks.js#touched",
+      "js/world/hulks.js#cutOut",
+      "js/world/hulks.js#place",
+      "js/world/hulks.js#spent",
+      "js/world/hulks.js#removeHulk",
+      "js/ships/shipdb.js#shipById"
+     ]
+    },
+    {
+     "key": "applyHulkCut",
+     "kind": "function",
+     "line": 365,
+     "end": 372,
+     "exported": true,
+     "calls": [
+      "js/world/hulks.js#cutOut",
+      "js/world/hulks.js#spent",
+      "js/world/hulks.js#removeHulk"
+     ]
+    },
+    {
      "key": "hulkVelocity",
      "kind": "function",
-     "line": 229,
-     "end": 235,
+     "line": 374,
+     "end": 380,
      "exported": true,
      "calls": [
       "js/world/bodies.js#bodyVelocity"
@@ -117834,16 +118042,16 @@
     {
      "key": "nearHulks",
      "kind": "function",
-     "line": 237,
-     "end": 245,
+     "line": 382,
+     "end": 390,
      "exported": true,
      "calls": []
     },
     {
      "key": "hulkManifest",
      "kind": "function",
-     "line": 247,
-     "end": 260,
+     "line": 392,
+     "end": 405,
      "exported": true,
      "calls": [
       "js/economy/materials.js#baseValue"

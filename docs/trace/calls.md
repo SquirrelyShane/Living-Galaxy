@@ -9,16 +9,16 @@ Resolved calls only: direct calls to local symbols and imported bindings (named,
 | symbol | files | calls |
 |---|---|---|
 | [js/station/stations.js › stationById](../files/js/station/stations.js.md#s-stationById) | 37 | 142 |
-| [js/sim/sim.js › logEvent](../files/js/sim/sim.js.md#s-logEvent) | 32 | 180 |
+| [js/sim/sim.js › logEvent](../files/js/sim/sim.js.md#s-logEvent) | 32 | 181 |
 | [js/economy/materials.js › goodName](../files/js/economy/materials.js.md#s-goodName) | 23 | 108 |
 | [js/console/kit.js › el](../files/js/console/kit.js.md#s-el) | 22 | 321 |
 | [js/shipgen/data/catalog/_part.js › P](../files/js/shipgen/data/catalog/_part.js.md#s-P) | 21 | 356 |
-| [js/ships/shipdb.js › shipById](../files/js/ships/shipdb.js.md#s-shipById) | 21 | 46 |
+| [js/ships/shipdb.js › shipById](../files/js/ships/shipdb.js.md#s-shipById) | 21 | 48 |
 | [js/console/kit.js › row](../files/js/console/kit.js.md#s-row) | 20 | 274 |
 | [js/console/kit.js › button](../files/js/console/kit.js.md#s-button) | 20 | 153 |
 | [js/console/kit.js › section](../files/js/console/kit.js.md#s-section) | 20 | 119 |
 | [js/console/kit.js › note](../files/js/console/kit.js.md#s-note) | 20 | 111 |
-| [js/world/bodies.js › bodyPosition](../files/js/world/bodies.js.md#s-bodyPosition) | 20 | 68 |
+| [js/world/bodies.js › bodyPosition](../files/js/world/bodies.js.md#s-bodyPosition) | 20 | 69 |
 | [js/corp/corps.js › corpOfStation](../files/js/corp/corps.js.md#s-corpOfStation) | 16 | 28 |
 | [js/shipgen/core/geometry.js › addMesh](../files/js/shipgen/core/geometry.js.md#s-addMesh) | 15 | 447 |
 | [js/corp/company.js › hasCompany](../files/js/corp/company.js.md#s-hasCompany) | 15 | 36 |
@@ -36,8 +36,8 @@ Resolved calls only: direct calls to local symbols and imported bindings (named,
 | [js/corp/corps.js › corpById](../files/js/corp/corps.js.md#s-corpById) | 11 | 18 |
 | [js/world/generate.js › rngFromSeed](../files/js/world/generate.js.md#s-rngFromSeed) | 11 | 17 |
 | [js/sim/sim.js › addAnchoredWaypoint](../files/js/sim/sim.js.md#s-addAnchoredWaypoint) | 11 | 13 |
-| [js/npc/traffic.js › vesselById](../files/js/npc/traffic.js.md#s-vesselById) | 10 | 41 |
-| [js/world/bodies.js › bodyById](../files/js/world/bodies.js.md#s-bodyById) | 10 | 39 |
+| [js/npc/traffic.js › vesselById](../files/js/npc/traffic.js.md#s-vesselById) | 10 | 42 |
+| [js/world/bodies.js › bodyById](../files/js/world/bodies.js.md#s-bodyById) | 10 | 40 |
 | [js/console/kit.js › chips](../files/js/console/kit.js.md#s-chips) | 10 | 35 |
 | [js/world/field.js › inBelt](../files/js/world/field.js.md#s-inBelt) | 10 | 17 |
 | [js/crew/ledger.js › rapportBetween](../files/js/crew/ledger.js.md#s-rapportBetween) | 10 | 16 |
@@ -174,13 +174,13 @@ Resolved calls only: direct calls to local symbols and imported bindings (named,
 - [js/interior/interior.js](../files/js/interior/interior.js.md) → js/npc/captain.js ×5, js/interior/deckplan.js ×4, js/core/input.js ×4, js/sim/sim.js ×2, js/ships/shipdb.js ×2, js/npc/crewfx.js ×2, js/crew/talkview.js ×1, js/crew/ledger.js ×1
 - [js/main.js](../files/js/main.js.md) → js/core/store.js ×2, js/sim/sim.js ×2, js/core/boot.js ×1, js/audio/index.js ×1, js/render/engine.js ×1, js/ui/hud.js ×1, js/net/account.js ×1, js/flight/pilot.js ×1
 - [js/mission/detour.js](../files/js/mission/detour.js.md) → js/sim/sim.js ×8, js/aria/nav.js ×1
-- [js/mission/run.js](../files/js/mission/run.js.md) → js/sim/sim.js ×30, js/flight/autopilot.js ×24, js/mission/script.js ×12, js/station/stations.js ×4, js/world/bodies.js ×3, js/flight/ship.js ×2, js/world/field.js ×2, js/mission/tradeops.js ×1, js/economy/sites.js ×1, js/mission/detour.js ×1, js/mission/salvage.js ×1, js/comms/chat.js ×1, js/aria/mind.js ×1
-- [js/mission/salvage.js](../files/js/mission/salvage.js.md) → js/sim/sim.js ×13, js/world/hulks.js ×5, js/flight/rig.js ×5, js/flight/ship.js ×3, js/economy/materials.js ×2, js/aria/nav.js ×2, js/world/field.js ×1, js/station/stations.js ×1
+- [js/mission/run.js](../files/js/mission/run.js.md) → js/sim/sim.js ×30, js/flight/autopilot.js ×25, js/mission/script.js ×12, js/station/stations.js ×4, js/world/bodies.js ×3, js/flight/ship.js ×2, js/world/field.js ×2, js/mission/tradeops.js ×1, js/economy/sites.js ×1, js/mission/detour.js ×1, js/mission/salvage.js ×1, js/comms/chat.js ×1, js/aria/mind.js ×1
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) → js/sim/sim.js ×13, js/flight/rig.js ×6, js/world/hulks.js ×5, js/flight/ship.js ×3, js/economy/materials.js ×2, js/aria/nav.js ×2, js/world/field.js ×1, js/station/stations.js ×1
 - [js/mission/script.js](../files/js/mission/script.js.md) → js/flight/ship.js ×2, js/economy/upgrades.js ×2
 - [js/mission/tradeops.js](../files/js/mission/tradeops.js.md) → js/sim/sim.js ×11, js/economy/traderoutes.js ×6, js/flight/ship.js ×5, js/economy/contracts.js ×4, js/station/stations.js ×3, js/aria/mind.js ×2
 - [js/net/account.js](../files/js/net/account.js.md) → js/comms/gnn.js ×1
 - [js/net/net.js](../files/js/net/net.js.md) → js/sim/sim.js ×7
-- [js/net/worldsync.js](../files/js/net/worldsync.js.md) → js/sim/sim.js ×10, js/net/net.js ×5, js/world/events/impactors.js ×4, js/npc/traffic.js ×2, js/world/events/holes.js ×2, js/comms/gnn.js ×1
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) → js/sim/sim.js ×11, js/net/net.js ×5, js/world/events/impactors.js ×4, js/npc/traffic.js ×3, js/world/hulks.js ×3, js/world/events/holes.js ×2, js/comms/gnn.js ×1
 - [js/npc/battles.js](../files/js/npc/battles.js.md) → js/npc/traffic.js ×11, js/corp/corps.js ×4, js/world/generate.js ×1, js/world/debris.js ×1, js/world/hulks.js ×1
 - [js/npc/bay.js](../files/js/npc/bay.js.md) → js/npc/lanes.js ×2
 - [js/npc/bounty.js](../files/js/npc/bounty.js.md) → js/corp/corps.js ×16, js/npc/cradle.js ×3, js/crew/deckmind.js ×2, js/sim/sim.js ×1, js/corp/gdb.js ×1, js/station/stations.js ×1
@@ -256,7 +256,7 @@ Resolved calls only: direct calls to local symbols and imported bindings (named,
 - [js/ships/shipdb.js](../files/js/ships/shipdb.js.md) → js/economy/materials.js ×1
 - [js/ships/shipforge.js](../files/js/ships/shipforge.js.md) → js/shipgen/anim.js ×3, js/ships/hullspec.js ×2, js/shipgen/generate.js ×2
 - [js/sim/salvage.js](../files/js/sim/salvage.js.md) → js/flight/ship.js ×1
-- [js/sim/sim.js](../files/js/sim/sim.js.md) → js/world/bodies.js ×90, js/flight/ship.js ×53, js/station/stations.js ×33, js/flight/pilot.js ×33, js/corp/corps.js ×28, js/core/input.js ×24, js/economy/materials.js ×21, js/station/stationworks.js ×21, js/world/debris.js ×18, js/npc/traffic.js ×15, js/world/anchors.js ×13, js/world/field.js ×13, js/world/hulks.js ×12, js/world/events/holes.js ×12, js/npc/security.js ×11, js/ships/shipdb.js ×11, js/world/events/cataclysm.js ×10, js/economy/upgrades.js ×8, js/world/events/impactors.js ×8, js/economy/contracts.js ×7, js/station/dockwork.js ×7, js/world/generate.js ×7, js/corp/seclevel.js ×7, js/flight/turrets.js ×6, js/npc/battles.js ×6, js/comms/gnn.js ×6, js/flight/avoid.js ×6, js/corp/company.js ×5, js/economy/economy.js ×5, js/economy/insurance.js ×5, js/flight/recorder.js ×5, js/economy/fabricate.js ×4, js/flight/autopilot.js ×4, js/world/events/impacts.js ×4, js/npc/flow.js ×4, js/npc/combat.js ×4, js/world/events/atmoworks.js ×4, js/station/stationyard.js ×3, js/flight/rig.js ×3, js/npc/rogues.js ×3, js/economy/icework.js ×3, js/drones/ops.js ×3, js/flight/defence.js ×3, js/npc/lanes.js ×3, js/comms/chat.js ×2, js/drones/npcdrones.js ×2, js/flight/repair.js ×2, js/core/store.js ×2, js/corp/fleet.js ×2, js/flight/contacts.js ×2, js/npc/captain.js ×2, js/flight/probes.js ×2, js/sim/career.js ×2, js/world/scale.js ×2, js/audio/index.js ×2, js/aria/aria.js ×1, js/core/perf.js ×1, js/drones/board.js ×1, js/crew/ledger.js ×1, js/crew/family.js ×1, js/interior/boarding.js ×1, js/crew/robots.js ×1, js/economy/shipcost.js ×1, js/sim/salvage.js ×1
+- [js/sim/sim.js](../files/js/sim/sim.js.md) → js/world/bodies.js ×90, js/flight/ship.js ×53, js/station/stations.js ×33, js/flight/pilot.js ×33, js/corp/corps.js ×28, js/core/input.js ×24, js/economy/materials.js ×21, js/station/stationworks.js ×21, js/world/debris.js ×18, js/npc/traffic.js ×15, js/world/anchors.js ×13, js/world/field.js ×13, js/world/hulks.js ×13, js/world/events/holes.js ×12, js/npc/security.js ×11, js/ships/shipdb.js ×11, js/world/events/cataclysm.js ×10, js/economy/upgrades.js ×8, js/world/events/impactors.js ×8, js/economy/contracts.js ×7, js/station/dockwork.js ×7, js/world/generate.js ×7, js/corp/seclevel.js ×7, js/flight/turrets.js ×6, js/npc/battles.js ×6, js/comms/gnn.js ×6, js/flight/avoid.js ×6, js/corp/company.js ×5, js/economy/economy.js ×5, js/economy/insurance.js ×5, js/flight/recorder.js ×5, js/economy/fabricate.js ×4, js/flight/autopilot.js ×4, js/world/events/impacts.js ×4, js/npc/flow.js ×4, js/npc/combat.js ×4, js/world/events/atmoworks.js ×4, js/station/stationyard.js ×3, js/flight/rig.js ×3, js/npc/rogues.js ×3, js/economy/icework.js ×3, js/drones/ops.js ×3, js/flight/defence.js ×3, js/npc/lanes.js ×3, js/comms/chat.js ×2, js/drones/npcdrones.js ×2, js/flight/repair.js ×2, js/core/store.js ×2, js/corp/fleet.js ×2, js/flight/contacts.js ×2, js/npc/captain.js ×2, js/flight/probes.js ×2, js/sim/career.js ×2, js/world/scale.js ×2, js/audio/index.js ×2, js/aria/aria.js ×1, js/core/perf.js ×1, js/drones/board.js ×1, js/crew/ledger.js ×1, js/crew/family.js ×1, js/interior/boarding.js ×1, js/crew/robots.js ×1, js/economy/shipcost.js ×1, js/sim/salvage.js ×1
 - [js/station/deckhall.js](../files/js/station/deckhall.js.md) → js/station/staffline.js ×10, js/crew/ledger.js ×6, js/corp/company.js ×6, js/ui/glyphs.js ×5, js/station/stafflife.js ×4, js/sim/sim.js ×3, js/crew/family.js ×3, js/ui/charts.js ×3, js/station/staffcare.js ×3, js/station/stationlife.js ×3, js/crew/talkview.js ×1
 - [js/station/deckworks.js](../files/js/station/deckworks.js.md) → js/drones/dronespec.js ×2, js/station/fabyard.js ×1, js/station/stationworks.js ×1, js/economy/materials.js ×1
 - [js/station/dockwork.js](../files/js/station/dockwork.js.md) → js/economy/materials.js ×2
@@ -297,5 +297,5 @@ Resolved calls only: direct calls to local symbols and imported bindings (named,
 - [js/world/events/impacts.js](../files/js/world/events/impacts.js.md) → js/asteroidgen/impact-sim.js ×9, js/asteroidgen/rng.js ×7, js/asteroidgen/impact.js ×5, js/bodygen/body.js ×2, js/asteroidgen/fracture.js ×1
 - [js/world/field.js](../files/js/world/field.js.md) → js/economy/sites.js ×4, js/bodygen/classes.js ×2
 - [js/world/generate.js](../files/js/world/generate.js.md) → js/world/archetypes.js ×4, js/world/names.js ×4
-- [js/world/hulks.js](../files/js/world/hulks.js.md) → js/world/bodies.js ×7, js/ships/shipdb.js ×3, js/economy/materials.js ×3, js/world/generate.js ×1
+- [js/world/hulks.js](../files/js/world/hulks.js.md) → js/world/bodies.js ×9, js/ships/shipdb.js ×5, js/economy/materials.js ×3, js/world/generate.js ×1
 - [js/world/naming.js](../files/js/world/naming.js.md) → js/vendor/stellar-names/index.js ×2

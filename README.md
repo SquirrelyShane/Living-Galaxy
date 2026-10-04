@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.90**
+**Version 0.3.91**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.90](PATCH-0.3.90.md). Career roadmap:
+Current patch: [0.3.91](docs/PATCH-0.3.91.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -256,7 +256,7 @@ updated with `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.js
 | `js/world/events/impacts.js` | What happens after a rock connects: the rigid-body break-up run, its pieces as debris, the fragment hand-off |
 | `js/world/events/holes.js` | Collapsed stars: transits and remnants, Kerr radii, gravity, what they eat, rarity, the wire |
 | `js/world/debris.js` | Chunks, bursts, rubble rings, salvage (a chunk an impact run holds is `driven`) |
-| `js/world/hulks.js` | 0.3.86: what a destroyed hull leaves — a hulk in sections (plate, parts, recorder, surviving cargo), in the frame of the world it died over; bound to the sim like debris, never importing it |
+| `js/world/hulks.js` | 0.3.86: what a destroyed hull leaves — a hulk in sections (plate, parts, recorder, surviving cargo), in the frame of the world it died over; bound to the sim like debris, never importing it ; 0.3.91: on the wire — `hulkWire` / `adoptHulkWire` / `applyHulkCut`, so a held sky has one set of hulks, the host's |
 | `js/world/events/cataclysm.js` | What a world does when something big enough hits it, and what a star does when it stops being one — pure maths, headless-testable |
 | `js/flight/turrets.js` | Engagement rules, drones, ordnance, mining yield |
 | `js/flight/rig.js` | 0.3.87: the salvage rig — CUT and STRIP on a hulk's sections, shedding what it frees as salvage chunks for the tractor; pure, hooks out, never imports the sim |
@@ -1771,6 +1771,18 @@ salvage job in the board has **CUT IT**, which flies SALVAGE → DOCK → DELIVE
 A wreck order is a real, pinned hulk on the port's approaches; a plate order
 takes hull steel off any hulk; both count only plate reeled off a hulk under the
 rig. A flight recorder pays 350 cr + 240 per hull tier at any honest port.
+
+**Hulks are shared in a held sky** (0.3.91, `js/world/hulks.js`, `js/net/worldsync.js`).
+A hulk used to belong to the process that simulated the kill, and in a held sky
+the kills are the host's — a pilot who joined Sol found none. The host now
+sends its hulks every 8 s (`hstate`; the Sol host from `host/sol-host.mjs`, a
+player who holds a room from `tickWorldSync`) and a mirror keeps that list:
+each row is the whole hulk, keyed by the dead vessel and when it died. Cutting
+only takes away — a finished section of a shared hulk is reported (`hcut`), the
+host cuts it for everyone and retires a hulk with nothing left; a stale packet
+never puts metal back, and a hulk cut up here is not re-added for 180 s. A kill
+a pilot reports leaves its hulk on the host. Contract wrecks stay the signing
+pilot's. The Sol host carries its hulks in the checkpoint.
 
 **TRADE RUN flies a route** (0.3.19, `js/economy/traderoutes.js`, `js/mission/tradeops.js`).
 At the top of each round it picks the best buy-here-sell-there run from where
@@ -3812,6 +3824,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `hulks` | 0.3.86: a dead hull leaves one seeded hulk — sections by tier, one recorder, real parts, a share of the hold; one death is one hulk, the sky caps at 48, a hulk expires unless pinned; it rides the sphere of influence the ship rides (not the wider well), is cut loose when its world breaks and removed inside one; in the sky, the pilot's kill, a hull-on-hull kill and a staged ambush each leave one, and it takes P-LOCK, MATCH, an anchored waypoint and SCAN |
 | `rig` | 0.3.87: the salvage rig — what stops it, what it picks (nearest in reach, the locked one first, bridge last), CUT at speed keeping 85% of the plate and losing parts and recorder, STRIP slowly bringing everything out, the salvage mod and a salvage-line hull making it quicker, loose plate leaving at the hulk's velocity; the mining laser cannot cut what the rig shed; the rig is its own line on the bus, idles, sheds after the laser; and the loop in a sky: laser and rig never together, cut, reel, hold, recorder, and all three Salvage primaries trained |
 | `salvageloop` | 0.3.90: SALVAGE validates, has a preset and picks by worth over time; flown headless it closes, strips, reels and ends, and rests the rig on a low battery; the cap spares a hulk being worked; wreck and plate orders count only plate off a hulk; a recorder pays; both ARIAs plan it and a pilot starts it by hand; a hand-started plan flies round a world; the RIG tutorial branch; the gate; the break-off line on a low battery; belt drones count toward a cull; a wreck rides its port's world on the open side; the brake matches what the autopilot flies to; a hulk under a raider is passed over; AUTO for an order; load shed while waiting on the jump reserve |
+| `hulkwire` | 0.3.91: a wire row is the whole hulk and a contract wreck is not sent; adopting twice changes nothing; cutting only takes away; a shared hulk the host no longer names goes unless it is being worked; a hulk cut up here is not brought back by a stale packet; the host cuts a reported section for everyone; one hull, one hulk; the cap spares the host's hulks; a checkpoint returns them as the host's own; a reported kill leaves a hulk; a shared section is reported; the Sol host sends, applies, checkpoints and names its build |
 | `trade` | 0.3.19: routes buy at one port's price and sell at another's for more, sized to hold/purse/shelf, ranked by cr/min; BUY with no good picks a route from here; SELL never sells a consignment; the port lean; TRADE RUN flown end to end buys at one port, sells at another and makes money; FLY IT builds exactly the route |
 | `desk` | 0.3.18: thirty offers a port across nine departments, every career's department worked at three ports in four, a floor under yours; landlord and tenant issuers; the nested view; cargo sized to hold and purse, combat gated on guns; sector shapes the mix; picket sweep, survey, drone cull, procurement and cargo pod end to end |
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |

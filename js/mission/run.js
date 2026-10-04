@@ -59,7 +59,9 @@ export function startMission(m) {
   mission.trade = null;
   const s0 = copy.steps[0];
   const tradeHere = s0?.op === "DOCK" && s0.target?.kind === "trade-source" && pickRoute(true)?.fromId === sim.ship.dockedAt;
-  if (sim.ship.dockedAt && FLYING.has(s0?.op) && !tradeHere && !(s0.op === "DOCK" && s0.target?.id === sim.ship.dockedAt)) copy.steps.unshift(makeStep("UNDOCK"));
+  const PORT = { "best-buyer": "sell", "best-smelter": "smelt", "nearest-port": "nearest" };
+  const hereIsBest = s0?.op === "DOCK" && PORT[s0.target?.kind] && bestPortFor(PORT[s0.target.kind])?.id === sim.ship.dockedAt;
+  if (sim.ship.dockedAt && FLYING.has(s0?.op) && !tradeHere && !hereIsBest && !(s0.op === "DOCK" && s0.target?.id === sim.ship.dockedAt)) copy.steps.unshift(makeStep("UNDOCK"));
   m.runs = (m.runs ?? 0) + 1;
   mission.active = copy;
   mission.stepIx = 0;

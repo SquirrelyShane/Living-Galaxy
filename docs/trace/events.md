@@ -101,7 +101,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `b` → `(inline)` — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L331
 - event.listen on `b` → `fn` — [js/crew/talkview.js › mountTalk>btn](../files/js/crew/talkview.js.md#s-mountTalk-btn) L59
 - event.listen on `btn` → `(inline)` — [js/economy/icework.js › wireIcework](../files/js/economy/icework.js.md#s-wireIcework) L131
-- event.listen on `btn` → `(inline)` — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L791
+- event.listen on `btn` → `(inline)` — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L792
 - event.listen on `b` → `(inline)` — [js/interior/interior.js › paintRail](../files/js/interior/interior.js.md#s-paintRail) L369
 - event.listen on `root.querySelector()` → `closeInterior` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L426
 - event.listen on `$()` → `toggleInterior` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L440

@@ -129,7 +129,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
 - [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L77
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2152
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2153
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33
@@ -148,7 +148,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
 
-## Exports with no importer (937)
+## Exports with no importer (939)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
@@ -556,6 +556,8 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/net/account.js](../files/js/net/account.js.md) `listPilots`
 - [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_CAP`
 - [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_SNAP`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULK_EVERY`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `hostVesselDown`
 - [js/net/worldsync.js](../files/js/net/worldsync.js.md) `hullWire`
 - [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_DEAD`
 - [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_BLEND`

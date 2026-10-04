@@ -1,6 +1,6 @@
 # js/aria/pilot.js
 
-[index](../../../README.md) · 509 lines · 39 symbols · 18 imports · 3 importers
+[index](../../../README.md) · 518 lines · 40 symbols · 19 imports · 3 importers
 
 ## About
 
@@ -49,7 +49,7 @@ and sells a hold before it goes out again, like you would. Under fire it puts
 the guns on CASTLE; on a bus that cannot carry itself it sheds the cutter and
 gravity rather than standing down.
 
-- L39 · `let prefs = null;` — aria.prefs, bound by wireAriaPilot (aria.js imports this module)
+- L41 · `let prefs = null;` — aria.prefs, bound by wireAriaPilot (aria.js imports this module)
 <!-- /note -->
 
 ## Imports
@@ -74,6 +74,7 @@ gravity rather than standing down.
 | 16 | `../corp/company.js` | `company`, `hasCompany` | [js/corp/company.js](../corp/company.js.md) |
 | 17 | `../flight/pilot.js` | `pilot` | [js/flight/pilot.js](../flight/pilot.js.md) |
 | 18 | `../mission/salvage.js` | `bestHulk`, `SALV` | [js/mission/salvage.js](../mission/salvage.js.md) |
+| 19 | `../world/hulks.js` | `hulks` | [js/world/hulks.js](../world/hulks.js.md) |
 
 ## Imported by
 
@@ -110,14 +111,14 @@ _none detected_
 
 ### <a id="s-ARIA_JOBS"></a>`ARIA_JOBS`
 
-const · **exported** · L20–20
+const · **exported** · L21–21
 
 <!-- note:ARIA_JOBS -->
 <!-- /note -->
 
 ### <a id="s-INVEST_JOBS"></a>`INVEST_JOBS`
 
-const · **exported** · L21–21
+const · **exported** · L22–22
 
 <!-- note:INVEST_JOBS -->
 The two jobs the pilot never "does" in a way the play-labeller can see — you
@@ -131,7 +132,7 @@ other job.
 
 ### <a id="s-LABEL_JOB"></a>`LABEL_JOB`
 
-const · L22–22
+const · L23–23
 
 <!-- note:LABEL_JOB -->
 Fabricating is not an investment and not a habit either — it is what to do
@@ -140,21 +141,21 @@ with a hold of ore, so it sits beside "sell" rather than beside "refit".
 
 ### <a id="s-ariaPilot"></a>`ariaPilot`
 
-const · **exported** · L24–37
+const · **exported** · L25–39
 
 <!-- note:ariaPilot -->
-- L25 · `job: null,` — what it is doing now
-- L27 · `planAt: 0,` — next sim time it may plan
-- L28 · `fails: {},` — job → consecutive failures
-- L29 · `jobs: 0,` — jobs handed to the runner this watch
-- L32 · `investAt: 0,` — next sim time it may spend money on the ship or a drone
-- L33 · `fabAt: 0,` — next sim time it may stop at a works
-- L34 · `bought: [],` — what it has bought this watch, for the report
+- L26 · `job: null,` — what it is doing now
+- L28 · `planAt: 0,` — next sim time it may plan
+- L29 · `fails: {},` — job → consecutive failures
+- L31 · `jobs: 0,` — jobs handed to the runner this watch
+- L34 · `investAt: 0,` — next sim time it may spend money on the ship or a drone
+- L35 · `fabAt: 0,` — next sim time it may stop at a works
+- L36 · `bought: [],` — what it has bought this watch, for the report
 <!-- /note -->
 
 ### <a id="s-prefs"></a>`prefs`
 
-const · L39–39
+const · L41–41
 
 <!-- note:prefs -->
 ---- your habits --------------------------------------------------------
@@ -162,16 +163,16 @@ const · L39–39
 
 ### <a id="s-say"></a>`say`
 
-const · L40–40
+const · L42–42
 
-- called by: [`tickAriaPilot`](#s-tickAriaPilot) ×6
+- called by: [`tickAriaPilot`](#s-tickAriaPilot) ×7
 
 <!-- note:say -->
 <!-- /note -->
 
 ### <a id="s-notePlayerJob"></a>`notePlayerJob(job, weight=)`
 
-function · **exported** · L42–48
+function · **exported** · L44–50
 
 - called by: [`wireAriaHooks`](aria.js.md#s-wireAriaHooks) _js/aria/aria.js_ · [`notePlayLabel`](#s-notePlayLabel)
 
@@ -181,7 +182,7 @@ A job the player did with their own hands.
 
 ### <a id="s-notePlayLabel"></a>`notePlayLabel(label)`
 
-function · **exported** · L50–53
+function · **exported** · L52–55
 
 - calls: [`notePlayerJob`](#s-notePlayerJob)
 - called by: [`wireAriaHooks`](aria.js.md#s-wireAriaHooks) _js/aria/aria.js_
@@ -192,7 +193,7 @@ From captain.js's five-second play label.
 
 ### <a id="s-jobHabits"></a>`jobHabits()`
 
-function · **exported** · L55–61
+function · **exported** · L57–63
 
 - called by: [`ariaTakeConn`](aria.js.md#s-ariaTakeConn) _js/aria/aria.js_ · [`ariaWatchReport`](aria.js.md#s-ariaWatchReport) _js/aria/aria.js_ · [`rawPlanJob`](#s-rawPlanJob)
 
@@ -202,7 +203,7 @@ Your share of each job, 0..1, and how much has been seen.
 
 ### <a id="s-unsurveyed"></a>`unsurveyed()`
 
-function · L63–73
+function · L65–75
 
 - via [js/sim/sim.js](../sim/sim.js.md): `sim.scanned.has`
 - called by: [`rawPlanJob`](#s-rawPlanJob)
@@ -213,7 +214,7 @@ function · L63–73
 
 ### <a id="s-bestRepairPort"></a>`bestRepairPort(ship=)`
 
-function · **exported** · L75–83
+function · **exported** · L77–85
 
 - calls: [`pricePerPoint`](../flight/repair.js.md#s-pricePerPoint) _js/flight/repair.js_ · [`repairsAt`](../flight/repair.js.md#s-repairsAt) _js/flight/repair.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`rawPlanJob`](#s-rawPlanJob) · [`shouldBreakOff`](#s-shouldBreakOff)
@@ -224,7 +225,7 @@ The yard to take a hurt hull to: near, cheap, not shooting.
 
 ### <a id="s-hostileNear"></a>`hostileNear(r=)`
 
-function · L85–88
+function · L87–90
 
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.some`
 - called by: [`planJob`](#s-planJob) · [`rawPlanJob`](#s-rawPlanJob) ×2 · [`shouldBreakOff`](#s-shouldBreakOff) · [`tickAriaPilot`](#s-tickAriaPilot)
@@ -234,7 +235,7 @@ function · L85–88
 
 ### <a id="s-deskSteps"></a>`deskSteps()`
 
-function · L90–95
+function · L92–97
 
 - calls: [`makeStep`](../mission/script.js.md#s-makeStep) _js/mission/script.js_ ×4
 - called by: [`rawPlanJob`](#s-rawPlanJob) ×4
@@ -244,7 +245,7 @@ function · L90–95
 
 ### <a id="s-INVEST"></a>`INVEST`
 
-const · L97–102
+const · L99–104
 
 <!-- note:INVEST -->
 ---- spending the takings ------------------------------------------------
@@ -270,15 +271,15 @@ without being asked:
 What to buy is chosen by the habit, not by price: the kit that helps the job
 this pilot actually does is worth more than the kit that is cheapest.
 
-- L98 · `reserve: 15000,` — credits ARIA will not spend, whatever is on offer
-- L99 · `cooldown: 300,` — sim seconds between purchases
-- L100 · `minHull: 0.6,` — a hurt hull gets fixed before anything gets bought
-- L101 · `maxRange: 2.2e5,` — how far it will go to shop (u)
+- L100 · `reserve: 15000,` — credits ARIA will not spend, whatever is on offer
+- L101 · `cooldown: 300,` — sim seconds between purchases
+- L102 · `minHull: 0.6,` — a hurt hull gets fixed before anything gets bought
+- L103 · `maxRange: 2.2e5,` — how far it will go to shop (u)
 <!-- /note -->
 
 ### <a id="s-GUESS"></a>`GUESS`
 
-const · L104–107
+const · L106–109
 
 <!-- note:GUESS -->
 What she does when she has not watched you long enough to know. A salvage
@@ -287,14 +288,21 @@ pilot's ARIA goes for hulks; anybody else's mines first, as before.
 
 ### <a id="s-WORK"></a>`WORK`
 
-const · L108–108
+const · L110–110
 
 <!-- note:WORK -->
 <!-- /note -->
 
+### <a id="s-SALVOR"></a>`SALVOR`
+
+const · L111–111
+
+<!-- note:SALVOR -->
+<!-- /note -->
+
 ### <a id="s-JOB_REFITS"></a>`JOB_REFITS`
 
-const · L110–115
+const · L113–118
 
 <!-- note:JOB_REFITS -->
 The refits that pay for themselves at each job, best first.
@@ -302,7 +310,7 @@ The refits that pay for themselves at each job, best first.
 
 ### <a id="s-ALWAYS_REFITS"></a>`ALWAYS_REFITS`
 
-const · L116–116
+const · L119–119
 
 <!-- note:ALWAYS_REFITS -->
 Wanted whatever the pilot does: a drone that welds the hull in flight, and
@@ -312,7 +320,7 @@ for every job on the board.
 
 ### <a id="s-JOB_DRONES"></a>`JOB_DRONES`
 
-const · L118–123
+const · L121–126
 
 <!-- note:JOB_DRONES -->
 The drone that does the pilot's job while the pilot does it somewhere else.
@@ -320,7 +328,7 @@ The drone that does the pilot's job while the pilot does it somewhere else.
 
 ### <a id="s-inRange"></a>`inRange(ship, st)`
 
-function · L125–125
+function · L128–128
 
 - calls: [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`buildPlan`](#s-buildPlan) · [`fabStop`](#s-fabStop) · [`refitPlan`](#s-refitPlan)
@@ -330,7 +338,7 @@ function · L125–125
 
 ### <a id="s-FABRULE"></a>`FABRULE`
 
-const · L127–132
+const · L130–135
 
 <!-- note:FABRULE -->
 ---- turning a hold of rock into parts ------------------------------------
@@ -354,15 +362,15 @@ Two things decide it, and they are deliberately different in kind:
   only ever move the bar by a third either way — a tape with three records
   in it should not be able to talk the planner into anything.
 
-- L128 · `holdMin: 0.55,` — how full before a stop is worth it
-- L129 · `margin: 1.4,` — what the part must be worth against its raw ore
-- L130 · `lean: 0.33,` — the most the tape may move that bar, either way
-- L131 · `cooldown: 90,` — sim seconds between fabrication stops
+- L131 · `holdMin: 0.55,` — how full before a stop is worth it
+- L132 · `margin: 1.4,` — what the part must be worth against its raw ore
+- L133 · `lean: 0.33,` — the most the tape may move that bar, either way
+- L134 · `cooldown: 90,` — sim seconds between fabrication stops
 <!-- /note -->
 
 ### <a id="s-fabLeaning"></a>`fabLeaning()`
 
-function · **exported** · L134–150
+function · **exported** · L137–153
 
 - calls: [`neighbours`](../flight/recorder.js.md#s-neighbours) _js/flight/recorder.js_ · [`snapshot`](../flight/recorder.js.md#s-snapshot) _js/flight/recorder.js_
 - called by: [`fabStop`](#s-fabStop) · [`rawPlanJob`](#s-rawPlanJob)
@@ -371,12 +379,12 @@ function · **exported** · L134–150
 What the pilot's own tape says about states like this one.
 → -1 (they sell raw) … 0 (no opinion) … +1 (they fabricate)
 
-- L140 · `if (near.length < 4) return 0;` — not enough to have an opinion
+- L143 · `if (near.length < 4) return 0;` — not enough to have an opinion
 <!-- /note -->
 
 ### <a id="s-fabStop"></a>`fabStop(ship=)`
 
-function · **exported** · L152–177
+function · **exported** · L155–180
 
 - calls: [`fabLeaning`](#s-fabLeaning) · [`inRange`](#s-inRange) · [`canFabAt`](../economy/fabricate.js.md#s-canFabAt) _js/economy/fabricate.js_ · [`fabMenuAt`](../economy/fabricate.js.md#s-fabMenuAt) _js/economy/fabricate.js_ · [`fabQueueAt`](../economy/fabricate.js.md#s-fabQueueAt) _js/economy/fabricate.js_ · [`maxRunnable`](../economy/fabricate.js.md#s-maxRunnable) _js/economy/fabricate.js_ · [`planJob`](../economy/fabricate.js.md#s-planJob) _js/economy/fabricate.js_ ×2 · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`rawPlanJob`](#s-rawPlanJob)
@@ -385,7 +393,7 @@ function · **exported** · L152–177
 The best fabrication stop for what is in the hold right now.
 → { st, good, name, qty, margin, plan } | null
 
-- L163 · `let tried = 0;` — Walk the menu in margin order and stop once a few are actually MAKEABLE.
+- L166 · `let tried = 0;` — Walk the menu in margin order and stop once a few are actually MAKEABLE.
   
   The first cut of this took the top ten by margin and planned those, which
   looks sensible and is wrong: a hold of iron ore and carbon makes steel
@@ -397,13 +405,13 @@ The best fabrication stop for what is in the hold right now.
   One cheap `planJob(…, 1, …)` says whether a line is possible at all; only
   the ones that pass are worth the binary search in `maxRunnable`. Four
   candidates is plenty and keeps this affordable at planner cadence.
-- L165 · `if (m.ratio < bar) break;` — the menu is sorted; the rest are worse
-- L166 · `if (!planFab(m.id, 1, stock).ok) continue;` — cannot make even one from this hold
+- L168 · `if (m.ratio < bar) break;` — the menu is sorted; the rest are worse
+- L169 · `if (!planFab(m.id, 1, stock).ok) continue;` — cannot make even one from this hold
 <!-- /note -->
 
 ### <a id="s-refitPlan"></a>`refitPlan(ship=, job=)`
 
-function · **exported** · L179–196
+function · **exported** · L182–199
 
 - calls: [`inRange`](#s-inRange) · [`hasUpgrade`](../economy/upgrades.js.md#s-hasUpgrade) _js/economy/upgrades.js_ · [`upgradeOptions`](../economy/upgrades.js.md#s-upgradeOptions) _js/economy/upgrades.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`rawPlanJob`](#s-rawPlanJob)
@@ -412,12 +420,12 @@ function · **exported** · L179–196
 The best refit ARIA can afford, at a port it is willing to fly to.
 → { st, opt, rank } | null
 
-- L191 · `const score = -rank * 100 - dist3(ship.pos, st) / 1e5;` — earlier in the want list wins; distance only breaks a tie
+- L194 · `const score = -rank * 100 - dist3(ship.pos, st) / 1e5;` — earlier in the want list wins; distance only breaks a tie
 <!-- /note -->
 
 ### <a id="s-buildPlan"></a>`buildPlan(ship=, job=)`
 
-function · **exported** · L198–214
+function · **exported** · L201–217
 
 - calls: [`inRange`](#s-inRange) · [`hasCompany`](../corp/company.js.md#s-hasCompany) _js/corp/company.js_ · [`buildOptions`](../drones/ops.js.md#s-buildOptions) _js/drones/ops.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`rawPlanJob`](#s-rawPlanJob)
@@ -432,7 +440,7 @@ treasury is short, the drone cap is reached, or the line is busy.
 
 ### <a id="s-MISSION"></a>`MISSION(name, steps)`
 
-function · L216–216
+function · L219–219
 
 - calls: [`makeMission`](../mission/script.js.md#s-makeMission) _js/mission/script.js_
 - called by: [`rawPlanJob`](#s-rawPlanJob) ×9
@@ -442,17 +450,24 @@ function · L216–216
 
 ### <a id="s-rawPlanJob"></a>`rawPlanJob()`
 
-function · L218–303
+function · L221–308
 
 - calls: [`bestRepairPort`](#s-bestRepairPort) · [`buildPlan`](#s-buildPlan) · [`deskSteps`](#s-deskSteps) ×4 · [`fabLeaning`](#s-fabLeaning) · [`fabStop`](#s-fabStop) · [`hostileNear`](#s-hostileNear) ×2 · [`jobHabits`](#s-jobHabits) · [`MISSION`](#s-MISSION) ×9 · [`rawPlanJob>weight`](#s-rawPlanJob-weight) ×3 · [`refitPlan`](#s-refitPlan) · [`unsurveyed`](#s-unsurveyed) · [`nearestSeam`](../flight/autopilot.js.md#s-nearestSeam) _js/flight/autopilot.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`bestHulk`](../mission/salvage.js.md#s-bestHulk) _js/mission/salvage.js_ · [`makeStep`](../mission/script.js.md#s-makeStep) _js/mission/script.js_ ×18
 - called by: [`planJob`](#s-planJob)
 
 <!-- note:rawPlanJob -->
+- L227 · `for (const k of Object.keys(fails)) if (fails[k] > 0 && sim.time - (ariaPilot.failAt[k] ??` — two failures used to bench a job until the pilot took the conn back; a
+  hulk that aged out mid-leg, twice, ended salvage for the whole watch.
+  A failure is forgiven four minutes on.
+- L279 · `const salvor = pilot?.complexId === "salvage" || (learned && (share.salvage ?? 0) >= 0.5);` — 0.3.91: a salvor with no hulk to work does not take up mining. With the
+  sky empty of hulks she was sent to the belt on a hull built for a rig —
+  "you mine 0% of the time" — and came home on a flat battery. She mines
+  if the pilot does; otherwise she waits for the fighting to leave some.
 <!-- /note -->
 
 #### <a id="s-rawPlanJob-weight"></a>`rawPlanJob>weight(j)`
 
-function · L277–277
+function · L282–282
 
 - calls: [`policyScore`](mind.js.md#s-policyScore) _js/aria/mind.js_ · [`snapshot`](../flight/recorder.js.md#s-snapshot) _js/flight/recorder.js_
 - called by: [`rawPlanJob`](#s-rawPlanJob) ×3
@@ -462,7 +477,7 @@ function · L277–277
 
 ### <a id="s-planJob"></a>`planJob()`
 
-function · **exported** · L305–312
+function · **exported** · L310–317
 
 - calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`contextualScore`](mind.js.md#s-contextualScore) _js/aria/mind.js_ · [`decideMind`](mind.js.md#s-decideMind) _js/aria/mind.js_ · [`hostileNear`](#s-hostileNear) · [`rawPlanJob`](#s-rawPlanJob) · [`snapshot`](../flight/recorder.js.md#s-snapshot) _js/flight/recorder.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_
 - called by: [`tickAriaPilot`](#s-tickAriaPilot)
@@ -483,7 +498,7 @@ tests call it directly. → { job, why, mission } | { job: null, why }
 
 ### <a id="s-shouldBreakOff"></a>`shouldBreakOff(ship=)`
 
-function · **exported** · L314–321
+function · **exported** · L319–326
 
 - calls: [`breakLine`](mind.js.md#s-breakLine) _js/aria/mind.js_ · [`bestRepairPort`](#s-bestRepairPort) · [`hostileNear`](#s-hostileNear) · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`pricePerPoint`](../flight/repair.js.md#s-pricePerPoint) _js/flight/repair.js_ · [`batteryCap`](../flight/ship.js.md#s-batteryCap) _js/flight/ship.js_
 - called by: [`tickAriaPilot`](#s-tickAriaPilot)
@@ -506,7 +521,7 @@ the repair line and only goes in between jobs, as she did before Core.
 
 ### <a id="s-beginAriaWatch"></a>`beginAriaWatch()`
 
-function · **exported** · L323–337
+function · **exported** · L328–343
 
 - calls: [`stopMission`](../mission/run.js.md#s-stopMission) _js/mission/run.js_
 - called by: [`ariaTakeConn`](aria.js.md#s-ariaTakeConn) _js/aria/aria.js_
@@ -514,13 +529,13 @@ function · **exported** · L323–337
 <!-- note:beginAriaWatch -->
 ---- the watch ----------------------------------------------------------
 
-- L333 · `ariaPilot.investAt = 0;` — A fresh watch may shop straight away — the pilot handed over on purpose.
-- L336 · `if (mission.active) stopMission("ARIA has the conn", { quiet: true });` — whatever you had the autopilot doing is yours; ARIA plans its own
+- L339 · `ariaPilot.investAt = 0;` — A fresh watch may shop straight away — the pilot handed over on purpose.
+- L342 · `if (mission.active) stopMission("ARIA has the conn", { quiet: true });` — whatever you had the autopilot doing is yours; ARIA plans its own
 <!-- /note -->
 
 ### <a id="s-endAriaWatch"></a>`endAriaWatch()`
 
-function · **exported** · L339–342
+function · **exported** · L345–348
 
 - calls: [`stopMission`](../mission/run.js.md#s-stopMission) _js/mission/run.js_
 - called by: [`ariaRelease`](aria.js.md#s-ariaRelease) _js/aria/aria.js_
@@ -530,25 +545,28 @@ function · **exported** · L339–342
 
 ### <a id="s-tickAriaPilot"></a>`tickAriaPilot()`
 
-function · **exported** · L344–412
+function · **exported** · L350–421
 
-- calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`learnOutcome`](mind.js.md#s-learnOutcome) _js/aria/mind.js_ · [`hostileNear`](#s-hostileNear) · [`planJob`](#s-planJob) · [`say`](#s-say) ×6 · [`shouldBreakOff`](#s-shouldBreakOff) · [`busOverload`](../flight/autopilot.js.md#s-busOverload) _js/flight/autopilot.js_ · [`pilotInput`](../flight/autopilot.js.md#s-pilotInput) _js/flight/autopilot.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ ×2 · [`repairQuote`](../flight/repair.js.md#s-repairQuote) _js/flight/repair.js_ · [`repairsAt`](../flight/repair.js.md#s-repairsAt) _js/flight/repair.js_ · [`yardRepair`](../flight/repair.js.md#s-yardRepair) _js/flight/repair.js_ · [`startMission`](../mission/run.js.md#s-startMission) _js/mission/run.js_ · [`stopMission`](../mission/run.js.md#s-stopMission) _js/mission/run.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ · [`setTurretMode`](../sim/sim.js.md#s-setTurretMode) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ ×3 · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
+- calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`learnOutcome`](mind.js.md#s-learnOutcome) _js/aria/mind.js_ · [`hostileNear`](#s-hostileNear) · [`planJob`](#s-planJob) · [`say`](#s-say) ×7 · [`shouldBreakOff`](#s-shouldBreakOff) · [`busOverload`](../flight/autopilot.js.md#s-busOverload) _js/flight/autopilot.js_ · [`pilotInput`](../flight/autopilot.js.md#s-pilotInput) _js/flight/autopilot.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ ×2 · [`repairQuote`](../flight/repair.js.md#s-repairQuote) _js/flight/repair.js_ · [`repairsAt`](../flight/repair.js.md#s-repairsAt) _js/flight/repair.js_ · [`yardRepair`](../flight/repair.js.md#s-yardRepair) _js/flight/repair.js_ · [`startMission`](../mission/run.js.md#s-startMission) _js/mission/run.js_ · [`stopMission`](../mission/run.js.md#s-stopMission) _js/mission/run.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`setMiningMode`](../sim/sim.js.md#s-setMiningMode) _js/sim/sim.js_ · [`setTurretMode`](../sim/sim.js.md#s-setTurretMode) _js/sim/sim.js_ · [`toggleSystem`](../sim/sim.js.md#s-toggleSystem) _js/sim/sim.js_ ×3 · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - via [js/npc/captain.js](../npc/captain.js.md): `hooks.onStick`
 - called by: [`wireAriaHooks`](aria.js.md#s-wireAriaHooks) _js/aria/aria.js_
 
 <!-- note:tickAriaPilot -->
 Called from captain.tickCaptain every tick ARIA holds the conn. → earned this watch
 
-- L348 · `if (!autopilot.on && pilotInput()) { hooks.onStick?.(); return 0; }` — between jobs too: the stick is yours
-- L350 · `if (hostileNear() && (ship.turretMode === "off" || ship.turretMode === "passive")) { setTu` — guns: under fire, answer it
-- L352 · `const bus = busOverload(ship);` — a bus that cannot refill itself: shed rather than stand down
-- L379 · `if (ariaPilot.job && mission.state === "failed") ariaPilot.fails[ariaPilot.job] = (ariaPil` — the last job ended: book it
-- L384 · `if (ship.dockedAt) {` — docked between jobs: do at the desk what you would
+- L354 · `if (!autopilot.on && pilotInput()) { hooks.onStick?.(); return 0; }` — between jobs too: the stick is yours
+- L356 · `if (hostileNear() && (ship.turretMode === "off" || ship.turretMode === "passive")) { setTu` — guns: under fire, answer it
+- L358 · `const bus = busOverload(ship);` — a bus that cannot refill itself: shed rather than stand down
+- L? · `if (ariaPilot.job && mission.state === "failed") ariaPilot.fails[ariaPilot.job] = (ariaPil` — the last job ended: book it
+- L392 · `if (ship.dockedAt) {` — docked between jobs: do at the desk what you would
+
+- L359 · `const rigRest = Boolean(mission.run?.resting) && mission.active?.steps[mission.stepIx]?.op` — the rig on STRIP is 40 kW on a bus with none to spare: she rested it two
+  or three times a hulk. Twenty of those are deck gravity and the floods.
 <!-- /note -->
 
 ### <a id="s-registerAriaOps"></a>`registerAriaOps()`
 
-function · L414–432
+function · L423–441
 
 - calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`registerBuildOp`](#s-registerBuildOp) · [`registerFabOp`](#s-registerFabOp) · [`registerRefitOp`](#s-registerRefitOp) · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`repairQuote`](../flight/repair.js.md#s-repairQuote) _js/flight/repair.js_ · [`yardRepair`](../flight/repair.js.md#s-yardRepair) _js/flight/repair.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`wireAriaPilot`](#s-wireAriaPilot)
@@ -567,7 +585,7 @@ and put a sentence on `mission.run.why` for the WORK card.
 
 ### <a id="s-registerRefitOp"></a>`registerRefitOp()`
 
-function · L434–455
+function · L443–464
 
 - calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`buyUpgrade`](../economy/upgrades.js.md#s-buyUpgrade) _js/economy/upgrades.js_ · [`effectOf`](../economy/upgrades.js.md#s-effectOf) _js/economy/upgrades.js_ · [`hasUpgrade`](../economy/upgrades.js.md#s-hasUpgrade) _js/economy/upgrades.js_ · [`upgradeOptions`](../economy/upgrades.js.md#s-upgradeOptions) _js/economy/upgrades.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - via [js/economy/upgrades.js](../economy/upgrades.js.md): `upgradeOptions.find`
@@ -578,14 +596,14 @@ function · L434–455
 
 ### <a id="s-registerBuildOp"></a>`registerBuildOp()`
 
-function · L457–477
+function · L466–486
 
 - calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`buildOptions`](../drones/ops.js.md#s-buildOptions) _js/drones/ops.js_ · [`orderBuild`](../drones/ops.js.md#s-orderBuild) _js/drones/ops.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - via [js/drones/ops.js](../drones/ops.js.md): `buildOptions.find`
 - called by: [`registerAriaOps`](#s-registerAriaOps)
 
 <!-- note:registerBuildOp -->
-- L474 · `` mission.run.why = `${opt.label} drone on the line at ${st.name} — ${opt.secs} s, ${opt.pri `` — The drone is on the LINE, not off it — it rolls off on its own timer and
+- L483 · `` mission.run.why = `${opt.label} drone on the line at ${st.name} — ${opt.secs} s, ${opt.pri `` — The drone is on the LINE, not off it — it rolls off on its own timer and
   asks for its orders on the drone channel. The mission's job is done when
   the order is placed; standing at the berth watching a build finish is
   exactly the kind of idling ARIA is supposed to avoid.
@@ -593,13 +611,13 @@ function · L457–477
 
 ### <a id="s-registerFabOp"></a>`registerFabOp()`
 
-function · L479–501
+function · L488–510
 
 - calls: [`authorize`](mind.js.md#s-authorize) _js/aria/mind.js_ · [`canFabAt`](../economy/fabricate.js.md#s-canFabAt) _js/economy/fabricate.js_ · [`orderFab`](../economy/fabricate.js.md#s-orderFab) _js/economy/fabricate.js_ · [`planJob`](../economy/fabricate.js.md#s-planJob) _js/economy/fabricate.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`registerAriaOps`](#s-registerAriaOps)
 
 <!-- note:registerFabOp -->
-- L497 · `ariaPilot.fabAt = sim.time + 90;` — The job is ON the line, not off it — it finishes on sim time and lands in
+- L506 · `ariaPilot.fabAt = sim.time + 90;` — The job is ON the line, not off it — it finishes on sim time and lands in
   this port's locker. Standing at the berth watching it is exactly the kind
   of idling the planner exists to avoid, so the step is done once it is
   placed, the same call BUILD makes.
@@ -607,7 +625,7 @@ function · L479–501
 
 ### <a id="s-wireAriaPilot"></a>`wireAriaPilot(ariaState, speak)`
 
-function · **exported** · L503–507
+function · **exported** · L512–516
 
 - calls: [`registerAriaOps`](#s-registerAriaOps)
 - called by: [`wireAriaHooks`](aria.js.md#s-wireAriaHooks) _js/aria/aria.js_
@@ -618,7 +636,7 @@ aria.js calls this once the module graph has loaded.
 
 ### <a id="s-bindAriaPrefs"></a>`bindAriaPrefs(p)`
 
-function · **exported** · L509–509
+function · **exported** · L518–518
 
 - called by: [`loadAria`](aria.js.md#s-loadAria) _js/aria/aria.js_ ×2 · [`resetAria`](aria.js.md#s-resetAria) _js/aria/aria.js_
 

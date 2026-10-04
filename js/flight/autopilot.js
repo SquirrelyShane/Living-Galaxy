@@ -516,6 +516,7 @@ export function bestPortFor(plan = sim.autoPlan.onDock) {
 }
 
 export function parkDistance(node) {
+  if (node.park > 0) return node.park;
   return node.body ? node.radius * PARK_RADII : node.kind === "point" ? POINT_PARK : PORT_PARK;
 }
 
