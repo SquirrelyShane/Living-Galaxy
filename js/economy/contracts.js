@@ -1,4 +1,5 @@
 import { recoverSite } from "../sim/salvage.js";
+import { HULK, hulkById, hullForPlate, plateOf, spawnHulk } from "../world/hulks.js";
 import { logEvent, sim, sellPriceAt, currentShipId, addWaypointAt, addAnchoredWaypoint, removeWaypoint } from "../sim/sim.js";
 import { stations, stationById } from "../station/stations.js";
 import { corpOfStation, corpRelation, corps, adjustStanding, standingLabel } from "../corp/corps.js";
@@ -66,6 +67,10 @@ export const BOARD = {
   visitR: 1500,
   pay: 1.0,
 };
+
+export const SALVAGE_PAY = { plate: 3.6, wreck: 3.2, fee: 300, pod: 0.35, podFee: 900 };
+export const WRECK = { near: 6000, far: 16000, lift: 2000, fan: 1.6 };
+const _host = { x: 0, y: 0, z: 0 };
 
 export const contracts = { boards: new Map(), active: [], done: 0, failed: 0, seq: 1 };
 
@@ -144,6 +149,7 @@ export function anchorFor(a) {
   if (a.markId) return { ref: { kind: "vessel", id: a.markId }, name: a.markName ?? "the mark" };
   if (a.boatId) return { ref: { kind: "boat", id: a.boatId }, name: a.boatName ?? "the boat" };
   if (a.nestId) return { ref: { kind: "nest", id: a.nestId }, name: a.nestName ?? "the nest" };
+  if (a.hulkId) return hulkById(a.hulkId) ? { ref: { kind: "hulk", id: a.hulkId }, name: a.hulkName ?? "the wreck" } : null;
   const t = a.targets?.[Math.min(a.leg ?? 0, (a.targets?.length ?? 1) - 1)];
   if (!t) return null;
   const at = targetPos(t);
@@ -307,21 +313,24 @@ const KINDS = {
     return { mech: "kill", armed: true, killKind: "rogue", count: n, nestId: nest.id, nestName: nest.name, pay: Math.round((450 * n + rnd() * 400) * t.pay), title: `Drone cull — ${n} out of ${nest.name}`, text: `Rogue drones out of ${nest.name} are working the lanes. Put ${n} of them down, anywhere.` };
   },
   salvage(st, rnd, t, fit) {
-    const qty = sized(fit, 0.08 + rnd() * 0.12 * t.pay, 6, "iron_ore");
-    return { mech: "deliver", good: "iron_ore", qty, salvage: true, pay: Math.round(qty * 18 * t.pay + 300 * t.pay), title: `Salvage ${qty} plate`, text: `The yard buys wreck plate: ${qty} units of debris iron, tractored off whatever died out there.` };
+    const qty = Math.max(12, Math.min(sized(fit, 0.5, 12, HULK.plate), Math.round(90 + rnd() * 130 * t.pay)));
+    return { mech: "deliver", good: HULK.plate, qty, salvage: true, pay: Math.round(qty * baseValue(HULK.plate) * SALVAGE_PAY.plate * (0.85 + 0.15 * t.pay) + SALVAGE_PAY.fee * t.pay), title: `Salvage ${qty} plate`, text: `The yard buys wreck plate: ${qty} units of hull steel off anything that died out there. It has to come off a hulk under your own rig — the scale knows mill steel from scrap.` };
   },
   wreck(st, rnd, t, fit) {
-    const spot = jobSpot(st, rnd, { spread: 1.5, r: 1200 });
-    if (!spot) return null;
-    const qty = sized(fit, 0.05 + rnd() * 0.08, 4, "iron_ore");
-    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the wreck in ${spot.name}`, dwell: 20 }], good: "iron_ore", qty, salvage: true, recovery: true, pay: Math.round((600 + qty * 20) * t.pay), title: `Recover a wreck in ${spot.name}`, text: `A hull went down in ${spotLine(spot, st)}. Fly the marked site, enable SALVAGE in SHIP systems, and hold position while the recovery rig strips ${qty} plate. Unload and return if your hold fills, then deliver the plate here.` };
+    const r = WRECK.near + rnd() * (WRECK.far - WRECK.near);
+    let a = rnd() * Math.PI * 2;
+    if (st.hostId && bodyPosition(st.hostId, sim.time, _host)) a = Math.atan2(st.z - _host.z, st.x - _host.x) + (rnd() - 0.5) * WRECK.fan;
+    const off = { x: Math.cos(a) * r, y: (rnd() - 0.5) * WRECK.lift, z: Math.sin(a) * r };
+    const where = `${Math.round(r / 100)} km off ${st.name}`;
+    const qty = Math.max(10, Math.min(sized(fit, 0.5, 10, HULK.plate), Math.round(80 + rnd() * 140 * t.pay)));
+    return { mech: "deliver", good: HULK.plate, qty, salvage: true, wreck: true, wreckAt: { off, name: where }, pay: Math.round(qty * baseValue(HULK.plate) * SALVAGE_PAY.wreck * (0.85 + 0.15 * t.pay) + SALVAGE_PAY.fee * 2 * t.pay), title: `Recover a wreck off ${st.name}`, text: `A hull went down on the approaches, ${where}. The hulk is marked on acceptance. Put the rig on it — STRIP keeps the parts and the recorder, CUT is quicker — let the tractor reel what comes off, and deliver ${qty} plate from it here. The rest is yours.` };
   },
   pod(st, rnd, t, fit) {
     const spot = jobSpot(st, rnd, { spread: 1.6, r: 900 });
     if (!spot) return null;
     const id = pickOf(rnd, ["steel_plate", "wiring", "motor", "ration", "medkit", "battery", "polymer", "glass"]);
     const qty = Math.max(2, qtyFor(fit, 0.04 + rnd() * 0.08, 2, id, t));
-    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the pod in ${spot.name}`, dwell: 12 }], grant: { good: id, qty }, recovery: true, good: id, qty, pay: Math.round((400 + qty * baseValue(id) * 0.15) * t.pay), title: `Recover a cargo pod — ${goodName(id)} in ${spot.name}`, text: `A hauler lost a pod of ${qty} ${goodName(id)} in ${spotLine(spot, st)}. Fly to it, enable SALVAGE with operations power, and recover it into your hold. Unload and return if needed, then bring the full cargo here. The owner pays the finder.` };
+    return { mech: "visit", targets: [{ kind: "point", x: spot.x, y: spot.y, z: spot.z, name: `the pod in ${spot.name}`, dwell: 12 }], grant: { good: id, qty }, recovery: true, good: id, qty, pay: Math.round((SALVAGE_PAY.podFee + qty * baseValue(id) * SALVAGE_PAY.pod) * t.pay), title: `Recover a cargo pod — ${goodName(id)} in ${spot.name}`, text: `A hauler lost a pod of ${qty} ${goodName(id)} in ${spotLine(spot, st)}. Fly to it, enable SALVAGE with operations power, and recover it into your hold. Unload and return if needed, then bring the full cargo here. The owner pays the finder.` };
   },
   materials(st, rnd, t, fit) {
     const pool = ["steel", "stainless", "ceramic", "glass", "polymer", "bronze", "superalloy", "aluminium", "copper", "titanium"];
@@ -421,7 +430,7 @@ function chainOffer(st, rnd, now, fit, spec) {
   if (stage.payK) job.pay = Math.round(job.pay * stage.payK);
   job.pay = Math.max(300, Math.round(job.pay * BOARD.pay));
   job.title = stage.title;
-  job.text = `${stage.text}${job.spot ? ` Survey puts it in ${spotLine(job.spot, st)}.` : ""}`;
+  job.text = `${stage.text}${job.spot ? ` Survey puts it in ${spotLine(job.spot, st)}.` : job.wreckAt ? ` The hulk lies ${job.wreckAt.name}; put the rig on it and bring ${job.qty} plate off it.` : job.salvage && job.mech === "deliver" ? ` Cut ${job.qty} plate off any hulk with your own rig.` : ""}`;
   if (job.targets?.length === 1 && job.spot) job.targets[0].name = job.spot.name;
   const issuer = corpOfStation(st);
   const id = `ct${contracts.seq++}`;
@@ -545,16 +554,25 @@ export function acceptContract(c) {
     sim.autoPlan.seam = { x: a.spot.x, y: a.spot.y, z: a.spot.z, name: a.spot.name, site: String(a.id) };
     sim.autoPlan.seamOre = a.good;
   }
-  if (a.targets?.length || a.markId || a.boatId || a.nestId) markTarget(a);
+  if (a.wreck && a.wreckAt) {
+    const def = hullForPlate(a.qty);
+    const port = stationById(a.stationId);
+    const at = a.wreckAt.off && port ? { x: port.x + a.wreckAt.off.x, y: port.y + a.wreckAt.off.y, z: port.z + a.wreckAt.off.z } : a.wreckAt;
+    const h = spawnHulk({ id: `wreck:${a.id}`, name: `Wreck ${a.wreckAt.name}`, ship: def.id, x: at.x, y: at.y, z: at.z }, { source: "contract", pinned: true, intact: 1, at: sim.time, parent: a.wreckAt.off ? port?.hostId ?? null : null });
+    if (h) { a.hulkId = h.id; a.hulkName = h.name; a.qty = Math.min(a.qty, Math.max(1, Math.floor(plateOf(def) * 0.85))); }
+  }
+  if (a.salvage && a.mech === "deliver") a.cut = 0;
+  if (a.targets?.length || a.markId || a.boatId || a.nestId || a.hulkId) markTarget(a);
   const mins = Math.round((a.deadline - sim.time) / 60);
   logEvent(`Accepted: ${c.title} for ${c.corpName} — ${c.pay} cr, ${mins} min`, "contract");
-  sim.notice = `${a.chain ? `${a.chainName} · ${a.tierName} — ` : ""}${c.title} — ${c.pay} cr on completion. ${mins} minutes.${a.targets?.length || a.markId || a.boatId || a.nestId ? " Waypoint set." : ""}`;
+  sim.notice = `${a.chain ? `${a.chainName} · ${a.tierName} — ` : ""}${c.title} — ${c.pay} cr on completion. ${mins} minutes.${a.targets?.length || a.markId || a.boatId || a.nestId || a.hulkId ? " Waypoint set." : ""}`;
   return null;
 }
 
 function settle(a, ok, why) {
   contracts.active.splice(contracts.active.indexOf(a), 1);
   if (a.spot) closeSite(a.id);
+  if (a.hulkId) { const h = hulkById(a.hulkId); if (h) { h.pinned = false; h.life = h.age + HULK.afterJob; } }
   for (const w of sim.waypoints.filter((x) => x.job === a.id)) removeWaypoint(w.id);
   if (sim.autoPlan.seamOre === a.good && !contracts.active.some((x) => x.spot && x.good === a.good)) sim.autoPlan.seamOre = null;
   const sp = a.spot, sm = sim.autoPlan.seam;
@@ -609,12 +627,28 @@ export function abandonContract(id) {
 }
 
 const cargoOk = (a) => !a.good || !a.qty || (sim.ship.hold[a.good] ?? 0) >= a.qty;
+const salvaged = (a) => !a.salvage || a.cut == null || a.cut >= a.qty - 1e-6;
+
+export function noteSalvaged(goodId, qty, from = null) {
+  let left = qty;
+  const order = contracts.active.filter((a) => a.salvage && (a.mech ?? "deliver") === "deliver" && a.cut != null && a.good === goodId && a.cut < a.qty)
+    .sort((x, y) => (y.hulkId === from ? 1 : 0) - (x.hulkId === from ? 1 : 0));
+  for (const a of order) {
+    if (left <= 0) break;
+    if (a.hulkId && a.hulkId !== from && hulkById(a.hulkId)) continue;
+    const give = Math.min(left, a.qty - a.cut);
+    a.cut += give;
+    left -= give;
+    if (a.cut >= a.qty - 1e-6) sim.notice = `${a.title}: ${a.qty} plate cut — deliver at ${a.stationName}.`;
+  }
+  return qty - left;
+}
 
 export function deliverableAt(stId = sim.ship.dockedAt) {
   if (!stId) return [];
   return contracts.active.filter((a) => {
     const mech = a.mech ?? (a.type === "haul" ? "haul" : a.type === "bounty" ? "kill" : a.type === "escort" ? "escort" : "deliver");
-    if (mech === "deliver") return a.stationId === stId && cargoOk(a);
+    if (mech === "deliver") return a.stationId === stId && cargoOk(a) && salvaged(a);
     if (mech === "haul") return a.destId === stId && cargoOk(a);
     if (mech === "visit") return a.stationId === stId && a.progress >= 1 && cargoOk(a);
     return a.stationId === stId && a.progress >= 1;
@@ -686,7 +720,7 @@ export function tickContracts(dt) {
       if (boat?.visible && _d(boat, sim.ship.pos) < 900) { a.onStation = (a.onStation ?? 0) + dt; a.progress = Math.min(1, a.onStation / a.need); }
     }
     if (a.salvage && a.mech === "deliver" && a.progress < 1) {
-      a.progress = Math.min(1, (sim.ship.hold[a.good] ?? 0) / a.qty);
+      a.progress = Math.min(1, (a.cut ?? sim.ship.hold[a.good] ?? 0) / a.qty);
     }
     if (a.mech === "survey" && a.progress < 1 && sim.scanned?.has?.(a.bodyId)) {
       a.progress = 1;
@@ -734,6 +768,10 @@ export function jobStatus(a) {
   if (mech === "survey") return a.progress >= 1 ? `report to ${a.stationName}` : `scan ${a.bodyName}`;
   if (mech === "kill") return a.progress >= 1 ? `pays at ${a.stationName}` : a.killKind === "rogue" ? `${a.kills ?? 0}/${a.count} drones` : `hunt ${a.markName}`;
   if (mech === "escort") return `${Math.round((a.progress ?? 0) * 100)}% on station · pays at ${a.stationName}`;
+  if (a.salvage && a.cut != null) {
+    const cut = Math.min(a.qty, Math.floor(a.cut));
+    return `${cut}/${a.qty} plate cut · ${cut < a.qty ? (a.hulkId ? (hulkById(a.hulkId) ? `rig on ${a.hulkName}` : "the wreck is gone — cut it off any hulk") : "rig on any hulk") : `deliver at ${a.stationName}`}`;
+  }
   const have = Math.min(a.qty, Math.round(sim.ship.hold[a.good] ?? 0));
   const where = mech === "haul" ? a.destName : a.stationName;
   const site = a.spot && siteById(a.id);

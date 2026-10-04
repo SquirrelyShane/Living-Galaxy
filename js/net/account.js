@@ -1,4 +1,4 @@
-import { RUN_KEYS, RUN_PREFIXES, LEARNED_KEYS, PROFILE_KEY } from "../core/profile.js";
+import { RUN_KEYS, RUN_PREFIXES, LEARNED_KEYS, LEARNED_PREFIXES, PROFILE_KEY } from "../core/profile.js";
 import { useGameStore } from "../core/store.js";
 import { gnnPost } from "../comms/gnn.js";
 
@@ -15,7 +15,7 @@ export const SITE_LINK = "https://living-galaxy.com";
 
 export const SCOPE = Object.freeze({
   keys: Object.freeze([...RUN_KEYS, ...LEARNED_KEYS, PROFILE_KEY]),
-  prefixes: Object.freeze([...RUN_PREFIXES]),
+  prefixes: Object.freeze([...RUN_PREFIXES, ...LEARNED_PREFIXES]),
 });
 
 export const account = {

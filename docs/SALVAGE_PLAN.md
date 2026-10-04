@@ -5,8 +5,27 @@ Scope: everything Salvage needs to pass all nine readiness gates and flip to
 `state: "open"` in `js/careers/status.js`. Planning only — no game code changed
 by this document.
 
+**Done at 0.3.90 — see section 0.** Sections 1–6 are kept as written at 0.3.85.
+
 Verb decision (locked): **dedicated salvage rig** — its own tool, beam, range,
 heat and power bus, independent of the mining cutter.
+
+## 0. Status at 0.3.90 — complete
+
+All nine gates are earned and `status.js` says `open`. The slices below landed
+as 0.3.86 (hulks), 0.3.87 (the rig) and 0.3.90 (everything else that the gate
+needs, in one release). 0.3.88 was ARIA's loop fix and 0.3.89 was not used, so
+the version numbers in section 4 from 0.3.88 on are the plan's, not history's.
+
+| planned slice | what happened |
+|---|---|
+| 0.3.88 jobs on hulks, goods, feeds | **0.3.90.** Wreck orders spawn and pin a hulk; plate orders take steel off any hulk; both count plate at the tractor (`noteSalvaged`), which closes the `iron_ore` leak; recorder payout; CUT IT. **Not done:** contract state across a reload. |
+| 0.3.89 rights, black boxes, shared hulks | **Not done.** No owner, claim, prize law, wire sync, or `v.derelict` hulks. The recorder pays (350 + 240 per tier) but is still `sim.recorders`, not a good. |
+| 0.3.90 ARIA flies the rig, tutorial | **0.3.90.** `SALVAGE` op in a factory of its own (`js/mission/salvage.js`, not inline in `run.js`, which is at its line limit); both planners; RIG tutorial branch. **Not done:** salvager drones on hulk sections, the `ui/map.js` button. |
+| 0.3.91 parity, smoke, open | **0.3.90.** `--parity`; `test/smoke-salvage.mjs`; rig 1.0 / 2.5 plate a second; orders sized to half the hold at 3.6× / 3.2× base. 0.87×. |
+
+Section 6's baseline (0.65×) is superseded by the 0.3.90 changelog table.
+Sections 7 and 8 still stand; section 8 is the list of what to build on this.
 
 ## 1. Where Salvage actually stands
 

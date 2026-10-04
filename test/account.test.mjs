@@ -100,7 +100,9 @@ const pilotOn = (ls, callsign = "Vex", extra = {}) => {
   ls.setItem("lgaa.profile.v1", JSON.stringify({ id: "r1", callsign }));
   ls.setItem("lgaa-company", JSON.stringify({ founded: true, name: `${callsign} Holdings`, treasury: 4200 }));
   ls.setItem(`lgaa.upgrades.v1:sky:${callsign}`, JSON.stringify(["plating"]));
-  ls.setItem("lgaa.aria.v1", JSON.stringify({ w: [0.1] }));
+  ls.setItem("lgaa.housebrain.v1", JSON.stringify({ w: [0.1] }));
+  ls.setItem("lgaa.aria.v1:sol:Vex", JSON.stringify({ prefs: {} }));        // 0.3.90: the key ARIA really writes
+  ls.setItem("lgaa.aria.mind.v1:sol:Vex", JSON.stringify({ v: 2 }));
   ls.setItem("lgaa.audio.mix", JSON.stringify({ master: 0.5 }));   // device: never travels
   ls.setItem("lgaa.cradle.v1", "[]");                              // the sky's: never travels
   for (const [k, v] of Object.entries(extra)) ls.setItem(k, v);
@@ -115,6 +117,7 @@ const pilotOn = (ls, callsign = "Vex", extra = {}) => {
   ok(!SCOPE.keys.includes("lgaa.cradle.v1"), "the cradle stays with the sky");
   ok(P.DEVICE_KEYS.includes(STATE_KEY) && P.DEVICE_KEYS.includes(NEWS_SEEN_KEY), "the module's own two keys are filed as the device's");
   ok(P.RUN_PREFIXES.every((p) => SCOPE.prefixes.includes(p)), "the callsign-suffixed families travel by prefix");
+  ok(P.LEARNED_PREFIXES.every((p) => SCOPE.prefixes.includes(p)), "and so does what ARIA learned in each sky (0.3.90)");
 }
 
 /* ---- 2. snapshot, hash, restore -------------------------------------------- */
@@ -126,7 +129,8 @@ const pilotOn = (ls, callsign = "Vex", extra = {}) => {
   account.flushers = [() => { flushed++; }, () => { throw new Error("bad flusher"); }];
   const s = snapshot();
   ok(flushed === 1, "flushers run before the snapshot, and one that throws does not stop it");
-  ok("lgaa-save-v1" in s.keys && "lgaa.profile.v1" in s.keys && "lgaa-company" in s.keys && "lgaa.aria.v1" in s.keys, "fixed keys are in");
+  ok("lgaa-save-v1" in s.keys && "lgaa.profile.v1" in s.keys && "lgaa-company" in s.keys && "lgaa.housebrain.v1" in s.keys, "fixed keys are in");
+  ok("lgaa.aria.v1:sol:Vex" in s.keys && "lgaa.aria.mind.v1:sol:Vex" in s.keys, "what ARIA learned in a sky is in, under the key she writes it to (0.3.90)");
   ok("lgaa.upgrades.v1:sky:Vex" in s.keys, "the suffixed family is found by enumeration");
   ok(!("lgaa.audio.mix" in s.keys) && !("lgaa.cradle.v1" in s.keys), "the mixer and the cradle are not");
   const h1 = hashOf(s);

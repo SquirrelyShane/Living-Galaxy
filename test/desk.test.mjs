@@ -177,6 +177,10 @@ const find = (pred) => { for (let k = 0; k < 40; k++) for (const st of honest) {
     const a = contracts.active.find((x) => x.id === pod.id);
     const p = targetPos(a.targets[0]);
     ship.pos = { x: p.x, y: p.y, z: p.z };
+    /* 0.3.84 made recovery the SALVAGE system's job: it has to be on, with the
+     * ops board powered. This case predates that and failed from then on. */
+    ok(/SALVAGE/.test((tickContracts(1), a.recoveryNote ?? "")) && !(ship.hold[pod.good] > 0), `with the tractor stowed nothing comes aboard (${a.recoveryNote})`);
+    ship.salvage = true; ship.powered = { ...(ship.powered ?? {}), ops: true };
     for (let i = 0; i < 20; i++) tickContracts(1);
     ok(a.progress === 1 && (ship.hold[pod.good] ?? 0) >= pod.qty, `the pod is aboard (${ship.hold[pod.good]} ${pod.good})`);
     ship.dockedAt = pod.stationId;

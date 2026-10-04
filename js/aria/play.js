@@ -1,4 +1,4 @@
-import { ariaMind, authorize, decideMind, policyScore, learnOutcome, spendCap } from "./mind.js";
+import { ariaMind, authorize, decideMind, policyScore, learnOutcome, spendCap, breakLine } from "./mind.js";
 import { sim, sellPriceAt, setTurretMode, setMiningMode, toggleSystem } from "../sim/sim.js";
 import { stations, stationById } from "../station/stations.js";
 import { holdRoom, batteryCap, roomFor, cargoTotal } from "../flight/ship.js";
@@ -22,6 +22,8 @@ import { runBusiness, bizReport, bizLine, resetBusiness, biz } from "./company.j
 import { company, hasCompany } from "../corp/company.js";
 import { crew } from "../crew/ledger.js";
 import { yardRepair, repairsAt, repairQuote, hullMaxOf } from "../flight/repair.js";
+import { bestHulk, SALV } from "../mission/salvage.js";
+import { hulkById } from "../world/hulks.js";
 
 export const CAREER_DEPT = Object.fromEntries(
   CATEGORY_ORDER.flatMap((cat) => CATEGORIES[cat].careers.map((c) => [c, cat])),
@@ -41,6 +43,7 @@ export const PLAY = {
   threatR: 6000,
   resumes: 2,
   shedAt: 0.45,
+  chargeWait: 10,
   shedSpare: 6,
   restoreAt: 0.8,
   restoreSpare: 25,
@@ -109,6 +112,10 @@ export function jobSeconds(o, from = sim.ship.pos) {
   let s = NAV.berth;
   const hops = [];
   if (o.spot) hops.push(o.spot, st);
+  else if (o.salvage && o.mech === "deliver") {
+    const h = (o.hulkId && hulkById(o.hulkId)) || (o.wreckAt?.off && st ? { x: st.x + o.wreckAt.off.x, y: st.y + o.wreckAt.off.y, z: st.z + o.wreckAt.off.z } : null) || bestHulk()?.h || null;
+    if (h) hops.push({ x: h.x, y: h.y, z: h.z, name: h.name ?? "the wreck" }, st); else hops.push(st);
+  }
   else if (o.mech === "haul") hops.push(stationById(o.destId));
   else if (o.sourceId) hops.push(stationById(o.sourceId), st);
   else if (o.targets?.length) { for (const t of o.targets) hops.push(targetPos(t, sim.time, {})); hops.push(st); }
@@ -123,6 +130,7 @@ export function jobSeconds(o, from = sim.ship.pos) {
   }
   s += (o.qty ?? 0) * 0.35;
   if (o.spot) s += (o.qty ?? 0) * 1.2;
+  if (o.salvage && o.mech === "deliver") s += (o.qty ?? 0) * 2.4;
   for (const t of o.targets ?? []) s += (t.dwell ?? 0) + 8;
   return s;
 }
@@ -160,6 +168,7 @@ export function canFly(o) {
     if (o.markId && !traffic.some((n) => n.id === o.markId && n.job !== "down")) return false;
     if (!o.markId && !(o.nestId && nests.some((n) => n.id === o.nestId))) return false;
   }
+  if (o.salvage && o.mech === "deliver" && !o.wreck && !bestHulk()) return false;
   if (o.mech === "haul" && sim.ship.dockedAt !== o.stationId) return false;
   if ((o.mech === "deliver" || o.mech === "haul") && o.qty > roomFor(sim.ship, o.good) + (sim.ship.hold[o.good] ?? 0)) return false;
   if (o.mech === "deliver" && !o.spot && !o.salvage && o.good) {
@@ -227,6 +236,15 @@ export function jobPlan(a) {
     }
     steps.push(makeStep("HOLD", null, { until: C("time", ">=", 150) }));
     at = sim.ship.pos;
+    go(a.stationId, a.stationName);
+  } else if (a.salvage && a.mech === "deliver" && a.cut != null) {
+    if (roomFor(sim.ship, a.good) < a.qty - (a.cut ?? 0)) {
+      steps.push(makeStep("DOCK", { kind: "best-buyer" }));
+      steps.push(makeStep("SELL", null, { args: { what: "all", keep: a.good } }));
+    }
+    const h = a.hulkId ? hulkById(a.hulkId) : null;
+    steps.push(makeStep("SALVAGE", h ? { kind: "hulk", id: h.id, name: h.name } : { kind: "best-hulk" }, { until: C("hold", ">=", 0.97), args: { mode: "auto", job: String(a.id) } }));
+    at = h ? { x: h.x, y: h.y, z: h.z } : sim.ship.pos;
     go(a.stationId, a.stationName);
   } else if (a.spot || (a.salvage && a.good)) {
     const mine = a.good ? ((sim.ship.hold[a.good] ?? 0) * bulkOf(a.good)) / Math.max(1, sim.ship.cargoCap ?? 1) : 0;
@@ -331,6 +349,24 @@ function startFreeMine() {
   return true;
 }
 
+function startFreeSalvage() {
+  const b = bestHulk();
+  if (!b) return false;
+  const m = makeMission({
+    name: "ARIA · free salvage",
+    steps: [
+      makeStep("SALVAGE", { kind: "best-hulk" }, { until: C("hold", ">=", 0.9), args: { mode: "auto", max: SALV.trip } }),
+      makeStep("DOCK", { kind: "best-buyer" }),
+      makeStep("SELL", null, { args: { what: "all" } }),
+    ],
+    loop: { mode: "none" }, builtin: true, aria: true,
+  });
+  if (!startMission(m)) return false;
+  play.move = { key: "salvage", kind: "salvage", since: now(), cr0: netWorth(), note: `${b.h.name} first — about ${Math.round(b.worth).toLocaleString("en-US")} cr in it` };
+  note(`free salvage: ${b.h.name}, ${Math.round(b.d / 100).toLocaleString("en-US")} km off`);
+  return true;
+}
+
 export function readyForTrouble() {
   const ship = sim.ship;
   if (ship.turretMode === "off" || !ship.turretsArmed) setTurretMode("enemies");
@@ -413,6 +449,7 @@ export function movesNow() {
   if (sim.ship.credits > PLAY.minCredits * 2 && bestRoute()) out.push({ key: "route", start: startRoute, what: "a trade route" });
   if (sim.ship.credits > PLAY.minCredits * 2 && holdRoom(sim.ship) > 5) out.push({ key: "supply", start: startSupply, what: "supply a stalled line" });
   if (play.dept === "mining" || play.brain.moves.mine) out.push({ key: "mine", start: startFreeMine, what: "free mining" });
+  if ((play.dept === "salvage" || play.brain.moves.salvage) && bestHulk()) out.push({ key: "salvage", start: startFreeSalvage, what: "free salvage" });
   if (Object.keys(sellable()).length) out.push({ key: "sell", start: startSell, what: "sell the hold" });
   if (hullFrac() < ariaMind.orders.repairBelow && now() - (play.yardAt ?? -1e9) > PLAY.yardCool && bestYard()) out.push({ key: "yard", start: startYard, what: "patch the hull" });
   const seen = new Set();
@@ -426,6 +463,7 @@ function rand() { return rng(); }
 export function weightOf(key) {
   const mine = key.startsWith(`board:${play.dept}`) || key === `chain:${play.dept}`
     || (key === "mine" && play.dept === "mining")
+    || (key === "salvage" && play.dept === "salvage")
     || ((key === "route" || key === "supply") && (play.dept === "trade" || play.dept === "logistics"));
   return policyScore(key, scoreOf(key) * (mine ? PLAY.deptBias : 1), { hull: hullFrac(), hold: holdUsed(), dk: sim.ship.dockedAt ? 1 : 0 }) ;
 }
@@ -433,7 +471,7 @@ export function weightOf(key) {
 export const hostilesClose = () => senseSpace().threat < PLAY.threatR;
 export function shouldBreakOff() {
   const h = hullFrac();
-  return h < PLAY.runAt || (ariaMind.orders.avoidHostiles && h < ariaMind.orders.repairBelow && hostilesClose());
+  return h < PLAY.runAt || (ariaMind.orders.avoidHostiles && h < breakLine((sim.ship.charge ?? 0) / Math.max(1, batteryCap(sim.ship))) && hostilesClose());
 }
 
 const heldFlyable = (a) => a.mech !== "escort" && (!(a.armed || a.mech === "kill") || (ariaMind.authority.combat && hullFit().armed));
@@ -498,6 +536,7 @@ export function beginPlay({ career = pilot?.complexId ?? "mining", name = "ARIA"
   play.move = null;
   play.paused = null;
   play.shed = [];
+  play.gunsWere = null;
   play.flatAt = -1e9;
   play.yardAt = -1e9;
   play.log = [];
@@ -512,15 +551,27 @@ export function beginPlay({ career = pilot?.complexId ?? "mining", name = "ARIA"
 }
 
 const COMFORT = [["localGravity", "deck gravity"], ["lights", "the floods"], ["sentry", "the sentry"]];
+const TRACTOR_OPS = new Set(["SALVAGE", "HOLD", "SET"]);
 
 export function tendBus() {
   const ship = sim.ship;
   const frac = (ship.charge ?? 0) / Math.max(1, batteryCap(ship));
   const spare = (ship.reactor ?? 130) - busIdle(ship).load;
-  if (!ship.dockedAt && frac < PLAY.shedAt && spare < PLAY.shedSpare) {
+  const waited = autopilot.on && autopilot.phase === "charge" && autopilot.chargeSince != null ? sim.time - autopilot.chargeSince : 0;
+  if (!ship.dockedAt && ((frac < PLAY.shedAt && spare < PLAY.shedSpare) || waited > PLAY.chargeWait)) {
     const hit = COMFORT.find(([k]) => ship[k]);
+    const op = mission.active?.steps[mission.stepIx]?.op ?? null;
     if (hit) { toggleSystem(hit[0]); play.shed.push(hit[0]); note(`battery at ${Math.round(frac * 100)}% and nothing spare on the bus — ${hit[1]} off`); }
+    else if (ship.salvage && (!TRACTOR_OPS.has(op) || waited > PLAY.chargeWait)) { toggleSystem("salvage"); play.shed.push("salvage"); note(`battery at ${Math.round(frac * 100)}% — the tractor is stowed for the leg`); }
     else if (!mission.active && ship.miningMode !== "off") setMiningMode("off", { quiet: true });
+    if (!hit && (frac <= AP_POWER.floor + 0.04 || waited > PLAY.chargeWait * 2.5) && ship.turretsArmed && ship.turretMode !== "off") {
+      play.gunsWere = ship.turretMode;
+      setTurretMode("off");
+      note(frac <= AP_POWER.floor + 0.04 ? `battery flat at ${Math.round(frac * 100)}% — guns stowed to get the mains back` : `${Math.round(waited)} s short of the core's reserve under fire — guns stowed until she can jump`);
+    }
+  } else if (play.gunsWere && (ship.dockedAt || (frac > 0.5 && !(autopilot.on && autopilot.phase === "charge")))) {
+    setTurretMode(play.gunsWere);
+    play.gunsWere = null;
   } else if (play.shed.length && (ship.dockedAt || (frac > PLAY.restoreAt && spare > PLAY.restoreSpare))) {
     const k = play.shed.pop();
     if (!ship[k]) toggleSystem(k);

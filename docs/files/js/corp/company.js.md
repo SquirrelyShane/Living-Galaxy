@@ -256,7 +256,7 @@ Money the company's drones and hulls bring in lands in the treasury, not your po
 function · **exported** · L129–134
 
 - calls: [`book`](#s-book)
-- called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ ×2 · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_
+- called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ ×2 · [`handInRecorders`](../sim/sim.js.md#s-handInRecorders) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_
 
 <!-- note:bookRevenue -->
 Revenue the pilot earns that the charter covers (or does not). sim.js calls this from trade and bounties.

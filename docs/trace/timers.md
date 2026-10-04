@@ -19,7 +19,7 @@ setInterval / setTimeout / requestAnimationFrame / requestIdleCallback call site
 ### `setInterval`
 
 - timer — [js/economy/icework.js › wireIcework](../files/js/economy/icework.js.md#s-wireIcework) L133
-- timer — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L745
+- timer — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L793
 - timer — [js/net/account.js › mountAccount](../files/js/net/account.js.md#s-mountAccount) L470
 - timer — [js/world/events/atmoworks.js › wireAtmoWorks](../files/js/world/events/atmoworks.js.md#s-wireAtmoWorks) L141
 

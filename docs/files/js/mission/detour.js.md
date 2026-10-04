@@ -1,6 +1,6 @@
 # js/mission/detour.js
 
-[index](../../../README.md) · 56 lines · 7 symbols · 2 imports · 1 importers
+[index](../../../README.md) · 59 lines · 7 symbols · 2 imports · 1 importers
 
 ## About
 
@@ -57,7 +57,7 @@ const · L6–6
 
 ### <a id="s-makeLegs"></a>`makeLegs({…})`
 
-function · **exported** · L8–56
+function · **exported** · L8–59
 
 - called by: [`@file`](run.js.md#) _js/mission/run.js_
 
@@ -66,16 +66,19 @@ function · **exported** · L8–56
 
 #### <a id="s-makeLegs-ariaFlown"></a>`makeLegs>ariaFlown()`
 
-function · L9–9
+function · L9–12
 
 - called by: [`makeLegs>legTo`](#s-makeLegs-legTo)
 
 <!-- note:makeLegs>ariaFlown -->
+0.3.90: a plan — a loop, a preset, anything with more than one step — is
+flown unattended whoever started it, and takes the dogleg too. A single
+"go there" order still stops and says why: the pilot is at the stick.
 <!-- /note -->
 
 #### <a id="s-makeLegs-failed"></a>`makeLegs>failed(r)`
 
-function · L10–10
+function · L13–13
 
 - called by: [`makeLegs>legTo`](#s-makeLegs-legTo) ×2
 
@@ -84,7 +87,7 @@ function · L10–10
 
 #### <a id="s-makeLegs-endDetour"></a>`makeLegs>endDetour()`
 
-function · L12–19
+function · L15–22
 
 - calls: [`removeWaypoint`](../sim/sim.js.md#s-removeWaypoint) _js/sim/sim.js_
 - called by: [`makeLegs>legTo`](#s-makeLegs-legTo) ×2
@@ -94,7 +97,7 @@ function · L12–19
 
 #### <a id="s-makeLegs-legTo"></a>`makeLegs>legTo(s, node, extra)`
 
-function · L21–53
+function · L24–56
 
 - calls: [`doglegAround`](../aria/nav.js.md#s-doglegAround) _js/aria/nav.js_ · [`makeLegs>ariaFlown`](#s-makeLegs-ariaFlown) · [`makeLegs>endDetour`](#s-makeLegs-endDetour) ×2 · [`makeLegs>failed`](#s-makeLegs-failed) ×2 · [`addWaypointAt`](../sim/sim.js.md#s-addWaypointAt) _js/sim/sim.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`losBlocker`](../sim/sim.js.md#s-losBlocker) _js/sim/sim.js_ ×2 · [`warpDestination`](../sim/sim.js.md#s-warpDestination) _js/sim/sim.js_ ×2 · [`warpNodeById`](../sim/sim.js.md#s-warpNodeById) _js/sim/sim.js_
 

@@ -129,6 +129,8 @@ function mountAutopilot(root, push, ctx) {
   goRow.value.replaceChildren(group(button("GOTO", () => go("GOTO", lockedRef()), "tiny"), button("APPROACH", () => go("APPROACH", lockedRef()), "tiny")));
   const mineRow = row(one, "Nearest seam");
   mineRow.value.replaceChildren(button("MINE", () => { const s = AP.nearestSeam?.(); go("MINE", s ? { kind: "point", ...s, name: "seam" } : { kind: "seam", name: "nearest seam" }); }, "tiny"));
+  const hulkRow = row(one, "Best hulk", { hint: "the hulk under the lock, else the one worth most for the trip" });
+  hulkRow.value.replaceChildren(button("SALVAGE", () => { if (!AP.engageSalvageLoop()) sim.notice ||= "No hulk to work."; }, "tiny"));
   const dockRow = row(one, "Nearest port");
   dockRow.value.replaceChildren(button("DOCK", () => go("DOCK", { kind: "nearest-port", name: "nearest port" }), "tiny"));
   const editRow = row(one, "Plan the run");
@@ -280,7 +282,7 @@ function mountAria(root) {
   note(s, w.observations < 40
     ? "Fly it yourself for a while first. Every few seconds of your own flying is one more example it has to go on."
     : "It works the ship the way you do — the job you spend your time on, flown by the autopilot — and hands it back the moment you touch the stick. The ARIA button on the flight HUD does the same.");
-  { const h = w.habits; if (h.total) row(s, "Your jobs", { value: ["mine", "sell", "survey"].map((j) => `${j} ${Math.round(h.share[j] * 100)}%`).join(" · "), hint: "what it will pick when it has the conn" }); }
+  { const h = w.habits; if (h.total) row(s, "Your jobs", { value: ["mine", "salvage", "sell", "survey"].filter((j) => j !== "salvage" || h.share[j] > 0).map((j) => `${j} ${Math.round(h.share[j] * 100)}%`).join(" · "), hint: "what it will pick when it has the conn" }); }
   root.append(s);
 
   for (const [kind, label, unit] of [["port", "WHERE YOU SELL", "sales"], ["ore", "WHAT YOU CUT", "cuts"]]) {

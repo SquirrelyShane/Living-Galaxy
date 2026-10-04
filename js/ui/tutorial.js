@@ -1,4 +1,6 @@
-import { acquireLock, addBodyWaypoint, addWaypointAt, logEvent, selectBody, sim } from "../sim/sim.js";
+import { acquireLock, addAnchoredWaypoint, addBodyWaypoint, addWaypointAt, logEvent, selectBody, sim } from "../sim/sim.js";
+import { hulks } from "../world/hulks.js";
+import { nextSection, rigRange } from "../flight/rig.js";
 import { BODIES, bodyPosition, currentSystem, scanRadius } from "../world/bodies.js";
 import { nearestStation } from "../station/stations.js";
 import { nearbyRocks } from "../world/field.js";
@@ -52,8 +54,15 @@ function buildCtx() {
     rock: null,
     belt: null,
     port: null,
+    hulk: null,
     complex: pilot.complexId,
   };
+  let bk = Infinity;
+  for (const h of hulks) {
+    if (h.dead || !nextSection(h)) continue;
+    const d = Math.hypot(h.x - pos.x, h.y - pos.y, h.z - pos.z) - h.r;
+    if (d < bk) { bk = d; out.hulk = { id: h.id, name: h.name, dist: d, reach: rigRange(ship) }; }
+  }
   let bh = Infinity, bu = Infinity;
   for (const b of BODIES) {
     if (b.kind === "star") continue;
@@ -116,7 +125,7 @@ const STEPS = [
   },
   {
     id: "earn",
-    title: (c) => (c.complex === "mining" ? "CUT" : c.complex === "salvage" ? "HAUL" : "TRADE"),
+    title: (c) => (c.complex === "mining" ? "CUT" : c.complex === "salvage" ? "RIG" : "TRADE"),
     text: (c) => {
       if (c.complex === "mining") {
         if (c.rock && c.rock.dist < 25000) return `MINER is already on CLOSEST. Close to under ${fmt(MINE_RANGE)} of ${c.rock.name} (${fmt(c.rock.dist)}) and hold there — the cutter finds the face, chips fly, the hold fills.`;
@@ -124,12 +133,18 @@ const STEPS = [
           ? `No rock in reach. ${c.belt.name[0].toUpperCase() + c.belt.name.slice(1)} is ${fmt(c.belt.dist)} out — MARK it and fly there (or warp toward a world past it), then close on a rock.`
           : "Find rock: watch for impact debris after a strike.";
       }
-      if (c.complex === "salvage") return `Take a wreck or pod job from the Salvage board and follow its waypoint. Enable SALVAGE in SHIP systems; keep operations powered and room in the hold. You can also fly through debris (${c.rock ? `${c.rock.name} ${fmt(c.rock.dist)}` : "impacts leave fields"}) inside 2200 u and the tractor brings it aboard.`;
+      if (c.complex === "salvage") {
+        if (c.hulk && c.hulk.dist < 25000) return `The RIG is already on STRIP and SALVG is on. Close to under ${fmt(c.hulk.reach)} of ${c.hulk.name} (${fmt(c.hulk.dist)}) and hold there — the rig takes it apart section by section, bridge last, and the tractor reels in what comes off. STRIP keeps the parts and the flight recorder, which an adjuster pays for at any port; the CUT switch is quicker and loses them.`;
+        if (c.hulk) return `Every hull that loses a fight leaves a hulk, and this sky is never short of them. ${c.hulk.name} is ${fmt(c.hulk.dist)} off — MARK HULK locks it and sets the waypoint, then warp out to it. SCAN reads what is in a hulk before you spend the time; NAV › AUTOPILOT › SALVAGE flies the whole loop.`;
+        return "No hulk in this sky yet — they come with the fighting, and GNN calls the losses. Until one does, take a wreck or pod job from the Salvage board: the wreck is marked for you the moment you sign.";
+      }
       return `You fly the Fledgling trainer; your complex will sign over a ${c.complex} hull at the issue rate at any yard. Every port pays for what its sector is short of — the map ≡ directory lists them by trade.`;
     },
     action: (c) => (c.complex === "mining" && !(c.rock && c.rock.dist < 25000) && c.belt
       ? { label: "MARK BELT", run: () => addWaypointAt("Belt edge", c.belt.x, c.belt.y, c.belt.z) }
-      : null),
+      : c.complex === "salvage" && c.hulk
+        ? { label: "MARK HULK", run: () => { acquireLock({ kind: "hulk", id: c.hulk.id }); addAnchoredWaypoint(c.hulk.name, { kind: "hulk", id: c.hulk.id }); } }
+        : null),
     done: (c, base) => (c.complex === "mining" || c.complex === "salvage" ? c.cargo > base.cargo + 1 : true),
     next: (c) => !(c.complex === "mining" || c.complex === "salvage"),
   },
@@ -158,7 +173,9 @@ const STEPS = [
   {
     id: "loop",
     title: "THE LOOP",
-    text: () => "Cut, haul, sell, crew up, rank up. Every sky has a main belt and an outer ice belt, so every ore and gas is out there; ICE melts water, ATMO reworks climates, GNN calls the big strikes. Fly safe.",
+    text: (c) => c.complex === "salvage"
+      ? "Rig, reel, sell, crew up, rank up. Hulks come and go with the fighting, so the best one is a moving answer — SCAN before you commit, STRIP when it is quiet, CUT when it is not. The Salvage board pays extra for plate off a named wreck, and every recorder you bring in is somebody's claim settled. Fly safe."
+      : "Cut, haul, sell, crew up, rank up. Every sky has a main belt and an outer ice belt, so every ore and gas is out there; ICE melts water, ATMO reworks climates, GNN calls the big strikes. Fly safe.",
     done: () => false,
     next: () => true,
   },
@@ -345,7 +362,7 @@ export function tutorialContext() {
 export function tutorialEvaluate() {
   const c = (tutorial.ctx = buildCtx());
   const step = steps()[tutorial.step];
-  return { track: tutorial.track, step: step?.id, text: step?.text(c), done: step?.done(c, tutorial.base), hilite: step?.hilite?.(c) ?? null };
+  return { track: tutorial.track, step: step?.id, title: typeof step?.title === "function" ? step.title(c) : step?.title ?? "", text: step?.text(c), action: step?.action?.(c)?.label ?? null, done: step?.done(c, tutorial.base), hilite: step?.hilite?.(c) ?? null };
 }
 
 export function wireTutorialTest() {

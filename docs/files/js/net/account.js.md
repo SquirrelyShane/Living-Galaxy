@@ -62,7 +62,7 @@ hand in fakes; nothing here imports the sim.
 
 | line | from | names | target |
 |---|---|---|---|
-| 1 | `../core/profile.js` | `RUN_KEYS`, `RUN_PREFIXES`, `LEARNED_KEYS`, `PROFILE_KEY` | [js/core/profile.js](../core/profile.js.md) |
+| 1 | `../core/profile.js` | `RUN_KEYS`, `RUN_PREFIXES`, `LEARNED_KEYS`, `LEARNED_PREFIXES`, `PROFILE_KEY` | [js/core/profile.js](../core/profile.js.md) |
 | 2 | `../core/store.js` | `useGameStore` | [js/core/store.js](../core/store.js.md) |
 | 3 | `../comms/gnn.js` | `gnnPost` | [js/comms/gnn.js](../comms/gnn.js.md) |
 

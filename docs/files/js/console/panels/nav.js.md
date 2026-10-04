@@ -1,6 +1,6 @@
 # js/console/panels/nav.js
 
-[index](../../../../README.md) · 371 lines · 28 symbols · 17 imports · 1 importers
+[index](../../../../README.md) · 373 lines · 28 symbols · 17 imports · 1 importers
 
 ## About
 
@@ -45,7 +45,7 @@ and the sensor contacts whose relations the turret rules read.
 
 ## Effects
 
-- **dom.query** — `button` (mountAutopilot:158) · `[data-wp]` (mountMarks:206) · `[data-cid]` (mountContacts:255)
+- **dom.query** — `button` (mountAutopilot:160) · `[data-wp]` (mountMarks:208) · `[data-cid]` (mountContacts:257)
 - **input.key** — `Control` (mountAutopilot:105)
 
 ## Symbols
@@ -116,9 +116,9 @@ const · L95–95
 
 ### <a id="s-mountAutopilot"></a>`mountAutopilot(root, push, ctx)`
 
-function · L97–162
+function · L97–164
 
-- calls: [`button`](../kit.js.md#s-button) _js/console/kit.js_ ×12 · [`el`](../kit.js.md#s-el) _js/console/kit.js_ ×4 · [`group`](../kit.js.md#s-group) _js/console/kit.js_ ×5 · [`note`](../kit.js.md#s-note) _js/console/kit.js_ · [`row`](../kit.js.md#s-row) _js/console/kit.js_ ×11 · [`section`](../kit.js.md#s-section) _js/console/kit.js_ ×2 · [`lockedRef`](#s-lockedRef) ×2 · [`mountAutopilot>defaults`](#s-mountAutopilot-defaults) ×3 · [`mountAutopilot>go`](#s-mountAutopilot-go) ×4 · [`nearestSeam`](../../flight/autopilot.js.md#s-nearestSeam) _js/flight/autopilot.js_ · [`answerAsk`](../../mission/run.js.md#s-answerAsk) _js/mission/run.js_ ×3 · [`missionStatusLine`](../../mission/run.js.md#s-missionStatusLine) _js/mission/run.js_ · [`pauseMission`](../../mission/run.js.md#s-pauseMission) _js/mission/run.js_ · [`resumeMission`](../../mission/run.js.md#s-resumeMission) _js/mission/run.js_ · [`stopMission`](../../mission/run.js.md#s-stopMission) _js/mission/run.js_ · [`stationStatus`](../../sim/sim.js.md#s-stationStatus) _js/sim/sim.js_
+- calls: [`button`](../kit.js.md#s-button) _js/console/kit.js_ ×13 · [`el`](../kit.js.md#s-el) _js/console/kit.js_ ×4 · [`group`](../kit.js.md#s-group) _js/console/kit.js_ ×5 · [`note`](../kit.js.md#s-note) _js/console/kit.js_ · [`row`](../kit.js.md#s-row) _js/console/kit.js_ ×12 · [`section`](../kit.js.md#s-section) _js/console/kit.js_ ×2 · [`lockedRef`](#s-lockedRef) ×2 · [`mountAutopilot>defaults`](#s-mountAutopilot-defaults) ×3 · [`mountAutopilot>go`](#s-mountAutopilot-go) ×4 · [`engageSalvageLoop`](../../flight/autopilot.js.md#s-engageSalvageLoop) _js/flight/autopilot.js_ · [`nearestSeam`](../../flight/autopilot.js.md#s-nearestSeam) _js/flight/autopilot.js_ · [`answerAsk`](../../mission/run.js.md#s-answerAsk) _js/mission/run.js_ ×3 · [`missionStatusLine`](../../mission/run.js.md#s-missionStatusLine) _js/mission/run.js_ · [`pauseMission`](../../mission/run.js.md#s-pauseMission) _js/mission/run.js_ · [`resumeMission`](../../mission/run.js.md#s-resumeMission) _js/mission/run.js_ · [`stopMission`](../../mission/run.js.md#s-stopMission) _js/mission/run.js_ · [`stationStatus`](../../sim/sim.js.md#s-stationStatus) _js/sim/sim.js_
 - effects: input.key `Control` · dom.query `button`
 
 <!-- note:mountAutopilot -->
@@ -145,7 +145,7 @@ function · L127–127
 
 ### <a id="s-mountMarks"></a>`mountMarks(root, push)`
 
-function · L164–220
+function · L166–222
 
 - calls: [`button`](../kit.js.md#s-button) _js/console/kit.js_ · [`el`](../kit.js.md#s-el) _js/console/kit.js_ ×2 · [`fmtDist`](../kit.js.md#s-fmtDist) _js/console/kit.js_ · [`group`](../kit.js.md#s-group) _js/console/kit.js_ · [`note`](../kit.js.md#s-note) _js/console/kit.js_ · [`row`](../kit.js.md#s-row) _js/console/kit.js_ · [`section`](../kit.js.md#s-section) _js/console/kit.js_ ×2 · [`mountMarks>rebuild`](#s-mountMarks-rebuild) ×3 · [`forwardOf`](../../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`rightOf`](../../flight/ship.js.md#s-rightOf) _js/flight/ship.js_ · [`upOf`](../../flight/ship.js.md#s-upOf) _js/flight/ship.js_ · [`addWaypoint`](../../sim/sim.js.md#s-addWaypoint) _js/sim/sim.js_ · [`waypointPosition`](../../sim/sim.js.md#s-waypointPosition) _js/sim/sim.js_
 - via [js/sim/sim.js](../../sim/sim.js.md): `sim.waypoints.find`
@@ -157,7 +157,7 @@ function · L164–220
 
 #### <a id="s-mountMarks-rebuild"></a>`mountMarks>rebuild()`
 
-function · L180–197
+function · L182–199
 
 - calls: [`button`](../kit.js.md#s-button) _js/console/kit.js_ ×2 · [`el`](../kit.js.md#s-el) _js/console/kit.js_ ×2 · [`group`](../kit.js.md#s-group) _js/console/kit.js_ · [`row`](../kit.js.md#s-row) _js/console/kit.js_ · [`markHint`](#s-markHint) · [`mountMarks>rebuild`](#s-mountMarks-rebuild) ×2 · [`removeWaypoint`](../../sim/sim.js.md#s-removeWaypoint) _js/sim/sim.js_ · [`setActiveWaypoint`](../../sim/sim.js.md#s-setActiveWaypoint) _js/sim/sim.js_
 - via [js/sim/sim.js](../../sim/sim.js.md): `sim.waypoints.map`, `sim.waypoints.map.join`
@@ -168,7 +168,7 @@ function · L180–197
 
 ### <a id="s-mountContacts"></a>`mountContacts(root, push)`
 
-function · L222–265
+function · L224–267
 
 - calls: [`button`](../kit.js.md#s-button) _js/console/kit.js_ ×3 · [`el`](../kit.js.md#s-el) _js/console/kit.js_ ×3 · [`fmtDist`](../kit.js.md#s-fmtDist) _js/console/kit.js_ · [`group`](../kit.js.md#s-group) _js/console/kit.js_ ×2 · [`note`](../kit.js.md#s-note) _js/console/kit.js_ · [`row`](../kit.js.md#s-row) _js/console/kit.js_ ×3 · [`section`](../kit.js.md#s-section) _js/console/kit.js_ ×2 · [`mountContacts>bulk`](#s-mountContacts-bulk) ×2 · [`cycleRelation`](../../sim/sim.js.md#s-cycleRelation) _js/sim/sim.js_
 - via [js/flight/ship.js](../../flight/ship.js.md): `TURRET_MODES.find`
@@ -181,7 +181,7 @@ function · L222–265
 
 #### <a id="s-mountContacts-bulk"></a>`mountContacts>bulk(rel)`
 
-function · L264–264
+function · L266–266
 
 - calls: [`setRelation`](../../sim/sim.js.md#s-setRelation) _js/sim/sim.js_
 - called by: [`mountContacts`](#s-mountContacts) ×2
@@ -191,7 +191,7 @@ function · L264–264
 
 ### <a id="s-mountAria"></a>`mountAria(root)`
 
-function · L267–305
+function · L269–307
 
 - calls: [`adviceReport`](../../aria/aria.js.md#s-adviceReport) _js/aria/aria.js_ · [`ariaRelease`](../../aria/aria.js.md#s-ariaRelease) _js/aria/aria.js_ · [`ariaTakeConn`](../../aria/aria.js.md#s-ariaTakeConn) _js/aria/aria.js_ · [`ariaWatchReport`](../../aria/aria.js.md#s-ariaWatchReport) _js/aria/aria.js_ · [`preferenceReport`](../../aria/aria.js.md#s-preferenceReport) _js/aria/aria.js_ · [`button`](../kit.js.md#s-button) _js/console/kit.js_ ×2 · [`note`](../kit.js.md#s-note) _js/console/kit.js_ ×2 · [`row`](../kit.js.md#s-row) _js/console/kit.js_ ×8 · [`section`](../kit.js.md#s-section) _js/console/kit.js_ ×3 · [`goodName`](../../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`stationById`](../../station/stations.js.md#s-stationById) _js/station/stations.js_
 - via [js/aria/aria.js](../../aria/aria.js.md): `preferenceReport.slice`
@@ -207,7 +207,7 @@ label off your own hands since the first time you took the stick.
 
 ### <a id="s-lockedRock"></a>`lockedRock()`
 
-function · **exported** · L307–311
+function · **exported** · L309–313
 
 - calls: [`inBelt`](../../world/field.js.md#s-inBelt) _js/world/field.js_ · [`nearbyRocks`](../../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - via [js/world/field.js](../../world/field.js.md): `nearbyRocks.find`
@@ -226,7 +226,7 @@ what a survey set can tell from a spectrum. With it you get the whole suite.
 
 ### <a id="s-mountSurvey"></a>`mountSurvey(root)`
 
-function · L313–347
+function · L315–349
 
 - calls: [`assayRock`](../../bodygen/body.js.md#s-assayRock) _js/bodygen/body.js_ · [`note`](../kit.js.md#s-note) _js/console/kit.js_ ×4 · [`row`](../kit.js.md#s-row) _js/console/kit.js_ ×8 · [`section`](../kit.js.md#s-section) _js/console/kit.js_ ×2 · [`lockedRock`](#s-lockedRock) · [`inBelt`](../../world/field.js.md#s-inBelt) _js/world/field.js_
 - via [js/flight/ship.js](../../flight/ship.js.md): `shipFx.fx`
@@ -236,7 +236,7 @@ function · L313–347
 
 ### <a id="s-SUBS"></a>`SUBS`
 
-const · L349–349
+const · L351–351
 
 <!-- note:SUBS -->
 ---- the panel -------------------------------------------------------------
@@ -244,7 +244,7 @@ const · L349–349
 
 ### <a id="s-mount"></a>`mount(root, ctx)`
 
-prop · L356–356
+prop · L358–358
 
 - calls: [`mountCore`](aria-core.js.md#s-mountCore) _js/console/panels/aria-core.js_
 
@@ -253,21 +253,21 @@ prop · L356–356
 
 ### <a id="s-paint"></a>`paint()`
 
-prop · L357–357
+prop · L359–359
 
 <!-- note:paint -->
 <!-- /note -->
 
 ### <a id="s-unmount"></a>`unmount()`
 
-prop · L358–358
+prop · L360–360
 
 <!-- note:unmount -->
 <!-- /note -->
 
 ### <a id="s-search"></a>`search()`
 
-prop · L359–370
+prop · L361–372
 
 - calls: [`markHint`](#s-markHint)
 
@@ -276,21 +276,21 @@ prop · L359–370
 
 #### <a id="s-search-status"></a>`search.status()`
 
-prop · L361–361
+prop · L363–363
 
 <!-- note:search.status -->
 <!-- /note -->
 
 #### <a id="s-search-status-2"></a>`search.status~2()`
 
-prop · L362–362
+prop · L364–364
 
 <!-- note:search.status~2 -->
 <!-- /note -->
 
 #### <a id="s-search-run"></a>`search.run()`
 
-prop · L364–364
+prop · L366–366
 
 - calls: [`toggleWarp`](../../sim/sim.js.md#s-toggleWarp) _js/sim/sim.js_
 
@@ -299,7 +299,7 @@ prop · L364–364
 
 #### <a id="s-search-status-3"></a>`search.status~3()`
 
-prop · L365–365
+prop · L367–367
 
 - calls: [`missionStatusLine`](../../mission/run.js.md#s-missionStatusLine) _js/mission/run.js_
 
@@ -308,7 +308,7 @@ prop · L365–365
 
 #### <a id="s-search-status-4"></a>`search.status~4()`
 
-prop · L367–367
+prop · L369–369
 
 - calls: [`ariaHasConn`](../../aria/aria.js.md#s-ariaHasConn) _js/aria/aria.js_ · [`ariaWatchReport`](../../aria/aria.js.md#s-ariaWatchReport) _js/aria/aria.js_
 
@@ -317,7 +317,7 @@ prop · L367–367
 
 #### <a id="s-search-status-5"></a>`search.status~5()`
 
-prop · L368–368
+prop · L370–370
 
 - calls: [`lockedRock`](#s-lockedRock)
 

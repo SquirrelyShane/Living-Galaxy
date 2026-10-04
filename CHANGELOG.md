@@ -1,5 +1,138 @@
 # Changelog
 
+## 0.3.90 — 2026-10-03 — Dead Hulls: The Loop
+
+Salvage is open. It had its verb (the rig, 0.3.87) and nothing that flew it:
+no mission op, no ARIA plan, a tutorial branch that still described the dwell
+timer, and a bench that had never been run with the rig in the loop. This
+release earns `aria`, `bench` and `smoke`, redoes `site` and `tutorial` on
+hulks, and closes the four items 0.3.88 left open. 0.3.89 was not used.
+
+**SALVAGE, the mission op** (`js/mission/salvage.js`, NEW). The same shape as
+MINE for dead hulls: pick the hulk worth most for the time it costs, fly to it,
+hold inside rig reach, run the rig down it bridge last while the tractor reels
+what it sheds, take the next one — until the hold is full, the order is filled,
+the step's condition is met or nothing in reach is worth the trip. `best-hulk`,
+`hulk` and `locked` targets; `strip`, `cut` and `auto` modes; a SALVAGE LOOP
+preset beside MINE LOOP; SALVAGE in WORK and NAV; CUT IT on a salvage job in
+the board. The pick is credits per second over leg + cut, and it passes over a
+hulk that will age out first, one under a hostile port's guns, one behind a
+world, one in a belt unless it is worth 2.5× as much, and one with a raider or
+a nest still over it. A low battery rests the rig (28% → 65%) instead of
+standing the mission down.
+
+**Jobs on hulks.** "Recover a wreck" spawns a real, pinned, whole hulk sized to
+the order, on the port's approaches rather than in a belt shoal, on the open
+side of a tethered port and riding that port's world. "Salvage N plate" takes
+hull steel off any hulk. Both are filled only by plate that came off a hulk
+under the rig — `noteSalvaged`, counted at the tractor — so mill steel bought
+off a shelf does not fill them, and neither does a mining cutter (the 0.3.85
+`iron_ore` leak). A flight recorder is handed in at any honest port for
+350 cr + 240 per hull tier and trains Law.
+
+**ARIA flies it.** The terminal player plans wreck and plate orders as
+SALVAGE → DOCK → DELIVER, sells or keeps what else came aboard, and flies free
+salvage between orders. At the conn she plans a salvage run when the pilot's
+habits or career say so. AUTO is STRIP while it is quiet and CUT under threat,
+and for an order: CUT, unless the wreck has no plate to spare.
+
+**What the bench found.** The first run with all of the above was 0.15× Mining.
+None of it was pay:
+- A hulk outside a world's sphere of influence lies in the star's frame; a
+  ship inside it brakes against the world. Near the edge the autopilot braked
+  for ever against a target leaving at 39 u/s — eight minutes for a 21 km leg,
+  on a flat battery. The autopilot now names the velocity its brake is to
+  match (`matchFrame`), in the cruise and in the park. This is the autopilot's
+  fix: it applies to every sublight leg, hand-started or ARIA's.
+- A hull waiting on the core's jump reserve (65% of the battery) with the shed
+  line at 45% shed nothing, never made the reserve under fire, and sat there
+  until the leg was given up — then flew it again. Waiting 10 s on the reserve
+  now sheds comforts and the tractor; 25 s stows the guns until she can jump.
+- The newest hulks are where the killing is. See the pick, above.
+- The rig worked at 0.4 plate/s STRIP, 1.0 CUT against a cutter's 3 to 6 ore/s. It
+  is now 1.0 and 2.5; the 2.5:1, the 85% CUT yield and the draw are unchanged,
+  so a plate costs less charge than it did.
+- Orders were a third the size of a mining order for the same flying. Plate
+  and wreck orders are sized to half the hold, and pay 3.6× and 3.2× the
+  plate's base value.
+
+**The open loops from 0.3.88.**
+- *Late break-off on a flat battery.* The break-off line is the repair line
+  plus 0.20 when the battery is under 25% (`breakLine`), in both ARIAs. At the
+  conn, a break-off is followed by the yard even when the hull is over the
+  repair line.
+- *ARIA's learned keys did not travel with the account.* `lgaa.aria.v1:*` and
+  `lgaa.aria.mind.v1:*` are filed as learned prefixes and synced.
+- *Drone culls did not count belt drones.* A rogue drone with no nest and no
+  owner is reported to the desk as a rogue.
+- *The stale `desk` pod case.* The test now powers the system the code has
+  required since 0.3.84. 39/39.
+- *The dogleg was ARIA's only.* Any plan with more than one step flies round a
+  world across its lane. A single "go there" still stops and says why.
+
+**Also.**
+- A hulk somebody is flying to or cutting is not the one the cap of 48 throws
+  away, and does not age out from under the beam.
+- The rig is put back as the pilot had it when a mission leaves the SALVAGE
+  step.
+- `tools/aria-bench.mjs --parity mining [--band 0.3]` prints each career as a
+  multiple of the named one and exits 1 outside the band.
+- The tutorial's salvage branch is RIG: lock a hulk, STRIP or CUT, reel, sell —
+  with MARK HULK when the nearest is out of sight and the Salvage board when
+  the sky has none.
+
+**Measured.** `node tools/aria-bench.mjs --careers mining,salvage --minutes 25
+--seeds 5 --parity mining`, final build:
+
+| career | median cr/min | range | done / dropped |
+|---|---|---|---|
+| mining | 3,513 | 2,088 – 4,655 | 5 / 0 |
+| salvage | 3,061 | 2,461 – 3,573 | 5 / 0 |
+
+Ratio **0.87×**, band 2,459 – 4,567. Mining's own median moved between 3,237
+and 4,109 across four runs of the same mining code — the runs are not seeded
+below the exploration coin — so against the highest of those Salvage is 0.75×:
+inside, with less room. At 0.3.85 the pair was 611 against 933 (0.65×).
+
+ARIA at the conn, headless, 30 sky-minutes, 20,000 cr: miner +30,703 (as
+0.3.88), salvor +81,553.
+
+**Verified.** The zip applied to a clean 0.3.88 with `tools/lg-patch.sh apply
+0.3.88 0.3.90`, which ran the ten suites it carries. All 107 node suites
+pass on that tree. (`lgpatch` is unreliable in the sandbox this was built in —
+a git push negotiation error fails a different 4–16 of its 49 assertions on
+some runs, on 0.3.88 as well; it passed in the run reported here.) Python
+suites pass. `codedocs --check` clean. Headless Chromium at 412 × 915:
+`smoke-salvage` (NEW — a new pilot picks Salvage on the card, the loop flies to
+a hulk, cuts, reels, docks, sells, and ARIA at the conn plans a salvage run),
+`smoke-rig`, `smoke-mining` and `smoke-coretutorial` pass. `smoke-hulks` fails
+on its SCAN line here and fails identically on 0.3.88; not looked into.
+
+**Not verified.** Not flown on a phone. Not flown with two players.
+
+**Still open.**
+- Hulks are session state: not saved, not shared between players. A wreck
+  order does not survive a reload.
+- No ownership, claims or prize law. Anyone may cut anything.
+- Salvager drones do not work hulk sections.
+- Hand loops are not at parity: with no orders, ARIA's SALVAGE LOOP out-earns
+  her MINE LOOP about 2.7× at the conn. The gate measures board work.
+- Parity is measured on the B hull. The A hull's orders are smaller.
+- The autopilot's approach law (4.5% of range per second) is why a 9 km leg
+  takes 80 s. It is every career's, so it was left alone.
+
+**Files.** NEW `js/mission/salvage.js`, `test/salvageloop.test.mjs`,
+`test/smoke-salvage.mjs`, `PATCH-0.3.90.md`. EDIT `js/aria/mind.js`,
+`js/aria/pilot.js`, `js/aria/play.js`, `js/careers/status.js`,
+`js/console/panels/nav.js`, `js/console/panels/work.js`, `js/core/profile.js`,
+`js/economy/contracts.js`, `js/flight/autopilot.js`, `js/flight/rig.js`,
+`js/mission/detour.js`, `js/mission/run.js`, `js/mission/script.js`,
+`js/net/account.js`, `js/sim/sim.js`, `js/ui/boardview.js`,
+`js/ui/tutorial.js`, `js/ui/tutorial-core.js`, `js/version.js`,
+`js/world/hulks.js`, `tools/aria-bench.mjs`, `index.html`, nine test files,
+`README.md`, `docs/SALVAGE_PLAN.md`, `docs/CAREER_ROADMAP.md` and the
+regenerated `docs/`.
+
 ## 0.3.88 — 2026-10-03 — ARIA Keeps the Loop
 
 Reported: ARIA warps to a station and docks, undocks at once, warps to the belt,

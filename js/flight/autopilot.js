@@ -1,7 +1,7 @@
 import {
   plotRoute, requestJump, selectBody, setNoticeAbout, sim, stationStatus, toggleDock,
   warpDestination, warpNodeById, logEvent, setThrottle, WARP, spoolTime, setMiningMode, canSmeltAt,
-  sellPriceAt, warpBlock, toggleWarp, setNavTarget,
+  sellPriceAt, warpBlock, toggleWarp, setNavTarget, setRigMode,
 } from "../sim/sim.js";
 import { threatTo, avoidAim, avoidLevel, deliberate, surfaceOnly, clearAvoidCommit, avoidCommit, blind, AVOID } from "./avoid.js";
 import { setInjectedPan, touch } from "../core/input.js";
@@ -18,6 +18,8 @@ import { preferenceFor } from "../aria/aria.js";
 import { oneStep, makeMission, makeStep } from "../mission/script.js";
 import { mission, startMission, stopMission, resumeMission, tickMission, missionStatusLine, restoreRun, answerAsk } from "../mission/run.js";
 import { jobForSite } from "../economy/contracts.js";
+import { hulkById } from "../world/hulks.js";
+import { bestHulk, SALV } from "../mission/salvage.js";
 import { goodName } from "../economy/materials.js";
 
 const batteryCap = (ship) => shipMod.batteryCap?.(ship) ?? BATTERY;
@@ -216,6 +218,41 @@ export function engageMiningLoop(seam = null) {
   return true;
 }
 
+export function engageSalvageLoop({ hulkId = null, job = null, mode = "strip" } = {}) {
+  if (captain.holder !== "player") { sim.notice = "The conn has the ship — the autopilot stands down."; return false; }
+  const locked = !hulkId && sim.lock?.kind === "hulk" ? sim.lock.id : null;
+  const id = hulkId ?? job?.hulkId ?? locked;
+  const h = id ? hulkById(id) : bestHulk({ mode })?.h ?? null;
+  if (!h) { sim.notice = id ? "That hulk is gone." : "No hulk in this sky worth the trip — they come and go with the fighting."; return false; }
+  ariaHooks.onPlayerJob?.("salvage", 3);
+  const d = planDefaults();
+  const target = id ? { kind: "hulk", id: h.id, name: h.name } : { kind: "best-hulk" };
+  const steps = job
+    ? [
+      makeStep("SALVAGE", target, { until: { k: "hold", op: ">=", v: 0.97 }, args: { mode, job: String(job.id) } }),
+      makeStep("DOCK", { kind: "station", id: job.stationId, name: job.stationName }),
+      makeStep("DELIVER"),
+      makeStep("SELL", null, { args: { what: "all" }, onFail: "skip" }),
+    ]
+    : [
+      makeStep("SALVAGE", target, { until: { k: "hold", op: ">=", v: 0.9 }, args: { mode, max: SALV.trip } }),
+      makeStep("DOCK", { kind: "best-buyer" }),
+      makeStep("SELL", null, { args: { what: "all" } }),
+      makeStep("CHARGE", null, { until: { k: "charge", op: ">=", v: 0.85 } }),
+    ];
+  const m = makeMission({
+    name: job ? "SALVAGE JOB" : "SALVAGE LOOP", builtin: true, mode: "salvage", steps,
+    loop: !job && sim.autoPlan.loop && !id ? { mode: "count", count: Infinity } : { mode: "none" },
+    defaults: { thrustCap: d.thrustCap ?? 1, warp: d.warp ?? "auto" },
+  });
+  if (!startMission(m)) return false;
+  setNoticeAbout(job
+    ? `Salvage job on — cut ${job.qty} plate off ${h.name}, deliver to ${job.stationName}. Touch the stick to take it back.`
+    : `Salvage loop on — ${h.name} first, ${mode.toUpperCase()}, then sell at the best port. Touch the stick to take it back.`, "AUTO");
+  logEvent(`Salvage loop engaged — ${h.name} · ${mode}`, "nav");
+  return true;
+}
+
 function engageJobLoop(job) {
   const seam = sim.autoPlan.seam;
   const d = planDefaults();
@@ -248,6 +285,8 @@ export function releaseControls() {
   autopilot.on = false;
   autopilot.coasting = false;
   sim.handsOff = false;
+  if (autopilot.rigWas && (sim.ship.rigMode ?? "off") !== autopilot.rigWas) setRigMode(autopilot.rigWas, { quiet: true });
+  autopilot.rigWas = null;
   if (autopilot.cutterWas && sim.ship.miningMode !== autopilot.cutterWas) setMiningMode(autopilot.cutterWas, { quiet: true });
   autopilot.cutterWas = null;
   autopilot.phase = "idle";
@@ -409,6 +448,12 @@ export function apSteer(tx, ty, tz, want, opts = false) {
 
 const _avoid = { x: 0, y: 0, z: 0 };
 
+export function matchFrame(v, forS = 0.5) {
+  const f = (sim.apFrame ??= { x: 0, y: 0, z: 0, until: -1 });
+  f.x = v.x; f.y = v.y; f.z = v.z;
+  f.until = sim.time + forS;
+}
+
 const LANE_DRIFT = 40;
 const PIVOT_SPEED = 80;
 export function flyTheLane(node, want = 0) {
@@ -496,6 +541,7 @@ export function tickAutopilot(dt) {
   }
   const op = mission.active?.steps[mission.stepIx]?.op;
   if (op !== "MINE" && ship.miningMode !== "off") setMiningMode("off", { quiet: true });
+  if (op !== "SALVAGE" && autopilot.rigWas && (ship.rigMode ?? "off") !== autopilot.rigWas) setRigMode(autopilot.rigWas, { quiet: true });
   if (sim.warp.state === "run") autopilot.jumped = true;
   if (autopilot.ignore.size > 48) {
     for (const [k, until] of autopilot.ignore) if (until <= sim.time) autopilot.ignore.delete(k);
@@ -588,6 +634,7 @@ export function apLeg(node, { cap = 1, warp = "auto", farLeg = null, graze = "ho
     autopilot.task = `cruise · ${node.name} · ${Math.round(dist / 100)} km`;
     const allowed = Math.max(DEAD_SLOW, (dist - park) * 0.045);
     apSteer(_p.x, _p.y, _p.z, 1.0);
+    matchFrame(_v);
     if (rel > allowed * (wasBraking ? 0.9 : 1.05) || drifting(_p, _v, allowed, wasBraking)) { setThrottle(0); touch.brake = true; autopilot.phase = "brake"; }
     if (apProgress(dist, Math.max(park * 4, 2000))) beginUnstick(autopilot.avoiding ? `${autopilot.avoiding.name} in the way` : "no way through");
     return "flying";
@@ -605,6 +652,7 @@ export function apPark(node) {
   autopilot.phase = "park";
   autopilot.task = `park · ${node.name}`;
   apSteer(_p.x, _p.y, _p.z, dist > park ? (node.kind === "point" ? 0.25 : 0.2) : 0);
+  matchFrame(_v);
   if (rel > DEAD_SLOW) { setThrottle(0); touch.brake = true; }
   const near = node.kind === "point" ? dist <= park * 1.2 : dist <= park * 1.05;
   if (near && rel <= DEAD_SLOW * 1.4) {

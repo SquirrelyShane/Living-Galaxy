@@ -15,6 +15,7 @@ export const OPS = {
   DOCK:     { label: "Dock",     target: "port|best-buyer|best-smelter|nearest-port|trade-source|trade-dest" },
   UNDOCK:   { label: "Undock" },
   MINE:     { label: "Mine",     target: "seam|point|here", until: { k: "hold", op: ">=", v: 0.9 } },
+  SALVAGE:  { label: "Salvage",  target: "best-hulk|hulk|locked", until: { k: "hold", op: ">=", v: 0.9 }, args: { mode: "strip" } },
   SELL:     { label: "Sell",     args: { what: "ore" } },
   DELIVER:  { label: "Deliver" },
   STASH:    { label: "Stash",    args: { what: "all" } },
@@ -31,7 +32,7 @@ export const OPS = {
   FAB:      { label: "Fabricate", args: { good: null, qty: 1 } },
 };
 
-export const REF_KINDS = ["body", "station", "wp", "point", "best-buyer", "best-smelter", "nearest-port", "seam", "here", "locked", "trade-source", "trade-dest"];
+export const REF_KINDS = ["body", "station", "wp", "point", "best-buyer", "best-smelter", "nearest-port", "seam", "here", "locked", "trade-source", "trade-dest", "hulk", "best-hulk"];
 export const COND_KEYS = ["hold", "credits", "charge", "hull", "time", "docked", "cargoOf", "loops"];
 export const COND_OPS = [">=", "<=", ">", "<", "==", "!="];
 export const WARP_POLICIES = ["auto", "ask", "never"];
@@ -40,6 +41,7 @@ const TARGETS_FOR = {
   GOTO: REF_KINDS, APPROACH: REF_KINDS, SURVEY: ["body", "locked"],
   DOCK: ["station", "best-buyer", "best-smelter", "nearest-port", "locked", "trade-source", "trade-dest"],
   MINE: ["seam", "point", "here", "wp", "locked"],
+  SALVAGE: ["best-hulk", "hulk", "locked"],
 };
 
 let _n = 0;
@@ -101,7 +103,7 @@ export function validate(m) {
     if (spec.target) {
       if (!s.target || !REF_KINDS.includes(s.target.kind)) out.push({ step: i, msg: `${spec.label} needs a target` });
       else if (TARGETS_FOR[s.op] && !TARGETS_FOR[s.op].includes(s.target.kind)) out.push({ step: i, msg: `${spec.label} cannot target ${s.target.kind}` });
-      else if (["body", "station", "wp"].includes(s.target.kind) && !s.target.id && s.op !== "SURVEY") out.push({ step: i, msg: `${spec.label} target has no id` });
+      else if (["body", "station", "wp", "hulk"].includes(s.target.kind) && !s.target.id && s.op !== "SURVEY") out.push({ step: i, msg: `${spec.label} target has no id` });
       else if (s.target.kind === "point" && ![s.target.x, s.target.y, s.target.z].every((v) => typeof v === "number")) out.push({ step: i, msg: "point target needs x, y, z" });
     }
     condErrors(s.until, i, out);
@@ -113,6 +115,7 @@ export function validate(m) {
     if (s.op === "BUILD" && !s.args?.role) out.push({ step: i, msg: "build needs a drone role" });
     if (s.op === "FAB" && !s.args?.good) out.push({ step: i, msg: "fabricate needs a part" });
     if (s.op === "FAB" && !(s.args?.qty > 0)) out.push({ step: i, msg: "fabricate needs a quantity" });
+    if (s.op === "SALVAGE" && s.args?.mode != null && !["cut", "strip", "auto"].includes(s.args.mode)) out.push({ step: i, msg: "salvage mode is cut, strip or auto" });
   });
   const L = m.loop ?? { mode: "none" };
   if (!["none", "count", "until"].includes(L.mode)) out.push({ step: -1, msg: `loop mode "${L.mode}"` });
@@ -181,6 +184,8 @@ export function describeRef(r) {
     case "trade-source": return "the route's source";
     case "trade-dest": return "the route's buyer";
     case "seam": return "the seam";
+    case "best-hulk": return "the best hulk in reach";
+    case "hulk": return r.id ? String(r.id) : "a hulk";
     case "here": return "here";
     case "locked": return "locked target";
     case "point": return `${Math.round(r.x / 100)},${Math.round(r.z / 100)} km`;
@@ -194,6 +199,7 @@ export function describeStep(step) {
   const parts = [step.op];
   const t = describeRef(step.target);
   if (t) parts[0] += ` ${t}`;
+  if (step.op === "SALVAGE") parts[0] += ` · ${(step.args?.mode ?? "strip").toUpperCase()}`;
   if (step.op === "SELL" || step.op === "STASH") parts[0] += ` ${(step.args?.what ?? "ore").replace(/_/g, " ")}`;
   if (step.op === "BUY") parts[0] += step.args?.good === "route" ? " the route's cargo" : ` ${step.args?.qty ?? 0} ${(step.args?.good ?? "best margin").replace(/_/g, " ")}`;
   if (step.op === "SET") parts[0] += ` ${Object.entries(step.args ?? {}).map(([k, v]) => `${k}=${typeof v === "object" ? `${v.key}:${v.on ? "on" : "off"}` : v}`).join(" ") || "—"}`;
@@ -229,6 +235,16 @@ export function presets() {
         makeStep("MINE", { kind: "seam" }, { until: C("hold", ">=", 0.9) }),
         makeStep("DOCK", { kind: "best-buyer" }),
         makeStep("SELL", null, { args: { what: "ore" } }),
+        makeStep("CHARGE", null, { until: C("charge", ">=", 0.85) }),
+      ],
+      loop: { mode: "until", until: C("credits", ">=", 50000) },
+    }),
+    makeMission({
+      id: "preset-salvage", name: "SALVAGE LOOP", preset: true, builtin: true,
+      steps: [
+        makeStep("SALVAGE", { kind: "best-hulk" }, { until: C("hold", ">=", 0.9), args: { mode: "strip", max: 4 } }),
+        makeStep("DOCK", { kind: "best-buyer" }),
+        makeStep("SELL", null, { args: { what: "all" } }),
         makeStep("CHARGE", null, { until: C("charge", ">=", 0.85) }),
       ],
       loop: { mode: "until", until: C("credits", ">=", 50000) },

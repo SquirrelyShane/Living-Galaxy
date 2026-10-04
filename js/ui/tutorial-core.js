@@ -59,7 +59,7 @@ export const CORE_STEPS = [
     title: "WHAT IT IS",
     text: () => {
       const u = spec();
-      return `The editor flies ONE step at a time until a ${u.name} is fitted — that is the box that remembers a plan. With it: several steps in a row, loops, and conditions like "until the hold is full". Without it the four presets still fly, because those are built in. ${cr(u.price)} cr at a ${(u.sector ?? []).join(" or ")} yard. Tap NEXT and I will find you one.`;
+      return `The editor flies ONE step at a time until a ${u.name} is fitted — that is the box that remembers a plan. With it: several steps in a row, loops, and conditions like "until the hold is full". Without it the five presets still fly, because those are built in. ${cr(u.price)} cr at a ${(u.sector ?? []).join(" or ")} yard. Tap NEXT and I will find you one.`;
     },
     done: () => false,
     next: () => true,

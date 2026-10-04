@@ -1,6 +1,6 @@
 # js/flight/pilot.js
 
-[index](../../../README.md) · 369 lines · 38 symbols · 5 imports · 71 importers
+[index](../../../README.md) · 369 lines · 38 symbols · 5 imports · 72 importers
 
 ## About
 
@@ -24,6 +24,7 @@ actually do out there, not off a menu.
 
 ## Imported by
 
+- [js/aria/pilot.js](../aria/pilot.js.md) — `pilot`
 - [js/aria/play.js](../aria/play.js.md) — `pilot`
 - [js/comms/comms.js](../comms/comms.js.md) — `pilot`
 - [js/console/panels/corp.js](../console/panels/corp.js.md) — `certSheet`, `corp`, `pilot`, `rankStatus`, `skillSheet`, `specEffectLines`, `specOptions`, `standingSheet`, `title`, `transferOptions`, `tryPromote`, `trySpecialize`, `tryTransfer`
@@ -98,7 +99,7 @@ actually do out there, not off a menu.
 
 ## Exports
 
-- [`pilot`](#s-pilot) · const — used by [js/aria/play.js](../aria/play.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/corp/company.js](../corp/company.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/crew/family.js](../crew/family.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/main.js](../main.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/ariaplay.test.mjs, test/careerstatus.test.mjs, test/qrf.test.mjs, test/rig.test.mjs, test/seclevel.test.mjs, test/upgrades.test.mjs
+- [`pilot`](#s-pilot) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/play.js](../aria/play.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/corp.js](../console/panels/corp.js.md), [js/corp/company.js](../corp/company.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/crew/family.js](../crew/family.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/main.js](../main.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationdeck.js](../station/stationdeck.js.md), [js/ui/boardview.js](../ui/boardview.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/ariaplay.test.mjs, test/careerstatus.test.mjs, test/qrf.test.mjs, test/rig.test.mjs, test/seclevel.test.mjs, test/upgrades.test.mjs
 - [`setCrewMods`](#s-setCrewMods) · function — used by [js/npc/crewfx.js](../npc/crewfx.js.md)
 - [`setUpgradeMods`](#s-setUpgradeMods) · function — used by [js/economy/upgrades.js](../economy/upgrades.js.md)
 - [`careerCatalog`](#s-careerCatalog) · function — used by [js/ui/creation.js](../ui/creation.js.md), test/careerstatus.test.mjs
@@ -352,7 +353,7 @@ function · **exported** · L193–195
 function · **exported** · L197–208
 
 - calls: [`trainSkill`](../careers/careerEngine.js.md#s-trainSkill) _js/careers/careerEngine.js_
-- called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`tickContracts`](../economy/contracts.js.md#s-tickContracts) _js/economy/contracts.js_ ×2 · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ ×2 · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ ×2 · [`finishDock`](../sim/sim.js.md#s-finishDock) _js/sim/sim.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ ×4 · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stepSalvage`](../sim/sim.js.md#s-stepSalvage) _js/sim/sim.js_ ×2 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_ ×2 · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_ ×4 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ ×2 · [`warpDropout`](../sim/sim.js.md#s-warpDropout) _js/sim/sim.js_ · [`wireRigHooks`](../sim/sim.js.md#s-wireRigHooks) _js/sim/sim.js_ · [`stepAtmoWorks`](../world/events/atmoworks.js.md#s-stepAtmoWorks) _js/world/events/atmoworks.js_ ×2
+- called by: [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`tickContracts`](../economy/contracts.js.md#s-tickContracts) _js/economy/contracts.js_ ×2 · [`claimPort`](../sim/sim.js.md#s-claimPort) _js/sim/sim.js_ ×2 · [`collectBeacon`](../sim/sim.js.md#s-collectBeacon) _js/sim/sim.js_ ×2 · [`finishDock`](../sim/sim.js.md#s-finishDock) _js/sim/sim.js_ · [`handInRecorders`](../sim/sim.js.md#s-handInRecorders) _js/sim/sim.js_ · [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ ×4 · [`smeltAll`](../sim/sim.js.md#s-smeltAll) _js/sim/sim.js_ · [`stepSalvage`](../sim/sim.js.md#s-stepSalvage) _js/sim/sim.js_ ×2 · [`tradeBuy`](../sim/sim.js.md#s-tradeBuy) _js/sim/sim.js_ · [`tradeSell`](../sim/sim.js.md#s-tradeSell) _js/sim/sim.js_ ×2 · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_ ×4 · [`tryScan`](../sim/sim.js.md#s-tryScan) _js/sim/sim.js_ ×2 · [`warpDropout`](../sim/sim.js.md#s-warpDropout) _js/sim/sim.js_ · [`wireRigHooks`](../sim/sim.js.md#s-wireRigHooks) _js/sim/sim.js_ · [`stepAtmoWorks`](../world/events/atmoworks.js.md#s-stepAtmoWorks) _js/world/events/atmoworks.js_ ×2
 
 <!-- note:work -->
 ---- skill drip ----------------------------------------------------------

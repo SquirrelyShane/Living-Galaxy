@@ -30,6 +30,9 @@
  *   --seed     exploration seed, so a bench repeats (default "bench")
  *   --seeds    how many seeds per career; the median is reported (default 1)
  *   --json     write the result here     --compare  diff against an earlier one
+ *   --parity   a career to measure the others against (0.3.90): prints each
+ *              career's median as a multiple of it and exits 1 if any is
+ *              outside --band (default 0.3, the readiness gate's ±30%)
  */
 
 import { register } from "node:module";
@@ -49,6 +52,8 @@ const JOBS = Math.max(1, Number(flag("jobs", 3)));
  * on the desk when she looked, which way the exploration coin fell. Averaging a
  * few seeds is the difference between an instrument and an anecdote. */
 const SEEDS = Math.max(1, Number(flag("seeds", 1)));
+const PARITY = flag("parity", null);
+const BAND = Number(flag("band", 0.3));
 const OUT = flag("json", null);
 const CMP = flag("compare", null);
 
@@ -196,7 +201,29 @@ console.log(`  ${dim("best route ÷ median career:")} ${warn(spread.routeOverCar
 if (spread.flewNothing.length) console.log(`  ${paint(203, `flew nothing: ${spread.flewNothing.join(", ")}`)}`);
 console.log("");
 
-const result = { at: new Date().toISOString(), room: ROOM, minutes: MINUTES, seeds: SEEDS, credits: CREDITS, seed: SEED, rows, runs, market, spread };
+/* 0.3.90: the readiness gate, scriptable. `bench` in js/careers/status.js means
+ * "within ±30% of Mining on this instrument"; this is that sentence as an exit
+ * code, so a career cannot be opened on a number nobody ran. */
+let parity = null;
+if (PARITY) {
+  const ref = rows.find((r) => r.career === PARITY);
+  if (!ref || ref.perMin <= 0) { console.log(`  ${paint(203, `parity: no positive median for "${PARITY}" to measure against`)}\n`); process.exitCode = 1; }
+  else {
+    parity = { against: PARITY, band: BAND, ref: ref.perMin, rows: [] };
+    console.log(`  ${bold("PARITY")} ${dim(`against ${PARITY} at ${money(ref.perMin)}/min, band ±${Math.round(BAND * 100)}% (${money(ref.perMin * (1 - BAND))}–${money(ref.perMin * (1 + BAND))})`)}`);
+    for (const r of rows) {
+      if (r.career === PARITY) continue;
+      const k = r.perMin / ref.perMin;
+      const ok = Math.abs(k - 1) <= BAND + 1e-9;
+      parity.rows.push({ career: r.career, ratio: Number(k.toFixed(3)), ok });
+      console.log(`  ${paint(colourFor(r.career).fg, pad(`▰ ${r.career}`, 17))}${right(`${k.toFixed(2)}×`, 8)}   ${paint(ok ? 78 : 203, ok ? "inside the band" : k > 1 ? "over the band" : "under the band")}`);
+      if (!ok) process.exitCode = 1;
+    }
+    console.log("");
+  }
+}
+
+const result = { at: new Date().toISOString(), room: ROOM, minutes: MINUTES, seeds: SEEDS, credits: CREDITS, seed: SEED, rows, runs, market, spread, parity };
 if (OUT) { writeFileSync(OUT, JSON.stringify(result, null, 2)); console.log(`  ${dim(`→ ${OUT}`)}\n`); }
 
 if (CMP) {

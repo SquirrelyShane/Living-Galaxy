@@ -1,6 +1,6 @@
 # js/mission/script.js
 
-[index](../../../README.md) · 287 lines · 43 symbols · 3 imports · 15 importers
+[index](../../../README.md) · 303 lines · 43 symbols · 3 imports · 15 importers
 
 ## About
 
@@ -83,8 +83,8 @@ Mission { id, name, steps: Step[], loop: { mode: "none"|"count"|"until", count?,
 
 ## Effects
 
-- **storage.get** — `‹MISSIONS_KEY()›` (loadMissions:271)
-- **storage.set** — `‹MISSIONS_KEY()›` (saveMissions:282)
+- **storage.get** — `‹MISSIONS_KEY()›` (loadMissions:287)
+- **storage.set** — `‹MISSIONS_KEY()›` (saveMissions:298)
 
 ## Symbols
 
@@ -129,55 +129,55 @@ function · **exported** · L10–10
 
 ### <a id="s-OPS"></a>`OPS`
 
-const · **exported** · L12–32
+const · **exported** · L12–33
 
 <!-- note:OPS -->
-- L19 · `DELIVER:  { label: "Deliver" },` — 0.3.72: close the delivery jobs due at this port
-- L29 · `REFIT:    { label: "Refit",    args: { id: null } },` — 0.3.06 — what ARIA spends money on at a port it is already sitting at.
+- L20 · `DELIVER:  { label: "Deliver" },` — 0.3.72: close the delivery jobs due at this port
+- L30 · `REFIT:    { label: "Refit",    args: { id: null } },` — 0.3.06 — what ARIA spends money on at a port it is already sitting at.
   Both are docked-only and both name their subject in args, so a step
   serialises and comes back without a target reference to resolve.
-- L31 · `FAB:      { label: "Fabricate", args: { good: null, qty: 1 } },` — 0.3.10 — put a fabrication job on the port's line and fly on; it finishes
+- L32 · `FAB:      { label: "Fabricate", args: { good: null, qty: 1 } },` — 0.3.10 — put a fabrication job on the port's line and fly on; it finishes
   on sim time and lands in that port's locker.
 <!-- /note -->
 
 ### <a id="s-REF_KINDS"></a>`REF_KINDS`
 
-const · **exported** · L34–34
+const · **exported** · L35–35
 
 <!-- note:REF_KINDS -->
 <!-- /note -->
 
 ### <a id="s-COND_KEYS"></a>`COND_KEYS`
 
-const · **exported** · L35–35
+const · **exported** · L36–36
 
 <!-- note:COND_KEYS -->
 <!-- /note -->
 
 ### <a id="s-COND_OPS"></a>`COND_OPS`
 
-const · **exported** · L36–36
+const · **exported** · L37–37
 
 <!-- note:COND_OPS -->
 <!-- /note -->
 
 ### <a id="s-WARP_POLICIES"></a>`WARP_POLICIES`
 
-const · **exported** · L37–37
+const · **exported** · L38–38
 
 <!-- note:WARP_POLICIES -->
 <!-- /note -->
 
 ### <a id="s-ON_FAIL"></a>`ON_FAIL`
 
-const · **exported** · L38–38
+const · **exported** · L39–39
 
 <!-- note:ON_FAIL -->
 <!-- /note -->
 
 ### <a id="s-TARGETS_FOR"></a>`TARGETS_FOR`
 
-const · L39–43
+const · L40–45
 
 <!-- note:TARGETS_FOR -->
 which target kinds each op accepts (null = no target)
@@ -185,14 +185,14 @@ which target kinds each op accepts (null = no target)
 
 ### <a id="s-_n"></a>`_n`
 
-const · L45–45
+const · L47–47
 
 <!-- note:_n -->
 <!-- /note -->
 
 ### <a id="s-uid"></a>`uid(p)`
 
-function · L46–46
+function · L48–48
 
 - called by: [`makeMission`](#s-makeMission) ×2 · [`makeStep`](#s-makeStep)
 
@@ -201,7 +201,7 @@ function · L46–46
 
 ### <a id="s-clone"></a>`clone(o)`
 
-function · L47–47
+function · L49–49
 
 - called by: [`deserialize`](#s-deserialize) · [`makeStep`](#s-makeStep) ×2
 
@@ -210,24 +210,24 @@ function · L47–47
 
 ### <a id="s-infOut"></a>`infOut(k, v)`
 
-function · L48–48
+function · L50–50
 
 <!-- note:infOut -->
 <!-- /note -->
 
 ### <a id="s-infIn"></a>`infIn(k, v)`
 
-function · L49–49
+function · L51–51
 
 <!-- note:infIn -->
 <!-- /note -->
 
 ### <a id="s-makeMission"></a>`makeMission(partial=)`
 
-function · **exported** · L51–66
+function · **exported** · L53–68
 
 - calls: [`uid`](#s-uid) ×2
-- called by: [`MISSION`](../aria/pilot.js.md#s-MISSION) _js/aria/pilot.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`startFreeMine`](../aria/play.js.md#s-startFreeMine) _js/aria/play.js_ · [`startRoute`](../aria/play.js.md#s-startRoute) _js/aria/play.js_ · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`flyRoute`](../console/panels/market.js.md#s-flyRoute) _js/console/panels/market.js_ · [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`fresh`](../console/panels/work.js.md#s-fresh) _js/console/panels/work.js_ · [`engageJobLoop`](../flight/autopilot.js.md#s-engageJobLoop) _js/flight/autopilot.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`deserialize`](#s-deserialize) · [`oneStep`](#s-oneStep) · [`presets`](#s-presets) ×4
+- called by: [`MISSION`](../aria/pilot.js.md#s-MISSION) _js/aria/pilot.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`startFreeMine`](../aria/play.js.md#s-startFreeMine) _js/aria/play.js_ · [`startFreeSalvage`](../aria/play.js.md#s-startFreeSalvage) _js/aria/play.js_ · [`startRoute`](../aria/play.js.md#s-startRoute) _js/aria/play.js_ · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`flyRoute`](../console/panels/market.js.md#s-flyRoute) _js/console/panels/market.js_ · [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`fresh`](../console/panels/work.js.md#s-fresh) _js/console/panels/work.js_ · [`engageJobLoop`](../flight/autopilot.js.md#s-engageJobLoop) _js/flight/autopilot.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`engageSalvageLoop`](../flight/autopilot.js.md#s-engageSalvageLoop) _js/flight/autopilot.js_ · [`deserialize`](#s-deserialize) · [`oneStep`](#s-oneStep) · [`presets`](#s-presets) ×5
 
 <!-- note:makeMission -->
 ids and defaults filled
@@ -235,17 +235,17 @@ ids and defaults filled
 
 ### <a id="s-makeStep"></a>`makeStep(op, target=, extra=)`
 
-function · **exported** · L68–74
+function · **exported** · L70–76
 
 - calls: [`clone`](#s-clone) ×2 · [`uid`](#s-uid)
-- called by: [`deskSteps`](../aria/pilot.js.md#s-deskSteps) _js/aria/pilot.js_ ×4 · [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ ×14 · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ ×17 · [`legsTo`](../aria/play.js.md#s-legsTo) _js/aria/play.js_ ×2 · [`startFreeMine`](../aria/play.js.md#s-startFreeMine) _js/aria/play.js_ ×3 · [`startRoute`](../aria/play.js.md#s-startRoute) _js/aria/play.js_ ×2 · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ ×2 · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ ×2 · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`flyRoute`](../console/panels/market.js.md#s-flyRoute) _js/console/panels/market.js_ ×4 · [`editor>render.onPick~3`](../console/panels/work.js.md#s-editor-render-onPick-3) _js/console/panels/work.js_ · [`engageJobLoop`](../flight/autopilot.js.md#s-engageJobLoop) _js/flight/autopilot.js_ ×5 · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ ×7 · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_ · [`oneStep`](#s-oneStep) · [`presets`](#s-presets) ×14
+- called by: [`deskSteps`](../aria/pilot.js.md#s-deskSteps) _js/aria/pilot.js_ ×4 · [`rawPlanJob`](../aria/pilot.js.md#s-rawPlanJob) _js/aria/pilot.js_ ×18 · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ ×20 · [`legsTo`](../aria/play.js.md#s-legsTo) _js/aria/play.js_ ×2 · [`startFreeMine`](../aria/play.js.md#s-startFreeMine) _js/aria/play.js_ ×3 · [`startFreeSalvage`](../aria/play.js.md#s-startFreeSalvage) _js/aria/play.js_ ×3 · [`startRoute`](../aria/play.js.md#s-startRoute) _js/aria/play.js_ ×2 · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ ×2 · [`startSupply`](../aria/play.js.md#s-startSupply) _js/aria/play.js_ ×2 · [`startYard`](../aria/play.js.md#s-startYard) _js/aria/play.js_ · [`flyRoute`](../console/panels/market.js.md#s-flyRoute) _js/console/panels/market.js_ ×4 · [`editor>render.onPick~3`](../console/panels/work.js.md#s-editor-render-onPick-3) _js/console/panels/work.js_ · [`engageJobLoop`](../flight/autopilot.js.md#s-engageJobLoop) _js/flight/autopilot.js_ ×5 · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ ×7 · [`engageSalvageLoop`](../flight/autopilot.js.md#s-engageSalvageLoop) _js/flight/autopilot.js_ ×8 · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_ · [`oneStep`](#s-oneStep) · [`presets`](#s-presets) ×18
 
 <!-- note:makeStep -->
 <!-- /note -->
 
 ### <a id="s-oneStep"></a>`oneStep(op, target, defaults=)`
 
-function · **exported** · L76–79
+function · **exported** · L78–81
 
 - calls: [`makeMission`](#s-makeMission) · [`makeStep`](#s-makeStep)
 - called by: [`mountAutopilot>go`](../console/panels/nav.js.md#s-mountAutopilot-go) _js/console/panels/nav.js_ · [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_ · [`engageAutopilot`](../flight/autopilot.js.md#s-engageAutopilot) _js/flight/autopilot.js_ · [`autoDock`](../ui/tutorial-core.js.md#s-autoDock) _js/ui/tutorial-core.js_
@@ -256,7 +256,7 @@ mission with one step, loop none — what HUD/chart buttons build
 
 ### <a id="s-condErrors"></a>`condErrors(c, where, out)`
 
-function · L81–92
+function · L83–94
 
 - calls: [`condErrors`](#s-condErrors) ×3
 - called by: [`condErrors`](#s-condErrors) ×3 · [`validate`](#s-validate) ×2
@@ -267,7 +267,7 @@ function · L81–92
 
 ### <a id="s-validate"></a>`validate(m)`
 
-function · **exported** · L94–125
+function · **exported** · L96–128
 
 - calls: [`condErrors`](#s-condErrors) ×2
 - called by: [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_ · [`deserialize`](#s-deserialize)
@@ -278,7 +278,7 @@ function · **exported** · L94–125
 
 ### <a id="s-snapshot"></a>`snapshot({…}=)`
 
-function · **exported** · L127–142
+function · **exported** · L130–145
 
 - calls: [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`batteryCap`](#s-batteryCap) · [`sim`](#s-sim)
 - called by: [`advance`](run.js.md#s-advance) _js/mission/run.js_ · [`untilMet`](run.js.md#s-untilMet) _js/mission/run.js_
@@ -291,63 +291,63 @@ function · **exported** · L127–142
 
 #### <a id="s-snapshot-cargoOf"></a>`snapshot.cargoOf(id)`
 
-prop · L139–139
+prop · L142–142
 
 <!-- note:snapshot.cargoOf -->
 <!-- /note -->
 
 ### <a id="s-CMP"></a>`CMP`
 
-const · L144–147
+const · L147–150
 
 <!-- note:CMP -->
 <!-- /note -->
 
 ##### <a id="s-CMP-"></a>`CMP.>=(a, b)`
 
-prop · L145–145
+prop · L148–148
 
 <!-- note:CMP.>= -->
 <!-- /note -->
 
 #### <a id="s-CMP--2"></a>`CMP.<=(a, b)`
 
-prop · L145–145
+prop · L148–148
 
 <!-- note:CMP.<= -->
 <!-- /note -->
 
 ##### <a id="s-CMP--3"></a>`CMP.>(a, b)`
 
-prop · L145–145
+prop · L148–148
 
 <!-- note:CMP.> -->
 <!-- /note -->
 
 #### <a id="s-CMP--4"></a>`CMP.<(a, b)`
 
-prop · L145–145
+prop · L148–148
 
 <!-- note:CMP.< -->
 <!-- /note -->
 
 #### <a id="s-CMP--5"></a>`CMP.==(a, b)`
 
-prop · L146–146
+prop · L149–149
 
 <!-- note:CMP.== -->
 <!-- /note -->
 
 #### <a id="s-CMP--6"></a>`CMP.!=(a, b)`
 
-prop · L146–146
+prop · L149–149
 
 <!-- note:CMP.!= -->
 <!-- /note -->
 
 ### <a id="s-evalCond"></a>`evalCond(cond, snap)`
 
-function · **exported** · L149–159
+function · **exported** · L152–162
 
 - calls: [`evalCond`](#s-evalCond) ×3
 - called by: [`advance`](run.js.md#s-advance) _js/mission/run.js_ · [`untilMet`](run.js.md#s-untilMet) _js/mission/run.js_ · [`evalCond`](#s-evalCond) ×3
@@ -357,7 +357,7 @@ function · **exported** · L149–159
 
 ### <a id="s-OPSYM"></a>`OPSYM`
 
-const · L161–161
+const · L164–164
 
 <!-- note:OPSYM -->
 ---- descriptions -----------------------------------------------------------
@@ -365,14 +365,14 @@ const · L161–161
 
 ### <a id="s-FRAC"></a>`FRAC`
 
-const · L162–162
+const · L165–165
 
 <!-- note:FRAC -->
 <!-- /note -->
 
 ### <a id="s-describeCond"></a>`describeCond(c)`
 
-function · **exported** · L164–172
+function · **exported** · L167–175
 
 - calls: [`describeCond`](#s-describeCond)
 - called by: [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ ×3 · [`describeCond`](#s-describeCond) · [`describeStep`](#s-describeStep)
@@ -382,7 +382,7 @@ function · **exported** · L164–172
 
 ### <a id="s-describeRef"></a>`describeRef(r)`
 
-function · **exported** · L174–190
+function · **exported** · L177–195
 
 - called by: [`missionStatusLine`](run.js.md#s-missionStatusLine) _js/mission/run.js_ · [`describeStep`](#s-describeStep)
 
@@ -391,7 +391,7 @@ function · **exported** · L174–190
 
 ### <a id="s-describeStep"></a>`describeStep(step)`
 
-function · **exported** · L192–205
+function · **exported** · L197–211
 
 - calls: [`describeCond`](#s-describeCond) · [`describeRef`](#s-describeRef)
 - called by: [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`liveCard`](../console/panels/work.js.md#s-liveCard) _js/console/panels/work.js_ · [`stepSheet`](../console/panels/work.js.md#s-stepSheet) _js/console/panels/work.js_
@@ -402,7 +402,7 @@ function · **exported** · L192–205
 
 ### <a id="s-serialize"></a>`serialize(m)`
 
-function · **exported** · L207–209
+function · **exported** · L213–215
 
 - called by: [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`fresh`](../console/panels/work.js.md#s-fresh) _js/console/panels/work.js_ · [`saveRun`](run.js.md#s-saveRun) _js/mission/run.js_ · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_
 
@@ -412,7 +412,7 @@ function · **exported** · L207–209
 
 ### <a id="s-deserialize"></a>`deserialize(json)`
 
-function · **exported** · L211–220
+function · **exported** · L217–226
 
 - calls: [`clone`](#s-clone) · [`makeMission`](#s-makeMission) · [`validate`](#s-validate)
 - called by: [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`fresh`](../console/panels/work.js.md#s-fresh) _js/console/panels/work.js_ · [`restoreRun`](run.js.md#s-restoreRun) _js/mission/run.js_ · [`startMission`](run.js.md#s-startMission) _js/mission/run.js_ · [`loadMissions`](#s-loadMissions)
@@ -423,9 +423,9 @@ function · **exported** · L211–220
 
 ### <a id="s-C"></a>`C(k, op, v, id)`
 
-function · L222–222
+function · L228–228
 
-- called by: [`presets`](#s-presets) ×6
+- called by: [`presets`](#s-presets) ×9
 
 <!-- note:C -->
 ---- presets ------------------------------------------------------------------
@@ -433,9 +433,9 @@ function · L222–222
 
 ### <a id="s-presets"></a>`presets()`
 
-function · **exported** · L224–265
+function · **exported** · L230–281
 
-- calls: [`C`](#s-C) ×6 · [`makeMission`](#s-makeMission) ×4 · [`makeStep`](#s-makeStep) ×14
+- calls: [`C`](#s-C) ×9 · [`makeMission`](#s-makeMission) ×5 · [`makeStep`](#s-makeStep) ×18
 - called by: [`mountRoutes`](../console/panels/market.js.md#s-mountRoutes) _js/console/panels/market.js_ · [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_ · [`search`](../console/panels/work.js.md#s-search) _js/console/panels/work.js_
 
 <!-- note:presets -->
@@ -449,7 +449,7 @@ WRITE, not the stock loops; `fresh()` in the editor strips the flag, so the
 moment a preset is copied out to be edited it becomes yours and is gated
 like anything else you build.
 
-- L226 · `makeMission({` — 0.3.19 — TRADE RUN flies a ROUTE (traderoutes.js): at the top of each
+- L232 · `makeMission({` — 0.3.19 — TRADE RUN flies a ROUTE (traderoutes.js): at the top of each
   round it picks the best buy-here-sell-there run from where the hull is,
   with the hold and the purse it has, docks at the source, buys the
   route's cargo (all the hold and purse allow), docks at the buyer, sells
@@ -461,7 +461,7 @@ like anything else you build.
 
 ### <a id="s-MISSIONS_KEY"></a>`MISSIONS_KEY()`
 
-function · **exported** · L267–267
+function · **exported** · L283–283
 
 - calls: [`sim`](#s-sim)
 - called by: [`loadMissions`](#s-loadMissions) · [`saveMissions`](#s-saveMissions)
@@ -472,7 +472,7 @@ function · **exported** · L267–267
 
 ### <a id="s-loadMissions"></a>`loadMissions()`
 
-function · **exported** · L269–278
+function · **exported** · L285–294
 
 - calls: [`deserialize`](#s-deserialize) · [`MISSIONS_KEY`](#s-MISSIONS_KEY)
 - called by: [`list`](../console/panels/work.js.md#s-list) _js/console/panels/work.js_ · [`mount`](../console/panels/work.js.md#s-mount) _js/console/panels/work.js_ · [`search`](../console/panels/work.js.md#s-search) _js/console/panels/work.js_
@@ -483,7 +483,7 @@ function · **exported** · L269–278
 
 ### <a id="s-saveMissions"></a>`saveMissions(list)`
 
-function · **exported** · L280–287
+function · **exported** · L296–303
 
 - calls: [`MISSIONS_KEY`](#s-MISSIONS_KEY)
 - called by: [`persist`](../console/panels/work.js.md#s-persist) _js/console/panels/work.js_

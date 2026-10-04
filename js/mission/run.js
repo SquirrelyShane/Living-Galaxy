@@ -12,6 +12,7 @@ import { post } from "../comms/chat.js";
 import { hasUpgrade } from "../economy/upgrades.js";
 import { makeTradeOps } from "./tradeops.js";
 import { makeLegs } from "./detour.js";
+import { makeSalvage } from "./salvage.js";
 import { validate, evalCond, snapshot, describeRef, deserialize, serialize, makeStep, missionCore } from "./script.js";
 import {
   autopilot, apLeg, apPark, apDock, apMine, apHold, bestPortFor, nearestSeam, releaseControls, resetProgress, jumpEndedShort, warpReserve, AP_POWER, busIdle,
@@ -37,7 +38,7 @@ export const missionHooks = { onStep: null, onAsk: null, onEnd: null };
 
 export const RUN_KEY = () => `lgaa.mission.run.v1:${sim.skySeed}:${sim.callsign}`;
 const batteryCap = (ship) => shipMod.batteryCap?.(ship) ?? BATTERY;
-const FLYING = new Set(["GOTO", "APPROACH", "MINE", "SURVEY", "DOCK"]);
+const FLYING = new Set(["GOTO", "APPROACH", "MINE", "SALVAGE", "SURVEY", "DOCK"]);
 const _p = { x: 0, y: 0, z: 0 };
 const note = (text) => { sim.notice = text; sim.noticeAt = sim.wall; };
 const T = makeTradeOps({ mission, note, ap: () => autopilot });
@@ -70,6 +71,7 @@ export function startMission(m) {
   mission.stats = { earned: 0, loops: 0, startedAt: sim.time };
   mission.origin = { x: sim.ship.pos.x, y: sim.ship.pos.y, z: sim.ship.pos.z, name: "the start" };
   autopilot.cutterWas = sim.ship.miningMode;
+  autopilot.rigWas = sim.ship.rigMode ?? "off";
   autopilot.on = true;
   autopilot.engagedAt = sim.time;
   autopilot.jumped = false;
@@ -305,6 +307,7 @@ function untilMet(s) {
 const legOpts = (s, extra = {}) => ({ cap: stepThrustCap(s), warp: stepWarpPolicy(s), ...extra });
 
 const { legTo } = makeLegs({ mission, ap: () => autopilot, apLeg, resetProgress, legOpts });
+const SALVAGE = makeSalvage({ mission, ap: () => autopilot, apPark, apHold, legTo, untilMet, ensureUndocked, resetProgress });
 
 export const EXEC = {
   GOTO(s) {
@@ -403,6 +406,7 @@ export const EXEC = {
     autopilot.phase = "seek";
     return "flying";
   },
+  SALVAGE,
   SELL: (s) => T.SELL(s), DELIVER: (s) => T.DELIVER(s),
   STASH(s) {
     const st = stationById(sim.ship.dockedAt);

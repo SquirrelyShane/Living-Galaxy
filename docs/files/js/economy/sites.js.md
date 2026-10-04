@@ -193,7 +193,7 @@ function · L40–40
 function · **exported** · L58–63
 
 - calls: [`bearing`](#s-bearing)
-- called by: [`KINDS.pod`](contracts.js.md#s-KINDS-pod) _js/economy/contracts.js_ · [`KINDS.wreck`](contracts.js.md#s-KINDS-wreck) _js/economy/contracts.js_ · [`chainOffer`](contracts.js.md#s-chainOffer) _js/economy/contracts.js_ · [`withSpot`](contracts.js.md#s-withSpot) _js/economy/contracts.js_
+- called by: [`KINDS.pod`](contracts.js.md#s-KINDS-pod) _js/economy/contracts.js_ · [`chainOffer`](contracts.js.md#s-chainOffer) _js/economy/contracts.js_ · [`withSpot`](contracts.js.md#s-withSpot) _js/economy/contracts.js_
 
 <!-- note:spotLine -->
 "the Kestrel Drift — 412 km out from Smelt Station, bearing 214"

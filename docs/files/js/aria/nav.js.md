@@ -1,6 +1,6 @@
 # js/aria/nav.js
 
-[index](../../../README.md) · 130 lines · 14 symbols · 3 imports · 3 importers
+[index](../../../README.md) · 130 lines · 14 symbols · 3 imports · 4 importers
 
 ## About
 
@@ -47,6 +47,7 @@ The old estimate divided distance by a flat cruise number and came out with
 
 - [js/aria/play.js](play.js.md) — `planRoute`, `legSeconds`, `tripSeconds`, `aimAt`, `lockOn`, `markPlace`, `routeLine`, `NAV`
 - [js/mission/detour.js](../mission/detour.js.md) — `doglegAround`
+- [js/mission/salvage.js](../mission/salvage.js.md) — `legSeconds`
 - test/ariasense.test.mjs _(outside js/)_ — `NAV`, `planRoute`, `legSeconds`, `tripSeconds`, `corridorBlocker`, `doglegAround`, `climbOut`, `lockOn`, `markPlace`, `aimAt`, `placeOf`, `routeLine`
 
 ## Exports
@@ -57,7 +58,7 @@ The old estimate divided distance by a flat cruise number and came out with
 - [`doglegAround`](#s-doglegAround) · function — used by [js/mission/detour.js](../mission/detour.js.md), test/ariasense.test.mjs
 - [`planRoute`](#s-planRoute) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`climbOut`](#s-climbOut) · function — used by test/ariasense.test.mjs
-- [`legSeconds`](#s-legSeconds) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
+- [`legSeconds`](#s-legSeconds) · function — used by [js/aria/play.js](play.js.md), [js/mission/salvage.js](../mission/salvage.js.md), test/ariasense.test.mjs
 - [`tripSeconds`](#s-tripSeconds) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`lockOn`](#s-lockOn) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`markPlace`](#s-markPlace) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
@@ -175,7 +176,7 @@ The well the hull has to climb out of before the core will hold, in units.
 function · **exported** · L76–95
 
 - calls: [`climbOut`](#s-climbOut) · [`placeOf`](#s-placeOf) ×2 · [`spoolTime`](../sim/sim.js.md#s-spoolTime) _js/sim/sim.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
-- called by: [`planRoute`](#s-planRoute) ×3 · [`tripSeconds`](#s-tripSeconds)
+- called by: [`planRoute`](#s-planRoute) ×3 · [`tripSeconds`](#s-tripSeconds) · [`bestHulk`](../mission/salvage.js.md#s-bestHulk) _js/mission/salvage.js_ ×2
 
 <!-- note:legSeconds -->
 Seconds for one leg, honestly: the climb out of whatever is holding you, the

@@ -4,8 +4,8 @@ import { shipFx } from "./ship.js";
 
 export const RIG = {
   range: 600,
-  cut: 1,
-  strip: 0.4,
+  cut: 2.5,
+  strip: 1,
   cutYield: 0.85,
   cutCargo: 0.5,
   lump: 6,
@@ -125,6 +125,7 @@ export function stepRig(ship, dt, time, lock = null) {
   const h = t.h;
   const s = nextSection(h);
   const strip = ship.rigMode === "strip";
+  h.busyUntil = Math.max(h.busyUntil ?? 0, time + 60);
   rig.active = true;
   ship.rigLive = true;
   rig.key = h.id;

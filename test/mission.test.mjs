@@ -37,10 +37,10 @@ const ok = (c, m) => { if (c) pass++; else { fail++; console.error("  FAIL", m);
   ok(validate(makeMission({ steps: [makeStep("HOLD")], loop: { mode: "count", count: 0 } })).some((e) => /loop count/.test(e.msg)), "…and a loop count under 1");
   ok(validate(makeMission({ steps: [makeStep("MINE", { kind: "best-buyer" })] })).some((e) => /cannot target/.test(e.msg)), "…and a MINE aimed at a port");
   for (const p of presets()) ok(validate(p).length === 0, `preset ${p.name} validates clean`);
-  ok(presets().map((p) => p.name).join(",") === "MINE LOOP,TRADE RUN,SURVEY SWEEP,PATROL", "the four presets");
+  ok(presets().map((p) => p.name).join(",") === "MINE LOOP,SALVAGE LOOP,TRADE RUN,SURVEY SWEEP,PATROL", "the five presets (0.3.90: SALVAGE LOOP)");
   const one = oneStep("APPROACH", { kind: "body", id: "mars", name: "Mars" }, { thrustCap: 0.5 });
   ok(one.steps.length === 1 && one.loop.mode === "none" && one.defaults.thrustCap === 0.5 && one.defaults.warp === "auto" && one.builtin, "oneStep builds a one-step builtin mission with defaults");
-  ok(Object.keys(OPS).length === 19, "nineteen ops (0.3.03: REPAIR; 0.3.06: REFIT, BUILD; 0.3.10: FAB; 0.3.72: DELIVER)");
+  ok(Object.keys(OPS).length === 20, "twenty ops (0.3.03: REPAIR; 0.3.06: REFIT, BUILD; 0.3.10: FAB; 0.3.72: DELIVER; 0.3.90: SALVAGE)");
 }
 
 /* ---- conditions --------------------------------------------------------------- */

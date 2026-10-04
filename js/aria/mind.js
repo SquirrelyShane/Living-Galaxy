@@ -3,7 +3,9 @@ const fresh = () => ({ v: 2, identity: null, prefs: { port: {}, ore: {}, plan: {
 export const WORKING_FLOOR = 800;
 const INVESTMENT = new Set(['refit', 'founding', 'settlement']);
 const UNCAPPED = new Set(['repairs', 'treasury']);
-const DOMAIN = { mine: 'navigation', survey: 'navigation', sell: 'trading', route: 'trading', supply: 'trading', repair: 'repairs', yard: 'repairs' };
+const DOMAIN = { mine: 'navigation', salvage: 'navigation', survey: 'navigation', sell: 'trading', route: 'trading', supply: 'trading', repair: 'repairs', yard: 'repairs' };
+export const BREAK = { lowCharge: 0.25, lift: 0.2, top: 0.95 };
+export const breakLine = (charge = 1) => Math.min(BREAK.top, ariaMind.orders.repairBelow + ((Number(charge) || 0) < BREAK.lowCharge ? BREAK.lift : 0));
 export const domainOf = (action) => DOMAIN[action] ?? (String(action).startsWith('board:') || String(action).startsWith('chain:') ? 'navigation' : action);
 export const reserveFor = (domain) => (UNCAPPED.has(domain) ? 0 : INVESTMENT.has(domain) ? ariaMind.orders.reserve : WORKING_FLOOR);
 export const spendCap = (credits, action = 'trading') => { const d = domainOf(action); return Math.max(0, Math.min(UNCAPPED.has(d) ? Infinity : ariaMind.orders.maxPurchase, (Number(credits) || 0) - reserveFor(d))); };

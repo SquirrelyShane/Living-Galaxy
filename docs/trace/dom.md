@@ -132,7 +132,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 - dom.query — [js/ui/dockboot.js › mountDockBoot>$](../files/js/ui/dockboot.js.md#s-mountDockBoot-S) L44
 - dom.query — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L226
-- dom.query — [js/ui/tutorial.js › setHilite](../files/js/ui/tutorial.js.md#s-setHilite) L308
+- dom.query — [js/ui/tutorial.js › setHilite](../files/js/ui/tutorial.js.md#s-setHilite) L325
 
 ### `‹tag›`
 
@@ -152,11 +152,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[${…}]`
 
-- dom.query — [js/ui/tutorial.js › clearHilite](../files/js/ui/tutorial.js.md#s-clearHilite) L299
+- dom.query — [js/ui/tutorial.js › clearHilite](../files/js/ui/tutorial.js.md#s-clearHilite) L316
 
 ### `[data-cid]`
 
-- dom.query — [js/console/panels/nav.js › mountContacts](../files/js/console/panels/nav.js.md#s-mountContacts) L255
+- dom.query — [js/console/panels/nav.js › mountContacts](../files/js/console/panels/nav.js.md#s-mountContacts) L257
 
 ### `[data-focus="${…}"]`
 
@@ -174,7 +174,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-posture="${…}"]`
 
-- dom.query — [js/mission/run.js › EXEC.SET](../files/js/mission/run.js.md#s-EXEC-SET) L466
+- dom.query — [js/mission/run.js › EXEC.SET](../files/js/mission/run.js.md#s-EXEC-SET) L470
 
 ### `[data-proxy]`
 
@@ -186,7 +186,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `[data-wp]`
 
-- dom.query — [js/console/panels/nav.js › mountMarks](../files/js/console/panels/nav.js.md#s-mountMarks) L206
+- dom.query — [js/console/panels/nav.js › mountMarks](../files/js/console/panels/nav.js.md#s-mountMarks) L208
 
 ### `#cm-acts`
 
@@ -260,38 +260,38 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `#tutor-act`
 
-- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L284
-- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L329
+- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L301
+- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L346
 
 ### `#tutor-alt`
 
-- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L287
-- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L333
+- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L304
+- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L350
 
 ### `#tutor-head`
 
-- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L281
+- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L298
 
 ### `#tutor-n`
 
-- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L326
+- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L343
 
 ### `#tutor-next`
 
-- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L283
-- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L336
+- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L300
+- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L353
 
 ### `#tutor-skip`
 
-- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L282
+- dom.query — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L299
 
 ### `#tutor-text`
 
-- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L327
+- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L344
 
 ### `#tutor-title`
 
-- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L325
+- dom.query — [js/ui/tutorial.js › paint](../files/js/ui/tutorial.js.md#s-paint) L342
 
 ### `a`
 
@@ -316,11 +316,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `aux-auto`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L741
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L789
 
 ### `aux-auto-st`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L742
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L790
 
 ### `aux-comms`
 
@@ -473,7 +473,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 ### `button`
 
 - dom.query — [js/console/panels/crew.js › mountHouse>paintDrawn](../files/js/console/panels/crew.js.md#s-mountHouse-paintDrawn) L292
-- dom.query — [js/console/panels/nav.js › mountAutopilot](../files/js/console/panels/nav.js.md#s-mountAutopilot) L158
+- dom.query — [js/console/panels/nav.js › mountAutopilot](../files/js/console/panels/nav.js.md#s-mountAutopilot) L160
 - dom.query — [js/station/stationdeck.js](../files/js/station/stationdeck.js.md) L302
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L369
 - dom.query — [js/station/stationdeck.js › mountStationDeck](../files/js/station/stationdeck.js.md#s-mountStationDeck) L403
@@ -705,7 +705,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.create — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L254
 - dom.create — [js/ui/map.js › mountMap>drawDirectory](../files/js/ui/map.js.md#s-mountMap-drawDirectory) L451
 - dom.create — [js/ui/map.js › mountMap](../files/js/ui/map.js.md#s-mountMap) L489
-- dom.create — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L268
+- dom.create — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L285
 
 ### `g-cgo`
 
@@ -789,7 +789,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 - dom.id — [js/ui/chatbox.js › setSize](../files/js/ui/chatbox.js.md#s-setSize) L48
 - dom.id — [js/ui/hud.js › mountHud>paintClock](../files/js/ui/hud.js.md#s-mountHud-paintClock) L932
 - dom.id — [js/ui/hud.js › mountHud>paintAll](../files/js/ui/hud.js.md#s-mountHud-paintAll) L950
-- dom.id — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L266
+- dom.id — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L283
 
 ### `hud-clock`
 

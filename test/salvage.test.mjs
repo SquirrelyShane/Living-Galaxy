@@ -35,7 +35,9 @@ ship.hold={}; ship.cargoCap=1000; ship.mods.salvage=1;
 const port=stations.find(s=>!s.hostile);
 const offered=stations.flatMap(s=>boardFor(s)).filter(a=>a.type==='wreck'||a.type==='pod');
 assert.ok(offered.length);
-assert.ok(offered.every(a=>a.recovery));
+// 0.3.90: a pod is still a tractor recovery; a wreck is a hulk the rig is put on.
+assert.ok(offered.filter(a=>a.type==='pod').every(a=>a.recovery));
+assert.ok(offered.filter(a=>a.type==='wreck').every(a=>a.wreck && a.wreckAt && a.mech==='deliver' && a.good==='steel' && !a.recovery));
 const a={ id:'recovery-test',type:'wreck',mech:'visit',recovery:true,salvage:true,stationId:port.id,stationName:port.name,title:'Test wreck',good:'iron_ore',qty:6,pay:100,progress:0,leg:0,deadline:sim.time+100,targets:[{kind:'point',...ship.pos,dwell:6}],cat:'salvage' };
 contracts.active.push(a);
 ship.salvage=false; tickContracts(10); assert.equal(a.progress,0);

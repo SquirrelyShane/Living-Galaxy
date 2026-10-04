@@ -1,6 +1,6 @@
 # js/core/profile.js
 
-[index](../../../README.md) · 132 lines · 17 symbols · 0 imports · 2 importers
+[index](../../../README.md) · 135 lines · 18 symbols · 0 imports · 2 importers
 
 ## About
 
@@ -55,7 +55,7 @@ _none_
 
 ## Imported by
 
-- [js/net/account.js](../net/account.js.md) — `RUN_KEYS`, `RUN_PREFIXES`, `LEARNED_KEYS`, `PROFILE_KEY`
+- [js/net/account.js](../net/account.js.md) — `RUN_KEYS`, `RUN_PREFIXES`, `LEARNED_KEYS`, `LEARNED_PREFIXES`, `PROFILE_KEY`
 - [js/ui/creation.js](../ui/creation.js.md) — `startRun`
 
 ## Exports
@@ -63,6 +63,7 @@ _none_
 - [`SKY_KEYS`](#s-SKY_KEYS) · const — **no importer in scanned roots**
 - [`DEVICE_KEYS`](#s-DEVICE_KEYS) · const — **no importer in scanned roots**
 - [`LEARNED_KEYS`](#s-LEARNED_KEYS) · const — used by [js/net/account.js](../net/account.js.md)
+- [`LEARNED_PREFIXES`](#s-LEARNED_PREFIXES) · const — used by [js/net/account.js](../net/account.js.md)
 - [`RUN_KEYS`](#s-RUN_KEYS) · const — used by [js/net/account.js](../net/account.js.md)
 - [`RUN_PREFIXES`](#s-RUN_PREFIXES) · const — used by [js/net/account.js](../net/account.js.md)
 - [`PROFILE_KEY`](#s-PROFILE_KEY) · const — used by [js/net/account.js](../net/account.js.md)
@@ -112,33 +113,46 @@ const · **exported** · L6–17
 
 ### <a id="s-LEARNED_KEYS"></a>`LEARNED_KEYS`
 
-const · **exported** · L19–24
+const · **exported** · L19–22
 
 <!-- note:LEARNED_KEYS -->
-- L20 · `"lgaa.aria.v1",` — js/aria/aria.js — the preference net, learned from how you fly
-- L22 · `"lgaa.housebrain.v1",` — js/npc/captain.js — the NPC captain's neural core
-- L23 · `"lgaa.tape.v1",` — js/flight/recorder.js — the (state, action, outcome) tape the pilot leaves behind
+- L? · `"lgaa.aria.v1",` — js/aria/aria.js — the preference net, learned from how you fly
+- L20 · `"lgaa.housebrain.v1",` — js/npc/captain.js — the NPC captain's neural core
+- L21 · `"lgaa.tape.v1",` — js/flight/recorder.js — the (state, action, outcome) tape the pilot leaves behind
+<!-- /note -->
+
+### <a id="s-LEARNED_PREFIXES"></a>`LEARNED_PREFIXES`
+
+const · **exported** · L24–27
+
+<!-- note:LEARNED_PREFIXES -->
+0.3.90: ARIA's preference net and her mind are written per sky and per
+callsign — `lgaa.aria.v1:&lt;sky>:&lt;callsign>`. They were filed above as bare
+keys, which name nothing that is ever written, so the account carried an
+empty slot and the learning stayed on the device it was made on. They are a
+prefix family: they travel with the account, and a new run does not clear
+them.
 <!-- /note -->
 
 ### <a id="s-RUN_KEYS"></a>`RUN_KEYS`
 
-const · **exported** · L26–36
+const · **exported** · L29–39
 
 <!-- note:RUN_KEYS -->
-- L27 · `"lgaa-company",` — js/corp/company.js — the corporation, its name, book and board
-- L28 · `"lgaa-fleet",` — js/corp/fleet.js — owned hulls
-- L29 · `"lgaa-social",` — js/crew/family.js — the household: partners, children, standing
-- L30 · `"lgaa-save-v1",` — js/core/store.js — callsign, per-sky scanned/beacons/terraform
-- L31 · `"lgaa-save-v0",` — js/core/store.js — the legacy save it upgrades from
-- L32 · `"lgaa.con.recents.v1",` — js/console/console.js — command history
-- L33 · `"lgaa.tutorial.v1",` — js/ui/tutorial.js — which lessons are done
-- L34 · `"lgaa.tutorial.core.v1",` — js/ui/tutorial.js — the MISSION CORE walkthrough, shown once
-- L35 · `"lgaa.pilot.v1",` — js/flight/pilot.js — the pilot record: race, career, rank, skills, hulls, cover (0.3.42)
+- L30 · `"lgaa-company",` — js/corp/company.js — the corporation, its name, book and board
+- L31 · `"lgaa-fleet",` — js/corp/fleet.js — owned hulls
+- L32 · `"lgaa-social",` — js/crew/family.js — the household: partners, children, standing
+- L33 · `"lgaa-save-v1",` — js/core/store.js — callsign, per-sky scanned/beacons/terraform
+- L34 · `"lgaa-save-v0",` — js/core/store.js — the legacy save it upgrades from
+- L35 · `"lgaa.con.recents.v1",` — js/console/console.js — command history
+- L36 · `"lgaa.tutorial.v1",` — js/ui/tutorial.js — which lessons are done
+- L37 · `"lgaa.tutorial.core.v1",` — js/ui/tutorial.js — the MISSION CORE walkthrough, shown once
+- L38 · `"lgaa.pilot.v1",` — js/flight/pilot.js — the pilot record: race, career, rank, skills, hulls, cover (0.3.42)
 <!-- /note -->
 
 ### <a id="s-RUN_PREFIXES"></a>`RUN_PREFIXES`
 
-const · **exported** · L38–45
+const · **exported** · L41–48
 
 <!-- note:RUN_PREFIXES -->
 The other half, and the half that made this bug so hard to see.
@@ -159,24 +173,24 @@ So these are cleared by PREFIX, over the whole of localStorage. The trailing
 colon is deliberate: it matches `lgaa.missions.v1:Vex` and never some
 future `lgaa.missions.v1b`.
 
-- L39 · `"lgaa.upgrades.v1:",` — js/economy/upgrades.js — refits fitted
-- L40 · `"lgaa.robots.v1:",` — js/crew/robots.js — the robot roster
-- L41 · `"lgaa.missions.v1:",` — js/mission/script.js — mission board state
-- L42 · `"lgaa.mission.run.v1:",` — js/mission/run.js — a mission part-flown
-- L43 · `"lgaa.drones.v1:",` — js/drones/ops.js — drone standing orders
-- L44 · `"lgaa.fab.v1:",` — js/economy/fabricate.js — jobs on the ports' fabrication lines
+- L42 · `"lgaa.upgrades.v1:",` — js/economy/upgrades.js — refits fitted
+- L43 · `"lgaa.robots.v1:",` — js/crew/robots.js — the robot roster
+- L44 · `"lgaa.missions.v1:",` — js/mission/script.js — mission board state
+- L45 · `"lgaa.mission.run.v1:",` — js/mission/run.js — a mission part-flown
+- L46 · `"lgaa.drones.v1:",` — js/drones/ops.js — drone standing orders
+- L47 · `"lgaa.fab.v1:",` — js/economy/fabricate.js — jobs on the ports' fabrication lines
 <!-- /note -->
 
 ### <a id="s-PROFILE_KEY"></a>`PROFILE_KEY`
 
-const · **exported** · L47–47
+const · **exported** · L50–50
 
 <!-- note:PROFILE_KEY -->
 <!-- /note -->
 
 ### <a id="s-store"></a>`store()`
 
-function · L49–51
+function · L52–54
 
 - called by: [`clearRun`](#s-clearRun) · [`forgetRun`](#s-forgetRun) · [`read`](#s-read) · [`write`](#s-write)
 
@@ -185,29 +199,29 @@ function · L49–51
 
 ### <a id="s-read"></a>`read()`
 
-function · L53–59
+function · L56–62
 
 - calls: [`store`](#s-store)
 - called by: [`profile`](#s-profile) · [`renameRun`](#s-renameRun) · [`runCallsign`](#s-runCallsign) · [`runId`](#s-runId) · [`startRun`](#s-startRun)
 
 <!-- note:read -->
-- L57 · `} catch {` — corrupt or absent
+- L60 · `} catch {` — corrupt or absent
 <!-- /note -->
 
 ### <a id="s-write"></a>`write(p)`
 
-function · L61–63
+function · L64–66
 
 - calls: [`store`](#s-store)
 - called by: [`renameRun`](#s-renameRun) · [`startRun`](#s-startRun)
 
 <!-- note:write -->
-- L62 · `try { store()?.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {` — quota, or no window
+- L65 · `try { store()?.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {` — quota, or no window
 <!-- /note -->
 
 ### <a id="s-mintId"></a>`mintId()`
 
-function · L65–69
+function · L68–72
 
 - called by: [`startRun`](#s-startRun)
 
@@ -217,7 +231,7 @@ A short, sortable, collision-proof id. Not a seed — nothing is rolled off it.
 
 ### <a id="s-profile"></a>`profile()`
 
-function · **exported** · L71–73
+function · **exported** · L74–76
 
 - calls: [`read`](#s-read)
 
@@ -227,7 +241,7 @@ The run in progress, or null before a pilot has ever been made on this device.
 
 ### <a id="s-runId"></a>`runId()`
 
-function · **exported** · L75–77
+function · **exported** · L78–80
 
 - calls: [`read`](#s-read)
 
@@ -237,7 +251,7 @@ The current run's id, or "" if there is not one yet.
 
 ### <a id="s-runCallsign"></a>`runCallsign()`
 
-function · **exported** · L79–81
+function · **exported** · L82–84
 
 - calls: [`read`](#s-read)
 
@@ -247,7 +261,7 @@ The callsign the current run was created under.
 
 ### <a id="s-clearRun"></a>`clearRun()`
 
-function · **exported** · L83–104
+function · **exported** · L86–107
 
 - calls: [`store`](#s-store)
 - called by: [`forgetRun`](#s-forgetRun) · [`startRun`](#s-startRun)
@@ -258,17 +272,17 @@ learned nets are left alone; so is the CRADLE, which is the sky's, not
 the pilot's. Returns the keys that were actually holding something, which
 is what makes this testable rather than hopeful.
 
-- L91 · `} catch {` — ignore one bad key rather than abandon the sweep
-- L93 · `const doomed = [];` — the callsign-suffixed families: enumerate rather than guess the suffix.
+- L94 · `} catch {` — ignore one bad key rather than abandon the sweep
+- L96 · `const doomed = [];` — the callsign-suffixed families: enumerate rather than guess the suffix.
   Collect first, delete after — removing while iterating an index-based
   Storage renumbers it underneath you and skips every other key.
-- L99 · `} catch {` — a Storage without length/key: the fixed keys above are still swept
-- L101 · `try { ls.removeItem(k); had.push(k); } catch {` — ignore
+- L102 · `} catch {` — a Storage without length/key: the fixed keys above are still swept
+- L104 · `try { ls.removeItem(k); had.push(k); } catch {` — ignore
 <!-- /note -->
 
 ### <a id="s-startRun"></a>`startRun(callsign)`
 
-function · **exported** · L106–118
+function · **exported** · L109–121
 
 - calls: [`clearRun`](#s-clearRun) · [`mintId`](#s-mintId) · [`read`](#s-read) · [`write`](#s-write)
 - called by: [`renameRun`](#s-renameRun) · [`mountCreation>finish`](../ui/creation.js.md#s-mountCreation-finish) _js/ui/creation.js_
@@ -284,7 +298,7 @@ creation is swept away behind it.
 
 ### <a id="s-renameRun"></a>`renameRun(callsign)`
 
-function · **exported** · L120–126
+function · **exported** · L123–129
 
 - calls: [`read`](#s-read) · [`startRun`](#s-startRun) · [`write`](#s-write)
 
@@ -294,12 +308,12 @@ Rename the run in place — the pilot is the same person, the name changed.
 
 ### <a id="s-forgetRun"></a>`forgetRun()`
 
-function · **exported** · L128–132
+function · **exported** · L131–135
 
 - calls: [`clearRun`](#s-clearRun) · [`store`](#s-store)
 
 <!-- note:forgetRun -->
 Console/testing: forget the run entirely, profile record and all.
 
-- L130 · `try { store()?.removeItem(PROFILE_KEY); } catch {` — ignore
+- L133 · `try { store()?.removeItem(PROFILE_KEY); } catch {` — ignore
 <!-- /note -->

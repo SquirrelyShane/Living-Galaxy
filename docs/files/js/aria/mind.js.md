@@ -1,6 +1,6 @@
 # js/aria/mind.js
 
-[index](../../../README.md) · 106 lines · 26 symbols · 0 imports · 11 importers
+[index](../../../README.md) · 108 lines · 28 symbols · 0 imports · 11 importers
 
 ## About
 
@@ -16,8 +16,8 @@ _none_
 
 - [js/aria/aria.js](aria.js.md) — `ariaMind`, `resetMind`, `saveMind`, `loadMind`, `mindKey`, `bindPeopleLookup`, `explanationPacket`
 - [js/aria/company.js](company.js.md) — `authorize`, `remember`
-- [js/aria/pilot.js](pilot.js.md) — `ariaMind`, `authorize`, `contextualScore`, `decideMind`, `policyScore`, `learnOutcome`
-- [js/aria/play.js](play.js.md) — `ariaMind`, `authorize`, `decideMind`, `policyScore`, `learnOutcome`, `spendCap`
+- [js/aria/pilot.js](pilot.js.md) — `ariaMind`, `authorize`, `contextualScore`, `decideMind`, `policyScore`, `learnOutcome`, `breakLine`
+- [js/aria/play.js](play.js.md) — `ariaMind`, `authorize`, `decideMind`, `policyScore`, `learnOutcome`, `spendCap`, `breakLine`
 - [js/console/panels/aria-core.js](../console/panels/aria-core.js.md) — `ariaMind`, `setOrders`, `personMemory`, `explanationPacket`
 - [js/flight/recorder.js](../flight/recorder.js.md) — `ariaMind`, `saveMind`, `learnTape`
 - [js/mission/run.js](../mission/run.js.md) — `authorize`
@@ -29,6 +29,8 @@ _none_
 ## Exports
 
 - [`WORKING_FLOOR`](#s-WORKING_FLOOR) · const — used by test/ariamind.test.mjs
+- [`BREAK`](#s-BREAK) · const — **no importer in scanned roots**
+- [`breakLine`](#s-breakLine) · function — used by [js/aria/pilot.js](pilot.js.md), [js/aria/play.js](play.js.md)
 - [`domainOf`](#s-domainOf) · function — **no importer in scanned roots**
 - [`reserveFor`](#s-reserveFor) · function — **no importer in scanned roots**
 - [`spendCap`](#s-spendCap) · function — used by [js/aria/play.js](play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), test/ariamind.test.mjs
@@ -51,8 +53,8 @@ _none_
 
 ## Effects
 
-- **storage.get** — `‹key›` (loadMind:19)
-- **storage.set** — `‹key›` (saveMind:15)
+- **storage.get** — `‹key›` (loadMind:21)
+- **storage.set** — `‹key›` (saveMind:17)
 
 ## Symbols
 
@@ -111,9 +113,30 @@ const · L6–6
 <!-- note:DOMAIN -->
 <!-- /note -->
 
+### <a id="s-BREAK"></a>`BREAK`
+
+const · **exported** · L7–7
+
+<!-- note:BREAK -->
+0.3.90 — where "it is going badly" starts. The captain's repair line is the
+hull she breaks off at with contacts close. With the battery under a quarter
+the mains are about to go cold and the run home is a coast, so the line is
+lifted: at the default 55% a flat-battery hull was reaching the yard on 18%,
+and the salvage hull on 2%.
+<!-- /note -->
+
+### <a id="s-breakLine"></a>`breakLine(charge=)`
+
+function · **exported** · L8–8
+
+- called by: [`shouldBreakOff`](pilot.js.md#s-shouldBreakOff) _js/aria/pilot.js_ · [`shouldBreakOff`](play.js.md#s-shouldBreakOff) _js/aria/play.js_
+
+<!-- note:breakLine -->
+<!-- /note -->
+
 ### <a id="s-domainOf"></a>`domainOf(action)`
 
-function · **exported** · L7–7
+function · **exported** · L9–9
 
 - called by: [`authorize`](#s-authorize) · [`spendCap`](#s-spendCap)
 
@@ -122,7 +145,7 @@ function · **exported** · L7–7
 
 ### <a id="s-reserveFor"></a>`reserveFor(domain)`
 
-function · **exported** · L8–8
+function · **exported** · L10–10
 
 - called by: [`authorize`](#s-authorize) · [`spendCap`](#s-spendCap)
 
@@ -131,7 +154,7 @@ function · **exported** · L8–8
 
 ### <a id="s-spendCap"></a>`spendCap(credits, action=)`
 
-function · **exported** · L9–9
+function · **exported** · L11–11
 
 - calls: [`domainOf`](#s-domainOf) · [`reserveFor`](#s-reserveFor)
 - called by: [`purse`](play.js.md#s-purse) _js/aria/play.js_ · [`makeTradeOps.BUY`](../mission/tradeops.js.md#s-makeTradeOps-BUY) _js/mission/tradeops.js_
@@ -143,7 +166,7 @@ planners budget with it so a plan is never refused at the till.
 
 ### <a id="s-ariaMind"></a>`ariaMind`
 
-const · **exported** · L10–10
+const · **exported** · L12–12
 
 - calls: [`fresh`](#s-fresh)
 
@@ -152,7 +175,7 @@ const · **exported** · L10–10
 
 ### <a id="s-resolver"></a>`resolver()`
 
-function · L11–11
+function · L13–13
 
 - called by: [`personMemory`](#s-personMemory)
 
@@ -161,7 +184,7 @@ function · L11–11
 
 ### <a id="s-bindPeopleLookup"></a>`bindPeopleLookup(fn)`
 
-function · **exported** · L12–12
+function · **exported** · L14–14
 
 - called by: [`wireAria`](aria.js.md#s-wireAria) _js/aria/aria.js_
 
@@ -170,7 +193,7 @@ function · **exported** · L12–12
 
 ### <a id="s-resetMind"></a>`resetMind(identity=)`
 
-function · **exported** · L13–13
+function · **exported** · L15–15
 
 - calls: [`fresh`](#s-fresh)
 - called by: [`resetAria`](aria.js.md#s-resetAria) _js/aria/aria.js_ · [`loadMind`](#s-loadMind)
@@ -180,7 +203,7 @@ function · **exported** · L13–13
 
 ### <a id="s-mindKey"></a>`mindKey(sky, captain)`
 
-function · **exported** · L14–14
+function · **exported** · L16–16
 
 - called by: [`loadAria`](aria.js.md#s-loadAria) _js/aria/aria.js_ · [`resetAria`](aria.js.md#s-resetAria) _js/aria/aria.js_ · [`saveAria`](aria.js.md#s-saveAria) _js/aria/aria.js_
 
@@ -189,7 +212,7 @@ function · **exported** · L14–14
 
 ### <a id="s-saveMind"></a>`saveMind(key)`
 
-function · **exported** · L15–15
+function · **exported** · L17–17
 
 - called by: [`saveAria`](aria.js.md#s-saveAria) _js/aria/aria.js_ · [`learnTape`](#s-learnTape) · [`saveTape`](../flight/recorder.js.md#s-saveTape) _js/flight/recorder.js_
 - effects: storage.set `‹key›`
@@ -199,20 +222,20 @@ function · **exported** · L15–15
 
 ### <a id="s-loadMind"></a>`loadMind(key)`
 
-function · **exported** · L16–29
+function · **exported** · L18–31
 
 - calls: [`resetMind`](#s-resetMind) · [`setOrders`](#s-setOrders)
 - called by: [`loadAria`](aria.js.md#s-loadAria) _js/aria/aria.js_
 - effects: storage.get `‹key›`
 
 <!-- note:loadMind -->
-- L23 · `if (raw.v === 2) for (const k of Object.keys(ariaMind.authority)) if (typeof raw.authority` — A v1 mind never recorded a captain's choice separately from the withheld
+- L25 · `if (raw.v === 2) for (const k of Object.keys(ariaMind.authority)) if (typeof raw.authority` — A v1 mind never recorded a captain's choice separately from the withheld
   defaults it shipped with, so its authority block is dropped once.
 <!-- /note -->
 
 ### <a id="s-setOrders"></a>`setOrders(patch)`
 
-function · **exported** · L30–36
+function · **exported** · L32–38
 
 - calls: [`clamp`](#s-clamp) ×2
 - called by: [`loadMind`](#s-loadMind) · [`mountCore`](../console/panels/aria-core.js.md#s-mountCore) _js/console/panels/aria-core.js_ ×3
@@ -222,7 +245,7 @@ function · **exported** · L30–36
 
 ### <a id="s-remember"></a>`remember({…})`
 
-function · **exported** · L37–40
+function · **exported** · L39–42
 
 - calls: [`clamp`](#s-clamp)
 - called by: [`considerHire`](company.js.md#s-considerHire) _js/aria/company.js_ · [`considerLayoff`](company.js.md#s-considerLayoff) _js/aria/company.js_ · [`considerSettle`](company.js.md#s-considerSettle) _js/aria/company.js_ · [`learnOutcome`](#s-learnOutcome) · [`learnTape`](#s-learnTape)
@@ -232,7 +255,7 @@ function · **exported** · L37–40
 
 ### <a id="s-personMemory"></a>`personMemory(id)`
 
-function · **exported** · L41–41
+function · **exported** · L43–43
 
 - calls: [`resolver`](#s-resolver)
 - called by: [`mountCore`](../console/panels/aria-core.js.md#s-mountCore) _js/console/panels/aria-core.js_
@@ -242,18 +265,18 @@ function · **exported** · L41–41
 
 ### <a id="s-learnTape"></a>`learnTape(r)`
 
-function · **exported** · L42–59
+function · **exported** · L44–61
 
 - calls: [`clamp`](#s-clamp) ×3 · [`remember`](#s-remember) · [`saveMind`](#s-saveMind)
 - called by: [`settle`](../flight/recorder.js.md#s-settle) _js/flight/recorder.js_
 
 <!-- note:learnTape -->
-- L44 · `` const key = `${r.by}:${r.kind}:${r.act}`; `` — Thirty-second deltas are associated observations, not causal action rewards.
+- L46 · `` const key = `${r.by}:${r.kind}:${r.act}`; `` — Thirty-second deltas are associated observations, not causal action rewards.
 <!-- /note -->
 
 ### <a id="s-contextualScore"></a>`contextualScore(action, state)`
 
-function · **exported** · L60–67
+function · **exported** · L62–69
 
 - calls: [`clamp`](#s-clamp) ×2
 - called by: [`decideMind`](#s-decideMind) · [`policyScore`](#s-policyScore) · [`planJob`](pilot.js.md#s-planJob) _js/aria/pilot.js_
@@ -263,7 +286,7 @@ function · **exported** · L60–67
 
 ### <a id="s-authorize"></a>`authorize(action, {…}=)`
 
-function · **exported** · L68–77
+function · **exported** · L70–79
 
 - calls: [`domainOf`](#s-domainOf) · [`reserveFor`](#s-reserveFor)
 - called by: [`considerFound`](company.js.md#s-considerFound) _js/aria/company.js_ · [`considerHire`](company.js.md#s-considerHire) _js/aria/company.js_ · [`considerLayoff`](company.js.md#s-considerLayoff) _js/aria/company.js_ · [`considerSettle`](company.js.md#s-considerSettle) _js/aria/company.js_ · [`considerTreasury`](company.js.md#s-considerTreasury) _js/aria/company.js_ · [`planJob`](pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`registerAriaOps`](pilot.js.md#s-registerAriaOps) _js/aria/pilot.js_ · [`registerBuildOp`](pilot.js.md#s-registerBuildOp) _js/aria/pilot.js_ · [`registerFabOp`](pilot.js.md#s-registerFabOp) _js/aria/pilot.js_ · [`registerRefitOp`](pilot.js.md#s-registerRefitOp) _js/aria/pilot.js_ · [`tickAriaPilot`](pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`decide`](play.js.md#s-decide) _js/aria/play.js_ · [`resumeHeld`](play.js.md#s-resumeHeld) _js/aria/play.js_ · [`startJob`](play.js.md#s-startJob) _js/aria/play.js_ · [`stepPlay`](play.js.md#s-stepPlay) _js/aria/play.js_ ×2 · [`tickMission`](../mission/run.js.md#s-tickMission) _js/mission/run.js_ · [`makeTradeOps.BUY`](../mission/tradeops.js.md#s-makeTradeOps-BUY) _js/mission/tradeops.js_
@@ -273,7 +296,7 @@ function · **exported** · L68–77
 
 ### <a id="s-decideMind"></a>`decideMind({…})`
 
-function · **exported** · L78–86
+function · **exported** · L80–88
 
 - calls: [`clamp`](#s-clamp) ×2 · [`contextualScore`](#s-contextualScore)
 - called by: [`planJob`](pilot.js.md#s-planJob) _js/aria/pilot.js_ · [`decide`](play.js.md#s-decide) _js/aria/play.js_
@@ -283,7 +306,7 @@ function · **exported** · L78–86
 
 ### <a id="s-explanationPacket"></a>`explanationPacket()`
 
-function · **exported** · L87–87
+function · **exported** · L89–89
 
 - called by: [`mountCore`](../console/panels/aria-core.js.md#s-mountCore) _js/console/panels/aria-core.js_
 
@@ -293,7 +316,7 @@ This packet deliberately contains no executor, callbacks, tools or ship referenc
 
 ### <a id="s-policyScore"></a>`policyScore(action, base, state=)`
 
-function · **exported** · L89–98
+function · **exported** · L91–100
 
 - calls: [`clamp`](#s-clamp) · [`contextualScore`](#s-contextualScore)
 - called by: [`rawPlanJob>weight`](pilot.js.md#s-rawPlanJob-weight) _js/aria/pilot.js_ · [`weightOf`](play.js.md#s-weightOf) _js/aria/play.js_
@@ -303,7 +326,7 @@ function · **exported** · L89–98
 
 ### <a id="s-learnOutcome"></a>`learnOutcome(action, secs, cr, ok, at=)`
 
-function · **exported** · L100–106
+function · **exported** · L102–108
 
 - calls: [`remember`](#s-remember)
 - called by: [`tickAriaPilot`](pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`brainNote`](play.js.md#s-brainNote) _js/aria/play.js_

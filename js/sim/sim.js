@@ -85,7 +85,7 @@ import { fx as upgradeFx, loadUpgrades, upgradeResists, resistKey } from "../eco
 import { tickPatchDrone, hullMaxOf } from "../flight/repair.js";
 import { bookRevenue, loadCompany, tickCompany, treasuryPay } from "../corp/company.js";
 import { resetHousehold } from "../crew/family.js";
-import { noteKill, noteDestroyed, resetContracts, tickContracts, owedCargo } from "../economy/contracts.js";
+import { noteKill, noteDestroyed, noteSalvaged, resetContracts, tickContracts, owedCargo } from "../economy/contracts.js";
 import { resetFleet, tickFleet } from "../corp/fleet.js";
 import { ariaHooks, captain, retakeCommand, tickCaptain } from "../npc/captain.js";
 import { crewEffects, updateCrewMods } from "../npc/crewfx.js";
@@ -217,6 +217,7 @@ export const sim = {
   domDist: 0,
   altitude: 0,
   frameVel: { x: 0, y: 0, z: 0 },
+  apFrame: null,
   onSystemChange: () => {},
 };
 
@@ -488,11 +489,12 @@ function wireRigHooks() {
     if (out.lost) bits.push(`${out.lost} parts lost to the cut`);
     if (out.cargo) bits.push(`${out.cargo.qty} ${goodName(out.cargo.id)}`);
     logEvent(`Rig: ${s.name} off the ${h.name} — ${bits.join(", ")}`, "cargo");
+    if (captain.holder === "player" && !sim.handsOff) ariaHooks.onPlayerJob?.("salvage", 1);
     if (!sim.ship.salvage) setNoticeAbout(`The ${s.name} is cut loose and drifting. SALVG reels it in.`, "RIG");
   };
   rigHooks.onRecorder = (h, kept) => {
     if (kept) {
-      sim.recorders.push({ vessel: h.vessel, name: h.vesselName, owner: h.owner ?? null, at: sim.time });
+      sim.recorders.push({ vessel: h.vessel, name: h.vesselName, owner: h.owner ?? null, tier: h.tier ?? "A", at: sim.time });
       work("law", 2);
       setNoticeAbout(`Flight recorder off the ${h.vesselName} is aboard, intact.`, "RIG");
       logEvent(`Recovered the ${h.vesselName}'s flight recorder`, "cargo");
@@ -1190,6 +1192,7 @@ export function launchSim(callsign, seed) {
   loadUpgrades();
   sim.color = hashHue(callsign);
   sim.timeScale = 1;
+  sim.apFrame = null;
   sim.warp.state = "idle";
   sim.warp.cool = 0;
   sim.trauma = 0;
@@ -3115,7 +3118,27 @@ export function takeSalvageContract(bodyId, rate) {
   return sim.contract;
 }
 
+export const RECORDER = { base: 350, perTier: 240 };
+export const recorderValue = (r) => RECORDER.base + RECORDER.perTier * Math.max(0, "ABCDEFG".indexOf(r?.tier ?? "A"));
+
+export function handInRecorders() {
+  const st = sim.ship.dockedAt ? stationById(sim.ship.dockedAt) : null;
+  if (!st || !sim.recorders.length || (st.hostile && !st.claimed) || st.sector === "pirate") return 0;
+  const n = sim.recorders.length;
+  let pay = 0;
+  for (const r of sim.recorders) pay += recorderValue(r);
+  sim.recorders.length = 0;
+  sim.ship.credits += pay;
+  bookRevenue("salvage", pay, `${n} flight recorder${n === 1 ? "" : "s"} to the adjuster at ${st.name}`);
+  work("law", 2 * n);
+  logEvent(`Adjuster at ${st.name} pays ${pay.toLocaleString()} cr for ${n} flight recorder${n === 1 ? "" : "s"}`, "trade");
+  sim.toast = `Flight recorder${n === 1 ? "" : "s"}: +${pay.toLocaleString()} cr`;
+  sim.lastToastAt = sim.time;
+  return pay;
+}
+
 export function stepContract() {
+  handInRecorders();
   const c = sim.contract;
   if (!c) return;
   if (sim.time > c.until) {
@@ -3152,6 +3175,7 @@ function stepSalvage(dt) {
       const mass = chunkMass(c);
       const recovered = addCargo(ship, c.good ?? "iron_ore", mass);
       if (recovered <= 0) continue;
+      if (c.salvage) noteSalvaged(c.good, recovered, c.from ?? null);
       work("salvage", recovered * 0.5);
       work("heavyOps", recovered * 0.2);
       const con = sim.contract;
@@ -3349,6 +3373,7 @@ function stepShip(a, dt) {
     targetVelocity(sim.lock.kind, sim.lock.id, _matchVel);
     frame = _matchVel;
   }
+  if (!onLock && sim.apFrame && sim.apFrame.until > sim.time) frame = sim.apFrame;
   sim.dockPort = dockPortFor(ship);
   if (!onLock && sim.dockPort && !tractor.active) {
     _matchVel.x = sim.dockPort.vx ?? 0; _matchVel.y = sim.dockPort.vy ?? 0; _matchVel.z = sim.dockPort.vz ?? 0;
@@ -3741,6 +3766,7 @@ function onKill(c, shot = null) {
     return;
   }
   if (c.kind === "peer") { noteKillBySelf({ peer: true, t: sim.time }); return; }
+  if (c.kind === "drone" && !c.stationId && !c.corpDrone) noteDestroyed({ rogue: true });
   if (c.stationId) {
     const st = stationById(c.stationId);
     const co = st ? corpOfStation(st) : null;

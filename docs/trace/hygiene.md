@@ -129,7 +129,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
 - [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L77
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2149
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2152
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33
@@ -148,7 +148,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
 
-## Exports with no importer (926)
+## Exports with no importer (937)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
@@ -157,6 +157,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `ariaNoteDecision`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `wireAriaHooks`
 - [js/aria/company.js](../files/js/aria/company.js.md) `wageOf`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `BREAK`
 - [js/aria/mind.js](../files/js/aria/mind.js.md) `domainOf`
 - [js/aria/mind.js](../files/js/aria/mind.js.md) `reserveFor`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `ARIA_JOBS`
@@ -438,6 +439,8 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/drones/ops.js](../files/js/drones/ops.js.md) `resetDroneOps`
 - [js/drones/roles.js](../files/js/drones/roles.js.md) `ROLE_IDS`
 - [js/economy/chains.js](../files/js/economy/chains.js.md) `chainState`
+- [js/economy/contracts.js](../files/js/economy/contracts.js.md) `SALVAGE_PAY`
+- [js/economy/contracts.js](../files/js/economy/contracts.js.md) `WRECK`
 - [js/economy/contracts.js](../files/js/economy/contracts.js.md) `anchorFor`
 - [js/economy/contracts.js](../files/js/economy/contracts.js.md) `visitRadius`
 - [js/economy/economy.js](../files/js/economy/economy.js.md) `SHORT_FRAC`
@@ -520,6 +523,14 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/interior/interior.js](../files/js/interior/interior.js.md) `closeInterior`
 - [js/mission/detour.js](../files/js/mission/detour.js.md) `LEG`
 - [js/mission/run.js](../files/js/mission/run.js.md) `clearRun`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `rigModeFor`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `forgetSkipped`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `skipHulk`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `rigRate`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `cutSeconds`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `hulkWorth`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `hotHulk`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `salvageReport`
 - [js/mission/script.js](../files/js/mission/script.js.md) `REF_KINDS`
 - [js/net/account.js](../files/js/net/account.js.md) `SNAP_VERSION`
 - [js/net/account.js](../files/js/net/account.js.md) `SLOT`

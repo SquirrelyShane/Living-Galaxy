@@ -127,7 +127,7 @@ tickSim(1 / 60);
 
 /* ---- the reason it exists -------------------------------------------------- */
 {
-  ok(presets().every((p) => p.builtin), "the four presets are builtin, so a coreless pilot is not left with nothing");
+  ok(presets().every((p) => p.builtin), "the presets are builtin, so a coreless pilot is not left with nothing");
   ok(hasUpgrade("nav_core"), "and the track's end state is a core that is really aboard");
 }
 

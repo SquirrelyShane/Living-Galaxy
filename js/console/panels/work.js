@@ -82,6 +82,7 @@ function targetOptions(op) {
   if (!spec?.target) return out;
   if (op === "DOCK") out.push({ kind: "best-buyer", name: null }, { kind: "best-smelter" }, { kind: "nearest-port" }, { kind: "locked" });
   else if (op === "MINE") out.push({ kind: "seam" }, { kind: "here" }, { kind: "locked" });
+  else if (op === "SALVAGE") return [{ kind: "best-hulk" }, { kind: "locked" }];
   else if (op === "SURVEY") out.push({ kind: "body", name: "nearest unsurveyed" }, { kind: "locked" });
   else out.push({ kind: "locked" }, { kind: "here" }, { kind: "best-buyer" }, { kind: "nearest-port" });
   if (op !== "DOCK" && op !== "MINE") for (const b of BODIES) if (b.kind !== "star") out.push({ kind: "body", id: b.id, name: b.name });
@@ -139,6 +140,10 @@ function stepSheet(m, ix, render) {
   if (s.op === "SELL" || s.op === "STASH") {
     b.append(el("p", "tlab", "What"));
     b.append(chips([{ id: "ore", label: "ORE" }, { id: "all", label: "ALL" }], { value: s.args?.what ?? "ore", onPick: (w) => { s.args = { ...s.args, what: w }; render(); } }).row);
+  }
+  if (s.op === "SALVAGE") {
+    b.append(el("p", "tlab", "Rig · STRIP keeps parts and the recorder, CUT is quicker, AUTO cuts only when hostiles are close"));
+    b.append(chips([{ id: "strip", label: "STRIP" }, { id: "cut", label: "CUT" }, { id: "auto", label: "AUTO" }], { value: s.args?.mode ?? "strip", onPick: (w) => { s.args = { ...s.args, mode: w }; render(); } }).row);
   }
   if (s.op === "BUY") {
     b.append(el("p", "tlab", "Good · quantity"));

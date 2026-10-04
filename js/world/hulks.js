@@ -1,6 +1,6 @@
 import { BODIES, bodyById, bodyPosition, bodyVelocity } from "./bodies.js";
 import { rngFromSeed } from "./generate.js";
-import { shipById, DEFAULT_SHIP_ID } from "../ships/shipdb.js";
+import { shipById, DEFAULT_SHIP_ID, SHIP_DB } from "../ships/shipdb.js";
 import { baseValue } from "../economy/materials.js";
 
 export const HULK = {
@@ -18,6 +18,7 @@ export const HULK = {
   driftTau: 45,
   again: 30,
   sweep: 2,
+  afterJob: 600,
 };
 
 export const HULK_SECTIONS = ["bridge", "engine block", "hold", "spine", "reactor deck", "bow", "port quarter", "starboard quarter"];
@@ -57,6 +58,18 @@ export function hulkById(id) {
   return null;
 }
 
+export const plateOf = (def) => HULK.plateK * Math.pow(Math.max(1, def?.stats?.massT ?? 12), HULK.plateExp);
+
+export function hullForPlate(qty, margin = 1.2) {
+  let best = null, big = null;
+  for (const def of SHIP_DB) {
+    const p = plateOf(def);
+    if (!big || p > big.p) big = { def, p };
+    if (p >= qty * margin && (!best || p < best.p)) best = { def, p };
+  }
+  return (best ?? big)?.def ?? shipById(DEFAULT_SHIP_ID);
+}
+
 export function sectionCount(tier) {
   const i = TIERS.indexOf(tier);
   return Math.max(2, Math.min(HULK_SECTIONS.length, 2 + (i < 0 ? 0 : i)));
@@ -91,7 +104,12 @@ function buildSections(def, cargo, rnd, intact) {
   return sections;
 }
 
-function frameFor(x, y, z, time) {
+function frameFor(x, y, z, time, parent = null) {
+  const host = parent ? bodyById(parent) : null;
+  if (host && !host.shattered && !host.collapsed && host.kind !== "star") {
+    bodyPosition(host.id, time, _bp);
+    return { parent: host.id, ox: x - _bp.x, oy: y - _bp.y, oz: z - _bp.z };
+  }
   let best = null;
   let ox = x, oy = y, oz = z;
   for (const b of BODIES) {
@@ -103,15 +121,19 @@ function frameFor(x, y, z, time) {
   return { parent: best?.id ?? null, ox, oy, oz };
 }
 
+const busy = (h, time) => (h.busyUntil ?? -Infinity) > time;
+
 function dropOldest() {
-  const i = hulks.findIndex((h) => !h.pinned);
+  const time = sim0.time ?? 0;
+  let i = hulks.findIndex((h) => !h.pinned && !busy(h, time));
+  if (i < 0) i = hulks.findIndex((h) => !h.pinned);
   if (i < 0) return false;
   hulks[i].dead = true;
   hulks.splice(i, 1);
   return true;
 }
 
-export function spawnHulk(v, { source = "kill", owner = null, at = null, pinned = false, intact = null } = {}) {
+export function spawnHulk(v, { source = "kill", owner = null, at = null, pinned = false, intact = null, parent = null } = {}) {
   if (!v || !Number.isFinite(v.x) || !Number.isFinite(v.y) || !Number.isFinite(v.z)) return null;
   const time = at ?? sim0.time ?? 0;
   const vessel = v.id ?? null;
@@ -125,7 +147,7 @@ export function spawnHulk(v, { source = "kill", owner = null, at = null, pinned 
   const sp = Math.hypot(vx, vy, vz);
   if (!Number.isFinite(sp)) { vx = 0; vy = 0; vz = 0; }
   else if (sp > HULK.driftMax) { const k = HULK.driftMax / sp; vx *= k; vy *= k; vz *= k; }
-  const frame = frameFor(v.x, v.y, v.z, time);
+  const frame = frameFor(v.x, v.y, v.z, time, parent);
   const h = {
     id: `hk${seq++}`,
     name: `${v.name ?? def.name} hulk`,
@@ -175,7 +197,7 @@ export function stepHulks(dt) {
   for (let i = hulks.length - 1; i >= 0; i--) {
     const h = hulks[i];
     h.age += dt;
-    if (!h.pinned && h.age > h.life) { h.dead = true; hulks.splice(i, 1); continue; }
+    if (!h.pinned && h.age > h.life && !busy(h, time)) { h.dead = true; hulks.splice(i, 1); continue; }
     if (h.vx || h.vy || h.vz) {
       h.ox += h.vx * dt; h.oy += h.vy * dt; h.oz += h.vz * dt;
       h.vx *= k; h.vy *= k; h.vz *= k;

@@ -3,7 +3,7 @@
 From 0.3.85, only careers with an open state and all nine readiness items
 can be selected for new pilots or new transfers. Unfinished careers remain
 visible but greyed out. Existing pilots and previously held careers are retained.
-Mining is currently the only completed career; Salvage recovery is in development.
+Mining and, from 0.3.90, Salvage are the completed careers.
 
 The switch is `js/careers/status.js`, and `test/careerstatus.test.mjs` guards it.
 
@@ -23,6 +23,12 @@ items gate new enrollment as of 0.3.85.
 | `aria` | ARIA can fly the verb | `aria-play --career mining` |
 | `bench` | `aria-bench` cr/min within ±30% of Mining | baseline |
 | `smoke` | A browser smoke that runs the whole loop | smoke-mining |
+
+Salvage's nine, as of 0.3.90: the rig (`verb`); hulks (`site`); wreck and plate
+orders filled only by plate off a hulk (`board`); cutting trains Salvage and
+Hullcraft, a recorder trains Law (`feeds`); the RIG branch (`tutorial`); tractor,
+rig on STRIP and `hullTune.rig` on the salvage line (`hull`); the SALVAGE op and
+both ARIAs' planners (`aria`); 0.87× Mining (`bench`); smoke-salvage (`smoke`).
 
 ## Baseline audit at 0.3.80 (retained for 0.3.83)
 
@@ -83,7 +89,8 @@ when their scope is ready.
 | **0.3.84** | **Dead Hulls: Recovery** | Salvage | Powered wreck/pod recovery at contract waypoints; capacity-safe partial collection; training from actual recovered material; tutorial guidance |
 | **0.3.86** | **Dead Hulls: Hulks** | Salvage | Destroyed hulls leave sectioned hulks (plate, parts, recorder, surviving cargo); lock, match, anchor and assay; no cutting yet |
 | **0.3.87** | **Dead Hulls: The Rig** | Salvage | The salvage rig (CUT / STRIP) works hulk sections and sheds salvage for the tractor; own power line; trains Salvage, Hullcraft and Law |
-| Next Salvage slices | Dead Hulls | Salvage | Persistent shared combat/cataclysm hulks; visible cutting into plate, parts and black boxes; ownership and salvage rights; ARIA recovery planning; Mining parity benchmark and browser smoke |
+| **0.3.90** | **Dead Hulls: The Loop** | Salvage | SALVAGE mission op and loop preset; wreck and plate orders bound to hulks; recorder payout; both ARIAs fly the rig; RIG tutorial branch; parity 0.87× Mining; browser smoke. **Salvage open.** |
+| Later Salvage slices | Dead Hulls | Salvage | Saved and shared hulks; ownership, claims and prize law; salvager drones on hulk sections; derelict hulls as hulks |
 | Then | The Watch | Security | Picket wings; disable and board; brig; nests; tutorial; ARIA; benchmark and smoke |
 | Then | The Floor | Commerce, Logistics | Order book; bonded manifests; convoys; insurance; hulls; tutorials; ARIA; benchmarks and smokes |
 | Then | The Line | Manufacturing, Construction, Shipyard | Leased fab lines; orbital builds; yard assembly and refit; complete the remaining loop checks |
@@ -115,6 +122,24 @@ verb trains all three primaries directly. Still open: `aria`, `bench`, `smoke`.
 Contracts are not bound to hulks, recorders have no payout, ARIA does not fly
 the rig and the tutorial does not teach it. Parity with Mining is unmeasured
 with the rig in the loop.
+
+### 0.3.90 — Salvage open
+
+All nine items are in `status.js` and the state is `open`. Measured on the final
+build, five seeds, 25 sky-minutes: Mining 3,513 cr/min (2,088–4,655), Salvage
+3,061 (2,461–3,573), 0.87×. Mining's own median moved between 3,237 and 4,109
+across four runs of unchanged mining code; against the highest Salvage is 0.75×.
+
+What it took beyond the planned slices is in the changelog under "What the bench
+found": an autopilot brake that could not come to rest against a hulk outside a
+world's sphere of influence, a hull that would not shed load while waiting on
+jump charge, hulks picked with their killers still over them, a rig a third the
+pace of a cutter, and orders a third the size of Mining's.
+
+Not part of the gate and not done: hulks are session state (not saved, not
+shared), so a wreck order does not survive a reload; no ownership or claims;
+salvager drones do not work hulks; with no orders, a salvage loop out-earns a
+mine loop about 2.7× with ARIA at the conn.
 
 ## How to complete a career loop
 

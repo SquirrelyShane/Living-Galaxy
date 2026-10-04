@@ -1,6 +1,6 @@
 # js/world/debris.js
 
-[index](../../../README.md) · 210 lines · 19 symbols · 1 imports · 10 importers
+[index](../../../README.md) · 210 lines · 19 symbols · 1 imports · 11 importers
 
 ## About
 
@@ -26,6 +26,7 @@ off a planet either rains back down, settles into a ring, or leaves.
 - [js/drones/ops.js](../drones/ops.js.md) — `chunks`, `removeChunk`, `chunkMass`, `burst`
 - [js/flight/rig.js](../flight/rig.js.md) — `addChunk`
 - [js/flight/turrets.js](../flight/turrets.js.md) — `chunks`, `removeChunk`
+- [js/mission/salvage.js](../mission/salvage.js.md) — `chunks`
 - [js/npc/battles.js](../npc/battles.js.md) — `burst`
 - [js/render/engine.js](../render/engine.js.md) — `chunks`
 - [js/sim/sim.js](../sim/sim.js.md) — `addChunk`, `bindDebris`, `burst`, `chunkMass`, `chunks`, `nearDebris`, `removeChunk`, `resetDebris`, `rubbleRing`, `stepDebris`
@@ -36,7 +37,7 @@ off a planet either rains back down, settles into a ring, or leaves.
 
 ## Exports
 
-- [`chunks`](#s-chunks) · const — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/asteroids.test.mjs, test/rig.test.mjs
+- [`chunks`](#s-chunks) · const — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/asteroids.test.mjs, test/rig.test.mjs
 - [`resetDebris`](#s-resetDebris) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/asteroids.test.mjs, test/rig.test.mjs
 - [`burst`](#s-burst) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`rubbleRing`](#s-rubbleRing) · function — used by [js/sim/sim.js](../sim/sim.js.md)

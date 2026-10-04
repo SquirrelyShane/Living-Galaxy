@@ -60,11 +60,11 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `c` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L37
 - event.listen on `sel` → `(inline)` — [js/console/panels/corp-town.js › careBlock>pick](../files/js/console/panels/corp-town.js.md#s-careBlock-pick) L37
 - event.listen on `name` → `(inline)` — [js/console/panels/crew.js › mountHouse](../files/js/console/panels/crew.js.md#s-mountHouse) L281
-- event.listen on `inp` → `(inline)` — [js/console/panels/work.js › condBuilder](../files/js/console/panels/work.js.md#s-condBuilder) L114
-- event.listen on `id` → `(inline)` — [js/console/panels/work.js › condBuilder](../files/js/console/panels/work.js.md#s-condBuilder) L120
-- event.listen on `good` → `(inline)` — [js/console/panels/work.js › stepSheet](../files/js/console/panels/work.js.md#s-stepSheet) L146
-- event.listen on `qty` → `(inline)` — [js/console/panels/work.js › stepSheet](../files/js/console/panels/work.js.md#s-stepSheet) L148
-- event.listen on `name` → `(inline)` — [js/console/panels/work.js › editor>render](../files/js/console/panels/work.js.md#s-editor-render) L234
+- event.listen on `inp` → `(inline)` — [js/console/panels/work.js › condBuilder](../files/js/console/panels/work.js.md#s-condBuilder) L115
+- event.listen on `id` → `(inline)` — [js/console/panels/work.js › condBuilder](../files/js/console/panels/work.js.md#s-condBuilder) L121
+- event.listen on `good` → `(inline)` — [js/console/panels/work.js › stepSheet](../files/js/console/panels/work.js.md#s-stepSheet) L151
+- event.listen on `qty` → `(inline)` — [js/console/panels/work.js › stepSheet](../files/js/console/panels/work.js.md#s-stepSheet) L153
+- event.listen on `name` → `(inline)` — [js/console/panels/work.js › editor>render](../files/js/console/panels/work.js.md#s-editor-render) L239
 - event.listen on `sel` → `(inline)` — [js/station/deckhall.js › careBlock>pick](../files/js/station/deckhall.js.md#s-careBlock-pick) L109
 - event.listen on `sel` → `(inline)` — [js/station/deckhall.js › lineCard](../files/js/station/deckhall.js.md#s-lineCard) L151
 - event.listen on `picker` → `(inline)` — [js/station/stationdeck.js › PANELS.shipyard>render](../files/js/station/stationdeck.js.md#s-PANELS-shipyard-render) L141
@@ -101,7 +101,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `b` → `(inline)` — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L331
 - event.listen on `b` → `fn` — [js/crew/talkview.js › mountTalk>btn](../files/js/crew/talkview.js.md#s-mountTalk-btn) L59
 - event.listen on `btn` → `(inline)` — [js/economy/icework.js › wireIcework](../files/js/economy/icework.js.md#s-wireIcework) L131
-- event.listen on `btn` → `(inline)` — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L743
+- event.listen on `btn` → `(inline)` — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L791
 - event.listen on `b` → `(inline)` — [js/interior/interior.js › paintRail](../files/js/interior/interior.js.md#s-paintRail) L369
 - event.listen on `root.querySelector()` → `closeInterior` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L426
 - event.listen on `$()` → `toggleInterior` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L440
@@ -189,11 +189,11 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `x` → `(inline)` — [js/ui/secbadge.js › mountSecBadge>build](../files/js/ui/secbadge.js.md#s-mountSecBadge-build) L48
 - event.listen on `sos` → `(inline)` — [js/ui/secbadge.js › mountSecBadge>build](../files/js/ui/secbadge.js.md#s-mountSecBadge-build) L66
 - event.listen on `fine` → `(inline)` — [js/ui/secbadge.js › mountSecBadge>build](../files/js/ui/secbadge.js.md#s-mountSecBadge-build) L77
-- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L281
-- event.listen on `root.querySelector()` → `skipTutorial` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L282
-- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L283
-- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L284
-- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L287
+- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L298
+- event.listen on `root.querySelector()` → `skipTutorial` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L299
+- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L300
+- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L301
+- event.listen on `root.querySelector()` → `(inline)` — [js/ui/tutorial.js › ensureRoot](../files/js/ui/tutorial.js.md#s-ensureRoot) L304
 - event.listen on `btn` → `(inline)` — [js/world/events/atmoworks.js › wireAtmoWorks](../files/js/world/events/atmoworks.js.md#s-wireAtmoWorks) L139
 
 ### `closed`

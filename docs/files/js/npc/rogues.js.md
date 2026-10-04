@@ -1,6 +1,6 @@
 # js/npc/rogues.js
 
-[index](../../../README.md) · 376 lines · 35 symbols · 7 imports · 8 importers
+[index](../../../README.md) · 376 lines · 35 symbols · 7 imports · 9 importers
 
 ## About
 
@@ -65,6 +65,7 @@ nest and no paying it off.
 - [js/aria/play.js](../aria/play.js.md) — `nests`
 - [js/aria/senses.js](../aria/senses.js.md) — `nests`
 - [js/economy/contracts.js](../economy/contracts.js.md) — `nests`
+- [js/mission/salvage.js](../mission/salvage.js.md) — `nests`
 - [js/npc/ground.js](ground.js.md) — `nests`
 - [js/sim/sim.js](../sim/sim.js.md) — `populateNests`, `stepRogues`, `mountRogues`, `rogueHooks`, `rogueReport`, `nests`, `waves`
 - test/hostilegun.test.mjs _(outside js/)_ — 
@@ -87,7 +88,7 @@ nest and no paying it off.
 - [`SIEGE_RATE`](#s-SIEGE_RATE) · const — **no importer in scanned roots**
 - [`DRONE_HULLS`](#s-DRONE_HULLS) · const — **no importer in scanned roots**
 - [`NEST_COLOURS`](#s-NEST_COLOURS) · const — **no importer in scanned roots**
-- [`nests`](#s-nests) · const — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/npc/ground.js](ground.js.md), [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
+- [`nests`](#s-nests) · const — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/ground.js](ground.js.md), [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
 - [`waves`](#s-waves) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
 - [`rogueHooks`](#s-rogueHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`resetRogues`](#s-resetRogues) · function — **no importer in scanned roots**

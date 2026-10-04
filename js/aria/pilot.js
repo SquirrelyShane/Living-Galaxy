@@ -1,6 +1,6 @@
-import { ariaMind, authorize, contextualScore, decideMind, policyScore, learnOutcome } from "./mind.js";
+import { ariaMind, authorize, contextualScore, decideMind, policyScore, learnOutcome, breakLine } from "./mind.js";
 import { sim, logEvent, setTurretMode, setMiningMode, toggleSystem } from "../sim/sim.js";
-import { cargoTotal, holdRoom } from "../flight/ship.js";
+import { cargoTotal, holdRoom, batteryCap } from "../flight/ship.js";
 import { stations, stationById } from "../station/stations.js";
 import { BODIES, dist3 } from "../world/bodies.js";
 import { contacts } from "../flight/turrets.js";
@@ -14,8 +14,10 @@ import { buildOptions, orderBuild } from "../drones/ops.js";
 import { orderFab, planJob as planFab, canFabAt, fabMenuAt, maxRunnable, fabQueueAt, FAB } from "../economy/fabricate.js";
 import { neighbours, snapshot } from "../flight/recorder.js";
 import { company, hasCompany } from "../corp/company.js";
+import { pilot } from "../flight/pilot.js";
+import { bestHulk, SALV } from "../mission/salvage.js";
 
-export const ARIA_JOBS = ["mine", "sell", "survey", "repair", "refit", "build", "fabricate"];
+export const ARIA_JOBS = ["mine", "sell", "survey", "repair", "refit", "build", "fabricate", "salvage"];
 export const INVEST_JOBS = ["refit", "build"];
 const LABEL_JOB = { mine: "mine", survey: "survey", dock: "sell" };
 
@@ -31,6 +33,7 @@ export const ariaPilot = {
   fabAt: 0,
   bought: [],
   brokeOff: 0,
+  yardRun: false,
 };
 
 let prefs = null;
@@ -97,6 +100,12 @@ const INVEST = {
   minHull: 0.6,
   maxRange: 2.2e5,
 };
+
+const GUESS = {
+  salvor: { salvage: 0.6, survey: 0.3, mine: 0.25, sell: 0.1 },
+  other: { mine: 0.6, survey: 0.4, salvage: 0.2, sell: 0.1 },
+};
+const WORK = ["mine", "survey", "sell", "salvage"];
 
 const JOB_REFITS = {
   mine: ["cutter_array", "cutter_lens", "hold_expansion", "cargo_racks", "assay_deck", "ore_sorter"],
@@ -213,7 +222,9 @@ function rawPlanJob() {
   const { share, total } = jobHabits();
   const fails = ariaPilot.fails;
 
-  if (ariaMind.authority.repairs && hullFrac < ariaMind.orders.repairBelow && (fails.repair ?? 0) < 2) {
+  const yardRun = ariaPilot.yardRun;
+  ariaPilot.yardRun = false;
+  if (ariaMind.authority.repairs && (hullFrac < ariaMind.orders.repairBelow || (yardRun && hullFrac < 0.995)) && (fails.repair ?? 0) < 2) {
     const st = bestRepairPort(ship);
     if (st && !st.hostile && st.sector !== "pirate") return { job: "repair", why: `hull at ${Math.round(hullFrac * 100)}% — ${st.name} has a yard`, mission: MISSION(`repair at ${st.name}`, [makeStep("DOCK", { kind: "station", id: st.id, name: st.name }), makeStep("REPAIR")]) };
   }
@@ -259,12 +270,23 @@ function rawPlanJob() {
 
   const seam = nearestSeam();
   const world = unsurveyed();
-  const can = { mine: Boolean(seam), survey: Boolean(world), sell: fill > 0.15 };
+  const hulk = (fails.salvage ?? 0) < 2 ? bestHulk() : null;
+  const can = { mine: Boolean(seam), survey: Boolean(world), sell: fill > 0.15, salvage: Boolean(hulk) };
   const learned = total >= 3;
-  const weight = (j) => policyScore(j, (can[j] ? (learned && ariaMind.orders.mode !== "optimize" ? share[j] : j === "mine" ? 0.6 : j === "survey" ? 0.4 : 0.1) + 0.05 : -1) - (fails[j] ?? 0) * 0.35 + (ariaPilot.job === j ? 0.05 : 0), snapshot());
-  const pick = ["mine", "survey", "sell"].sort((a, b) => weight(b) - weight(a))[0];
+  const guess = GUESS[pilot?.complexId === "salvage" ? "salvor" : "other"];
+  const weight = (j) => policyScore(j, (can[j] ? (learned && ariaMind.orders.mode !== "optimize" ? share[j] : guess[j]) + 0.05 : -1) - (fails[j] ?? 0) * 0.35 + (ariaPilot.job === j ? 0.05 : 0), snapshot());
+  const pick = [...WORK].sort((a, b) => weight(b) - weight(a))[0];
   if (weight(pick) < 0) return { job: null, why: "nothing this ship can do here" };
-  const habit = learned ? `you ${pick === "mine" ? "mine" : pick === "survey" ? "survey" : "run cargo"} ${Math.round(share[pick] * 100)}% of the time` : "I have not watched you long — my best guess";
+  const habit = learned ? `you ${pick === "mine" ? "mine" : pick === "survey" ? "survey" : pick === "salvage" ? "work hulks" : "run cargo"} ${Math.round(share[pick] * 100)}% of the time` : "I have not watched you long — my best guess";
+
+  if (pick === "salvage") {
+    return { job: "salvage", why: `${habit}; ${hulk.h.name}, about ${Math.round(hulk.worth).toLocaleString()} cr in it`, mission: MISSION(`salvage ${hulk.h.vesselName}`, [
+      makeStep("SALVAGE", { kind: "best-hulk" }, { until: { k: "hold", op: ">=", v: 0.9 }, args: { mode: "auto", max: SALV.trip } }),
+      makeStep("DOCK", { kind: "best-buyer" }),
+      makeStep("SELL", null, { args: { what: "all" } }),
+      makeStep("REPAIR", null, { onFail: "skip" }),
+    ]) };
+  }
 
   if (pick === "mine") {
     return { job: "mine", why: `${habit}; ${seam.name}`, mission: MISSION(`mine ${seam.name}`, [
@@ -285,13 +307,13 @@ export function planJob() {
   let plan = rawPlanJob();
   const permission = plan.job ? authorize(plan.job, { at: sim.time }) : { ok: true };
   if (!permission.ok) plan = { job: null, why: permission.why };
-  decideMind({ action: plan.job, why: plan.why, state, steps: plan.mission?.steps.map(s => s.op) ?? [], alternatives: ["mine", "survey", "sell"].map(action => ({ action, ...contextualScore(action, state) })), at: sim.time });
+  decideMind({ action: plan.job, why: plan.why, state, steps: plan.mission?.steps.map(s => s.op) ?? [], alternatives: WORK.map(action => ({ action, ...contextualScore(action, state) })), at: sim.time });
   return plan;
 }
 
 export function shouldBreakOff(ship = sim.ship) {
   if (!ariaMind.orders.avoidHostiles || !ariaMind.authority.repairs) return null;
-  if (ship.dockedAt || ship.hull / hullMaxOf(ship) >= ariaMind.orders.repairBelow) return null;
+  if (ship.dockedAt || ship.hull / hullMaxOf(ship) >= breakLine((ship.charge ?? 0) / Math.max(1, batteryCap(ship)))) return null;
   if ((ariaPilot.fails.repair ?? 0) >= 2 || !hostileNear()) return null;
   const st = bestRepairPort(ship);
   if (!st || ship.credits < pricePerPoint(st)) return null;
@@ -301,6 +323,7 @@ export function shouldBreakOff(ship = sim.ship) {
 export function beginAriaWatch() {
   ariaPilot.job = null;
   ariaPilot.brokeOff = 0;
+  ariaPilot.yardRun = false;
   ariaPilot.why = "";
   ariaPilot.planAt = 0;
   ariaPilot.fails = {};
@@ -342,6 +365,7 @@ export function tickAriaPilot() {
     const yard = shouldBreakOff(ship);
     if (yard) {
       ariaPilot.brokeOff++;
+      ariaPilot.yardRun = true;
       say?.(`Hull at ${Math.round((ship.hull / hullMaxOf(ship)) * 100)}% with contacts close — breaking off for the yard at ${yard.name}.`);
       stopMission("breaking off for the yard", { quiet: true });
       ariaPilot.job = null;

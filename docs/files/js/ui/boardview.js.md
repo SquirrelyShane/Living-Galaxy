@@ -1,6 +1,6 @@
 # js/ui/boardview.js
 
-[index](../../../README.md) · 123 lines · 9 symbols · 7 imports · 2 importers
+[index](../../../README.md) · 124 lines · 9 symbols · 7 imports · 2 importers
 
 ## About
 
@@ -31,7 +31,7 @@ across repaints.
 | 2 | `../corp/corps.js` | `corps`, `standingLabel` | [js/corp/corps.js](../corp/corps.js.md) |
 | 3 | `../sim/sim.js` | `sim` | [js/sim/sim.js](../sim/sim.js.md) |
 | 4 | `../economy/contracts.js` | `acceptBlocker`, `acceptContract`, `boardByCategory`, `hullFit`, `CATEGORIES`, `jobStatus`, `markTarget`, `timeLeft`, `abandonContract`, `deliverContracts`, `deliverableAt`, `contracts`, `BOARD` | [js/economy/contracts.js](../economy/contracts.js.md) |
-| 5 | `../flight/autopilot.js` | `engageMiningLoop` | [js/flight/autopilot.js](../flight/autopilot.js.md) |
+| 5 | `../flight/autopilot.js` | `engageMiningLoop`, `engageSalvageLoop` | [js/flight/autopilot.js](../flight/autopilot.js.md) |
 | 6 | `../economy/sites.js` | `siteById` | [js/economy/sites.js](../economy/sites.js.md) |
 | 7 | `../economy/chains.js` | `chainReport` | [js/economy/chains.js](../economy/chains.js.md) |
 
@@ -132,15 +132,15 @@ the caller's style; `onChange()` repaints the caller after an accept.
 
 ### <a id="s-renderHeld"></a>`renderHeld(host, st, {…}=)`
 
-function · **exported** · L100–121
+function · **exported** · L100–122
 
-- calls: [`abandonContract`](../economy/contracts.js.md#s-abandonContract) _js/economy/contracts.js_ · [`deliverableAt`](../economy/contracts.js.md#s-deliverableAt) _js/economy/contracts.js_ · [`deliverContracts`](../economy/contracts.js.md#s-deliverContracts) _js/economy/contracts.js_ · [`jobStatus`](../economy/contracts.js.md#s-jobStatus) _js/economy/contracts.js_ · [`markTarget`](../economy/contracts.js.md#s-markTarget) _js/economy/contracts.js_ · [`timeLeft`](../economy/contracts.js.md#s-timeLeft) _js/economy/contracts.js_ · [`siteById`](../economy/sites.js.md#s-siteById) _js/economy/sites.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`mk`](#s-mk) ×8
+- calls: [`abandonContract`](../economy/contracts.js.md#s-abandonContract) _js/economy/contracts.js_ · [`deliverableAt`](../economy/contracts.js.md#s-deliverableAt) _js/economy/contracts.js_ · [`deliverContracts`](../economy/contracts.js.md#s-deliverContracts) _js/economy/contracts.js_ · [`jobStatus`](../economy/contracts.js.md#s-jobStatus) _js/economy/contracts.js_ · [`markTarget`](../economy/contracts.js.md#s-markTarget) _js/economy/contracts.js_ · [`timeLeft`](../economy/contracts.js.md#s-timeLeft) _js/economy/contracts.js_ · [`siteById`](../economy/sites.js.md#s-siteById) _js/economy/sites.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`engageSalvageLoop`](../flight/autopilot.js.md#s-engageSalvageLoop) _js/flight/autopilot.js_ · [`mk`](#s-mk) ×8
 - called by: [`mountBoard`](../console/panels/corp.js.md#s-mountBoard) _js/console/panels/corp.js_ · [`PANELS.board`](../station/stationdeck.js.md#s-PANELS-board) _js/station/stationdeck.js_
 
 <!-- note:renderHeld -->
 The jobs in hand, with what is left to do and the buttons that go with it.
 
-- L115 · `if ((a.targets?.length && (a.progress ?? 0) < 1) || a.markId || a.boatId || a.nestId) v.ap` — 0.3.67: hunts and escorts can be marked too — the mark follows the hull
+- L? · `if ((a.targets?.length && (a.progress ?? 0) < 1) || a.markId || a.boatId || a.nestId) v.ap` — 0.3.67: hunts and escorts can be marked too — the mark follows the hull
 - L116 · `if (a.spot && siteById(a.id) && (sim.ship.hold[a.good] ?? 0) < a.qty) v.append(btn("MINE I` — 0.3.20: a job with a seam of its own can be handed straight to the mining loop.
   0.3.67: to the seam's ROCK — the loop carries the site, so its mark sits on
   the rock the cutter goes to first, not on the empty middle of the scatter

@@ -1,6 +1,6 @@
 # js/world/field.js
 
-[index](../../../README.md) · 303 lines · 47 symbols · 4 imports · 20 importers
+[index](../../../README.md) · 303 lines · 47 symbols · 4 imports · 21 importers
 
 ## About
 
@@ -39,6 +39,7 @@ rocks are remembered by key so they stay gone.
 - [js/flight/probes.js](../flight/probes.js.md) — `bandAt`, `BAND_METAL`, `BAND_CARBON`, `CELL`, `inBelt`, `nearbyRocks`
 - [js/flight/turrets.js](../flight/turrets.js.md) — `nearbyRocks`, `wearRock`
 - [js/mission/run.js](../mission/run.js.md) — `inBelt`
+- [js/mission/salvage.js](../mission/salvage.js.md) — `inBelt`
 - [js/npc/captain.js](../npc/captain.js.md) — `inBelt`, `nearbyRocks`
 - [js/npc/ground.js](../npc/ground.js.md) — `nearbyRocks`, `bandNameAt`
 - [js/render/engine.js](../render/engine.js.md) — `inBelt`, `nearbyRocks`, `brokenRocks`
@@ -75,7 +76,7 @@ rocks are remembered by key so they stay gone.
 - [`markSkipped`](#s-markSkipped) · function — **no importer in scanned roots**
 - [`beltExit`](#s-beltExit) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md), test/avoid.test.mjs
 - [`aboveBelt`](#s-aboveBelt) · function — used by test/avoid.test.mjs
-- [`inBelt`](#s-inBelt) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/mission/run.js](../mission/run.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/avoid.test.mjs, test/chart.test.mjs, test/sites.test.mjs
+- [`inBelt`](#s-inBelt) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/avoid.test.mjs, test/chart.test.mjs, test/sites.test.mjs
 - [`brokenRocks`](#s-brokenRocks) · const — used by [js/render/engine.js](../render/engine.js.md)
 - [`wearRock`](#s-wearRock) · function — used by [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), test/marks.test.mjs, test/sites.test.mjs
 - [`eatRocks`](#s-eatRocks) · function — used by [js/sim/sim.js](../sim/sim.js.md)
@@ -575,7 +576,7 @@ Is this position clear of the rock layer, wherever it is in the annulus?
 
 function · **exported** · L269–276
 
-- called by: [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`senseSpace`](../aria/senses.js.md#s-senseSpace) _js/aria/senses.js_ · [`lockedRock`](../console/panels/nav.js.md#s-lockedRock) _js/console/panels/nav.js_ · [`mountSurvey`](../console/panels/nav.js.md#s-mountSurvey) _js/console/panels/nav.js_ · [`atSeam`](../flight/autopilot.js.md#s-atSeam) _js/flight/autopilot.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`assayPoint`](../flight/probes.js.md#s-assayPoint) _js/flight/probes.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ ×2 · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`mountGame>updateAsteroids`](../render/engine.js.md#s-mountGame-updateAsteroids) _js/render/engine.js_ · [`clearArrival`](../sim/sim.js.md#s-clearArrival) _js/sim/sim.js_ · [`stepCollisions`](../sim/sim.js.md#s-stepCollisions) _js/sim/sim.js_ · [`stepWarp`](../sim/sim.js.md#s-stepWarp) _js/sim/sim.js_ · [`beltExit`](#s-beltExit)
+- called by: [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`senseSpace`](../aria/senses.js.md#s-senseSpace) _js/aria/senses.js_ · [`lockedRock`](../console/panels/nav.js.md#s-lockedRock) _js/console/panels/nav.js_ · [`mountSurvey`](../console/panels/nav.js.md#s-mountSurvey) _js/console/panels/nav.js_ · [`atSeam`](../flight/autopilot.js.md#s-atSeam) _js/flight/autopilot.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`assayPoint`](../flight/probes.js.md#s-assayPoint) _js/flight/probes.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ ×2 · [`bestHulk`](../mission/salvage.js.md#s-bestHulk) _js/mission/salvage.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`mountGame>updateAsteroids`](../render/engine.js.md#s-mountGame-updateAsteroids) _js/render/engine.js_ · [`clearArrival`](../sim/sim.js.md#s-clearArrival) _js/sim/sim.js_ · [`stepCollisions`](../sim/sim.js.md#s-stepCollisions) _js/sim/sim.js_ · [`stepWarp`](../sim/sim.js.md#s-stepWarp) _js/sim/sim.js_ · [`beltExit`](#s-beltExit)
 
 <!-- note:inBelt -->
 <!-- /note -->

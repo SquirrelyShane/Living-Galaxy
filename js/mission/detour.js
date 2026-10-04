@@ -6,7 +6,10 @@ export const LEG = { detours: 3 };
 const _q = { x: 0, y: 0, z: 0 };
 
 export function makeLegs({ mission, ap, apLeg, resetProgress, legOpts }) {
-  const ariaFlown = () => Boolean(mission.active && (mission.active.mode === "aria" || mission.active.aria));
+  const ariaFlown = () => {
+    const m = mission.active;
+    return Boolean(m && (m.mode === "aria" || m.aria || m.steps.filter((s) => s.op !== "UNDOCK").length > 1));
+  };
   const failed = (r) => `fail:${r.replace(/^blocked:/, "")}`;
 
   function endDetour() {

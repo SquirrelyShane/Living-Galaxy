@@ -59,7 +59,8 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   ok(P.RUN_KEYS.includes("lgaa-company"), "the corporation belongs to a run — this is the corp name that used to persist");
   ok(P.RUN_KEYS.includes("lgaa-save-v1"), "so is the save that carries the callsign");
   ok(P.DEVICE_KEYS.includes("lgaa.audio.mix"), "the mixer is the device's, not the pilot's");
-  ok(P.LEARNED_KEYS.includes("lgaa.aria.v1"), "ARIA's preference net follows the human, not the character");
+  ok(P.LEARNED_PREFIXES.includes("lgaa.aria.v1:") && P.LEARNED_PREFIXES.includes("lgaa.aria.mind.v1:"), "ARIA's preference net and her mind follow the human, not the character — as the per-sky, per-callsign families they are written as");
+  ok(!P.LEARNED_KEYS.includes("lgaa.aria.v1") && P.LEARNED_PREFIXES.every((p) => p.endsWith(":")), "…and are not also filed as bare keys that name nothing");
   ok(!all.includes("lgaa.cradle.v1"), "the CRADLE is in none of them — it is the sky's population");
 }
 
@@ -81,6 +82,9 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   }
   /* and one near-miss that must survive: a different key that merely starts the same way */
   store.set("lgaa.missions.v1b", "{}");
+  /* 0.3.90: what ARIA learned, for the same skies and callsigns — never the run's to clear */
+  const learned = [];
+  for (const p of P.LEARNED_PREFIXES) for (const sky of ["APBFT", "sol"]) { const k = `${p}${sky}:Aurelia Vex`; learned.push(k); store.set(k, "{}"); }
 
   const run = P.startRun("Second Pilot");
   ok(P.RUN_KEYS.every((k) => !store.has(k)), "every run key is gone");
@@ -88,6 +92,7 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   ok(store.has("lgaa.missions.v1b"), "a key that only shares a prefix is left alone");
   ok(P.DEVICE_KEYS.every((k) => store.has(k)), "every device key survives");
   ok(P.LEARNED_KEYS.every((k) => store.has(k)), "every learned net survives");
+  ok(learned.every((k) => store.has(k)), `…and so does every sky's ARIA (${learned.length} keys)`);
   ok(store.has("lgaa.cradle.v1"), "and the ledger is not touched");
   ok(run.cleared.length === P.RUN_KEYS.length + suffixed.length, `it reports what it actually cleared (${run.cleared.length})`);
   ok(P.runCallsign() === "Second Pilot", "the run knows whose it is");
@@ -194,7 +199,7 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   ]);
   const known = new Set([...P.RUN_KEYS, ...P.DEVICE_KEYS, ...P.LEARNED_KEYS, ...P.SKY_KEYS, "lgaa.profile.v1"]);
   const found = new Map();                // key (or prefix stem) → the file that owns it
-  const stems = P.RUN_PREFIXES.map((p) => p.slice(0, -1));
+  const stems = [...P.RUN_PREFIXES, ...P.LEARNED_PREFIXES].map((p) => p.slice(0, -1));
   for (const f of files) {
     if (f.endsWith("js/core/profile.js")) continue;
     const src = readFileSync(f, "utf8");
@@ -212,6 +217,7 @@ const { cradle, generateNPC, releaseEmployed, employedCount, importLedger } = aw
   ok(found.size >= 15, `…and the sweep actually found the keys (${found.size})`);
   /* the reverse: nothing classified has been deleted out from under us */
   const orphans = [...P.RUN_KEYS, ...stems].filter((k) => !found.has(k) && k !== "lgaa-save-v0");
+  ok(stems.every((k) => !P.LEARNED_KEYS.includes(k)), "no learned family is also filed as a fixed key");
   ok(orphans.length === 0, `no run key names a module that no longer writes it (${orphans.join(", ")})`);
   /* and the trap that started this: a prefix family must NOT also be listed as
    * a bare key, because removeItem on the bare name is a no-op that reads as a

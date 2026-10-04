@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.88**
+**Version 0.3.90**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.88](PATCH-0.3.88.md). Career roadmap:
+Current patch: [0.3.90](PATCH-0.3.90.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -241,6 +241,7 @@ updated with `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.js
 | `js/aria/mind.js` | 0.3.88: the one mind both ARIAs share — captain's standing orders (reserve, purchase ceiling, repair line, avoid hostiles, mode), authority by domain (all granted until unticked), the outcome book, Tape contexts, episodic memory; `authorize()` and `spendCap()` are the only spending gate; no sim imports |
 | `js/console/panels/aria-core.js` | 0.3.88: NAV › ARIA CORE — goals, the current decision and why, withheld-action notices, standing orders and authority ticks |
 | `js/mission/detour.js` | 0.3.88: the leg and the dogleg — an ARIA mission whose lane has a world across it marks a point clear of it, hops there and resumes; a factory beside `run.js`, so hand-started missions are untouched |
+| `js/mission/salvage.js` | 0.3.90: SALVAGE, the mission op, and the eye that picks a hulk — worth over leg-plus-cut seconds, passing over a hulk that will age out, lies under hostile guns, behind a world or under a raider; rig rest on a low battery; AUTO mode. A factory beside `run.js`, like `tradeops.js` and `detour.js` |
 | `js/economy/fabricate.js` | The fabrication solver and job queue: resolves a part down the whole recipe tree to raw ore, runs it on sim time at a port, delivers to the locker (leaf — no game imports) |
 | `js/station/fabyard.js` | The deck's fabrication desk: the menu with margins, the bill before you commit, the one tap-through quantity button |
 | `js/station/deckworks.js` | The whole DECK › WORKS tab — your fabrication desk, then the port's own defences, magazines and lines |
@@ -413,11 +414,13 @@ certificate it awards you on the way up — the record of the climb, not a gate.
 If you do not clear the rank-A bar at the door you are taken on as a
 probationary aide on a reduced share until your first promotion.
 
-**All sixteen careers are selectable (0.3.81).** New pilots can enter any
-complex, and lateral transfers use the ordinary eligibility rules. The roadmap
-still records which career loops need more work; it does not lock access.
-See [`docs/CAREER_ROADMAP.md`](docs/CAREER_ROADMAP.md) and
-`js/careers/status.js` for that progress.
+**Two careers are open: Mining and Salvage (0.3.90).** Since 0.3.85 a new
+pilot or a new transfer can enter only a career whose loop is complete — all
+nine readiness items in `js/careers/status.js`. The other fourteen stay on the
+card, greyed, marked IN DEVELOPMENT; pilots already in one keep it. Salvage
+earned its last three items (`aria`, `bench`, `smoke`) in 0.3.90. See
+[`docs/CAREER_ROADMAP.md`](docs/CAREER_ROADMAP.md) for what each of the rest
+still needs.
 
 **3 · Corporation.** Fifteen outfits grow with the system: five charter holders
 holding one economic sector each, five alternates working the margins, and five
@@ -1743,13 +1746,31 @@ comes back **paused** after a reload — nothing flies by itself.
 APPROACH build one-step missions on the locked target; MINE HERE and the chart's
 MINE LOOP build the MINE LOOP preset (seam → cut until the hold is full → best
 port → sell / stash / smelt → charge → round again); PLAN… under the chart sheet
-and CONSOLE › WORK › MISSION open the editor: presets (MINE LOOP, TRADE RUN,
-SURVEY SWEEP, PATROL), your saved list (per pilot), step rows with a target
+and CONSOLE › WORK › MISSION open the editor: presets (MINE LOOP, SALVAGE LOOP,
+TRADE RUN, SURVEY SWEEP, PATROL), your saved list (per pilot), step rows with a target
 picker, an until builder and a loop row, RUN. CONSOLE › NAV › AUTOPILOT shows
 the live status line, the current step, STOP / PAUSE / RESUME and the default
 thrust-cap and warp chips the one-step buttons use. Loops and multi-step missions
 need the **Mission core** refit (logistic or military yard); HUD one-steps and
 the chart's loop always work.
+
+**SALVAGE LOOP works the hulks** (0.3.90, `js/mission/salvage.js`). SALVAGE is
+MINE for dead hulls: the step picks the hulk worth most for the seconds it costs
+— the leg plus the cut — flies to it, holds inside rig reach with the brake
+matched to the hulk rather than the nearest world, runs the rig down it bridge
+last while the tractor reels what it sheds, and takes the next until the hold is
+full, the order is filled or nothing in reach is worth the trip. It passes over
+a hulk that will age out first, one under a hostile port's guns, one behind a
+world, one in a belt unless it is worth 2.5× as much, and one with a raider or a
+nest still over it. Targets are `best-hulk`, a named `hulk` and `locked`; modes
+are STRIP, CUT and AUTO (STRIP while it is quiet, CUT under threat; for an
+order, CUT unless the wreck has no plate to spare). A battery at 28% rests the
+rig until 65% rather than standing the mission down. The preset is SALVAGE →
+DOCK best buyer → SELL → CHARGE; NAV › AUTOPILOT has **Best hulk**, and a
+salvage job in the board has **CUT IT**, which flies SALVAGE → DOCK → DELIVER.
+A wreck order is a real, pinned hulk on the port's approaches; a plate order
+takes hull steel off any hulk; both count only plate reeled off a hulk under the
+rig. A flight recorder pays 350 cr + 240 per hull tier at any honest port.
 
 **TRADE RUN flies a route** (0.3.19, `js/economy/traderoutes.js`, `js/mission/tradeops.js`).
 At the top of each round it picks the best buy-here-sell-there run from where
@@ -2117,7 +2138,7 @@ narrow it.
 | Freight & Logistics | logistics | consigned hauls, supply shortages, bonded courier parcels on a short clock |
 | Trade & Procurement | commerce | procurement (names who sells it cheapest), consignment sales (a cut of the far port's price), restocks, tenders |
 | Security & Bounties | security | named bounties, escorts, picket sweeps (fly and hold points), drone culls (N rogues out of a named nest) |
-| Salvage & Recovery | salvage | wreck plate, wreck sites on the belt, drifting cargo pods (aboard at the site, paid to the finder) |
+| Salvage & Recovery | salvage | hull plate cut off any hulk, a marked wreck on the port's approaches (0.3.90: both filled only by plate off a hulk under the rig), drifting cargo pods (aboard at the site, paid to the finder) |
 | Industry & Construction | manufacturing, construction, shipyard | refined materials, construction lifts and deliveries, yard parts |
 | Energy & Fuel | energy | bunker fuel, reactor service |
 | Survey & Science | research, navigation, terraforming | survey an unregistered world (SCAN it), assay samples, chart a lane to a beacon |
@@ -2217,7 +2238,13 @@ settled:
 ```
 node tools/aria-bench.mjs --minutes 25 --json before.json
 node tools/aria-bench.mjs --minutes 25 --compare before.json
+node tools/aria-bench.mjs --careers mining,salvage --seeds 5 --parity mining
 ```
+
+`--parity <career>` (0.3.90) is the readiness gate made scriptable: each
+career's median as a multiple of the named one, exit 1 if any is outside
+`--band` (default 0.3, the gate's ±30%). At 0.3.90: mining 3,513 cr/min,
+salvage 3,061 — 0.87×.
 
 Every career from the same purse, in the same sky, off the same seed, for the
 same minutes of sky, with the market's own numbers underneath — how many routes
@@ -3784,6 +3811,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `sites` | 0.3.20: a spot is deterministic, in the belt, named, with a bearing and a range; a site's rocks are in the field at it, carry the job's ore, cut and deplete like any other, and the belt's own ores are still there; every rock job posts a place; accept opens the seam and points the loop at it, deliver and abandon close it |
 | `hulks` | 0.3.86: a dead hull leaves one seeded hulk — sections by tier, one recorder, real parts, a share of the hold; one death is one hulk, the sky caps at 48, a hulk expires unless pinned; it rides the sphere of influence the ship rides (not the wider well), is cut loose when its world breaks and removed inside one; in the sky, the pilot's kill, a hull-on-hull kill and a staged ambush each leave one, and it takes P-LOCK, MATCH, an anchored waypoint and SCAN |
 | `rig` | 0.3.87: the salvage rig — what stops it, what it picks (nearest in reach, the locked one first, bridge last), CUT at speed keeping 85% of the plate and losing parts and recorder, STRIP slowly bringing everything out, the salvage mod and a salvage-line hull making it quicker, loose plate leaving at the hulk's velocity; the mining laser cannot cut what the rig shed; the rig is its own line on the bus, idles, sheds after the laser; and the loop in a sky: laser and rig never together, cut, reel, hold, recorder, and all three Salvage primaries trained |
+| `salvageloop` | 0.3.90: SALVAGE validates, has a preset and picks by worth over time; flown headless it closes, strips, reels and ends, and rests the rig on a low battery; the cap spares a hulk being worked; wreck and plate orders count only plate off a hulk; a recorder pays; both ARIAs plan it and a pilot starts it by hand; a hand-started plan flies round a world; the RIG tutorial branch; the gate; the break-off line on a low battery; belt drones count toward a cull; a wreck rides its port's world on the open side; the brake matches what the autopilot flies to; a hulk under a raider is passed over; AUTO for an order; load shed while waiting on the jump reserve |
 | `trade` | 0.3.19: routes buy at one port's price and sell at another's for more, sized to hold/purse/shelf, ranked by cr/min; BUY with no good picks a route from here; SELL never sells a consignment; the port lean; TRADE RUN flown end to end buys at one port, sells at another and makes money; FLY IT builds exactly the route |
 | `desk` | 0.3.18: thirty offers a port across nine departments, every career's department worked at three ports in four, a floor under yours; landlord and tenant issuers; the nested view; cargo sized to hold and purse, combat gated on guns; sector shapes the mix; picket sweep, survey, drone cull, procurement and cargo pod end to end |
 | `converse` | 0.3.17: every tree topic carries on past its first answer and every path ends; follow-ups answer what was said; the hope fund, the mate you'd look after and a pay promise come back as ↻ threads reading the ship as it is now; one id one topic |
@@ -3842,6 +3870,7 @@ node test/smoke-<name>.mjs "$(npm root -g)/playwright/index.mjs"
 | `smoke-mining` | the cutter's shutoff, watched across the whole event rather than sampled at one instant |
 | `smoke-hulks` | 0.3.86: a hulk off the nose draws as a dead hull with no plume, tumbles, strobes its recorder beacon, takes P-LOCK, answers SCAN with its manifest, and leaves the scene when removed |
 | `smoke-rig` | 0.3.87: with a hulk in reach the quick CUT switch runs the rig, reads RIG STRIP, the arc and flash draw, plate comes aboard through the tractor, a second tap stows it — and with no hulk about the same switch is the mining laser again |
+| `smoke-salvage` | 0.3.90: a new pilot picks Salvage on the creation card; SALVAGE LOOP flies to a hulk, the rig cuts with the arc drawn, plate comes aboard, the loop docks, sells and puts the rig back as it was; ARIA at the conn plans a salvage run |
 | `smoke-impact` | a strike drawn as the rock's fractured body with a blast, its pieces held as chunks and let go, a rock-on-rock collision with both bodies drawn, a cut-out rock going up as a shatter field |
 | `smoke-blackhole` | the lens picked and run over scene depth, a shadow and a lit disk read back from the composer, the stand-in under a low tier, a belt tunnel with infall, a rogue torn apart, the chart and the canopy label |
 | `smoke-freeze` | a live mission plus every console panel: the canopy keeps drawing, and a refresher that throws is dropped rather than taking the frame loop with it |

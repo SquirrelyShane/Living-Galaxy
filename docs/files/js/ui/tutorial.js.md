@@ -1,6 +1,6 @@
 # js/ui/tutorial.js
 
-[index](../../../README.md) · 353 lines · 54 symbols · 11 imports · 4 importers
+[index](../../../README.md) · 370 lines · 55 symbols · 13 imports · 4 importers
 
 ## About
 
@@ -23,17 +23,19 @@ nothing to measure. SKIP ends it; it is remembered per device.
 
 | line | from | names | target |
 |---|---|---|---|
-| 1 | `../sim/sim.js` | `acquireLock`, `addBodyWaypoint`, `addWaypointAt`, `logEvent`, `selectBody`, `sim` | [js/sim/sim.js](../sim/sim.js.md) |
-| 2 | `../world/bodies.js` | `BODIES`, `bodyPosition`, `currentSystem`, `scanRadius` | [js/world/bodies.js](../world/bodies.js.md) |
-| 3 | `../station/stations.js` | `nearestStation` | [js/station/stations.js](../station/stations.js.md) |
-| 4 | `../world/field.js` | `nearbyRocks` | [js/world/field.js](../world/field.js.md) |
-| 5 | `../world/debris.js` | `chunks` | [js/world/debris.js](../world/debris.js.md) |
-| 6 | `../flight/turrets.js` | `MINE_RANGE` | [js/flight/turrets.js](../flight/turrets.js.md) |
-| 7 | `../crew/ledger.js` | `crew` | [js/crew/ledger.js](../crew/ledger.js.md) |
-| 8 | `../flight/pilot.js` | `pilot` | [js/flight/pilot.js](../flight/pilot.js.md) |
-| 9 | `../flight/ship.js` | `cargoTotal`, `speedOf` | [js/flight/ship.js](../flight/ship.js.md) |
-| 10 | `../interior/interior.js` | `interior` | [js/interior/interior.js](../interior/interior.js.md) |
-| 11 | `./tutorial-core.js` | `CORE_STEPS`, `resetCoreTrack` | [js/ui/tutorial-core.js](tutorial-core.js.md) |
+| 1 | `../sim/sim.js` | `acquireLock`, `addAnchoredWaypoint`, `addBodyWaypoint`, `addWaypointAt`, `logEvent`, `selectBody`, `sim` | [js/sim/sim.js](../sim/sim.js.md) |
+| 2 | `../world/hulks.js` | `hulks` | [js/world/hulks.js](../world/hulks.js.md) |
+| 3 | `../flight/rig.js` | `nextSection`, `rigRange` | [js/flight/rig.js](../flight/rig.js.md) |
+| 4 | `../world/bodies.js` | `BODIES`, `bodyPosition`, `currentSystem`, `scanRadius` | [js/world/bodies.js](../world/bodies.js.md) |
+| 5 | `../station/stations.js` | `nearestStation` | [js/station/stations.js](../station/stations.js.md) |
+| 6 | `../world/field.js` | `nearbyRocks` | [js/world/field.js](../world/field.js.md) |
+| 7 | `../world/debris.js` | `chunks` | [js/world/debris.js](../world/debris.js.md) |
+| 8 | `../flight/turrets.js` | `MINE_RANGE` | [js/flight/turrets.js](../flight/turrets.js.md) |
+| 9 | `../crew/ledger.js` | `crew` | [js/crew/ledger.js](../crew/ledger.js.md) |
+| 10 | `../flight/pilot.js` | `pilot` | [js/flight/pilot.js](../flight/pilot.js.md) |
+| 11 | `../flight/ship.js` | `cargoTotal`, `speedOf` | [js/flight/ship.js](../flight/ship.js.md) |
+| 12 | `../interior/interior.js` | `interior` | [js/interior/interior.js](../interior/interior.js.md) |
+| 13 | `./tutorial-core.js` | `CORE_STEPS`, `resetCoreTrack` | [js/ui/tutorial-core.js](tutorial-core.js.md) |
 
 ## Imported by
 
@@ -56,74 +58,74 @@ nothing to measure. SKIP ends it; it is remembered per device.
 
 ## Effects
 
-- **dom.create** — `div` (ensureRoot:268)
-- **dom.id** — `hud` (ensureRoot:266)
-- **dom.query** — `#tutor-head` (ensureRoot:281) · `#tutor-skip` (ensureRoot:282) · `#tutor-next` (ensureRoot:283, paint:336) · `#tutor-act` (ensureRoot:284, paint:329) · `#tutor-alt` (ensureRoot:287, paint:333) · `[${…}]` (clearHilite:299) · `‹sel›` (setHilite:308) · `#tutor-title` (paint:325) · `#tutor-n` (paint:326) · `#tutor-text` (paint:327)
-- **event.listen** — `click on root.querySelector() → (inline)` (ensureRoot:281, ensureRoot:283, ensureRoot:284, ensureRoot:287) · `click on root.querySelector() → skipTutorial` (ensureRoot:282)
-- **storage.get** — `‹LS_KEY›` (startTutorial:176) · `‹CORE_KEY›` (startCoreTutorial:193)
-- **storage.set** — `‹CORE_KEY›` (startCoreTutorial:195) · `‹(conditional)›` (finish:216)
+- **dom.create** — `div` (ensureRoot:285)
+- **dom.id** — `hud` (ensureRoot:283)
+- **dom.query** — `#tutor-head` (ensureRoot:298) · `#tutor-skip` (ensureRoot:299) · `#tutor-next` (ensureRoot:300, paint:353) · `#tutor-act` (ensureRoot:301, paint:346) · `#tutor-alt` (ensureRoot:304, paint:350) · `[${…}]` (clearHilite:316) · `‹sel›` (setHilite:325) · `#tutor-title` (paint:342) · `#tutor-n` (paint:343) · `#tutor-text` (paint:344)
+- **event.listen** — `click on root.querySelector() → (inline)` (ensureRoot:298, ensureRoot:300, ensureRoot:301, ensureRoot:304) · `click on root.querySelector() → skipTutorial` (ensureRoot:299)
+- **storage.get** — `‹LS_KEY›` (startTutorial:193) · `‹CORE_KEY›` (startCoreTutorial:210)
+- **storage.set** — `‹CORE_KEY›` (startCoreTutorial:212) · `‹(conditional)›` (finish:233)
 
 ## Symbols
 
 ### <a id="s-LS_KEY"></a>`LS_KEY`
 
-const · L13–13
+const · L15–15
 
 <!-- note:LS_KEY -->
 <!-- /note -->
 
 ### <a id="s-CORE_KEY"></a>`CORE_KEY`
 
-const · L14–14
+const · L16–16
 
 <!-- note:CORE_KEY -->
 <!-- /note -->
 
 ### <a id="s-tutorial"></a>`tutorial`
 
-const · **exported** · L16–27
+const · **exported** · L18–29
 
 <!-- note:tutorial -->
-- L21 · `track: "intro",` — which set of lessons is running: the intro, or a track started on demand
-- L22 · `resume: null,` — where the intro was when a track cut in front of it
-- L23 · `base: {},` — baselines captured when a step starts
+- L23 · `track: "intro",` — which set of lessons is running: the intro, or a track started on demand
+- L24 · `resume: null,` — where the intro was when a track cut in front of it
+- L25 · `base: {},` — baselines captured when a step starts
 <!-- /note -->
 
 ### <a id="s-fmt"></a>`fmt(d)`
 
-function · L29–34
+function · L31–36
 
-- called by: [`STEPS.text`](#s-STEPS-text) · [`STEPS.text~2`](#s-STEPS-text-2) ×2 · [`STEPS.text~3`](#s-STEPS-text-3) · [`STEPS.text~4`](#s-STEPS-text-4) ×4 · [`STEPS.text~5`](#s-STEPS-text-5) ×2
+- called by: [`STEPS.text`](#s-STEPS-text) · [`STEPS.text~2`](#s-STEPS-text-2) ×2 · [`STEPS.text~3`](#s-STEPS-text-3) · [`STEPS.text~4`](#s-STEPS-text-4) ×6 · [`STEPS.text~5`](#s-STEPS-text-5) ×2
 
 <!-- note:fmt -->
 <!-- /note -->
 
 ### <a id="s-_p"></a>`_p`
 
-const · L36–36
+const · L38–38
 
 <!-- note:_p -->
 <!-- /note -->
 
 ### <a id="s-buildCtx"></a>`buildCtx()`
 
-function · L38–88
+function · L40–97
 
-- calls: [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`nearestStation`](../station/stations.js.md#s-nearestStation) _js/station/stations.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`scanRadius`](../world/bodies.js.md#s-scanRadius) _js/world/bodies.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
+- calls: [`nextSection`](../flight/rig.js.md#s-nextSection) _js/flight/rig.js_ · [`rigRange`](../flight/rig.js.md#s-rigRange) _js/flight/rig.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`nearestStation`](../station/stations.js.md#s-nearestStation) _js/station/stations.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`scanRadius`](../world/bodies.js.md#s-scanRadius) _js/world/bodies.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - via [js/sim/sim.js](../sim/sim.js.md): `sim.scanned.has`
 - called by: [`finish`](#s-finish) · [`startCoreTutorial`](#s-startCoreTutorial) · [`startTutorial`](#s-startTutorial) · [`tickTutorial`](#s-tickTutorial) · [`tutorialContext`](#s-tutorialContext) · [`tutorialEvaluate`](#s-tutorialEvaluate)
 
 <!-- note:buildCtx -->
 What the tutorial can see right now. Rebuilt twice a second.
 
-- L57 · `let bh = Infinity, bu = Infinity;` — nearest world and nearest unsurveyed world
-- L68 · `let br = Infinity;` — nearest cuttable thing: belt rock or impact debris
-- L77 · `const belt = currentSystem.belt ?? currentSystem.outerBelt;` — where the belt is from here: the nearest point of the main ring
+- L66 · `let bh = Infinity, bu = Infinity;` — nearest world and nearest unsurveyed world
+- L77 · `let br = Infinity;` — nearest cuttable thing: belt rock or impact debris
+- L86 · `const belt = currentSystem.belt ?? currentSystem.outerBelt;` — where the belt is from here: the nearest point of the main ring
 <!-- /note -->
 
 ### <a id="s-STEPS"></a>`STEPS`
 
-const · L90–165
+const · L99–182
 
 <!-- note:STEPS -->
 ---- the steps ------------------------------------------------------------
@@ -131,7 +133,7 @@ const · L90–165
 
 #### <a id="s-STEPS-text"></a>`STEPS.text(c)`
 
-prop · L94–94
+prop · L103–103
 
 - calls: [`fmt`](#s-fmt)
 
@@ -140,14 +142,14 @@ prop · L94–94
 
 #### <a id="s-STEPS-done"></a>`STEPS.done(c)`
 
-prop · L95–95
+prop · L104–104
 
 <!-- note:STEPS.done -->
 <!-- /note -->
 
 #### <a id="s-STEPS-text-2"></a>`STEPS.text~2(c)`
 
-prop · L100–102
+prop · L109–111
 
 - calls: [`fmt`](#s-fmt) ×2
 
@@ -156,14 +158,14 @@ prop · L100–102
 
 #### <a id="s-STEPS-action"></a>`STEPS.action(c)`
 
-prop · L103–103
+prop · L112–112
 
 <!-- note:STEPS.action -->
 <!-- /note -->
 
 ##### <a id="s-STEPS-action-run"></a>`STEPS.action.run()`
 
-prop · L103–103
+prop · L112–112
 
 - calls: [`addBodyWaypoint`](../sim/sim.js.md#s-addBodyWaypoint) _js/sim/sim.js_ · [`selectBody`](../sim/sim.js.md#s-selectBody) _js/sim/sim.js_
 
@@ -172,14 +174,14 @@ prop · L103–103
 
 #### <a id="s-STEPS-done-2"></a>`STEPS.done~2(c, base)`
 
-prop · L104–104
+prop · L113–113
 
 <!-- note:STEPS.done~2 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-text-3"></a>`STEPS.text~3(c)`
 
-prop · L109–114
+prop · L118–123
 
 - calls: [`fmt`](#s-fmt)
 
@@ -188,60 +190,69 @@ prop · L109–114
 
 #### <a id="s-STEPS-done-3"></a>`STEPS.done~3(c)`
 
-prop · L115–115
+prop · L124–124
 
 <!-- note:STEPS.done~3 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-title"></a>`STEPS.title(c)`
 
-prop · L119–119
+prop · L128–128
 
 <!-- note:STEPS.title -->
 <!-- /note -->
 
 #### <a id="s-STEPS-text-4"></a>`STEPS.text~4(c)`
 
-prop · L120–129
+prop · L129–142
 
-- calls: [`fmt`](#s-fmt) ×4
+- calls: [`fmt`](#s-fmt) ×6
 
 <!-- note:STEPS.text~4 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-action-2"></a>`STEPS.action~2(c)`
 
-prop · L130–132
+prop · L143–147
 
 <!-- note:STEPS.action~2 -->
 <!-- /note -->
 
 ##### <a id="s-STEPS-action-2-run"></a>`STEPS.action~2.run()`
 
-prop · L131–131
+prop · L144–144
 
 - calls: [`addWaypointAt`](../sim/sim.js.md#s-addWaypointAt) _js/sim/sim.js_
 
 <!-- note:STEPS.action~2.run -->
 <!-- /note -->
 
+##### <a id="s-STEPS-action-2-run-2"></a>`STEPS.action~2.run~2()`
+
+prop · L146–146
+
+- calls: [`acquireLock`](../sim/sim.js.md#s-acquireLock) _js/sim/sim.js_ · [`addAnchoredWaypoint`](../sim/sim.js.md#s-addAnchoredWaypoint) _js/sim/sim.js_
+
+<!-- note:STEPS.action~2.run~2 -->
+<!-- /note -->
+
 #### <a id="s-STEPS-done-4"></a>`STEPS.done~4(c, base)`
 
-prop · L133–133
+prop · L148–148
 
 <!-- note:STEPS.done~4 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-next"></a>`STEPS.next(c)`
 
-prop · L134–134
+prop · L149–149
 
 <!-- note:STEPS.next -->
 <!-- /note -->
 
 #### <a id="s-STEPS-text-5"></a>`STEPS.text~5(c)`
 
-prop · L139–141
+prop · L154–156
 
 - calls: [`fmt`](#s-fmt) ×2
 
@@ -250,14 +261,14 @@ prop · L139–141
 
 #### <a id="s-STEPS-action-3"></a>`STEPS.action~3(c)`
 
-prop · L142–142
+prop · L157–157
 
 <!-- note:STEPS.action~3 -->
 <!-- /note -->
 
 ##### <a id="s-STEPS-action-3-run"></a>`STEPS.action~3.run()`
 
-prop · L142–142
+prop · L157–157
 
 - calls: [`acquireLock`](../sim/sim.js.md#s-acquireLock) _js/sim/sim.js_
 
@@ -266,70 +277,70 @@ prop · L142–142
 
 #### <a id="s-STEPS-done-5"></a>`STEPS.done~5(c)`
 
-prop · L143–143
+prop · L158–158
 
 <!-- note:STEPS.done~5 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-text-6"></a>`STEPS.text~6()`
 
-prop · L148–148
+prop · L163–163
 
 <!-- note:STEPS.text~6 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-done-6"></a>`STEPS.done~6(c, base)`
 
-prop · L149–149
+prop · L164–164
 
 <!-- note:STEPS.done~6 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-text-7"></a>`STEPS.text~7()`
 
-prop · L154–154
+prop · L169–169
 
 <!-- note:STEPS.text~7 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-done-7"></a>`STEPS.done~7(c)`
 
-prop · L155–155
+prop · L170–170
 
 <!-- note:STEPS.done~7 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-next-2"></a>`STEPS.next~2()`
 
-prop · L156–156
+prop · L171–171
 
 <!-- note:STEPS.next~2 -->
 <!-- /note -->
 
-#### <a id="s-STEPS-text-8"></a>`STEPS.text~8()`
+#### <a id="s-STEPS-text-8"></a>`STEPS.text~8(c)`
 
-prop · L161–161
+prop · L176–178
 
 <!-- note:STEPS.text~8 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-done-8"></a>`STEPS.done~8()`
 
-prop · L162–162
+prop · L179–179
 
 <!-- note:STEPS.done~8 -->
 <!-- /note -->
 
 #### <a id="s-STEPS-next-3"></a>`STEPS.next~3()`
 
-prop · L163–163
+prop · L180–180
 
 <!-- note:STEPS.next~3 -->
 <!-- /note -->
 
 ### <a id="s-TRACKS"></a>`TRACKS`
 
-const · L167–167
+const · L184–184
 
 <!-- note:TRACKS -->
 The lesson sets. `intro` runs itself on a fresh device; `core` is started by
@@ -339,7 +350,7 @@ front of another — see startCoreTutorial.
 
 ### <a id="s-steps"></a>`steps()`
 
-function · L168–168
+function · L185–185
 
 - called by: [`advance`](#s-advance) ×2 · [`ensureRoot`](#s-ensureRoot) ×2 · [`paint`](#s-paint) ×2 · [`tickTutorial`](#s-tickTutorial) · [`tutorialEvaluate`](#s-tutorialEvaluate) · [`tutorialSteps`](#s-tutorialSteps)
 
@@ -348,7 +359,7 @@ function · L168–168
 
 ### <a id="s-captureBase"></a>`captureBase(c)`
 
-function · L170–172
+function · L187–189
 
 - called by: [`advance`](#s-advance) · [`finish`](#s-finish) · [`startCoreTutorial`](#s-startCoreTutorial) · [`startTutorial`](#s-startTutorial)
 
@@ -358,19 +369,19 @@ function · L170–172
 
 ### <a id="s-startTutorial"></a>`startTutorial(force=)`
 
-function · **exported** · L174–189
+function · **exported** · L191–206
 
 - calls: [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`buildCtx`](#s-buildCtx) · [`captureBase`](#s-captureBase) · [`paint`](#s-paint)
 - called by: [`registerStaticJumps.run~4`](../console/console.js.md#s-registerStaticJumps-run-4) _js/console/console.js_ · [`mountHud`](hud.js.md#s-mountHud) _js/ui/hud.js_ · [`mountHud>go`](hud.js.md#s-mountHud-go) _js/ui/hud.js_
 - effects: storage.get `‹LS_KEY›`
 
 <!-- note:startTutorial -->
-- L176 · `try { if (localStorage.getItem(LS_KEY) === "done") return false; } catch {` — no storage
+- L193 · `try { if (localStorage.getItem(LS_KEY) === "done") return false; } catch {` — no storage
 <!-- /note -->
 
 ### <a id="s-startCoreTutorial"></a>`startCoreTutorial(force=)`
 
-function · **exported** · L191–208
+function · **exported** · L208–225
 
 - calls: [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`resetCoreTrack`](tutorial-core.js.md#s-resetCoreTrack) _js/ui/tutorial-core.js_ · [`buildCtx`](#s-buildCtx) · [`captureBase`](#s-captureBase) · [`paint`](#s-paint)
 - called by: [`denyCore`](../console/panels/work.js.md#s-denyCore) _js/console/panels/work.js_ · [`editor>render`](../console/panels/work.js.md#s-editor-render) _js/console/panels/work.js_
@@ -385,16 +396,16 @@ It saves whatever the intro was doing and hands the card back afterwards, so
 a pilot who hits the mission wall three steps into the intro does not lose
 those three steps.
 
-- L193 · `try { if (localStorage.getItem(CORE_KEY) === "done") return false; } catch {` — no storage
-- L195 · `try { localStorage.setItem(CORE_KEY, "done"); } catch {   }` — Marked seen on the way IN, not on the way out. Otherwise the editor pops
+- L210 · `try { if (localStorage.getItem(CORE_KEY) === "done") return false; } catch {` — no storage
+- L212 · `try { localStorage.setItem(CORE_KEY, "done"); } catch {   }` — Marked seen on the way IN, not on the way out. Otherwise the editor pops
   the card again on every refusal until the core is bought, which is exactly
   the pilot least in the mood for it. SHOW ME HOW passes force.
-- L195 · `try { localStorage.setItem(CORE_KEY, "done"); } catch {` — no storage
+- L212 · `try { localStorage.setItem(CORE_KEY, "done"); } catch {` — no storage
 <!-- /note -->
 
 ### <a id="s-skipTutorial"></a>`skipTutorial()`
 
-function · **exported** · L210–212
+function · **exported** · L227–229
 
 - calls: [`finish`](#s-finish)
 
@@ -403,20 +414,20 @@ function · **exported** · L210–212
 
 ### <a id="s-finish"></a>`finish(how)`
 
-function · L214–235
+function · L231–252
 
 - calls: [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`buildCtx`](#s-buildCtx) · [`captureBase`](#s-captureBase) · [`clearHilite`](#s-clearHilite) · [`paint`](#s-paint)
 - called by: [`advance`](#s-advance) · [`skipTutorial`](#s-skipTutorial) · [`tickTutorial`](#s-tickTutorial)
 - effects: storage.set `‹(conditional)›`
 
 <!-- note:finish -->
-- L216 · `try { localStorage.setItem(wasCore ? CORE_KEY : LS_KEY, "done"); } catch {` — fine
-- L221 · `if (wasCore && tutorial.resume && how !== "skipped") {` — a track that cut in front of the intro gives the card back
+- L233 · `try { localStorage.setItem(wasCore ? CORE_KEY : LS_KEY, "done"); } catch {` — fine
+- L238 · `if (wasCore && tutorial.resume && how !== "skipped") {` — a track that cut in front of the intro gives the card back
 <!-- /note -->
 
 ### <a id="s-advance"></a>`advance()`
 
-function · L237–243
+function · L254–260
 
 - calls: [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_ · [`captureBase`](#s-captureBase) · [`finish`](#s-finish) · [`label`](#s-label) · [`paint`](#s-paint) · [`steps`](#s-steps) ×2
 - called by: [`ensureRoot`](#s-ensureRoot) · [`tickTutorial`](#s-tickTutorial)
@@ -426,7 +437,7 @@ function · L237–243
 
 ### <a id="s-label"></a>`label(t, c)`
 
-function · L245–247
+function · L262–264
 
 - called by: [`advance`](#s-advance) · [`paint`](#s-paint)
 
@@ -435,7 +446,7 @@ function · L245–247
 
 ### <a id="s-tickTutorial"></a>`tickTutorial(dt)`
 
-function · **exported** · L249–259
+function · **exported** · L266–276
 
 - calls: [`advance`](#s-advance) · [`buildCtx`](#s-buildCtx) · [`finish`](#s-finish) · [`paint`](#s-paint) · [`steps`](#s-steps)
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
@@ -446,7 +457,7 @@ Called from the render loop with real seconds.
 
 ### <a id="s-lastText"></a>`lastText`
 
-const · L261–261
+const · L278–278
 
 <!-- note:lastText -->
 ---- card ---------------------------------------------------------------
@@ -454,7 +465,7 @@ const · L261–261
 
 ### <a id="s-ensureRoot"></a>`ensureRoot()`
 
-function · L263–292
+function · L280–309
 
 - calls: [`advance`](#s-advance) · [`steps`](#s-steps) ×2
 - called by: [`paint`](#s-paint)
@@ -465,7 +476,7 @@ function · L263–292
 
 ### <a id="s-HI"></a>`HI`
 
-const · L294–294
+const · L311–311
 
 <!-- note:HI -->
 The control a step is talking about, lit up.
@@ -483,14 +494,14 @@ a repaint, and still reaches CSS.
 
 ### <a id="s-hiliteSel"></a>`hiliteSel`
 
-const · L295–295
+const · L312–312
 
 <!-- note:hiliteSel -->
 <!-- /note -->
 
 ### <a id="s-clearHilite"></a>`clearHilite()`
 
-function · L297–301
+function · L314–318
 
 - called by: [`finish`](#s-finish) · [`paint`](#s-paint) · [`setHilite`](#s-setHilite)
 - effects: dom.query `[${…}]`
@@ -500,7 +511,7 @@ function · L297–301
 
 ### <a id="s-setHilite"></a>`setHilite(sel)`
 
-function · L303–310
+function · L320–327
 
 - calls: [`clearHilite`](#s-clearHilite)
 - called by: [`paint`](#s-paint)
@@ -514,7 +525,7 @@ already lit while the step pointed at nothing.
 
 ### <a id="s-paint"></a>`paint(force)`
 
-function · L312–337
+function · L329–354
 
 - calls: [`clearHilite`](#s-clearHilite) · [`ensureRoot`](#s-ensureRoot) · [`label`](#s-label) · [`setHilite`](#s-setHilite) · [`steps`](#s-steps) ×2
 - called by: [`advance`](#s-advance) · [`finish`](#s-finish) · [`startCoreTutorial`](#s-startCoreTutorial) · [`startTutorial`](#s-startTutorial) · [`tickTutorial`](#s-tickTutorial)
@@ -525,7 +536,7 @@ function · L312–337
 
 ### <a id="s-tutorialSteps"></a>`tutorialSteps()`
 
-function · **exported** · L339–341
+function · **exported** · L356–358
 
 - calls: [`steps`](#s-steps)
 
@@ -535,7 +546,7 @@ Test/console access: step list and a synchronous evaluate.
 
 ### <a id="s-tutorialContext"></a>`tutorialContext()`
 
-function · **exported** · L342–344
+function · **exported** · L359–361
 
 - calls: [`buildCtx`](#s-buildCtx)
 
@@ -544,7 +555,7 @@ function · **exported** · L342–344
 
 ### <a id="s-tutorialEvaluate"></a>`tutorialEvaluate()`
 
-function · **exported** · L345–349
+function · **exported** · L362–366
 
 - calls: [`buildCtx`](#s-buildCtx) · [`steps`](#s-steps)
 
@@ -553,7 +564,7 @@ function · **exported** · L345–349
 
 ### <a id="s-wireTutorialTest"></a>`wireTutorialTest()`
 
-function · **exported** · L351–353
+function · **exported** · L368–370
 
 - called by: [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
 

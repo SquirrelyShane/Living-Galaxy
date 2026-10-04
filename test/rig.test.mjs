@@ -275,8 +275,8 @@ ship.dockedAt = null;
 /* ---- 10. readiness ------------------------------------------------------------- */
 {
   const st = careerStatus("salvage");
-  ok(st.has.includes("verb") && st.missing.join() === "aria,bench,smoke", `Salvage has its verb; still to earn: ${st.missing.join(", ")}`);
-  ok(!isCareerOpen("salvage"), "so it is not open yet");
+  ok(st.has.includes("verb") && st.missing.length === 0, `Salvage has its verb and, since 0.3.90, every other gate (still to earn: ${st.missing.join(", ") || "none"})`);
+  ok(isCareerOpen("salvage"), "so it is open");
 }
 
 console.log(`rig: ${pass} passed, ${fail} failed`);

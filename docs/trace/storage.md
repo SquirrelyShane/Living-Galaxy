@@ -8,12 +8,12 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹(conditional)›`
 
-- storage.set — [js/ui/tutorial.js › finish](../files/js/ui/tutorial.js.md#s-finish) L216
+- storage.set — [js/ui/tutorial.js › finish](../files/js/ui/tutorial.js.md#s-finish) L233
 
 ### `‹CORE_KEY›`
 
-- storage.get — [js/ui/tutorial.js › startCoreTutorial](../files/js/ui/tutorial.js.md#s-startCoreTutorial) L193
-- storage.set — [js/ui/tutorial.js › startCoreTutorial](../files/js/ui/tutorial.js.md#s-startCoreTutorial) L195
+- storage.get — [js/ui/tutorial.js › startCoreTutorial](../files/js/ui/tutorial.js.md#s-startCoreTutorial) L210
+- storage.set — [js/ui/tutorial.js › startCoreTutorial](../files/js/ui/tutorial.js.md#s-startCoreTutorial) L212
 
 ### `‹FAB_KEY()›`
 
@@ -32,8 +32,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹key›`
 
-- storage.set — [js/aria/mind.js › saveMind](../files/js/aria/mind.js.md#s-saveMind) L15
-- storage.get — [js/aria/mind.js › loadMind](../files/js/aria/mind.js.md#s-loadMind) L19
+- storage.set — [js/aria/mind.js › saveMind](../files/js/aria/mind.js.md#s-saveMind) L17
+- storage.get — [js/aria/mind.js › loadMind](../files/js/aria/mind.js.md#s-loadMind) L21
 
 ### `‹KEY›`
 
@@ -55,12 +55,12 @@ Every localStorage/sessionStorage key read, written or removed.
 - storage.set — [js/corp/gdb.js › save](../files/js/corp/gdb.js.md#s-save) L50
 - storage.remove — [js/corp/gdb.js › resetGdb](../files/js/corp/gdb.js.md#s-resetGdb) L347
 - storage.get — [js/npc/cradle.js › load](../files/js/npc/cradle.js.md#s-load) L209
-- storage.get — [js/ui/tutorial.js › startTutorial](../files/js/ui/tutorial.js.md#s-startTutorial) L176
+- storage.get — [js/ui/tutorial.js › startTutorial](../files/js/ui/tutorial.js.md#s-startTutorial) L193
 
 ### `‹MISSIONS_KEY()›`
 
-- storage.get — [js/mission/script.js › loadMissions](../files/js/mission/script.js.md#s-loadMissions) L271
-- storage.set — [js/mission/script.js › saveMissions](../files/js/mission/script.js.md#s-saveMissions) L282
+- storage.get — [js/mission/script.js › loadMissions](../files/js/mission/script.js.md#s-loadMissions) L287
+- storage.set — [js/mission/script.js › saveMissions](../files/js/mission/script.js.md#s-saveMissions) L298
 
 ### `‹RECENTS_KEY›`
 
@@ -80,8 +80,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹RUN_KEY()›`
 
-- storage.remove — [js/mission/run.js › clearRun](../files/js/mission/run.js.md#s-clearRun) L534
-- storage.get — [js/mission/run.js › restoreRun](../files/js/mission/run.js.md#s-restoreRun) L543
+- storage.remove — [js/mission/run.js › clearRun](../files/js/mission/run.js.md#s-clearRun) L538
+- storage.get — [js/mission/run.js › restoreRun](../files/js/mission/run.js.md#s-restoreRun) L547
 
 ### `‹SAVE_KEY_V1›`
 
