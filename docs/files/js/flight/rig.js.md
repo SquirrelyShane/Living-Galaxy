@@ -1,6 +1,6 @@
 # js/flight/rig.js
 
-[index](../../../README.md) · 159 lines · 13 symbols · 3 imports · 6 importers
+[index](../../../README.md) · 160 lines · 13 symbols · 3 imports · 6 importers
 
 ## About
 
@@ -55,7 +55,7 @@ _none detected_
 
 ### <a id="s-RIG"></a>`RIG`
 
-const · **exported** · L5–16
+const · **exported** · L5–17
 
 <!-- note:RIG -->
 Every number the rig runs on, for the parity slice to tune in one place.
@@ -70,28 +70,28 @@ Every number the rig runs on, for the parity slice to tune in one place.
 
 ### <a id="s-rig"></a>`rig`
 
-const · **exported** · L18–18
+const · **exported** · L19–19
 
 <!-- note:rig -->
 <!-- /note -->
 
 ### <a id="s-rigHooks"></a>`rigHooks`
 
-const · **exported** · L20–20
+const · **exported** · L21–21
 
 <!-- note:rigHooks -->
 <!-- /note -->
 
 ### <a id="s-_v"></a>`_v`
 
-const · L22–22
+const · L23–23
 
 <!-- note:_v -->
 <!-- /note -->
 
 ### <a id="s-resetRig"></a>`resetRig()`
 
-function · **exported** · L24–32
+function · **exported** · L25–33
 
 - called by: [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_
 
@@ -100,17 +100,17 @@ function · **exported** · L24–32
 
 ### <a id="s-rigRange"></a>`rigRange(ship)`
 
-function · **exported** · L34–36
+function · **exported** · L35–37
 
 - via [js/flight/ship.js](ship.js.md): `shipFx.fx`
-- called by: [`rigTarget`](#s-rigTarget) · [`makeSalvage>mark`](../mission/salvage.js.md#s-makeSalvage-mark) _js/mission/salvage.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
+- called by: [`rigTarget`](#s-rigTarget) · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
 
 <!-- note:rigRange -->
 <!-- /note -->
 
 ### <a id="s-rigBlocker"></a>`rigBlocker(ship)`
 
-function · **exported** · L38–43
+function · **exported** · L39–44
 
 - called by: [`stepRig`](#s-stepRig) · [`makeSalvage`](../mission/salvage.js.md#s-makeSalvage) _js/mission/salvage.js_
 
@@ -119,7 +119,7 @@ function · **exported** · L38–43
 
 ### <a id="s-hulkCut"></a>`hulkCut(h)`
 
-function · **exported** · L45–49
+function · **exported** · L46–50
 
 - called by: [`stepRig`](#s-stepRig)
 
@@ -128,7 +128,7 @@ function · **exported** · L45–49
 
 ### <a id="s-nextSection"></a>`nextSection(h)`
 
-function · **exported** · L51–54
+function · **exported** · L52–55
 
 - called by: [`rigTarget`](#s-rigTarget) · [`stepRig`](#s-stepRig) ×2 · [`bestHulk`](../mission/salvage.js.md#s-bestHulk) _js/mission/salvage.js_ · [`makeSalvage`](../mission/salvage.js.md#s-makeSalvage) _js/mission/salvage.js_ · [`makeSalvage>pick`](../mission/salvage.js.md#s-makeSalvage-pick) _js/mission/salvage.js_ ×2 · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
 
@@ -140,7 +140,7 @@ before the recorder is at risk.
 
 ### <a id="s-rigTarget"></a>`rigTarget(ship, lock=)`
 
-function · **exported** · L56–68
+function · **exported** · L57–69
 
 - calls: [`nextSection`](#s-nextSection) · [`rigRange`](#s-rigRange) · [`nearHulks`](../world/hulks.js.md#s-nearHulks) _js/world/hulks.js_
 - called by: [`stepRig`](#s-stepRig) · [`rigWanted`](../sim/sim.js.md#s-rigWanted) _js/sim/sim.js_
@@ -152,7 +152,7 @@ hulk, if it is in reach. Reach is measured to the hulk's skin (`d - h.r`).
 
 ### <a id="s-shed"></a>`shed(h, good, qty)`
 
-function · L70–89
+function · L71–90
 
 - calls: [`addChunk`](../world/debris.js.md#s-addChunk) _js/world/debris.js_ · [`hulkVelocity`](../world/hulks.js.md#s-hulkVelocity) _js/world/hulks.js_
 - called by: [`finishSection`](#s-finishSection) ×2 · [`stepRig`](#s-stepRig)
@@ -166,7 +166,7 @@ in `turrets.js` skips it — otherwise two controllers would mine like a seam).
 
 ### <a id="s-finishSection"></a>`finishSection(h, s, strip)`
 
-function · L91–113
+function · L92–114
 
 - calls: [`shed`](#s-shed) ×2
 - called by: [`stepRig`](#s-stepRig)
@@ -180,7 +180,7 @@ recorder is recovered on STRIP and destroyed on CUT. Fires `onRecorder` then
 
 ### <a id="s-stepRig"></a>`stepRig(ship, dt, time, lock=)`
 
-function · **exported** · L115–159
+function · **exported** · L116–160
 
 - calls: [`finishSection`](#s-finishSection) · [`hulkCut`](#s-hulkCut) · [`nextSection`](#s-nextSection) ×2 · [`rigBlocker`](#s-rigBlocker) · [`rigTarget`](#s-rigTarget) · [`shed`](#s-shed) · [`hulkVelocity`](../world/hulks.js.md#s-hulkVelocity) _js/world/hulks.js_ · [`removeHulk`](../world/hulks.js.md#s-removeHulk) _js/world/hulks.js_
 - called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_

@@ -9,6 +9,7 @@ export const RIG = {
   cutYield: 0.85,
   cutCargo: 0.5,
   lump: 6,
+  scrap: [0.35, 1],
   chunkLife: 1800,
   heatCut: 0.9,
   heatStrip: 1.5,
@@ -71,14 +72,14 @@ function shed(h, good, qty) {
   const q = Math.round(qty * 100) / 100;
   if (!(q > 0)) return null;
   hulkVelocity(h, _v);
-  const reach = h.r * 1.5 + 4;
+  const reach = Math.min(h.r * 1.5 + 4, (h.len ?? 6) * 0.6 + 0.6);
   const a = Math.random() * Math.PI * 2, b = (Math.random() - 0.5) * Math.PI;
   const dx = Math.cos(a) * Math.cos(b), dy = Math.sin(b), dz = Math.sin(a) * Math.cos(b);
-  const sp = 1 + Math.random() * 3;
+  const sp = 0.4 + Math.random() * 1.2;
   return addChunk({
     x: h.x + dx * reach, y: h.y + dy * reach, z: h.z + dz * reach,
     vx: _v.x + dx * sp, vy: _v.y + dy * sp, vz: _v.z + dz * sp,
-    r: 3 + Math.min(6, Math.sqrt(q)),
+    r: RIG.scrap[0] + Math.min(RIG.scrap[1] - RIG.scrap[0], Math.sqrt(q) * 0.13),
     good,
     remainingMass: q,
     salvage: true,

@@ -1,6 +1,6 @@
 # js/render/engine.js
 
-[index](../../../README.md) · 2840 lines · 130 symbols · 48 imports · 1 importers
+[index](../../../README.md) · 2948 lines · 138 symbols · 48 imports · 1 importers
 
 ## About
 
@@ -54,7 +54,7 @@ ship (the floating origin) and depth is logarithmic.
 | 48 | `../npc/traffic.js` | `traffic`, `HOSTILE_ROLES`, `LAW_ROLES` | [js/npc/traffic.js](../npc/traffic.js.md) |
 | 49 | `../net/worldsync.js` | `tickWorldSync`, `wireWorldSyncTest` | [js/net/worldsync.js](../net/worldsync.js.md) |
 | 50 | `../world/debris.js` | `chunks` | [js/world/debris.js](../world/debris.js.md) |
-| 51 | `../world/hulks.js` | `hulks` | [js/world/hulks.js](../world/hulks.js.md) |
+| 51 | `../world/hulks.js` | `hulks`, `hulkById`, `HULK`, `HULK_PARTS` | [js/world/hulks.js](../world/hulks.js.md) |
 | 52 | `../flight/rig.js` | `rig` | [js/flight/rig.js](../flight/rig.js.md) |
 | 53 | `../world/events/cataclysm.js` | `dirFbm`, `dirNoise`, `kelvinHex` | [js/world/events/cataclysm.js](../world/events/cataclysm.js.md) |
 | 54 | `../ui/tutorial.js` | `tickTutorial`, `wireTutorialTest` | [js/ui/tutorial.js](../ui/tutorial.js.md) |
@@ -73,11 +73,11 @@ ship (the floating origin) and depth is logarithmic.
 
 ## Effects
 
-- **dom.id** — `warp-flash` (mountGame:1371)
-- **event.listen** — `wheel on canvas → (inline)` (mountGame:1415) · `dblclick on canvas → (inline)` (mountGame:1420) · `pointerdown on canvas → onPointerDown` (mountGame:1506) · `pointermove on canvas → onPointerMove` (mountGame:1507) · `pointerup on canvas → onPointerUp` (mountGame:1508) · `pointercancel on canvas → onPointerUp` (mountGame:1509)
-- **event.unlisten** — `pointerdown on canvas → onPointerDown` (mountGame:2815) · `pointermove on canvas → onPointerMove` (mountGame:2816) · `pointerup on canvas → onPointerUp` (mountGame:2817) · `pointercancel on canvas → onPointerUp` (mountGame:2818)
-- **global.write** — `window.__lgMarkers` (mountGame>tick:2795) · `window.__lgGL` (mountGame:2803) · `window.__lgAttract` (mountGame:2806)
-- **storage.get** — `lgaa.attract` (mountGame:172) · `lgaa.rocks` (mountGame>rockQuality:1516)
+- **dom.id** — `warp-flash` (mountGame:1388)
+- **event.listen** — `wheel on canvas → (inline)` (mountGame:1432) · `dblclick on canvas → (inline)` (mountGame:1437) · `pointerdown on canvas → onPointerDown` (mountGame:1523) · `pointermove on canvas → onPointerMove` (mountGame:1524) · `pointerup on canvas → onPointerUp` (mountGame:1525) · `pointercancel on canvas → onPointerUp` (mountGame:1526)
+- **event.unlisten** — `pointerdown on canvas → onPointerDown` (mountGame:2921) · `pointermove on canvas → onPointerMove` (mountGame:2922) · `pointerup on canvas → onPointerUp` (mountGame:2923) · `pointercancel on canvas → onPointerUp` (mountGame:2924)
+- **global.write** — `window.__lgMarkers` (mountGame>tick:2901) · `window.__lgGL` (mountGame:2909) · `window.__lgAttract` (mountGame:2912)
+- **storage.get** — `lgaa.attract` (mountGame:176) · `lgaa.rocks` (mountGame>rockQuality:1533)
 
 ## Symbols
 
@@ -123,93 +123,114 @@ const · L65–65
 <!-- note:_dummy -->
 <!-- /note -->
 
-### <a id="s-_basisX"></a>`_basisX`
+### <a id="s-_wbox"></a>`_wbox`
 
 const · L66–66
+
+<!-- note:_wbox -->
+<!-- /note -->
+
+### <a id="s-_wc"></a>`_wc`
+
+const · L67–67
+
+<!-- note:_wc -->
+<!-- /note -->
+
+### <a id="s-_basisX"></a>`_basisX`
+
+const · L68–68
 
 <!-- note:_basisX -->
 <!-- /note -->
 
 ### <a id="s-_mouse"></a>`_mouse`
 
-const · L67–67
+const · L69–69
 
 <!-- note:_mouse -->
 <!-- /note -->
 
 ### <a id="s-_ray"></a>`_ray`
 
-const · L68–68
+const · L70–70
 
 <!-- note:_ray -->
 <!-- /note -->
 
 ### <a id="s-_mat"></a>`_mat`
 
-const · L69–69
+const · L71–71
 
 <!-- note:_mat -->
 <!-- /note -->
 
 ### <a id="s-_bp"></a>`_bp`
 
-const · L70–70
+const · L72–72
 
 <!-- note:_bp -->
 <!-- /note -->
 
 ### <a id="s-NEAR"></a>`NEAR`
 
-const · L72–72
+const · L74–74
 
 <!-- note:NEAR -->
 <!-- /note -->
 
 ### <a id="s-FAR"></a>`FAR`
 
-const · L73–73
+const · L75–75
 
 <!-- note:FAR -->
 <!-- /note -->
 
 ### <a id="s-STAR_SHELL"></a>`STAR_SHELL`
 
-const · L74–74
+const · L76–76
 
 <!-- note:STAR_SHELL -->
 <!-- /note -->
 
 ### <a id="s-MAX_ROCKS"></a>`MAX_ROCKS`
 
-const · L75–75
+const · L77–77
 
 <!-- note:MAX_ROCKS -->
 <!-- /note -->
 
 ### <a id="s-MAX_CHUNKS"></a>`MAX_CHUNKS`
 
-const · L76–76
+const · L78–78
 
 <!-- note:MAX_CHUNKS -->
 <!-- /note -->
 
+### <a id="s-MAX_SCRAP"></a>`MAX_SCRAP`
+
+const · L79–79
+
+<!-- note:MAX_SCRAP -->
+<!-- /note -->
+
 ### <a id="s-MAX_IMPACTORS"></a>`MAX_IMPACTORS`
 
-const · L77–77 · **never referenced**
+const · L80–80 · **never referenced**
 
 <!-- note:MAX_IMPACTORS -->
 <!-- /note -->
 
 ### <a id="s-MAX_SHOTS"></a>`MAX_SHOTS`
 
-const · L78–78
+const · L81–81
 
 <!-- note:MAX_SHOTS -->
 <!-- /note -->
 
 ### <a id="s-disposeObject"></a>`disposeObject(root, keep=)`
 
-function · L80–91
+function · L83–94
 
 - calls: [`disposeMat`](#s-disposeMat)
 - called by: [`mountGame`](#s-mountGame) · [`mountGame>clearWorld`](#s-mountGame-clearWorld) ×2 · [`mountGame>disposeRig`](#s-mountGame-disposeRig) · [`mountGame>rebuildBody`](#s-mountGame-rebuildBody) · [`mountGame>refreshOwnHull`](#s-mountGame-refreshOwnHull) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) ×2 · [`mountGame>syncRemotes`](#s-mountGame-syncRemotes) ×2 · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) ×2 · [`mountGame>updateStations`](#s-mountGame-updateStations)
@@ -219,17 +240,17 @@ function · L80–91
 
 ### <a id="s-disposeMat"></a>`disposeMat(mat)`
 
-function · L93–100
+function · L96–103
 
 - called by: [`disposeObject`](#s-disposeObject)
 
 <!-- note:disposeMat -->
-- L99 · `m.__disposed = true;` — a queued surface job for this material is skipped, not painted onto a dead mat
+- L102 · `m.__disposed = true;` — a queued surface job for this material is skipped, not painted onto a dead mat
 <!-- /note -->
 
 ### <a id="s-hexColor"></a>`hexColor(hex)`
 
-function · L102–104
+function · L105–107
 
 - called by: [`mountGame>applyStar`](#s-mountGame-applyStar) ×3 · [`mountGame>buildPlanet`](#s-mountGame-buildPlanet) ×2
 
@@ -238,7 +259,7 @@ function · L102–104
 
 ### <a id="s-_dematState"></a>`_dematState`
 
-const · L106–106
+const · L109–109
 
 <!-- note:_dematState -->
 Deck-plan transition: the forged hull goes to cyan wireframe and fades as
@@ -248,7 +269,7 @@ them touches nothing else.
 
 ### <a id="s-dematerialize"></a>`dematerialize(group, t)`
 
-function · L107–127
+function · L110–130
 
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
@@ -257,13 +278,13 @@ function · L107–127
 
 ### <a id="s-makeShipGroup"></a>`makeShipGroup(color, scale=, shipId=, seed=, detail=)`
 
-function · L129–134
+function · L132–137
 
 - calls: [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ ×2 · [`forgeShip`](../ships/shipforge.js.md#s-forgeShip) _js/ships/shipforge.js_
 - called by: [`mountGame`](#s-mountGame) · [`mountGame>refreshOwnHull`](#s-mountGame-refreshOwnHull) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncRemotes`](#s-mountGame-syncRemotes) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic)
 
 <!-- note:makeShipGroup -->
-- L130 · `const def = shipById(shipId) ?? shipById(DEFAULT_SHIP_ID);` — Hulls come from the fleet registry (shipdb.js) and are grown by the
+- L133 · `const def = shipById(shipId) ?? shipById(DEFAULT_SHIP_ID);` — Hulls come from the fleet registry (shipdb.js) and are grown by the
   forge (shipforge.js) over the ship generator in js/shipgen/ — same def +
   seed is the same ship on every client. The group's real length is the
   registry length (1 u = 10 m); `scale` stays a straight multiplier so old
@@ -272,9 +293,16 @@ function · L129–134
   silhouette and fittings, no sub-metre clutter, one draw per material.
 <!-- /note -->
 
+### <a id="s-PART_IDS"></a>`PART_IDS`
+
+const · L139–139
+
+<!-- note:PART_IDS -->
+<!-- /note -->
+
 ### <a id="s-hullBudget"></a>`hullBudget`
 
-const · L136–136
+const · L140–140
 
 <!-- note:hullBudget -->
 Generated hulls take tens of milliseconds to grow. A sky full of traffic
@@ -283,7 +311,7 @@ is built one hull per frame instead of all at once on arrival.
 
 ### <a id="s-drawRange"></a>`drawRange()`
 
-function · L137–137
+function · L141–141
 
 - calls: [`sensorRange`](../sim/sim.js.md#s-sensorRange) _js/sim/sim.js_
 - called by: [`meshRange`](#s-meshRange) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncProbeMeshes`](#s-mountGame-syncProbeMeshes) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) · [`mountGame>tick`](#s-mountGame-tick) ×3
@@ -296,7 +324,7 @@ canopy — the chart directory and its blips are how you find them.
 
 ### <a id="s-MESH_K"></a>`MESH_K`
 
-const · L138–138
+const · L142–142
 
 <!-- note:MESH_K -->
 What a MESH is built and drawn at, as opposed to what is known about. On a
@@ -312,7 +340,7 @@ trimming simulation detail to fix a rasteriser does nothing at all.
 
 ### <a id="s-meshRange"></a>`meshRange()`
 
-function · L139–139
+function · L143–143
 
 - calls: [`drawRange`](#s-drawRange)
 - called by: [`mountGame>syncContactMeshes`](#s-mountGame-syncContactMeshes) · [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) · [`mountGame>syncWorkDrones`](#s-mountGame-syncWorkDrones)
@@ -322,7 +350,7 @@ function · L139–139
 
 ### <a id="s-ROCK_DRAW_R"></a>`ROCK_DRAW_R`
 
-const · L140–140
+const · L144–144
 
 <!-- note:ROCK_DRAW_R -->
 Belt rocks resolve closer than hulls: they are drawn (and only exist for the
@@ -332,21 +360,21 @@ a cell never pops into the canopy fully formed.
 
 ### <a id="s-ROCK_FADE"></a>`ROCK_FADE`
 
-const · L141–141
+const · L145–145
 
 <!-- note:ROCK_FADE -->
 <!-- /note -->
 
 ### <a id="s-frameDt"></a>`frameDt`
 
-const · L142–142
+const · L146–146
 
 <!-- note:frameDt -->
 <!-- /note -->
 
 ### <a id="s-throttleCapOf"></a>`throttleCapOf()`
 
-function · L143–143
+function · L147–147
 
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
@@ -356,7 +384,7 @@ Plume length is throttle over the normal band; overdrive pins it wide open.
 
 ### <a id="s-orientCraft"></a>`orientCraft(group, yaw, pitch, roll)`
 
-function · L145–165
+function · L149–169
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_
 - called by: [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncRemotes`](#s-mountGame-syncRemotes) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) · [`mountGame>tick`](#s-mountGame-tick)
@@ -367,12 +395,12 @@ convention a three.js camera uses, so the cockpit lens can take this
 quaternion straight. (X cross Y must equal Z or the matrix is a reflection
 and setFromRotationMatrix quietly returns garbage.)
 
-- L147 · `_f.set(-f.x, -f.y, -f.z);` — local +Z points behind
+- L151 · `_f.set(-f.x, -f.y, -f.z);` — local +Z points behind
 <!-- /note -->
 
 ### <a id="s-mountGame"></a>`mountGame(canvas)`
 
-function · **exported** · L167–2840
+function · **exported** · L171–2948
 
 - calls: [`loadAria`](../aria/aria.js.md#s-loadAria) _js/aria/aria.js_ · [`wireAria`](../aria/aria.js.md#s-wireAria) _js/aria/aria.js_ · [`mountBakedData`](../bodygen/baked.js.md#s-mountBakedData) _js/bodygen/baked.js_ · [`grow`](../bodygen/grower.js.md#s-grow) _js/bodygen/grower.js_ · [`bindInput`](../core/input.js.md#s-bindInput) _js/core/input.js_ · [`wireWorldSyncTest`](../net/worldsync.js.md#s-wireWorldSyncTest) _js/net/worldsync.js_ · [`mountAttract`](attract.js.md#s-mountAttract) _js/render/attract.js_ · [`disposeObject`](#s-disposeObject) · [`makeShipGroup`](#s-makeShipGroup) · [`mountGame>extReset`](#s-mountGame-extReset) · [`mountGame>extZoom`](#s-mountGame-extZoom) · [`mountGame>inst`](#s-mountGame-inst) · [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld) · [`mountGame>releaseBody`](#s-mountGame-releaseBody) · [`mountGame>releaseImpactorBody`](#s-mountGame-releaseImpactorBody) · [`mountGame>resize`](#s-mountGame-resize) · [`mountGame>rockQuality`](#s-mountGame-rockQuality) · [`makeHoleFx`](holefx.js.md#s-makeHoleFx) _js/render/holefx.js_ · [`makeImpactFx`](impactfx.js.md#s-makeImpactFx) _js/render/impactfx.js_ · [`makeBloom`](postfx.js.md#s-makeBloom) _js/render/postfx.js_ · [`makeRockFx`](rockfx.js.md#s-makeRockFx) _js/render/rockfx.js_ · [`makeWarpFx`](warpfx.js.md#s-makeWarpFx) _js/render/warpfx.js_ · [`currentShipId`](../sim/sim.js.md#s-currentShipId) _js/sim/sim.js_ · [`wireControlsTest`](../sim/sim.js.md#s-wireControlsTest) _js/sim/sim.js_ · [`wireTutorialTest`](../ui/tutorial.js.md#s-wireTutorialTest) _js/ui/tutorial.js_ · [`makeGlowTexture`](../world/textures.js.md#s-makeGlowTexture) _js/world/textures.js_ · [`makeRingTexture`](../world/textures.js.md#s-makeRingTexture) _js/world/textures.js_
 - via [js/bodygen/grower.js](../bodygen/grower.js.md): `grow.then`
@@ -380,18 +408,18 @@ function · **exported** · L167–2840
 - effects: storage.get `lgaa.attract` · dom.id `warp-flash` · event.listen `wheel` · event.listen `dblclick` · event.listen `pointerdown` · event.listen `pointermove` · event.listen `pointerup` · event.listen `pointercancel` · global.write `window.__lgGL` · global.write `window.__lgAttract` · event.unlisten `pointerdown` · event.unlisten `pointermove` · event.unlisten `pointerup` · event.unlisten `pointercancel`
 
 <!-- note:mountGame -->
-- L170 · `const attractQuality = (() => {` — How much the title screen is allowed to spend. A forged hull costs tens
+- L174 · `const attractQuality = (() => {` — How much the title screen is allowed to spend. A forged hull costs tens
   of milliseconds once and a couple of thousand triangles a frame, and the
   nebula is one 2048x1024 canvas — cheap on a modern phone, not on a five
   year old one. The player can force it either way; otherwise it is judged
   on cores and whether the OS has been asked for less motion.
-- L208 · `const origin = { x: 0, y: 0, z: 0 };` — Origin of the rendered world, in sim coordinates.
-- L215 · `const sunLight = new THREE.DirectionalLight(0xffe8cc, 2.7);` — One directional light standing in for the star: at these distances a
+- L212 · `const origin = { x: 0, y: 0, z: 0 };` — Origin of the rendered world, in sim coordinates.
+- L219 · `const sunLight = new THREE.DirectionalLight(0xffe8cc, 2.7);` — One directional light standing in for the star: at these distances a
   point light's falloff is unusable, but the rays are parallel anyway.
-- L220 · `const starGeo = new THREE.BufferGeometry();` — --- star shell: parented to nothing, always centred on the camera ---
-- L245 · `const warpFx = makeWarpFx(scene, starPos, STAR_SHELL);` — The warp layers reuse the shell's own star positions, so the streaks smear
+- L224 · `const starGeo = new THREE.BufferGeometry();` — --- star shell: parented to nothing, always centred on the camera ---
+- L249 · `const warpFx = makeWarpFx(scene, starPos, STAR_SHELL);` — The warp layers reuse the shell's own star positions, so the streaks smear
   the sky that is actually there rather than a second one laid over it.
-- L276 · `const PROTO_VARIANTS = 2;` — --- asteroid field ------------------------------------------------------
+- L280 · `const PROTO_VARIANTS = 2;` — --- asteroid field ------------------------------------------------------
   
   Every rock in the belt is the asteroid generator's (0.3.02). The field used
   to be three hand-deformed icosahedra from js/world/rockgen.js wearing a tint, and
@@ -406,18 +434,18 @@ function · **exported** · L167–2840
   rocks close aboard still get their OWN grown body (below). Prototypes grow
   in the worker at launch; a class whose prototype has not landed yet simply
   does not draw for that second.
-- L306 · `}, () => {` — reset or cancelled — a relaunch files it again
-- L309 · `const asteroids = { get count() { return rockBuckets.reduce((s, b) => s + b.lods.reduce((n` — the old single-mesh handle the console and the smokes reach for; `count`
+- L310 · `}, () => {` — reset or cancelled — a relaunch files it again
+- L313 · `const asteroids = { get count() { return rockBuckets.reduce((s, b) => s + b.lods.reduce((n` — the old single-mesh handle the console and the smokes reach for; `count`
   is the whole field so "are there rocks on screen" still answers
-- L310 · `const PROTO_LOD_ANG = [0.1, 0.03];` — angular radius (radius / distance) under which a rock drops to the next
+- L314 · `const PROTO_LOD_ANG = [0.1, 0.03];` — angular radius (radius / distance) under which a rock drops to the next
   lattice: on a phone-width canopy about eighty pixels across, then about twenty-five
-- L311 · `const LOD_HYST = 1.2;` — 0.3.62: a lattice change has to clear its threshold by this factor
-- L312 · `const lodMemo = new Map();` — rock key → the lattice it drew at last frame
-- L314 · `const grown = new Set();` — Dust. Belt haze was cut in the chart patch because a static Points band
+- L315 · `const LOD_HYST = 1.2;` — 0.3.62: a lattice change has to clear its threshold by this factor
+- L316 · `const lodMemo = new Map();` — rock key → the lattice it drew at last frame
+- L318 · `const grown = new Set();` — Dust. Belt haze was cut in the chart patch because a static Points band
   read as fog; this is the opposite idea — a small parallax cloud that only
   exists within a few hundred units of the hull, so it reads as speed
   through the rocks rather than as weather.
-- L314 · `const grown = new Set();` — --- grown bodies -------------------------------------------------------
+- L318 · `const grown = new Set();` — --- grown bodies -------------------------------------------------------
   
   The instanced field above draws four hundred rocks for thirty thousand
   triangles, which is what makes a belt a belt on a phone. It is also a lie
@@ -436,9 +464,9 @@ function · **exported** · L167–2840
   (js/bodygen/grower.js, bake.js); mounted one per frame. The outcrop
   crystals, the seated rubble and the ice clouds are gone — the seams are in
   the surface now, and a stationary rock does not wear a debris ring.
-- L316 · `const BODY_R = 3400;` — grow a body inside this of the hull
-- L317 · `const BODY_MIN_R = 55;` — …and only for rocks big enough to look at
-- L318 · `const BODY_KEEP = 0.34;` — 0.3.28 — hysteresis on the grown set.
+- L320 · `const BODY_R = 3400;` — grow a body inside this of the hull
+- L321 · `const BODY_MIN_R = 55;` — …and only for rocks big enough to look at
+- L322 · `const BODY_KEEP = 0.34;` — 0.3.28 — hysteresis on the grown set.
   
   A grown body is the rock's OWN geometry; everything else in the belt draws
   as one of a handful of class prototypes. So a rock crossing the budget
@@ -456,26 +484,26 @@ function · **exported** · L167–2840
   length where you are looking at it. And a body that has just been mounted
   is not evicted for `HOLD` seconds, so a burst of arrivals cannot evict
   each other in turn.
-- L318 · `const BODY_KEEP = 0.34;` — an incumbent ranks as this much of BODY_R nearer than it is
-- L319 · `const BODY_FAR = 1.45;` — …and keeps its body until this multiple of BODY_R
-- L320 · `const BODY_HOLD = 1.5;` — s a fresh mount is safe from eviction
-- L321 · `const bodies = new Map();` — rock key → { group, unit, mesh, mount, assay, cls, used }
-- L334 · `const dustMat = new THREE.PointsMaterial({ map: glowTex, color: 0x9d968b, size: 3, sizeAtt` — soft round motes: a bare PointsMaterial draws a square, and close to the hull those read as white tiles
-- L353 · `const shotGeo = new THREE.BufferGeometry();` — --- ordnance ---
-- L363 · `const BEAM_SEGS = 8;` — --- mining laser ------------------------------------------------------
+- L322 · `const BODY_KEEP = 0.34;` — an incumbent ranks as this much of BODY_R nearer than it is
+- L323 · `const BODY_FAR = 1.45;` — …and keeps its body until this multiple of BODY_R
+- L324 · `const BODY_HOLD = 1.5;` — s a fresh mount is safe from eviction
+- L325 · `const bodies = new Map();` — rock key → { group, unit, mesh, mount, assay, cls, used }
+- L338 · `const dustMat = new THREE.PointsMaterial({ map: glowTex, color: 0x9d968b, size: 3, sizeAtt` — soft round motes: a bare PointsMaterial draws a square, and close to the hull those read as white tiles
+- L357 · `const shotGeo = new THREE.BufferGeometry();` — --- ordnance ---
+- L367 · `const BEAM_SEGS = 8;` — --- mining laser ------------------------------------------------------
   A segmented cutter beam from the emitter under the lens to the rock,
   chips flying off the cut, a dust plume drifting away from it — and when
   the cutter drops out, the beam breaks into its sections and each one
   shrinks to nothing in turn instead of just blinking off.
-- L365 · `beamSegGeo.rotateX(Math.PI / 2);` — axis along +Z so lookAt aims it
-- L373 · `const core = new THREE.Mesh(beamSegGeo, new THREE.MeshBasicMaterial({ color: 0xfff6e2, tra` — the core is drawn normally, not additively, so it still reads against a sunlit face
-- L383 · `const MAX_CHIPS = 160;` — chips: a pool of points flying off the cut
-- L386 · `const chipAge = new Float32Array(MAX_CHIPS).fill(-1);` — <0 = free
-- L396 · `const MAX_PUFFS = 14;` — dust: a few soft puffs that swell and thin out
-- L406 · `const chunkGeo = new THREE.IcosahedronGeometry(1, 0);` — --- debris ---
-- L412 · `debrisMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_CHUNKS` — per-instance colour allocated up front so fresh, still-glowing rubble can
+- L369 · `beamSegGeo.rotateX(Math.PI / 2);` — axis along +Z so lookAt aims it
+- L377 · `const core = new THREE.Mesh(beamSegGeo, new THREE.MeshBasicMaterial({ color: 0xfff6e2, tra` — the core is drawn normally, not additively, so it still reads against a sunlit face
+- L387 · `const MAX_CHIPS = 160;` — chips: a pool of points flying off the cut
+- L390 · `const chipAge = new Float32Array(MAX_CHIPS).fill(-1);` — <0 = free
+- L400 · `const MAX_PUFFS = 14;` — dust: a few soft puffs that swell and thin out
+- L410 · `const chunkGeo = new THREE.IcosahedronGeometry(1, 0);` — --- debris ---
+- L416 · `debrisMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_CHUNKS` — per-instance colour allocated up front so fresh, still-glowing rubble can
   be tinted without forcing a shader recompile mid-catastrophe
-- L418 · `const impBodies = new Map();` — --- super asteroids -----------------------------------------------------
+- L435 · `const impBodies = new Map();` — --- super asteroids -----------------------------------------------------
   
   The rogue rocks were the one thing the rock rebuild missed. They were an
   80-face IcosahedronGeometry(1, 1) in flat brown, drawn eight at a time
@@ -494,67 +522,67 @@ function · **exported** · L167–2840
   paid once per rock per session and never in a burst. Until a body exists —
   and at the quality floor, where none are grown — the rock wears a shared
   placeholder hull that is at least deformed and textured rather than round.
-- L418 · `const impBodies = new Map();` — impactor id → { group, unit, mesh, mount, assay, cls, r }
-- L420 · `const ROGUE_CLASSES = ["S", "S", "S", "C", "C", "C", "M", "M", "X", "B", "V", "P", "D", "E` — A rogue arrives from outside the system, so it is not drawn from a belt
+- L435 · `const impBodies = new Map();` — impactor id → { group, unit, mesh, mount, assay, cls, r }
+- L437 · `const ROGUE_CLASSES = ["S", "S", "S", "C", "C", "C", "M", "M", "X", "B", "V", "P", "D", "E` — A rogue arrives from outside the system, so it is not drawn from a belt
   band's shortlist — it can be anything, weighted the way the sky's rock
   population is. Deterministic on the rock's own seed, so the thing you
   catalogued as a metal body is still a metal body next time you see it.
-- L423 · `const _seenDrone = new Set();` — No stand-in hull any more: a rogue's body is requested the moment the rock
+- L440 · `const _seenDrone = new Set();` — No stand-in hull any more: a rogue's body is requested the moment the rock
   exists (tens of kilometres out) and lands from the worker in well under the
   time it takes to fly close enough to see it.
-- L423 · `const _seenDrone = new Set();` — --- stations: STATIONGEN hulls, grown once per port by the yard ---
-- L423 · `const _seenDrone = new Set();` — reused eviction scratch, see syncContactMeshes
-- L426 · `const flowMeshes = new Map();` — port heartbeat boats (hull pool instances), see syncFlow
-- L427 · `const navLights = new Map();` — running lights: a strobe per hull on the board, sized so it never drops under a few pixels — a
+- L440 · `const _seenDrone = new Set();` — --- stations: STATIONGEN hulls, grown once per port by the yard ---
+- L440 · `const _seenDrone = new Set();` — reused eviction scratch, see syncContactMeshes
+- L443 · `const flowMeshes = new Map();` — port heartbeat boats (hull pool instances), see syncFlow
+- L444 · `const navLights = new Map();` — running lights: a strobe per hull on the board, sized so it never drops under a few pixels — a
   30 m boat is a sub-pixel speck at 2 km, but its anti-collision light is not
-- L427 · `const navLights = new Map();` — id → { sprite, phase }
-- L456 · `const LAMP_FULL_R = 6000;` — A port's own lighting: full inside LAMP_FULL_R, out by LAMP_OUT_R. The
+- L444 · `const navLights = new Map();` — id → { sprite, phase }
+- L473 · `const LAMP_FULL_R = 6000;` — A port's own lighting: full inside LAMP_FULL_R, out by LAMP_OUT_R. The
   curve is eased so the last of it goes rather than lingering as a dim
   smudge, and LAMP_OUT_R sits inside sensor range on purpose — past it a
   port is a contact and a silhouette, not a light source.
-- L464 · `const STATION_ANIM_R = 45000;` — rings spin, lamps blink, drones sortie inside this
-- L486 · `const laneRigs = new Map();` — --- traffic lanes: the funnel out of the primary hangar mouth. Two strings of
+- L481 · `const STATION_ANIM_R = 45000;` — rings spin, lamps blink, drones sortie inside this
+- L503 · `const laneRigs = new Map();` — --- traffic lanes: the funnel out of the primary hangar mouth. Two strings of
   beads per lane along the zone's edges, a runner chasing along each (out on
   the exit lane, in on the entry lane), a translucent wedge per lane with its
   three ways ruled inside, gate rings at the mouth and the far end. Built in
   the hull's own frame and turned with it.
-- L489 · `const LANE_SHOW_R = LANE_DRAW_R;` — the rig is drawn only inside this of the lane itself (5 km), brightening as you close
-- L635 · `const floods = new THREE.PointLight(0xdfe8f5, 0, 4200, 1.4);` — --- hull floodlights ---
-- L638 · `const droneMeshes = new Map();` — --- contacts (drones) ---
-- L638 · `const droneMeshes = new Map();` — (The shared tetrahedron and cone that used to stand in for a drone whose
+- L506 · `const LANE_SHOW_R = LANE_DRAW_R;` — the rig is drawn only inside this of the lane itself (5 km), brightening as you close
+- L652 · `const floods = new THREE.PointLight(0xdfe8f5, 0, 4200, 1.4);` — --- hull floodlights ---
+- L655 · `const droneMeshes = new Map();` — --- contacts (drones) ---
+- L655 · `const droneMeshes = new Map();` — (The shared tetrahedron and cone that used to stand in for a drone whose
   design had not grown are gone — see syncContactMeshes. Nothing that flies
   is an abstract shape any more.)
-- L639 · `const probeMeshes = new Map();` — your survey probes in flight (droneforge "probe" design)
-- L640 · `const workMeshes = new Map();` — your work drones (drones/ops.js), one robot per drone
-- L641 · `const activeFX = [];` — declared up here so clearWorld can empty them: the FX sections below fill them
-- L641 · `const activeFX = [];` — impact FX, see spawnImpactFX
-- L642 · `const eventRigs = new Map();` — staged cataclysm rigs, see buildEventRig
-- L643 · `const bodyRings = new Map();` — the rings debris settles into, see stepBodyRings
-- L687 · `const texQueue = [];` — Surfaces are expensive to paint, so the world comes up flat-shaded and
+- L656 · `const probeMeshes = new Map();` — your survey probes in flight (droneforge "probe" design)
+- L657 · `const workMeshes = new Map();` — your work drones (drones/ops.js), one robot per drone
+- L658 · `const activeFX = [];` — declared up here so clearWorld can empty them: the FX sections below fill them
+- L658 · `const activeFX = [];` — impact FX, see spawnImpactFX
+- L659 · `const eventRigs = new Map();` — staged cataclysm rigs, see buildEventRig
+- L660 · `const bodyRings = new Map();` — the rings debris settles into, see stepBodyRings
+- L704 · `const texQueue = [];` — Surfaces are expensive to paint, so the world comes up flat-shaded and
   each body gets its real skin over the following frames.
-- L689 · `const texCache = new Map();` — 0.3.61 — painted skins outlive a rebuild of the SAME sky. The menu grows
+- L706 · `const texCache = new Map();` — 0.3.61 — painted skins outlive a rebuild of the SAME sky. The menu grows
   the backdrop, FLY AS grows the sky again, and every world used to come up
   flat and be repainted one a frame (100–300 ms each on a phone) all over
   again. A skin is a pure function of its arguments, so it is kept, marked
   `keep` so disposeObject passes it by, and let go when the sky changes.
-- L692 · `const CLOSE_IN = 8, CLOSE_OUT = 11;` — 0.3.73 — the world you are near gets a close-up skin (js/world/textures.js
+- L709 · `const CLOSE_IN = 8, CLOSE_OUT = 11;` — 0.3.73 — the world you are near gets a close-up skin (js/world/textures.js
   planetPainter): same surface, 1536 px across and two more octaves, painted
   a few rows a frame once the sky's own skins are done. One world at a time;
   it hands the ordinary skin back when you leave. Tier 0–1 devices skip it.
-- L692 · `const CLOSE_IN = 8, CLOSE_OUT = 11;` — radii from the centre: start painting / let go (spawn sits at ~4.6)
-- L966 · `let beltHaze = null;` — --- belt haze: the belts as a band you can see from anywhere ---------
+- L709 · `const CLOSE_IN = 8, CLOSE_OUT = 11;` — radii from the centre: start painting / let go (spawn sits at ~4.6)
+- L983 · `let beltHaze = null;` — --- belt haze: the belts as a band you can see from anywhere ---------
   A cloud of faint points in each belt annulus, seeded per sky. Rocks
   proper are diced out of field.js when you are inside; this is the
   far view, so the belt reads as a place before you reach it.
-- L995 · `let shipId = currentShipId();` — Own hull — only drawn in the external camera mode. Forged from the
+- L1012 · `let shipId = currentShipId();` — Own hull — only drawn in the external camera mode. Forged from the
   pilot's issued hull, seeded by callsign, and re-forged on promotion.
-- L1020 · `const fxRingGeo = new THREE.RingGeometry(0.88, 1, 64);` — ---- impact destruction FX --------------------------------------------
+- L1037 · `const fxRingGeo = new THREE.RingGeometry(0.88, 1, 64);` — ---- impact destruction FX --------------------------------------------
   The sim queues strikes (sim.impactFX); this drains them into animated
   meshes parented to the planet's own group, so the waves ride the spin:
   a flash at the site, shock rings walking outward across the surface, a
   blast dome for the cataclysms, and a glowing scar that cools into the
   dark crater the rebuild draws. Shared unit geometry, per-FX materials.
-- L1124 · `` const SHELL_VERT = ` `` — ---- staged cataclysms & the lit sky ------------------------------------
+- L1141 · `` const SHELL_VERT = ` `` — ---- staged cataclysms & the lit sky ------------------------------------
   sim.events carries the live curve (see js/world/events/cataclysm.js); this turns each
   one into geometry that lives for the whole event rather than a one-shot
   puff: an incandescent core, a vapour plume that balloons and cools, a
@@ -565,15 +593,15 @@ function · **exported** · L167–2840
   lights follow the brightest events, so a world dying BEHIND you rim-lights
   your hull from behind and the exposure lifts — you see it happen without
   seeing it. That is what a real transient does to a real eye.
-- L1281 · `const eventLights = [];` — ---- the sky lights up -------------------------------------------------
-- L1373 · `let camMode = 0;` — 0 = cockpit FPV, 1 = external
-- L1393 · `const ext = { yaw: 0.55, pitch: 0.22, dist: 4.2, panX: 0, panY: 0 };` — --- external camera: orbit / pan / zoom around the hull ---------------
+- L1298 · `const eventLights = [];` — ---- the sky lights up -------------------------------------------------
+- L1390 · `let camMode = 0;` — 0 = cockpit FPV, 1 = external
+- L1410 · `const ext = { yaw: 0.55, pitch: 0.22, dist: 4.2, panX: 0, panY: 0 };` — --- external camera: orbit / pan / zoom around the hull ---------------
   One finger (or the mouse) orbits, the wheel or a pinch zooms, two
   fingers together pan the point the camera looks at. Angles are in the
   hull's own frame so the view rides the ship through a turn.
-- L1537 · `const bakeTier = bodyBudget >= 18 ? "high" : bodyBudget >= 10 ? "full" : bodyBudget > 0 ?` — The bake tier off the same budget that decides how many bodies there are:
+- L1554 · `const bakeTier = bodyBudget >= 18 ? "high" : bodyBudget >= 10 ? "full" : bodyBudget > 0 ?` — The bake tier off the same budget that decides how many bodies there are:
   a device carrying four gets coarser ones than a device carrying eighteen.
-- L1543 · `const shapes = new Map();` — 0.3.62 — ONE ROCK, ONE SHAPE.
+- L1560 · `const shapes = new Map();` — 0.3.62 — ONE ROCK, ONE SHAPE.
   
   Reported: a rock turned into a different rock as you closed on it, and the
   belt kept rebuilding. Both were by design. Far away a rock drew as its
@@ -595,34 +623,47 @@ function · **exported** · L167–2840
   geometry with its own material only for its tint, which is the instance's
   tint to the digit. Nothing is regrown as you fly; a rock changes only when
   something happens to it (worn by the cutter, shattered, struck).
-- L1543 · `const shapes = new Map();` — `${cls}:${v}` → { mount, built, unitR, owned }
-- L2035 · `const sdroneGlow = new THREE.SpriteMaterial({ map: glowTex, color: 0x7df0ff, transparent:` — a port's interceptors: a blue dart with a plume, nose along its velocity
-- L2037 · `const beamMat = new THREE.MeshBasicMaterial({ color: 0x7fe0ff, transparent: true, opacity:` — the tractor: a pulsing beam from the mouth to the hull while port control has the helm
-- L2067 · `const _dLook = new THREE.Vector3();` — Remote drones are robots (droneforge.js over js/robotgen/): a port's interceptors and gun
+- L1560 · `const shapes = new Map();` — `${cls}:${v}` → { mount, built, unitR, owned }
+- L2076 · `const sdroneGlow = new THREE.SpriteMaterial({ map: glowTex, color: 0x7df0ff, transparent:` — a port's interceptors: a blue dart with a plume, nose along its velocity
+- L2078 · `const beamMat = new THREE.MeshBasicMaterial({ color: 0x7fe0ff, transparent: true, opacity:` — the tractor: a pulsing beam from the mouth to the hull while port control has the helm
+- L2108 · `const _dLook = new THREE.Vector3();` — Remote drones are robots (droneforge.js over js/robotgen/): a port's interceptors and gun
   drones are its own line's design, seeded by the port's name. A contact flies the old
   placeholder for the frame or two until its design is grown, then swaps.
-- L2106 · `const workBeamMat = new THREE.LineBasicMaterial({ color: 0xffa24a, transparent: true, opac` — Your work drones: drawn inside draw range and off the clamps; a cutter beam while mining.
-- L2160 · `const _pDir = new THREE.Vector3();` — Your survey probes: drawn while they are in flight and inside draw range.
-- L2263 · `const _liveFlow = new Set();` — The flow: port heartbeat boats, drawn from the hull pool. An instance
+- L2147 · `const workBeamMat = new THREE.LineBasicMaterial({ color: 0xffa24a, transparent: true, opac` — Your work drones: drawn inside draw range and off the clamps; a cutter beam while mining.
+- L2201 · `const _pDir = new THREE.Vector3();` — Your survey probes: drawn while they are in flight and inside draw range.
+- L2304 · `const _liveFlow = new Set();` — The flow: port heartbeat boats, drawn from the hull pool. An instance
   shares its template's geometry — never run the disposer on one.
-- L2346 · `const edgeBuf = [];` — Off-screen candidates, reused each HUD pass. There is no far-contact
+- L2452 · `const edgeBuf = [];` — Off-screen candidates, reused each HUD pass. There is no far-contact
   buffer any more: the canopy names nothing it cannot see on sensors, so
   there is no tier beyond `drawRange()` to rank.
-- L2347 · `const _relById = new Map();` — contact id → relation, rebuilt per HUD pass
-- L2348 · `const EDGE_M = 7;` — % inset of an off-screen marker from the edge
-- L2349 · `const EDGE_NEAR_R = 70000;` — and anything this close gets one whatever it is
-- L2803 · `window.__lgGL = { scene, camera, renderer, worldRoot, sunGroup, sun, planets, origin, aste` — dev handle — handy when the sky looks wrong
-- L2805 · `const attract = mountAttract({ scene, camera, canvas, worldRoot, reduced, quality: attract` — The title card used to look out on an empty starfield: the menu camera sat
+- L2453 · `const _relById = new Map();` — contact id → relation, rebuilt per HUD pass
+- L2454 · `const EDGE_M = 7;` — % inset of an off-screen marker from the edge
+- L2455 · `const EDGE_NEAR_R = 70000;` — and anything this close gets one whatever it is
+- L2909 · `window.__lgGL = { scene, camera, renderer, worldRoot, sunGroup, sun, planets, origin, aste` — dev handle — handy when the sky looks wrong
+- L2911 · `const attract = mountAttract({ scene, camera, canvas, worldRoot, reduced, quality: attract` — The title card used to look out on an empty starfield: the menu camera sat
   twenty-six star-radii out and aimed at the barycentre, so every world in
   the sky rendered at under a pixel. The attract director reframes that same
   scene onto the best world in it and hangs one real forged hull in the
   foreground. It owns only what it adds, and it comes down the moment the
   sim launches.
+
+- L422 · `const scrapGeo = new THREE.BoxGeometry(2.2, 0.16, 1.4);` — 0.3.92 — what the rig sheds is hull plate, not rock. It was drawn with the
+  debris icosahedron at 3–9 u a side, off a hull 2–8 u long: "random
+  geometric shapes" bigger than the ship they came from. A plate is a plate:
+  thin, a fraction of the hull's length, the colour of what it is.
+- L2339 · `const HULK_PAINT = "#84756a";` — 0.3.92 — a hulk has to look like one. It was the live hull, whole, in a
+  paint a shade off black: at the range the rig works from it was a dot,
+  and up close an intact ship. Now it is scorched rather than invisible,
+  torn where it was hit, smouldering, and it comes apart from the stern as
+  the rig takes its sections — the bridge, as in the rig's own order, last.
+- L2345 · `const wreckMats = new Map();` — a dead hull has no lamps and is as often as not on the night side of
+  something: a little of its own warmth keeps the shape readable there.
+  One copy of each material for every hulk, never the live ships' own.
 <!-- /note -->
 
 #### <a id="s-mountGame-rel"></a>`mountGame>rel(x, y, z, obj)`
 
-function · L209–209
+function · L213–213
 
 - called by: [`mountGame>syncContactMeshes`](#s-mountGame-syncContactMeshes) · [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncProbeMeshes`](#s-mountGame-syncProbeMeshes) · [`mountGame>syncRemotes`](#s-mountGame-syncRemotes) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) · [`mountGame>syncWorkDrones`](#s-mountGame-syncWorkDrones) · [`mountGame>tick`](#s-mountGame-tick) ×6 · [`mountGame>updateLanes`](#s-mountGame-updateLanes) · [`mountGame>updateStations`](#s-mountGame-updateStations)
 
@@ -631,7 +672,7 @@ function · L209–209
 
 #### <a id="s-mountGame-inst"></a>`mountGame>inst(geo)`
 
-function · L291–300
+function · L295–304
 
 - called by: [`mountGame`](#s-mountGame)
 
@@ -640,14 +681,14 @@ function · L291–300
 
 #### <a id="s-mountGame-count"></a>`mountGame.count()`
 
-prop · L309–309
+prop · L313–313
 
 <!-- note:mountGame.count -->
 <!-- /note -->
 
 #### <a id="s-mountGame-rogueClass"></a>`mountGame>rogueClass(m)`
 
-function · L421–421
+function · L438–438
 
 - called by: [`mountGame>impactorBody`](#s-mountGame-impactorBody)
 
@@ -656,16 +697,16 @@ function · L421–421
 
 #### <a id="s-mountGame-navLightFor"></a>`mountGame>navLightFor(id, color)`
 
-function · L429–441
+function · L446–458
 
 - called by: [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) ×2
 
 <!-- note:mountGame>navLightFor -->
 <!-- /note -->
 
-#### <a id="s-mountGame-placeNavLight"></a>`mountGame>placeNavLight(L, x, y, z, t, d)`
+#### <a id="s-mountGame-placeNavLight"></a>`mountGame>placeNavLight(L, x, y, z, t, d, floor=)`
 
-function · L442–448
+function · L459–465
 
 - called by: [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) ×2
 
@@ -674,7 +715,7 @@ function · L442–448
 
 #### <a id="s-mountGame-dropNavLight"></a>`mountGame>dropNavLight(id)`
 
-function · L449–455
+function · L466–472
 
 - called by: [`mountGame>clearWorld`](#s-mountGame-clearWorld) · [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) ×2 · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) ×3
 
@@ -683,7 +724,7 @@ function · L449–455
 
 #### <a id="s-mountGame-lampLevel"></a>`mountGame>lampLevel(d)`
 
-function · L458–463
+function · L475–480
 
 - called by: [`mountGame>updateStations`](#s-mountGame-updateStations)
 
@@ -692,18 +733,18 @@ function · L458–463
 
 #### <a id="s-mountGame-makeStation"></a>`mountGame>makeStation(st)`
 
-function · L466–476
+function · L483–493
 
 - calls: [`ensureBuilt`](../station/stationyard.js.md#s-ensureBuilt) _js/station/stationyard.js_
 - called by: [`mountGame>updateStations`](#s-mountGame-updateStations)
 
 <!-- note:mountGame>makeStation -->
-- L471 · `const proxy = new THREE.Mesh(new THREE.SphereGeometry(Math.max(20, st.radius), 12, 8), new` — what a tap hits: an unseen sphere the size of the hull
+- L488 · `const proxy = new THREE.Mesh(new THREE.SphereGeometry(Math.max(20, st.radius), 12, 8), new` — what a tap hits: an unseen sphere the size of the hull
 <!-- /note -->
 
 #### <a id="s-mountGame-dropProxy"></a>`mountGame>dropProxy(holder)`
 
-function · L477–484
+function · L494–501
 
 - called by: [`mountGame>clearWorld`](#s-mountGame-clearWorld) · [`mountGame>updateStations`](#s-mountGame-updateStations)
 
@@ -713,22 +754,22 @@ the tap sphere is the engine's own: freed with the holder, and off the pick list
 
 #### <a id="s-mountGame-makeLanes"></a>`mountGame>makeLanes(st)`
 
-function · L491–572
+function · L508–589
 
 - calls: [`laneCentre`](../npc/lanes.js.md#s-laneCentre) _js/npc/lanes.js_ · [`lanePoint`](../npc/lanes.js.md#s-lanePoint) _js/npc/lanes.js_ ×2 · [`spreadAt`](../npc/lanes.js.md#s-spreadAt) _js/npc/lanes.js_ · [`stationLane`](../npc/lanes.js.md#s-stationLane) _js/npc/lanes.js_ · [`mountGame>makeLanes>edge`](#s-mountGame-makeLanes-edge) ×2
 - called by: [`mountGame>updateStations`](#s-mountGame-updateStations)
 
 <!-- note:mountGame>makeLanes -->
-- L494 · `const origin0 = { x: 0, y: 0, z: 0, seed: st.seed, radius: st.radius, port: st.portLocal ?` — the rig lives in the unrotated hull frame; updateLanes yaws it with the port
-- L508 · `const strings = [];` — marker beads: two strings per lane, along the zone's outer edges
-- L508 · `const strings = [];` — { which, lat }
-- L529 · `for (const which of lanes) {` — the coloured zones: a translucent wedge per lane, three ways ruled inside
-- L557 · `const yaw = Math.atan2(f.dir.x, f.dir.z);` — gates: a ring at the mouth end and at the far end of each lane, sized to the zone there
+- L511 · `const origin0 = { x: 0, y: 0, z: 0, seed: st.seed, radius: st.radius, port: st.portLocal ?` — the rig lives in the unrotated hull frame; updateLanes yaws it with the port
+- L525 · `const strings = [];` — marker beads: two strings per lane, along the zone's outer edges
+- L525 · `const strings = [];` — { which, lat }
+- L546 · `for (const which of lanes) {` — the coloured zones: a translucent wedge per lane, three ways ruled inside
+- L574 · `const yaw = Math.atan2(f.dir.x, f.dir.z);` — gates: a ring at the mouth end and at the far end of each lane, sized to the zone there
 <!-- /note -->
 
 ##### <a id="s-mountGame-makeLanes-edge"></a>`mountGame>makeLanes>edge(which, u, latK, vertK, out)`
 
-function · L498–507
+function · L515–524
 
 - calls: [`laneCentre`](../npc/lanes.js.md#s-laneCentre) _js/npc/lanes.js_ · [`spreadAt`](../npc/lanes.js.md#s-spreadAt) _js/npc/lanes.js_
 - called by: [`mountGame>makeLanes`](#s-mountGame-makeLanes) ×2
@@ -738,28 +779,28 @@ function · L498–507
 
 #### <a id="s-mountGame-updateLanes"></a>`mountGame>updateLanes(t)`
 
-function · L573–599
+function · L590–616
 
 - calls: [`beadLit`](../npc/lanes.js.md#s-beadLit) _js/npc/lanes.js_ · [`laneDistance`](../npc/lanes.js.md#s-laneDistance) _js/npc/lanes.js_ · [`mountGame>rel`](#s-mountGame-rel)
 - via [js/station/stations.js](../station/stations.js.md): `stations.find`
 - called by: [`mountGame>updateStations`](#s-mountGame-updateStations)
 
 <!-- note:mountGame>updateLanes -->
-- L574 · `if (!sim.ui?.lanesDrawn) { for (const [, g] of laneRigs) g.visible = false; return; }` — the lane rigs are a chart overlay now (CMD › Flight › Lane rigs): port control flies the
+- L591 · `if (!sim.ui?.lanesDrawn) { for (const [, g] of laneRigs) g.visible = false; return; }` — the lane rigs are a chart overlay now (CMD › Flight › Lane rigs): port control flies the
   lane for you, so by default nothing is drawn — the geometry still steers the autopilot
-- L580 · `const d = laneDistance(st, sim.ship.pos);` — the lanes are an approach aid, not a landmark: nothing past LANE_SHOW_R of the lane itself, fading in from there
+- L597 · `const d = laneDistance(st, sim.ship.pos);` — the lanes are an approach aid, not a landmark: nothing past LANE_SHOW_R of the lane itself, fading in from there
 <!-- /note -->
 
 #### <a id="s-mountGame-updateStations"></a>`mountGame>updateStations(dt)`
 
-function · L601–633
+function · L618–650
 
 - calls: [`disposeObject`](#s-disposeObject) · [`mountGame>dropProxy`](#s-mountGame-dropProxy) · [`mountGame>lampLevel`](#s-mountGame-lampLevel) · [`mountGame>makeLanes`](#s-mountGame-makeLanes) · [`mountGame>makeStation`](#s-mountGame-makeStation) · [`mountGame>rel`](#s-mountGame-rel) · [`mountGame>updateLanes`](#s-mountGame-updateLanes) · [`tick`](../stationgen/anim.js.md#s-tick) _js/stationgen/anim.js_ ×2 · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - via [js/station/stations.js](../station/stations.js.md): `stations.some`
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>updateStations -->
-- L617 · `if (m.visible && st.gen) {` — The hull is a shape out to STATION_DRAW_R; its LIGHTING is not. A port's
+- L634 · `if (m.visible && st.gen) {` — The hull is a shape out to STATION_DRAW_R; its LIGHTING is not. A port's
   gate lamps, roof floods, chase beads and mouth strips read at full
   strength on the approach and are gone well before sensor range, so a
   station stops being a smear of white dots visible from the far side of
@@ -768,22 +809,22 @@ function · L601–633
 
 #### <a id="s-mountGame-clearWorld"></a>`mountGame>clearWorld()`
 
-function · L645–671
+function · L662–688
 
 - calls: [`releaseDrones`](../drones/droneforge.js.md#s-releaseDrones) _js/drones/droneforge.js_ · [`disposeObject`](#s-disposeObject) ×2 · [`mountGame>disposeRig`](#s-mountGame-disposeRig) · [`mountGame>dropCloseUp`](#s-mountGame-dropCloseUp) · [`mountGame>dropNavLight`](#s-mountGame-dropNavLight) · [`mountGame>dropProxy`](#s-mountGame-dropProxy)
 - called by: [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
 
 <!-- note:mountGame>clearWorld -->
-- L646 · `for (const [, m] of stationMeshes) { scene.remove(m); dropProxy(m); }` — station ids restart at st1 every sky — never let a stale mesh answer to a new id.
+- L663 · `for (const [, m] of stationMeshes) { scene.remove(m); dropProxy(m); }` — station ids restart at st1 every sky — never let a stale mesh answer to a new id.
   The hulls themselves are the yard's: stations.js releases them with the roster.
-- L648 · `for (const fx of activeFX) for (const part of fx.parts) { fx.group.remove(part.mesh); if (` — FX are parented to planet groups that are about to go: nothing may keep pointing at them
-- L651 · `for (const [, m] of bodyRings) { m.parent?.remove(m); m.geometry.dispose(); m.material.dis` — body ids repeat across skies: a ring built for the last sky's radii must not answer to this one's
-- L653 · `for (const [, m] of droneMeshes) scene.remove(m);` — drones are clones of per-port designs (droneforge.js): out of the scene first, then free the designs
+- L665 · `for (const fx of activeFX) for (const part of fx.parts) { fx.group.remove(part.mesh); if (` — FX are parented to planet groups that are about to go: nothing may keep pointing at them
+- L668 · `for (const [, m] of bodyRings) { m.parent?.remove(m); m.geometry.dispose(); m.material.dis` — body ids repeat across skies: a ring built for the last sky's radii must not answer to this one's
+- L670 · `for (const [, m] of droneMeshes) scene.remove(m);` — drones are clones of per-port designs (droneforge.js): out of the scene first, then free the designs
 <!-- /note -->
 
 #### <a id="s-mountGame-applyStar"></a>`mountGame>applyStar(star)`
 
-function · L673–685
+function · L690–702
 
 - calls: [`hexColor`](#s-hexColor) ×3 · [`makePlanetTexture`](../world/textures.js.md#s-makePlanetTexture) _js/world/textures.js_
 - called by: [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
@@ -793,7 +834,7 @@ function · L673–685
 
 #### <a id="s-mountGame-dropCloseUp"></a>`mountGame>dropCloseUp()`
 
-function · L695–702
+function · L712–719
 
 - called by: [`mountGame>clearWorld`](#s-mountGame-clearWorld) · [`mountGame>stepCloseUp`](#s-mountGame-stepCloseUp)
 
@@ -802,19 +843,19 @@ function · L695–702
 
 #### <a id="s-mountGame-stepCloseUp"></a>`mountGame>stepCloseUp()`
 
-function · L703–729
+function · L720–746
 
 - calls: [`mountGame>dropCloseUp`](#s-mountGame-dropCloseUp) · [`mountGame>texArgs`](#s-mountGame-texArgs) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`planetPainter`](../world/textures.js.md#s-planetPainter) _js/world/textures.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>stepCloseUp -->
-- L711 · `if (!near || texQueue.length) return;` — the sky's own skins come first
-- L721 · `if (closeUp.painter.step(perf.tier >= 3 ? 4 : 2)) {` — ~7 ms a frame on a desktop core at 4 rows; a phone about 2–3×
+- L728 · `if (!near || texQueue.length) return;` — the sky's own skins come first
+- L738 · `if (closeUp.painter.step(perf.tier >= 3 ? 4 : 2)) {` — ~7 ms a frame on a desktop core at 4 rows; a phone about 2–3×
 <!-- /note -->
 
 #### <a id="s-mountGame-texArgs"></a>`mountGame>texArgs(b)`
 
-function · L730–730
+function · L747–747
 
 - called by: [`mountGame>stepCloseUp`](#s-mountGame-stepCloseUp) · [`mountGame>texKey`](#s-mountGame-texKey) · [`mountGame>tick`](#s-mountGame-tick)
 
@@ -823,7 +864,7 @@ function · L730–730
 
 #### <a id="s-mountGame-texKey"></a>`mountGame>texKey(b)`
 
-function · L731–731
+function · L748–748
 
 - calls: [`mountGame>texArgs`](#s-mountGame-texArgs)
 - called by: [`mountGame>buildPlanet`](#s-mountGame-buildPlanet) · [`mountGame>tick`](#s-mountGame-tick)
@@ -833,7 +874,7 @@ function · L731–731
 
 #### <a id="s-mountGame-texCacheFor"></a>`mountGame>texCacheFor(sky)`
 
-function · L732–737
+function · L749–754
 
 - called by: [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
 
@@ -842,7 +883,7 @@ function · L732–737
 
 #### <a id="s-mountGame-surfJag"></a>`mountGame>surfJag(seed, nx, ny, nz)`
 
-function · L739–741
+function · L756–758
 
 - calls: [`dirNoise`](../world/events/cataclysm.js.md#s-dirNoise) _js/world/events/cataclysm.js_
 - called by: [`mountGame>deformCratered`](#s-mountGame-deformCratered)
@@ -852,20 +893,20 @@ Deterministic per-vertex jitter, hashed off the QUANTIZED surface normal so
 the sphere's UV seam (duplicated vertices at the same position) jags the
 same way on both sides and never cracks open.
 
-- L740 · `return dirNoise(seed, nx, ny, nz, 4);` — kept as the low-frequency roughness term, but SMOOTH now: the old
+- L757 · `return dirNoise(seed, nx, ny, nz, 4);` — kept as the low-frequency roughness term, but SMOOTH now: the old
   version hashed every vertex independently, so neighbouring vertices got
   uncorrelated displacement and every damaged world grew a coat of
   spikes. dirNoise interpolates a lattice over the direction vector, so
   neighbours move together — rough, not hairy — and it is still a pure
   function of the unit normal, so duplicated UV-seam vertices agree.
-- L740 · `return dirNoise(seed, nx, ny, nz, 4);` — freq 4 puts ~3-4 vertices inside every noise cell at the damaged-world
+- L757 · `return dirNoise(seed, nx, ny, nz, 4);` — freq 4 puts ~3-4 vertices inside every noise cell at the damaged-world
   mesh density (96 segments), which is the difference between a rough
   rim and a pincushion
 <!-- /note -->
 
 #### <a id="s-mountGame-deformCratered"></a>`mountGame>deformCratered(geo, b, drawR)`
 
-function · L743–789
+function · L760–806
 
 - calls: [`mountGame>surfJag`](#s-mountGame-surfJag)
 - called by: [`mountGame>buildPlanet`](#s-mountGame-buildPlanet)
@@ -875,18 +916,18 @@ Real crater geometry: every recorded strike digs a bowl with a rough floor
 and a thrown-up rim, and scorches the ground it dug — so a hit world stops
 being a perfect sphere and big hits read as missing pieces on the limb.
 
-- L761 · `const rough = c.rough ?? 1;` — how sharp this basin still is — a slumped one is smooth
-- L764 · `disp -= (1 - u * u) * depth * (1 + j * 0.3);` — the bowl: parabolic floor, roughened, deepest at the middle
-- L767 · `const w = 1 - (u - 1) / 0.4;` — the thrown-up rim just past the lip, fading out. Smooth noise
+- L778 · `const rough = c.rough ?? 1;` — how sharp this basin still is — a slumped one is smooth
+- L781 · `disp -= (1 - u * u) * depth * (1 + j * 0.3);` — the bowl: parabolic floor, roughened, deepest at the middle
+- L784 · `const w = 1 - (u - 1) / 0.4;` — the thrown-up rim just past the lip, fading out. Smooth noise
   only — this term used to be per-vertex white noise, which is what
   turned a hard-hit world into a pincushion.
-- L774 · `disp = Math.max(-0.42, Math.min(0.16, disp));` — overlapping basins used to stack without limit and chew a world
+- L791 · `disp = Math.max(-0.42, Math.min(0.16, disp));` — overlapping basins used to stack without limit and chew a world
   down to 0.4 R in places. A body can lose a bite, not evaporate.
 <!-- /note -->
 
 #### <a id="s-mountGame-deformShatteredCore"></a>`mountGame>deformShatteredCore(geo, b, drawR)`
 
-function · L791–807
+function · L808–824
 
 - calls: [`dirFbm`](../world/events/cataclysm.js.md#s-dirFbm) _js/world/events/cataclysm.js_ · [`dirNoise`](../world/events/cataclysm.js.md#s-dirNoise) _js/world/events/cataclysm.js_
 - called by: [`mountGame>buildPlanet`](#s-mountGame-buildPlanet)
@@ -898,22 +939,22 @@ noise tear the core into an irregular lump.
 
 #### <a id="s-mountGame-buildPlanet"></a>`mountGame>buildPlanet(b, keepMap=)`
 
-function · L809–889
+function · L826–906
 
 - calls: [`hexColor`](#s-hexColor) ×2 · [`mountGame>deformCratered`](#s-mountGame-deformCratered) · [`mountGame>deformShatteredCore`](#s-mountGame-deformShatteredCore) · [`mountGame>texKey`](#s-mountGame-texKey) · [`remnantRadius`](../world/scale.js.md#s-remnantRadius) _js/world/scale.js_
 - called by: [`mountGame>rebuildBody`](#s-mountGame-rebuildBody) · [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
 
 <!-- note:mountGame>buildPlanet -->
-- L819 · `const cachedMap = keepMap ? null : texCache.get(texKey(b));` — a rebuild hands the painted skin across: craters are vertex colour, the surface is the same
-- L830 · `const seg = cratered || b.shattered ? 96 : b.radius > 1600 ? 64 : 44;` — a damaged world earns a denser mesh so the bowls resolve
-- L831 · `const drawR = remnantRadius(b);` — A shattered world is a core in a cloud, not a sphere.
-- L836 · `if (keepMap) mat.color.setRGB(1, 1, 1);` — the painted skin carries its own colour, as the surface job leaves it
-- L849 · `if (b.kind === "gas") {` — gas giants take no crater — the strike leaves a dark storm bruise instead
+- L836 · `const cachedMap = keepMap ? null : texCache.get(texKey(b));` — a rebuild hands the painted skin across: craters are vertex colour, the surface is the same
+- L847 · `const seg = cratered || b.shattered ? 96 : b.radius > 1600 ? 64 : 44;` — a damaged world earns a denser mesh so the bowls resolve
+- L848 · `const drawR = remnantRadius(b);` — A shattered world is a core in a cloud, not a sphere.
+- L853 · `if (keepMap) mat.color.setRGB(1, 1, 1);` — the painted skin carries its own colour, as the surface job leaves it
+- L866 · `if (b.kind === "gas") {` — gas giants take no crater — the strike leaves a dark storm bruise instead
 <!-- /note -->
 
 #### <a id="s-mountGame-buildOrbits"></a>`mountGame>buildOrbits()`
 
-function · L891–908
+function · L908–925
 
 - called by: [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
 
@@ -922,18 +963,18 @@ function · L891–908
 
 #### <a id="s-mountGame-buildBeacons"></a>`mountGame>buildBeacons()`
 
-function · L910–917
+function · L927–934
 
 - called by: [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
 
 <!-- note:mountGame>buildBeacons -->
-- L915 · `beacons.push({ id: b.id, mesh, def: b });` — carry the definition on the record: BEACONS.find() per beacon per
+- L932 · `beacons.push({ id: b.id, mesh, def: b });` — carry the definition on the record: BEACONS.find() per beacon per
   frame is loop-invariant work in the render loop
 <!-- /note -->
 
 #### <a id="s-mountGame-rebuildBody"></a>`mountGame>rebuildBody(id)`
 
-function · L919–944
+function · L936–961
 
 - calls: [`disposeObject`](#s-disposeObject) · [`mountGame>buildPlanet`](#s-mountGame-buildPlanet)
 - via [js/world/bodies.js](../world/bodies.js.md): `BODIES.find`
@@ -942,14 +983,14 @@ function · L919–944
 <!-- note:mountGame>rebuildBody -->
 Rebuilds one world in place after it has been hit.
 
-- L924 · `for (const fx of activeFX) if (fx.group === old.group) for (const part of fx.parts) old.gr` — FX riding the old group step off it before it is disposed and onto the new one after
-- L927 · `if (ring && ring.parent === old.group) old.group.remove(ring);` — stepBodyRings re-parents it
-- L928 · `const keepMap = old.mat.map;` — the painted skin survives the rebuild: only the mesh changes
+- L941 · `for (const fx of activeFX) if (fx.group === old.group) for (const part of fx.parts) old.gr` — FX riding the old group step off it before it is disposed and onto the new one after
+- L944 · `if (ring && ring.parent === old.group) old.group.remove(ring);` — stepBodyRings re-parents it
+- L945 · `const keepMap = old.mat.map;` — the painted skin survives the rebuild: only the mesh changes
 <!-- /note -->
 
 #### <a id="s-mountGame-rebuildWorld"></a>`mountGame>rebuildWorld()`
 
-function · L946–964
+function · L963–981
 
 - calls: [`mountGame>applyStar`](#s-mountGame-applyStar) · [`mountGame>buildBeacons`](#s-mountGame-buildBeacons) · [`mountGame>buildBeltHaze`](#s-mountGame-buildBeltHaze) · [`mountGame>buildOrbits`](#s-mountGame-buildOrbits) · [`mountGame>buildPlanet`](#s-mountGame-buildPlanet) · [`mountGame>clearWorld`](#s-mountGame-clearWorld) · [`mountGame>texCacheFor`](#s-mountGame-texCacheFor) · [`drainPool`](hullpool.js.md#s-drainPool) _js/render/hullpool.js_ · [`releaseInstance`](hullpool.js.md#s-releaseInstance) _js/render/hullpool.js_ · [`starBody`](../world/bodies.js.md#s-starBody) _js/world/bodies.js_
 - called by: [`mountGame`](#s-mountGame)
@@ -959,7 +1000,7 @@ function · L946–964
 
 #### <a id="s-mountGame-buildBeltHaze"></a>`mountGame>buildBeltHaze()`
 
-function · L967–991
+function · L984–1008
 
 - calls: [`mountGame>buildBeltHaze>rnd`](#s-mountGame-buildBeltHaze-rnd) ×4
 - called by: [`mountGame>rebuildWorld`](#s-mountGame-rebuildWorld)
@@ -972,7 +1013,7 @@ sim.showBeltHaze = true before a sky loads to get the far view back.
 
 ##### <a id="s-mountGame-buildBeltHaze-rnd"></a>`mountGame>buildBeltHaze>rnd()`
 
-function · L976–976
+function · L993–993
 
 - called by: [`mountGame>buildBeltHaze`](#s-mountGame-buildBeltHaze) ×4
 
@@ -981,7 +1022,7 @@ function · L976–976
 
 #### <a id="s-mountGame-refreshOwnHull"></a>`mountGame>refreshOwnHull()`
 
-function · L998–1010
+function · L1015–1027
 
 - calls: [`disposeObject`](#s-disposeObject) · [`makeShipGroup`](#s-makeShipGroup) · [`currentShipId`](../sim/sim.js.md#s-currentShipId) _js/sim/sim.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
@@ -991,7 +1032,7 @@ function · L998–1010
 
 #### <a id="s-mountGame-fxMat"></a>`mountGame>fxMat(color, opacity)`
 
-function · L1026–1028
+function · L1043–1045
 
 - called by: [`mountGame>spawnImpactFX`](#s-mountGame-spawnImpactFX) ×3
 
@@ -1000,7 +1041,7 @@ function · L1026–1028
 
 #### <a id="s-mountGame-placeOnSurface"></a>`mountGame>placeOnSurface(mesh, b, n, lift)`
 
-function · L1030–1033
+function · L1047–1050
 
 - called by: [`mountGame>spawnImpactFX`](#s-mountGame-spawnImpactFX) ×2
 
@@ -1009,24 +1050,24 @@ function · L1030–1033
 
 #### <a id="s-mountGame-spawnImpactFX"></a>`mountGame>spawnImpactFX(ev)`
 
-function · L1035–1101
+function · L1052–1118
 
 - calls: [`mountGame>easeOut`](#s-mountGame-easeOut) ×2 · [`mountGame>fxMat`](#s-mountGame-fxMat) ×3 · [`mountGame>placeOnSurface`](#s-mountGame-placeOnSurface) ×2 · [`mountGame>spawnImpactFX>add`](#s-mountGame-spawnImpactFX-add) ×5 · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - called by: [`mountGame>stepImpactFX`](#s-mountGame-stepImpactFX)
 
 <!-- note:mountGame>spawnImpactFX -->
-- L1042 · `const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xfff1d6, t` — the flash — every strike gets one
-- L1053 · `const rings = ev.tier === "cataclysm" ? 3 : 2;` — shock rings walking the surface, staggered
-- L1070 · `const scar = new THREE.Mesh(fxDiscGeo, fxMat(0xff6a2a, 0.85));` — the glowing scar that cools into the crater
-- L1081 · `if (ev.tier === "cataclysm" && !ev.outcome) {` — a cataclysm now gets the full staged rig (stepEventFX) instead of the
+- L1059 · `const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xfff1d6, t` — the flash — every strike gets one
+- L1070 · `const rings = ev.tier === "cataclysm" ? 3 : 2;` — shock rings walking the surface, staggered
+- L1087 · `const scar = new THREE.Mesh(fxDiscGeo, fxMat(0xff6a2a, 0.85));` — the glowing scar that cools into the crater
+- L1098 · `if (ev.tier === "cataclysm" && !ev.outcome) {` — a cataclysm now gets the full staged rig (stepEventFX) instead of the
   one-shot dome — this branch only still fires for the legacy path
-- L1082 · `const dome = new THREE.Mesh(fxDomeGeo, fxMat(0xffb36a, 0.4));` — the blast dome
-- L1093 · `const mat = p.mat;` — the world flinches: emissive spike rides on top of the thermal glow
+- L1099 · `const dome = new THREE.Mesh(fxDomeGeo, fxMat(0xffb36a, 0.4));` — the blast dome
+- L1110 · `const mat = p.mat;` — the world flinches: emissive spike rides on top of the thermal glow
 <!-- /note -->
 
 ##### <a id="s-mountGame-spawnImpactFX-add"></a>`mountGame>spawnImpactFX>add(mesh, anim)`
 
-function · L1040–1040
+function · L1057–1057
 
 - called by: [`mountGame>spawnImpactFX`](#s-mountGame-spawnImpactFX) ×5
 
@@ -1035,7 +1076,7 @@ function · L1040–1040
 
 #### <a id="s-mountGame-easeOut"></a>`mountGame>easeOut(u)`
 
-function · L1103–1105
+function · L1120–1122
 
 - called by: [`mountGame>spawnImpactFX`](#s-mountGame-spawnImpactFX) ×2
 
@@ -1044,7 +1085,7 @@ function · L1103–1105
 
 #### <a id="s-mountGame-stepImpactFX"></a>`mountGame>stepImpactFX(dtSim)`
 
-function · L1107–1122
+function · L1124–1139
 
 - calls: [`mountGame>spawnImpactFX`](#s-mountGame-spawnImpactFX)
 - via [js/sim/sim.js](../sim/sim.js.md): `sim.impactFX.shift`
@@ -1055,7 +1096,7 @@ function · L1107–1122
 
 #### <a id="s-mountGame-shellMat"></a>`mountGame>shellMat(hex, opacity, power)`
 
-function · L1140–1154
+function · L1157–1171
 
 - called by: [`mountGame>buildEventRig`](#s-mountGame-buildEventRig) ×3
 
@@ -1064,21 +1105,21 @@ function · L1140–1154
 
 #### <a id="s-mountGame-buildEventRig"></a>`mountGame>buildEventRig(ev)`
 
-function · L1161–1193
+function · L1178–1210
 
 - calls: [`mountGame>shellMat`](#s-mountGame-shellMat) ×3
 - via [js/flight/rig.js](../flight/rig.js.md): `rig.parts.pulses.push`
 - called by: [`mountGame>stepEventFX`](#s-mountGame-stepEventFX)
 
 <!-- note:mountGame>buildEventRig -->
-- L1167 · `const core = new THREE.Sprite(new THREE.SpriteMaterial({` — the incandescent core — the hottest, brightest thing in the event
-- L1174 · `const plume = new THREE.Mesh(evShellGeo, shellMat(0xfff0d8, 0.55, 1.6));` — the vapour plume: opaque and incandescent, then optically thin
-- L1178 · `const shell = new THREE.Mesh(evShellGeo, shellMat(0xffc07a, 0.9, 3.2));` — the blast shell — a rimmed bubble racing away from the site
+- L1184 · `const core = new THREE.Sprite(new THREE.SpriteMaterial({` — the incandescent core — the hottest, brightest thing in the event
+- L1191 · `const plume = new THREE.Mesh(evShellGeo, shellMat(0xfff0d8, 0.55, 1.6));` — the vapour plume: opaque and incandescent, then optically thin
+- L1195 · `const shell = new THREE.Mesh(evShellGeo, shellMat(0xffc07a, 0.9, 3.2));` — the blast shell — a rimmed bubble racing away from the site
 <!-- /note -->
 
 #### <a id="s-mountGame-disposeRig"></a>`mountGame>disposeRig(rig)`
 
-function · L1195–1199
+function · L1212–1216
 
 - calls: [`disposeObject`](#s-disposeObject)
 - via [js/flight/rig.js](../flight/rig.js.md): `rig.host.remove`
@@ -1089,55 +1130,55 @@ function · L1195–1199
 
 #### <a id="s-mountGame-stepEventFX"></a>`mountGame>stepEventFX()`
 
-function · L1203–1254
+function · L1220–1271
 
 - calls: [`mountGame>buildEventRig`](#s-mountGame-buildEventRig) · [`mountGame>disposeRig`](#s-mountGame-disposeRig) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`kelvinHex`](../world/events/cataclysm.js.md#s-kelvinHex) _js/world/events/cataclysm.js_
 - via [js/flight/rig.js](../flight/rig.js.md): `rig.group.getWorldPosition`, `rig.parts.pulses.forEach`
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>stepEventFX -->
-- L1225 · `const plume = rig.parts.plume;` — the plume balloons out and thins — never a hard-edged ball
-- L1242 · `rig.parts.pulses.forEach((ring, i) => {` — shock pulses walking out of the photosphere, staggered a third of a
+- L1242 · `const plume = rig.parts.plume;` — the plume balloons out and thins — never a hard-edged ball
+- L1259 · `rig.parts.pulses.forEach((ring, i) => {` — shock pulses walking out of the photosphere, staggered a third of a
   cycle apart so there is always one on its way out
 <!-- /note -->
 
 #### <a id="s-mountGame-stepBodyRings"></a>`mountGame>stepBodyRings()`
 
-function · L1256–1279
+function · L1273–1296
 
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>stepBodyRings -->
 ---- rings the debris settles into ------------------------------------
 
-- L1260 · `const p = b.kind === "star" ? { group: sunGroup } : planets.find((x) => x.id === b.id);` — the star is not in planets: its supernova remnant ring rides the sun group
-- L1275 · `const st = b.ring.settle ?? 0;` — invisible while it is still a chaotic torus, resolving into a sheet
+- L1277 · `const p = b.kind === "star" ? { group: sunGroup } : planets.find((x) => x.id === b.id);` — the star is not in planets: its supernova remnant ring rides the sun group
+- L1292 · `const st = b.ring.settle ?? 0;` — invisible while it is still a chaotic torus, resolving into a sheet
   only as the out-of-plane motion damps out
 <!-- /note -->
 
 #### <a id="s-mountGame-stepSkyLight"></a>`mountGame>stepSkyLight()`
 
-function · L1295–1340
+function · L1312–1357
 
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>stepSkyLight -->
-- L1307 · `l.distance = Math.max(g.radius * 900, 400000);` — generous reach — the point of this light is that it reaches YOU
-- L1311 · `const lift = sim.skyLift ?? 0;` — exposure and fill rise with the sky, then come back down like an eye.
+- L1324 · `l.distance = Math.max(g.radius * 900, 400000);` — generous reach — the point of this light is that it reaches YOU
+- L1328 · `const lift = sim.skyLift ?? 0;` — exposure and fill rise with the sky, then come back down like an eye.
   Deliberately restrained: the canopy white-out is a separate thing, and
   blowing the whole frame out hides the event instead of selling it.
-- L1321 · `const g0 = glows[0];` — Where the light is coming from, in screen terms. With nothing in frame
+- L1338 · `const g0 = glows[0];` — Where the light is coming from, in screen terms. With nothing in frame
   to catch a rim light, this is what tells you an event is off to your
   left, or squarely behind you: glare washing in from that edge.
-- L1328 · `const off = Math.atan2(lat, -_glareV.z) / Math.PI;` — 0 = dead ahead, 1 = square on the beam, back to 0 = dead astern
-- L1331 · `const reach = Math.min(1, off * 2.1);` — push the hot spot to the canopy edge as the source leaves the frame,
+- L1345 · `const off = Math.atan2(lat, -_glareV.z) / Math.PI;` — 0 = dead ahead, 1 = square on the beam, back to 0 = dead astern
+- L1348 · `const reach = Math.min(1, off * 2.1);` — push the hot spot to the canopy edge as the source leaves the frame,
   and let it fall back to an even wash once it is properly astern
-- L1337 · `lum: lift * (behind ? 0.55 : 0.85),` — squarely behind you reads as a general lift, not a hot edge
+- L1354 · `lum: lift * (behind ? 0.55 : 0.85),` — squarely behind you reads as a general lift, not a hot edge
 <!-- /note -->
 
 #### <a id="s-mountGame-audioState"></a>`mountGame>audioState()`
 
-function · L1342–1365
+function · L1359–1382
 
 - calls: [`batteryCap`](../flight/ship.js.md#s-batteryCap) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
@@ -1148,13 +1189,13 @@ that earns its keep: it turns falling toward something enormous into a
 drone that sags, which is mass made audible without a single number on
 screen.
 
-- L1344 · `const dom = sim.dominant;` — sim.dominant is the body itself and sim.domDist the range to its
+- L1361 · `const dom = sim.dominant;` — sim.dominant is the body itself and sim.domDist the range to its
   centre — the well is how far inside nine radii you have fallen.
 <!-- /note -->
 
 #### <a id="s-mountGame-resize"></a>`mountGame>resize()`
 
-function · L1375–1381
+function · L1392–1398
 
 - called by: [`mountGame`](#s-mountGame)
 
@@ -1163,7 +1204,7 @@ function · L1375–1381
 
 #### <a id="s-mountGame-extZoom"></a>`mountGame>extZoom(f)`
 
-function · L1400–1402
+function · L1417–1419
 
 - called by: [`mountGame`](#s-mountGame)
 
@@ -1172,7 +1213,7 @@ function · L1400–1402
 
 #### <a id="s-mountGame-extOrbit"></a>`mountGame>extOrbit(dx, dy)`
 
-function · L1403–1406
+function · L1420–1423
 
 - called by: [`mountGame>onPointerMove`](#s-mountGame-onPointerMove)
 
@@ -1181,7 +1222,7 @@ function · L1403–1406
 
 #### <a id="s-mountGame-extPan"></a>`mountGame>extPan(dx, dy)`
 
-function · L1407–1411
+function · L1424–1428
 
 - called by: [`mountGame>onPointerMove`](#s-mountGame-onPointerMove)
 
@@ -1190,7 +1231,7 @@ function · L1407–1411
 
 #### <a id="s-mountGame-extReset"></a>`mountGame>extReset()`
 
-function · L1412–1414
+function · L1429–1431
 
 - called by: [`mountGame`](#s-mountGame)
 
@@ -1199,28 +1240,28 @@ function · L1412–1414
 
 #### <a id="s-mountGame-pickAt"></a>`mountGame>pickAt(clientX, clientY)`
 
-function · L1422–1440
+function · L1439–1457
 
 - calls: [`acquireLock`](../sim/sim.js.md#s-acquireLock) _js/sim/sim.js_ ×2
 - called by: [`mountGame>onPointerUp`](#s-mountGame-onPointerUp)
 
 <!-- note:mountGame>pickAt -->
-- L1432 · `acquireLock({ kind: "station", id: stId });` — A tap on a port starts a signature lock on it (same as P-LOCK with it under the reticle).
-- L1437 · `acquireLock({ kind: "body", id });` — A tap on a world is the same act as putting the reticle on it: one
+- L1449 · `acquireLock({ kind: "station", id: stId });` — A tap on a port starts a signature lock on it (same as P-LOCK with it under the reticle).
+- L1454 · `acquireLock({ kind: "body", id });` — A tap on a world is the same act as putting the reticle on it: one
   lock, one nav target. (It used to set the nav target on its own,
   which is how a stale planet outlived the lock that chose it.)
 <!-- /note -->
 
 #### <a id="s-mountGame-onPointerDown"></a>`mountGame>onPointerDown(e)`
 
-function · L1442–1461
+function · L1459–1478
 
 <!-- note:mountGame>onPointerDown -->
 <!-- /note -->
 
 #### <a id="s-mountGame-onPointerMove"></a>`mountGame>onPointerMove(e)`
 
-function · L1462–1494
+function · L1479–1511
 
 - calls: [`addLook`](../core/input.js.md#s-addLook) _js/core/input.js_ · [`mountGame>extOrbit`](#s-mountGame-extOrbit) · [`mountGame>extPan`](#s-mountGame-extPan)
 
@@ -1229,17 +1270,17 @@ function · L1462–1494
 
 #### <a id="s-mountGame-onPointerUp"></a>`mountGame>onPointerUp(e)`
 
-function · L1495–1505
+function · L1512–1522
 
 - calls: [`mountGame>pickAt`](#s-mountGame-pickAt)
 
 <!-- note:mountGame>onPointerUp -->
-- L1502 · `}` — already released
+- L1519 · `}` — already released
 <!-- /note -->
 
 #### <a id="s-mountGame-rockQuality"></a>`mountGame>rockQuality()`
 
-function · L1513–1526
+function · L1530–1543
 
 - called by: [`mountGame`](#s-mountGame)
 - effects: storage.get `lgaa.rocks`
@@ -1254,7 +1295,7 @@ exactly where a phone is already working hardest.
 
 #### <a id="s-mountGame-releaseBody"></a>`mountGame>releaseBody(key)`
 
-function · L1528–1535
+function · L1545–1552
 
 - called by: [`mountGame`](#s-mountGame) · [`mountGame>bodyFor`](#s-mountGame-bodyFor) · [`mountGame>clearRockBuckets`](#s-mountGame-clearRockBuckets) · [`mountGame>drainBrokenRocks`](#s-mountGame-drainBrokenRocks)
 
@@ -1263,7 +1304,7 @@ function · L1528–1535
 
 #### <a id="s-mountGame-rogueKey"></a>`mountGame>rogueKey(m)`
 
-function · L1541–1541
+function · L1558–1558
 
 - called by: [`mountGame>impactorBody`](#s-mountGame-impactorBody)
 
@@ -1272,7 +1313,7 @@ function · L1541–1541
 
 #### <a id="s-mountGame-shapeKey"></a>`mountGame>shapeKey(b)`
 
-function · L1544–1544
+function · L1561–1561
 
 - called by: [`mountGame>shapeFor`](#s-mountGame-shapeFor)
 
@@ -1281,7 +1322,7 @@ function · L1544–1544
 
 #### <a id="s-mountGame-bucketOf"></a>`mountGame>bucketOf(rock)`
 
-function · L1545–1545
+function · L1562–1562
 
 - called by: [`mountGame>bodyFor`](#s-mountGame-bodyFor) · [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids) ×2
 
@@ -1290,7 +1331,7 @@ function · L1545–1545
 
 #### <a id="s-mountGame-stretchOf"></a>`mountGame>stretchOf(rock, out)`
 
-function · L1546–1552
+function · L1563–1569
 
 - called by: [`mountGame>poseBody`](#s-mountGame-poseBody) · [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids)
 
@@ -1302,7 +1343,7 @@ instance and the close-aboard body alike, or they would disagree.
 
 #### <a id="s-mountGame-rockTint"></a>`mountGame>rockTint(r, out)`
 
-function · L1554–1560
+function · L1571–1577
 
 - calls: [`rockLook`](../world/rockgen.js.md#s-rockLook) _js/world/rockgen.js_
 - called by: [`mountGame>mountShared`](#s-mountGame-mountShared) · [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids)
@@ -1314,7 +1355,7 @@ this carries THE rock: a lightness jitter off its seed and a lean toward its ore
 
 #### <a id="s-mountGame-shapeFor"></a>`mountGame>shapeFor(bucket)`
 
-function · L1562–1585
+function · L1579–1602
 
 - calls: [`mountBakedData`](../bodygen/baked.js.md#s-mountBakedData) _js/bodygen/baked.js_ · [`grow`](../bodygen/grower.js.md#s-grow) _js/bodygen/grower.js_ · [`peek`](../bodygen/grower.js.md#s-peek) _js/bodygen/grower.js_ · [`mountGame>shapeKey`](#s-mountGame-shapeKey)
 - called by: [`mountGame>bodyFor`](#s-mountGame-bodyFor) · [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids)
@@ -1322,13 +1363,13 @@ function · L1562–1585
 <!-- note:mountGame>shapeFor -->
 The close-aboard shape of a prototype, grown once, or null while it grows.
 
-- L1563 · `if (!bucket?.mesh) return null;` — the field itself has not landed
-- L1568 · `const rec = { mount: bucket.mount, built: bucket.mount.built, unitR: bucket.unitR, owned:` — the belt lattice is the prototype's own: the very mesh the field draws
+- L1580 · `if (!bucket?.mesh) return null;` — the field itself has not landed
+- L1585 · `const rec = { mount: bucket.mount, built: bucket.mount.built, unitR: bucket.unitR, owned:` — the belt lattice is the prototype's own: the very mesh the field draws
 <!-- /note -->
 
 #### <a id="s-mountGame-bodyFor"></a>`mountGame>bodyFor(rock, dist=, now=)`
 
-function · L1587–1612
+function · L1604–1629
 
 - calls: [`mountGame>bucketOf`](#s-mountGame-bucketOf) · [`mountGame>mountShared`](#s-mountGame-mountShared) · [`mountGame>releaseBody`](#s-mountGame-releaseBody) · [`mountGame>shapeFor`](#s-mountGame-shapeFor)
 - called by: [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids)
@@ -1338,7 +1379,7 @@ The body for this rock, or null while its shape grows. The rock keeps
 drawing as its prototype meanwhile — the same shape, so nothing changes
 when the body takes over.
 
-- L1594 · `let victim = null, worst = -Infinity;` — 0.3.28: evict the one that has been out of sight longest AND is
+- L1611 · `let victim = null, worst = -Infinity;` — 0.3.28: evict the one that has been out of sight longest AND is
   further away than the rock asking for its slot — never the rock under
   the lock or the cutter, and never one mounted moments ago. (0.3.62: an
   eviction no longer changes what you see — the rock goes back to an
@@ -1347,7 +1388,7 @@ when the body takes over.
 
 #### <a id="s-mountGame-mountShared"></a>`mountGame>mountShared(shape, rock)`
 
-function · L1614–1628
+function · L1631–1645
 
 - calls: [`bakedMaterial`](../bodygen/baked.js.md#s-bakedMaterial) _js/bodygen/baked.js_ · [`mountGame>rockTint`](#s-mountGame-rockTint)
 - called by: [`mountGame>bodyFor`](#s-mountGame-bodyFor)
@@ -1358,14 +1399,14 @@ A close-aboard rock on its prototype's shared shape: its own mesh and tint, noth
 
 ##### <a id="s-mountGame-mountShared-dispose"></a>`mountGame>mountShared.dispose()`
 
-prop · L1627–1627
+prop · L1644–1644
 
 <!-- note:mountGame>mountShared.dispose -->
 <!-- /note -->
 
 #### <a id="s-mountGame-poseBody"></a>`mountGame>poseBody(b, r, t)`
 
-function · L1630–1638
+function · L1647–1655
 
 - calls: [`mountGame>stretchOf`](#s-mountGame-stretchOf)
 - called by: [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids) ×2
@@ -1376,7 +1417,7 @@ Place a close-aboard body exactly where, and as, its instance would be.
 
 #### <a id="s-mountGame-mountBody"></a>`mountGame>mountBody(d, radius)`
 
-function · L1640–1652
+function · L1657–1669
 
 - calls: [`mountBakedData`](../bodygen/baked.js.md#s-mountBakedData) _js/bodygen/baked.js_
 - called by: [`mountGame>impactorBody`](#s-mountGame-impactorBody)
@@ -1390,7 +1431,7 @@ any shatter field share.
 
 #### <a id="s-mountGame-assayFor"></a>`mountGame>assayFor(key)`
 
-function · L1654–1656
+function · L1671–1673
 
 <!-- note:mountGame>assayFor -->
 The assay for a rock, if a body has been grown for it. For the survey card.
@@ -1398,7 +1439,7 @@ The assay for a rock, if a body has been grown for it. For the survey card.
 
 #### <a id="s-mountGame-clearRockBuckets"></a>`mountGame>clearRockBuckets()`
 
-function · L1658–1662
+function · L1675–1679
 
 - calls: [`mountGame>releaseBody`](#s-mountGame-releaseBody)
 - called by: [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids)
@@ -1408,7 +1449,7 @@ function · L1658–1662
 
 #### <a id="s-mountGame-drainBrokenRocks"></a>`mountGame>drainBrokenRocks()`
 
-function · L1666–1674
+function · L1683–1691
 
 - calls: [`mountGame>releaseBody`](#s-mountGame-releaseBody)
 - via [js/world/field.js](../world/field.js.md): `brokenRocks.shift`
@@ -1420,56 +1461,56 @@ Cut-out rocks go up as shatter fields in their own colours — if we grew them.
 
 #### <a id="s-mountGame-updateAsteroids"></a>`mountGame>updateAsteroids(t)`
 
-function · L1677–1773
+function · L1694–1790
 
 - calls: [`cancel`](../bodygen/grower.js.md#s-cancel) _js/bodygen/grower.js_ ×2 · [`pump`](../bodygen/grower.js.md#s-pump) _js/bodygen/grower.js_ · [`mountGame>bodyFor`](#s-mountGame-bodyFor) · [`mountGame>bucketOf`](#s-mountGame-bucketOf) ×2 · [`mountGame>clearRockBuckets`](#s-mountGame-clearRockBuckets) · [`mountGame>drainBrokenRocks`](#s-mountGame-drainBrokenRocks) · [`mountGame>poseBody`](#s-mountGame-poseBody) ×2 · [`mountGame>rockTint`](#s-mountGame-rockTint) · [`mountGame>shapeFor`](#s-mountGame-shapeFor) · [`mountGame>stretchOf`](#s-mountGame-stretchOf) · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>updateAsteroids -->
-- L1678 · `pump();` — no worker (or it failed): grow one queued body on this thread a frame
-- L1688 · `if (lodMemo.size > 4 * MAX_ROCKS) lodMemo.clear();` — rocks flown past long ago
-- L1691 · `grown.clear();` — Who gets grown: the nearest big rocks, plus whatever is locked or under
+- L1695 · `pump();` — no worker (or it failed): grow one queued body on this thread a frame
+- L1705 · `if (lodMemo.size > 4 * MAX_ROCKS) lodMemo.clear();` — rocks flown past long ago
+- L1708 · `grown.clear();` — Who gets grown: the nearest big rocks, plus whatever is locked or under
   the cutter — that one is the rock you are looking at, so it is never the
   one left as a prototype. One mounted per frame, no more.
-- L1699 · `if (d > (held ? BODY_R * BODY_FAR : BODY_R)) continue;` — enter the set at BODY_R; leave it only well outside, so the change
+- L1716 · `if (d > (held ? BODY_R * BODY_FAR : BODY_R)) continue;` — enter the set at BODY_R; leave it only well outside, so the change
   of shape happens far away rather than in front of you
-- L1715 · `for (const { r } of near) {` — 0.3.28 — a body that is mounted STAYS drawn while its rock is still in
+- L1732 · `for (const { r } of near) {` — 0.3.28 — a body that is mounted STAYS drawn while its rock is still in
   range, even if this frame's ranking put it outside the top slice. It
   used to be hidden the moment it lost its rank, which turned a
   one-frame reordering into a rock visibly changing shape and changing
   back. The pool is already capped at the budget, so keeping them all
   drawn costs nothing that was not already paid for.
-- L1722 · `for (const [key, b] of bodies) if (!grown.has(key) && b.group.visible) { b.group.visible =` — and one that really has left the range goes back to the field
-- L1723 · `cancelGrowth((key) => !key.startsWith("belt:") || _wantKeys.has(key));` — a rock flown past before its body grew is not worth the worker's time
-- L1730 · `if (grown.has(r.key)) { drawn++; continue; }` — it has a real body; the instance would sit inside it
-- L1734 · `const prev = lodMemo.get(r.key);` — 0.3.62 — lattice hysteresis: a rock sitting on a threshold used to flip
+- L1739 · `for (const [key, b] of bodies) if (!grown.has(key) && b.group.visible) { b.group.visible =` — and one that really has left the range goes back to the field
+- L1740 · `cancelGrowth((key) => !key.startsWith("belt:") || _wantKeys.has(key));` — a rock flown past before its body grew is not worth the worker's time
+- L1747 · `if (grown.has(r.key)) { drawn++; continue; }` — it has a real body; the instance would sit inside it
+- L1751 · `const prev = lodMemo.get(r.key);` — 0.3.62 — lattice hysteresis: a rock sitting on a threshold used to flip
   between 768 and 192 triangles frame to frame as it spun and drifted,
   which reads as the rock re-forming. It now has to clear the threshold
   by a fifth to change lattice, either way.
-- L1744 · `const k = Math.min(1, (ROCK_DRAW_R - d) / ROCK_FADE);` — grow in across the outer slice of the range: nothing pops
-- L1751 · `rockTint(r, _rcol);` — the prototype carries the class's surface; the instance carries THIS
+- L1761 · `const k = Math.min(1, (ROCK_DRAW_R - d) / ROCK_FADE);` — grow in across the outer slice of the range: nothing pops
+- L1768 · `rockTint(r, _rcol);` — the prototype carries the class's surface; the instance carries THIS
   rock: a lightness jitter off its seed and a lean toward its ore, so the
   rock you can see is the rock you are about to cut
-- L1765 · `dust.visible = drawn > 0;` — the dust box follows the hull in whole-box steps, so motes stream past
+- L1782 · `dust.visible = drawn > 0;` — the dust box follows the hull in whole-box steps, so motes stream past
   instead of being dragged along with you
 <!-- /note -->
 
 #### <a id="s-mountGame-updateDebris"></a>`mountGame>updateDebris(t)`
 
-function · L1776–1802
+function · L1793–1834
 
 - calls: [`kelvinHex`](../world/events/cataclysm.js.md#s-kelvinHex) _js/world/events/cataclysm.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>updateDebris -->
-- L1781 · `if (c.driven && c.fractured != null) continue;` — a rock's own pieces are drawn by its fractured body while the impact run holds them
-- L1786 · `const h = c.hot ?? 0;` — rubble thrown off a strike is still incandescent — it cools through
+- L1799 · `if (c.driven && c.fractured != null) continue;` — a rock's own pieces are drawn by its fractured body while the impact run holds them
+- L1816 · `const h = c.hot ?? 0;` — rubble thrown off a strike is still incandescent — it cools through
   the same blackbody curve the parent body does
 <!-- /note -->
 
 #### <a id="s-mountGame-releaseImpactorBody"></a>`mountGame>releaseImpactorBody(id)`
 
-function · L1804–1811
+function · L1836–1843
 
 - called by: [`mountGame`](#s-mountGame) · [`mountGame>impactorBody`](#s-mountGame-impactorBody) · [`mountGame>updateImpactors`](#s-mountGame-updateImpactors)
 
@@ -1478,7 +1519,7 @@ function · L1804–1811
 
 #### <a id="s-mountGame-impactorBody"></a>`mountGame>impactorBody(m)`
 
-function · L1813–1823
+function · L1845–1855
 
 - calls: [`rogueParams`](../bodygen/body.js.md#s-rogueParams) _js/bodygen/body.js_ · [`grow`](../bodygen/grower.js.md#s-grow) _js/bodygen/grower.js_ · [`peek`](../bodygen/grower.js.md#s-peek) _js/bodygen/grower.js_ · [`mountGame>mountBody`](#s-mountGame-mountBody) · [`mountGame>releaseImpactorBody`](#s-mountGame-releaseImpactorBody) · [`mountGame>rogueClass`](#s-mountGame-rogueClass) · [`mountGame>rogueKey`](#s-mountGame-rogueKey)
 - called by: [`mountGame>updateImpactors`](#s-mountGame-updateImpactors)
@@ -1486,13 +1527,13 @@ function · L1813–1823
 <!-- note:mountGame>impactorBody -->
 The grown body for one rogue rock, the cached one, or null while it grows.
 
-- L1815 · `if (have && Math.abs(have.r - m.r) < have.r * 0.02) return have;` — a mirrored rock can have its radius corrected by the host; a body built
+- L1847 · `if (have && Math.abs(have.r - m.r) < have.r * 0.02) return have;` — a mirrored rock can have its radius corrected by the host; a body built
   at the old size would sit visibly inside or outside its own collision
 <!-- /note -->
 
 #### <a id="s-mountGame-rogueAssay"></a>`mountGame>rogueAssay(id)`
 
-function · L1825–1827
+function · L1857–1859
 
 <!-- note:mountGame>rogueAssay -->
 The assay for a rogue rock, if its body has been grown. For the survey card.
@@ -1500,19 +1541,19 @@ The assay for a rogue rock, if its body has been grown. For the survey card.
 
 #### <a id="s-mountGame-updateImpactors"></a>`mountGame>updateImpactors(t)`
 
-function · L1829–1844
+function · L1861–1876
 
 - calls: [`mountGame>impactorBody`](#s-mountGame-impactorBody) · [`mountGame>releaseImpactorBody`](#s-mountGame-releaseImpactorBody)
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>updateImpactors -->
-- L1834 · `const had = impBodies.get(m.id);` — one mount a frame, same rule the belt plays by
-- L1843 · `if (impBodies.size) for (const id of [...impBodies.keys()]) if (!live.has(id)) releaseImpa` — a rock that struck, or drifted past the despawn rim, takes its body with it
+- L1866 · `const had = impBodies.get(m.id);` — one mount a frame, same rule the belt plays by
+- L1875 · `if (impBodies.size) for (const id of [...impBodies.keys()]) if (!live.has(id)) releaseImpa` — a rock that struck, or drifted past the despawn rim, takes its body with it
 <!-- /note -->
 
 #### <a id="s-mountGame-updateShots"></a>`mountGame>updateShots()`
 
-function · L1846–1858
+function · L1878–1890
 
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
@@ -1521,17 +1562,17 @@ function · L1846–1858
 
 #### <a id="s-mountGame-spawnChip"></a>`mountGame>spawnChip(vx0, vy0, vz0)`
 
-function · L1860–1874
+function · L1892–1906
 
 - called by: [`mountGame>updateMiningFX`](#s-mountGame-updateMiningFX)
 
 <!-- note:mountGame>spawnChip -->
-- L1865 · `const sp = 22 + Math.random() * 50;` — off the face, away from the beam, with a tangential kick
+- L1897 · `const sp = 22 + Math.random() * 50;` — off the face, away from the beam, with a tangential kick
 <!-- /note -->
 
 #### <a id="s-mountGame-spawnPuff"></a>`mountGame>spawnPuff(vx0, vy0, vz0)`
 
-function · L1876–1887
+function · L1908–1919
 
 - called by: [`mountGame>updateMiningFX`](#s-mountGame-updateMiningFX)
 
@@ -1540,39 +1581,45 @@ function · L1876–1887
 
 #### <a id="s-mountGame-updateMiningFX"></a>`mountGame>updateMiningFX(dt)`
 
-function · L1889–1976
+function · L1921–2008
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`rightOf`](../flight/ship.js.md#s-rightOf) _js/flight/ship.js_ · [`upOf`](../flight/ship.js.md#s-upOf) _js/flight/ship.js_ · [`mountGame>spawnChip`](#s-mountGame-spawnChip) · [`mountGame>spawnPuff`](#s-mountGame-spawnPuff)
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>updateMiningFX -->
-- L1893 · `const f = forwardOf(s.yaw, s.pitch);` — the emitter sits under and to the right of the lens, on the hull
-- L1896 · `laser.from.x = s.pos.x + f.x * 1.6 + r.x * 1.6 - u.x * 1.2;` — far enough off the lens axis that the beam reads as a streak from the
+- L1925 · `const f = forwardOf(s.yaw, s.pitch);` — the emitter sits under and to the right of the lens, on the hull
+- L1928 · `laser.from.x = s.pos.x + f.x * 1.6 + r.x * 1.6 - u.x * 1.2;` — far enough off the lens axis that the beam reads as a streak from the
   bottom-right of the canopy to the cut, not a dot on the reticle
-- L1903 · `const reach = Math.max(1, d - (mining.r ?? 0) * 0.9);` — the cut lands on the near face, not the centre
-- L1910 · `const tv = mining.vx ?? 0, tvy = mining.vy ?? 0, tvz = mining.vz ?? 0;` — what comes off the face rides the rock's own drift, if it has one
-- L1920 · `beamGroup.visible = laser.on;` — beam segments
-- L1929 · `let keep = 1;` — two-beat die-off: first the line breaks into dashes — every section
+- L1935 · `const reach = Math.max(1, d - (mining.r ?? 0) * 0.9);` — the cut lands on the near face, not the centre
+- L1942 · `const tv = mining.vx ?? 0, tvy = mining.vy ?? 0, tvz = mining.vz ?? 0;` — what comes off the face rides the rock's own drift, if it has one
+- L1952 · `beamGroup.visible = laser.on;` — beam segments
+- L1961 · `let keep = 1;` — two-beat die-off: first the line breaks into dashes — every section
   pulls in on its centre and gaps open — then the dashes go out one by
   one from the cut back toward the emitter, the bright near ones last
-- L1940 · `const taper = 0.22 + 0.78 * ((i + 0.5) / BEAM_SEGS);` — thin at the emitter, full width by the cut — a taper, stepped per section
-- L1948 · `let live = 0;` — chips
-- L1965 · `for (const p of puffs) {` — dust
+- L1972 · `const taper = 0.22 + 0.78 * ((i + 0.5) / BEAM_SEGS);` — thin at the emitter, full width by the cut — a taper, stepped per section
+- L1980 · `let live = 0;` — chips
+- L1997 · `for (const p of puffs) {` — dust
 <!-- /note -->
 
 #### <a id="s-mountGame-updateRigFX"></a>`mountGame>updateRigFX(dt)`
 
-function · L1996–2033
+function · L2028–2074
 
-- calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`rightOf`](../flight/ship.js.md#s-rightOf) _js/flight/ship.js_ · [`upOf`](../flight/ship.js.md#s-upOf) _js/flight/ship.js_
+- calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`rightOf`](../flight/ship.js.md#s-rightOf) _js/flight/ship.js_ · [`upOf`](../flight/ship.js.md#s-upOf) _js/flight/ship.js_ · [`hulkById`](../world/hulks.js.md#s-hulkById) _js/world/hulks.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>updateRigFX -->
+- L2038 · `const hk = rig.key ? hulkById(rig.key) : null;` — the arc ends on the hulk as it is drawn this frame — the rig's own
+  mark is a sim step old, and a hulk riding a world's frame moves 40 u
+  a second: at 600 u that never showed, at 25 u the arc missed the hull
+  — and on the part that is about to come off, not on its middle
+- L2061 · `const closeK = Math.min(1, Math.max(0.18, len / 400));` — sized for a hulk 600 u off; at the 40 u she now parks at, an arc a
+  metre and a half across and a flash nine wide hid the hull whole
 <!-- /note -->
 
 #### <a id="s-mountGame-updateTractorBeam"></a>`mountGame>updateTractorBeam(t)`
 
-function · L2048–2065
+function · L2089–2106
 
 - via [js/station/stations.js](../station/stations.js.md): `stations.find`
 - called by: [`mountGame>tick`](#s-mountGame-tick)
@@ -1582,7 +1629,7 @@ function · L2048–2065
 
 #### <a id="s-mountGame-droneDesign"></a>`mountGame>droneDesign(c)`
 
-function · L2068–2073
+function · L2109–2114
 
 - calls: [`droneFor`](../drones/droneforge.js.md#s-droneFor) _js/drones/droneforge.js_
 - via [js/station/stations.js](../station/stations.js.md): `stations.find`
@@ -1593,7 +1640,7 @@ function · L2068–2073
 
 #### <a id="s-mountGame-syncContactMeshes"></a>`mountGame>syncContactMeshes()`
 
-function · L2074–2104
+function · L2115–2145
 
 - calls: [`droneBudget`](../drones/droneforge.js.md#s-droneBudget) _js/drones/droneforge.js_ · [`meshRange`](#s-meshRange) · [`mountGame>droneDesign`](#s-mountGame-droneDesign) · [`mountGame>rel`](#s-mountGame-rel) · [`mountGame>syncProbeMeshes`](#s-mountGame-syncProbeMeshes) · [`mountGame>syncWorkDrones`](#s-mountGame-syncWorkDrones) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
@@ -1613,9 +1660,9 @@ NOTHING for those frames — exactly as an NPC ship at the same distance
 already did. The design keeps being requested every frame until the
 budget grows it, so the gap is a frame or two, not a state.
 
-- L2081 · `if (!bot) continue;` — no real hull yet: draw nothing at all
-- L2089 · `_dLook.set(sim.ship.pos.x - origin.x, sim.ship.pos.y - origin.y, sim.ship.pos.z - origin.z` — a gun drone keeps its optics on you, with a slow station-keeping bob
-- L2094 · `_seenDrone.clear();` — the eviction sweep: `contacts.some()` per mesh is O(meshes × contacts)
+- L2122 · `if (!bot) continue;` — no real hull yet: draw nothing at all
+- L2130 · `_dLook.set(sim.ship.pos.x - origin.x, sim.ship.pos.y - origin.y, sim.ship.pos.z - origin.z` — a gun drone keeps its optics on you, with a slow station-keeping bob
+- L2135 · `_seenDrone.clear();` — the eviction sweep: `contacts.some()` per mesh is O(meshes × contacts)
   with a closure allocated per mesh, every frame — 40 meshes against a
   120-entry board is 4,800 comparisons a frame. One pass to mark what is
   live, one to drop what is not, same as syncWorkDrones already does.
@@ -1623,19 +1670,19 @@ budget grows it, so the gap is a frame or two, not a state.
 
 #### <a id="s-mountGame-syncWorkDrones"></a>`mountGame>syncWorkDrones()`
 
-function · L2109–2152
+function · L2150–2193
 
 - calls: [`droneFor`](../drones/droneforge.js.md#s-droneFor) _js/drones/droneforge.js_ · [`releaseDrone`](../drones/droneforge.js.md#s-releaseDrone) _js/drones/droneforge.js_ · [`meshRange`](#s-meshRange) · [`mountGame>rel`](#s-mountGame-rel) · [`mountGame>unitsUseDrone`](#s-mountGame-unitsUseDrone) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`mountGame>syncContactMeshes`](#s-mountGame-syncContactMeshes)
 
 <!-- note:mountGame>syncWorkDrones -->
-- L2113 · `if ((u.dockedAt && !u.bay) || u.state === "setup") continue;` — 0.3.15: a drone in its bay run is on the board
-- L2149 · `const key = w.mesh.userData?.template;` — the last unit flying a design frees the design (droneFor's key: kind|seed|sector)
+- L2154 · `if ((u.dockedAt && !u.bay) || u.state === "setup") continue;` — 0.3.15: a drone in its bay run is on the board
+- L2190 · `const key = w.mesh.userData?.template;` — the last unit flying a design frees the design (droneFor's key: kind|seed|sector)
 <!-- /note -->
 
 #### <a id="s-mountGame-unitsUseDrone"></a>`mountGame>unitsUseDrone(key)`
 
-function · L2153–2158
+function · L2194–2199
 
 - called by: [`mountGame>syncWorkDrones`](#s-mountGame-syncWorkDrones)
 
@@ -1644,7 +1691,7 @@ function · L2153–2158
 
 #### <a id="s-mountGame-syncProbeMeshes"></a>`mountGame>syncProbeMeshes()`
 
-function · L2161–2182
+function · L2202–2223
 
 - calls: [`droneFor`](../drones/droneforge.js.md#s-droneFor) _js/drones/droneforge.js_ · [`drawRange`](#s-drawRange) · [`mountGame>rel`](#s-mountGame-rel) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`mountGame>syncContactMeshes`](#s-mountGame-syncContactMeshes)
@@ -1654,7 +1701,7 @@ function · L2161–2182
 
 #### <a id="s-mountGame-syncRemotes"></a>`mountGame>syncRemotes()`
 
-function · L2184–2213
+function · L2225–2254
 
 - calls: [`disposeObject`](#s-disposeObject) ×2 · [`makeShipGroup`](#s-makeShipGroup) · [`mountGame>rel`](#s-mountGame-rel) · [`orientCraft`](#s-orientCraft) · [`tickHull`](../ships/shipforge.js.md#s-tickHull) _js/ships/shipforge.js_
 - via [js/sim/sim.js](../sim/sim.js.md): `sim.remotes.has`
@@ -1665,21 +1712,21 @@ function · L2184–2213
 
 #### <a id="s-mountGame-syncTraffic"></a>`mountGame>syncTraffic()`
 
-function · L2216–2261
+function · L2257–2302
 
 - calls: [`disposeObject`](#s-disposeObject) ×2 · [`drawRange`](#s-drawRange) · [`makeShipGroup`](#s-makeShipGroup) · [`meshRange`](#s-meshRange) · [`mountGame>dropNavLight`](#s-mountGame-dropNavLight) ×3 · [`mountGame>navLightFor`](#s-mountGame-navLightFor) ×2 · [`mountGame>placeNavLight`](#s-mountGame-placeNavLight) ×2 · [`mountGame>rel`](#s-mountGame-rel) · [`orientCraft`](#s-orientCraft) · [`tickHull`](../ships/shipforge.js.md#s-tickHull) _js/ships/shipforge.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>syncTraffic -->
-- L2222 · `if (n.visible === false) {` — inside a ring or in a lane: nothing to draw, but the hull is kept for when it comes out
-- L2233 · `const dn = dist3(sim.ship.pos, n);` — a hull 80 km out is a sub-pixel dot: keep its label and its strobe, skip its mesh
-- L2236 · `else if (far) dropNavLight(n.id);` — past 1.3× draw range the strobe goes too
+- L2263 · `if (n.visible === false) {` — inside a ring or in a lane: nothing to draw, but the hull is kept for when it comes out
+- L2274 · `const dn = dist3(sim.ship.pos, n);` — a hull 80 km out is a sub-pixel dot: keep its label and its strobe, skip its mesh
+- L2277 · `else if (far) dropNavLight(n.id);` — past 1.3× draw range the strobe goes too
 <!-- /note -->
 
 #### <a id="s-mountGame-syncFlow"></a>`mountGame>syncFlow()`
 
-function · L2264–2294
+function · L2305–2335
 
 - calls: [`meshRange`](#s-meshRange) · [`mountGame>dropNavLight`](#s-mountGame-dropNavLight) · [`mountGame>navLightFor`](#s-mountGame-navLightFor) · [`mountGame>placeNavLight`](#s-mountGame-placeNavLight) · [`mountGame>rel`](#s-mountGame-rel) · [`orientCraft`](#s-orientCraft) · [`instanceOf`](hullpool.js.md#s-instanceOf) _js/render/hullpool.js_ · [`releaseInstance`](hullpool.js.md#s-releaseInstance) _js/render/hullpool.js_ · [`templateFor`](hullpool.js.md#s-templateFor) _js/render/hullpool.js_ · [`warm`](hullpool.js.md#s-warm) _js/render/hullpool.js_ · [`tickHull`](../ships/shipforge.js.md#s-tickHull) _js/ships/shipforge.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2
 - called by: [`mountGame>tick`](#s-mountGame-tick)
@@ -1687,11 +1734,48 @@ function · L2264–2294
 <!-- note:mountGame>syncFlow -->
 <!-- /note -->
 
+#### <a id="s-mountGame-hash01"></a>`mountGame>hash01(str)`
+
+function · L2343–2343
+
+- called by: [`mountGame>wreckOf`](#s-mountGame-wreckOf) ×2
+
+<!-- note:mountGame>hash01 -->
+<!-- /note -->
+
+#### <a id="s-mountGame-wreckMat"></a>`mountGame>wreckMat(m)`
+
+function · L2346–2358
+
+- called by: [`mountGame>wreckOf`](#s-mountGame-wreckOf)
+
+<!-- note:mountGame>wreckMat -->
+<!-- /note -->
+
+#### <a id="s-mountGame-wreckOf"></a>`mountGame>wreckOf(group, h)`
+
+function · L2360–2391
+
+- calls: [`mountGame>hash01`](#s-mountGame-hash01) ×2 · [`mountGame>wreckMat`](#s-mountGame-wreckMat) · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ ×2
+- called by: [`mountGame>syncHulks`](#s-mountGame-syncHulks)
+
+<!-- note:mountGame>wreckOf -->
+<!-- /note -->
+
+#### <a id="s-mountGame-cutBack"></a>`mountGame>cutBack(obj, h)`
+
+function · L2393–2402
+
+- called by: [`mountGame>syncHulks`](#s-mountGame-syncHulks)
+
+<!-- note:mountGame>cutBack -->
+<!-- /note -->
+
 #### <a id="s-mountGame-syncHulks"></a>`mountGame>syncHulks()`
 
-function · L2300–2344
+function · L2404–2450
 
-- calls: [`disposeObject`](#s-disposeObject) ×2 · [`drawRange`](#s-drawRange) · [`makeShipGroup`](#s-makeShipGroup) · [`meshRange`](#s-meshRange) · [`mountGame>dropNavLight`](#s-mountGame-dropNavLight) ×2 · [`mountGame>navLightFor`](#s-mountGame-navLightFor) · [`mountGame>placeNavLight`](#s-mountGame-placeNavLight) · [`mountGame>rel`](#s-mountGame-rel) · [`orientCraft`](#s-orientCraft) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
+- calls: [`disposeObject`](#s-disposeObject) ×2 · [`drawRange`](#s-drawRange) · [`makeShipGroup`](#s-makeShipGroup) · [`meshRange`](#s-meshRange) · [`mountGame>cutBack`](#s-mountGame-cutBack) · [`mountGame>dropNavLight`](#s-mountGame-dropNavLight) ×2 · [`mountGame>navLightFor`](#s-mountGame-navLightFor) · [`mountGame>placeNavLight`](#s-mountGame-placeNavLight) · [`mountGame>rel`](#s-mountGame-rel) · [`mountGame>wreckOf`](#s-mountGame-wreckOf) · [`orientCraft`](#s-orientCraft) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
 <!-- note:mountGame>syncHulks -->
@@ -1699,7 +1783,7 @@ function · L2300–2344
 
 #### <a id="s-mountGame-projectMark"></a>`mountGame>projectMark(x, y, z)`
 
-function · L2352–2374
+function · L2458–2480
 
 - called by: [`mountGame>tick`](#s-mountGame-tick)
 
@@ -1709,14 +1793,14 @@ screen — or behind the camera — clamp it to the edge with the bearing to
 turn toward. `projectPoint` has always computed `behind` and nothing has
 ever read it; this is what it was for.
 
-- L2356 · `if (behind) { nx = -nx; ny = -ny; }` — behind the camera the projection mirrors through the origin, so a
+- L2462 · `if (behind) { nx = -nx; ny = -ny; }` — behind the camera the projection mirrors through the origin, so a
   contact over your shoulder reads as being in front and on the wrong
   side. Flip it back, then treat it as off-screen by construction.
 <!-- /note -->
 
 #### <a id="s-mountGame-projectPoint"></a>`mountGame>projectPoint(x, y, z)`
 
-function · L2376–2380
+function · L2482–2486
 
 - called by: [`mountGame>projectDir`](#s-mountGame-projectDir) · [`mountGame>tick`](#s-mountGame-tick) ×15
 
@@ -1725,7 +1809,7 @@ function · L2376–2380
 
 #### <a id="s-mountGame-projectDir"></a>`mountGame>projectDir(dx, dy, dz)`
 
-function · L2382–2385
+function · L2488–2491
 
 - calls: [`mountGame>projectPoint`](#s-mountGame-projectPoint)
 - called by: [`mountGame>tick`](#s-mountGame-tick) ×3
@@ -1736,7 +1820,7 @@ Projects a direction as a point far ahead of the ship.
 
 #### <a id="s-mountGame-tick"></a>`mountGame>tick(timestamp)`
 
-function · L2387–2801
+function · L2493–2907
 
 - calls: [`resumeAudioIfNeeded`](../audio/index.js.md#s-resumeAudioIfNeeded) _js/audio/index.js_ · [`tickAudio`](../audio/index.js.md#s-tickAudio) _js/audio/index.js_ · [`notePerf`](../core/perf.js.md#s-notePerf) _js/core/perf.js_ · [`contactView`](../flight/contacts.js.md#s-contactView) _js/flight/contacts.js_ ×2 · [`hullTag`](../flight/contacts.js.md#s-hullTag) _js/flight/contacts.js_ · [`scanFocus`](../flight/contacts.js.md#s-scanFocus) _js/flight/contacts.js_ · [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ ×4 · [`rightOf`](../flight/ship.js.md#s-rightOf) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`upOf`](../flight/ship.js.md#s-upOf) _js/flight/ship.js_ ×2 · [`tickWorldSync`](../net/worldsync.js.md#s-tickWorldSync) _js/net/worldsync.js_ · [`fightCentre`](../npc/battles.js.md#s-fightCentre) _js/npc/battles.js_ · [`dematerialize`](#s-dematerialize) · [`drawRange`](#s-drawRange) ×3 · [`mountGame>audioState`](#s-mountGame-audioState) · [`mountGame>projectDir`](#s-mountGame-projectDir) ×3 · [`mountGame>projectMark`](#s-mountGame-projectMark) · [`mountGame>projectPoint`](#s-mountGame-projectPoint) ×15 · [`mountGame>rebuildBody`](#s-mountGame-rebuildBody) · [`mountGame>refreshOwnHull`](#s-mountGame-refreshOwnHull) · [`mountGame>rel`](#s-mountGame-rel) ×6 · [`mountGame>stepBodyRings`](#s-mountGame-stepBodyRings) · [`mountGame>stepCloseUp`](#s-mountGame-stepCloseUp) · [`mountGame>stepEventFX`](#s-mountGame-stepEventFX) · [`mountGame>stepImpactFX`](#s-mountGame-stepImpactFX) · [`mountGame>stepSkyLight`](#s-mountGame-stepSkyLight) · [`mountGame>syncContactMeshes`](#s-mountGame-syncContactMeshes) · [`mountGame>syncFlow`](#s-mountGame-syncFlow) · [`mountGame>syncHulks`](#s-mountGame-syncHulks) · [`mountGame>syncRemotes`](#s-mountGame-syncRemotes) · [`mountGame>syncTraffic`](#s-mountGame-syncTraffic) · [`mountGame>texArgs`](#s-mountGame-texArgs) · [`mountGame>texKey`](#s-mountGame-texKey) · [`mountGame>updateAsteroids`](#s-mountGame-updateAsteroids) · [`mountGame>updateDebris`](#s-mountGame-updateDebris) · [`mountGame>updateImpactors`](#s-mountGame-updateImpactors) · [`mountGame>updateMiningFX`](#s-mountGame-updateMiningFX) · [`mountGame>updateRigFX`](#s-mountGame-updateRigFX) · [`mountGame>updateShots`](#s-mountGame-updateShots) · [`mountGame>updateStations`](#s-mountGame-updateStations) · [`mountGame>updateTractorBeam`](#s-mountGame-updateTractorBeam) · [`orientCraft`](#s-orientCraft) · [`throttleCapOf`](#s-throttleCapOf) · [`tickHull`](../ships/shipforge.js.md#s-tickHull) _js/ships/shipforge.js_ · [`activeWaypoint`](../sim/sim.js.md#s-activeWaypoint) _js/sim/sim.js_ · [`pauseTick`](../sim/sim.js.md#s-pauseTick) _js/sim/sim.js_ · [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_ · [`spoolTime`](../sim/sim.js.md#s-spoolTime) _js/sim/sim.js_ · [`targetPosition`](../sim/sim.js.md#s-targetPosition) _js/sim/sim.js_ · [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_ · [`waypointPosition`](../sim/sim.js.md#s-waypointPosition) _js/sim/sim.js_ · [`tickTutorial`](../ui/tutorial.js.md#s-tickTutorial) _js/ui/tutorial.js_ · [`beaconPosition`](../world/bodies.js.md#s-beaconPosition) _js/world/bodies.js_ ×2 · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ ×2 · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ ×4 · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×12 · [`scanRadius`](../world/bodies.js.md#s-scanRadius) _js/world/bodies.js_ · [`starBody`](../world/bodies.js.md#s-starBody) _js/world/bodies.js_ ×3 · [`kelvinHex`](../world/events/cataclysm.js.md#s-kelvinHex) _js/world/events/cataclysm.js_ · [`makePlanetTexture`](../world/textures.js.md#s-makePlanetTexture) _js/world/textures.js_
 - via [js/world/bodies.js](../world/bodies.js.md): `BODIES.filter`, `BODIES.filter.map`
@@ -1745,37 +1829,37 @@ function · L2387–2801
 - effects: global.write `window.__lgMarkers`
 
 <!-- note:mountGame>tick -->
-- L2393 · `notePerf(raw, dt);` — what the last frame actually cost, before anything in this one runs.
+- L2499 · `notePerf(raw, dt);` — what the last frame actually cost, before anything in this one runs.
   perf.js keeps a median of these and hands the sky a detail tier, so a
   device that cannot carry a hundred and thirty hulls at full fidelity
   sheds the far field rather than the frame rate.
-- L2399 · `tickAudio(audioState(), dt);` — The ambient bed reads the game once a frame and rate-limits itself
+- L2505 · `tickAudio(audioState(), dt);` — The ambient bed reads the game once a frame and rate-limits itself
   internally. Everything it needs is gathered here rather than reached
   for from inside the audio module, so what the sound reacts to is one
   readable object instead of a web of imports.
-- L2406 · `if (playing) {` — ---- floating origin ----
-- L2411 · `const star = starBody();` — No world worth framing, or the attract scene is off on a weak
+- L2512 · `if (playing) {` — ---- floating origin ----
+- L2517 · `const star = starBody();` — No world worth framing, or the attract scene is off on a weak
   device: the old slow circle around the star.
-- L2421 · `sun.rotation.y += dt * 0.0012;` — ---- world transforms ----
-- L2433 · `for (const b of BODIES) {` — a world that took a hit gets rebuilt with its new shape — before the FX of
+- L2527 · `sun.rotation.y += dt * 0.0012;` — ---- world transforms ----
+- L2539 · `for (const b of BODIES) {` — a world that took a hit gets rebuilt with its new shape — before the FX of
   the hit are parented to it, so this frame's spawn lands on the group that stays
-- L2446 · `p.group.rotation.y += dt * p.spin * 0.006;` — Axial spin you can notice over an hour, not over a minute.
-- L2447 · `const bb = bodyById(p.id);` — impact heat glows ember-orange and fades as the world radiates it
+- L2552 · `p.group.rotation.y += dt * p.spin * 0.006;` — Axial spin you can notice over an hour, not over a minute.
+- L2553 · `const bb = bodyById(p.id);` — impact heat glows ember-orange and fades as the world radiates it
   away; a resurfaced world glows from the inside at its own temperature
   and walks the blackbody curve down as it cools
-- L2454 · `p.mat.emissiveIntensity = p.baseIntensity + molten * 0.62;` — enough to read as molten from orbit, not enough to flatten the
+- L2560 · `p.mat.emissiveIntensity = p.baseIntensity + molten * 0.62;` — enough to read as molten from orbit, not enough to flatten the
   globe into a featureless disc
-- L2477 · `if (texQueue.length) {` — one surface per frame — the sky is flyable while they resolve
-- L2522 · `if (playing) camMode = sim.cameraMode ?? camMode;` — ---- camera ----
-- L2530 · `const f = forwardOf(s.yaw, s.pitch);` — orbit in the hull frame: forward/right/up of the nose, then the
+- L2583 · `if (texQueue.length) {` — one surface per frame — the sky is flyable while they resolve
+- L2628 · `if (playing) camMode = sim.cameraMode ?? camMode;` — ---- camera ----
+- L2636 · `const f = forwardOf(s.yaw, s.pitch);` — orbit in the hull frame: forward/right/up of the nose, then the
   pilot's own yaw/pitch around it, then a pan of the look point
-- L2534 · `const bx = -Math.cos(ext.yaw) * cp;` — behind the hull at yaw 0
-- L2535 · `const bz = Math.sin(ext.yaw) * cp;` — around the side
-- L2548 · `const f = forwardOf(s.yaw, s.pitch);` — Seat-mounted lens: the camera IS bolted to the hull, a little above
+- L2640 · `const bx = -Math.cos(ext.yaw) * cp;` — behind the hull at yaw 0
+- L2641 · `const bz = Math.sin(ext.yaw) * cp;` — around the side
+- L2654 · `const f = forwardOf(s.yaw, s.pitch);` — Seat-mounted lens: the camera IS bolted to the hull, a little above
   and ahead of the centre of mass, so the nose is your line of sight.
-- L2551 · `camera.quaternion.copy(ship.quaternion);` — The lens is bolted to the hull, so it simply wears the hull's
+- L2657 · `camera.quaternion.copy(ship.quaternion);` — The lens is bolted to the hull, so it simply wears the hull's
   attitude — roll included. Where you look is where the nose is.
-- L2570 · `const wState = sim.warp.state;` — ---- warp ----
+- L2676 · `const wState = sim.warp.state;` — ---- warp ----
   After the camera is posed, and deliberately so. The near tunnel layer is
   parented to the camera's own position and orientation, and at 55,000
   units a second a frame-old camera leaves it nearly a kilometre astern —
@@ -1786,13 +1870,13 @@ function · L2387–2801
   quarter so the sky has visibly begun to move before the core lets go,
   the run takes it the rest of the way, and a dropout drains it. Every
   visual below hangs off that one number.
-- L2580 · `stars.material.opacity = 0.9 * (1 - Math.min(1, warpStrength * 2.2));` — the resting point-sky gives way to its own streaks rather than sitting
+- L2686 · `stars.material.opacity = 0.9 * (1 - Math.min(1, warpStrength * 2.2));` — the resting point-sky gives way to its own streaks rather than sitting
   underneath them as a second set of heads
-- L2582 · `warpFx.updateWakes(traffic, origin);` — a hull under lane drive leaves a wake whether or not YOU are warping:
+- L2688 · `warpFx.updateWakes(traffic, origin);` — a hull under lane drive leaves a wake whether or not YOU are warping:
   it is how traffic crossing the system reads at a glance
-- L2585 · `if (sim.pulse > 0 && sim.selected) {` — ---- survey pulse ----
-- L2598 · `camera.updateMatrixWorld(true);` — ---- HUD ----
-- L2628 · `edgeBuf.length = 0;` — ---- the working sky, and what the canopy may say about it ----
+- L2691 · `if (sim.pulse > 0 && sim.selected) {` — ---- survey pulse ----
+- L2704 · `camera.updateMatrixWorld(true);` — ---- HUD ----
+- L2734 · `edgeBuf.length = 0;` — ---- the working sky, and what the canopy may say about it ----
   
   The canopy is the ship's own smart HUD: the scanner and the comms
   array, drawn on the glass. So it reports what those two actually
@@ -1812,19 +1896,19 @@ function · L2387–2801
   A contact the scanner has nothing on gets nothing drawn. That is
   the point: an empty canopy means the array has not found anything,
   not that the sky is empty.
-- L2630 · `_relById.clear();` — relation comes off the contact board, which already resolves role,
+- L2736 · `_relById.clear();` — relation comes off the contact board, which already resolves role,
   corp standing and any flag you set by hand into one word. Every hull
   the canopy can label is inside CONTACT_R, so it is always there.
-- L2639 · `if (!view) continue;` — the array has nothing on it yet
-- L2649 · `` const range = view.named ? ` · ${d < 10000 ? `${Math.round(d)} u` : `${Math.round(d / 100) `` — a named contact earns its range readout; an unnamed return is
+- L2745 · `if (!view) continue;` — the array has nothing on it yet
+- L2755 · `` const range = view.named ? ` · ${d < 10000 ? `${Math.round(d)} u` : `${Math.round(d / 100) `` — a named contact earns its range readout; an unnamed return is
   just a class, and putting a precise distance on something you
   cannot even identify reads as knowing more than you do
-- L2667 · `edgeBuf.sort((a, b) => b.rank - a.rank);` — The rim is 412 pixels wide on the device this is played on. Twenty
+- L2773 · `edgeBuf.sort((a, b) => b.rank - a.rank);` — The rim is 412 pixels wide on the device this is played on. Twenty
   arrows around it is not situational awareness, it is a border — so
   only the few that would change what you do next get one.
-- L2670 · `for (const u of droneOps.units) {` — your drones by name and what they are doing; the corporations' by flag
-- L2686 · `for (const n of flow) {` — the heartbeat: a boat on the board is a ship with a name; its manifest reads inside 1.5 km
-- L2686 · `for (const n of flow) {` — Port shuttles. Two rules they did not used to obey:
+- L2776 · `for (const u of droneOps.units) {` — your drones by name and what they are doing; the corporations' by flag
+- L2792 · `for (const n of flow) {` — the heartbeat: a boat on the board is a ship with a name; its manifest reads inside 1.5 km
+- L2792 · `for (const n of flow) {` — Port shuttles. Two rules they did not used to obey:
   
     - a boat is only labelled if it HAS A HULL DRAWN. `syncFlow` skips
       the mesh when the pool has not warmed yet, and the label loop
@@ -1835,20 +1919,20 @@ function · L2387–2801
     - and they go through the scanner like everything else. A shuttle
       is `[D]`: it belongs to its port, it flies a fixed loop, it goes
       home, and nobody is filed as its captain.
-- L2705 · `const eng = sim.engagement;` — a live engagement: marked wherever it is, so you can go and join it
-- L2725 · `for (const h of holes) {` — a collapsed star is labelled from anywhere in the system: it is the one
+- L2811 · `const eng = sim.engagement;` — a live engagement: marked wherever it is, so you can go and join it
+- L2831 · `for (const h of holes) {` — a collapsed star is labelled from anywhere in the system: it is the one
   thing out there you most need to know the direction of
-- L2749 · `const markers = [];` — Flight markers: prograde, retrograde, commanded heading, target.
-- L2798 · `bloom.setThreshold(warpStrength > 0.05 ? 0.42 : 0.62, 0.65);` — Bloom only while there is something to bloom. Idle, this is byte for
+- L2855 · `const markers = [];` — Flight markers: prograde, retrograde, commanded heading, target.
+- L2904 · `bloom.setThreshold(warpStrength > 0.05 ? 0.42 : 0.62, 0.65);` — Bloom only while there is something to bloom. Idle, this is byte for
   byte the plain render it always was; in a tunnel it is two extra
   full-screen passes, and perf.js decides whether the device can have
   them at all.
-- L2799 · `const lensPass = holeFx.lens();` — a lensed disk is the one thing outside a warp tunnel that wants to bleed
+- L2905 · `const lensPass = holeFx.lens();` — a lensed disk is the one thing outside a warp tunnel that wants to bleed
 <!-- /note -->
 
 #### <a id="s-mountGame-bodyDetail"></a>`mountGame.bodyDetail()`
 
-prop · L2803–2803
+prop · L2909–2909
 
 <!-- note:mountGame.bodyDetail -->
 <!-- /note -->

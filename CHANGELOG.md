@@ -1,5 +1,114 @@
 # Changelog
 
+## 0.3.92 — 2026-10-04 — Dead Hulls: Something To Look At
+
+Reported, with two screenshots from a phone: salvaging from the board shows
+random geometric shapes flying at the pilot and no ship carcass. Both were
+true, and the hulk was there — a dot under the lock box.
+
+### Players
+
+A wreck now looks like a wreck, and you work it from close enough to see it.
+
+- The autopilot and ARIA park a few hull lengths off a hulk instead of hundreds of units away, so the wreck fills a good part of the view while it is cut.
+- Hulks are scorched, torn and smouldering, and come apart from the stern as the rig takes their sections. The bridge goes last.
+- What the rig sheds is drawn as hull plate and crates, at the size of plate off that hull, and is reeled across to you at a speed you can follow. It used to be drawn as rock, bigger than the ship it came off.
+- The cutting arc lands on the part of the hull that is about to come off, and is sized to the hull rather than hiding it.
+- The lock box and waypoint mark sit on the hulk instead of trailing a little behind it.
+- The rig lights as she arrives, not from its full reach.
+- A long frame or a tab coming back no longer lets a hulk drift away from a ship holding station on it.
+- A small hull cut up in a few seconds no longer ends a salvage loop with an error.
+
+No save migration is required.
+
+Tested in a desktop browser at phone size; not yet on a phone. Flying the rig by hand it still reaches 600 u, and from there a hull is still a dot: close in to see it.
+
+### What was wrong
+
+- **The scale.** A hull is 1.6 to 8.5 u long. The rig reaches 600 u and the
+  autopilot parked at 500–800 u (0.3.90) or 330 u (0.3.91). A 5.5 u hull at
+  330 u is one degree: fifteen pixels on a phone, in a paint a shade off black.
+- **The shapes.** Salvage chunks were drawn by the rock-debris mesh — an
+  icosahedron — at the chunk's radius, 3 to 9 u: larger than the hull they
+  came off. The tractor pulled them at 240 u/s² and took them aboard at 90 u.
+
+### What changed
+
+- `hulkPark(h)` (`js/mission/salvage.js`): the SALVAGE step parks at 4.5 hull
+  lengths, 10–36 u. The leg's last approach runs at a gain of 0.2 instead of
+  the autopilot's 0.045 inside the last 900 u (`node.gain`, `node.gainR`), so
+  closing from the rig's reach takes about 16 s rather than 70. From further
+  out that gain arrived at 660 u/s and sailed 3,000 u past; it is not used
+  there.
+- The rig is lit inside four park distances, not from 600 u. Lit from its full
+  reach it had a small hull cut up while she was still 280 u off — unseen —
+  and, never having "worked" it by the old test, failed the step. `run.worked`
+  is now read wherever the rig is on the hulk.
+- `js/render/engine.js`:
+  - salvage chunks have their own instanced mesh, a thin plate (parts and
+    cargo as crates, tinted by what they are), drawn at the chunk's radius;
+  - `wreckOf` / `cutBack`: a hulk mesh loses a fifth to a half of its
+    parts by how intact it is, then the rest from the stern in proportion to
+    plate cut; scorched paint, a little self-light so it reads on the night
+    side, one smouldering ember; its own materials, never the live ships';
+  - the arc ends on the hulk as drawn this frame and on the next part to go;
+    the arc's width, the flash and the recorder beacon are sized to the hull.
+- `js/flight/rig.js`: shed plate has a radius of 0.35–1 u (was 3–9), leaves the
+  hull at walking pace, from the hull's skin.
+- `js/sim/sim.js`:
+  - `REEL`: a salvage chunk is reeled at 0.8 × its distance, 14–420 u/s, eased,
+    relative to the ship, and is aboard at 9 u. Rock debris is unchanged.
+  - the `hulk` anchor resolves where the hulk is at the time asked, from its
+    world and offset. A waypoint caches its place once a tick and the autopilot
+    asks before the hulks step, so the mark and the lock box sat a tick behind
+    a hulk riding a world at 40 u/s — a hull's width, at 25 u.
+- `js/flight/autopilot.js`: `matchFrame` holds 2.5 s (was 0.5) and is dropped by
+  `releaseControls`. A hitch longer than half a second let the frame lapse to
+  the nearest world's; a ship 30 u off a hulk in another frame watched it leave
+  and took seventy seconds to get back.
+- `js/world/hulks.js`: a hulk carries its hull's length (`len`), on the wire
+  too.
+
+**Measured.** Headless Chromium at 412 × 915, a board wreck order flown with
+CUT IT: lit at 78 u, parked at 29 u off a 5.5 u hull; from 700 u to the first
+cut, 16 s. `smoke-salvage`: 11 u off a 2.4 u hull, 166 px across; 22 parts
+drawn at first, 13 a few sections in; plate drawn as plate, none as rock.
+
+Parity bench, 5 seeds, final build: salvage 2,554 cr/min (1,689–4,234), mining
+2,232 (1,061–3,678) — 1.14×, inside the band, on another low mining draw.
+Against the pooled mining median of 3,513 it is 0.73×: inside, with little
+room. Working a hulk from close in costs about 14 s a hulk over 0.3.91, which
+cut from the rig's full reach; 0.3.91's salvage median was 2,976.
+
+Headless, ARIA at the conn, 30 sky-minutes: salvor +98,712, miner +30,703
+(unchanged).
+
+**Verified.** The zip applied to a clean 0.3.91 with `tools/lg-patch.sh apply
+0.3.91 0.3.92`. All 108 node suites pass on the tree (`lgpatch` aside on some
+runs, as before). Python suites pass. `codedocs --check` clean. Browser smokes
+on a plain server: `smoke-salvage` — which now also requires that she works
+the hulk from 60 u or less, that the hull is at least 60 px across, that what
+is shed is drawn as plate and none as rock, and that the hulk comes apart —
+`smoke-rig`, `smoke-mining`, `smoke-coretutorial`. Looked at: screenshots of a
+board wreck order under CUT IT at 412 × 915, from the approach through three
+sections.
+
+**Not verified.** Not on a phone. Not in a live Sol with this build (0.3.91's
+live run stands for the sharing; the park and the drawing are the same code in
+a held sky).
+
+**Still open.**
+- By hand the rig still works from 600 u, where the hull is a dot. A HUD hint
+  to close in, or a shorter hand reach, is a design call.
+- Hulks are not solid: a ship can fly through one.
+- Everything 0.3.91 left open.
+
+**Files.** EDIT `js/render/engine.js`, `js/mission/salvage.js`,
+`js/flight/autopilot.js`, `js/flight/rig.js`, `js/sim/sim.js`,
+`js/world/hulks.js`, `js/version.js`, `test/salvageloop.test.mjs`,
+`test/hulkwire.test.mjs`, `test/smoke-salvage.mjs`, `test/smoke-rig.mjs`,
+`README.md` and the regenerated `docs/`. NEW `docs/PATCH-0.3.92.md`.
+
 ## 0.3.91 — 2026-10-04 — Dead Hulls: A Shared Field
 
 Reported: ARIA still does not reach a full salvage run. Reproduced by doing

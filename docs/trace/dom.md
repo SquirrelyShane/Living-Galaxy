@@ -316,11 +316,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `aux-auto`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L790
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L792
 
 ### `aux-auto-st`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L791
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L793
 
 ### `aux-comms`
 
@@ -1295,7 +1295,7 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `warp-flash`
 
-- dom.id — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1371
+- dom.id — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L1388
 
 ### `warp-state`
 
