@@ -1,0 +1,30 @@
+{
+  "base": "4584b5df4399b1c9e4e878e6e9c49adfabf167fc",
+  "commit": "af50387f3696820d76320d6f39abd75db8e3ea36",
+  "version": "0.3.93",
+  "files": {
+    "CHANGELOG.md": "b86c670811b126ee2b43ac7ff10f092410123baf4d68f65af23bf7d28726ea7d",
+    "README.md": "7522eaab2029922c5a6c51371bdc7b3cec54ff0b453b2f2a6e9c307eeb3cc2fe",
+    "deploy/install-aria.sh": "562a5d4e26731d855e16bac38b950c256f24ef6a103045c91c0c46e886aada90",
+    "docs/ARIA-DIALOGUE.md": "e5b919668589836f85e940967eb223936f57954685a767ff971b893f68806895",
+    "docs/PATCH-0.3.93.md": "cb4edda5cf81c7d699bd9ddfb8afc0abe2961383b904a66d715f96a84470fc4f",
+    "js/aria/aria.js": "46bde1567c558b96e9505f40c601d92543b34ff069e136ba884360ebc0e703ca",
+    "js/aria/conversation.js": "264c2e8fce8e1c3c820bd0998406a302475f6a78579b941003d3792e1d55ab1d",
+    "js/aria/memory.js": "a4b9fe3e299cf9d969251c04994e18bbdf848a404133b50ba1d2a371cf23d482",
+    "js/aria/mind.js": "7c6889970eb704382af6dc11f9badd93c48bfd628e958d4d2b51071dce80eca2",
+    "js/aria/pilot.js": "a7de3d0fd8719ff5d4e85edb5a33a7e75c764b929306e6fd7c801aab84642ed4",
+    "js/aria/play.js": "337875ba668180846a85de124864d357cb299a9e52b773d5aadf018a02314123",
+    "js/console/panels/aria-core.js": "41d84c2b3b1154f30fa24ffa5db53fd9486a2c76ccf67594f155900bd33a273d",
+    "js/console/panels/nav.js": "3c35a1fb11102f45a56b0ce928662a336b399f1887a2a59b49ef8eb98a3ce742",
+    "js/npc/captain.js": "1dab79ea008c97368b5ca863ce61a2566e03bfe234b8d6d208a1ebf48aaa6195",
+    "js/version.js": "2057a6c390492af22e2512aab370d155469cb99073341a7c4975a382915ddc2a",
+    "server.py": "3d2499cca8fc97065cc3ca555a15180a0eca5228f92c40156e712ffcd114d36d",
+    "test/aria-conversation.test.mjs": "884cf832c1e9ca9f558bc7133f959ed76021ac120542ed33f0c1ed6569def255",
+    "test/aria-core-learning.test.mjs": "8ff70d11ef000f423830585598ade04b1962c366254cc222e96a7f90f8ff786f",
+    "test/aria-core-panel.test.mjs": "4df385106382ef83df1392d414d52fb22e7739d00fe579d38b664e1aae130983",
+    "test/aria-observation.test.mjs": "dc567ca836fa72fc1de654d6d9cf28b27c0a014a227705fa584f3a651e527145",
+    "test/aria-relay.test.py": "1da3c6db5978d92560f7ac2c9f64b06a0f6b1f1527333384900a1a248acfa34a",
+    "test/ariamind.test.mjs": "a8d39aff792fc4fcacc40b344518597d786b72f467781da4153c2d87953989ca",
+    "test/smoke-aria-core.mjs": "c3bb0a73bae4d4cb36ff259165fcebee622e83baed77d3925dadd70d0ee582b7"
+  }
+}
