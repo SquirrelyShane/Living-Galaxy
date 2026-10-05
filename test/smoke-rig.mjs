@@ -53,8 +53,13 @@ const on = await page.evaluate(async () => {
   const { rig } = await import("/js/flight/rig.js");
   const gl = window.__lgGL;
   const beam = gl.scene.children.find((c) => c.isMesh && c.geometry?.type === "CylinderGeometry" && c.children.length === 1 && c.children[0].isMesh);
-  const at = (c) => Math.hypot(c.position.x - (rig.x - gl.origin.x), c.position.y - (rig.y - gl.origin.y), c.position.z - (rig.z - gl.origin.z));
-  const flash = gl.scene.children.find((c) => c.isSprite && c.visible && at(c) < 1 && c.material.color.getHex() === 0xbfe9ff);
+  /* 0.3.92: the arc ends on the hulk as it is drawn this frame, on the part about
+   * to come off — so the flash is looked for within a hull length of the hulk
+   * itself, not of the rig's own mark, which is a sim step old */
+  const { hulkById } = await import("/js/world/hulks.js");
+  const hk = hulkById(rig.key) ?? rig;
+  const at = (c) => Math.hypot(c.position.x - (hk.x - gl.origin.x), c.position.y - (hk.y - gl.origin.y), c.position.z - (hk.z - gl.origin.z));
+  const flash = gl.scene.children.find((c) => c.isSprite && c.visible && at(c) < 8 && c.material.color.getHex() === 0xbfe9ff);
   const sw = document.getElementById("sw-cut");
   return { rig: sim.ship.rigMode, miner: sim.ship.miningMode, active: rig.active, section: rig.section, beam: Boolean(beam?.visible), beamLen: beam ? +beam.scale.z.toFixed(1) : 0, beamHex: beam?.material.color.getHexString(), flash: Boolean(flash), nm: sw.querySelector(".nm").textContent, st: sw.querySelector(".st").textContent, lit: sw.classList.contains("on"), drawRig: sim.ship.draws?.rig };
 });

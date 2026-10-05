@@ -27,7 +27,11 @@ export const SALV = {
   trip: 4,
   threatR: 6000,
   jobMargin: 1.08,
-  standoff: 0.55,
+  lengths: 4.5,
+  park: [10, 36],
+  cutFrom: 4,
+  gain: 0.2,
+  gainR: 900,
   beltK: 0.4,
   hotR: 9000,
   nestR: 16000,
@@ -46,6 +50,8 @@ export function rigModeFor(want = "strip", pos = sim.ship.pos, { job = null, h =
   for (const c of contacts) if (c.hp > 0 && c.relation === "hostile" && d3(c, pos) < SALV.threatR) return "cut";
   return "strip";
 }
+
+export const hulkPark = (h) => Math.max(SALV.park[0], Math.min(SALV.park[1], (h?.len ?? 4) * SALV.lengths));
 
 const skipped = new Map();
 const d3 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -135,7 +141,7 @@ export function makeSalvage({ mission, ap, apPark, apHold, legTo, untilMet, ensu
     wp.transient = true;
     run.wpId = wp.id;
     run.node = warpNodeById(wp.id);
-    if (run.node) run.node.park = Math.max(150, rigRange(sim.ship) * SALV.standoff);
+    if (run.node) { run.node.park = hulkPark(h); run.node.gain = SALV.gain; run.node.gainR = SALV.gainR; }
     run.hulkId = h.id;
     run.idleSince = null;
     run.stuck0 = ap().unstuckCount ?? 0;
@@ -209,8 +215,10 @@ export function makeSalvage({ mission, ap, apPark, apHold, legTo, untilMet, ensu
     const charge = (ship.charge ?? 0) / Math.max(1, batteryCap(ship));
     if (charge <= SALV.restAt) run.resting = true;
     else if (charge >= SALV.resumeAt) run.resting = false;
-    const want = run.resting ? "off" : mode;
+    const close = d3(ship.pos, h) <= (run.node?.park ?? SALV.park[1]) * SALV.cutFrom;
+    const want = run.resting || !close ? "off" : mode;
     if ((ship.rigMode ?? "off") !== want) setRigMode(want, { quiet: true });
+    if (rig.active && rig.key === h.id) run.worked = h.id;
     const leg = legTo(s, run.node);
     if (typeof leg === "string" && leg.startsWith("fail:") && s.target?.kind !== "hulk" && (run.skips ?? 0) < SALV.skips) {
       run.skips = (run.skips ?? 0) + 1;

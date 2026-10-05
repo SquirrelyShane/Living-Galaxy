@@ -65,7 +65,7 @@ let rows;
     `the same plate, parts, hold and recorder (${A.plate} plate, ${A.partCount} parts, ${A.cargoCount} water, ${A.value} cr)`);
   ok(JSON.stringify(A.parts) === JSON.stringify(before.a.parts) && JSON.stringify(B.parts) === JSON.stringify(before.b.parts), "part for part");
   ok(Math.abs(ma.x - before.ax) < 1 && Math.abs(ma.z - before.az) < 1 && ma.r === before.ar && Math.abs(ma.yaw - before.ayaw) < 0.01, "in the same place, the same size, lying the same way");
-  ok(ma.name === "Test v:a hulk" && ma.hullName && ma.tier, `named and classed (${ma.name}, ${ma.hullName} ${ma.tier})`);
+  ok(ma.name === "Test v:a hulk" && ma.hullName && ma.tier && ma.len > 0, `named, classed and sized (${ma.name}, ${ma.hullName} ${ma.tier}, ${ma.len} u long)`);
   ok(Math.abs(ma.age - 12) < 0.01 && ma.life === HULK.life, `as old as it is on the host (${ma.age}s)`);
   void w;
 }
