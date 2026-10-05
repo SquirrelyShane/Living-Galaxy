@@ -1,6 +1,6 @@
 # js/sim/sim.js
 
-[index](../../../README.md) · 4135 lines · 296 symbols · 68 imports · 147 importers
+[index](../../../README.md) · 4151 lines · 298 symbols · 68 imports · 147 importers
 
 ## About
 
@@ -377,6 +377,7 @@ for. Worlds are hundreds of times your length and pull like it.
 - [`setThrottle`](#s-setThrottle) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md), [js/mission/script.js](../mission/script.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/ui/hud.js](../ui/hud.js.md), test/chart.test.mjs
 - [`throttleCap`](#s-throttleCap) · function — used by [js/mission/run.js](../mission/run.js.md), [js/mission/script.js](../mission/script.js.md), test/chart.test.mjs
 - [`shiftClock`](#s-shiftClock) · function — used by [js/mission/script.js](../mission/script.js.md), [js/net/net.js](../net/net.js.md), [js/net/worldsync.js](../net/worldsync.js.md)
+- [`CLOCK_CARRY_R`](#s-CLOCK_CARRY_R) · const — used by [js/mission/script.js](../mission/script.js.md)
 - [`tickSim`](#s-tickSim) · function — used by [js/mission/script.js](../mission/script.js.md), [js/render/engine.js](../render/engine.js.md), test/ariabiz.test.mjs, test/ariaplay.test.mjs, test/ariasense.test.mjs, test/autopilot.test.mjs, test/avoid.test.mjs, test/board.test.mjs, test/chart.test.mjs, test/chartquiet.test.mjs, test/childtalk.test.mjs, test/dockwork.test.mjs, test/gdb.test.mjs, test/hold.test.mjs, test/hulks.test.mjs, test/line.test.mjs, test/mission.test.mjs, test/nose.test.mjs, test/npcchat.test.mjs, test/orders.test.mjs, test/people.test.mjs, test/portcontrol.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/rig.test.mjs, test/robots.test.mjs, test/seclevel.test.mjs, test/solprime.test.mjs, test/stafflife.test.mjs, test/systems.test.mjs, test/trade.test.mjs, test/undock.test.mjs, test/upgrades.test.mjs
 - [`leaveHulk`](#s-leaveHulk) · function — used by [js/mission/script.js](../mission/script.js.md), [js/net/worldsync.js](../net/worldsync.js.md), test/hulks.test.mjs
 - [`pauseTick`](#s-pauseTick) · function — used by [js/mission/script.js](../mission/script.js.md), [js/render/engine.js](../render/engine.js.md)
@@ -395,7 +396,7 @@ for. Worlds are hundreds of times your length and pull like it.
 
 ## Effects
 
-- **global.write** — `window.__lg` (wireControlsTest:4059)
+- **global.write** — `window.__lg` (wireControlsTest:4075)
 
 ## Symbols
 
@@ -3380,9 +3381,9 @@ function · L3325–3417
 
 ### <a id="s-shiftClock"></a>`shiftClock(dt)`
 
-function · **exported** · L3419–3437
+function · **exported** · L3419–3442
 
-- calls: [`gravityAt`](../flight/ship.js.md#s-gravityAt) _js/flight/ship.js_ · [`dockPortFor`](#s-dockPortFor) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ ×2 · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_ ×2
+- calls: [`gravityAt`](../flight/ship.js.md#s-gravityAt) _js/flight/ship.js_ · [`carryLoose`](#s-carryLoose) ×2 · [`dockPortFor`](#s-dockPortFor) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ ×2 · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_ ×2
 - called by: [`poll`](../net/net.js.md#s-poll) _js/net/net.js_ ×2 · [`applySolPrime`](../net/worldsync.js.md#s-applySolPrime) _js/net/worldsync.js_
 
 <!-- note:shiftClock -->
@@ -3395,8 +3396,8 @@ ever came in range of the tractor. The hull now rides the jump in whatever
 frame it is flying in — the port it is docking at, else the well it is in.
 
 - L3426 · `if (ship.dockedAt || tractor.active) return;` — clampDocked and the tractor re-seat the hull off the new clock
-- L3428 · `ship.pos.x += (port.vx ?? 0) * dt; ship.pos.y += (port.vy ?? 0) * dt; ship.pos.z += (port.` — a berth request is a short-range frame and its corrections are small
-- L3431 · `const dom = sim.dominant ?? gravityAt(ship.pos, t0, bodyPosition, _clockG).body;` — 0.3.55 — carry the hull with the world it is near, by where that world IS
+- L? · `ship.pos.x += (port.vx ?? 0) * dt; ship.pos.y += (port.vy ?? 0) * dt; ship.pos.z += (port.` — a berth request is a short-range frame and its corrections are small
+- L3433 · `const dom = sim.dominant ?? gravityAt(ship.pos, t0, bodyPosition, _clockG).body;` — 0.3.55 — carry the hull with the world it is near, by where that world IS
   at the new time. This used to be `velocity × dt`: a straight line along
   the world's orbit. Fine for the quarter-second nudges of the clock chase;
   not for JOINING a shared sky, where the clock jumps by the room's whole
@@ -3408,33 +3409,54 @@ frame it is flying in — the port it is docking at, else the well it is in.
   in empty space. When a relay restart moved the room's clock back, the
   same thing ran the other way. Now the hull keeps its place and its motion
   relative to its world for any jump, forward or back.
-- L3432 · `if (!dom || dom.kind === "star") return;` — the star does not move
+- L3434 · `if (!dom || dom.kind === "star") return;` — the star does not move
+
+- L3439 · `carryLoose(ship.pos, dx, dy, dz, dvx, dvy, dvz);` — 0.3.93: what is adrift beside the ship rides the same correction. The ship
+  and the hulk were carried and the plate between them was not, so every
+  correction left it a body-speed × dt further off — 31 u for 0.8 s at Earth,
+  against a 9 u door.
+<!-- /note -->
+
+### <a id="s-CLOCK_CARRY_R"></a>`CLOCK_CARRY_R`
+
+const · **exported** · L3444–3444
+
+<!-- note:CLOCK_CARRY_R -->
+<!-- /note -->
+
+### <a id="s-carryLoose"></a>`carryLoose(from, dx, dy, dz, dvx, dvy, dvz)`
+
+function · L3446–3453
+
+- called by: [`shiftClock`](#s-shiftClock) ×2
+
+<!-- note:carryLoose -->
 <!-- /note -->
 
 ### <a id="s-_clockA"></a>`_clockA`
 
-const · L3438–3438
+const · L3454–3454
 
 <!-- note:_clockA -->
 <!-- /note -->
 
 ### <a id="s-_clockB"></a>`_clockB`
 
-const · L3439–3439
+const · L3455–3455
 
 <!-- note:_clockB -->
 <!-- /note -->
 
 ### <a id="s-_clockG"></a>`_clockG`
 
-const · L3440–3440
+const · L3456–3456
 
 <!-- note:_clockG -->
 <!-- /note -->
 
 ### <a id="s-DOCK_FRAME_R"></a>`DOCK_FRAME_R`
 
-const · L3442–3442
+const · L3458–3458
 
 <!-- note:DOCK_FRAME_R -->
 The port whose frame the hull flies in: a live berth request (yours or the autopilot's) inside 30 km.
@@ -3442,18 +3464,18 @@ The port whose frame the hull flies in: a live berth request (yours or the autop
 
 ### <a id="s-dockPortFor"></a>`dockPortFor(ship)`
 
-function · L3443–3451
+function · L3459–3467
 
 - calls: [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ ×3 · [`hasDockRequest`](../station/stationworks.js.md#s-hasDockRequest) _js/station/stationworks.js_
 - called by: [`shiftClock`](#s-shiftClock) · [`stepShip`](#s-stepShip)
 
 <!-- note:dockPortFor -->
-- L3446 · `const id = (dockRequest.stId && hasDockRequest(stationById(dockRequest.stId) ?? { id: null` — a berth you asked for, the one the autopilot filed, or the port the autopilot is flying to
+- L3462 · `const id = (dockRequest.stId && hasDockRequest(stationById(dockRequest.stId) ?? { id: null` — a berth you asked for, the one the autopilot filed, or the port the autopilot is flying to
 <!-- /note -->
 
 ### <a id="s-_avoidDir"></a>`_avoidDir`
 
-const · L3453–3453
+const · L3469–3469
 
 <!-- note:_avoidDir -->
 ---- flight assist: collision avoidance --------------------------------
@@ -3465,27 +3487,27 @@ purpose, because mining and docking are both "fly at that thing".
 
 ### <a id="s-avoidAt"></a>`avoidAt`
 
-const · L3454–3454
+const · L3470–3470
 
 <!-- note:avoidAt -->
 <!-- /note -->
 
 ### <a id="s-updateAvoidance"></a>`updateAvoidance(ship)`
 
-function · L3456–3478
+function · L3472–3494
 
 - calls: [`avoidAim`](../flight/avoid.js.md#s-avoidAim) _js/flight/avoid.js_ · [`avoidLevel`](../flight/avoid.js.md#s-avoidLevel) _js/flight/avoid.js_ · [`deliberate`](../flight/avoid.js.md#s-deliberate) _js/flight/avoid.js_ · [`surfaceOnly`](../flight/avoid.js.md#s-surfaceOnly) _js/flight/avoid.js_ · [`threatTo`](../flight/avoid.js.md#s-threatTo) _js/flight/avoid.js_ · [`updateAvoidance>off`](#s-updateAvoidance-off)
 - called by: [`stepShip`](#s-stepShip)
 
 <!-- note:updateAvoidance -->
-- L3468 · `ship.avoid = null;` — Level 1 is a warning, not a manoeuvre: the HUD says something is in the
+- L3484 · `ship.avoid = null;` — Level 1 is a warning, not a manoeuvre: the HUD says something is in the
   way and the pilot gets to decide. The assist only takes a hand when
   there is no longer time to.
 <!-- /note -->
 
 #### <a id="s-updateAvoidance-off"></a>`updateAvoidance>off()`
 
-function · L3457–3457
+function · L3473–3473
 
 - called by: [`updateAvoidance`](#s-updateAvoidance)
 
@@ -3494,16 +3516,16 @@ function · L3457–3457
 
 ### <a id="s-tickSim"></a>`tickSim(dt)`
 
-function · **exported** · L3480–3562
+function · **exported** · L3496–3578
 
 - calls: [`setEngineLevel`](../audio/index.js.md#s-setEngineLevel) _js/audio/index.js_ ×2 · [`justPressed`](../core/input.js.md#s-justPressed) _js/core/input.js_ ×17 · [`sampleInput`](../core/input.js.md#s-sampleInput) _js/core/input.js_ · [`stepRig`](../flight/rig.js.md#s-stepRig) _js/flight/rig.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`stepMining`](../flight/turrets.js.md#s-stepMining) _js/flight/turrets.js_ · [`stepShots`](../flight/turrets.js.md#s-stepShots) _js/flight/turrets.js_ · [`syncContacts`](../flight/turrets.js.md#s-syncContacts) _js/flight/turrets.js_ · [`broadcastShip`](#s-broadcastShip) · [`clampDocked`](#s-clampDocked) · [`collectBeaconsNear`](#s-collectBeaconsNear) · [`cycleMiningMode`](#s-cycleMiningMode) · [`cycleRigMode`](#s-cycleRigMode) · [`cycleTurretMode`](#s-cycleTurretMode) · [`sampleTelemetry`](#s-sampleTelemetry) · [`setTerminal`](#s-setTerminal) · [`stepShip`](#s-stepShip) · [`stepTractorTick`](#s-stepTractorTick) · [`stepWarp`](#s-stepWarp) · [`stepWorld`](#s-stepWorld) · [`toggleDock`](#s-toggleDock) · [`toggleSystem`](#s-toggleSystem) ×6 · [`toggleWarp`](#s-toggleWarp) · [`tryScan`](#s-tryScan) · [`wrapPi`](#s-wrapPi) · [`handlingLeft`](../station/dockwork.js.md#s-handlingLeft) _js/station/dockwork.js_ · [`stepDockwork`](../station/dockwork.js.md#s-stepDockwork) _js/station/dockwork.js_ · [`stepStations`](../station/stations.js.md#s-stepStations) _js/station/stations.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.setMapOpen`, `useGameStore.getState.setPhase`
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
 
 <!-- note:tickSim -->
-- L3498 · `stepDockwork(d * (sim.phase === "play" ? sim.timeScale : 1), sim.ship?.dockedAt ?? null);` — the crane runs whether or not the hull is flying — it is the reason it is not
-- L3499 · `if (sim.undockWhenClear) {` — 0.3.75: a departure booked while the crane worked goes the moment it is done
-- L3509 · `stepStations(sim.time);` — Stations move to THIS tick's time before anything is glued to them.
+- L3514 · `stepDockwork(d * (sim.phase === "play" ? sim.timeScale : 1), sim.ship?.dockedAt ?? null);` — the crane runs whether or not the hull is flying — it is the reason it is not
+- L3515 · `if (sim.undockWhenClear) {` — 0.3.75: a departure booked while the crane worked goes the moment it is done
+- L3525 · `stepStations(sim.time);` — Stations move to THIS tick's time before anything is glued to them.
   stepWorld() also steps them, but it runs at the end of the tick — so
   clampDocked() and the tractor were snapping the ship relative to where
   the station was LAST tick, and stepWorld then moved the station out from
@@ -3515,18 +3537,18 @@ function · **exported** · L3480–3562
   and throttle input is ignored; the ship keeps its vector and the reactor
   keeps working. HOLD is the one control that still reaches the thrusters.
 - L? · `stepMining(sim.ship, d, sim.time, sim.lock, sim.handsOff ? sim.autoPlan?.seamOre ?? null :` — the ore a contract named, but only while the loop is flying: your own hand at the cutter cuts whatever you point it at
-- L3558 · `collectBeaconsNear();` — 0.3.73: the ship is still flying with the console up — it still picks up
+- L3574 · `collectBeaconsNear();` — 0.3.73: the ship is still flying with the console up — it still picks up
   beacons, and it still tells the room where it is. This branch returned
   before the broadcast, so the relay aged the pilot out after a few seconds
   of reading gauges; closing the console rejoined it as a stranger.
-- L3525 · `if (sim.remotes.size > 0 && sim.timeScale !== 1) sim.timeScale = 1;` — two pilots in one room keep one clock — time-warp would desync the sky
+- L3541 · `if (sim.remotes.size > 0 && sim.timeScale !== 1) sim.timeScale = 1;` — two pilots in one room keep one clock — time-warp would desync the sky
 
-- L3514 · `if (sim.terminalOpen && sim.termHold) a.brake = true;` — Console is a live panel; retain the normal simulation path.
+- L3530 · `if (sim.terminalOpen && sim.termHold) a.brake = true;` — Console is a live panel; retain the normal simulation path.
 <!-- /note -->
 
 ### <a id="s-collectBeaconsNear"></a>`collectBeaconsNear()`
 
-function · L3564–3569
+function · L3580–3585
 
 - calls: [`collectBeacon`](#s-collectBeacon) · [`beaconPosition`](../world/bodies.js.md#s-beaconPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`tickSim`](#s-tickSim)
@@ -3536,7 +3558,7 @@ function · L3564–3569
 
 ### <a id="s-broadcastShip"></a>`broadcastShip(d)`
 
-function · L3571–3588
+function · L3587–3604
 
 - calls: [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`currentShipId`](#s-currentShipId)
 - called by: [`tickSim`](#s-tickSim)
@@ -3547,21 +3569,21 @@ Where this pilot is, for the room — 20 Hz at most, the relay rate-limits furth
 
 ### <a id="s-_gImp"></a>`_gImp`
 
-const · L3590–3590
+const · L3606–3606
 
 <!-- note:_gImp -->
 <!-- /note -->
 
 ### <a id="s-_bv"></a>`_bv`
 
-const · L3591–3591
+const · L3607–3607
 
 <!-- note:_bv -->
 <!-- /note -->
 
 ### <a id="s-stepPorts"></a>`stepPorts(dt)`
 
-function · L3593–3619
+function · L3609–3635
 
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.push`
 - called by: [`stepWorld`](#s-stepWorld)
@@ -3571,12 +3593,12 @@ Everything that happens out there whether or not you are looking.
 
 Free ports keep guns. They only wake up when somebody is close enough to rob.
 
-- L3596 · `if ((st.truceUntil ?? -1) > sim.time) continue;` — toll paid — the watch stays in its holes
+- L3612 · `if ((st.truceUntil ?? -1) > sim.time) continue;` — toll paid — the watch stays in its holes
 <!-- /note -->
 
 ### <a id="s-clampDocked"></a>`clampDocked()`
 
-function · L3621–3636
+function · L3637–3652
 
 - calls: [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`tickSim`](#s-tickSim)
@@ -3589,7 +3611,7 @@ follow and the ship would otherwise be left hanging in space.
 
 ### <a id="s-stepCareer"></a>`stepCareer(d)`
 
-function · L3639–3651
+function · L3655–3667
 
 - calls: [`createCareerStepper`](career.js.md#s-createCareerStepper) _js/sim/career.js_
 - called by: [`stepWorld`](#s-stepWorld)
@@ -3603,30 +3625,30 @@ function · L3639–3651
 
 ### <a id="s-stepWorld"></a>`stepWorld(d)`
 
-function · L3653–3706
+function · L3669–3722
 
 - calls: [`tickFleet`](../corp/fleet.js.md#s-tickFleet) _js/corp/fleet.js_ · [`stepSecLevel`](../corp/seclevel.js.md#s-stepSecLevel) _js/corp/seclevel.js_ · [`stepNpcDrones`](../drones/npcdrones.js.md#s-stepNpcDrones) _js/drones/npcdrones.js_ · [`stepDroneOps`](../drones/ops.js.md#s-stepDroneOps) _js/drones/ops.js_ · [`tickContracts`](../economy/contracts.js.md#s-tickContracts) _js/economy/contracts.js_ · [`stepEconomy`](../economy/economy.js.md#s-stepEconomy) _js/economy/economy.js_ · [`stepFab`](../economy/fabricate.js.md#s-stepFab) _js/economy/fabricate.js_ · [`tickAutopilot`](../flight/autopilot.js.md#s-tickAutopilot) _js/flight/autopilot.js_ · [`stepProbes`](../flight/probes.js.md#s-stepProbes) _js/flight/probes.js_ · [`stepBattles`](../npc/battles.js.md#s-stepBattles) _js/npc/battles.js_ · [`tickCaptain`](../npc/captain.js.md#s-tickCaptain) _js/npc/captain.js_ · [`stepNpcCombat`](../npc/combat.js.md#s-stepNpcCombat) _js/npc/combat.js_ · [`stepFlow`](../npc/flow.js.md#s-stepFlow) _js/npc/flow.js_ · [`stepRogues`](../npc/rogues.js.md#s-stepRogues) _js/npc/rogues.js_ · [`stepSecurity`](../npc/security.js.md#s-stepSecurity) _js/npc/security.js_ · [`stepTraffic`](../npc/traffic.js.md#s-stepTraffic) _js/npc/traffic.js_ · [`stepCareer`](#s-stepCareer) · [`stepCataclysms`](#s-stepCataclysms) · [`stepLaneDiscipline`](#s-stepLaneDiscipline) · [`stepPorts`](#s-stepPorts) · [`stepSalvage`](#s-stepSalvage) · [`watchHoles`](#s-watchHoles) · [`stepStations`](../station/stations.js.md#s-stepStations) _js/station/stations.js_ · [`stepStationWorks`](../station/stationworks.js.md#s-stepStationWorks) _js/station/stationworks.js_ · [`stepDebris`](../world/debris.js.md#s-stepDebris) _js/world/debris.js_ · [`stepHoles`](../world/events/holes.js.md#s-stepHoles) _js/world/events/holes.js_ · [`emptyThreatBoard`](../world/events/impactors.js.md#s-emptyThreatBoard) _js/world/events/impactors.js_ · [`stepImpactors`](../world/events/impactors.js.md#s-stepImpactors) _js/world/events/impactors.js_ · [`threatBoard`](../world/events/impactors.js.md#s-threatBoard) _js/world/events/impactors.js_ · [`stepImpacts`](../world/events/impacts.js.md#s-stepImpacts) _js/world/events/impacts.js_ · [`stepHulks`](../world/hulks.js.md#s-stepHulks) _js/world/hulks.js_
 - called by: [`tickSim`](#s-tickSim) · [`tickSolHost`](#s-tickSolHost)
 
 <!-- note:stepWorld -->
-- L3655 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — the player's position is what decides the far-field detail budget and
+- L3671 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — the player's position is what decides the far-field detail budget and
   which fights fly real rounds, so the sky is told where the player is
-- L3655 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — 0.3.65: the dedicated Sol host has no pilot, so its far-field budget must not
+- L3671 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — 0.3.65: the dedicated Sol host has no pilot, so its far-field budget must not
   centre on the observatory's parked hull — it flies every hull at full detail
   (null = everything near), and the positions it hands mirrors are real ones
-- L3656 · `if (sim.worldAuthority !== false) {` — A mirror flies the hulls — it has to, or they would freeze between the
+- L3672 · `if (sim.worldAuthority !== false) {` — A mirror flies the hulls — it has to, or they would freeze between the
   host's packets — but it does not get to decide anything. Who is hunting
   whom, who called for help and what a nest launched are the host's to
   settle, and a mirror that made its own mind up would be fighting a
   different war in the same sky. worldsync.js overwrites the outcome.
-- L3661 · `stepSecLevel(sim.ship, sim.time, d, { authority: sim.worldAuthority !== false });` — the security ◆ is the pilot's, not the sky's: every client steps its own (0.3.48)
-- L3703 · `sim.threats = sim.ship.sentry && sim.ship.powered.ops` — both branches hand back the SAME array — the `: []` used to allocate a
+- L3677 · `stepSecLevel(sim.ship, sim.time, d, { authority: sim.worldAuthority !== false });` — the security ◆ is the pilot's, not the sky's: every client steps its own (0.3.48)
+- L3719 · `sim.threats = sim.ship.sentry && sim.ship.powered.ops` — both branches hand back the SAME array — the `: []` used to allocate a
   fresh empty one every tick the sentry was off, which is most of them
 <!-- /note -->
 
 ### <a id="s-leaveHulk"></a>`leaveHulk(c, source=)`
 
-function · **exported** · L3708–3713
+function · **exported** · L3724–3729
 
 - calls: [`corpOfVessel`](../corp/corps.js.md#s-corpOfVessel) _js/corp/corps.js_ · [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_ · [`spawnHulk`](../world/hulks.js.md#s-spawnHulk) _js/world/hulks.js_
 - called by: [`hostVesselDown`](../net/worldsync.js.md#s-hostVesselDown) _js/net/worldsync.js_ · [`onKill`](#s-onKill) ×3 · [`wireReactiveSky`](#s-wireReactiveSky)
@@ -3639,7 +3661,7 @@ anything that is not an NPC hull — drones, station guns, peers.
 
 ### <a id="s-onKill"></a>`onKill(c, shot=)`
 
-function · L3715–3806
+function · L3731–3822
 
 - calls: [`bookRevenue`](../corp/company.js.md#s-bookRevenue) _js/corp/company.js_ · [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ ×4 · [`blameKill`](../corp/corps.js.md#s-blameKill) _js/corp/corps.js_ · [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ ×2 · [`corpOfVessel`](../corp/corps.js.md#s-corpOfVessel) _js/corp/corps.js_ ×2 · [`noteKillBySelf`](../corp/seclevel.js.md#s-noteKillBySelf) _js/corp/seclevel.js_ ×2 · [`noteDroneKill`](../drones/ops.js.md#s-noteDroneKill) _js/drones/ops.js_ · [`noteDestroyed`](../economy/contracts.js.md#s-noteDestroyed) _js/economy/contracts.js_ ×2 · [`noteKill`](../economy/contracts.js.md#s-noteKill) _js/economy/contracts.js_ · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×4 · [`pirateKilled`](../npc/battles.js.md#s-pirateKilled) _js/npc/battles.js_ ×3 · [`markVesselDown`](../npc/traffic.js.md#s-markVesselDown) _js/npc/traffic.js_ ×3 · [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`leaveHulk`](#s-leaveHulk) ×3 · [`logEvent`](#s-logEvent) ×7 · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ ×3 · [`burst`](../world/debris.js.md#s-burst) _js/world/debris.js_ ×4
 - via [js/station/stations.js](../station/stations.js.md): `stations.find`
@@ -3647,21 +3669,21 @@ function · L3715–3806
 - via [js/drones/npcdrones.js](../drones/npcdrones.js.md): `npcDrones.units.find`
 
 <!-- note:onKill -->
-- L3716 · `if (shot && shot.faction === "npc-port") {` — 0.3.59: a port's guard drone made the kill — the port's, not yours
-- L3727 · `if (shot && shot.faction === "npc-law") {` — 0.3.56: the Directorate's wing made the kill — theirs, not yours: no heat, no bounty, no credit
-- L3735 · `if (shot && String(shot.owner).startsWith("pdrone-")) noteDroneKill(shot.owner);` — one of your work drones made the kill: it is yours — bounty, standing, the lot
-- L3738 · `const stId = String(shot.owner).split(":")[0].replace(/^sdrone-/, "").split("-")[0];` — a port's guns or drones made the kill: the debris is theirs, the bounty is not
-- L3743 · `burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ??` — what is left of it drifts where it died — the tractor takes plate
-- L3745 · `if (c.kind === "npc") {` — a working hull: that was somebody's crew. Its owners remember, and so does the room.
-- L3758 · `noteDestroyed(n);` — 0.3.18: a drone cull on the desk counts every drone you put down
-- L3760 · `const e = pirateKilled(c.id, sim.time);` — a pirate: the charters pay for that, and so does anyone they were working over
-- L3762 · `const bounty = 240 + Math.round((shipById(n.ship)?.stats.massT ?? 30) * 4) + (e ? 350 : 0)` — 0.3.47: 420 + 6/t + 600 for a rescue was a starter hull every eight kills
-- L3781 · `noteKillBySelf({ n, t: sim.time });` — an honest hull: its flag remembers, its flag's allies remember, its flag's enemies approve
-- L3781 · `noteKillBySelf({ n, t: sim.time });` — 0.3.48: and so does the Directorate
-- L3787 · `if (c.kind === "peer") { noteKillBySelf({ peer: true, t: sim.time }); return; }` — another pilot: the heaviest thing the Directorate files (0.3.48)
-- L3789 · `if (c.stationId) {` — Somebody owned that gun.
+- L3732 · `if (shot && shot.faction === "npc-port") {` — 0.3.59: a port's guard drone made the kill — the port's, not yours
+- L3743 · `if (shot && shot.faction === "npc-law") {` — 0.3.56: the Directorate's wing made the kill — theirs, not yours: no heat, no bounty, no credit
+- L3751 · `if (shot && String(shot.owner).startsWith("pdrone-")) noteDroneKill(shot.owner);` — one of your work drones made the kill: it is yours — bounty, standing, the lot
+- L3754 · `const stId = String(shot.owner).split(":")[0].replace(/^sdrone-/, "").split("-")[0];` — a port's guns or drones made the kill: the debris is theirs, the bounty is not
+- L3759 · `burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ??` — what is left of it drifts where it died — the tractor takes plate
+- L3761 · `if (c.kind === "npc") {` — a working hull: that was somebody's crew. Its owners remember, and so does the room.
+- L3774 · `noteDestroyed(n);` — 0.3.18: a drone cull on the desk counts every drone you put down
+- L3776 · `const e = pirateKilled(c.id, sim.time);` — a pirate: the charters pay for that, and so does anyone they were working over
+- L3778 · `const bounty = 240 + Math.round((shipById(n.ship)?.stats.massT ?? 30) * 4) + (e ? 350 : 0)` — 0.3.47: 420 + 6/t + 600 for a rescue was a starter hull every eight kills
+- L3797 · `noteKillBySelf({ n, t: sim.time });` — an honest hull: its flag remembers, its flag's allies remember, its flag's enemies approve
+- L3797 · `noteKillBySelf({ n, t: sim.time });` — 0.3.48: and so does the Directorate
+- L3803 · `if (c.kind === "peer") { noteKillBySelf({ peer: true, t: sim.time }); return; }` — another pilot: the heaviest thing the Directorate files (0.3.48)
+- L3805 · `if (c.stationId) {` — Somebody owned that gun.
 
-- L3788 · `if (c.kind === "drone" && !c.stationId && !c.corpDrone) noteDestroyed({ rogue: true });` — 0.3.90: a cull contract reads "put N rogue drones down, anywhere", and the
+- L3804 · `if (c.kind === "drone" && !c.stationId && !c.corpDrone) noteDestroyed({ rogue: true });` — 0.3.90: a cull contract reads "put N rogue drones down, anywhere", and the
   drones a belt throws at any hull near it are called exactly that — but only
   a nest's own wave hulls were counted, so the job could be flown for twenty
   minutes over a belt full of dead drones and never close.
@@ -3669,7 +3691,7 @@ function · L3715–3806
 
 ### <a id="s-pauseTick"></a>`pauseTick()`
 
-function · **exported** · L3808–3811
+function · **exported** · L3824–3827
 
 - calls: [`justPressed`](../core/input.js.md#s-justPressed) _js/core/input.js_ · [`sampleInput`](../core/input.js.md#s-sampleInput) _js/core/input.js_ · [`resumePlay`](#s-resumePlay)
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
@@ -3679,7 +3701,7 @@ function · **exported** · L3808–3811
 
 ### <a id="s-resumePlay"></a>`resumePlay()`
 
-function · **exported** · L3813–3816
+function · **exported** · L3829–3832
 
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.setPhase`
 - called by: [`pauseTick`](#s-pauseTick) · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×3
@@ -3689,20 +3711,20 @@ function · **exported** · L3813–3816
 
 ### <a id="s-selectBody"></a>`selectBody(id)`
 
-function · **exported** · L3818–3842
+function · **exported** · L3834–3858
 
 - calls: [`acquireLock`](#s-acquireLock) ×2 · [`selectBody`](#s-selectBody) · [`setNavTarget`](#s-setNavTarget) ×2 · [`setNoticeAbout`](#s-setNoticeAbout) · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.patchHud`
 - called by: [`lockOn`](../aria/nav.js.md#s-lockOn) _js/aria/nav.js_ · [`stepMarkets.effect`](../comms/comms.js.md#s-stepMarkets-effect) _js/comms/comms.js_ · [`stepMarkets.effect~2`](../comms/comms.js.md#s-stepMarkets-effect-2) _js/comms/comms.js_ · [`stepNews.run`](../comms/comms.js.md#s-stepNews-run) _js/comms/comms.js_ · [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_ · [`engageAutopilot`](../flight/autopilot.js.md#s-engageAutopilot) _js/flight/autopilot.js_ · [`resolve`](../mission/run.js.md#s-resolve) _js/mission/run.js_ · [`makeSalvage>mark`](../mission/salvage.js.md#s-makeSalvage-mark) _js/mission/salvage.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ · [`selectBody`](#s-selectBody) · [`mountMap`](../ui/map.js.md#s-mountMap) _js/ui/map.js_ · [`mountMap.run~3`](../ui/map.js.md#s-mountMap-run-3) _js/ui/map.js_ · [`mountMap>drawDirectory`](../ui/map.js.md#s-mountMap-drawDirectory) _js/ui/map.js_ · [`mountMap>tapAt`](../ui/map.js.md#s-mountMap-tapAt) _js/ui/map.js_ · [`STEPS.action.run`](../ui/tutorial.js.md#s-STEPS-action-run) _js/ui/tutorial.js_
 
 <!-- note:selectBody -->
-- L3833 · `if (sim.lock.id !== id) {` — a pick off the map is a real lock, not a second parallel notion of
+- L3849 · `if (sim.lock.id !== id) {` — a pick off the map is a real lock, not a second parallel notion of
   "selected" — so the HUD, MATCH and the autopilot all agree with it
 <!-- /note -->
 
 ### <a id="s-requestJump"></a>`requestJump()`
 
-function · **exported** · L3844–3846
+function · **exported** · L3860–3862
 
 - called by: [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3711,7 +3733,7 @@ function · **exported** · L3844–3846
 
 ### <a id="s-requestScan"></a>`requestScan()`
 
-function · **exported** · L3847–3849
+function · **exported** · L3863–3865
 
 - called by: [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_ · [`EXEC.SURVEY`](../mission/run.js.md#s-EXEC-SURVEY) _js/mission/run.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3720,7 +3742,7 @@ function · **exported** · L3847–3849
 
 ### <a id="s-dismissNotice"></a>`dismissNotice()`
 
-function · **exported** · L3851–3853
+function · **exported** · L3867–3869
 
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3730,7 +3752,7 @@ Tap the card to send it away early.
 
 ### <a id="s-requestWarp"></a>`requestWarp`
 
-const · **exported** · L3854–3854
+const · **exported** · L3870–3870
 
 <!-- note:requestWarp -->
 legacy alias
@@ -3738,7 +3760,7 @@ legacy alias
 
 ### <a id="s-bodyUnderReticle"></a>`bodyUnderReticle()`
 
-function · **exported** · L3856–3870
+function · **exported** · L3872–3886
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`clamp`](#s-clamp) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 - called by: [`publishHud`](#s-publishHud) · [`togglePointerLock`](#s-togglePointerLock)
@@ -3746,13 +3768,13 @@ function · **exported** · L3856–3870
 <!-- note:bodyUnderReticle -->
 The world under the reticle: smallest angle off the nose inside 0.3 rad, big discs winning ties.
 
-- L3865 · `const disc = Math.atan2(b.radius ?? 0, d);` — apparent radius
-- L3866 · `const score = Math.max(0, ang - disc);` — inside the disc counts as dead on
+- L3881 · `const disc = Math.atan2(b.radius ?? 0, d);` — apparent radius
+- L3882 · `const score = Math.max(0, ang - disc);` — inside the disc counts as dead on
 <!-- /note -->
 
 ### <a id="s-nearestBody"></a>`nearestBody()`
 
-function · L3872–3883
+function · L3888–3899
 
 - calls: [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`publishHud`](#s-publishHud)
@@ -3762,7 +3784,7 @@ function · L3872–3883
 
 ### <a id="s-publishHud"></a>`publishHud(labels, plots)`
 
-function · **exported** · L3885–4056
+function · **exported** · L3901–4072
 
 - calls: [`avoidLevel`](../flight/avoid.js.md#s-avoidLevel) _js/flight/avoid.js_ · [`rankStatus`](../flight/pilot.js.md#s-rankStatus) _js/flight/pilot.js_ · [`title`](../flight/pilot.js.md#s-title) _js/flight/pilot.js_ · [`absSpeedOf`](../flight/ship.js.md#s-absSpeedOf) _js/flight/ship.js_ · [`batteryCap`](../flight/ship.js.md#s-batteryCap) _js/flight/ship.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`closingSpeed`](../flight/ship.js.md#s-closingSpeed) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`fightCentre`](../npc/battles.js.md#s-fightCentre) _js/npc/battles.js_ · [`etaOf`](../npc/security.js.md#s-etaOf) _js/npc/security.js_ · [`nearestCall`](../npc/security.js.md#s-nearestCall) _js/npc/security.js_ · [`trafficCensus`](../npc/traffic.js.md#s-trafficCensus) _js/npc/traffic.js_ · [`activeWaypoint`](#s-activeWaypoint) · [`bodyUnderReticle`](#s-bodyUnderReticle) · [`nearestBody`](#s-nearestBody) · [`plotRoute`](#s-plotRoute) · [`pulseActive`](#s-pulseActive) · [`spoolTime`](#s-spoolTime) · [`stationStatus`](#s-stationStatus) · [`throttleCap`](#s-throttleCap) · [`waypointPosition`](#s-waypointPosition) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2 · [`surveyIds`](../world/bodies.js.md#s-surveyIds) _js/world/bodies.js_
 - via [js/npc/flow.js](../npc/flow.js.md): `flow.reduce`
@@ -3770,59 +3792,59 @@ function · **exported** · L3885–4056
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
 
 <!-- note:publishHud -->
-- L3896 · `if (sim.notice !== sim.lastNotice) {` — Any code path that writes a new notice restarts its clock, so the card
+- L3912 · `if (sim.notice !== sim.lastNotice) {` — Any code path that writes a new notice restarts its clock, so the card
   can fade on its own instead of parking on the canopy forever.
-- L3936 · `hazard: sim.threat && sim.threat.t < AVOID.horizon` — `hazard`, not `threat` — the payload already carries a `threat` for the
+- L3952 · `hazard: sim.threat && sim.threat.t < AVOID.horizon` — `hazard`, not `threat` — the payload already carries a `threat` for the
   warp route's obstruction list further down, and a duplicate key in an
   object literal is silently won by the last one. This read as the
   avoidance not working at all.
-- L3939 · `response: (() => {` — The response clock. A player deciding whether to press an attack on a
+- L3955 · `response: (() => {` — The response clock. A player deciding whether to press an attack on a
   supply hull is deciding against this number, so it is on the canopy and
   it is honest: seconds until the first responder is on scene, or the fact
   that nobody is coming. It shows for any call near enough to matter, not
   only the player's own — a fight you are flying past is a fight you can
   join, and knowing when the law arrives is the whole decision.
-- L3962 · `charge: ship.charge,` — cockpit instrumentation
+- L3978 · `charge: ship.charge,` — cockpit instrumentation
 <!-- /note -->
 
 ### <a id="s-wireControlsTest"></a>`wireControlsTest()`
 
-function · **exported** · L4058–4122
+function · **exported** · L4074–4138
 
 - called by: [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
 - effects: global.write `window.__lg`
 
 <!-- note:wireControlsTest -->
-- L4061 · `traffic,` — the reactive sky, for the headless smokes and the console: the roster
+- L4077 · `traffic,` — the reactive sky, for the headless smokes and the console: the roster
   itself, who is answering what, what the nests are doing, and what the
   frame budget has decided the device can carry
-- L4063 · `holes: { holes, summonHole, collapseToHole, goSupernova },` — 0.3: collapsed stars and the impact runs, for the smokes and the console
+- L4079 · `holes: { holes, summonHole, collapseToHole, goSupernova },` — 0.3: collapsed stars and the impact runs, for the smokes and the console
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-threats"></a>`wireControlsTest.threats()`
 
-prop · L4096–4096
+prop · L4112–4112
 
 <!-- note:wireControlsTest.threats -->
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-ship"></a>`wireControlsTest.ship()`
 
-prop · L4106–4106
+prop · L4122–4122
 
 <!-- note:wireControlsTest.ship -->
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-getYaw"></a>`wireControlsTest.getYaw()`
 
-prop · L4107–4107
+prop · L4123–4123
 
 <!-- note:wireControlsTest.getYaw -->
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-getSpeed"></a>`wireControlsTest.getSpeed()`
 
-prop · L4108–4108
+prop · L4124–4124
 
 - calls: [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_
 
@@ -3831,7 +3853,7 @@ prop · L4108–4108
 
 #### <a id="s-wireControlsTest-setKeys"></a>`wireControlsTest.setKeys(codes)`
 
-prop · L4110–4110
+prop · L4126–4126
 
 - calls: [`setInjectedKeys`](../core/input.js.md#s-setInjectedKeys) _js/core/input.js_
 
@@ -3840,7 +3862,7 @@ prop · L4110–4110
 
 #### <a id="s-wireControlsTest-setPan"></a>`wireControlsTest.setPan(x, y)`
 
-prop · L4111–4111
+prop · L4127–4127
 
 - calls: [`setInjectedPan`](../core/input.js.md#s-setInjectedPan) _js/core/input.js_
 
@@ -3849,7 +3871,7 @@ prop · L4111–4111
 
 ### <a id="s-tickSolHost"></a>`tickSolHost(dt)`
 
-function · **exported** · L4126–4135
+function · **exported** · L4142–4151
 
 - calls: [`stepWorld`](#s-stepWorld)
 

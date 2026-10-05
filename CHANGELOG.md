@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.3.93 — 2026-10-04 — Dead Hulls: Plate That Keeps Up
+
+Found on a bug hunt of `main` at 0.3.92: `test/smoke-rig.mjs` failed on a slow
+renderer with "no plate came aboard". The rig cut, the plate was shed, and it
+hung 15–50 u off the ship without ever being taken in.
+
+### Players
+
+Salvage plate now reaches your hold on a busy or slow device.
+
+- In Sol, plate the rig cut loose could hang a short way off your ship and never come aboard when the game was running slowly or had just hitched. It now stays with you and is reeled in as normal.
+- Loose rock near your ship is kept with you the same way.
+
+No save migration is required.
+
+Tested in a headless browser on a software renderer, which is far slower than a phone; not yet on a phone.
+
+### What was wrong
+
+- In a held sky the relay nudges a pilot's clock onto the shared one
+  (`js/net/net.js` → `shiftClock`) whenever it is more than 0.25 s out. A
+  frame is capped at 0.1 s of sim time, so a device under ten frames a second
+  is corrected on every poll, and any device is corrected after a long frame.
+- `shiftClock` carried the ship along its world's orbit and a hulk follows its
+  world by itself. Loose chunks were not carried: each correction left them
+  the world's speed × the correction further off. At Earth that is 39 u/s, so
+  a 0.8 s correction moved plate from 30 u to 51 u.
+- Before 0.3.92 it did not show: the tractor took a chunk aboard at 90 u.
+  0.3.92 made that 9 u for plate, and a correction a second kept it outside.
+  Measured on the software renderer: first plate aboard after 76 s, with 17
+  pieces adrift.
+- The suites did not see it because they fly salvage high over the ecliptic,
+  where no world is dominant and `shiftClock` moves nothing.
+
+### What changed
+
+- `js/sim/sim.js`: `shiftClock` gives loose chunks within `CLOCK_CARRY_R`
+  (9,000 u, past the tractor's longest reach) of the ship the same position and
+  velocity change it gives the ship — in a world's frame and in a port's.
+  Chunks an impact run is driving and ring chunks on their orbit are left
+  alone.
+
+Files: `js/sim/sim.js`, `js/version.js`, `test/scrapcarry.test.mjs` (new, 9),
+`CHANGELOG.md`, `README.md`, `docs/PATCH-0.3.93.md` (new), regenerated code
+docs.
+
+Verified: 108 of 109 node suites green (`scrapcarry` new; it fails 3 checks
+on 0.3.92's `sim.js`), the three Python suites, `codedocs --check`,
+`preload --check`. Smokes green on a software renderer: rig (failed on 0.3.92:
+"no plate came aboard"), salvage, hulks, ui, continue, mining, rocks.
+`lgpatch.test.mjs` is not counted: it passed 49/49 once and 33–41 on other
+runs in the build sandbox, on local `git push` negotiation errors; `tools/` is
+untouched. Not measured: a phone, a live relay, two pilots.
+
 ## 0.3.92 — 2026-10-04 — Dead Hulls: Something To Look At
 
 Reported, with two screenshots from a phone: salvaging from the board shows

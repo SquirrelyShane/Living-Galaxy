@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.92**
+**Version 0.3.93**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.92](docs/PATCH-0.3.92.md). Career roadmap:
+Current patch: [0.3.93](docs/PATCH-0.3.93.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -1781,6 +1781,12 @@ is cut (`wreckOf` / `cutBack` in `js/render/engine.js`); what the rig sheds is
 drawn as plate and crates on its own instanced mesh and reeled at a pace set by
 its distance (`REEL` in `js/sim/sim.js`), aboard at 9 u. By hand the rig still
 works from 600 u.
+
+**Loose scrap rides a clock correction** (0.3.93). In a held sky the relay
+nudges the pilot's clock onto the shared one (`shiftClock`), and the ship is
+carried along its world's orbit when it does. Loose chunks within
+`CLOCK_CARRY_R` of her are carried with her; left behind, a correction a
+second on a slow device kept plate outside the 9 u it is taken aboard at.
 
 **Hulks are shared in a held sky** (0.3.91, `js/world/hulks.js`, `js/net/worldsync.js`).
 A hulk used to belong to the process that simulated the kill, and in a held sky

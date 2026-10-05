@@ -3425,15 +3425,31 @@ export function shiftClock(dt) {
   sim.time += dt;
   if (ship.dockedAt || tractor.active) return;
   if (port) {
-    ship.pos.x += (port.vx ?? 0) * dt; ship.pos.y += (port.vy ?? 0) * dt; ship.pos.z += (port.vz ?? 0) * dt;
+    const px = (port.vx ?? 0) * dt, py = (port.vy ?? 0) * dt, pz = (port.vz ?? 0) * dt;
+    carryLoose(ship.pos, px, py, pz, 0, 0, 0);
+    ship.pos.x += px; ship.pos.y += py; ship.pos.z += pz;
     return;
   }
   const dom = sim.dominant ?? gravityAt(ship.pos, t0, bodyPosition, _clockG).body;
   if (!dom || dom.kind === "star") return;
   if (!bodyPosition(dom.id, t0, _clockA) || !bodyPosition(dom.id, sim.time, _clockB)) return;
-  ship.pos.x += _clockB.x - _clockA.x; ship.pos.y += _clockB.y - _clockA.y; ship.pos.z += _clockB.z - _clockA.z;
+  const dx = _clockB.x - _clockA.x, dy = _clockB.y - _clockA.y, dz = _clockB.z - _clockA.z;
   bodyVelocity(dom.id, t0, _clockA); bodyVelocity(dom.id, sim.time, _clockB);
-  ship.vel.x += _clockB.x - _clockA.x; ship.vel.y += _clockB.y - _clockA.y; ship.vel.z += _clockB.z - _clockA.z;
+  const dvx = _clockB.x - _clockA.x, dvy = _clockB.y - _clockA.y, dvz = _clockB.z - _clockA.z;
+  carryLoose(ship.pos, dx, dy, dz, dvx, dvy, dvz);
+  ship.pos.x += dx; ship.pos.y += dy; ship.pos.z += dz;
+  ship.vel.x += dvx; ship.vel.y += dvy; ship.vel.z += dvz;
+}
+
+export const CLOCK_CARRY_R = 9000;
+
+function carryLoose(from, dx, dy, dz, dvx, dvy, dvz) {
+  for (const c of chunks) {
+    if (c.driven || c.orbitR != null) continue;
+    if (Math.hypot(c.x - from.x, c.y - from.y, c.z - from.z) > CLOCK_CARRY_R) continue;
+    c.x += dx; c.y += dy; c.z += dz;
+    c.vx += dvx; c.vy += dvy; c.vz += dvz;
+  }
 }
 const _clockA = { x: 0, y: 0, z: 0 };
 const _clockB = { x: 0, y: 0, z: 0 };
