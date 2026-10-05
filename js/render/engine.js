@@ -48,7 +48,7 @@ import { fightCentre } from "../npc/battles.js";
 import { traffic, HOSTILE_ROLES, LAW_ROLES } from "../npc/traffic.js";
 import { tickWorldSync, wireWorldSyncTest } from "../net/worldsync.js";
 import { chunks } from "../world/debris.js";
-import { hulks, hulkById, HULK, HULK_PARTS } from "../world/hulks.js";
+import { hulks } from "../world/hulks.js";
 import { rig } from "../flight/rig.js";
 import { dirFbm, dirNoise, kelvinHex } from "../world/events/cataclysm.js";
 import { tickTutorial, wireTutorialTest } from "../ui/tutorial.js";
@@ -63,8 +63,6 @@ const _right = new THREE.Vector3();
 const _shipUp = new THREE.Vector3();
 const _proj = new THREE.Vector3();
 const _dummy = new THREE.Object3D();
-const _wbox = new THREE.Box3();
-const _wc = new THREE.Vector3();
 const _basisX = new THREE.Vector3();
 const _mouse = new THREE.Vector2();
 const _ray = new THREE.Raycaster();
@@ -76,7 +74,6 @@ const FAR = 3.0e7;
 const STAR_SHELL = 1.5e7;
 const MAX_ROCKS = 420;
 const MAX_CHUNKS = 900;
-const MAX_SCRAP = 160;
 const MAX_IMPACTORS = 8;
 const MAX_SHOTS = 220;
 
@@ -136,7 +133,6 @@ function makeShipGroup(color, scale = 1, shipId = null, seed = "sol", detail = "
   return g;
 }
 
-const PART_IDS = new Set(Object.values(HULK_PARTS).flat());
 let hullBudget = 1;
 const drawRange = () => sensorRange();
 const MESH_K = [0.45, 0.6, 0.8, 1];
@@ -419,19 +415,6 @@ export function mountGame(canvas) {
   debrisMesh.frustumCulled = false;
   scene.add(debrisMesh);
 
-  const scrapGeo = new THREE.BoxGeometry(2.2, 0.16, 1.4);
-  scrapGeo.userData.keep = true;
-  const scrapMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.6, flatShading: true, emissive: 0x231b15, emissiveIntensity: 1 });
-  scrapMat.userData.keep = true;
-  const scrapMesh = new THREE.InstancedMesh(scrapGeo, scrapMat, MAX_SCRAP);
-  scrapMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  scrapMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX_SCRAP * 3).fill(1), 3);
-  scrapMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-  scrapMesh.count = 0;
-  scrapMesh.frustumCulled = false;
-  scene.add(scrapMesh);
-  const SCRAP_PLATE = new THREE.Color(0x9a8f84), SCRAP_PART = new THREE.Color(0x8fc6d6), SCRAP_CARGO = new THREE.Color(0xd9a441);
-
   const impBodies = new Map();
 
   const ROGUE_CLASSES = ["S", "S", "S", "C", "C", "C", "M", "M", "X", "B", "V", "P", "D", "E"];
@@ -456,8 +439,8 @@ export function mountGame(canvas) {
     navLights.set(id, L);
     return L;
   }
-  function placeNavLight(L, x, y, z, t, d, floor = 3.5) {
-    const sz = Math.max(floor, d * 0.011);
+  function placeNavLight(L, x, y, z, t, d) {
+    const sz = Math.max(3.5, d * 0.011);
     L.sprite.position.set(x - origin.x, y - origin.y, z - origin.z);
     L.sprite.scale.set(sz, sz, 1);
     const s = Math.sin(t * 5.5 + L.phase);
@@ -1792,23 +1775,10 @@ export function mountGame(canvas) {
   const _dcol = new THREE.Color();
   function updateDebris(t) {
     let n = 0;
-    let m = 0;
     let anyHot = false;
     for (const c of chunks) {
       if (n >= MAX_CHUNKS) break;
       if (c.driven && c.fractured != null) continue;
-      if (c.salvage) {
-        if (m >= MAX_SCRAP) continue;
-        const box = c.good !== HULK.plate;
-        _dummy.position.set(c.x - origin.x, c.y - origin.y, c.z - origin.z);
-        _dummy.rotation.set(t * c.spin * 1.3 + c.seed * 9, t * c.spin * 0.9, c.seed * 6.28);
-        if (box) _dummy.scale.set(c.r * 0.45, c.r * 4.2, c.r * 0.7);
-        else _dummy.scale.setScalar(c.r);
-        _dummy.updateMatrix();
-        scrapMesh.setColorAt(m, c.good === HULK.plate ? SCRAP_PLATE : PART_IDS.has(c.good) ? SCRAP_PART : SCRAP_CARGO);
-        scrapMesh.setMatrixAt(m++, _dummy.matrix);
-        continue;
-      }
       _dummy.position.set(c.x - origin.x, c.y - origin.y, c.z - origin.z);
       _dummy.rotation.set(t * c.spin, t * c.spin * 0.7, c.seed * 6.28);
       _dummy.scale.setScalar(c.r);
@@ -1824,8 +1794,6 @@ export function mountGame(canvas) {
       debrisMesh.setMatrixAt(n++, _dummy.matrix);
     }
     debrisMesh.count = n;
-    scrapMesh.count = m;
-    if (m) { scrapMesh.instanceMatrix.needsUpdate = true; scrapMesh.instanceColor.needsUpdate = true; }
     if (n) debrisMesh.instanceMatrix.needsUpdate = true;
     if (n && (anyHot || debrisMesh.userData.wasHot)) {
       debrisMesh.instanceColor.needsUpdate = true;
@@ -2035,14 +2003,7 @@ export function mountGame(canvas) {
       rigFx.fx = s.pos.x + f.x * 1.6 - r.x * 1.6 - u.x * 1.2;
       rigFx.fy = s.pos.y + f.y * 1.6 - r.y * 1.6 - u.y * 1.2;
       rigFx.fz = s.pos.z + f.z * 1.6 - r.z * 1.6 - u.z * 1.2;
-      const hk = rig.key ? hulkById(rig.key) : null;
-      rigFx.tx = hk?.x ?? rig.x; rigFx.ty = hk?.y ?? rig.y; rigFx.tz = hk?.z ?? rig.z;
-      const wk = hk ? hulkMeshes.get(`hulk:${hk.id}`) : null;
-      const part = wk?.wreck.parts[Math.max(0, wk.wreck.shown)];
-      if (part) {
-        _wc.set(part.x, part.y, part.z).applyQuaternion(wk.group.quaternion);
-        rigFx.tx += _wc.x; rigFx.ty += _wc.y; rigFx.tz += _wc.z;
-      }
+      rigFx.tx = rig.x; rigFx.ty = rig.y; rigFx.tz = rig.z;
       rigFx.strip = rig.mode === "strip";
       rigFx.on = true;
       rigFx.fade = 0;
@@ -2058,8 +2019,7 @@ export function mountGame(canvas) {
     dx /= len; dy /= len; dz /= len;
     const keep = 1 - Math.min(1, rigFx.fade / RIG_FADE);
     const flicker = 0.7 + 0.3 * Math.sin(rigFx.t * 61) * Math.sin(rigFx.t * 11.7);
-    const closeK = Math.min(1, Math.max(0.18, len / 400));
-    const rad = ((rigFx.strip ? 0.35 : 0.7) * (0.8 + (rig.heat ?? 0) * 0.5) * flicker + Math.min(1.6, len * 0.0016)) * closeK;
+    const rad = (rigFx.strip ? 0.35 : 0.7) * (0.8 + (rig.heat ?? 0) * 0.5) * flicker + Math.min(1.6, len * 0.0016);
     rigOuterMat.color.setHex(rigFx.strip ? 0x6affc8 : 0x58c8ff);
     rigOuterMat.opacity = 0.5 * keep * flicker;
     rigCoreMat.opacity = 0.95 * keep;
@@ -2067,8 +2027,7 @@ export function mountGame(canvas) {
     rigBeam.lookAt(rigBeam.position.x + dx, rigBeam.position.y + dy, rigBeam.position.z + dz);
     rigBeam.scale.set(rad, rad, len);
     rigFlash.position.set(rigFx.tx - origin.x, rigFx.ty - origin.y, rigFx.tz - origin.z);
-    const hullLen = hulkMeshes.get(`hulk:${rig.key}`)?.len ?? 6;
-    const sz = Math.min((rigFx.strip ? 5 : 9) * (0.7 + 0.6 * flicker) + len * 0.004, Math.max(0.9, hullLen * 0.5) * (0.7 + 0.6 * flicker) + len * 0.004);
+    const sz = (rigFx.strip ? 5 : 9) * (0.7 + 0.6 * flicker) + len * 0.004;
     rigFlash.scale.set(sz, sz, 1);
     rigFlash.material.opacity = 0.9 * keep * flicker;
   }
@@ -2336,71 +2295,8 @@ export function mountGame(canvas) {
 
   const hulkMeshes = new Map();
   const _liveHulk = new Set();
-  const HULK_PAINT = "#84756a";
+  const HULK_PAINT = "#4b4138";
   const HULK_BEACON = "#ff8a2a";
-  const HULK_EMBER = 0xff6a1e;
-  const WRECK = { torn: 0.2, tornK: 0.45, keep: 2 };
-  const hash01 = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10007) / 10007; };
-
-  const wreckMats = new Map();
-  function wreckMat(m) {
-    if (!m || !m.isMeshStandardMaterial) return m;
-    let w = wreckMats.get(m.uuid);
-    if (!w) {
-      w = m.clone();
-      w.emissive = new THREE.Color(0x4f3b2b);
-      w.emissiveIntensity = 1;
-      w.emissiveMap = null;
-      w.userData.keep = true;
-      wreckMats.set(m.uuid, w);
-    }
-    return w;
-  }
-
-  function wreckOf(group, h) {
-    const def = shipById(h.ship) ?? shipById(DEFAULT_SHIP_ID);
-    const len = def.dims?.[0] ?? 3;
-    group.updateMatrixWorld(true);
-    const parts = [];
-    group.traverse((o) => {
-      if (o.userData?.plume) { o.visible = false; return; }
-      if (!o.isMesh || !o.visible) return;
-      o.material = Array.isArray(o.material) ? o.material.map(wreckMat) : wreckMat(o.material);
-      _wbox.setFromObject(o);
-      if (_wbox.isEmpty()) return;
-      _wbox.getCenter(_wc);
-      parts.push({ o, z: _wc.z, x: _wc.x, y: _wc.y });
-    });
-    parts.sort((a, b) => a.z - b.z);
-    let intact = 0;
-    for (const sec of h.sections) intact += sec.intact ?? 1;
-    intact /= Math.max(1, h.sections.length);
-    const torn = WRECK.torn + (1 - intact) * WRECK.tornK;
-    const key = String(h.vessel ?? h.id);
-    let gash = null;
-    for (let i = WRECK.keep; i < parts.length; i++) {
-      if (hash01(`${key}:${i}`) < torn) { parts[i].o.visible = false; parts[i].gone = true; gash ??= parts[i]; }
-    }
-    const ember = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: HULK_EMBER, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending }));
-    const at = gash ?? parts[Math.floor(parts.length / 2)] ?? { x: 0, y: 0, z: 0 };
-    const k = 1 / (group.scale.x || 1);
-    ember.position.set(at.x * k, at.y * k, at.z * k);
-    ember.scale.setScalar(len * 0.42 * k);
-    group.add(ember);
-    return { len, parts: parts.filter((p) => !p.gone), ember, shown: -1, phase: hash01(key) * 6.28 };
-  }
-
-  function cutBack(obj, h) {
-    let all = 0, left = 0;
-    for (const sec of h.sections) { all += sec.plate0; left += sec.plate; }
-    const f = all > 0 ? 1 - left / all : 1;
-    const n = obj.wreck.parts.length;
-    const hide = Math.min(Math.max(0, n - WRECK.keep), Math.floor(f * (n - WRECK.keep) + 1e-6));
-    if (hide === obj.wreck.shown) return;
-    obj.wreck.shown = hide;
-    for (let i = 0; i < n; i++) obj.wreck.parts[i].o.visible = i >= hide;
-  }
-
   function syncHulks() {
     const live = _liveHulk;
     live.clear();
@@ -2411,9 +2307,9 @@ export function mountGame(canvas) {
       if (d > far) continue;
       const key = `hulk:${h.id}`;
       live.add(key);
-      let obj = hulkMeshes.get(key);
-      if (h.sections[0]?.box) placeNavLight(navLightFor(key, HULK_BEACON), h.x, h.y, h.z, sim.time * 0.3, d, Math.max(0.5, (obj?.len ?? 6) * 0.22));
+      if (h.sections[0]?.box) placeNavLight(navLightFor(key, HULK_BEACON), h.x, h.y, h.z, sim.time * 0.3, d);
       else dropNavLight(key);
+      let obj = hulkMeshes.get(key);
       if (obj && obj.ship !== h.ship) {
         scene.remove(obj.group);
         disposeObject(obj.group);
@@ -2428,14 +2324,12 @@ export function mountGame(canvas) {
         if (hullBudget <= 0) continue;
         hullBudget--;
         const group = makeShipGroup(HULK_PAINT, 1, h.ship, h.vessel ?? h.id, "lite");
-        const wreck = wreckOf(group, h);
+        group.traverse((o) => { if (o.userData?.plume) o.visible = false; });
         scene.add(group);
-        obj = { group, ship: h.ship, wreck, len: wreck.len };
+        obj = { group, ship: h.ship };
         hulkMeshes.set(key, obj);
       }
       obj.group.visible = true;
-      cutBack(obj, h);
-      obj.wreck.ember.material.opacity = 0.28 + 0.22 * Math.sin(sim.time * 7.3 + obj.wreck.phase) * Math.sin(sim.time * 1.9 + obj.wreck.phase * 2) + 0.12;
       rel(h.x, h.y, h.z, obj.group);
       orientCraft(obj.group, h.yaw + h.tumble, h.pitch, h.roll + h.tumble * 0.6);
     }
@@ -2940,8 +2834,6 @@ export function mountGame(canvas) {
     holeFx.dispose();
     beaconGeo.dispose();
     chunkGeo.dispose();
-    scrapGeo.dispose();
-    scrapMat.dispose();
     renderer.dispose();
     if (window.__lg) delete window.__lg;
   };

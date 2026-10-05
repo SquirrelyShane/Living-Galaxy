@@ -393,14 +393,7 @@ registerAnchor("nest", (a, t, out) => { const n = nests.find((x) => x.id === a.i
 registerAnchor("beacon", (a, t, out) => { const d = BEACONS.find((b) => b.id === a.id); return d ? put(out, beaconPosition(d, t)) : null; });
 registerAnchor("rock", (a, t, out) => { const m = impactors.find((x) => x.id === a.id); return m ? put(out, m) : null; });
 registerAnchor("debris", (a, t, out) => { const c = chunks.find((x) => x.id === a.id); return c ? put(out, c) : null; });
-registerAnchor("hulk", (a, t, out) => {
-  const h = hulkById(a.id);
-  if (!h) return null;
-  a.label = h.name;
-  if (h.parent && bodyById(h.parent)) { bodyPosition(h.parent, t, _hk); out.x = _hk.x + h.ox; out.y = _hk.y + h.oy; out.z = _hk.z + h.oz; return out; }
-  return put(out, h);
-});
-const _hk = { x: 0, y: 0, z: 0 };
+registerAnchor("hulk", (a, t, out) => { const h = hulkById(a.id); if (!h) return null; a.label = h.name; return put(out, h); });
 
 export function activeWaypoint() {
   return sim.waypoints.find((w) => w.id === sim.activeWaypoint) ?? null;
@@ -3167,8 +3160,6 @@ export function stepContract() {
   }
 }
 
-export const REEL = { k: 0.8, slow: 14, fast: 420, ease: 4, aboard: 9 };
-
 function stepSalvage(dt) {
   const ship = sim.ship;
   if (recoveryBlocker(ship)) return;
@@ -3177,20 +3168,11 @@ function stepSalvage(dt) {
   const reach = ship.mods?.salvage ?? 1;
   const near = nearDebris(ship.pos, 2200 * reach).filter((e) => !e.c.driven);
   for (const { c, d } of near.slice(0, 6)) {
-    if (c.salvage) {
-      const sp = Math.max(REEL.slow, Math.min(REEL.fast, d * REEL.k)) * reach;
-      const ease = Math.min(1, REEL.ease * dt);
-      const inv = 1 / Math.max(d, 1e-6);
-      c.vx += (ship.vel.x + (ship.pos.x - c.x) * inv * sp - c.vx) * ease;
-      c.vy += (ship.vel.y + (ship.pos.y - c.y) * inv * sp - c.vy) * ease;
-      c.vz += (ship.vel.z + (ship.pos.z - c.z) * inv * sp - c.vz) * ease;
-    } else {
-      const k = (240 * reach * dt) / Math.max(d, 1);
-      c.vx += (ship.pos.x - c.x) * k;
-      c.vy += (ship.pos.y - c.y) * k;
-      c.vz += (ship.pos.z - c.z) * k;
-    }
-    if (d < (c.salvage ? REEL.aboard : 90)) {
+    const k = (240 * reach * dt) / Math.max(d, 1);
+    c.vx += (ship.pos.x - c.x) * k;
+    c.vy += (ship.pos.y - c.y) * k;
+    c.vz += (ship.pos.z - c.z) * k;
+    if (d < 90) {
       const mass = chunkMass(c);
       const recovered = addCargo(ship, c.good ?? "iron_ore", mass);
       if (recovered <= 0) continue;

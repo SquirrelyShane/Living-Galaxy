@@ -12,11 +12,11 @@ Assignments onto window / globalThis / self.
 
 ### `window.__lg`
 
-- global.write — [js/sim/sim.js › wireControlsTest](../files/js/sim/sim.js.md#s-wireControlsTest) L4059
+- global.write — [js/sim/sim.js › wireControlsTest](../files/js/sim/sim.js.md#s-wireControlsTest) L4041
 
 ### `window.__lgAttract`
 
-- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2912
+- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2806
 
 ### `window.__lgFlyQueued`
 
@@ -24,11 +24,11 @@ Assignments onto window / globalThis / self.
 
 ### `window.__lgGL`
 
-- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2909
+- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2803
 
 ### `window.__lgMarkers`
 
-- global.write — [js/render/engine.js › mountGame>tick](../files/js/render/engine.js.md#s-mountGame-tick) L2901
+- global.write — [js/render/engine.js › mountGame>tick](../files/js/render/engine.js.md#s-mountGame-tick) L2795
 
 ### `window.npcSpeech`
 

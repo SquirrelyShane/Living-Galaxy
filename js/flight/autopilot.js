@@ -145,7 +145,6 @@ const PARK_RADII = 2.5;
 const PORT_PARK = 1400;
 const POINT_PARK = 500;
 const DEAD_SLOW = 10;
-const APPROACH_GAIN = 0.045;
 const ROCK_STANDOFF = 0.75;
 const SEAM_REACH = 25000;
 const ALIGN_CEILING = 600;
@@ -281,7 +280,6 @@ export function disengageAutopilot(why = "disengaged") {
 }
 
 export function releaseControls() {
-  if (sim.apFrame) sim.apFrame.until = -1;
   if (autopilot.on && sim.warp.state === "spool") toggleWarp();
   if (autopilot.on) sim.wantJump = false;
   autopilot.on = false;
@@ -450,7 +448,7 @@ export function apSteer(tx, ty, tz, want, opts = false) {
 
 const _avoid = { x: 0, y: 0, z: 0 };
 
-export function matchFrame(v, forS = 2.5) {
+export function matchFrame(v, forS = 0.5) {
   const f = (sim.apFrame ??= { x: 0, y: 0, z: 0, until: -1 });
   f.x = v.x; f.y = v.y; f.z = v.z;
   f.until = sim.time + forS;
@@ -635,7 +633,7 @@ export function apLeg(node, { cap = 1, warp = "auto", farLeg = null, graze = "ho
     const wasBraking = autopilot.phase === "brake";
     autopilot.phase = "cruise";
     autopilot.task = `cruise · ${node.name} · ${Math.round(dist / 100)} km`;
-    const allowed = Math.max(DEAD_SLOW, (dist - park) * (node.gain && dist < (node.gainR ?? 0) ? node.gain : APPROACH_GAIN));
+    const allowed = Math.max(DEAD_SLOW, (dist - park) * 0.045);
     apSteer(_p.x, _p.y, _p.z, 1.0);
     matchFrame(_v);
     if (rel > allowed * (wasBraking ? 0.9 : 1.05) || drifting(_p, _v, allowed, wasBraking)) { setThrottle(0); touch.brake = true; autopilot.phase = "brake"; }

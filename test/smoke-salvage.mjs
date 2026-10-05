@@ -1,6 +1,4 @@
-/* Headless smoke, 0.3.90 (0.3.92: and you can see it — she parks a few hull
- * lengths off, the hull is a wreck that comes apart, and what comes off it is
- * drawn as plate, not rock): Salvage end to end in the sky you can see. A fresh
+/* Headless smoke, 0.3.90: Salvage end to end in the sky you can see. A fresh
  * pilot picks Salvage on the creation card (it must be offered, not "in
  * development"), the tutorial card is the RIG branch, a hulk is left a few km
  * off and the SALVAGE LOOP is engaged: the autopilot must fly to it, run the
@@ -81,35 +79,20 @@ const cut = await page.evaluate(async (hulkId) => {
   const { rig } = await import("/js/flight/rig.js");
   const { autopilot } = await import("/js/flight/autopilot.js");
   const wait = (ms) => new Promise((f) => setTimeout(f, ms));
-  const { hulkById } = await import("/js/world/hulks.js");
-  const { chunks } = await import("/js/world/debris.js");
-  let ran = false, mode = null, beam = false, plates = 0, rocks = 0, closest = Infinity, px = 0, parts0 = 0, partsNow = 0;
+  let ran = false, mode = null, beam = false;
   const gl = window.__lgGL;
-  const h = hulkById(hulkId);
-  const scrap = gl.scene.children.find((c) => c.isInstancedMesh && c.geometry?.type === "BoxGeometry");
-  const debris = gl.scene.children.find((c) => c.isInstancedMesh && c.geometry?.type === "IcosahedronGeometry");
-  const wreck = () => gl.scene.children.find((c) => c.isGroup && c.visible && Math.hypot(c.position.x - (h.x - gl.origin.x), c.position.y - (h.y - gl.origin.y), c.position.z - (h.z - gl.origin.z)) < 2);
-  /* how wide the hull is on the glass, in px: its long axis seen side on, by distance and the camera's field */
-  const widthPx = (d) => (h.len / Math.max(d, 1e-6)) / (2 * Math.tan((gl.camera.fov * Math.PI) / 360)) * innerHeight;
-  const shown = (g) => { let n = 0; g?.traverse((o) => { if (o.isMesh && o.visible) n++; }); return n; };
   const t0 = performance.now();
-  while (performance.now() - t0 < 170000) {
-    const d = Math.hypot(h.x - sim.ship.pos.x, h.y - sim.ship.pos.y, h.z - sim.ship.pos.z);
-    const g = wreck();
-    if (g && !parts0) parts0 = shown(g);
+  while (performance.now() - t0 < 150000) {
     if (rig.active && rig.key === hulkId) {
       ran = true; mode = sim.ship.rigMode;
       const b = gl.scene.children.find((c) => c.isMesh && c.geometry?.type === "CylinderGeometry" && c.children.length === 1 && c.children[0].isMesh);
       beam ||= Boolean(b?.visible);
     }
-    { const loose = chunks.filter((c) => c.salvage).length; if (loose) { plates = Math.max(plates, scrap?.count ?? 0); rocks = Math.max(rocks, (debris?.count ?? 0) - (chunks.length - loose)); } }
-    if (d < closest) { closest = d; px = widthPx(d); }
-    if (g) partsNow = shown(g);
-    if (ran && (sim.ship.hold.steel ?? 0) > 12 && autopilot.phase === "salvage" && d < 60) break;
-    if (!autopilot.on || h.dead) break;
+    if (ran && (sim.ship.hold.steel ?? 0) > 3) break;
+    if (!autopilot.on) break;
     await wait(250);
   }
-  return { ran, mode, beam, plates, rocks, hasScrapMesh: Boolean(scrap), closest: Math.round(closest), hullLen: h.len, px: Math.round(px), parts0, partsNow, steel: +(sim.ship.hold.steel ?? 0).toFixed(1), on: autopilot.on, phase: autopilot.phase, task: autopilot.task ?? null, secs: Math.round((performance.now() - t0) / 1000) };
+  return { ran, mode, beam, steel: +(sim.ship.hold.steel ?? 0).toFixed(1), on: autopilot.on, phase: autopilot.phase, task: autopilot.task ?? null, secs: Math.round((performance.now() - t0) / 1000) };
 }, engaged.hulk);
 console.log("cut:", JSON.stringify(cut));
 await page.screenshot({ path: process.env.SHOT ?? "/tmp/salvage.png" });
@@ -181,11 +164,6 @@ if (!cut.ran) bad.push(`the autopilot never ran the rig on the hulk (${cut.phase
 if (cut.mode !== "cut") bad.push(`the rig ran in ${cut.mode}, not the mode asked for`);
 if (!cut.beam) bad.push("no arc drawn while the autopilot cut");
 if (!(cut.steel > 0)) bad.push("no plate came aboard under autopilot");
-if (!(cut.closest <= 60)) bad.push(`the autopilot worked the hulk from ${cut.closest} u — a ${cut.hullLen} u hull is a dot from there`);
-if (!(cut.px >= 60)) bad.push(`the hull is ${cut.px} px across on the glass at her park — it has to be something to look at`);
-if (!cut.hasScrapMesh || !(cut.plates > 0)) bad.push("what the rig shed was not drawn as plate");
-if (cut.rocks > 0) bad.push(`${cut.rocks} salvage chunk(s) were drawn as rock`);
-if (!(cut.parts0 > 0 && cut.partsNow < cut.parts0)) bad.push(`the hulk did not come apart as it was cut (${cut.parts0} parts drawn at first, ${cut.partsNow} now)`);
 if (!sold.done) bad.push(`the loop never finished (${sold.ops.join(" ")} · ${sold.notice})`);
 if (!sold.ops.includes("DOCK")) bad.push("the loop never flew the DOCK step");
 if (!sold.docked) bad.push("the ship never docked");

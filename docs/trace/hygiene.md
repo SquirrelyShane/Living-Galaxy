@@ -4,7 +4,7 @@
 
 Candidates, not verdicts: tests, index.html, tools and the addon are scanned for imports, but anything reached by string, by `window`, or from a file outside the scanned roots will look dead here.
 
-## Unused imports (110)
+## Unused imports (109)
 
 - [js/aria/play.js](../files/js/aria/play.js.md) L19 `legSeconds` from `./nav.js`
 - [js/aria/play.js](../files/js/aria/play.js.md) L19 `tripSeconds` from `./nav.js`
@@ -21,7 +21,6 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/mission/run.js](../files/js/mission/run.js.md) L2 `sellPriceAt` from `../sim/sim.js`
 - [js/mission/run.js](../files/js/mission/run.js.md) L2 `buyPriceAt` from `../sim/sim.js`
 - [js/mission/run.js](../files/js/mission/run.js.md) L12 `hasUpgrade` from `../economy/upgrades.js`
-- [js/mission/salvage.js](../files/js/mission/salvage.js.md) L4 `rigRange` from `../flight/rig.js`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) L3 `contacts` from `../flight/turrets.js`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) L3 `contactById` from `../flight/turrets.js`
 - [js/npc/npccrew.js](../files/js/npc/npccrew.js.md) L8 `crew` from `../crew/ledger.js`
@@ -129,8 +128,8 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/npc/speech.js › nearestPortName](../files/js/npc/speech.js.md#s-nearestPortName) L136
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
-- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L80
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2160
+- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L77
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2153
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33
@@ -149,7 +148,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
 
-## Exports with no importer (940)
+## Exports with no importer (939)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
@@ -525,7 +524,6 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/mission/detour.js](../files/js/mission/detour.js.md) `LEG`
 - [js/mission/run.js](../files/js/mission/run.js.md) `clearRun`
 - [js/mission/salvage.js](../files/js/mission/salvage.js.md) `rigModeFor`
-- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `hulkPark`
 - [js/mission/salvage.js](../files/js/mission/salvage.js.md) `forgetSkipped`
 - [js/mission/salvage.js](../files/js/mission/salvage.js.md) `skipHulk`
 - [js/mission/salvage.js](../files/js/mission/salvage.js.md) `rigRate`

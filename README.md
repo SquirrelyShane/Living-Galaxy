@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.92**
+**Version 0.3.91**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.92](docs/PATCH-0.3.92.md). Career roadmap:
+Current patch: [0.3.91](docs/PATCH-0.3.91.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -1771,16 +1771,6 @@ salvage job in the board has **CUT IT**, which flies SALVAGE → DOCK → DELIVE
 A wreck order is a real, pinned hulk on the port's approaches; a plate order
 takes hull steel off any hulk; both count only plate reeled off a hulk under the
 rig. A flight recorder pays 350 cr + 240 per hull tier at any honest port.
-
-**A wreck is worked from close in** (0.3.92). A hull is 1.6 to 8.5 u long, so
-the SALVAGE step parks at 4.5 hull lengths (`hulkPark`, 10–36 u), closes the
-last of the way at an approach gain of 0.2, and lights the rig inside four park
-distances rather than from its 600 u reach. The renderer draws a hulk scorched,
-torn by how intact it is, smouldering, and losing parts from the stern as plate
-is cut (`wreckOf` / `cutBack` in `js/render/engine.js`); what the rig sheds is
-drawn as plate and crates on its own instanced mesh and reeled at a pace set by
-its distance (`REEL` in `js/sim/sim.js`), aboard at 9 u. By hand the rig still
-works from 600 u.
 
 **Hulks are shared in a held sky** (0.3.91, `js/world/hulks.js`, `js/net/worldsync.js`).
 A hulk used to belong to the process that simulated the kill, and in a held sky

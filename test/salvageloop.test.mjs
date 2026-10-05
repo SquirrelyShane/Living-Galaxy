@@ -30,13 +30,7 @@
  *      forgiven four minutes on rather than ending salvage for the watch; the
  *      hulk's park is inside the rig's reach, so the arc lights as she
  *      arrives; a hulk she cannot reach is passed over, not the end of the
- *      run; and the rig's rest sheds deck gravity and the floods;
- *  11. 0.3.92, salvage you can see: she parks a few hull lengths off, not at
- *      the edge of the rig's reach; the arc lights as she comes in, not from
- *      600 u; a small hull cut up in seconds does not fail the step; what the
- *      rig sheds is plate-sized and is reeled across at a pace the eye can
- *      follow; a hulk's mark is where the hulk is this tick; and the frame the
- *      autopilot matches survives a hitch.
+ *      run; and the rig's rest sheds deck gravity and the floods.
  */
 import { readFileSync } from "node:fs";
 
@@ -44,7 +38,7 @@ const store = new Map();
 globalThis.localStorage ??= { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: (k) => store.delete(k) };
 { let a = 0x51ed270b; Math.random = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
-const { sim, launchSim, tickSim, setRigMode, handInRecorders, recorderValue, losBlocker, warpDestination, warpNodeById, wellEdge } = await import("../js/sim/sim.js");
+const { sim, launchSim, tickSim, handInRecorders, recorderValue, losBlocker, warpDestination, warpNodeById, wellEdge } = await import("../js/sim/sim.js");
 const { makePilot, pilot } = await import("../js/flight/pilot.js");
 const { touch } = await import("../js/core/input.js");
 const { stations } = await import("../js/station/stations.js");
@@ -393,7 +387,7 @@ const hulkAt = (dx, opts = {}, v = {}) => spawnHulk({ id: `t:${Math.random()}`, 
   const { parkDistance } = await import("../js/flight/autopilot.js");
   const { rigRange } = await import("../js/flight/rig.js");
   const { notePlayerJob, tickAriaPilot } = await import("../js/aria/pilot.js");
-  const { makeSalvage, hulkPark } = await import("../js/mission/salvage.js");
+  const { makeSalvage } = await import("../js/mission/salvage.js");
   const { captain } = await import("../js/npc/captain.js");
 
   /* nothing to cut: she waits */
@@ -434,8 +428,7 @@ const hulkAt = (dx, opts = {}, v = {}) => spawnHulk({ id: `t:${Math.random()}`, 
   ok(engageSalvageLoop({ hulkId: h.id, mode: "strip" }), "a loop on one hulk");
   tick(1);
   const node = mission.run.node;
-  ok(node && node.park === hulkPark(h) && parkDistance(node) === node.park && node.park * 1.6 < rigRange(ship), `the hulk's park is ${Math.round(node?.park)} u, so the leg ends inside the rig's ${rigRange(ship)} u`);
-  ok(h.len > 0 && hulkPark(h) === Math.max(SALV.park[0], Math.min(SALV.park[1], h.len * SALV.lengths)) && hulkPark(h) <= 36 && hulkPark({ len: 1.6 }) >= 10 && hulkPark({ len: 40 }) === SALV.park[1], `and it is a few hull lengths, not a share of the rig's reach: ${hulkPark(h).toFixed(1)} u off a ${h.len} u hull (0.3.92)`);
+  ok(node && node.park === Math.max(150, rigRange(ship) * SALV.standoff) && parkDistance(node) === node.park && node.park * 1.6 < rigRange(ship), `the hulk's park is ${Math.round(node?.park)} u, so the leg ends inside the rig's ${rigRange(ship)} u`);
   let nearAt = null, litAt = null;
   for (let i = 0; i < 240 * HZ && litAt == null; i++) {
     tickSim(1 / HZ);
@@ -495,82 +488,6 @@ const hulkAt = (dx, opts = {}, v = {}) => spawnHulk({ id: `t:${Math.random()}`, 
   mission.active = null; mission.state = "idle"; mission.run = {};
   captain.holder = holder;
   if (!ship.localGravity) ship.localGravity = true;
-}
-
-/* ---- 11. 0.3.92: salvage you can see -------------------------------------------------- */
-{
-  const { hulkPark } = await import("../js/mission/salvage.js");
-  const { RIG, rigRange } = await import("../js/flight/rig.js");
-  const { addChunk, removeChunk } = await import("../js/world/debris.js");
-  const { REEL, addAnchoredWaypoint, waypointPosition, removeWaypoint } = await import("../js/sim/sim.js");
-  const { matchFrame, releaseControls } = await import("../js/flight/autopilot.js");
-  const { bodyById } = await import("../js/world/bodies.js");
-
-  /* close, and lit on the way in */
-  clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.hold = {}; tick(1);
-  const h = hulkAt(900, {}, { ship: "general_c", name: "Close Test" });
-  ok(engageSalvageLoop({ hulkId: h.id, mode: "strip" }), "a loop on a hulk 900 u off");
-  let litAt = null, parkedAt = null;
-  for (let i = 0; i < 200 * HZ && parkedAt == null; i++) {
-    tickSim(1 / HZ);
-    const d = d3(ship.pos, h);
-    if (litAt == null && rig.active && rig.key === h.id) litAt = d;
-    if (autopilot.phase === "salvage" && d <= hulkPark(h) * 1.25) parkedAt = d;
-  }
-  ok(litAt != null && litAt <= hulkPark(h) * SALV.cutFrom + 6 && litAt < rigRange(ship) * 0.5, `the arc lights as she comes in — ${litAt?.toFixed(0)} u — not from the rig's ${rigRange(ship)} u reach`);
-  ok(parkedAt != null && parkedAt <= hulkPark(h) * 1.25 && parkedAt / h.len < 8, `she works it from ${parkedAt?.toFixed(0)} u: ${(parkedAt / h.len).toFixed(1)} lengths of a ${h.len} u hull`);
-  tick(4);
-  ok(Math.abs(d3(ship.pos, h) - parkedAt) < hulkPark(h) * 0.5, "and stays there");
-  stopMission("test", { quiet: true });
-
-  /* a small hull, CUT: gone in seconds, and the step goes on */
-  clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.hold = {}; tick(1);
-  const small = hulkAt(400, {}, { ship: "general_a", name: "Small Test" });
-  ok(engageSalvageLoop({ hulkId: small.id, mode: "cut" }), "a loop asked to CUT a small hull");
-  let failed = false, reached = null;
-  for (let i = 0; i < 180 * HZ && reached == null; i++) {
-    tickSim(1 / HZ);
-    if (mission.state === "failed") { failed = true; break; }
-    if (mission.active?.steps[mission.stepIx]?.op === "DOCK") reached = sim.time;
-  }
-  ok(!failed && reached != null && small.dead, `cut up, and on to the port (${failed ? `failed: ${mission.lastWhy ?? sim.notice}` : "DOCK"})`);
-  stopMission("test", { quiet: true });
-
-  /* plate-sized, and reeled rather than flung */
-  clearSky(); park(OPEN.x, OPEN.y, OPEN.z); whole(); ship.hold = {}; ship.salvage = true; setRigMode("off", { quiet: true }); tick(1);
-  const c = addChunk({ x: ship.pos.x + 40, y: ship.pos.y, z: ship.pos.z, vx: ship.vel.x, vy: ship.vel.y, vz: ship.vel.z, r: 0.7, good: "steel", remainingMass: 6, salvage: true, from: "t", life: 600 });
-  tick(0.3);
-  ok(chunks.includes(c) && !(ship.hold.steel > 0), "a plate 40 u off is not aboard the instant it is shed");
-  const sp = Math.hypot(c.vx - ship.vel.x, c.vy - ship.vel.y, c.vz - ship.vel.z);
-  tick(0.7);
-  const sp2 = Math.hypot(c.vx - ship.vel.x, c.vy - ship.vel.y, c.vz - ship.vel.z);
-  ok(sp < 40 && sp2 < 45 && sp2 > 5, `it comes across at a speed the eye can follow (${sp2.toFixed(0)} u/s; rock debris is pulled at 240 u/s²)`);
-  let aboard = null;
-  for (let i = 0; i < 12 * HZ && aboard == null; i++) { tickSim(1 / HZ); if (!chunks.includes(c)) aboard = i / HZ; }
-  ok(aboard != null && Math.abs((ship.hold.steel ?? 0) - 6) < 1e-6, `and is aboard when it reaches the hull (${aboard?.toFixed(1)} s later)`);
-  ok(REEL.aboard < 20 && RIG.scrap[1] <= 1.2, `a plate is collected at ${REEL.aboard} u, and is at most ${(RIG.scrap[1] * 2.2).toFixed(1)} u long`);
-  if (chunks.includes(c)) removeChunk(c);
-
-  /* the mark is where the hulk is this tick */
-  clearSky();
-  const earth = bodyById("earth");
-  const ep = { x: 0, y: 0, z: 0 };
-  bodyPosition("earth", sim.time, ep);
-  const eh = spawnHulk({ id: "t:frame", name: "Frame Test", ship: "general_b", x: ep.x + earth.radius * 4, y: ep.y, z: ep.z }, { source: "test", intact: 1, at: sim.time, parent: "earth" });
-  const wp = addAnchoredWaypoint(eh.name, { kind: "hulk", id: eh.id }, eh, { reuse: false });
-  const stale = { x: eh.x, y: eh.y, z: eh.z };
-  sim.time += 0.5;
-  const now = waypointPosition(wp, {});
-  bodyPosition("earth", sim.time, ep);
-  ok(Math.hypot(now.x - (ep.x + eh.ox), now.y - (ep.y + eh.oy), now.z - (ep.z + eh.oz)) < 1e-6 && Math.hypot(now.x - stale.x, now.z - stale.z) > 5, `a hulk's mark is where its world has carried it this tick, not where the last step left the hulk (${Math.hypot(now.x - stale.x, now.z - stale.z).toFixed(1)} u on)`);
-  removeWaypoint(wp.id);
-
-  /* the matched frame survives a hitch */
-  matchFrame({ x: 3, y: 0, z: 0 });
-  ok(sim.apFrame.until - sim.time >= 2 && sim.apFrame.until - sim.time <= 3, `the frame the autopilot matches is held ${(sim.apFrame.until - sim.time).toFixed(1)} s, through a long frame`);
-  releaseControls();
-  ok(sim.apFrame.until < sim.time, "and dropped the moment the autopilot lets go");
-  clearSky();
 }
 
 console.log(`salvageloop: ${pass} passed, ${fail} failed`);
