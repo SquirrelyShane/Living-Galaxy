@@ -53,9 +53,7 @@ export function stepProduction(st, dt, time) {
   if (!w) return;
   w.tick = (w.tick ?? 0) + dt;
   w.stalls = {};
-  for (const what in RECIPES) {
-    if (!Object.hasOwn(RECIPES, what)) continue;
-    const R = RECIPES[what];
+  for (const [what, R] of Object.entries(RECIPES)) {
     const lines = w.lines[R.line] ?? 0;
     if (!lines) continue;
     if (what !== "plate" && !w.needs[what]) continue;
@@ -103,17 +101,16 @@ function targetsFor(st, ship) {
 }
 
 function siegeOf(st) {
-  let count = 0, best = null, bestD2 = DEFENCE_REACH * DEFENCE_REACH;
+  let count = 0, hp = 0, dps = 0;
   for (const n of traffic) {
     if (n.job === "down" || n.visible === false) continue;
     if (!HOSTILE_ROLES.has(n.role)) continue;
-    const dx = n.x - st.x, dy = n.y - st.y, dz = n.z - st.z;
-    const d2 = dx * dx + dy * dy + dz * dz;
-    if (d2 > DEFENCE_REACH * DEFENCE_REACH) continue;
+    if (d3(n, st) > DEFENCE_REACH) continue;
     count++;
-    if (d2 < bestD2) { best = n; bestD2 = d2; }
+    hp += (n.hp ?? 0) + (n.shield ?? 0);
+    if (n.gun) dps += (n.gun.dmg * (n.gun.mounts ?? 1)) / Math.max(0.2, n.gun.rate);
   }
-  return { count, best };
+  return { count, hp, dps };
 }
 
 export function batteryDps(st) {
@@ -137,7 +134,13 @@ function stepSiege(st, dt, time) {
   st.guns = { firing: Math.min(st.mounts.length, siege.count), dry: false };
   st.lastFireAt = time;
 
-  if (siege.best) worksHooks.onBatteryHit?.(siege.best, guns * SIEGE_HIT * dt, st, time);
+  let best = null, bestD = DEFENCE_REACH;
+  for (const n of traffic) {
+    if (n.job === "down" || n.visible === false || !HOSTILE_ROLES.has(n.role)) continue;
+    const d = d3(n, st);
+    if (d < bestD) { best = n; bestD = d; }
+  }
+  if (best) worksHooks.onBatteryHit?.(best, guns * SIEGE_HIT * dt, st, time);
 }
 
 export const worksHooks = { onBatteryHit: null };

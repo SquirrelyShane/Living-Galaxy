@@ -1,6 +1,6 @@
 # js/sim/sim.js
 
-[index](../../../README.md) · 4167 lines · 298 symbols · 68 imports · 147 importers
+[index](../../../README.md) · 4151 lines · 298 symbols · 68 imports · 147 importers
 
 ## About
 
@@ -23,10 +23,10 @@ for. Worlds are hundreds of times your length and pull like it.
   Everything it makes lands in the locker either way, because a job outlives
   the visit that ordered it: you queue it, you fly, you come back to parts.
 - L837 · `let marketSlot = -1, marketSeed = null;` — the last event slot rolled: one roll per slot, not per frame
-- L1987 · `let blockAt = -1, blockFor = null, blockCool = false, blockDom = null;` — when/for what sim.warp.block was last read
-- L1988 · `const _blockAtPos = { x: 0, y: 0, z: 0 };` — …and from where: a jump in position re-reads at once
-- L2164 · `const LOCK_CONE = 0.32;` — rad — how close to the nose it has to be
-- L2165 · `const LOCK_BREAK = 1.05;` — rad — look this far off and a hold breaks
+- L1980 · `let blockAt = -1, blockFor = null, blockCool = false, blockDom = null;` — when/for what sim.warp.block was last read
+- L1981 · `const _blockAtPos = { x: 0, y: 0, z: 0 };` — …and from where: a jump in position re-reads at once
+- L2157 · `const LOCK_CONE = 0.32;` — rad — how close to the nose it has to be
+- L2158 · `const LOCK_BREAK = 1.05;` — rad — look this far off and a hold breaks
 
 - L396 · `registerAnchor("hulk", (a, t, out) => {` — 0.3.92: where the hulk is at t, not where the last step left it. A waypoint
   caches its place once a tick, and the autopilot asks before the hulks have
@@ -396,7 +396,7 @@ for. Worlds are hundreds of times your length and pull like it.
 
 ## Effects
 
-- **global.write** — `window.__lg` (wireControlsTest:4091)
+- **global.write** — `window.__lg` (wireControlsTest:4075)
 
 ## Symbols
 
@@ -1344,30 +1344,30 @@ function · **exported** · L933–937
 
 ### <a id="s-loadSky"></a>`loadSky(seed)`
 
-function · **exported** · L939–1000
+function · **exported** · L939–999
 
 - calls: [`resetPerf`](../core/perf.js.md#s-resetPerf) _js/core/perf.js_ · [`buildCorps`](../corp/corps.js.md#s-buildCorps) _js/corp/corps.js_ · [`resetSecLevel`](../corp/seclevel.js.md#s-resetSecLevel) _js/corp/seclevel.js_ · [`resetBoard`](../drones/board.js.md#s-resetBoard) _js/drones/board.js_ · [`populateNpcDrones`](../drones/npcdrones.js.md#s-populateNpcDrones) _js/drones/npcdrones.js_ · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ · [`resetRig`](../flight/rig.js.md#s-resetRig) _js/flight/rig.js_ · [`resetCombat`](../flight/turrets.js.md#s-resetCombat) _js/flight/turrets.js_ · [`resetBattles`](../npc/battles.js.md#s-resetBattles) _js/npc/battles.js_ · [`mountNpcCombat`](../npc/combat.js.md#s-mountNpcCombat) _js/npc/combat.js_ · [`resetNpcCombat`](../npc/combat.js.md#s-resetNpcCombat) _js/npc/combat.js_ · [`populateFlow`](../npc/flow.js.md#s-populateFlow) _js/npc/flow.js_ · [`mountRogues`](../npc/rogues.js.md#s-mountRogues) _js/npc/rogues.js_ · [`populateNests`](../npc/rogues.js.md#s-populateNests) _js/npc/rogues.js_ · [`assignGuards`](../npc/security.js.md#s-assignGuards) _js/npc/security.js_ · [`mountSecurity`](../npc/security.js.md#s-mountSecurity) _js/npc/security.js_ · [`resetSecurity`](../npc/security.js.md#s-resetSecurity) _js/npc/security.js_ · [`populateTraffic`](../npc/traffic.js.md#s-populateTraffic) _js/npc/traffic.js_ · [`logEvent`](#s-logEvent) · [`wireReactiveSky`](#s-wireReactiveSky) · [`buildStations`](../station/stations.js.md#s-buildStations) _js/station/stations.js_ · [`resetStations`](../station/stations.js.md#s-resetStations) _js/station/stations.js_ · [`stepStations`](../station/stations.js.md#s-stepStations) _js/station/stations.js_ · [`carryBuilt`](../station/stationyard.js.md#s-carryBuilt) _js/station/stationyard.js_ · [`dropCarried`](../station/stationyard.js.md#s-dropCarried) _js/station/stationyard.js_ · [`applySystem`](../world/bodies.js.md#s-applySystem) _js/world/bodies.js_ · [`surveyIds`](../world/bodies.js.md#s-surveyIds) _js/world/bodies.js_ · [`bindDebris`](../world/debris.js.md#s-bindDebris) _js/world/debris.js_ · [`resetDebris`](../world/debris.js.md#s-resetDebris) _js/world/debris.js_ · [`resetHoles`](../world/events/holes.js.md#s-resetHoles) _js/world/events/holes.js_ · [`resetImpactors`](../world/events/impactors.js.md#s-resetImpactors) _js/world/events/impactors.js_ · [`resetImpacts`](../world/events/impacts.js.md#s-resetImpacts) _js/world/events/impacts.js_ · [`resetField`](../world/field.js.md#s-resetField) _js/world/field.js_ · [`generateSystem`](../world/generate.js.md#s-generateSystem) _js/world/generate.js_ · [`rngFromSeed`](../world/generate.js.md#s-rngFromSeed) _js/world/generate.js_ ×3 · [`bindHulks`](../world/hulks.js.md#s-bindHulks) _js/world/hulks.js_ · [`resetHulks`](../world/hulks.js.md#s-resetHulks) _js/world/hulks.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.patchHud`
 - called by: [`launchSim`](#s-launchSim) · [`mountHud>queueSky`](../ui/hud.js.md#s-mountHud-queueSky) _js/ui/hud.js_
 
 <!-- note:loadSky -->
-- L941 · `if (sim.skySeed === seed && stations.length) carryBuilt(stations);` — 0.3.61 — the same sky again (the menu grew it as a backdrop; FLY AS or a
+- L940 · `if (sim.skySeed === seed && stations.length) carryBuilt(stations);` — 0.3.61 — the same sky again (the menu grew it as a backdrop; FLY AS or a
   launch grows it for real): the ports are the same hulls, so hold them
-- L958 · `sim.events.length = 0;` — a new sky starts quiet: no live events, no lit horizon
-- L970 · `if (pilot.restored) {` — 0.3.42 — standing is the pilot's, per sky: the corps are regrown from the
+- L957 · `sim.events.length = 0;` — a new sky starts quiet: no live events, no lit horizon
+- L969 · `if (pilot.restored) {` — 0.3.42 — standing is the pilot's, per sky: the corps are regrown from the
   seed on every load, and until now that put every one of them back to the
   tier default — a season of favours gone on reload. The record carries a
   table per sky; a returning pilot gets theirs back here, before anything
   reads it.
-- L976 · `resetPerf();` — Before anything is POPULATED, not after. How many hulls and how many
+- L975 · `resetPerf();` — Before anything is POPULATED, not after. How many hulls and how many
   shuttles a sky carries is a decision taken once and lived with; letting it
   be taken from a frame-time measurement left over from a different sky
   means a system built while the last one was struggling stays permanently
   thin, even on a device that is now idle. Reset first, build at a known
   tier, and let the budget do what it is actually for — trimming per-frame
   detail — once the sky is running.
-- L979 · `board.clock = () => sim.time;` — the corporations' own drone lines, on the same work board as yours
-- L983 · `resetSecurity();` — the reactive sky: who answers a call, who is hunting whom, and what is
+- L978 · `board.clock = () => sim.time;` — the corporations' own drone lines, on the same work board as yours
+- L982 · `resetSecurity();` — the reactive sky: who answers a call, who is hunting whom, and what is
   building drones out in the cold. Directors are installed in the order
   they get to claim a hull — security first (a picket on a call flies the
   call), then combat (anything with a fight on flies the fight), then the
@@ -1376,7 +1376,7 @@ function · **exported** · L939–1000
 
 ### <a id="s-wireReactiveSky"></a>`wireReactiveSky()`
 
-function · L1002–1111
+function · L1001–1110
 
 - calls: [`gnnPost`](../comms/gnn.js.md#s-gnnPost) _js/comms/gnn.js_ ×3 · [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ ×2 · [`corpById`](../corp/corps.js.md#s-corpById) _js/corp/corps.js_ · [`corpOfVessel`](../corp/corps.js.md#s-corpOfVessel) _js/corp/corps.js_ · [`noteHonestHit`](../corp/seclevel.js.md#s-noteHonestHit) _js/corp/seclevel.js_ · [`noteShot`](../corp/seclevel.js.md#s-noteShot) _js/corp/seclevel.js_ · [`wingArrived`](../corp/seclevel.js.md#s-wingArrived) _js/corp/seclevel.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`fireRound`](../flight/turrets.js.md#s-fireRound) _js/flight/turrets.js_ · [`damageHull`](../npc/combat.js.md#s-damageHull) _js/npc/combat.js_ · [`callForHelp`](../npc/security.js.md#s-callForHelp) _js/npc/security.js_ · [`etaOf`](../npc/security.js.md#s-etaOf) _js/npc/security.js_ ×2 · [`securityCorp`](../npc/security.js.md#s-securityCorp) _js/npc/security.js_ ×2 · [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_ ×3 · [`leaveHulk`](#s-leaveHulk) · [`logEvent`](#s-logEvent) ×7 · [`wireReactiveSky>fam`](#s-wireReactiveSky-fam) ×3 · [`spawnBodyId`](../world/generate.js.md#s-spawnBodyId) _js/world/generate.js_
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.filter`
@@ -1393,33 +1393,33 @@ that changes how a fight feels — the response clock. A player deciding
 whether to press an attack on a supply hull is deciding against that timer,
 so it has to be honest and it has to be visible.
 
-- L1003 · `combatHooks.onHit = (c, damage, owner, time) => {` — every round that lands on anything, from anyone
-- L1007 · `n.hp = c.hp;` — the contact already took the damage; this mirrors it back onto the hull
+- L1002 · `combatHooks.onHit = (c, damage, owner, time) => {` — every round that lands on anything, from anyone
+- L1006 · `n.hp = c.hp;` — the contact already took the damage; this mirrors it back onto the hull
   and lets the hull react to having been shot at
-- L1018 · `combatHooksOut.onDown = (n, byId, t) => {` — somebody lost a hull out there, and it was not the player's doing
-- L1029 · `const co = corpOfVessel(n);` — an honest hull was lost. The port it was carrying for notices.
-- L1038 · `econHooks.labour = labourAt;` — 0.3.52: company hands on shift make their port's lines run faster
-- L1039 · `crewHooks.port = () => sim.ship?.dockedAt ?? null;` — 0.3.54: where a paid-off hand now lives
-- L1041 · `securityHooks.selfVictim = selfVictim;` — 0.3.48: the security ◆ — the player's own SOS, and what a fight costs you
-- L1045 · `securityHooks.onCall = (call) => {` — the clock the player is deciding against
-- L1060 · `if (call.sos) {` — 0.3.56: your own SOS — the wing checks whether what was on you is still at it
-- L1061 · `const pay = wingArrived(call, sim.time, sim.ship);` — toasts the bounty itself when there is one
-- L1069 · `rockHooks.spare = (b) => {` — 0.3.60: a rogue is never AIMED at a settled world — one with a port in its
+- L1017 · `combatHooksOut.onDown = (n, byId, t) => {` — somebody lost a hull out there, and it was not the player's doing
+- L1028 · `const co = corpOfVessel(n);` — an honest hull was lost. The port it was carrying for notices.
+- L1037 · `econHooks.labour = labourAt;` — 0.3.52: company hands on shift make their port's lines run faster
+- L1038 · `crewHooks.port = () => sim.ship?.dockedAt ?? null;` — 0.3.54: where a paid-off hand now lives
+- L1040 · `securityHooks.selfVictim = selfVictim;` — 0.3.48: the security ◆ — the player's own SOS, and what a fight costs you
+- L1044 · `securityHooks.onCall = (call) => {` — the clock the player is deciding against
+- L1059 · `if (call.sos) {` — 0.3.56: your own SOS — the wing checks whether what was on you is still at it
+- L1060 · `const pay = wingArrived(call, sim.time, sim.ship);` — toasts the bounty itself when there is one
+- L1068 · `rockHooks.spare = (b) => {` — 0.3.60: a rogue is never AIMED at a settled world — one with a port in its
   family's wells — or at the world this sky spawns you by
-- L1075 · `npcDroneHooks.hostiles = () => contacts.filter((c) => c.relation === "hostile" && c.hp > 0` — 0.3.59: a port's guard drones fire at hostiles on the board; its repair drones patch you
-- L1082 · `if (sim.time - (ship.lastHitAt ?? -1e9) < DRONE_LINE.quietFor) return null;` — not mid-fight
-- L1085 · `if (co && (co.standing ?? 0) < -10) return null;` — a port that does not like you does not fix you
-- L1089 · `combatHooks.onFire = (c, t) => noteShot(c, t, sim.lock?.id ?? null);` — 0.3.56: your turrets fired — self-defence, or a fight you picked?
-- L1091 · `worksHooks.onBatteryHit = (n, amount, st, time) => {` — a port's batteries, fighting something the player cannot see. Damage goes
+- L1074 · `npcDroneHooks.hostiles = () => contacts.filter((c) => c.relation === "hostile" && c.hp > 0` — 0.3.59: a port's guard drones fire at hostiles on the board; its repair drones patch you
+- L1081 · `if (sim.time - (ship.lastHitAt ?? -1e9) < DRONE_LINE.quietFor) return null;` — not mid-fight
+- L1084 · `if (co && (co.standing ?? 0) < -10) return null;` — a port that does not like you does not fix you
+- L1088 · `combatHooks.onFire = (c, t) => noteShot(c, t, sim.lock?.id ?? null);` — 0.3.56: your turrets fired — self-defence, or a fight you picked?
+- L1090 · `worksHooks.onBatteryHit = (n, amount, st, time) => {` — a port's batteries, fighting something the player cannot see. Damage goes
   through the same path a round would take, so a raider driven off a port on
   the far side of the system carries that damage into its next fight.
-- L1096 · `rogueHooks.onLaunch = (wave, nest) => {` — the rogues
-- L1097 · `if (!nest.known) return;` — you cannot be told about a nest nobody has found
+- L1095 · `rogueHooks.onLaunch = (wave, nest) => {` — the rogues
+- L1096 · `if (!nest.known) return;` — you cannot be told about a nest nobody has found
 <!-- /note -->
 
 #### <a id="s-wireReactiveSky-fam"></a>`wireReactiveSky>fam(id)`
 
-function · L1070–1070
+function · L1069–1069
 
 - via [js/world/bodies.js](../world/bodies.js.md): `BODIES.find`
 - called by: [`wireReactiveSky`](#s-wireReactiveSky) ×3
@@ -1429,14 +1429,14 @@ function · L1070–1070
 
 #### <a id="s-wireReactiveSky-heal"></a>`wireReactiveSky.heal(a)`
 
-prop · L1087–1087
+prop · L1086–1086
 
 <!-- note:wireReactiveSky.heal -->
 <!-- /note -->
 
 ### <a id="s-seedOrbit"></a>`seedOrbit(ship, body, time)`
 
-function · L1113–1131
+function · L1112–1130
 
 - calls: [`clamp`](#s-clamp) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_
 - called by: [`launchSim`](#s-launchSim)
@@ -1446,12 +1446,12 @@ Station-keeping hold, nose-on to the home world. You open your eyes with
 the planet filling a quarter of the canopy and its gravity already working
 on you — the fastest way to learn what these worlds weigh.
 
-- L1119 · `bodyVelocity(body.id, time, ship.vel);` — Match the world's own orbital motion, or it simply leaves without you.
+- L1118 · `bodyVelocity(body.id, time, ship.vel);` — Match the world's own orbital motion, or it simply leaves without you.
 <!-- /note -->
 
 ### <a id="s-launchSim"></a>`launchSim(callsign, seed)`
 
-function · **exported** · L1133–1260
+function · **exported** · L1132–1259
 
 - calls: [`resetChat`](../comms/chat.js.md#s-resetChat) _js/comms/chat.js_ · [`resetGnn`](../comms/gnn.js.md#s-resetGnn) _js/comms/gnn.js_ · [`loadSave`](../core/store.js.md#s-loadSave) _js/core/store.js_ · [`skyProgress`](../core/store.js.md#s-skyProgress) _js/core/store.js_ · [`loadCompany`](../corp/company.js.md#s-loadCompany) _js/corp/company.js_ · [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ · [`resetFleet`](../corp/fleet.js.md#s-resetFleet) _js/corp/fleet.js_ · [`resetHousehold`](../crew/family.js.md#s-resetHousehold) _js/crew/family.js_ · [`resetCrew`](../crew/ledger.js.md#s-resetCrew) _js/crew/ledger.js_ · [`loadRobots`](../crew/robots.js.md#s-loadRobots) _js/crew/robots.js_ · [`loadDroneOps`](../drones/ops.js.md#s-loadDroneOps) _js/drones/ops.js_ · [`resetContracts`](../economy/contracts.js.md#s-resetContracts) _js/economy/contracts.js_ · [`loadFab`](../economy/fabricate.js.md#s-loadFab) _js/economy/fabricate.js_ · [`resetFab`](../economy/fabricate.js.md#s-resetFab) _js/economy/fabricate.js_ · [`resetIcework`](../economy/icework.js.md#s-resetIcework) _js/economy/icework.js_ · [`insure`](../economy/insurance.js.md#s-insure) _js/economy/insurance.js_ · [`resetInsurance`](../economy/insurance.js.md#s-resetInsurance) _js/economy/insurance.js_ · [`loadUpgrades`](../economy/upgrades.js.md#s-loadUpgrades) _js/economy/upgrades.js_ · [`disengageAutopilot`](../flight/autopilot.js.md#s-disengageAutopilot) _js/flight/autopilot.js_ · [`resetContacts`](../flight/contacts.js.md#s-resetContacts) _js/flight/contacts.js_ · [`applyRaceToShip`](../flight/pilot.js.md#s-applyRaceToShip) _js/flight/pilot.js_ · [`resetProbes`](../flight/probes.js.md#s-resetProbes) _js/flight/probes.js_ · [`makeShip`](../flight/ship.js.md#s-makeShip) _js/flight/ship.js_ · [`resetBoarding`](../interior/boarding.js.md#s-resetBoarding) _js/interior/boarding.js_ · [`retakeCommand`](../npc/captain.js.md#s-retakeCommand) _js/npc/captain.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`applyCareerDefaults`](#s-applyCareerDefaults) · [`currentShipId`](#s-currentShipId) · [`loadSky`](#s-loadSky) · [`resetTelemetry`](#s-resetTelemetry) · [`savePilotRecord`](#s-savePilotRecord) · [`seedOrbit`](#s-seedOrbit) · [`syncHullDefence`](#s-syncHullDefence) · [`wireMiningHooks`](#s-wireMiningHooks) · [`wireRigHooks`](#s-wireRigHooks) · [`clearDockRequest`](../station/stationworks.js.md#s-clearDockRequest) _js/station/stationworks.js_ · [`releaseTractor`](../station/stationworks.js.md#s-releaseTractor) _js/station/stationworks.js_ · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`hashHue`](../world/bodies.js.md#s-hashHue) _js/world/bodies.js_ · [`surveyIds`](../world/bodies.js.md#s-surveyIds) _js/world/bodies.js_ · [`applyTerraformSnapshot`](../world/events/atmoworks.js.md#s-applyTerraformSnapshot) _js/world/events/atmoworks.js_ · [`resetAtmoWorks`](../world/events/atmoworks.js.md#s-resetAtmoWorks) _js/world/events/atmoworks.js_ · [`terraformSnapshot`](../world/events/atmoworks.js.md#s-terraformSnapshot) _js/world/events/atmoworks.js_ · [`setImpactorAuthority`](../world/events/impactors.js.md#s-setImpactorAuthority) _js/world/events/impactors.js_ · [`spawnBodyId`](../world/generate.js.md#s-spawnBodyId) _js/world/generate.js_
 - via [js/npc/captain.js](../npc/captain.js.md): `ariaHooks.onBeforeLaunch`, `ariaHooks.onLaunch`
@@ -1459,35 +1459,35 @@ function · **exported** · L1133–1260
 - called by: [`mountHud>go`](../ui/hud.js.md#s-mountHud-go) _js/ui/hud.js_
 
 <!-- note:launchSim -->
-- L1145 · `sim.waypoints = [];` — nothing from the last sky may point at this one: generated ids repeat
-- L1156 · `if (pilot.corpId && !pilot.restored) adjustStanding(pilot.corpId, 25, "signed on");` — signing on is a fresh pilot's event — a returning one (0.3.42) signed on
+- L1144 · `sim.waypoints = [];` — nothing from the last sky may point at this one: generated ids repeat
+- L1155 · `if (pilot.corpId && !pilot.restored) adjustStanding(pilot.corpId, 25, "signed on");` — signing on is a fresh pilot's event — a returning one (0.3.42) signed on
   the day they were made, and does not collect the standing again each launch
-- L1159 · `resetInsurance();` — policies are written against hulls, and these are new hulls
-- L1161 · `const rec = pilot.record ?? null;` — the hulls the pilot bought, and the cover written on them, come back
+- L1158 · `resetInsurance();` — policies are written against hulls, and these are new hulls
+- L1160 · `const rec = pilot.record ?? null;` — the hulls the pilot bought, and the cover written on them, come back
   with the pilot — they were swept with everything else until 0.3.42
-- L1166 · `syncHullDefence(ship, currentShipId());` — set the pools before anything can read them: syncHullTune refreshes these
+- L1165 · `syncHullDefence(ship, currentShipId());` — set the pools before anything can read them: syncHullTune refreshes these
   every tick, but a launch must not leave `resists` null for a frame
-- L1176 · `releaseTractor();` — station ids restart at st1: a pull or a request held over would answer to the wrong port
-- L1186 · `sim.pulseUntil = -1e6;` — sky time restarts: nothing keyed to the old clock may still be running
-- L1200 · `loadRobots();` — robots and refit upgrades are property: keyed by sky and callsign, so they load once both are set
-- L1217 · `chat.clock = () => sim.time;` — the chat bus and GNN run on sky time; your drones come back where you left them
-- L1222 · `resetFab();` — jobs on a port's line belong to the sky, like the drones do: come back to
+- L1175 · `releaseTractor();` — station ids restart at st1: a pull or a request held over would answer to the wrong port
+- L1185 · `sim.pulseUntil = -1e6;` — sky time restarts: nothing keyed to the old clock may still be running
+- L1199 · `loadRobots();` — robots and refit upgrades are property: keyed by sky and callsign, so they load once both are set
+- L1216 · `chat.clock = () => sim.time;` — the chat bus and GNN run on sky time; your drones come back where you left them
+- L1221 · `resetFab();` — jobs on a port's line belong to the sky, like the drones do: come back to
   this sky and the parts are waiting where you left them on the line
-- L1229 · `const purse = loadSave().credits;` — 0.3.41 — the wallet comes back. Until now `ship.credits` was whatever
+- L1228 · `const purse = loadSave().credits;` — 0.3.41 — the wallet comes back. Until now `ship.credits` was whatever
   makeShip() and the race bonus issued, every launch: a session's earnings
   were gone on reload while the corp treasury beside them survived, and
   the account page (0.3.40) made that visible. A saved purse replaces the
   starting one — after the race bonus, which is a fresh pilot's and must
   not be paid again each morning.
-- L1234 · `applyTerraformSnapshot(sim.pendingTerraform?.snap, sim.pendingTerraform?.bonds);` — the sky keeps what the atmo works earned
-- L1254 · `terraform: terraformSnapshot(),` — 0.3.40: the launch persist below used to write `terraform: {}` for this
+- L1233 · `applyTerraformSnapshot(sim.pendingTerraform?.snap, sim.pendingTerraform?.bonds);` — the sky keeps what the atmo works earned
+- L1253 · `terraform: terraformSnapshot(),` — 0.3.40: the launch persist below used to write `terraform: {}` for this
   sky (the store had none yet) and the atmo works' progress was gone until
   the next scan or beacon wrote it back — two reloads in a row lost it.
 <!-- /note -->
 
 ### <a id="s-applyCareerDefaults"></a>`applyCareerDefaults(ship)`
 
-function · **exported** · L1262–1264
+function · **exported** · L1261–1263
 
 - calls: [`applyCareerDefaults`](career.js.md#s-applyCareerDefaults) _js/sim/career.js_
 - called by: [`launchSim`](#s-launchSim)
@@ -1499,7 +1499,7 @@ is armed, a salvager's tractor is live, a security hand's guns are warm.
 
 ### <a id="s-TELEMETRY_KEEP"></a>`TELEMETRY_KEEP`
 
-const · L1266–1266
+const · L1265–1265
 
 <!-- note:TELEMETRY_KEEP -->
 One row of the passive record every three sky-seconds; two hours' worth kept.
@@ -1507,7 +1507,7 @@ One row of the passive record every three sky-seconds; two hours' worth kept.
 
 ### <a id="s-sampleTelemetry"></a>`sampleTelemetry()`
 
-function · L1267–1278
+function · L1266–1277
 
 - calls: [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`sampleTelemetry>push`](#s-sampleTelemetry-push) ×6
 - called by: [`tickSim`](#s-tickSim)
@@ -1517,7 +1517,7 @@ function · L1267–1278
 
 #### <a id="s-sampleTelemetry-push"></a>`sampleTelemetry>push(k, v)`
 
-function · L1271–1271
+function · L1270–1270
 
 - called by: [`sampleTelemetry`](#s-sampleTelemetry) ×6
 
@@ -1526,7 +1526,7 @@ function · L1271–1271
 
 ### <a id="s-resetTelemetry"></a>`resetTelemetry()`
 
-function · **exported** · L1280–1282
+function · **exported** · L1279–1281
 
 - called by: [`launchSim`](#s-launchSim)
 
@@ -1535,19 +1535,19 @@ function · **exported** · L1280–1282
 
 ### <a id="s-returnToMenu"></a>`returnToMenu()`
 
-function · **exported** · L1284–1301
+function · **exported** · L1283–1300
 
 - calls: [`resetFlow`](../npc/flow.js.md#s-resetFlow) _js/npc/flow.js_ · [`resetTraffic`](../npc/traffic.js.md#s-resetTraffic) _js/npc/traffic.js_ · [`clearDockRequest`](../station/stationworks.js.md#s-clearDockRequest) _js/station/stationworks.js_ · [`releaseTractor`](../station/stationworks.js.md#s-releaseTractor) _js/station/stationworks.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.patchHud`, `useGameStore.getState.setPhase`
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
 <!-- note:returnToMenu -->
-- L1287 · `releaseTractor();` — nothing keyed to this sky's ports may follow you out
+- L1286 · `releaseTractor();` — nothing keyed to this sky's ports may follow you out
 <!-- /note -->
 
 ### <a id="s-currentShipId"></a>`currentShipId()`
 
-function · **exported** · L1303–1306
+function · **exported** · L1302–1305
 
 - calls: [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_
 - called by: [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`currentPlan`](../crew/roster.js.md#s-currentPlan) _js/crew/roster.js_ · [`hullFit`](../economy/contracts.js.md#s-hullFit) _js/economy/contracts.js_ · [`iceworkFit`](../economy/icework.js.md#s-iceworkFit) _js/economy/icework.js_ · [`hullTier`](../economy/upgrades.js.md#s-hullTier) _js/economy/upgrades.js_ · [`ensurePlan`](../interior/interior.js.md#s-ensurePlan) _js/interior/interior.js_ · [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_ · [`mountGame>refreshOwnHull`](../render/engine.js.md#s-mountGame-refreshOwnHull) _js/render/engine.js_ · [`broadcastShip`](#s-broadcastShip) · [`crewCapacity`](#s-crewCapacity) · [`launchSim`](#s-launchSim) · [`loseHull`](#s-loseHull) ×2 · [`syncHullTune`](#s-syncHullTune) · [`build`](../station/refityard.js.md#s-build) _js/station/refityard.js_ · [`PANELS.shipyard`](../station/stationdeck.js.md#s-PANELS-shipyard) _js/station/stationdeck.js_ · [`PANELS.shipyard>render`](../station/stationdeck.js.md#s-PANELS-shipyard-render) _js/station/stationdeck.js_ · [`atmoFit`](../world/events/atmoworks.js.md#s-atmoFit) _js/world/events/atmoworks.js_
@@ -1555,13 +1555,13 @@ function · **exported** · L1303–1306
 <!-- note:currentShipId -->
 The hull the pilot's complex has issued them at their current rank.
 
-- L1304 · `if (sim.activeHullId && shipById(sim.activeHullId)) return sim.activeHullId;` — a bought hull
-- L1305 · `return DEFAULT_SHIP_ID;` — the trainer everyone starts in
+- L1303 · `if (sim.activeHullId && shipById(sim.activeHullId)) return sim.activeHullId;` — a bought hull
+- L1304 · `return DEFAULT_SHIP_ID;` — the trainer everyone starts in
 <!-- /note -->
 
 ### <a id="s-issuedHullId"></a>`issuedHullId()`
 
-function · **exported** · L1308–1314
+function · **exported** · L1307–1313
 
 - calls: [`rankStatus`](../flight/pilot.js.md#s-rankStatus) _js/flight/pilot.js_ · [`issuedShips`](../ships/shipdb.js.md#s-issuedShips) _js/ships/shipdb.js_
 - called by: [`PANELS.shipyard`](../station/stationdeck.js.md#s-PANELS-shipyard) _js/station/stationdeck.js_ ×2
@@ -1569,12 +1569,12 @@ function · **exported** · L1308–1314
 <!-- note:issuedHullId -->
 The hull the complex would sign over at the pilot's rank — for sale at the issue rate, not handed out.
 
-- L1312 · `} catch {` — pre-creation
+- L1311 · `} catch {` — pre-creation
 <!-- /note -->
 
 ### <a id="s-_hullTune"></a>`_hullTune`
 
-const · L1316–1316
+const · L1315–1315
 
 - calls: [`hullTuneFor`](../ships/shipdb.js.md#s-hullTuneFor) _js/ships/shipdb.js_
 
@@ -1584,19 +1584,19 @@ Flight multipliers from the active hull, refreshed when it changes.
 
 ### <a id="s-syncHullTune"></a>`syncHullTune(ship)`
 
-function · L1317–1326
+function · L1316–1325
 
 - calls: [`hullTuneFor`](../ships/shipdb.js.md#s-hullTuneFor) _js/ships/shipdb.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`currentShipId`](#s-currentShipId) · [`syncHullDefence`](#s-syncHullDefence)
 - called by: [`stepShip`](#s-stepShip)
 
 <!-- note:syncHullTune -->
-- L1319 · `if (_hullTune.id !== id || ship.hullTune !== _hullTune) {` — a fresh makeShip() on a relaunch with the same hull id has no tune yet
-- L1322 · `ship.mods = null;` — force syncMods to recompute the hold with the new hull factor
+- L1318 · `if (_hullTune.id !== id || ship.hullTune !== _hullTune) {` — a fresh makeShip() on a relaunch with the same hull id has no tune yet
+- L1321 · `ship.mods = null;` — force syncMods to recompute the hold with the new hull factor
 <!-- /note -->
 
 ### <a id="s-_defenceFor"></a>`_defenceFor`
 
-const · L1328–1328
+const · L1327–1327
 
 <!-- note:_defenceFor -->
 WHAT THIS HULL CAN TAKE (0.3.34).
@@ -1615,19 +1615,19 @@ the current value down so nothing sits over its own maximum.
 
 ### <a id="s-syncHullDefence"></a>`syncHullDefence(ship, id)`
 
-function · L1329–1345
+function · L1328–1344
 
 - calls: [`resistKey`](../economy/upgrades.js.md#s-resistKey) _js/economy/upgrades.js_ · [`upgradeResists`](../economy/upgrades.js.md#s-upgradeResists) _js/economy/upgrades.js_ · [`hullPoolFor`](../flight/defence.js.md#s-hullPoolFor) _js/flight/defence.js_ · [`resistsFor`](../flight/defence.js.md#s-resistsFor) _js/flight/defence.js_ · [`shieldPoolFor`](../flight/defence.js.md#s-shieldPoolFor) _js/flight/defence.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_
 - called by: [`launchSim`](#s-launchSim) · [`syncHullTune`](#s-syncHullTune)
 
 <!-- note:syncHullDefence -->
-- L1341 · `ship.resists = resistsFor(def, { ...(ship.mods ?? {}), resist: upgradeResists() });` — fitted resists are summed separately from the multiplicative mods bag —
+- L1340 · `ship.resists = resistsFor(def, { ...(ship.mods ?? {}), resist: upgradeResists() });` — fitted resists are summed separately from the multiplicative mods bag —
   see upgradeResists() for why they cannot live in it
 <!-- /note -->
 
 ### <a id="s-WRONG_WAY_GRACE"></a>`WRONG_WAY_GRACE`
 
-const · L1347–1347
+const · L1346–1346
 
 <!-- note:WRONG_WAY_GRACE -->
 ---- lane discipline ------------------------------------------------------
@@ -1641,18 +1641,18 @@ little back.
 
 ### <a id="s-stepLaneDiscipline"></a>`stepLaneDiscipline(dt)`
 
-function · L1348–1377
+function · L1347–1376
 
 - calls: [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ · [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`portPulse`](../npc/flow.js.md#s-portPulse) _js/npc/flow.js_ · [`laneFlow`](../npc/lanes.js.md#s-laneFlow) _js/npc/lanes.js_ · [`laneOf`](../npc/lanes.js.md#s-laneOf) _js/npc/lanes.js_ · [`stationLane`](../npc/lanes.js.md#s-stationLane) _js/npc/lanes.js_ · [`logEvent`](#s-logEvent) · [`nearestStation`](../station/stations.js.md#s-nearestStation) _js/station/stations.js_
 - called by: [`stepWorld`](#s-stepWorld)
 
 <!-- note:stepLaneDiscipline -->
-- L1350 · `if (tractor.active) { if (sim.lane) sim.lane.wrong = false; sim.wrongWayFor = 0; return; }` — control has the helm: whatever line it is flying you on is by definition the right one
+- L1349 · `if (tractor.active) { if (sim.lane) sim.lane.wrong = false; sim.wrongWayFor = 0; return; }` — control has the helm: whatever line it is flying you on is by definition the right one
 <!-- /note -->
 
 ### <a id="s-laneCredit"></a>`laneCredit(st)`
 
-function · **exported** · L1379–1387
+function · **exported** · L1378–1386
 
 - calls: [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ · [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`logEvent`](#s-logEvent)
 - called by: [`finishDock`](#s-finishDock)
@@ -1663,7 +1663,7 @@ Called on a successful dock: a clean entry-lane approach is remembered by the po
 
 ### <a id="s-applyRemoteState"></a>`applyRemoteState(from, data)`
 
-function · **exported** · L1389–1415
+function · **exported** · L1388–1414
 
 - calls: [`hashHue`](../world/bodies.js.md#s-hashHue) _js/world/bodies.js_
 - called by: [`poll`](../net/net.js.md#s-poll) _js/net/net.js_
@@ -1674,7 +1674,7 @@ function · **exported** · L1389–1415
 
 ### <a id="s-applyReliable"></a>`applyReliable(_from, data)`
 
-function · **exported** · L1417–1424
+function · **exported** · L1416–1423
 
 - calls: [`applySkyEvent`](#s-applySkyEvent) · [`collectBeacon`](#s-collectBeacon) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - called by: [`poll`](../net/net.js.md#s-poll) _js/net/net.js_
@@ -1684,7 +1684,7 @@ function · **exported** · L1417–1424
 
 ### <a id="s-dropRemote"></a>`dropRemote(id)`
 
-function · **exported** · L1426–1428
+function · **exported** · L1425–1427
 
 - called by: [`disconnectNet`](../net/net.js.md#s-disconnectNet) _js/net/net.js_ · [`poll`](../net/net.js.md#s-poll) _js/net/net.js_ ×2
 
@@ -1693,7 +1693,7 @@ function · **exported** · L1426–1428
 
 ### <a id="s-collectBeacon"></a>`collectBeacon(id, local)`
 
-function · L1430–1446
+function · L1429–1445
 
 - calls: [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×2 · [`batteryCap`](../flight/ship.js.md#s-batteryCap) _js/flight/ship.js_ · [`logEvent`](#s-logEvent) · [`persistProgress`](#s-persistProgress)
 - via [js/world/bodies.js](../world/bodies.js.md): `BEACONS.find`
@@ -1706,7 +1706,7 @@ function · L1430–1446
 
 ### <a id="s-savePilotRecord"></a>`savePilotRecord()`
 
-function · L1448–1454
+function · L1447–1453
 
 - calls: [`loadPilot`](../flight/pilot.js.md#s-loadPilot) _js/flight/pilot.js_ · [`savePilot`](../flight/pilot.js.md#s-savePilot) _js/flight/pilot.js_
 - via [js/economy/insurance.js](../economy/insurance.js.md): `policies.values`
@@ -1716,12 +1716,12 @@ function · L1448–1454
 <!-- note:savePilotRecord -->
 The pilot record with what the sim owns: hulls bought, the active one, the cover on them.
 
-- L1451 · `const standing = { ...(loadPilot()?.standing ?? {}) };` — standing per sky: this sky's table over whatever other skies the record already holds
+- L1450 · `const standing = { ...(loadPilot()?.standing ?? {}) };` — standing per sky: this sky's table over whatever other skies the record already holds
 <!-- /note -->
 
 ### <a id="s-persistNow"></a>`persistNow()`
 
-function · **exported** · L1456–1460
+function · **exported** · L1455–1459
 
 - calls: [`persistProgress`](#s-persistProgress)
 - called by: [`@file`](../main.js.md#) _js/main.js_ ×2
@@ -1732,7 +1732,7 @@ Write progress and the wallet now — the tab is going away (main.js wires it).
 
 ### <a id="s-persistProgress"></a>`persistProgress()`
 
-function · L1462–1476
+function · L1461–1475
 
 - calls: [`savePilotRecord`](#s-savePilotRecord) · [`surveyIds`](../world/bodies.js.md#s-surveyIds) _js/world/bodies.js_ · [`terraformSnapshot`](../world/events/atmoworks.js.md#s-terraformSnapshot) _js/world/events/atmoworks.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.patchHud`, `useGameStore.getState.persist`
@@ -1743,7 +1743,7 @@ function · L1462–1476
 
 ### <a id="s-tryAssay"></a>`tryAssay()`
 
-function · L1478–1533
+function · L1477–1532
 
 - calls: [`benchValue`](../economy/icework.js.md#s-benchValue) _js/economy/icework.js_ ×2 · [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ ×4 · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×4 · [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`logEvent`](#s-logEvent) ×3 · [`setNoticeAbout`](#s-setNoticeAbout) ×3 · [`tryAssay>inCone`](#s-tryAssay-inCone) ×3 · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`chunkMass`](../world/debris.js.md#s-chunkMass) _js/world/debris.js_ · [`nearDebris`](../world/debris.js.md#s-nearDebris) _js/world/debris.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`hulkManifest`](../world/hulks.js.md#s-hulkManifest) _js/world/hulks.js_ · [`nearHulks`](../world/hulks.js.md#s-nearHulks) _js/world/hulks.js_
 - via [js/economy/materials.js](../economy/materials.js.md): `goodName.toLowerCase`
@@ -1753,14 +1753,14 @@ function · L1478–1533
 <!-- note:tryAssay -->
 The scanner reads what the nose is on: debris and belt rocks up close, worlds beyond.
 
-- L1495 · `let bestChunk = null;` — impact debris first — the question after a strike is always "what is in the chunks"
-- L1499 · `break;` — nearDebris is sorted
-- L1513 · `let bestRock = null;` — then the field: the rock under the reticle, ore, ice, veins and all
+- L1494 · `let bestChunk = null;` — impact debris first — the question after a strike is always "what is in the chunks"
+- L1498 · `break;` — nearDebris is sorted
+- L1512 · `let bestRock = null;` — then the field: the rock under the reticle, ore, ice, veins and all
 <!-- /note -->
 
 #### <a id="s-tryAssay-inCone"></a>`tryAssay>inCone(x, y, z, d)`
 
-function · L1481–1481
+function · L1480–1480
 
 - called by: [`tryAssay`](#s-tryAssay) ×3
 
@@ -1769,7 +1769,7 @@ function · L1481–1481
 
 ### <a id="s-tryScan"></a>`tryScan()`
 
-function · L1535–1583
+function · L1534–1582
 
 - calls: [`rollOre`](../economy/materials.js.md#s-rollOre) _js/economy/materials.js_ ×2 · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×2 · [`addCargo`](../flight/ship.js.md#s-addCargo) _js/flight/ship.js_ · [`logEvent`](#s-logEvent) ×2 · [`persistProgress`](#s-persistProgress) · [`setNavTarget`](#s-setNavTarget) · [`tryAssay`](#s-tryAssay) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`bodyTempK`](../world/bodies.js.md#s-bodyTempK) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`scanRadius`](../world/bodies.js.md#s-scanRadius) _js/world/bodies.js_ · [`rngFromSeed`](../world/generate.js.md#s-rngFromSeed) _js/world/generate.js_
 - via [js/economy/materials.js](../economy/materials.js.md): `ORES.find`
@@ -1777,17 +1777,17 @@ function · L1535–1583
 - called by: [`tickSim`](#s-tickSim)
 
 <!-- note:tryScan -->
-- L1537 · `if (tryAssay()) return;` — close targets outrank the planet behind them
-- L1554 · `if (!sim.lock.id) setNavTarget(bestId);` — a survey reports on what is in range; it does not re-aim the warp core.
+- L1536 · `if (tryAssay()) return;` — close targets outrank the planet behind them
+- L1553 · `if (!sim.lock.id) setNavTarget(bestId);` — a survey reports on what is in range; it does not re-aim the warp core.
   (It only takes the nav target if nothing is locked at all.)
-- L1570 · `` const sampler = rngFromSeed(`${bestId}:sample`); `` — A survey pays out a core sample of whatever that world is made of.
-- L1571 · `const deposits = body.arch?.ores?.length ? body.arch.ores : null;` — Same source the readout uses: the archetype's deposit list, weighted to the top entry.
-- L1577 · `const heatMul = !hot ? 1 : ore.id.endsWith("_ice") || ore.id === "tholins" ? 0.45 : 1.35;` — a hot crust: excavated metal pays a third more, volatiles are boiling away
+- L1569 · `` const sampler = rngFromSeed(`${bestId}:sample`); `` — A survey pays out a core sample of whatever that world is made of.
+- L1570 · `const deposits = body.arch?.ores?.length ? body.arch.ores : null;` — Same source the readout uses: the archetype's deposit list, weighted to the top entry.
+- L1576 · `const heatMul = !hot ? 1 : ore.id.endsWith("_ice") || ore.id === "tholins" ? 0.45 : 1.35;` — a hot crust: excavated metal pays a third more, volatiles are boiling away
 <!-- /note -->
 
 ### <a id="s-wellEdge"></a>`wellEdge(body)`
 
-function · **exported** · L1585–1590
+function · **exported** · L1584–1589
 
 - calls: [`remnantRadius`](../world/scale.js.md#s-remnantRadius) _js/world/scale.js_
 - called by: [`climbOut`](../aria/nav.js.md#s-climbOut) _js/aria/nav.js_ · [`warpBlock`](#s-warpBlock) ×2 · [`warpBlockDuringSpool`](#s-warpBlockDuringSpool)
@@ -1826,7 +1826,7 @@ number on the HUD. If the readout rounds to 0.00 G, nothing holds you.
 
 ### <a id="s-wellG"></a>`wellG(body, dist)`
 
-function · **exported** · L1592–1595
+function · **exported** · L1591–1594
 
 - called by: [`warpBlock`](#s-warpBlock) · [`warpBlockDuringSpool`](#s-warpBlockDuringSpool)
 
@@ -1836,24 +1836,24 @@ The pull here, in the units the HUD prints. One source of truth.
 
 ### <a id="s-WARP"></a>`WARP`
 
-const · **exported** · L1597–1608
+const · **exported** · L1596–1607
 
 <!-- note:WARP -->
-- L1598 · `wellG: 0.5,` — pull (u/s²; the HUD's G readout ×25) under which a world no longer holds the core
-- L1599 · `wellClear: 1.35,` — and never inside this many radii — clear of the air and the rings, no further
-- L1600 · `wellFar: 8,` — and never beyond this many radii, however heavy (a giant's well is still a ways out)
-- L1601 · `wellFloorG: 0.005,` — if the HUD would round the pull to 0.00 G, nothing is holding you. Ever.
-- L1602 · `spool: 6,` — seconds to charge
-- L1603 · `draw: 95,` — kW while spooling
-- L1604 · `cool: 8,` — seconds of lockout after a run
-- L1605 · `minCharge: 300,` — refuse to start below this
-- L1606 · `losMargin: 1.4,` — corridor is this many body radii wide
-- L1607 · `starClear: 6,` — star radii you must be beyond
+- L1597 · `wellG: 0.5,` — pull (u/s²; the HUD's G readout ×25) under which a world no longer holds the core
+- L1598 · `wellClear: 1.35,` — and never inside this many radii — clear of the air and the rings, no further
+- L1599 · `wellFar: 8,` — and never beyond this many radii, however heavy (a giant's well is still a ways out)
+- L1600 · `wellFloorG: 0.005,` — if the HUD would round the pull to 0.00 G, nothing is holding you. Ever.
+- L1601 · `spool: 6,` — seconds to charge
+- L1602 · `draw: 95,` — kW while spooling
+- L1603 · `cool: 8,` — seconds of lockout after a run
+- L1604 · `minCharge: 300,` — refuse to start below this
+- L1605 · `losMargin: 1.4,` — corridor is this many body radii wide
+- L1606 · `starClear: 6,` — star radii you must be beyond
 <!-- /note -->
 
 ### <a id="s-segmentMiss"></a>`segmentMiss(px, py, pz, ax, ay, az, bx, by, bz)`
 
-function · L1610–1618
+function · L1609–1617
 
 - called by: [`losBlocker`](#s-losBlocker) · [`plotRoute`](#s-plotRoute) ×4
 
@@ -1862,21 +1862,21 @@ function · L1610–1618
 
 ### <a id="s-_dest"></a>`_dest`
 
-const · L1620–1620
+const · L1619–1619
 
 <!-- note:_dest -->
 <!-- /note -->
 
 ### <a id="s-_obs"></a>`_obs`
 
-const · L1621–1621
+const · L1620–1620
 
 <!-- note:_obs -->
 <!-- /note -->
 
 ### <a id="s-warpNodeById"></a>`warpNodeById(id)`
 
-function · **exported** · L1623–1650
+function · **exported** · L1622–1649
 
 - calls: [`warpNodeById`](#s-warpNodeById) · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - called by: [`aimAt`](../aria/nav.js.md#s-aimAt) _js/aria/nav.js_ · [`engageAutopilot`](../flight/autopilot.js.md#s-engageAutopilot) _js/flight/autopilot.js_ · [`makeLegs>legTo`](../mission/detour.js.md#s-makeLegs-legTo) _js/mission/detour.js_ · [`markAt`](../mission/run.js.md#s-markAt) _js/mission/run.js_ · [`resolve`](../mission/run.js.md#s-resolve) _js/mission/run.js_ ×7 · [`makeSalvage>mark`](../mission/salvage.js.md#s-makeSalvage-mark) _js/mission/salvage.js_ · [`acquireLock`](#s-acquireLock) · [`engageWarp`](#s-engageWarp) · [`plotRoute`](#s-plotRoute) · [`setNavTarget`](#s-setNavTarget) · [`stepWarp`](#s-stepWarp) · [`toggleWarp`](#s-toggleWarp) · [`warpBlock`](#s-warpBlock) ×2 · [`warpBlockDuringSpool`](#s-warpBlockDuringSpool) · [`warpDestination`](#s-warpDestination) · [`warpNodeById`](#s-warpNodeById) · [`warpStatus`](#s-warpStatus) · [`mountMap`](../ui/map.js.md#s-mountMap) _js/ui/map.js_ · [`warpDone`](../ui/tutorial-core.js.md#s-warpDone) _js/ui/tutorial-core.js_ · [`warpWhy`](../ui/tutorial-core.js.md#s-warpWhy) _js/ui/tutorial-core.js_
@@ -1886,13 +1886,13 @@ Anything the core will jump to: a world or a port. One shape —
 { id, name, kind, radius, arriveR, pos(out), vel(out), body? } — so the
 plot, the gates and the run never care which it was.
 
-- L1640 · `const wp = sim.waypoints.find((w) => w.id === id);` — a saved location is a warp node too: the core jumps to a point in space —
+- L1639 · `const wp = sim.waypoints.find((w) => w.id === id);` — a saved location is a warp node too: the core jumps to a point in space —
   a belt band, a probe drop, a spot you marked off the chart
 <!-- /note -->
 
 #### <a id="s-warpNodeById-pos"></a>`warpNodeById.pos(out)`
 
-prop · L1628–1628
+prop · L1627–1627
 
 - calls: [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 
@@ -1901,7 +1901,7 @@ prop · L1628–1628
 
 #### <a id="s-warpNodeById-vel"></a>`warpNodeById.vel(out)`
 
-prop · L1629–1629
+prop · L1628–1628
 
 - calls: [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_
 
@@ -1910,21 +1910,21 @@ prop · L1629–1629
 
 #### <a id="s-warpNodeById-pos-2"></a>`warpNodeById.pos~2(out)`
 
-prop · L1636–1636
+prop · L1635–1635
 
 <!-- note:warpNodeById.pos~2 -->
 <!-- /note -->
 
 #### <a id="s-warpNodeById-vel-2"></a>`warpNodeById.vel~2(out)`
 
-prop · L1637–1637
+prop · L1636–1636
 
 <!-- note:warpNodeById.vel~2 -->
 <!-- /note -->
 
 #### <a id="s-warpNodeById-pos-3"></a>`warpNodeById.pos~3(out)`
 
-prop · L1645–1645
+prop · L1644–1644
 
 - calls: [`waypointPosition`](#s-waypointPosition)
 
@@ -1933,7 +1933,7 @@ prop · L1645–1645
 
 #### <a id="s-warpNodeById-vel-3"></a>`warpNodeById.vel~3(out)`
 
-prop · L1646–1646
+prop · L1645–1645
 
 - calls: [`waypointVelocity`](#s-waypointVelocity)
 
@@ -1942,7 +1942,7 @@ prop · L1646–1646
 
 ### <a id="s-POINT_ARRIVE_R"></a>`POINT_ARRIVE_R`
 
-const · **exported** · L1652–1652
+const · **exported** · L1651–1651
 
 <!-- note:POINT_ARRIVE_R -->
 How close a point jump drops you (u). Inside a belt that is one cell of rock.
@@ -1950,7 +1950,7 @@ How close a point jump drops you (u). Inside a belt that is one cell of rock.
 
 ### <a id="s-warpDestination"></a>`warpDestination(target, out)`
 
-function · **exported** · L1654–1667
+function · **exported** · L1653–1666
 
 - calls: [`warpNodeById`](#s-warpNodeById)
 - called by: [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ ×2 · [`flyTheLane`](../flight/autopilot.js.md#s-flyTheLane) _js/flight/autopilot.js_ · [`makeLegs>legTo`](../mission/detour.js.md#s-makeLegs-legTo) _js/mission/detour.js_ ×2 · [`engageWarp`](#s-engageWarp) · [`plotRoute`](#s-plotRoute) · [`warpBlock`](#s-warpBlock) · [`warpBlockDuringSpool`](#s-warpBlockDuringSpool) · [`mountMap`](../ui/map.js.md#s-mountMap) _js/ui/map.js_ · [`warpDone`](../ui/tutorial-core.js.md#s-warpDone) _js/ui/tutorial-core.js_
@@ -1958,12 +1958,12 @@ function · **exported** · L1654–1667
 <!-- note:warpDestination -->
 Where a warp to a node would put you: standoff, sunward side.
 
-- L1659 · `o.x = _bp.x; o.y = _bp.y; o.z = _bp.z;` — a point IS the destination — the arrival clearance nudge keeps you out of any rock sitting on it
+- L1658 · `o.x = _bp.x; o.y = _bp.y; o.z = _bp.z;` — a point IS the destination — the arrival clearance nudge keeps you out of any rock sitting on it
 <!-- /note -->
 
 ### <a id="s-losBlocker"></a>`losBlocker(from, to, ignoreId)`
 
-function · **exported** · L1669–1677
+function · **exported** · L1668–1676
 
 - calls: [`segmentMiss`](#s-segmentMiss) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 - called by: [`corridorBlocker`](../aria/nav.js.md#s-corridorBlocker) _js/aria/nav.js_ · [`doglegAround`](../aria/nav.js.md#s-doglegAround) _js/aria/nav.js_ ×2 · [`sensePorts`](../aria/senses.js.md#s-sensePorts) _js/aria/senses.js_ · [`tradeRoutes`](../economy/traderoutes.js.md#s-tradeRoutes) _js/economy/traderoutes.js_ · [`tradeRoutes>lineBlocked`](../economy/traderoutes.js.md#s-tradeRoutes-lineBlocked) _js/economy/traderoutes.js_ · [`makeLegs>legTo`](../mission/detour.js.md#s-makeLegs-legTo) _js/mission/detour.js_ ×2 · [`EXEC.GOTO`](../mission/run.js.md#s-EXEC-GOTO) _js/mission/run.js_ · [`bestHulk`](../mission/salvage.js.md#s-bestHulk) _js/mission/salvage.js_ · [`warpBlock`](#s-warpBlock) · [`warpBlockDuringSpool`](#s-warpBlockDuringSpool) · [`mountMap`](../ui/map.js.md#s-mountMap) _js/ui/map.js_ ×2
@@ -1974,7 +1974,7 @@ First body whose bulk sits in the corridor, or null if the lane is clear.
 
 ### <a id="s-warpBlock"></a>`warpBlock(targetId)`
 
-function · **exported** · L1679–1714
+function · **exported** · L1678–1713
 
 - calls: [`losBlocker`](#s-losBlocker) · [`warpDestination`](#s-warpDestination) · [`warpNodeById`](#s-warpNodeById) ×2 · [`wellEdge`](#s-wellEdge) ×2 · [`wellG`](#s-wellG) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`starBody`](../world/bodies.js.md#s-starBody) _js/world/bodies.js_ · [`holeWarpBlock`](../world/events/holes.js.md#s-holeWarpBlock) _js/world/events/holes.js_
 - called by: [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_ · [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ · [`stepWarp`](#s-stepWarp) · [`toggleWarp`](#s-toggleWarp) · [`mountMap`](../ui/map.js.md#s-mountMap) _js/ui/map.js_ · [`mountMap>laneState`](../ui/map.js.md#s-mountMap-laneState) _js/ui/map.js_ · [`warpWhy`](../ui/tutorial-core.js.md#s-warpWhy) _js/ui/tutorial-core.js_
@@ -1984,19 +1984,19 @@ Why the core will not engage right now, or "" if it will. Evaluated every
 tick so the dash reads the truth and a spool aborts the moment it stops
 being true.
 
-- L1683 · `if (sim.lock.id && !warpNodeById(sim.lock.id)) return "LOCK NOT A WARP NODE";` — say WHY there is no target when the lock is on something you cannot
+- L1682 · `if (sim.lock.id && !warpNodeById(sim.lock.id)) return "LOCK NOT A WARP NODE";` — say WHY there is no target when the lock is on something you cannot
   jump to — a rock, a wreck, another ship
-- L1693 · `const dom = sim.dominant;` — Warp geometry will not hold inside a well — while the well still pulls. A world's well ends
+- L1692 · `const dom = sim.dominant;` — Warp geometry will not hold inside a well — while the well still pulls. A world's well ends
   where its draw falls under WARP.wellG, or WARP.wellClear radii out, whichever is farther;
   beyond that the world may still be the strongest pull around and it does not matter.
-- L1695 · `const g = wellG(dom, sim.domDist);` — The readout is the authority. A world that is not registering on the
+- L1694 · `const g = wellG(dom, sim.domDist);` — The readout is the authority. A world that is not registering on the
   instruments does not get to refuse the jump, whatever the geometry
   says — that mismatch is what made a well feel like it went on forever.
 <!-- /note -->
 
 ### <a id="s-warpStatus"></a>`warpStatus()`
 
-function · **exported** · L1716–1726
+function · **exported** · L1715–1725
 
 - calls: [`spoolTime`](#s-spoolTime) · [`warpNodeById`](#s-warpNodeById)
 - called by: [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_
@@ -2006,9 +2006,9 @@ function · **exported** · L1716–1726
 
 ### <a id="s-spoolTime"></a>`spoolTime()`
 
-function · **exported** · L1728–1730
+function · **exported** · L1727–1729
 
-- called by: [`legSeconds`](../aria/nav.js.md#s-legSeconds) _js/aria/nav.js_ · [`warpReserve`](../flight/autopilot.js.md#s-warpReserve) _js/flight/autopilot.js_ · [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_ · [`engageWarp`](#s-engageWarp) · [`plotRoute`](#s-plotRoute) ×2 · [`publishHud`](#s-publishHud) · [`stepWarp`](#s-stepWarp) · [`warpStatus`](#s-warpStatus)
+- called by: [`legSeconds`](../aria/nav.js.md#s-legSeconds) _js/aria/nav.js_ · [`warpReserve`](../flight/autopilot.js.md#s-warpReserve) _js/flight/autopilot.js_ · [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_ · [`engageWarp`](#s-engageWarp) · [`plotRoute`](#s-plotRoute) · [`publishHud`](#s-publishHud) · [`stepWarp`](#s-stepWarp) · [`warpStatus`](#s-warpStatus)
 
 <!-- note:spoolTime -->
 Seconds the core needs to spool, through the pilot's drive modifier.
@@ -2016,7 +2016,7 @@ Seconds the core needs to spool, through the pilot's drive modifier.
 
 ### <a id="s-ALIGN_DEG"></a>`ALIGN_DEG`
 
-const · **exported** · L1732–1732
+const · **exported** · L1731–1731
 
 <!-- note:ALIGN_DEG -->
 ---- route plotting ------------------------------------------------------
@@ -2028,7 +2028,7 @@ projected impact points). No alignment, no plot; no plot, no spool.
 
 ### <a id="s-DROPOUT_ODDS"></a>`DROPOUT_ODDS`
 
-const · **exported** · L1734–1734
+const · **exported** · L1733–1733
 
 <!-- note:DROPOUT_ODDS -->
 A plotted hazard is a priced risk: cross it in warp and the core may drop
@@ -2037,34 +2037,34 @@ you out right there. Traffic never drops you — it fines your standing.
 
 ### <a id="s-_routeCache"></a>`_routeCache`
 
-const · L1736–1736
+const · L1735–1735
 
 <!-- note:_routeCache -->
 <!-- /note -->
 
 ### <a id="s-_rp"></a>`_rp`
 
-const · L1737–1737
+const · L1736–1736
 
 <!-- note:_rp -->
 <!-- /note -->
 
 ### <a id="s-alignmentTo"></a>`alignmentTo(dest)`
 
-function · **exported** · L1739–1745
+function · **exported** · L1738–1744
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`clamp`](#s-clamp)
-- called by: [`plotRoute`](#s-plotRoute) ×2
+- called by: [`plotRoute`](#s-plotRoute)
 
 <!-- note:alignmentTo -->
 Angle (deg) between the nose and the lane to `dest`.
 <!-- /note -->
 
-### <a id="s-plotRoute"></a>`plotRoute(targetId=, {…}=)`
+### <a id="s-plotRoute"></a>`plotRoute(targetId=)`
 
-function · **exported** · L1747–1828
+function · **exported** · L1746–1821
 
-- calls: [`alignmentTo`](#s-alignmentTo) ×2 · [`clamp`](#s-clamp) ×5 · [`segmentMiss`](#s-segmentMiss) ×4 · [`spoolTime`](#s-spoolTime) ×2 · [`warpDestination`](#s-warpDestination) · [`warpNodeById`](#s-warpNodeById) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×5 · [`holeRadii`](../world/events/holes.js.md#s-holeRadii) _js/world/events/holes.js_
+- calls: [`alignmentTo`](#s-alignmentTo) · [`clamp`](#s-clamp) ×5 · [`segmentMiss`](#s-segmentMiss) ×4 · [`spoolTime`](#s-spoolTime) · [`warpDestination`](#s-warpDestination) · [`warpNodeById`](#s-warpNodeById) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×5 · [`holeRadii`](../world/events/holes.js.md#s-holeRadii) _js/world/events/holes.js_
 - called by: [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ · [`publishHud`](#s-publishHud) · [`toggleWarp`](#s-toggleWarp)
 
 <!-- note:plotRoute -->
@@ -2073,21 +2073,18 @@ Plot the corridor to a warp target. Cached ~4 Hz per target. Returns
 first fatal obstruction (a body dead in the lane), hazards are everything
 else worth a captain's eye, each with `at` (0..1 along the lane).
 
-- L1766 · `for (const b of BODIES) {` — bodies in the corridor
-- L1778 · `for (const [belt, label] of [[currentSystem.belt, "BELT"], [currentSystem.outerBelt, "OUTE` — belt crossings: sample the lane against each annulus
-- L1793 · `for (const m of impactors) {` — impactor tracks near the lane
-- L1797 · `for (const h of holes) {` — collapsed stars and transits: a warp covers 900–1800 u a tick, so a lane
+- L1759 · `for (const b of BODIES) {` — bodies in the corridor
+- L1771 · `for (const [belt, label] of [[currentSystem.belt, "BELT"], [currentSystem.outerBelt, "OUTE` — belt crossings: sample the lane against each annulus
+- L1786 · `for (const m of impactors) {` — impactor tracks near the lane
+- L1790 · `for (const h of holes) {` — collapsed stars and transits: a warp covers 900–1800 u a tick, so a lane
   through a hole lands a tick inside the disk. 0.3 plotted straight through them.
-- L1806 · `for (const st of stations) {` — port traffic — the destination port is not its own hazard
-- L1817 · `eta: 0,` — filled below: spool + run
-
-- L1752 · `const key = preview ? JSON.stringify([targetId, body.id, body.kind, body.name,` — Only HUD previews reuse geometry. Warp decisions always inspect the live sky.
-  Turning changes alignment, not the segment; moving either endpoint does.
+- L1799 · `for (const st of stations) {` — port traffic — the destination port is not its own hazard
+- L1810 · `eta: 0,` — filled below: spool + run
 <!-- /note -->
 
 ### <a id="s-toggleWarp"></a>`toggleWarp()`
 
-function · **exported** · L1830–1867
+function · **exported** · L1823–1860
 
 - calls: [`logEvent`](#s-logEvent) ×2 · [`plotRoute`](#s-plotRoute) · [`warpBlock`](#s-warpBlock) · [`warpNodeById`](#s-warpNodeById)
 - via [js/audio/index.js](../audio/index.js.md): `NAV.dropout`, `WARN.caution`, `WARN.deny`
@@ -2096,12 +2093,12 @@ function · **exported** · L1830–1867
 <!-- note:toggleWarp -->
 Tap once to spool, tap again to stand it down.
 
-- L1846 · `const route = plotRoute(sim.selected);` — the nav computer wants the nose on the lane before it commits the core
+- L1839 · `const route = plotRoute(sim.selected);` — the nav computer wants the nose on the lane before it commits the core
 <!-- /note -->
 
 ### <a id="s-abortSpool"></a>`abortSpool(reason)`
 
-function · L1869–1877
+function · L1862–1870
 
 - calls: [`logEvent`](#s-logEvent)
 - via [js/audio/index.js](../audio/index.js.md): `WARN.caution`
@@ -2112,7 +2109,7 @@ function · L1869–1877
 
 ### <a id="s-warpBlockDuringSpool"></a>`warpBlockDuringSpool()`
 
-function · L1879–1899
+function · L1872–1892
 
 - calls: [`losBlocker`](#s-losBlocker) · [`warpDestination`](#s-warpDestination) · [`warpNodeById`](#s-warpNodeById) · [`wellEdge`](#s-wellEdge) · [`wellG`](#s-wellG) · [`starBody`](../world/bodies.js.md#s-starBody) _js/world/bodies.js_ · [`holeWarpBlock`](../world/events/holes.js.md#s-holeWarpBlock) _js/world/events/holes.js_
 - called by: [`stepWarp`](#s-stepWarp)
@@ -2132,7 +2129,7 @@ the same invariant — if the readout rounds to 0.00 G, nothing is holding you.
 
 ### <a id="s-warpDropout"></a>`warpDropout(h, u)`
 
-function · L1901–1922
+function · L1894–1915
 
 - calls: [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ · [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`logEvent`](#s-logEvent) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - via [js/audio/index.js](../audio/index.js.md): `WARN.caution`
@@ -2141,14 +2138,14 @@ function · L1901–1922
 <!-- note:warpDropout -->
 The core lets go mid-run: dumped at the crossing with the hazard for company.
 
-- L1907 · `const d = dist3(w.from, w.to) || 1;` — carry a chunk of lane speed into realspace — a dropout is not a parking job
-- L1913 · `applyDamage(ship, h.kind === "rock" ? 22 : 10, null, sim.time, "kinetic");` — a collision is mass
-- L1921 · `work("navigation", 2);` — surviving one teaches you something
+- L1900 · `const d = dist3(w.from, w.to) || 1;` — carry a chunk of lane speed into realspace — a dropout is not a parking job
+- L1906 · `applyDamage(ship, h.kind === "rock" ? 22 : 10, null, sim.time, "kinetic");` — a collision is mass
+- L1914 · `work("navigation", 2);` — surviving one teaches you something
 <!-- /note -->
 
 ### <a id="s-WARP_TURN_IN"></a>`WARP_TURN_IN`
 
-const · L1924–1924
+const · L1917–1917
 
 <!-- note:WARP_TURN_IN -->
 fractions of a warp run: onto the lane by the first, off it from the second (0.3.51)
@@ -2156,27 +2153,27 @@ fractions of a warp run: onto the lane by the first, off it from the second (0.3
 
 ### <a id="s-WARP_TURN_OUT"></a>`WARP_TURN_OUT`
 
-const · L1925–1925
+const · L1918–1918
 
 <!-- note:WARP_TURN_OUT -->
 <!-- /note -->
 
 ### <a id="s-engageWarp"></a>`engageWarp()`
 
-function · L1927–1961
+function · L1920–1954
 
 - calls: [`abortSpool`](#s-abortSpool) · [`clamp`](#s-clamp) ×3 · [`spoolTime`](#s-spoolTime) · [`warpDestination`](#s-warpDestination) · [`warpNodeById`](#s-warpNodeById) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - via [js/audio/index.js](../audio/index.js.md): `NAV.jump`, `NAV.spool`
 - called by: [`stepWarp`](#s-stepWarp)
 
 <!-- note:engageWarp -->
-- L1945 · `w.dur = clamp(dist3(ship.pos, to) / 55000, 3, 45);` — a run is a voyage: ~55k u/s in the tunnel, up to 45 s across the system
-- L1952 · `{` — the lane itself: where the hull is actually going for the whole run
+- L1938 · `w.dur = clamp(dist3(ship.pos, to) / 55000, 3, 45);` — a run is a voyage: ~55k u/s in the tunnel, up to 45 s across the system
+- L1945 · `{` — the lane itself: where the hull is actually going for the whole run
 <!-- /note -->
 
 ### <a id="s-clearArrival"></a>`clearArrival(ship)`
 
-function · **exported** · L1963–1985
+function · **exported** · L1956–1978
 
 - calls: [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - called by: [`stepWarp`](#s-stepWarp)
@@ -2188,49 +2185,49 @@ belt rock it overlaps (with a margin) — returns true if it had to move.
 
 ### <a id="s-ARRIVE_CLEAR"></a>`ARRIVE_CLEAR`
 
-const · L1986–1986
+const · L1979–1979
 
 <!-- note:ARRIVE_CLEAR -->
 <!-- /note -->
 
 ### <a id="s-blockAt"></a>`blockAt`
 
-const · L1987–1987
+const · L1980–1980
 
 <!-- note:blockAt -->
 <!-- /note -->
 
 ### <a id="s-blockFor"></a>`blockFor`
 
-const · L1987–1987
+const · L1980–1980
 
 <!-- note:blockFor -->
 <!-- /note -->
 
 ### <a id="s-blockCool"></a>`blockCool`
 
-const · L1987–1987
+const · L1980–1980
 
 <!-- note:blockCool -->
 <!-- /note -->
 
 ### <a id="s-blockDom"></a>`blockDom`
 
-const · L1987–1987
+const · L1980–1980
 
 <!-- note:blockDom -->
 <!-- /note -->
 
 ### <a id="s-_blockAtPos"></a>`_blockAtPos`
 
-const · L1988–1988
+const · L1981–1981
 
 <!-- note:_blockAtPos -->
 <!-- /note -->
 
 ### <a id="s-stepWarp"></a>`stepWarp(dt)`
 
-function · **exported** · L1990–2076
+function · **exported** · L1983–2069
 
 - calls: [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ · [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`fx`](../economy/upgrades.js.md#s-fx) _js/economy/upgrades.js_ · [`abortSpool`](#s-abortSpool) ×2 · [`clamp`](#s-clamp) ×2 · [`clearArrival`](#s-clearArrival) · [`easeInOut`](#s-easeInOut) ×3 · [`engageWarp`](#s-engageWarp) · [`lerp`](#s-lerp) ×5 · [`logEvent`](#s-logEvent) ×2 · [`removeWaypoint`](#s-removeWaypoint) · [`setNoticeAbout`](#s-setNoticeAbout) ×2 · [`spoolTime`](#s-spoolTime) · [`warpBlock`](#s-warpBlock) · [`warpBlockDuringSpool`](#s-warpBlockDuringSpool) · [`warpDropout`](#s-warpDropout) · [`warpNodeById`](#s-warpNodeById) · [`wrapPi`](#s-wrapPi) ×2 · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - via [js/audio/index.js](../audio/index.js.md): `NAV.arrive`
@@ -2238,26 +2235,26 @@ function · **exported** · L1990–2076
 - called by: [`tickSim`](#s-tickSim)
 
 <!-- note:stepWarp -->
-- L1995 · `if (w.state !== "idle") { w.block = ""; blockAt = -1; }` — the readout, not the gate: the jump itself re-checks live. Five times a second is plenty
+- L1988 · `if (w.state !== "idle") { w.block = ""; blockAt = -1; }` — the readout, not the gate: the jump itself re-checks live. Five times a second is plenty
   for a line of text, and warpBlock walks every body for a blocker.
-- L2003 · `if (sim.selected !== w.targetId) {` — Re-check the gates against the live target, not the one you tapped.
-- L2023 · `const f = clamp(w.t / w.dur, 0, 1);` — 0.3.51: the nose follows the lane. It used to turn from wherever it
+- L1996 · `if (sim.selected !== w.targetId) {` — Re-check the gates against the live target, not the one you tapped.
+- L2016 · `const f = clamp(w.t / w.dur, 0, 1);` — 0.3.51: the nose follows the lane. It used to turn from wherever it
   started to "facing the target on arrival" across the whole jump, while
   the hull moved in a straight line — so any drop point off to one side of
   the target (every station lane, every stand-off) flew the jump crabbed,
   measured 24° by the end. Now: come onto the lane in the first tenth, fly
   it nose-first, and turn to face the target only as the core lets go.
-- L2039 · `for (const h of w.hazards ?? []) {` — every hazard the plot accepted gets its roll as the lane crosses it
-- L2049 · `const roll = sim.dropoutRoll ?? Math.random();` — sim.dropoutRoll: deterministic hook for tests
-- L2050 · `if (roll < (DROPOUT_ODDS[h.kind] ?? 0) * upgradeFx("dropout", 1)) {` — hazard baffles do not change the lane, they change the odds of the
+- L2032 · `for (const h of w.hazards ?? []) {` — every hazard the plot accepted gets its roll as the lane crosses it
+- L2042 · `const roll = sim.dropoutRoll ?? Math.random();` — sim.dropoutRoll: deterministic hook for tests
+- L2043 · `if (roll < (DROPOUT_ODDS[h.kind] ?? 0) * upgradeFx("dropout", 1)) {` — hazard baffles do not change the lane, they change the odds of the
   core letting go in it
-- L2061 · `node.vel(ship.vel);` — Drop out matched to the target's own motion so you are not simply
+- L2054 · `node.vel(ship.vel);` — Drop out matched to the target's own motion so you are not simply
   dumped into its gravity well at rest.
 <!-- /note -->
 
 ### <a id="s-impact"></a>`impact(ship, nx, ny, nz, surfaceDist, name)`
 
-function · L2078–2106
+function · L2071–2099
 
 - calls: [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`logEvent`](#s-logEvent)
 - via [js/audio/index.js](../audio/index.js.md): `SHIP.impact`
@@ -2278,30 +2275,30 @@ damping twice a frame, which is a 97% velocity cut every ten frames. No
 amount of thrust escapes that. It read in play as "the collision avoidance
 has me stuck inside the belt", and it was really the collision RESPONSE.
 
-- L2081 · `const speed = Math.abs(radial - (fv.x * nx + fv.y * ny + fv.z * nz));` — Only the closing speed relative to the surface hurts.
-- L2094 · `applyDamage(ship, (speed - 22) * 0.32, null, sim.time, "kinetic");` — scraping a surface
+- L2074 · `const speed = Math.abs(radial - (fv.x * nx + fv.y * ny + fv.z * nz));` — Only the closing speed relative to the surface hurts.
+- L2087 · `applyDamage(ship, (speed - 22) * 0.32, null, sim.time, "kinetic");` — scraping a surface
 <!-- /note -->
 
 ### <a id="s-stepCollisions"></a>`stepCollisions(ship, dt)`
 
-function · L2108–2162
+function · L2101–2155
 
 - calls: [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ ×3 · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`impact`](#s-impact) ×2 · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`starBody`](../world/bodies.js.md#s-starBody) _js/world/bodies.js_ · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - called by: [`stepShip`](#s-stepShip)
 
 <!-- note:stepCollisions -->
-- L2119 · `} else if (b.kind === "star") {` — no photosphere to hit and no surface to burn: the remnant's own zones
+- L2112 · `} else if (b.kind === "star") {` — no photosphere to hit and no surface to burn: the remnant's own zones
   (holes.js, holeOnShip) are what hurt now
-- L2127 · `const t = (1 - d / (b.radius * 2.4)) * Math.min(1, b.thermal / 500);` — a fresh impact site radiates — a heated world is briefly a small sun
-- L2140 · `const d = Math.hypot(ship.pos.x, ship.pos.y, ship.pos.z);` — absolute floor so nothing tunnels through the photosphere
-- L2150 · `const rocks = nearbyRocks(ship.pos, sim.time, 1);` — ONE contact a frame — the deepest. Resolving every overlapping rock in
+- L2120 · `const t = (1 - d / (b.radius * 2.4)) * Math.min(1, b.thermal / 500);` — a fresh impact site radiates — a heated world is briefly a small sun
+- L2133 · `const d = Math.hypot(ship.pos.x, ship.pos.y, ship.pos.z);` — absolute floor so nothing tunnels through the photosphere
+- L2143 · `const rocks = nearbyRocks(ship.pos, sim.time, 1);` — ONE contact a frame — the deepest. Resolving every overlapping rock in
   turn compounds the restitution damping and pushes the hull out of one
   rock straight into the next, which is the belt trap described above.
 <!-- /note -->
 
 ### <a id="s-LOCK_CONE"></a>`LOCK_CONE`
 
-const · L2164–2164
+const · L2157–2157
 
 <!-- note:LOCK_CONE -->
 ---- targeting -----------------------------------------------------------
@@ -2314,28 +2311,28 @@ frame so the two of you hang motionless together.
 
 ### <a id="s-LOCK_BREAK"></a>`LOCK_BREAK`
 
-const · L2165–2165
+const · L2158–2158
 
 <!-- note:LOCK_BREAK -->
 <!-- /note -->
 
 ### <a id="s-_lp"></a>`_lp`
 
-const · L2166–2166
+const · L2159–2159
 
 <!-- note:_lp -->
 <!-- /note -->
 
 ### <a id="s-_lv"></a>`_lv`
 
-const · L2167–2167 · **never referenced**
+const · L2160–2160 · **never referenced**
 
 <!-- note:_lv -->
 <!-- /note -->
 
 ### <a id="s-lockCandidates"></a>`lockCandidates()`
 
-function · **exported** · L2169–2195
+function · **exported** · L2162–2188
 
 - calls: [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`hulkSig`](#s-hulkSig) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`nearDebris`](../world/debris.js.md#s-nearDebris) _js/world/debris.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`nearHulks`](../world/hulks.js.md#s-nearHulks) _js/world/hulks.js_
 - called by: [`acquireLock`](#s-acquireLock) · [`togglePointerLock`](#s-togglePointerLock)
@@ -2343,28 +2340,28 @@ function · **exported** · L2169–2195
 <!-- note:lockCandidates -->
 Everything the targeting computer can see, with a signature strength.
 
-- L2184 · `const ship = sim.ship;` — the small stuff a miner actually wants: belt rocks in the cells around
+- L2177 · `const ship = sim.ship;` — the small stuff a miner actually wants: belt rocks in the cells around
   you and impact debris within cutter reach × a few — both were invisible
   to the targeting computer before, which is why P-LOCK "found nothing"
 <!-- /note -->
 
 ### <a id="s-LOCK_DEBRIS_RANGE"></a>`LOCK_DEBRIS_RANGE`
 
-const · L2197–2197
+const · L2190–2190
 
 <!-- note:LOCK_DEBRIS_RANGE -->
 <!-- /note -->
 
 ### <a id="s-LOCK_HULK_RANGE"></a>`LOCK_HULK_RANGE`
 
-const · L2198–2198
+const · L2191–2191
 
 <!-- note:LOCK_HULK_RANGE -->
 <!-- /note -->
 
 ### <a id="s-hulkSig"></a>`hulkSig(h)`
 
-function · L2199–2199
+function · L2192–2192
 
 - called by: [`candidateSig`](#s-candidateSig) · [`lockCandidates`](#s-lockCandidates)
 
@@ -2373,7 +2370,7 @@ function · L2199–2199
 
 ### <a id="s-candidateSig"></a>`candidateSig(kind, id)`
 
-function · L2201–2210
+function · L2194–2203
 
 - calls: [`hulkSig`](#s-hulkSig) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`hulkById`](../world/hulks.js.md#s-hulkById) _js/world/hulks.js_
 - via [js/world/events/impactors.js](../world/events/impactors.js.md): `impactors.find`
@@ -2385,12 +2382,12 @@ function · L2201–2210
 <!-- note:candidateSig -->
 A candidate's signature strength without rebuilding the whole list.
 
-- L2208 · `if (kind === "waypoint") return 400;` — a saved fix resolves instantly — it is our own number
+- L2201 · `if (kind === "waypoint") return 400;` — a saved fix resolves instantly — it is our own number
 <!-- /note -->
 
 ### <a id="s-targetPosition"></a>`targetPosition(kind, id, out)`
 
-function · **exported** · L2212–2241
+function · **exported** · L2205–2234
 
 - calls: [`waypointPosition`](#s-waypointPosition) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`hulkById`](../world/hulks.js.md#s-hulkById) _js/world/hulks.js_
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.find`
@@ -2406,7 +2403,7 @@ Live position of whatever is locked, or null if it is gone.
 
 ### <a id="s-targetVelocity"></a>`targetVelocity(kind, id, out)`
 
-function · **exported** · L2243–2271
+function · **exported** · L2236–2264
 
 - calls: [`waypointVelocity`](#s-waypointVelocity) · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_ · [`hulkById`](../world/hulks.js.md#s-hulkById) _js/world/hulks.js_ · [`hulkVelocity`](../world/hulks.js.md#s-hulkVelocity) _js/world/hulks.js_
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.find`
@@ -2416,12 +2413,12 @@ function · **exported** · L2243–2271
 - called by: [`stepShip`](#s-stepShip)
 
 <!-- note:targetVelocity -->
-- L2266 · `: null;` — belt rocks drift too slowly to matter
+- L2259 · `: null;` — belt rocks drift too slowly to matter
 <!-- /note -->
 
 ### <a id="s-setNavTarget"></a>`setNavTarget(id, why)`
 
-function · **exported** · L2273–2287
+function · **exported** · L2266–2280
 
 - calls: [`logEvent`](#s-logEvent) · [`warpNodeById`](#s-warpNodeById)
 - via [js/audio/index.js](../audio/index.js.md): `WARN.caution`
@@ -2442,19 +2439,19 @@ The only writer of sim.selected. Aborts a spool that was for something else.
 
 ### <a id="s-clearLock"></a>`clearLock(why)`
 
-function · **exported** · L2289–2299
+function · **exported** · L2282–2292
 
 - calls: [`setNavTarget`](#s-setNavTarget)
 - called by: [`stepLock`](#s-stepLock) ×2 · [`togglePointerLock`](#s-togglePointerLock)
 
 <!-- note:clearLock -->
-- L2297 · `setNavTarget(null);` — dropping the lock drops the destination with it — a released lock must
+- L2290 · `setNavTarget(null);` — dropping the lock drops the destination with it — a released lock must
   never leave the core aimed at the last thing you happened to look at
 <!-- /note -->
 
 ### <a id="s-togglePointerLock"></a>`togglePointerLock()`
 
-function · **exported** · L2301–2331
+function · **exported** · L2294–2324
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`acquireLock`](#s-acquireLock) ×2 · [`bodyUnderReticle`](#s-bodyUnderReticle) · [`clamp`](#s-clamp) · [`clearLock`](#s-clearLock) · [`lockCandidates`](#s-lockCandidates)
 - via [js/audio/index.js](../audio/index.js.md): `WARN.deny`
@@ -2463,12 +2460,12 @@ function · **exported** · L2301–2331
 <!-- note:togglePointerLock -->
 P-LOCK: acquire whatever the reticle is nearest, or drop what you have.
 
-- L2317 · `const score = ang - Math.min(0.12, c.sig / (d + 1));` — Prefer what you are actually pointing at, then what reads loudest.
+- L2310 · `const score = ang - Math.min(0.12, c.sig / (d + 1));` — Prefer what you are actually pointing at, then what reads loudest.
 <!-- /note -->
 
 ### <a id="s-acquireLock"></a>`acquireLock(c)`
 
-function · **exported** · L2333–2344
+function · **exported** · L2326–2337
 
 - calls: [`lockCandidates`](#s-lockCandidates) · [`setNavTarget`](#s-setNavTarget) · [`warpNodeById`](#s-warpNodeById)
 - called by: [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ ×2 · [`mountGame>pickAt`](../render/engine.js.md#s-mountGame-pickAt) _js/render/engine.js_ ×2 · [`selectBody`](#s-selectBody) ×2 · [`togglePointerLock`](#s-togglePointerLock) ×2 · [`mountMap.run~3`](../ui/map.js.md#s-mountMap-run-3) _js/ui/map.js_ · [`mountMap>drawDirectory`](../ui/map.js.md#s-mountMap-drawDirectory) _js/ui/map.js_ · [`mountMap>tapAt`](../ui/map.js.md#s-mountMap-tapAt) _js/ui/map.js_ · [`CORE_STEPS.action.run`](../ui/tutorial-core.js.md#s-CORE_STEPS-action-run) _js/ui/tutorial-core.js_ · [`autoDock`](../ui/tutorial-core.js.md#s-autoDock) _js/ui/tutorial-core.js_ · [`STEPS.action~2.run~2`](../ui/tutorial.js.md#s-STEPS-action-2-run-2) _js/ui/tutorial.js_ · [`STEPS.action~3.run`](../ui/tutorial.js.md#s-STEPS-action-3-run) _js/ui/tutorial.js_
@@ -2476,26 +2473,26 @@ function · **exported** · L2333–2344
 <!-- note:acquireLock -->
 Starts a signature lock on a `lockCandidates()` entry (or `{kind,id}`).
 
-- L2341 · `setNavTarget(warpNodeById(best.id) ? best.id : null);` — warp-capable kinds (worlds and ports) become the nav target; everything
+- L2334 · `setNavTarget(warpNodeById(best.id) ? best.id : null);` — warp-capable kinds (worlds and ports) become the nav target; everything
   else — rocks, debris, other ships — clears it, so the core reads NO
   TARGET rather than quietly reusing the last planet you looked at
 <!-- /note -->
 
 ### <a id="s-stepLock"></a>`stepLock(dt)`
 
-function · L2346–2383
+function · L2339–2376
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`candidateSig`](#s-candidateSig) · [`clamp`](#s-clamp) ×2 · [`clearLock`](#s-clearLock) ×2 · [`logEvent`](#s-logEvent) · [`targetPosition`](#s-targetPosition)
 - via [js/audio/index.js](../audio/index.js.md): `NAV.lock`
 - called by: [`stepShip`](#s-stepShip)
 
 <!-- note:stepLock -->
-- L2364 · `const rate = clamp((sig / Math.max(d, 1)) * 26 + 0.16, 0.1, 1.4) * (ship.mods?.lock ?? 1);` — Big and close resolves fast; small and far is a slog.
+- L2357 · `const rate = clamp((sig / Math.max(d, 1)) * 26 + 0.16, 0.1, 1.4) * (ship.mods?.lock ?? 1);` — Big and close resolves fast; small and far is a slog.
 <!-- /note -->
 
 ### <a id="s-_anchorPos"></a>`_anchorPos`
 
-const · L2385–2385
+const · L2378–2378
 
 <!-- note:_anchorPos -->
 ---- station keeping ----------------------------------------------------
@@ -2503,7 +2500,7 @@ const · L2385–2385
 
 ### <a id="s-updateHold"></a>`updateHold(ship, commanded)`
 
-function · L2387–2420
+function · L2380–2413
 
 - calls: [`targetPosition`](#s-targetPosition)
 - called by: [`stepShip`](#s-stepShip)
@@ -2512,14 +2509,14 @@ function · L2387–2420
 The point the assist should fly. Captured the moment you stop commanding
 the ship, then carried along by whatever it is anchored to.
 
-- L2403 · `const drifted =` — Re-anchor on a discontinuity. While the controller is actually holding you
+- L2396 · `const drifted =` — Re-anchor on a discontinuity. While the controller is actually holding you
   never get more than a few units off, so a large error means something moved
   you — a warp, an impact, a new anchor — and the old offset is meaningless.
 <!-- /note -->
 
 ### <a id="s-impactSeverity"></a>`impactSeverity(impactorR, body, speed)`
 
-function · L2422–2425
+function · L2415–2418
 
 - calls: [`clamp`](#s-clamp)
 - called by: [`applyRemoteStrike`](#s-applyRemoteStrike) · [`onImpact`](#s-onImpact) · [`strikeBody`](#s-strikeBody)
@@ -2534,24 +2531,24 @@ size, how much mass is thrown off, whether the world survives at all.
 
 ### <a id="s-damageBody"></a>`damageBody(body, severity, n, impactorR, speed, {…}=)`
 
-function · **exported** · L2427–2467
+function · **exported** · L2420–2460
 
 - calls: [`clamp`](#s-clamp) · [`shatterBody`](#s-shatterBody) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_ · [`refreshBody`](../world/bodies.js.md#s-refreshBody) _js/world/bodies.js_ · [`burst`](../world/debris.js.md#s-burst) _js/world/debris.js_
 - called by: [`onImpact`](#s-onImpact)
 
 <!-- note:damageBody -->
-- L2436 · `depth: depth0,` — how deep the bowl digs, as a fraction of the radius — the renderer
+- L2429 · `depth: depth0,` — how deep the bowl digs, as a fraction of the radius — the renderer
   carves this out of the sphere, so a cataclysm leaves a visible bite
-- L2437 · `depth0,` — the shape it was born with, and how sharp its rim still is. A hot
+- L2430 · `depth0,` — the shape it was born with, and how sharp its rim still is. A hot
   world's basins slump toward a fraction of depth0 and the rim loses its
   roughness — which is what stops a struck world staying jagged forever.
-- L2443 · `body.radius = Math.max(body.baseRadius * 0.45, body.radius * (1 - severity * 0.12));` — mass thrown off, and with it the atmosphere if the hit was bad enough
-- L2448 · `if (ejecta) burst({` — a strike that runs the impact physics (js/world/events/impacts.js) throws its own crust
+- L2436 · `body.radius = Math.max(body.baseRadius * 0.45, body.radius * (1 - severity * 0.12));` — mass thrown off, and with it the atmosphere if the hit was bad enough
+- L2441 · `if (ejecta) burst({` — a strike that runs the impact physics (js/world/events/impacts.js) throws its own crust
 <!-- /note -->
 
 ### <a id="s-eventSeq"></a>`eventSeq`
 
-const · L2469–2469
+const · L2462–2462
 
 <!-- note:eventSeq -->
 ---- staged cataclysms ---------------------------------------------------
@@ -2564,7 +2561,7 @@ The sim owns the clock; the renderer reads the curve.
 
 ### <a id="s-startCataclysm"></a>`startCataclysm(body, sev, n, outcome)`
 
-function · **exported** · L2471–2488
+function · **exported** · L2464–2481
 
 - calls: [`eventDuration`](../world/events/cataclysm.js.md#s-eventDuration) _js/world/events/cataclysm.js_
 - called by: [`onImpact`](#s-onImpact)
@@ -2574,7 +2571,7 @@ function · **exported** · L2471–2488
 
 ### <a id="s-goSupernova"></a>`goSupernova(bodyId)`
 
-function · **exported** · L2490–2514
+function · **exported** · L2483–2507
 
 - calls: [`logEvent`](#s-logEvent) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`starBody`](../world/bodies.js.md#s-starBody) _js/world/bodies.js_ · [`supernovaDuration`](../world/events/cataclysm.js.md#s-supernovaDuration) _js/world/events/cataclysm.js_
 - via [js/audio/index.js](../audio/index.js.md): `WARN.critical`
@@ -2585,7 +2582,7 @@ A star stops being a star. Staged like a real type-II light curve.
 
 ### <a id="s-layRing"></a>`layRing(body, sev, shattered)`
 
-function · L2516–2550
+function · L2509–2543
 
 - calls: [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`ringPlan`](../world/events/cataclysm.js.md#s-ringPlan) _js/world/events/cataclysm.js_
 - via [js/world/debris.js](../world/debris.js.md): `chunks.push`, `chunks.shift`
@@ -2594,17 +2591,17 @@ function · L2516–2550
 <!-- note:layRing -->
 Lay the debris an event threw off into a torus that will settle to a ring.
 
-- L2521 · `const f = Math.pow(Math.random(), 0.6);` — mass concentrates toward the inside, the way a real disc does
-- L2523 · `const inc = (Math.random() - 0.5) * plan.tilt;` — born as a thick, inclined, crossing-orbit torus. stepDebris damps the
+- L2514 · `const f = Math.pow(Math.random(), 0.6);` — mass concentrates toward the inside, the way a real disc does
+- L2516 · `const inc = (Math.random() - 0.5) * plan.tilt;` — born as a thick, inclined, crossing-orbit torus. stepDebris damps the
   out-of-plane component far faster than the radial one, so it flattens
   into the equatorial plane before it circularises — which is exactly
   what collisional damping does to real impact debris.
-- L2541 · `orbitInc: inc,` — the plane it is heading for, and how far along it is
+- L2534 · `orbitInc: inc,` — the plane it is heading for, and how far along it is
 <!-- /note -->
 
 ### <a id="s-stepCataclysms"></a>`stepCataclysms(d)`
 
-function · L2552–2609
+function · L2545–2602
 
 - calls: [`collapseToHole`](#s-collapseToHole) · [`layRing`](#s-layRing) · [`logEvent`](#s-logEvent) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`apparentGlow`](../world/events/cataclysm.js.md#s-apparentGlow) _js/world/events/cataclysm.js_ · [`cataclysmState`](../world/events/cataclysm.js.md#s-cataclysmState) _js/world/events/cataclysm.js_ · [`kelvinHex`](../world/events/cataclysm.js.md#s-kelvinHex) _js/world/events/cataclysm.js_ · [`relaxCraters`](../world/events/cataclysm.js.md#s-relaxCraters) _js/world/events/cataclysm.js_ · [`supernovaState`](../world/events/cataclysm.js.md#s-supernovaState) _js/world/events/cataclysm.js_
 - called by: [`stepWorld`](#s-stepWorld)
@@ -2612,21 +2609,21 @@ function · L2552–2609
 <!-- note:stepCataclysms -->
 Run every live event: relax the craters, light the sky, lay the rings.
 
-- L2569 · `if (relaxCraters(body, d, ev.molten)) {` — a molten surface flows: basins slump, rims collapse. This is the fix
+- L2562 · `if (relaxCraters(body, d, ev.molten)) {` — a molten surface flows: basins slump, rims collapse. This is the fix
   for "planets go spiky and stay that way" — the spikes are a phase, not
   a permanent state, and what is left when it cools is a shallow basin.
-- L2573 · `if (ev.molten > 0.02) body.moltenGlow = ev.molten;` — the world is still glowing from the inside while it is molten
-- L2576 · `if (!ev.ringed && ev.t > 12 && (ev.outcome === OUTCOME.DISRUPT || ev.outcome === OUTCOME.S` — the ring goes down once the curtain has had time to leave the surface
-- L2583 · `if (ev.lum > 0.004) {` — publish the light. This is what makes an event BEHIND you visible:
+- L2566 · `if (ev.molten > 0.02) body.moltenGlow = ev.molten;` — the world is still glowing from the inside while it is molten
+- L2569 · `if (!ev.ringed && ev.t > 12 && (ev.outcome === OUTCOME.DISRUPT || ev.outcome === OUTCOME.S` — the ring goes down once the curtain has had time to leave the surface
+- L2576 · `if (ev.lum > 0.004) {` — publish the light. This is what makes an event BEHIND you visible:
   the renderer turns it into a real light plus an exposure bump, so the
   hull in front of you brightens even when the source is off screen.
-- L2599 · `if (ev.kind === "supernova" && !body.collapsed && ev.t > SN_COLLAPSE_AT) collapseToHole(bo` — the plateau breaks and the core has nothing left holding it up
-- L2608 · `sim.skyLift += (lift - sim.skyLift) * Math.min(1, d * (lift > sim.skyLift ? 9 : 0.8));` — the eye takes a second or two to come back down
+- L2592 · `if (ev.kind === "supernova" && !body.collapsed && ev.t > SN_COLLAPSE_AT) collapseToHole(bo` — the plateau breaks and the core has nothing left holding it up
+- L2601 · `sim.skyLift += (lift - sim.skyLift) * Math.min(1, d * (lift > sim.skyLift ? 9 : 0.8));` — the eye takes a second or two to come back down
 <!-- /note -->
 
 ### <a id="s-SN_COLLAPSE_AT"></a>`SN_COLLAPSE_AT`
 
-const · L2611–2611
+const · L2604–2604
 
 <!-- note:SN_COLLAPSE_AT -->
 Breakout + rise + plateau (cataclysm.js SN_PHASES): the moment the
@@ -2635,7 +2632,7 @@ photosphere stops being held up by recombination is when the core has gone.
 
 ### <a id="s-collapseToHole"></a>`collapseToHole(star)`
 
-function · **exported** · L2613–2624
+function · **exported** · L2606–2617
 
 - calls: [`logEvent`](#s-logEvent) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`collapseStar`](../world/events/holes.js.md#s-collapseStar) _js/world/events/holes.js_
 - via [js/audio/index.js](../audio/index.js.md): `WARN.critical`
@@ -2647,7 +2644,7 @@ A star that went supernova leaves a black hole where it was.
 
 ### <a id="s-summonHole"></a>`summonHole(opts=)`
 
-function · **exported** · L2626–2641
+function · **exported** · L2619–2634
 
 - calls: [`logEvent`](#s-logEvent) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`spawnTransit`](../world/events/holes.js.md#s-spawnTransit) _js/world/events/holes.js_
 
@@ -2658,7 +2655,7 @@ Throw a transit remnant through the sky now (the console, a story, a test).
 
 ### <a id="s-_holeCtx"></a>`_holeCtx`
 
-const · L2643–2650
+const · L2636–2643
 
 <!-- note:_holeCtx -->
 ---- what a hole does to the things the sim owns ---------------------------
@@ -2670,7 +2667,7 @@ perf suite's "no top-level assignment through a cyclic binding" rule forbids.
 
 #### <a id="s-_holeCtx-damageBody"></a>`_holeCtx.damageBody(b, sev, n, r, speed)`
 
-prop · L2646–2646
+prop · L2639–2639
 
 - calls: [`_holeCtx.damageBody`](#s-_holeCtx-damageBody)
 - called by: [`_holeCtx.damageBody`](#s-_holeCtx-damageBody)
@@ -2680,7 +2677,7 @@ prop · L2646–2646
 
 #### <a id="s-_holeCtx-log"></a>`_holeCtx.log(text, kind)`
 
-prop · L2648–2648
+prop · L2641–2641
 
 - calls: [`logEvent`](#s-logEvent)
 
@@ -2689,7 +2686,7 @@ prop · L2648–2648
 
 ### <a id="s-holeLoseStation"></a>`holeLoseStation(st, h)`
 
-function · L2652–2660
+function · L2645–2653
 
 - calls: [`dropStation`](#s-dropStation) · [`logEvent`](#s-logEvent)
 - via [js/station/stations.js](../station/stations.js.md): `stations.indexOf`
@@ -2699,7 +2696,7 @@ function · L2652–2660
 
 ### <a id="s-holeRakeStation"></a>`holeRakeStation(st, h, frac)`
 
-function · L2662–2667
+function · L2655–2660
 
 - calls: [`logEvent`](#s-logEvent)
 
@@ -2708,18 +2705,18 @@ function · L2662–2667
 
 ### <a id="s-holeOnShip"></a>`holeOnShip(h, zone, d, dt)`
 
-function · L2669–2693
+function · L2662–2686
 
 - calls: [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ ×3 · [`logEvent`](#s-logEvent) · [`holeRadii`](../world/events/holes.js.md#s-holeRadii) _js/world/events/holes.js_
 
 <!-- note:holeOnShip -->
-- L2684 · `const t = 1 - (d - R.horizon) / Math.max(1, R.burn - R.horizon);` — inside the ISCO the disk's own light is a furnace
-- L2691 · `applyDamage(ship, 6 * t * dt, null, sim.time, "em");` — a hole's induced currents
+- L2677 · `const t = 1 - (d - R.horizon) / Math.max(1, R.burn - R.horizon);` — inside the ISCO the disk's own light is a furnace
+- L2684 · `applyDamage(ship, 6 * t * dt, null, sim.time, "em");` — a hole's induced currents
 <!-- /note -->
 
 ### <a id="s-holeRescue"></a>`holeRescue(ship, name)`
 
-function · L2695–2719
+function · L2688–2712
 
 - calls: [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`logEvent`](#s-logEvent)
 - via [js/audio/index.js](../audio/index.js.md): `WARN.alarm`
@@ -2735,7 +2732,7 @@ the hold is gone, the hull comes back at the nearest friendly port.
 
 ### <a id="s-loseHull"></a>`loseHull(ship, cause=)`
 
-function · **exported** · L2721–2772
+function · **exported** · L2714–2765
 
 - calls: [`claim`](../economy/insurance.js.md#s-claim) _js/economy/insurance.js_ · [`playerKey`](../economy/insurance.js.md#s-playerKey) _js/economy/insurance.js_ · [`policyFor`](../economy/insurance.js.md#s-policyFor) _js/economy/insurance.js_ · [`yardQuote`](../economy/shipcost.js.md#s-yardQuote) _js/economy/shipcost.js_ · [`rankStatus`](../flight/pilot.js.md#s-rankStatus) _js/flight/pilot.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ ×2 · [`currentShipId`](#s-currentShipId) ×2 · [`logEvent`](#s-logEvent)
 - via [js/audio/index.js](../audio/index.js.md): `WARN.alarm`
@@ -2759,16 +2756,16 @@ would be a worse game than a harsh one.
 The hold goes with the hull. So does the cover: a policy is written against
 one hull and consumed by its loss.
 
-- L2724 · `const buyer = { complexId: pilot.complexId ?? null, letter: rankStatus()?.letter ?? null }` — a pilot with no complex has no rank, and rankStatus() answers null for
+- L2717 · `const buyer = { complexId: pilot.complexId ?? null, letter: rankStatus()?.letter ?? null }` — a pilot with no complex has no rank, and rankStatus() answers null for
   them — losing a hull must not be the thing that throws
-- L2731 · `sim.ownedHulls = (sim.ownedHulls ?? []).filter((h) => h !== id);` — struck off the books, and fall back to whatever is left
-- L2733 · `sim.requestPersist = true;` — the loss is on the record before the next frame can be closed on
-- L2738 · `let best = null, bd = Infinity;` — nearest port that will have you
+- L2724 · `sim.ownedHulls = (sim.ownedHulls ?? []).filter((h) => h !== id);` — struck off the books, and fall back to whatever is left
+- L2726 · `sim.requestPersist = true;` — the loss is on the record before the next frame can be closed on
+- L2731 · `let best = null, bd = Infinity;` — nearest port that will have you
 <!-- /note -->
 
 ### <a id="s-HOLE_WARN"></a>`HOLE_WARN`
 
-const · L2774–2774
+const · L2767–2767
 
 <!-- note:HOLE_WARN -->
 The dash: say it before it matters, and say it again as it gets worse.
@@ -2776,7 +2773,7 @@ The dash: say it before it matters, and say it again as it gets worse.
 
 ### <a id="s-watchHoles"></a>`watchHoles()`
 
-function · L2775–2802
+function · L2768–2795
 
 - calls: [`gnnPost`](../comms/gnn.js.md#s-gnnPost) _js/comms/gnn.js_ · [`holeClosing`](#s-holeClosing) · [`holeRadii`](../world/events/holes.js.md#s-holeRadii) _js/world/events/holes.js_ · [`nearestHole`](../world/events/holes.js.md#s-nearestHole) _js/world/events/holes.js_
 - via [js/audio/index.js](../audio/index.js.md): `WARN.caution`, `WARN.critical`
@@ -2787,7 +2784,7 @@ function · L2775–2802
 
 ### <a id="s-holeClosing"></a>`holeClosing(h)`
 
-function · L2804–2809
+function · L2797–2802
 
 - called by: [`watchHoles`](#s-watchHoles)
 
@@ -2796,7 +2793,7 @@ function · L2804–2809
 
 ### <a id="s-shatterBody"></a>`shatterBody(body)`
 
-function · L2811–2819
+function · L2804–2812
 
 - calls: [`logEvent`](#s-logEvent) · [`refreshBody`](../world/bodies.js.md#s-refreshBody) _js/world/bodies.js_ · [`rubbleRing`](../world/debris.js.md#s-rubbleRing) _js/world/debris.js_
 - called by: [`damageBody`](#s-damageBody)
@@ -2806,7 +2803,7 @@ function · L2811–2819
 
 ### <a id="s-applyRemoteStrike"></a>`applyRemoteStrike(ev)`
 
-function · **exported** · L2821–2828
+function · **exported** · L2814–2821
 
 - calls: [`impactSeverity`](#s-impactSeverity) · [`impactTier`](#s-impactTier) · [`onImpact`](#s-onImpact) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - via [js/world/events/impactors.js](../world/events/impactors.js.md): `impactors.findIndex`, `impactors.splice`
@@ -2818,7 +2815,7 @@ A strike the host saw. Mirrors apply it as if the rock had landed here too.
 
 ### <a id="s-worldSnapshot"></a>`worldSnapshot()`
 
-function · **exported** · L2830–2850
+function · **exported** · L2823–2843
 
 - calls: [`holeWire`](../world/events/holes.js.md#s-holeWire) _js/world/events/holes.js_ · [`impactorWire`](../world/events/impactors.js.md#s-impactorWire) _js/world/events/impactors.js_
 - called by: [`tickWorldSync`](../net/worldsync.js.md#s-tickWorldSync) _js/net/worldsync.js_
@@ -2834,7 +2831,7 @@ desk need no snapshot — both are functions of the room's shared time.)
 
 ### <a id="s-applyWorldSnapshot"></a>`applyWorldSnapshot(snap, {…}=)`
 
-function · **exported** · L2852–2889
+function · **exported** · L2845–2882
 
 - calls: [`dropStation`](#s-dropStation) · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ ×2 · [`refreshBody`](../world/bodies.js.md#s-refreshBody) _js/world/bodies.js_ ×2 · [`rubbleRing`](../world/debris.js.md#s-rubbleRing) _js/world/debris.js_ · [`adoptHoles`](../world/events/holes.js.md#s-adoptHoles) _js/world/events/holes.js_ · [`adoptImpactors`](../world/events/impactors.js.md#s-adoptImpactors) _js/world/events/impactors.js_
 - called by: [`applySolPrime`](../net/worldsync.js.md#s-applySolPrime) _js/net/worldsync.js_ · [`pull`](../net/worldsync.js.md#s-pull) _js/net/worldsync.js_
@@ -2844,7 +2841,7 @@ function · **exported** · L2852–2889
 
 ### <a id="s-dropStation"></a>`dropStation(i)`
 
-function · L2891–2896
+function · L2884–2889
 
 - calls: [`setNavTarget`](#s-setNavTarget) · [`releaseBuilt`](../station/stationyard.js.md#s-releaseBuilt) _js/station/stationyard.js_
 - via [js/station/stations.js](../station/stations.js.md): `stations.splice`
@@ -2856,7 +2853,7 @@ A port off the roster: its hull back to the yard, and the core no longer aimed a
 
 ### <a id="s-impactTier"></a>`impactTier(sev)`
 
-function · **exported** · L2898–2902
+function · **exported** · L2891–2895
 
 - called by: [`applyRemoteStrike`](#s-applyRemoteStrike) · [`onImpact`](#s-onImpact) · [`strikeBody`](#s-strikeBody)
 
@@ -2868,7 +2865,7 @@ of ejecta — and if you are close, the canopy whites out.
 
 ### <a id="s-strikeBody"></a>`strikeBody(bodyId, r=, speed=, n=)`
 
-function · **exported** · L2904–2912
+function · **exported** · L2897–2905
 
 - calls: [`impactSeverity`](#s-impactSeverity) · [`impactTier`](#s-impactTier) · [`onImpact`](#s-onImpact) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 
@@ -2878,31 +2875,31 @@ Synthesize a strike (tests, stories, the console). Aims at the sunward face unle
 
 ### <a id="s-onImpact"></a>`onImpact(m, body, speed, n)`
 
-function · L2914–2999
+function · L2907–2992
 
 - calls: [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`clamp`](#s-clamp) ×3 · [`damageBody`](#s-damageBody) · [`dropStation`](#s-dropStation) · [`impactSeverity`](#s-impactSeverity) · [`impactTier`](#s-impactTier) · [`logEvent`](#s-logEvent) ×4 · [`startCataclysm`](#s-startCataclysm) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ ×2 · [`bodyTempK`](../world/bodies.js.md#s-bodyTempK) _js/world/bodies.js_ · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`heatBody`](../world/bodies.js.md#s-heatBody) _js/world/bodies.js_ · [`isCataclysmic`](../world/events/cataclysm.js.md#s-isCataclysmic) _js/world/events/cataclysm.js_ · [`outcomeOf`](../world/events/cataclysm.js.md#s-outcomeOf) _js/world/events/cataclysm.js_ · [`startStrike`](../world/events/impacts.js.md#s-startStrike) _js/world/events/impacts.js_ · [`surfaceGravity`](../world/scale.js.md#s-surfaceGravity) _js/world/scale.js_
 - via [js/audio/index.js](../audio/index.js.md): `SHIP.impact`
 - called by: [`applyRemoteStrike`](#s-applyRemoteStrike) · [`strikeBody`](#s-strikeBody)
 
 <!-- note:onImpact -->
-- L2917 · `let run = null;` — A real rock (not a synthesized test mass) runs the rigid-body break-up —
+- L2910 · `let run = null;` — A real rock (not a synthesized test mass) runs the rigid-body break-up —
   if it landed where anybody could see it; otherwise the old burst stands in.
-- L2922 · `const still = !m.vx && !m.vy && !m.vz;` — a mirrored strike arrives with a speed and a normal but no velocity:
+- L2915 · `const still = !m.vx && !m.vy && !m.vz;` — a mirrored strike arrives with a speed and a normal but no velocity:
   the rock came in along the normal at that speed, relative to the world
-- L2936 · `if (isCataclysmic(outcome)) startCataclysm(body, sev, n, outcome);` — anything from a resurfacing upward runs the staged event
-- L2937 · `heatBody(body, clamp(sev * 900 + speed * 0.35, 30, 620));` — the strike dumps heat: kinetic scale, capped so a moonlet does not become a star
-- L2940 · `sim.impactFX.push({ bodyId: body.id, n: { x: n.nx, y: n.ny, z: n.nz }, sev, tier: impactTi` — hand the renderer the strike: where, how hard, whether the world died
-- L2942 · `if (sim.worldAuthority && !m.remote) {` — a held sky: the host tells everyone the rock landed, and where
-- L2945 · `if (d < body.radius * 30) {` — close enough to a big one and the canopy whites out
-- L2948 · `const blastR = body.radius * (2.5 + sev * 6);` — the blast wave does not care what it hits: ports, drones, guards, pilots,
+- L2929 · `if (isCataclysmic(outcome)) startCataclysm(body, sev, n, outcome);` — anything from a resurfacing upward runs the staged event
+- L2930 · `heatBody(body, clamp(sev * 900 + speed * 0.35, 30, 620));` — the strike dumps heat: kinetic scale, capped so a moonlet does not become a star
+- L2933 · `sim.impactFX.push({ bodyId: body.id, n: { x: n.nx, y: n.ny, z: n.nz }, sev, tier: impactTi` — hand the renderer the strike: where, how hard, whether the world died
+- L2935 · `if (sim.worldAuthority && !m.remote) {` — a held sky: the host tells everyone the rock landed, and where
+- L2938 · `if (d < body.radius * 30) {` — close enough to a big one and the canopy whites out
+- L2941 · `const blastR = body.radius * (2.5 + sev * 6);` — the blast wave does not care what it hits: ports, drones, guards, pilots,
   and you, out to a severity-scaled radius around the struck world
-- L2953 · `` logEvent(`${st.name} lost with ${body.name} — no carrier from the ring`, "impact"); `` — a tethered port dies with its world
-- L2995 · `if (d < body.radius * 14) {` — You feel a big one if you are anywhere near it.
+- L2946 · `` logEvent(`${st.name} lost with ${body.name} — no carrier from the ring`, "impact"); `` — a tethered port dies with its world
+- L2988 · `if (d < body.radius * 14) {` — You feel a big one if you are anywhere near it.
 <!-- /note -->
 
 ### <a id="s-CRUST_TINT"></a>`CRUST_TINT`
 
-const · L3001–3004
+const · L2994–2997
 
 <!-- note:CRUST_TINT -->
 What crust a world throws, by kind — the run's chunks carry it as colour.
@@ -2910,7 +2907,7 @@ What crust a world throws, by kind — the run's chunks carry it as colour.
 
 ### <a id="s-onRogueCollision"></a>`onRogueCollision(a, b, remote=)`
 
-function · L3006–3030
+function · L2999–3023
 
 - calls: [`gnnPost`](../comms/gnn.js.md#s-gnnPost) _js/comms/gnn.js_ · [`logEvent`](#s-logEvent) · [`onRogueCollision>wire`](#s-onRogueCollision-wire) ×2 · [`burst`](../world/debris.js.md#s-burst) _js/world/debris.js_ · [`startCollision`](../world/events/impacts.js.md#s-startCollision) _js/world/events/impacts.js_
 - called by: [`applyRemoteRockHit`](#s-applyRemoteRockHit)
@@ -2921,7 +2918,7 @@ Two rogues met (impactors.js). Host only: a mirror is told and runs the same bre
 
 #### <a id="s-onRogueCollision-wire"></a>`onRogueCollision>wire(m)`
 
-function · L3027–3027
+function · L3020–3020
 
 - called by: [`onRogueCollision`](#s-onRogueCollision) ×2
 
@@ -2930,7 +2927,7 @@ function · L3027–3027
 
 ### <a id="s-applyRemoteRockHit"></a>`applyRemoteRockHit(ev)`
 
-function · **exported** · L3032–3040
+function · **exported** · L3025–3033
 
 - calls: [`onRogueCollision`](#s-onRogueCollision)
 - via [js/world/events/impactors.js](../world/events/impactors.js.md): `impactors.findIndex`, `impactors.splice`
@@ -2942,7 +2939,7 @@ A collision the host saw. The mirror runs it too, but spawns no rogue: the host'
 
 ### <a id="s-fragmentRogue"></a>`fragmentRogue(m)`
 
-function · L3042–3045
+function · L3035–3038
 
 - calls: [`logEvent`](#s-logEvent) · [`addRogue`](../world/events/impactors.js.md#s-addRogue) _js/world/events/impactors.js_
 
@@ -2951,14 +2948,14 @@ function · L3042–3045
 
 ### <a id="s-_impactCtx"></a>`_impactCtx`
 
-const · L3046–3046
+const · L3039–3039
 
 <!-- note:_impactCtx -->
 <!-- /note -->
 
 ### <a id="s-onShipHit"></a>`onShipHit(m, speed)`
 
-function · L3048–3063
+function · L3041–3056
 
 - calls: [`applyDamage`](../flight/ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`logEvent`](#s-logEvent) · [`burst`](../world/debris.js.md#s-burst) _js/world/debris.js_
 - via [js/audio/index.js](../audio/index.js.md): `SHIP.impact`
@@ -2968,7 +2965,7 @@ function · L3048–3063
 
 ### <a id="s-SENSOR_R"></a>`SENSOR_R`
 
-const · **exported** · L3065–3065
+const · **exported** · L3058–3058
 
 <!-- note:SENSOR_R -->
 ---- ops board ----------------------------------------------------------
@@ -2980,7 +2977,7 @@ else. A pulse throws it out for 30 s; a scan-rated pilot sees further.
 
 ### <a id="s-crewCapacity"></a>`crewCapacity()`
 
-function · **exported** · L3066–3068
+function · **exported** · L3059–3061
 
 - calls: [`fx`](../economy/upgrades.js.md#s-fx) _js/economy/upgrades.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`currentShipId`](#s-currentShipId)
 - called by: [`bizReport`](../aria/company.js.md#s-bizReport) _js/aria/company.js_ · [`considerHire`](../aria/company.js.md#s-considerHire) _js/aria/company.js_ · [`considerSettle`](../aria/company.js.md#s-considerSettle) _js/aria/company.js_ · [`robotCapacity`](#s-robotCapacity) · [`crewSection`](../station/deckhall.js.md#s-crewSection) _js/station/deckhall.js_ · [`floorSection`](../station/deckhall.js.md#s-floorSection) _js/station/deckhall.js_ · [`hallSection`](../station/deckhall.js.md#s-hallSection) _js/station/deckhall.js_
@@ -2997,7 +2994,7 @@ a person would not. Anything that asks "how many berths" asks here now.
 
 ### <a id="s-robotCapacity"></a>`robotCapacity()`
 
-function · **exported** · L3070–3072
+function · **exported** · L3063–3065
 
 - calls: [`fx`](../economy/upgrades.js.md#s-fx) _js/economy/upgrades.js_ · [`crewCapacity`](#s-crewCapacity)
 
@@ -3007,7 +3004,7 @@ Robot frames that do NOT take a crew berth (the frame racks refit).
 
 ### <a id="s-repairAt"></a>`repairAt`
 
-const · L3074–3074
+const · L3067–3067
 
 <!-- note:repairAt -->
 Nanofoam closes small breaches on its own; a bloom-regulated core opens them.
@@ -3016,17 +3013,17 @@ Both land here, once a cycle, so the two cancel honestly if you fit both.
 
 ### <a id="s-tickHullRepair"></a>`tickHullRepair()`
 
-function · L3075–3085
+function · L3068–3078
 
 - calls: [`fx`](../economy/upgrades.js.md#s-fx) _js/economy/upgrades.js_
 
 <!-- note:tickHullRepair -->
-- L3078 · `if (sim.time - repairAt < 90) return;` — one crew cycle (crew.js CYCLE_SECONDS)
+- L3071 · `if (sim.time - repairAt < 90) return;` — one crew cycle (crew.js CYCLE_SECONDS)
 <!-- /note -->
 
 ### <a id="s-sensorRange"></a>`sensorRange()`
 
-function · **exported** · L3087–3090
+function · **exported** · L3080–3083
 
 - called by: [`remoteScan`](../flight/probes.js.md#s-remoteScan) _js/flight/probes.js_ · [`drawRange`](../render/engine.js.md#s-drawRange) _js/render/engine.js_
 
@@ -3035,7 +3032,7 @@ function · **exported** · L3087–3090
 
 ### <a id="s-sensorPulse"></a>`sensorPulse()`
 
-function · **exported** · L3092–3105
+function · **exported** · L3085–3098
 
 - calls: [`logEvent`](#s-logEvent)
 - via [js/audio/index.js](../audio/index.js.md): `NAV.ping`, `WARN.deny`
@@ -3046,7 +3043,7 @@ function · **exported** · L3092–3105
 
 ### <a id="s-pulseActive"></a>`pulseActive()`
 
-function · **exported** · L3107–3109
+function · **exported** · L3100–3102
 
 - called by: [`publishHud`](#s-publishHud)
 
@@ -3055,7 +3052,7 @@ function · **exported** · L3107–3109
 
 ### <a id="s-autoLevel"></a>`autoLevel()`
 
-function · **exported** · L3111–3116
+function · **exported** · L3104–3109
 
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3064,7 +3061,7 @@ function · **exported** · L3111–3116
 
 ### <a id="s-cycleTimeScale"></a>`cycleTimeScale()`
 
-function · **exported** · L3118–3126
+function · **exported** · L3111–3119
 
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3073,7 +3070,7 @@ function · **exported** · L3118–3126
 
 ### <a id="s-takeSalvageContract"></a>`takeSalvageContract(bodyId, rate)`
 
-function · **exported** · L3128–3134
+function · **exported** · L3121–3127
 
 - calls: [`logEvent`](#s-logEvent) · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - called by: [`stepNews.run~2`](../comms/comms.js.md#s-stepNews-run-2) _js/comms/comms.js_
@@ -3086,7 +3083,7 @@ Start a GNN salvage contract on a shattered world's field.
 
 ### <a id="s-RECORDER"></a>`RECORDER`
 
-const · **exported** · L3136–3136
+const · **exported** · L3129–3129
 
 <!-- note:RECORDER -->
 0.3.90 — a flight recorder pays. STRIP brings the bridge's recorder out
@@ -3097,7 +3094,7 @@ bigger hull, since a bigger loss is a bigger claim.
 
 ### <a id="s-recorderValue"></a>`recorderValue(r)`
 
-function · **exported** · L3137–3137
+function · **exported** · L3130–3130
 
 - called by: [`handInRecorders`](#s-handInRecorders)
 
@@ -3106,7 +3103,7 @@ function · **exported** · L3137–3137
 
 ### <a id="s-handInRecorders"></a>`handInRecorders()`
 
-function · **exported** · L3139–3153
+function · **exported** · L3132–3146
 
 - calls: [`bookRevenue`](../corp/company.js.md#s-bookRevenue) _js/corp/company.js_ · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ · [`logEvent`](#s-logEvent) · [`recorderValue`](#s-recorderValue) · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`stepContract`](#s-stepContract)
@@ -3116,35 +3113,35 @@ function · **exported** · L3139–3153
 
 ### <a id="s-stepContract"></a>`stepContract()`
 
-function · **exported** · L3155–3175
+function · **exported** · L3148–3168
 
 - calls: [`handInRecorders`](#s-handInRecorders) · [`logEvent`](#s-logEvent) ×2
 
 <!-- note:stepContract -->
-- L3166 · `if (sim.ship.dockedAt && c.hauled > 0.5) {` — the charter pays on the spot when you dock with contract tonnage
+- L3159 · `if (sim.ship.dockedAt && c.hauled > 0.5) {` — the charter pays on the spot when you dock with contract tonnage
 <!-- /note -->
 
 ### <a id="s-REEL"></a>`REEL`
 
-const · **exported** · L3177–3177
+const · **exported** · L3170–3170
 
 <!-- note:REEL -->
 <!-- /note -->
 
 ### <a id="s-stepSalvage"></a>`stepSalvage(dt)`
 
-function · L3179–3216
+function · L3172–3209
 
 - calls: [`noteSalvaged`](../economy/contracts.js.md#s-noteSalvaged) _js/economy/contracts.js_ · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×2 · [`addCargo`](../flight/ship.js.md#s-addCargo) _js/flight/ship.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`recoveryBlocker`](salvage.js.md#s-recoveryBlocker) _js/sim/salvage.js_ · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ · [`chunkMass`](../world/debris.js.md#s-chunkMass) _js/world/debris.js_ · [`nearDebris`](../world/debris.js.md#s-nearDebris) _js/world/debris.js_ · [`removeChunk`](../world/debris.js.md#s-removeChunk) _js/world/debris.js_
 - via [js/world/debris.js](../world/debris.js.md): `nearDebris.filter`
 - called by: [`stepWorld`](#s-stepWorld)
 
 <!-- note:stepSalvage -->
-- L3185 · `const near = nearDebris(ship.pos, 2200 * reach).filter((e) => !e.c.driven);` — pieces an impact run still drives are overwritten every tick: they held the six slots for up to 26 s
-- L3195 · `const k = (240 * reach * dt) / Math.max(d, 1);` — pull it in, then take it aboard
-- L3207 · `const con = sim.contract;` — contract tonnage: anything tractored inside the contracted world's old well
+- L3178 · `const near = nearDebris(ship.pos, 2200 * reach).filter((e) => !e.c.driven);` — pieces an impact run still drives are overwritten every tick: they held the six slots for up to 26 s
+- L3188 · `const k = (240 * reach * dt) / Math.max(d, 1);` — pull it in, then take it aboard
+- L3200 · `const con = sim.contract;` — contract tonnage: anything tractored inside the contracted world's old well
 
-- L3188 · `const sp = Math.max(REEL.slow, Math.min(REEL.fast, d * REEL.k)) * reach;` — 0.3.92: what the rig sheds is reeled, not flung. The pull for rock
+- L3181 · `const sp = Math.max(REEL.slow, Math.min(REEL.fast, d * REEL.k)) * reach;` — 0.3.92: what the rig sheds is reeled, not flung. The pull for rock
   debris is 240 u/s² and collects at 90 u; from the 40 u she parks at
   that took a plate aboard the frame it came off — nothing to see — or
   threw it past the canopy. A plate comes across at a speed set by how
@@ -3153,7 +3150,7 @@ function · L3179–3216
 
 ### <a id="s-cycleTurretMode"></a>`cycleTurretMode(dir=)`
 
-function · **exported** · L3218–3227
+function · **exported** · L3211–3220
 
 - calls: [`logEvent`](#s-logEvent)
 - via [js/flight/ship.js](../flight/ship.js.md): `TURRET_MODES.findIndex`
@@ -3165,7 +3162,7 @@ function · **exported** · L3218–3227
 
 ### <a id="s-setTurretMode"></a>`setTurretMode(id)`
 
-function · **exported** · L3229–3238
+function · **exported** · L3222–3231
 
 - calls: [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ · [`logEvent`](#s-logEvent)
 - via [js/flight/ship.js](../flight/ship.js.md): `TURRET_MODES.find`
@@ -3177,19 +3174,19 @@ Jump straight to a rule — the terminal shows all of them at once.
 
 ### <a id="s-setMiningMode"></a>`setMiningMode(id, {…}=)`
 
-function · **exported** · L3240–3250
+function · **exported** · L3233–3243
 
 - calls: [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ · [`logEvent`](#s-logEvent)
 - via [js/flight/ship.js](../flight/ship.js.md): `MINING_MODES.find`
 - called by: [`tickAriaPilot`](../aria/pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`tendBus`](../aria/play.js.md#s-tendBus) _js/aria/play.js_ · [`applyPosture`](../console/panels/ship.js.md#s-applyPosture) _js/console/panels/ship.js_ · [`mountSystems`](../console/panels/ship.js.md#s-mountSystems) _js/console/panels/ship.js_ · [`search.run~4`](../console/panels/ship.js.md#s-search-run-4) _js/console/panels/ship.js_ · [`apMine`](../flight/autopilot.js.md#s-apMine) _js/flight/autopilot.js_ ×3 · [`releaseControls`](../flight/autopilot.js.md#s-releaseControls) _js/flight/autopilot.js_ · [`tickAutopilot`](../flight/autopilot.js.md#s-tickAutopilot) _js/flight/autopilot.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ · [`EXEC.SET`](../mission/run.js.md#s-EXEC-SET) _js/mission/run.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ ×2 · [`wireMiningHooks`](#s-wireMiningHooks) · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×3
 
 <!-- note:setMiningMode -->
-- L3246 · `if (quiet) return m;` — the autopilot stowing its own cutter must not talk over its engage notice
+- L3239 · `if (quiet) return m;` — the autopilot stowing its own cutter must not talk over its engage notice
 <!-- /note -->
 
 ### <a id="s-cycleMiningMode"></a>`cycleMiningMode(dir=)`
 
-function · **exported** · L3252–3261
+function · **exported** · L3245–3254
 
 - calls: [`logEvent`](#s-logEvent)
 - via [js/flight/ship.js](../flight/ship.js.md): `MINING_MODES.findIndex`
@@ -3200,7 +3197,7 @@ function · **exported** · L3252–3261
 
 ### <a id="s-setRigMode"></a>`setRigMode(id, {…}=)`
 
-function · **exported** · L3263–3273
+function · **exported** · L3256–3266
 
 - calls: [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ · [`logEvent`](#s-logEvent)
 - via [js/flight/ship.js](../flight/ship.js.md): `RIG_MODES.find`
@@ -3214,7 +3211,7 @@ together: turning either on stows the other, here and in `setMiningMode` /
 
 ### <a id="s-cycleRigMode"></a>`cycleRigMode(dir=)`
 
-function · **exported** · L3275–3278
+function · **exported** · L3268–3271
 
 - calls: [`setRigMode`](#s-setRigMode)
 - via [js/flight/ship.js](../flight/ship.js.md): `RIG_MODES.findIndex`
@@ -3225,7 +3222,7 @@ function · **exported** · L3275–3278
 
 ### <a id="s-rigWanted"></a>`rigWanted()`
 
-function · **exported** · L3280–3282
+function · **exported** · L3273–3275
 
 - calls: [`rigTarget`](../flight/rig.js.md#s-rigTarget) _js/flight/rig.js_
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×2 · [`mountHud>paintAll`](../ui/hud.js.md#s-mountHud-paintAll) _js/ui/hud.js_
@@ -3237,84 +3234,84 @@ reach? If so the switch means the rig; otherwise it means the mining laser.
 
 ### <a id="s-TOGGLE_TEXT"></a>`TOGGLE_TEXT`
 
-const · L3284–3297
+const · L3277–3290
 
 <!-- note:TOGGLE_TEXT -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-shields"></a>`TOGGLE_TEXT.shields(on)`
 
-prop · L3285–3285
+prop · L3278–3278
 
 <!-- note:TOGGLE_TEXT.shields -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-turretsArmed"></a>`TOGGLE_TEXT.turretsArmed(on)`
 
-prop · L3286–3286
+prop · L3279–3279
 
 <!-- note:TOGGLE_TEXT.turretsArmed -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-engines"></a>`TOGGLE_TEXT.engines(on)`
 
-prop · L3287–3287
+prop · L3280–3280
 
 <!-- note:TOGGLE_TEXT.engines -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-pressurized"></a>`TOGGLE_TEXT.pressurized(on)`
 
-prop · L3288–3289
+prop · L3281–3282
 
 <!-- note:TOGGLE_TEXT.pressurized -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-localGravity"></a>`TOGGLE_TEXT.localGravity(on)`
 
-prop · L3290–3290
+prop · L3283–3283
 
 <!-- note:TOGGLE_TEXT.localGravity -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-assist"></a>`TOGGLE_TEXT.assist(on)`
 
-prop · L3291–3291
+prop · L3284–3284
 
 <!-- note:TOGGLE_TEXT.assist -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-lights"></a>`TOGGLE_TEXT.lights(on)`
 
-prop · L3292–3292
+prop · L3285–3285
 
 <!-- note:TOGGLE_TEXT.lights -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-sentry"></a>`TOGGLE_TEXT.sentry(on)`
 
-prop · L3293–3293
+prop · L3286–3286
 
 <!-- note:TOGGLE_TEXT.sentry -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-salvage"></a>`TOGGLE_TEXT.salvage(on)`
 
-prop · L3294–3294
+prop · L3287–3287
 
 <!-- note:TOGGLE_TEXT.salvage -->
 <!-- /note -->
 
 #### <a id="s-TOGGLE_TEXT-matchLock"></a>`TOGGLE_TEXT.matchLock(on)`
 
-prop · L3295–3296
+prop · L3288–3289
 
 <!-- note:TOGGLE_TEXT.matchLock -->
 <!-- /note -->
 
 ### <a id="s-toggleSystem"></a>`toggleSystem(key)`
 
-function · **exported** · L3299–3318
+function · **exported** · L3292–3311
 
 - calls: [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ · [`logEvent`](#s-logEvent)
 - via [js/audio/index.js](../audio/index.js.md): `WARN.deny`
@@ -3325,19 +3322,19 @@ function · **exported** · L3299–3318
 
 ### <a id="s-setThrottle"></a>`setThrottle(v)`
 
-function · **exported** · L3320–3326
+function · **exported** · L3313–3319
 
 - calls: [`record`](../flight/recorder.js.md#s-record) _js/flight/recorder.js_ · [`clamp`](#s-clamp)
 - called by: [`apDock`](../flight/autopilot.js.md#s-apDock) _js/flight/autopilot.js_ ×3 · [`apHold`](../flight/autopilot.js.md#s-apHold) _js/flight/autopilot.js_ · [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ ×2 · [`apMine`](../flight/autopilot.js.md#s-apMine) _js/flight/autopilot.js_ · [`apPark`](../flight/autopilot.js.md#s-apPark) _js/flight/autopilot.js_ · [`apSteer`](../flight/autopilot.js.md#s-apSteer) _js/flight/autopilot.js_ ×2 · [`flyTheLane`](../flight/autopilot.js.md#s-flyTheLane) _js/flight/autopilot.js_ ×2 · [`releaseControls`](../flight/autopilot.js.md#s-releaseControls) _js/flight/autopilot.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ ×7 · [`retakeCommand`](../npc/captain.js.md#s-retakeCommand) _js/npc/captain.js_ · [`steerToward`](../npc/captain.js.md#s-steerToward) _js/npc/captain.js_ · [`setTune`](#s-setTune) · [`stepShip`](#s-stepShip) ×5 · [`bindThrottle`](../ui/hud.js.md#s-bindThrottle) _js/ui/hud.js_ · [`bindThrottle>end`](../ui/hud.js.md#s-bindThrottle-end) _js/ui/hud.js_ · [`bindThrottle>set`](../ui/hud.js.md#s-bindThrottle-set) _js/ui/hud.js_
 
 <!-- note:setThrottle -->
-- L3325 · `if (Math.abs(sim.ship.throttle - was) >= 0.1) tapeRecord("order", "throttle", sim.ship.thr` — A stick sends this every frame it is held. What belongs on the tape is the
+- L3318 · `if (Math.abs(sim.ship.throttle - was) >= 0.1) tapeRecord("order", "throttle", sim.ship.thr` — A stick sends this every frame it is held. What belongs on the tape is the
   DECISION, not the sweep, so only a tenth-of-a-notch move is filed.
 <!-- /note -->
 
 ### <a id="s-throttleCap"></a>`throttleCap()`
 
-function · **exported** · L3328–3330
+function · **exported** · L3321–3323
 
 - called by: [`stepThrustCap`](../mission/run.js.md#s-stepThrustCap) _js/mission/run.js_ · [`publishHud`](#s-publishHud) · [`stepShip`](#s-stepShip) ×3
 
@@ -3346,7 +3343,7 @@ function · **exported** · L3328–3330
 
 ### <a id="s-stepShip"></a>`stepShip(a, dt)`
 
-function · L3332–3424
+function · L3325–3417
 
 - calls: [`consumeLook`](../core/input.js.md#s-consumeLook) _js/core/input.js_ · [`justPressed`](../core/input.js.md#s-justPressed) _js/core/input.js_ · [`tickContacts`](../flight/contacts.js.md#s-tickContacts) _js/flight/contacts.js_ · [`buildDemand`](../flight/ship.js.md#s-buildDemand) _js/flight/ship.js_ · [`gravityAt`](../flight/ship.js.md#s-gravityAt) _js/flight/ship.js_ · [`stepAttitude`](../flight/ship.js.md#s-stepAttitude) _js/flight/ship.js_ · [`stepPower`](../flight/ship.js.md#s-stepPower) _js/flight/ship.js_ · [`stepTranslation`](../flight/ship.js.md#s-stepTranslation) _js/flight/ship.js_ · [`stepTurrets`](../flight/turrets.js.md#s-stepTurrets) _js/flight/turrets.js_ · [`clamp`](#s-clamp) · [`dockPortFor`](#s-dockPortFor) · [`expo`](#s-expo) ×2 · [`holeRescue`](#s-holeRescue) · [`loseHull`](#s-loseHull) · [`setThrottle`](#s-setThrottle) ×5 · [`stepCollisions`](#s-stepCollisions) · [`stepLock`](#s-stepLock) · [`syncHullTune`](#s-syncHullTune) · [`targetVelocity`](#s-targetVelocity) · [`throttleCap`](#s-throttleCap) ×3 · [`updateAvoidance`](#s-updateAvoidance) · [`updateHold`](#s-updateHold) · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_
 - called by: [`tickSim`](#s-tickSim)
@@ -3354,37 +3351,37 @@ function · L3332–3424
 <!-- note:stepShip -->
 ---- main tick ----------------------------------------------------------
 
-- L3335 · `const look = consumeLook();` — 1. Aim. Panning is pointing: the reticle IS the nose vector.
-- L3336 · `const tune = ship.tune;` — Increasing yaw swings the nose to port, so stick-right has to subtract.
+- L3328 · `const look = consumeLook();` — 1. Aim. Panning is pointing: the reticle IS the nose vector.
+- L3329 · `const tune = ship.tune;` — Increasing yaw swings the nose to port, so stick-right has to subtract.
   This is the single place pan reaches the heading, so the stick, the
   keyboard and the gamepad all get the fix at once.
-- L3336 · `const tune = ship.tune;` — Expo shapes the stick, then a low-pass ramps it. Between them a thumb
+- L3329 · `const tune = ship.tune;` — Expo shapes the stick, then a low-pass ramps it. Between them a thumb
   flick becomes a sweep instead of a jerk.
-- L3345 · `if (justPressed("cruise")) {` — 2. Throttle. The slider writes it directly; keys nudge it.
+- L3338 · `if (justPressed("cruise")) {` — 2. Throttle. The slider writes it directly; keys nudge it.
   Shift is the boost — mains to the cap while it is held. Shift+Ctrl sets
   CRUISE: the boosted setting stays after the keys lift, until anything
   touches the thrusters (slider, steps, X, brake, RCS).
-- L3374 · `const demand = buildDemand(ship, rcsMag, a.brake, sim.warp.state === "spool" ? WARP.draw :` — 3. Power before motion — a brownout must derate this tick's burn.
-- L3374 · `const demand = buildDemand(ship, rcsMag, a.brake, sim.warp.state === "spool" ? WARP.draw :` — A spooling core is the single heaviest thing on the bus.
-- L3381 · `const dom = gravityAt(ship.pos, sim.time, bodyPosition, _g);` — 4. Gravity, attitude, translation.
-- L3395 · `stepLock(dt);` — MATCH flies you into the locked target's own frame rather than the frame
+- L3367 · `const demand = buildDemand(ship, rcsMag, a.brake, sim.warp.state === "spool" ? WARP.draw :` — 3. Power before motion — a brownout must derate this tick's burn.
+- L3367 · `const demand = buildDemand(ship, rcsMag, a.brake, sim.warp.state === "spool" ? WARP.draw :` — A spooling core is the single heaviest thing on the bus.
+- L3374 · `const dom = gravityAt(ship.pos, sim.time, bodyPosition, _g);` — 4. Gravity, attitude, translation.
+- L3388 · `stepLock(dt);` — MATCH flies you into the locked target's own frame rather than the frame
   of whatever well you happen to be in.
-- L3403 · `sim.dockPort = dockPortFor(ship);` — A berth asked for: fly in the PORT's frame. The assist, the brake and the
+- L3396 · `sim.dockPort = dockPortFor(ship);` — A berth asked for: fly in the PORT's frame. The assist, the brake and the
   hold all worked relative to the well you were in, so beside a port carried
   round its world at 50–280 u/s, BRAKE stopped you dead in the world's frame
   while the port sailed on — the approach chased the entry gate in circles,
   never under the tractor's 150 u/s capture limit, and nothing ever caught the
   ship. The port's own velocity is the only frame a docking lane makes sense in.
-- L3411 · `updateAvoidance(ship);` — What the flight assist is allowed to dodge. Computed here, where every
+- L3404 · `updateAvoidance(ship);` — What the flight assist is allowed to dodge. Computed here, where every
   hazard source is already imported, and handed to the flight model as a
   plain vector — ship.js must not reach back into the sim for it.
-- L3421 · `const hit = ship.lastHitBy && sim.time - (ship.lastHitAt ?? -1e9) < 12 ? ship.lastHitBy :` — blame whatever last put a round into you, if it was recent enough to be
+- L3414 · `const hit = ship.lastHitBy && sim.time - (ship.lastHitAt ?? -1e9) < 12 ? ship.lastHitBy :` — blame whatever last put a round into you, if it was recent enough to be
   the reason — scraping a rock ten minutes ago is not what killed you
 <!-- /note -->
 
 ### <a id="s-shiftClock"></a>`shiftClock(dt)`
 
-function · **exported** · L3426–3449
+function · **exported** · L3419–3442
 
 - calls: [`gravityAt`](../flight/ship.js.md#s-gravityAt) _js/flight/ship.js_ · [`carryLoose`](#s-carryLoose) ×2 · [`dockPortFor`](#s-dockPortFor) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ ×2 · [`bodyVelocity`](../world/bodies.js.md#s-bodyVelocity) _js/world/bodies.js_ ×2
 - called by: [`poll`](../net/net.js.md#s-poll) _js/net/net.js_ ×2 · [`applySolPrime`](../net/worldsync.js.md#s-applySolPrime) _js/net/worldsync.js_
@@ -3398,9 +3395,9 @@ faster than any approach could close, so the autopilot circled it and nothing
 ever came in range of the tractor. The hull now rides the jump in whatever
 frame it is flying in — the port it is docking at, else the well it is in.
 
-- L3433 · `if (ship.dockedAt || tractor.active) return;` — clampDocked and the tractor re-seat the hull off the new clock
+- L3426 · `if (ship.dockedAt || tractor.active) return;` — clampDocked and the tractor re-seat the hull off the new clock
 - L? · `ship.pos.x += (port.vx ?? 0) * dt; ship.pos.y += (port.vy ?? 0) * dt; ship.pos.z += (port.` — a berth request is a short-range frame and its corrections are small
-- L3440 · `const dom = sim.dominant ?? gravityAt(ship.pos, t0, bodyPosition, _clockG).body;` — 0.3.55 — carry the hull with the world it is near, by where that world IS
+- L3433 · `const dom = sim.dominant ?? gravityAt(ship.pos, t0, bodyPosition, _clockG).body;` — 0.3.55 — carry the hull with the world it is near, by where that world IS
   at the new time. This used to be `velocity × dt`: a straight line along
   the world's orbit. Fine for the quarter-second nudges of the clock chase;
   not for JOINING a shared sky, where the clock jumps by the room's whole
@@ -3412,9 +3409,9 @@ frame it is flying in — the port it is docking at, else the well it is in.
   in empty space. When a relay restart moved the room's clock back, the
   same thing ran the other way. Now the hull keeps its place and its motion
   relative to its world for any jump, forward or back.
-- L3441 · `if (!dom || dom.kind === "star") return;` — the star does not move
+- L3434 · `if (!dom || dom.kind === "star") return;` — the star does not move
 
-- L3446 · `carryLoose(ship.pos, dx, dy, dz, dvx, dvy, dvz);` — 0.3.93: what is adrift beside the ship rides the same correction. The ship
+- L3439 · `carryLoose(ship.pos, dx, dy, dz, dvx, dvy, dvz);` — 0.3.93: what is adrift beside the ship rides the same correction. The ship
   and the hulk were carried and the plate between them was not, so every
   correction left it a body-speed × dt further off — 31 u for 0.8 s at Earth,
   against a 9 u door.
@@ -3422,14 +3419,14 @@ frame it is flying in — the port it is docking at, else the well it is in.
 
 ### <a id="s-CLOCK_CARRY_R"></a>`CLOCK_CARRY_R`
 
-const · **exported** · L3451–3451
+const · **exported** · L3444–3444
 
 <!-- note:CLOCK_CARRY_R -->
 <!-- /note -->
 
 ### <a id="s-carryLoose"></a>`carryLoose(from, dx, dy, dz, dvx, dvy, dvz)`
 
-function · L3453–3461
+function · L3446–3453
 
 - called by: [`shiftClock`](#s-shiftClock) ×2
 
@@ -3438,28 +3435,28 @@ function · L3453–3461
 
 ### <a id="s-_clockA"></a>`_clockA`
 
-const · L3462–3462
+const · L3454–3454
 
 <!-- note:_clockA -->
 <!-- /note -->
 
 ### <a id="s-_clockB"></a>`_clockB`
 
-const · L3463–3463
+const · L3455–3455
 
 <!-- note:_clockB -->
 <!-- /note -->
 
 ### <a id="s-_clockG"></a>`_clockG`
 
-const · L3464–3464
+const · L3456–3456
 
 <!-- note:_clockG -->
 <!-- /note -->
 
 ### <a id="s-DOCK_FRAME_R"></a>`DOCK_FRAME_R`
 
-const · L3466–3466
+const · L3458–3458
 
 <!-- note:DOCK_FRAME_R -->
 The port whose frame the hull flies in: a live berth request (yours or the autopilot's) inside 30 km.
@@ -3467,18 +3464,18 @@ The port whose frame the hull flies in: a live berth request (yours or the autop
 
 ### <a id="s-dockPortFor"></a>`dockPortFor(ship)`
 
-function · L3467–3475
+function · L3459–3467
 
 - calls: [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ ×3 · [`hasDockRequest`](../station/stationworks.js.md#s-hasDockRequest) _js/station/stationworks.js_
 - called by: [`shiftClock`](#s-shiftClock) · [`stepShip`](#s-stepShip)
 
 <!-- note:dockPortFor -->
-- L3470 · `const id = (dockRequest.stId && hasDockRequest(stationById(dockRequest.stId) ?? { id: null` — a berth you asked for, the one the autopilot filed, or the port the autopilot is flying to
+- L3462 · `const id = (dockRequest.stId && hasDockRequest(stationById(dockRequest.stId) ?? { id: null` — a berth you asked for, the one the autopilot filed, or the port the autopilot is flying to
 <!-- /note -->
 
 ### <a id="s-_avoidDir"></a>`_avoidDir`
 
-const · L3477–3477
+const · L3469–3469
 
 <!-- note:_avoidDir -->
 ---- flight assist: collision avoidance --------------------------------
@@ -3490,27 +3487,27 @@ purpose, because mining and docking are both "fly at that thing".
 
 ### <a id="s-avoidAt"></a>`avoidAt`
 
-const · L3478–3478
+const · L3470–3470
 
 <!-- note:avoidAt -->
 <!-- /note -->
 
 ### <a id="s-updateAvoidance"></a>`updateAvoidance(ship)`
 
-function · L3480–3502
+function · L3472–3494
 
 - calls: [`avoidAim`](../flight/avoid.js.md#s-avoidAim) _js/flight/avoid.js_ · [`avoidLevel`](../flight/avoid.js.md#s-avoidLevel) _js/flight/avoid.js_ · [`deliberate`](../flight/avoid.js.md#s-deliberate) _js/flight/avoid.js_ · [`surfaceOnly`](../flight/avoid.js.md#s-surfaceOnly) _js/flight/avoid.js_ · [`threatTo`](../flight/avoid.js.md#s-threatTo) _js/flight/avoid.js_ · [`updateAvoidance>off`](#s-updateAvoidance-off)
 - called by: [`stepShip`](#s-stepShip)
 
 <!-- note:updateAvoidance -->
-- L3492 · `ship.avoid = null;` — Level 1 is a warning, not a manoeuvre: the HUD says something is in the
+- L3484 · `ship.avoid = null;` — Level 1 is a warning, not a manoeuvre: the HUD says something is in the
   way and the pilot gets to decide. The assist only takes a hand when
   there is no longer time to.
 <!-- /note -->
 
 #### <a id="s-updateAvoidance-off"></a>`updateAvoidance>off()`
 
-function · L3481–3481
+function · L3473–3473
 
 - called by: [`updateAvoidance`](#s-updateAvoidance)
 
@@ -3519,16 +3516,16 @@ function · L3481–3481
 
 ### <a id="s-tickSim"></a>`tickSim(dt)`
 
-function · **exported** · L3504–3587
+function · **exported** · L3496–3578
 
 - calls: [`setEngineLevel`](../audio/index.js.md#s-setEngineLevel) _js/audio/index.js_ ×2 · [`justPressed`](../core/input.js.md#s-justPressed) _js/core/input.js_ ×17 · [`sampleInput`](../core/input.js.md#s-sampleInput) _js/core/input.js_ · [`stepRig`](../flight/rig.js.md#s-stepRig) _js/flight/rig.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`stepMining`](../flight/turrets.js.md#s-stepMining) _js/flight/turrets.js_ · [`stepShots`](../flight/turrets.js.md#s-stepShots) _js/flight/turrets.js_ · [`syncContacts`](../flight/turrets.js.md#s-syncContacts) _js/flight/turrets.js_ · [`broadcastShip`](#s-broadcastShip) · [`clampDocked`](#s-clampDocked) · [`collectBeaconsNear`](#s-collectBeaconsNear) · [`cycleMiningMode`](#s-cycleMiningMode) · [`cycleRigMode`](#s-cycleRigMode) · [`cycleTurretMode`](#s-cycleTurretMode) · [`sampleTelemetry`](#s-sampleTelemetry) · [`setTerminal`](#s-setTerminal) · [`stepShip`](#s-stepShip) · [`stepTractorTick`](#s-stepTractorTick) · [`stepWarp`](#s-stepWarp) · [`stepWorld`](#s-stepWorld) · [`toggleDock`](#s-toggleDock) · [`toggleSystem`](#s-toggleSystem) ×6 · [`toggleWarp`](#s-toggleWarp) · [`tryScan`](#s-tryScan) · [`wrapPi`](#s-wrapPi) · [`handlingLeft`](../station/dockwork.js.md#s-handlingLeft) _js/station/dockwork.js_ · [`stepDockwork`](../station/dockwork.js.md#s-stepDockwork) _js/station/dockwork.js_ · [`stepStations`](../station/stations.js.md#s-stepStations) _js/station/stations.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.setMapOpen`, `useGameStore.getState.setPhase`
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
 
 <!-- note:tickSim -->
-- L3523 · `stepDockwork(d * (sim.phase === "play" ? sim.timeScale : 1), sim.ship?.dockedAt ?? null);` — the crane runs whether or not the hull is flying — it is the reason it is not
-- L3524 · `if (sim.undockWhenClear) {` — 0.3.75: a departure booked while the crane worked goes the moment it is done
-- L3534 · `stepStations(sim.time);` — Stations move to THIS tick's time before anything is glued to them.
+- L3514 · `stepDockwork(d * (sim.phase === "play" ? sim.timeScale : 1), sim.ship?.dockedAt ?? null);` — the crane runs whether or not the hull is flying — it is the reason it is not
+- L3515 · `if (sim.undockWhenClear) {` — 0.3.75: a departure booked while the crane worked goes the moment it is done
+- L3525 · `stepStations(sim.time);` — Stations move to THIS tick's time before anything is glued to them.
   stepWorld() also steps them, but it runs at the end of the tick — so
   clampDocked() and the tractor were snapping the ship relative to where
   the station was LAST tick, and stepWorld then moved the station out from
@@ -3540,18 +3537,18 @@ function · **exported** · L3504–3587
   and throttle input is ignored; the ship keeps its vector and the reactor
   keeps working. HOLD is the one control that still reaches the thrusters.
 - L? · `stepMining(sim.ship, d, sim.time, sim.lock, sim.handsOff ? sim.autoPlan?.seamOre ?? null :` — the ore a contract named, but only while the loop is flying: your own hand at the cutter cuts whatever you point it at
-- L3583 · `collectBeaconsNear();` — 0.3.73: the ship is still flying with the console up — it still picks up
+- L3574 · `collectBeaconsNear();` — 0.3.73: the ship is still flying with the console up — it still picks up
   beacons, and it still tells the room where it is. This branch returned
   before the broadcast, so the relay aged the pilot out after a few seconds
   of reading gauges; closing the console rejoined it as a stranger.
-- L3550 · `if (sim.remotes.size > 0 && sim.timeScale !== 1) sim.timeScale = 1;` — two pilots in one room keep one clock — time-warp would desync the sky
+- L3541 · `if (sim.remotes.size > 0 && sim.timeScale !== 1) sim.timeScale = 1;` — two pilots in one room keep one clock — time-warp would desync the sky
 
-- L3539 · `if (sim.terminalOpen && sim.termHold) a.brake = true;` — Console is a live panel; retain the normal simulation path.
+- L3530 · `if (sim.terminalOpen && sim.termHold) a.brake = true;` — Console is a live panel; retain the normal simulation path.
 <!-- /note -->
 
 ### <a id="s-collectBeaconsNear"></a>`collectBeaconsNear()`
 
-function · L3589–3594
+function · L3580–3585
 
 - calls: [`collectBeacon`](#s-collectBeacon) · [`beaconPosition`](../world/bodies.js.md#s-beaconPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`tickSim`](#s-tickSim)
@@ -3561,7 +3558,7 @@ function · L3589–3594
 
 ### <a id="s-broadcastShip"></a>`broadcastShip(d)`
 
-function · L3596–3613
+function · L3587–3604
 
 - calls: [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`currentShipId`](#s-currentShipId)
 - called by: [`tickSim`](#s-tickSim)
@@ -3572,21 +3569,21 @@ Where this pilot is, for the room — 20 Hz at most, the relay rate-limits furth
 
 ### <a id="s-_gImp"></a>`_gImp`
 
-const · L3615–3615
+const · L3606–3606
 
 <!-- note:_gImp -->
 <!-- /note -->
 
 ### <a id="s-_bv"></a>`_bv`
 
-const · L3616–3616
+const · L3607–3607
 
 <!-- note:_bv -->
 <!-- /note -->
 
 ### <a id="s-stepPorts"></a>`stepPorts(dt)`
 
-function · L3618–3651
+function · L3609–3635
 
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.push`
 - called by: [`stepWorld`](#s-stepWorld)
@@ -3596,15 +3593,12 @@ Everything that happens out there whether or not you are looking.
 
 Free ports keep guns. They only wake up when somebody is close enough to rob.
 
-- L3622 · `if ((st.truceUntil ?? -1) > sim.time) continue;` — toll paid — the watch stays in its holes
-
-- L3619 · `let guardCounts = null;` — Build an ephemeral index only if a hostile port is actually in range.
-  The exported contact array may be spliced/replaced by other modules.
+- L3612 · `if ((st.truceUntil ?? -1) > sim.time) continue;` — toll paid — the watch stays in its holes
 <!-- /note -->
 
 ### <a id="s-clampDocked"></a>`clampDocked()`
 
-function · L3653–3668
+function · L3637–3652
 
 - calls: [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`tickSim`](#s-tickSim)
@@ -3617,7 +3611,7 @@ follow and the ship would otherwise be left hanging in space.
 
 ### <a id="s-stepCareer"></a>`stepCareer(d)`
 
-function · L3671–3683
+function · L3655–3667
 
 - calls: [`createCareerStepper`](career.js.md#s-createCareerStepper) _js/sim/career.js_
 - called by: [`stepWorld`](#s-stepWorld)
@@ -3629,34 +3623,32 @@ function · L3671–3683
 - L? · `work("geology", 2);` — a called-in vein is real prospecting
 <!-- /note -->
 
-### <a id="s-stepWorld"></a>`stepWorld(d, stationsReady=)`
+### <a id="s-stepWorld"></a>`stepWorld(d)`
 
-function · L3685–3738
+function · L3669–3722
 
 - calls: [`tickFleet`](../corp/fleet.js.md#s-tickFleet) _js/corp/fleet.js_ · [`stepSecLevel`](../corp/seclevel.js.md#s-stepSecLevel) _js/corp/seclevel.js_ · [`stepNpcDrones`](../drones/npcdrones.js.md#s-stepNpcDrones) _js/drones/npcdrones.js_ · [`stepDroneOps`](../drones/ops.js.md#s-stepDroneOps) _js/drones/ops.js_ · [`tickContracts`](../economy/contracts.js.md#s-tickContracts) _js/economy/contracts.js_ · [`stepEconomy`](../economy/economy.js.md#s-stepEconomy) _js/economy/economy.js_ · [`stepFab`](../economy/fabricate.js.md#s-stepFab) _js/economy/fabricate.js_ · [`tickAutopilot`](../flight/autopilot.js.md#s-tickAutopilot) _js/flight/autopilot.js_ · [`stepProbes`](../flight/probes.js.md#s-stepProbes) _js/flight/probes.js_ · [`stepBattles`](../npc/battles.js.md#s-stepBattles) _js/npc/battles.js_ · [`tickCaptain`](../npc/captain.js.md#s-tickCaptain) _js/npc/captain.js_ · [`stepNpcCombat`](../npc/combat.js.md#s-stepNpcCombat) _js/npc/combat.js_ · [`stepFlow`](../npc/flow.js.md#s-stepFlow) _js/npc/flow.js_ · [`stepRogues`](../npc/rogues.js.md#s-stepRogues) _js/npc/rogues.js_ · [`stepSecurity`](../npc/security.js.md#s-stepSecurity) _js/npc/security.js_ · [`stepTraffic`](../npc/traffic.js.md#s-stepTraffic) _js/npc/traffic.js_ · [`stepCareer`](#s-stepCareer) · [`stepCataclysms`](#s-stepCataclysms) · [`stepLaneDiscipline`](#s-stepLaneDiscipline) · [`stepPorts`](#s-stepPorts) · [`stepSalvage`](#s-stepSalvage) · [`watchHoles`](#s-watchHoles) · [`stepStations`](../station/stations.js.md#s-stepStations) _js/station/stations.js_ · [`stepStationWorks`](../station/stationworks.js.md#s-stepStationWorks) _js/station/stationworks.js_ · [`stepDebris`](../world/debris.js.md#s-stepDebris) _js/world/debris.js_ · [`stepHoles`](../world/events/holes.js.md#s-stepHoles) _js/world/events/holes.js_ · [`emptyThreatBoard`](../world/events/impactors.js.md#s-emptyThreatBoard) _js/world/events/impactors.js_ · [`stepImpactors`](../world/events/impactors.js.md#s-stepImpactors) _js/world/events/impactors.js_ · [`threatBoard`](../world/events/impactors.js.md#s-threatBoard) _js/world/events/impactors.js_ · [`stepImpacts`](../world/events/impacts.js.md#s-stepImpacts) _js/world/events/impacts.js_ · [`stepHulks`](../world/hulks.js.md#s-stepHulks) _js/world/hulks.js_
 - called by: [`tickSim`](#s-tickSim) · [`tickSolHost`](#s-tickSolHost)
 
 <!-- note:stepWorld -->
-- L3687 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — the player's position is what decides the far-field detail budget and
+- L3671 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — the player's position is what decides the far-field detail budget and
   which fights fly real rounds, so the sky is told where the player is
-- L3687 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — 0.3.65: the dedicated Sol host has no pilot, so its far-field budget must not
+- L3671 · `stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);` — 0.3.65: the dedicated Sol host has no pilot, so its far-field budget must not
   centre on the observatory's parked hull — it flies every hull at full detail
   (null = everything near), and the positions it hands mirrors are real ones
-- L3688 · `if (sim.worldAuthority !== false) {` — A mirror flies the hulls — it has to, or they would freeze between the
+- L3672 · `if (sim.worldAuthority !== false) {` — A mirror flies the hulls — it has to, or they would freeze between the
   host's packets — but it does not get to decide anything. Who is hunting
   whom, who called for help and what a nest launched are the host's to
   settle, and a mirror that made its own mind up would be fighting a
   different war in the same sky. worldsync.js overwrites the outcome.
-- L3693 · `stepSecLevel(sim.ship, sim.time, d, { authority: sim.worldAuthority !== false });` — the security ◆ is the pilot's, not the sky's: every client steps its own (0.3.48)
-- L3735 · `sim.threats = sim.ship.sentry && sim.ship.powered.ops` — both branches hand back the SAME array — the `: []` used to allocate a
+- L3677 · `stepSecLevel(sim.ship, sim.time, d, { authority: sim.worldAuthority !== false });` — the security ◆ is the pilot's, not the sky's: every client steps its own (0.3.48)
+- L3719 · `sim.threats = sim.ship.sentry && sim.ship.powered.ops` — both branches hand back the SAME array — the `: []` used to allocate a
   fresh empty one every tick the sentry was off, which is most of them
-
-- L3686 · `if (!stationsReady) stepStations(sim.time);` — tickSim already placed the ports before ship physics; the headless host has not.
 <!-- /note -->
 
 ### <a id="s-leaveHulk"></a>`leaveHulk(c, source=)`
 
-function · **exported** · L3740–3745
+function · **exported** · L3724–3729
 
 - calls: [`corpOfVessel`](../corp/corps.js.md#s-corpOfVessel) _js/corp/corps.js_ · [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_ · [`spawnHulk`](../world/hulks.js.md#s-spawnHulk) _js/world/hulks.js_
 - called by: [`hostVesselDown`](../net/worldsync.js.md#s-hostVesselDown) _js/net/worldsync.js_ · [`onKill`](#s-onKill) ×3 · [`wireReactiveSky`](#s-wireReactiveSky)
@@ -3669,7 +3661,7 @@ anything that is not an NPC hull — drones, station guns, peers.
 
 ### <a id="s-onKill"></a>`onKill(c, shot=)`
 
-function · L3747–3838
+function · L3731–3822
 
 - calls: [`bookRevenue`](../corp/company.js.md#s-bookRevenue) _js/corp/company.js_ · [`adjustStanding`](../corp/corps.js.md#s-adjustStanding) _js/corp/corps.js_ ×4 · [`blameKill`](../corp/corps.js.md#s-blameKill) _js/corp/corps.js_ · [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ ×2 · [`corpOfVessel`](../corp/corps.js.md#s-corpOfVessel) _js/corp/corps.js_ ×2 · [`noteKillBySelf`](../corp/seclevel.js.md#s-noteKillBySelf) _js/corp/seclevel.js_ ×2 · [`noteDroneKill`](../drones/ops.js.md#s-noteDroneKill) _js/drones/ops.js_ · [`noteDestroyed`](../economy/contracts.js.md#s-noteDestroyed) _js/economy/contracts.js_ ×2 · [`noteKill`](../economy/contracts.js.md#s-noteKill) _js/economy/contracts.js_ · [`work`](../flight/pilot.js.md#s-work) _js/flight/pilot.js_ ×4 · [`pirateKilled`](../npc/battles.js.md#s-pirateKilled) _js/npc/battles.js_ ×3 · [`markVesselDown`](../npc/traffic.js.md#s-markVesselDown) _js/npc/traffic.js_ ×3 · [`vesselById`](../npc/traffic.js.md#s-vesselById) _js/npc/traffic.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`leaveHulk`](#s-leaveHulk) ×3 · [`logEvent`](#s-logEvent) ×7 · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ ×3 · [`burst`](../world/debris.js.md#s-burst) _js/world/debris.js_ ×4
 - via [js/station/stations.js](../station/stations.js.md): `stations.find`
@@ -3677,21 +3669,21 @@ function · L3747–3838
 - via [js/drones/npcdrones.js](../drones/npcdrones.js.md): `npcDrones.units.find`
 
 <!-- note:onKill -->
-- L3748 · `if (shot && shot.faction === "npc-port") {` — 0.3.59: a port's guard drone made the kill — the port's, not yours
-- L3759 · `if (shot && shot.faction === "npc-law") {` — 0.3.56: the Directorate's wing made the kill — theirs, not yours: no heat, no bounty, no credit
-- L3767 · `if (shot && String(shot.owner).startsWith("pdrone-")) noteDroneKill(shot.owner);` — one of your work drones made the kill: it is yours — bounty, standing, the lot
-- L3770 · `const stId = String(shot.owner).split(":")[0].replace(/^sdrone-/, "").split("-")[0];` — a port's guns or drones made the kill: the debris is theirs, the bounty is not
-- L3775 · `burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ??` — what is left of it drifts where it died — the tractor takes plate
-- L3777 · `if (c.kind === "npc") {` — a working hull: that was somebody's crew. Its owners remember, and so does the room.
-- L3790 · `noteDestroyed(n);` — 0.3.18: a drone cull on the desk counts every drone you put down
-- L3792 · `const e = pirateKilled(c.id, sim.time);` — a pirate: the charters pay for that, and so does anyone they were working over
-- L3794 · `const bounty = 240 + Math.round((shipById(n.ship)?.stats.massT ?? 30) * 4) + (e ? 350 : 0)` — 0.3.47: 420 + 6/t + 600 for a rescue was a starter hull every eight kills
-- L3813 · `noteKillBySelf({ n, t: sim.time });` — an honest hull: its flag remembers, its flag's allies remember, its flag's enemies approve
-- L3813 · `noteKillBySelf({ n, t: sim.time });` — 0.3.48: and so does the Directorate
-- L3819 · `if (c.kind === "peer") { noteKillBySelf({ peer: true, t: sim.time }); return; }` — another pilot: the heaviest thing the Directorate files (0.3.48)
-- L3821 · `if (c.stationId) {` — Somebody owned that gun.
+- L3732 · `if (shot && shot.faction === "npc-port") {` — 0.3.59: a port's guard drone made the kill — the port's, not yours
+- L3743 · `if (shot && shot.faction === "npc-law") {` — 0.3.56: the Directorate's wing made the kill — theirs, not yours: no heat, no bounty, no credit
+- L3751 · `if (shot && String(shot.owner).startsWith("pdrone-")) noteDroneKill(shot.owner);` — one of your work drones made the kill: it is yours — bounty, standing, the lot
+- L3754 · `const stId = String(shot.owner).split(":")[0].replace(/^sdrone-/, "").split("-")[0];` — a port's guns or drones made the kill: the debris is theirs, the bounty is not
+- L3759 · `burst({ x: c.x, y: c.y, z: c.z, vx: (c.vx ?? 0) * 0.3, vy: (c.vy ?? 0) * 0.3, vz: (c.vz ??` — what is left of it drifts where it died — the tractor takes plate
+- L3761 · `if (c.kind === "npc") {` — a working hull: that was somebody's crew. Its owners remember, and so does the room.
+- L3774 · `noteDestroyed(n);` — 0.3.18: a drone cull on the desk counts every drone you put down
+- L3776 · `const e = pirateKilled(c.id, sim.time);` — a pirate: the charters pay for that, and so does anyone they were working over
+- L3778 · `const bounty = 240 + Math.round((shipById(n.ship)?.stats.massT ?? 30) * 4) + (e ? 350 : 0)` — 0.3.47: 420 + 6/t + 600 for a rescue was a starter hull every eight kills
+- L3797 · `noteKillBySelf({ n, t: sim.time });` — an honest hull: its flag remembers, its flag's allies remember, its flag's enemies approve
+- L3797 · `noteKillBySelf({ n, t: sim.time });` — 0.3.48: and so does the Directorate
+- L3803 · `if (c.kind === "peer") { noteKillBySelf({ peer: true, t: sim.time }); return; }` — another pilot: the heaviest thing the Directorate files (0.3.48)
+- L3805 · `if (c.stationId) {` — Somebody owned that gun.
 
-- L3820 · `if (c.kind === "drone" && !c.stationId && !c.corpDrone) noteDestroyed({ rogue: true });` — 0.3.90: a cull contract reads "put N rogue drones down, anywhere", and the
+- L3804 · `if (c.kind === "drone" && !c.stationId && !c.corpDrone) noteDestroyed({ rogue: true });` — 0.3.90: a cull contract reads "put N rogue drones down, anywhere", and the
   drones a belt throws at any hull near it are called exactly that — but only
   a nest's own wave hulls were counted, so the job could be flown for twenty
   minutes over a belt full of dead drones and never close.
@@ -3699,7 +3691,7 @@ function · L3747–3838
 
 ### <a id="s-pauseTick"></a>`pauseTick()`
 
-function · **exported** · L3840–3843
+function · **exported** · L3824–3827
 
 - calls: [`justPressed`](../core/input.js.md#s-justPressed) _js/core/input.js_ · [`sampleInput`](../core/input.js.md#s-sampleInput) _js/core/input.js_ · [`resumePlay`](#s-resumePlay)
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
@@ -3709,7 +3701,7 @@ function · **exported** · L3840–3843
 
 ### <a id="s-resumePlay"></a>`resumePlay()`
 
-function · **exported** · L3845–3848
+function · **exported** · L3829–3832
 
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.setPhase`
 - called by: [`pauseTick`](#s-pauseTick) · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×3
@@ -3719,20 +3711,20 @@ function · **exported** · L3845–3848
 
 ### <a id="s-selectBody"></a>`selectBody(id)`
 
-function · **exported** · L3850–3874
+function · **exported** · L3834–3858
 
 - calls: [`acquireLock`](#s-acquireLock) ×2 · [`selectBody`](#s-selectBody) · [`setNavTarget`](#s-setNavTarget) ×2 · [`setNoticeAbout`](#s-setNoticeAbout) · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`bodyById`](../world/bodies.js.md#s-bodyById) _js/world/bodies.js_
 - via [js/core/store.js](../core/store.js.md): `useGameStore.getState`, `useGameStore.getState.patchHud`
 - called by: [`lockOn`](../aria/nav.js.md#s-lockOn) _js/aria/nav.js_ · [`stepMarkets.effect`](../comms/comms.js.md#s-stepMarkets-effect) _js/comms/comms.js_ · [`stepMarkets.effect~2`](../comms/comms.js.md#s-stepMarkets-effect-2) _js/comms/comms.js_ · [`stepNews.run`](../comms/comms.js.md#s-stepNews-run) _js/comms/comms.js_ · [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_ · [`engageAutopilot`](../flight/autopilot.js.md#s-engageAutopilot) _js/flight/autopilot.js_ · [`resolve`](../mission/run.js.md#s-resolve) _js/mission/run.js_ · [`makeSalvage>mark`](../mission/salvage.js.md#s-makeSalvage-mark) _js/mission/salvage.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ · [`selectBody`](#s-selectBody) · [`mountMap`](../ui/map.js.md#s-mountMap) _js/ui/map.js_ · [`mountMap.run~3`](../ui/map.js.md#s-mountMap-run-3) _js/ui/map.js_ · [`mountMap>drawDirectory`](../ui/map.js.md#s-mountMap-drawDirectory) _js/ui/map.js_ · [`mountMap>tapAt`](../ui/map.js.md#s-mountMap-tapAt) _js/ui/map.js_ · [`STEPS.action.run`](../ui/tutorial.js.md#s-STEPS-action-run) _js/ui/tutorial.js_
 
 <!-- note:selectBody -->
-- L3865 · `if (sim.lock.id !== id) {` — a pick off the map is a real lock, not a second parallel notion of
+- L3849 · `if (sim.lock.id !== id) {` — a pick off the map is a real lock, not a second parallel notion of
   "selected" — so the HUD, MATCH and the autopilot all agree with it
 <!-- /note -->
 
 ### <a id="s-requestJump"></a>`requestJump()`
 
-function · **exported** · L3876–3878
+function · **exported** · L3860–3862
 
 - called by: [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ · [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3741,7 +3733,7 @@ function · **exported** · L3876–3878
 
 ### <a id="s-requestScan"></a>`requestScan()`
 
-function · **exported** · L3879–3881
+function · **exported** · L3863–3865
 
 - called by: [`mountTargets`](../console/panels/nav.js.md#s-mountTargets) _js/console/panels/nav.js_ · [`EXEC.SURVEY`](../mission/run.js.md#s-EXEC-SURVEY) _js/mission/run.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3750,7 +3742,7 @@ function · **exported** · L3879–3881
 
 ### <a id="s-dismissNotice"></a>`dismissNotice()`
 
-function · **exported** · L3883–3885
+function · **exported** · L3867–3869
 
 - called by: [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
 
@@ -3760,7 +3752,7 @@ Tap the card to send it away early.
 
 ### <a id="s-requestWarp"></a>`requestWarp`
 
-const · **exported** · L3886–3886
+const · **exported** · L3870–3870
 
 <!-- note:requestWarp -->
 legacy alias
@@ -3768,7 +3760,7 @@ legacy alias
 
 ### <a id="s-bodyUnderReticle"></a>`bodyUnderReticle()`
 
-function · **exported** · L3888–3902
+function · **exported** · L3872–3886
 
 - calls: [`forwardOf`](../flight/ship.js.md#s-forwardOf) _js/flight/ship.js_ · [`clamp`](#s-clamp) · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 - called by: [`publishHud`](#s-publishHud) · [`togglePointerLock`](#s-togglePointerLock)
@@ -3776,13 +3768,13 @@ function · **exported** · L3888–3902
 <!-- note:bodyUnderReticle -->
 The world under the reticle: smallest angle off the nose inside 0.3 rad, big discs winning ties.
 
-- L3897 · `const disc = Math.atan2(b.radius ?? 0, d);` — apparent radius
-- L3898 · `const score = Math.max(0, ang - disc);` — inside the disc counts as dead on
+- L3881 · `const disc = Math.atan2(b.radius ?? 0, d);` — apparent radius
+- L3882 · `const score = Math.max(0, ang - disc);` — inside the disc counts as dead on
 <!-- /note -->
 
 ### <a id="s-nearestBody"></a>`nearestBody()`
 
-function · L3904–3915
+function · L3888–3899
 
 - calls: [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
 - called by: [`publishHud`](#s-publishHud)
@@ -3792,7 +3784,7 @@ function · L3904–3915
 
 ### <a id="s-publishHud"></a>`publishHud(labels, plots)`
 
-function · **exported** · L3917–4088
+function · **exported** · L3901–4072
 
 - calls: [`avoidLevel`](../flight/avoid.js.md#s-avoidLevel) _js/flight/avoid.js_ · [`rankStatus`](../flight/pilot.js.md#s-rankStatus) _js/flight/pilot.js_ · [`title`](../flight/pilot.js.md#s-title) _js/flight/pilot.js_ · [`absSpeedOf`](../flight/ship.js.md#s-absSpeedOf) _js/flight/ship.js_ · [`batteryCap`](../flight/ship.js.md#s-batteryCap) _js/flight/ship.js_ · [`cargoTotal`](../flight/ship.js.md#s-cargoTotal) _js/flight/ship.js_ · [`closingSpeed`](../flight/ship.js.md#s-closingSpeed) _js/flight/ship.js_ · [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_ · [`fightCentre`](../npc/battles.js.md#s-fightCentre) _js/npc/battles.js_ · [`etaOf`](../npc/security.js.md#s-etaOf) _js/npc/security.js_ · [`nearestCall`](../npc/security.js.md#s-nearestCall) _js/npc/security.js_ · [`trafficCensus`](../npc/traffic.js.md#s-trafficCensus) _js/npc/traffic.js_ · [`activeWaypoint`](#s-activeWaypoint) · [`bodyUnderReticle`](#s-bodyUnderReticle) · [`nearestBody`](#s-nearestBody) · [`plotRoute`](#s-plotRoute) · [`pulseActive`](#s-pulseActive) · [`spoolTime`](#s-spoolTime) · [`stationStatus`](#s-stationStatus) · [`throttleCap`](#s-throttleCap) · [`waypointPosition`](#s-waypointPosition) · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2 · [`surveyIds`](../world/bodies.js.md#s-surveyIds) _js/world/bodies.js_
 - via [js/npc/flow.js](../npc/flow.js.md): `flow.reduce`
@@ -3800,59 +3792,59 @@ function · **exported** · L3917–4088
 - called by: [`mountGame>tick`](../render/engine.js.md#s-mountGame-tick) _js/render/engine.js_
 
 <!-- note:publishHud -->
-- L3928 · `if (sim.notice !== sim.lastNotice) {` — Any code path that writes a new notice restarts its clock, so the card
+- L3912 · `if (sim.notice !== sim.lastNotice) {` — Any code path that writes a new notice restarts its clock, so the card
   can fade on its own instead of parking on the canopy forever.
-- L3968 · `hazard: sim.threat && sim.threat.t < AVOID.horizon` — `hazard`, not `threat` — the payload already carries a `threat` for the
+- L3952 · `hazard: sim.threat && sim.threat.t < AVOID.horizon` — `hazard`, not `threat` — the payload already carries a `threat` for the
   warp route's obstruction list further down, and a duplicate key in an
   object literal is silently won by the last one. This read as the
   avoidance not working at all.
-- L3971 · `response: (() => {` — The response clock. A player deciding whether to press an attack on a
+- L3955 · `response: (() => {` — The response clock. A player deciding whether to press an attack on a
   supply hull is deciding against this number, so it is on the canopy and
   it is honest: seconds until the first responder is on scene, or the fact
   that nobody is coming. It shows for any call near enough to matter, not
   only the player's own — a fight you are flying past is a fight you can
   join, and knowing when the law arrives is the whole decision.
-- L3994 · `charge: ship.charge,` — cockpit instrumentation
+- L3978 · `charge: ship.charge,` — cockpit instrumentation
 <!-- /note -->
 
 ### <a id="s-wireControlsTest"></a>`wireControlsTest()`
 
-function · **exported** · L4090–4154
+function · **exported** · L4074–4138
 
 - called by: [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
 - effects: global.write `window.__lg`
 
 <!-- note:wireControlsTest -->
-- L4093 · `traffic,` — the reactive sky, for the headless smokes and the console: the roster
+- L4077 · `traffic,` — the reactive sky, for the headless smokes and the console: the roster
   itself, who is answering what, what the nests are doing, and what the
   frame budget has decided the device can carry
-- L4095 · `holes: { holes, summonHole, collapseToHole, goSupernova },` — 0.3: collapsed stars and the impact runs, for the smokes and the console
+- L4079 · `holes: { holes, summonHole, collapseToHole, goSupernova },` — 0.3: collapsed stars and the impact runs, for the smokes and the console
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-threats"></a>`wireControlsTest.threats()`
 
-prop · L4128–4128
+prop · L4112–4112
 
 <!-- note:wireControlsTest.threats -->
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-ship"></a>`wireControlsTest.ship()`
 
-prop · L4138–4138
+prop · L4122–4122
 
 <!-- note:wireControlsTest.ship -->
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-getYaw"></a>`wireControlsTest.getYaw()`
 
-prop · L4139–4139
+prop · L4123–4123
 
 <!-- note:wireControlsTest.getYaw -->
 <!-- /note -->
 
 #### <a id="s-wireControlsTest-getSpeed"></a>`wireControlsTest.getSpeed()`
 
-prop · L4140–4140
+prop · L4124–4124
 
 - calls: [`speedOf`](../flight/ship.js.md#s-speedOf) _js/flight/ship.js_
 
@@ -3861,7 +3853,7 @@ prop · L4140–4140
 
 #### <a id="s-wireControlsTest-setKeys"></a>`wireControlsTest.setKeys(codes)`
 
-prop · L4142–4142
+prop · L4126–4126
 
 - calls: [`setInjectedKeys`](../core/input.js.md#s-setInjectedKeys) _js/core/input.js_
 
@@ -3870,7 +3862,7 @@ prop · L4142–4142
 
 #### <a id="s-wireControlsTest-setPan"></a>`wireControlsTest.setPan(x, y)`
 
-prop · L4143–4143
+prop · L4127–4127
 
 - calls: [`setInjectedPan`](../core/input.js.md#s-setInjectedPan) _js/core/input.js_
 
@@ -3879,7 +3871,7 @@ prop · L4143–4143
 
 ### <a id="s-tickSolHost"></a>`tickSolHost(dt)`
 
-function · **exported** · L4158–4167
+function · **exported** · L4142–4151
 
 - calls: [`stepWorld`](#s-stepWorld)
 

@@ -937,7 +937,6 @@ export function hydrateProgress() {
 }
 
 export function loadSky(seed) {
-  _routeCache = { key: "", system: null, route: null, dur: 0 };
   if (sim.skySeed === seed && stations.length) carryBuilt(stations);
   sim.skySeed = seed;
   const sys = applySystem(generateSystem(seed));
@@ -1733,7 +1732,7 @@ export const ALIGN_DEG = 10;
 
 export const DROPOUT_ODDS = { belt: 0.35, rock: 0.55, graze: 0.9, traffic: 0, impact: 1 };
 
-let _routeCache = { key: "", system: null, route: null, dur: 0 };
+let _routeCache = { key: "", route: null };
 const _rp = { x: 0, y: 0, z: 0 };
 
 export function alignmentTo(dest) {
@@ -1744,19 +1743,13 @@ export function alignmentTo(dest) {
   return (Math.acos(clamp((dx * f.x + dy * f.y + dz * f.z) / d, -1, 1)) * 180) / Math.PI;
 }
 
-export function plotRoute(targetId = sim.selected, { preview = false } = {}) {
+export function plotRoute(targetId = sim.selected) {
   const body = warpNodeById(targetId);
   if (!body) return null;
+  const key = `${targetId}:${Math.floor(sim.time * 4)}:${Math.round(sim.ship.yaw * 100)}:${Math.round(sim.ship.pitch * 100)}`;
+  if (_routeCache.key === key) return _routeCache.route;
   const ship = sim.ship;
   const dest = warpDestination(body);
-  const key = preview ? JSON.stringify([targetId, body.id, body.kind, body.name,
-    body.radius, Math.floor(sim.time * 4), ship.pos.x, ship.pos.y, ship.pos.z,
-    dest.x, dest.y, dest.z, BODIES.length, impactors.length, holes.length, stations.length]) : "";
-  if (preview && _routeCache.system === currentSystem && _routeCache.key === key) {
-    const align = alignmentTo(dest);
-    return { ..._routeCache.route, align: Math.round(align), aligned: align <= ALIGN_DEG,
-      eta: Math.round((spoolTime() + _routeCache.dur) * 10) / 10 };
-  }
   const dist = dist3(ship.pos, dest);
   const dur = clamp(dist / 55000, 3, 45);
   const align = alignmentTo(dest);
@@ -1823,7 +1816,7 @@ export function plotRoute(targetId = sim.selected, { preview = false } = {}) {
   };
   route.eta = Math.round((spoolTime() + dur) * 10) / 10;
   route.kind = body.kind;
-  if (preview) _routeCache = { key, system: currentSystem, route, dur };
+  _routeCache = { key, route };
   return route;
 }
 
@@ -3453,8 +3446,7 @@ export const CLOCK_CARRY_R = 9000;
 function carryLoose(from, dx, dy, dz, dvx, dvy, dvz) {
   for (const c of chunks) {
     if (c.driven || c.orbitR != null) continue;
-    const dx0 = c.x - from.x, dy0 = c.y - from.y, dz0 = c.z - from.z;
-    if (dx0 * dx0 + dy0 * dy0 + dz0 * dz0 > CLOCK_CARRY_R * CLOCK_CARRY_R) continue;
+    if (Math.hypot(c.x - from.x, c.y - from.y, c.z - from.z) > CLOCK_CARRY_R) continue;
     c.x += dx; c.y += dy; c.z += dz;
     c.vx += dvx; c.vy += dvy; c.vz += dvz;
   }
@@ -3510,9 +3502,8 @@ export function tickSim(dt) {
   sim.flash = Math.max(0, sim.flash - d * 0.7);
   sim.pulse = Math.max(0, sim.pulse - d * 1.8);
 
-  const remoteBlend = 1 - Math.exp(-10 * d);
   for (const r of sim.remotes.values()) {
-    const k = remoteBlend;
+    const k = 1 - Math.exp(-10 * d);
     r.x += (r.tx - r.x) * k;
     r.y += (r.ty - r.y) * k;
     r.z += (r.tz - r.z) * k;
@@ -3578,7 +3569,7 @@ export function tickSim(dt) {
   stepMining(sim.ship, d, sim.time, sim.lock);
   if (sim.ship.rigMode !== "off" && sim.ship.miningMode !== "off") sim.ship.rigMode = "off";
   stepRig(sim.ship, d, sim.time, sim.lock);
-  stepWorld(d, true);
+  stepWorld(d);
 
   collectBeaconsNear();
 
@@ -3616,22 +3607,15 @@ const _gImp = { x: 0, y: 0, z: 0 };
 const _bv = { x: 0, y: 0, z: 0 };
 
 function stepPorts(dt) {
-  let guardCounts = null;
   for (const st of stations) {
     if (!st.hostile || st.guards <= 0) continue;
     if ((st.truceUntil ?? -1) > sim.time) continue;
-    const dx = st.x - sim.ship.pos.x, dy = st.y - sim.ship.pos.y, dz = st.z - sim.ship.pos.z;
-    if (dx * dx + dy * dy + dz * dz > 12000 * 12000) continue;
-    if (!guardCounts) {
-      guardCounts = new Map();
-      for (const c of contacts) {
-        if (c.hp > 0) guardCounts.set(c.stationId, (guardCounts.get(c.stationId) ?? 0) + 1);
-      }
-    }
-    const live = guardCounts.get(st.id) ?? 0;
+    const d = Math.hypot(st.x - sim.ship.pos.x, st.y - sim.ship.pos.y, st.z - sim.ship.pos.z);
+    if (d > 12000) continue;
+    let live = 0;
+    for (const c of contacts) if (c.stationId === st.id && c.hp > 0) live++;
     if (live >= st.guards) continue;
     const a = Math.random() * Math.PI * 2;
-    guardCounts.set(st.id, live + 1);
     contacts.push({
       id: `guard-${st.id}-${Math.random().toString(36).slice(2, 7)}`,
       kind: "drone",
@@ -3682,8 +3666,8 @@ function stepCareer(d) {
   stepCareerImpl(d);
 }
 
-function stepWorld(d, stationsReady = false) {
-  if (!stationsReady) stepStations(sim.time);
+function stepWorld(d) {
+  stepStations(sim.time);
   stepTraffic(sim.time, d, stations, currentSystem, sim.soloHost ? null : sim.ship.pos);
   if (sim.worldAuthority !== false) {
     stepNpcCombat(sim.time, d, sim.ship.pos);
@@ -3957,7 +3941,7 @@ export function publishHud(labels, plots) {
     warpState: sim.warp.state,
     flash: sim.flash,
     noticeAbout: sim.noticeAbout ?? null,
-    route: sim.selected && sim.warp.state !== "run" && !sim.ship.dockedAt ? plotRoute(sim.selected, { preview: true }) : null,
+    route: sim.selected && sim.warp.state !== "run" && !sim.ship.dockedAt ? plotRoute(sim.selected) : null,
     warpProgress:
       sim.warp.state === "spool"
         ? sim.warp.t / spoolTime()

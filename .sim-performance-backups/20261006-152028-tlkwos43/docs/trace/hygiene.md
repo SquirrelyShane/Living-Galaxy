@@ -130,7 +130,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
 - [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L80
-- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2167
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2160
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
 - [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33

@@ -1,6 +1,6 @@
 # js/station/stationworks.js
 
-[index](../../../README.md) · 404 lines · 46 symbols · 6 imports · 11 importers
+[index](../../../README.md) · 407 lines · 46 symbols · 6 imports · 11 importers
 
 ## About
 
@@ -283,7 +283,7 @@ function · L45–49
 
 ### <a id="s-stepProduction"></a>`stepProduction(st, dt, time)`
 
-function · **exported** · L51–79
+function · **exported** · L51–77
 
 - calls: [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`addStock`](#s-addStock) ×3 · [`stockLine`](#s-stockLine) · [`takeStock`](#s-takeStock) · [`worksFor`](#s-worksFor)
 - called by: [`stepStationWorks`](#s-stepStationWorks)
@@ -291,17 +291,15 @@ function · **exported** · L51–79
 <!-- note:stepProduction -->
 One production pass for a port: every line runs its recipe when its magazine has room and the stock is there.
 
-- L61 · `if (what !== "plate" && !w.needs[what]) continue;` — no gun that eats it: no line for it
-- L66 · `const short = Object.entries(R.needs).find(([id, q]) => (stockLine(st, id)?.qty ?? 0) < q)` — the batch's bill, all or nothing
-- L73 · `w.stalled = w.stalls.slug ?? w.stalls.drone ?? w.stalls.missile ?? w.stalls.plate ?? null;` — the first stalled line is the one the deck shouts about; drones and slugs before plate
-- L74 · `if (time - (w.suppliedAt ?? -SUPPLY_S) >= SUPPLY_S) {` — the supply line: the sector's own buy list trickles in on the flow
-
-- L56 · `for (const what in RECIPES) {` — Recipes are exported and may be extended; enumerate without allocating tuples.
+- L59 · `if (what !== "plate" && !w.needs[what]) continue;` — no gun that eats it: no line for it
+- L64 · `const short = Object.entries(R.needs).find(([id, q]) => (stockLine(st, id)?.qty ?? 0) < q)` — the batch's bill, all or nothing
+- L71 · `w.stalled = w.stalls.slug ?? w.stalls.drone ?? w.stalls.missile ?? w.stalls.plate ?? null;` — the first stalled line is the one the deck shouts about; drones and slugs before plate
+- L72 · `if (time - (w.suppliedAt ?? -SUPPLY_S) >= SUPPLY_S) {` — the supply line: the sector's own buy list trickles in on the flow
 <!-- /note -->
 
 ### <a id="s-worksReport"></a>`worksReport(st)`
 
-function · **exported** · L81–96
+function · **exported** · L79–94
 
 - calls: [`worksFor`](#s-worksFor)
 - called by: [`stationStatus`](../sim/sim.js.md#s-stationStatus) _js/sim/sim.js_ · [`worksPanel`](deckworks.js.md#s-worksPanel) _js/station/deckworks.js_
@@ -312,9 +310,9 @@ What the port can tell you about its works.
 
 ### <a id="s-d3"></a>`d3(a, b)`
 
-function · L98–98
+function · L96–96
 
-- called by: [`engagePush`](#s-engagePush) ×3 · [`engageTractor`](#s-engageTractor) · [`mouthAround`](#s-mouthAround) · [`stepStationDrones`](#s-stepStationDrones) ×2 · [`stepStationWorks`](#s-stepStationWorks) · [`unrequestedApproach`](#s-unrequestedApproach)
+- called by: [`engagePush`](#s-engagePush) ×3 · [`engageTractor`](#s-engageTractor) · [`mouthAround`](#s-mouthAround) · [`siegeOf`](#s-siegeOf) · [`stepSiege`](#s-stepSiege) · [`stepStationDrones`](#s-stepStationDrones) ×2 · [`stepStationWorks`](#s-stepStationWorks) · [`unrequestedApproach`](#s-unrequestedApproach)
 
 <!-- note:d3 -->
 ---- defence ------------------------------------------------------------------
@@ -322,7 +320,7 @@ function · L98–98
 
 ### <a id="s-targetsFor"></a>`targetsFor(st, ship)`
 
-function · L100–103
+function · L98–101
 
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.filter`
 - called by: [`stepDefences`](#s-stepDefences)
@@ -333,8 +331,9 @@ Who a port's guns are for: the player's hostiles, or the player when the port is
 
 ### <a id="s-siegeOf"></a>`siegeOf(st)`
 
-function · L105–117
+function · L103–114
 
+- calls: [`d3`](#s-d3)
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`
 - called by: [`stepSiege`](#s-stepSiege)
 
@@ -343,14 +342,11 @@ The hostile hulls actually inside a port's engagement envelope, whether or
 not the player is anywhere near. `contacts` only exists within sensor range
 of the player, so a port under attack on the far side of the system has to
 be answered off the roster instead.
-
-- L114 · `if (d2 < bestD2) { best = n; bestD2 = d2; }` — Match the original strict nearest-target test (the radius boundary counts
-  as siege pressure but is not a battery target).
 <!-- /note -->
 
 ### <a id="s-batteryDps"></a>`batteryDps(st)`
 
-function · **exported** · L119–126
+function · **exported** · L116–123
 
 - called by: [`stepSiege`](#s-stepSiege)
 
@@ -360,9 +356,10 @@ A port's total effective firepower, for a fight resolved on the numbers.
 
 ### <a id="s-stepSiege"></a>`stepSiege(st, dt, time)`
 
-function · L128–141
+function · L125–144
 
-- calls: [`batteryDps`](#s-batteryDps) · [`siegeOf`](#s-siegeOf) · [`worksFor`](#s-worksFor)
+- calls: [`batteryDps`](#s-batteryDps) · [`d3`](#s-d3) · [`siegeOf`](#s-siegeOf) · [`worksFor`](#s-worksFor)
+- via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`
 - called by: [`stepStationWorks`](#s-stepStationWorks)
 
 <!-- note:stepSiege -->
@@ -372,21 +369,21 @@ their effective firepower onto the nearest raider, the raiders put theirs
 into the port's magazines and its works. A port with no guns loses; a
 military port with a full doctrine does not.
 
-- L135 · `if (w?.stock && (w.stock.slug ?? 0) <= 0 && (w.stock.missile ?? 0) <= 0) { st.guns = { fir` — the batteries need ammunition like they do up close
-- L? · `let best = null, bestD = DEFENCE_REACH;` — pick the nearest raider and put the whole battery on it, which is what a
+- L132 · `if (w?.stock && (w.stock.slug ?? 0) <= 0 && (w.stock.missile ?? 0) <= 0) { st.guns = { fir` — the batteries need ammunition like they do up close
+- L137 · `let best = null, bestD = DEFENCE_REACH;` — pick the nearest raider and put the whole battery on it, which is what a
   fire-control mast is for
 <!-- /note -->
 
 ### <a id="s-worksHooks"></a>`worksHooks`
 
-const · **exported** · L143–143
+const · **exported** · L146–146
 
 <!-- note:worksHooks -->
 <!-- /note -->
 
 ### <a id="s-stepDefences"></a>`stepDefences(st, dt, time, ship)`
 
-function · **exported** · L145–180
+function · **exported** · L148–183
 
 - calls: [`fireRound`](../flight/turrets.js.md#s-fireRound) _js/flight/turrets.js_ · [`targetsFor`](#s-targetsFor) · [`worksFor`](#s-worksFor)
 - called by: [`stepStationWorks`](#s-stepStationWorks)
@@ -396,7 +393,7 @@ function · **exported** · L145–180
 
 ### <a id="s-droneSeq"></a>`droneSeq`
 
-const · L182–182
+const · L185–185
 
 <!-- note:droneSeq -->
 ---- drones -------------------------------------------------------------------
@@ -404,22 +401,22 @@ const · L182–182
 
 ### <a id="s-stepStationDrones"></a>`stepStationDrones(st, dt, time, ship)`
 
-function · **exported** · L183–239
+function · **exported** · L186–242
 
 - calls: [`fireRound`](../flight/turrets.js.md#s-fireRound) _js/flight/turrets.js_ · [`d3`](#s-d3) ×2 · [`worksFor`](#s-worksFor)
 - via [js/flight/turrets.js](../flight/turrets.js.md): `contacts.filter`, `contacts.indexOf`, `contacts.push`, `contacts.splice`
 - called by: [`stepStationWorks`](#s-stepStationWorks)
 
 <!-- note:stepStationDrones -->
-- L190 · `if (targets.length && w.stock.drone >= 1) {` — launch: one per bay per second while there is something to meet, up to the cells
-- L207 · `for (let i = st.dronesOut.length - 1; i >= 0; i--) {` — fly: close on a hostile and shoot, or come home and land
-- L218 · `const cruise = Math.max(-DRONE_SPEED, Math.min(DRONE_SPEED, (d - want) * 0.9));` — velocity matching: close at up to DRONE_SPEED, ease onto the standoff, and station-keep there
-- L233 · `if (!tgt && d < 30) {` — recovered: back in the cells
+- L193 · `if (targets.length && w.stock.drone >= 1) {` — launch: one per bay per second while there is something to meet, up to the cells
+- L210 · `for (let i = st.dronesOut.length - 1; i >= 0; i--) {` — fly: close on a hostile and shoot, or come home and land
+- L221 · `const cruise = Math.max(-DRONE_SPEED, Math.min(DRONE_SPEED, (d - want) * 0.9));` — velocity matching: close at up to DRONE_SPEED, ease onto the standoff, and station-keep there
+- L236 · `if (!tgt && d < 30) {` — recovered: back in the cells
 <!-- /note -->
 
 ### <a id="s-stepStationWorks"></a>`stepStationWorks(dt, time, ship)`
 
-function · **exported** · L241–253
+function · **exported** · L244–256
 
 - calls: [`d3`](#s-d3) · [`stepDefences`](#s-stepDefences) · [`stepProduction`](#s-stepProduction) · [`stepSiege`](#s-stepSiege) · [`stepStationDrones`](#s-stepStationDrones)
 - called by: [`stepWorld`](../sim/sim.js.md#s-stepWorld) _js/sim/sim.js_
@@ -427,7 +424,7 @@ function · **exported** · L241–253
 <!-- note:stepStationWorks -->
 ---- the works tick ------------------------------------------------------------
 
-- L247 · `stepSiege(st, dt, time);` — Out of the player's sight the guns still work. They have to: rogue
+- L250 · `stepSiege(st, dt, time);` — Out of the player's sight the guns still work. They have to: rogue
   waves pick their targets off the whole station list, and a port that
   only defends itself when somebody is watching would be dismantled the
   first time a wave went somewhere quiet.
@@ -435,7 +432,7 @@ function · **exported** · L241–253
 
 ### <a id="s-approachOf"></a>`approachOf(ship, st)`
 
-function · **exported** · L255–262
+function · **exported** · L258–265
 
 - calls: [`laneOf`](../npc/lanes.js.md#s-laneOf) _js/npc/lanes.js_ · [`mouthAround`](#s-mouthAround) · [`outboundSpeed`](#s-outboundSpeed)
 - called by: [`autoTractor`](#s-autoTractor) · [`unrequestedApproach`](#s-unrequestedApproach)
@@ -448,7 +445,7 @@ Is the ship on a port's entry lane inside the funnel, or in its mouth? { st, han
 
 ### <a id="s-outboundSpeed"></a>`outboundSpeed(ship, st)`
 
-function · **exported** · L264–267
+function · **exported** · L267–270
 
 - calls: [`stationLane`](../npc/lanes.js.md#s-stationLane) _js/npc/lanes.js_
 - called by: [`approachOf`](#s-approachOf) · [`inDeparture`](#s-inDeparture)
@@ -459,7 +456,7 @@ Speed away from the port along its lane axis (u/s, relative to the port): + outb
 
 ### <a id="s-inDeparture"></a>`inDeparture(st, ship, time)`
 
-function · **exported** · L269–274
+function · **exported** · L272–277
 
 - calls: [`laneOf`](../npc/lanes.js.md#s-laneOf) _js/npc/lanes.js_ · [`outboundSpeed`](#s-outboundSpeed)
 - called by: [`execute`](../npc/captain.js.md#s-execute) _js/npc/captain.js_ · [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_ · [`autoTractor`](#s-autoTractor) · [`unrequestedApproach`](#s-unrequestedApproach)
@@ -470,7 +467,7 @@ Is the hull still on the departure the port pushed it onto? By the clock, or by 
 
 ### <a id="s-mouthAround"></a>`mouthAround(ship, only=)`
 
-function · **exported** · L276–287
+function · **exported** · L279–290
 
 - calls: [`d3`](#s-d3) · [`mouthCoords`](stationyard.js.md#s-mouthCoords) _js/station/stationyard.js_
 - called by: [`approachOf`](#s-approachOf)
@@ -478,12 +475,12 @@ function · **exported** · L276–287
 <!-- note:mouthAround -->
 Which hangar mouth the ship is inside, if any: { st, hangar, m }
 
-- L283 · `if (c.along < m.d && c.along > -m.d * 0.95 && Math.abs(c.lat) < m.w * 0.5 && Math.abs(c.ve` — the mouth's reach: a bay-depth out in front of the aperture, and the bay itself
+- L286 · `if (c.along < m.d && c.along > -m.d * 0.95 && Math.abs(c.lat) < m.w * 0.5 && Math.abs(c.ve` — the mouth's reach: a bay-depth out in front of the aperture, and the bay itself
 <!-- /note -->
 
 ### <a id="s-easeInOut"></a>`easeInOut(u)`
 
-function · L289–289
+function · L292–292
 
 - called by: [`stepTractor`](#s-stepTractor)
 
@@ -492,7 +489,7 @@ function · L289–289
 
 ### <a id="s-engageTractor"></a>`engageTractor(st, ship, hangar=, why=)`
 
-function · **exported** · L291–317
+function · **exported** · L294–320
 
 - calls: [`d3`](#s-d3) · [`mouthCoords`](stationyard.js.md#s-mouthCoords) _js/station/stationyard.js_
 - called by: [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_ · [`autoTractor`](#s-autoTractor)
@@ -500,14 +497,14 @@ function · **exported** · L291–317
 <!-- note:engageTractor -->
 Port control takes the helm. Returns the tractor or null with a reason.
 
-- L295 · `const door = { x: st.x + m.entry.x, y: st.y + m.entry.y, z: st.z + m.entry.z };` — the ENTRY door: port half of the aperture
-- L297 · `const gate = { x: door.x + m.dir.x * gateD, y: door.y + m.dir.y * gateD, z: door.z + m.dir` — square on to the door before the sill
-- L301 · `const pts = [from];` — the path: gather to the gate off the entry door if you are outside it, then the door, then the clamps
+- L298 · `const door = { x: st.x + m.entry.x, y: st.y + m.entry.y, z: st.z + m.entry.z };` — the ENTRY door: port half of the aperture
+- L300 · `const gate = { x: door.x + m.dir.x * gateD, y: door.y + m.dir.y * gateD, z: door.z + m.dir` — square on to the door before the sill
+- L304 · `const pts = [from];` — the path: gather to the gate off the entry door if you are outside it, then the door, then the clamps
 <!-- /note -->
 
 ### <a id="s-releaseTractor"></a>`releaseTractor()`
 
-function · **exported** · L319–319
+function · **exported** · L322–322
 
 - called by: [`launchSim`](../sim/sim.js.md#s-launchSim) _js/sim/sim.js_ · [`returnToMenu`](../sim/sim.js.md#s-returnToMenu) _js/sim/sim.js_ · [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_ · [`stepTractor`](#s-stepTractor) ×3
 
@@ -516,7 +513,7 @@ function · **exported** · L319–319
 
 ### <a id="s-holdOff"></a>`holdOff(time, secs=, stId=)`
 
-function · **exported** · L320–320
+function · **exported** · L323–323
 
 - called by: [`stepTractorTick`](../sim/sim.js.md#s-stepTractorTick) _js/sim/sim.js_
 
@@ -526,7 +523,7 @@ No lock is taken for `secs`; with a port given, that port treats you as outbound
 
 ### <a id="s-stepTractor"></a>`stepTractor(dt, ship)`
 
-function · **exported** · L322–358
+function · **exported** · L325–361
 
 - calls: [`stationById`](stations.js.md#s-stationById) _js/station/stations.js_ · [`easeInOut`](#s-easeInOut) · [`releaseTractor`](#s-releaseTractor) ×3
 - called by: [`stepTractorTick`](../sim/sim.js.md#s-stepTractorTick) _js/sim/sim.js_
@@ -534,16 +531,16 @@ function · **exported** · L322–358
 <!-- note:stepTractor -->
 Advance the tractor: moves the ship along the path in the station's frame. Returns "docked" when it lands.
 
-- L326 · `tractor.t += dt * (tractor.rush ?? 1);` — js/ui/dockboot.js sets rush while the canopy is covered by the boot sequence
-- L327 · `const drift = { x: st.x - tractor.origin.x, y: st.y - tractor.origin.y, z: st.z - tractor.` — the path was laid in world space at capture; the station has moved since — follow it
-- L336 · `const k = Math.min(1, dt * 1.6);` — the nose comes round to the bay
-- L346 · `const d = tractor.exitDir;` — let go with way on, pointed out along the exit line, and stay hands-off for a while
-- L349 · `return "released";` — the caller calls holdOff(time) so no lock is taken on the way out
+- L329 · `tractor.t += dt * (tractor.rush ?? 1);` — js/ui/dockboot.js sets rush while the canopy is covered by the boot sequence
+- L330 · `const drift = { x: st.x - tractor.origin.x, y: st.y - tractor.origin.y, z: st.z - tractor.` — the path was laid in world space at capture; the station has moved since — follow it
+- L339 · `const k = Math.min(1, dt * 1.6);` — the nose comes round to the bay
+- L349 · `const d = tractor.exitDir;` — let go with way on, pointed out along the exit line, and stay hands-off for a while
+- L352 · `return "released";` — the caller calls holdOff(time) so no lock is taken on the way out
 <!-- /note -->
 
 ### <a id="s-autoTractor"></a>`autoTractor(ship, relSpeedOf, time)`
 
-function · **exported** · L360–371
+function · **exported** · L363–374
 
 - calls: [`stationById`](stations.js.md#s-stationById) _js/station/stations.js_ · [`approachOf`](#s-approachOf) · [`clearDockRequest`](#s-clearDockRequest) · [`engageTractor`](#s-engageTractor) · [`hasDockRequest`](#s-hasDockRequest) · [`inDeparture`](#s-inDeparture)
 - called by: [`stepTractorTick`](../sim/sim.js.md#s-stepTractorTick) _js/sim/sim.js_
@@ -555,7 +552,7 @@ A hull that did not ask is left alone (the puck rings instead). Returns the stat
 
 ### <a id="s-unrequestedApproach"></a>`unrequestedApproach(ship, time)`
 
-function · **exported** · L373–383
+function · **exported** · L376–386
 
 - calls: [`approachOf`](#s-approachOf) · [`d3`](#s-d3) · [`hasDockRequest`](#s-hasDockRequest) · [`inDeparture`](#s-inDeparture)
 - called by: [`stepTractorTick`](../sim/sim.js.md#s-stepTractorTick) _js/sim/sim.js_
@@ -566,7 +563,7 @@ A hull in a mouth or on the entry lane with no berth asked for: who should be ta
 
 ### <a id="s-engagePush"></a>`engagePush(st, ship, hangar=)`
 
-function · **exported** · L385–402
+function · **exported** · L388–405
 
 - calls: [`lanePoint`](../npc/lanes.js.md#s-lanePoint) _js/npc/lanes.js_ · [`stationLane`](../npc/lanes.js.md#s-stationLane) _js/npc/lanes.js_ · [`d3`](#s-d3) ×3
 - called by: [`toggleDock`](../sim/sim.js.md#s-toggleDock) _js/sim/sim.js_
@@ -574,9 +571,9 @@ function · **exported** · L385–402
 <!-- note:engagePush -->
 Undocking: port control pushes the hull out of the bay, through the mouth and clear of the capture reach, then lets go.
 
-- L388 · `const door = { x: st.x + m.exit.x, y: st.y + m.exit.y, z: st.z + m.exit.z };` — the EXIT door: starboard half of the aperture
-- L390 · `const clear = hangar === 0 && st.port ? lanePoint(st, "exit", RELEASE_U) : { x: door.x + m` — the release point: up the exit lane's centre way, past the funnel and outside the tractor's reach
-- L394 · `{ a: from, b: door, t: Math.max(2.5, d3(from, door) / 12) },` — off the clamps and across to the exit door, dead slow
-- L395 · `{ a: door, b: sill, t: Math.max(1.5, d3(door, sill) / 22) },` — over the sill
-- L396 · `{ a: sill, b: clear, t: Math.max(3, d3(sill, clear) / 48) },` — up the exit lane, gathering way
+- L391 · `const door = { x: st.x + m.exit.x, y: st.y + m.exit.y, z: st.z + m.exit.z };` — the EXIT door: starboard half of the aperture
+- L393 · `const clear = hangar === 0 && st.port ? lanePoint(st, "exit", RELEASE_U) : { x: door.x + m` — the release point: up the exit lane's centre way, past the funnel and outside the tractor's reach
+- L397 · `{ a: from, b: door, t: Math.max(2.5, d3(from, door) / 12) },` — off the clamps and across to the exit door, dead slow
+- L398 · `{ a: door, b: sill, t: Math.max(1.5, d3(door, sill) / 22) },` — over the sill
+- L399 · `{ a: sill, b: clear, t: Math.max(3, d3(sill, clear) / 48) },` — up the exit lane, gathering way
 <!-- /note -->
