@@ -1,6 +1,6 @@
 # js/world/generate.js
 
-[index](../../../README.md) · 268 lines · 24 symbols · 3 imports · 16 importers
+[index](../../../README.md) · 268 lines · 24 symbols · 3 imports · 17 importers
 
 ## About
 
@@ -32,12 +32,13 @@
 - test/economy.test.mjs _(outside js/)_ — `rngFromSeed`
 - test/nav.test.mjs _(outside js/)_ — `generateSystem`
 - test/npcchat.test.mjs _(outside js/)_ — `rngFromSeed`
+- test/performance-upgrade.test.mjs _(outside js/)_ — `generateSystem`
 - test/spacing.test.mjs _(outside js/)_ — `generateSystem`, `spawnBodyId`, `rngFromSeed`
 
 ## Exports
 
 - [`rngFromSeed`](#s-rngFromSeed) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/rogues.js](../npc/rogues.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/world/hulks.js](hulks.js.md), test/ariaplay.test.mjs, test/economy.test.mjs, test/npcchat.test.mjs, test/spacing.test.mjs
-- [`generateSystem`](#s-generateSystem) · function — used by [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/nav.test.mjs, test/spacing.test.mjs
+- [`generateSystem`](#s-generateSystem) · function — used by [js/sim/sim.js](../sim/sim.js.md), [js/ui/hud.js](../ui/hud.js.md), test/nav.test.mjs, test/performance-upgrade.test.mjs, test/spacing.test.mjs
 - [`spawnBodyId`](#s-spawnBodyId) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/spacing.test.mjs
 - [`describeSystem`](#s-describeSystem) · function — used by [js/ui/hud.js](../ui/hud.js.md)
 

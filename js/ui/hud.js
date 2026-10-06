@@ -1,3 +1,4 @@
+import { paintLabels, paintMarkerNodes } from "./hudnodes.js";
 import { PUBLIC_ROOM, bodyById } from "../world/bodies.js";
 import { clockAt } from "../station/stationclock.js";
 import { BUILD_LINE } from "../version.js";
@@ -171,15 +172,24 @@ function stackLeftColumn(force = false) {
   const now = globalThis.performance?.now?.() ?? Date.now();
   if (!force && now - stackAt < 200) return;
   stackAt = now;
-  let y = null;
+  const measured = [];
   for (const id of LEFT_STACK) {
     const el = doc.getElementById(id);
     if (!el) continue;
-    if (y == null) { y = el.getBoundingClientRect().top; }
-    else el.style.setProperty("top", `${Math.round(y)}px`, "important");
     const shown = !el.classList.contains("hidden") && el.offsetParent !== null && getComputedStyle(el).display !== "none";
-    const h = shown ? el.getBoundingClientRect().height : 0;
-    if (h > 1) y += h + STACK_GAP;
+    const rect = el.getBoundingClientRect();
+    measured.push({ el, top: rect.top, height: shown ? rect.height : 0 });
+  }
+  let y = null;
+  for (const { el, top, height } of measured) {
+    if (y == null) y = top;
+    else {
+      const value = `${Math.round(y)}px`;
+      if (el.style.getPropertyValue("top") !== value || el.style.getPropertyPriority("top") !== "important") {
+        el.style.setProperty("top", value, "important");
+      }
+    }
+    if (height > 1) y += height + STACK_GAP;
   }
   stackRightColumn(doc);
 }
@@ -403,18 +413,7 @@ const MARKER = {
 };
 
 function paintMarkers(box) {
-  const list = window.__lgMarkers ?? [];
-  if (!list.length) {
-    if (box.childElementCount) box.innerHTML = "";
-    return;
-  }
-  box.innerHTML = list
-    .map((m) => {
-      const d = MARKER[m.kind] ?? { glyph: "", label: "" };
-      const cap = m.kind === "lock" && m.pct != null ? `${Math.round(m.pct * 100)}%` : d.label;
-      return `<span class="${m.kind}" style="left:${m.x}%;top:${m.y}%">${d.glyph}${cap ? `<b>${cap}</b>` : ""}</span>`;
-    })
-    .join("");
+  paintMarkerNodes(box, window.__lgMarkers ?? [], MARKER);
 }
 
 const TURRET_IX = { off: 0, passive: 1, castle: 2, free: 3 };
@@ -1175,13 +1174,7 @@ export function mountHud() {
     $("mode-mining").classList.toggle("hot", s.miningMode === "overdrive");
     $("mode-mining").classList.toggle("cold", s.miningMode === "off");
 
-    $("labels").innerHTML = s.labels
-      .map((l) => {
-        const a = Number.isFinite(l.a) ? `;--a:${Number(l.a).toFixed(1)}deg` : "";
-        const tag = l.tag ? `<i class="tag t${esc(l.tag)}">[${esc(l.tag)}]</i>` : "";
-        return `<span class="${esc(l.kind)}" style="left:${Number(l.x)}%;top:${Number(l.y)}%${a}">${tag}${esc(l.name)}</span>`;
-      })
-      .join("");
+    paintLabels($("labels"), s.labels);
     paintMarkers(markerBox);
     $("heat-wash").style.opacity = String(Math.min(0.85, s.heat));
 

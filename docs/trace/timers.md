@@ -57,6 +57,6 @@ setInterval / setTimeout / requestAnimationFrame / requestIdleCallback call site
 - timer — [js/ui/dockboot.js › mountDockBoot>bootDeck](../files/js/ui/dockboot.js.md#s-mountDockBoot-bootDeck) L54
 - timer — [js/ui/glyphs.js › compileBlock](../files/js/ui/glyphs.js.md#s-compileBlock) L137
 - timer — [js/ui/glyphs.js › compileBlock>spin](../files/js/ui/glyphs.js.md#s-compileBlock-spin) L155
-- timer — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L229
-- timer — [js/ui/hud.js › mountHud>queueSky](../files/js/ui/hud.js.md#s-mountHud-queueSky) L528
-- timer — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L671
+- timer — [js/ui/hud.js › bindOrient](../files/js/ui/hud.js.md#s-bindOrient) L239
+- timer — [js/ui/hud.js › mountHud>queueSky](../files/js/ui/hud.js.md#s-mountHud-queueSky) L527
+- timer — [js/ui/hud.js › mountHud](../files/js/ui/hud.js.md#s-mountHud) L670

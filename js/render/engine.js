@@ -1,3 +1,4 @@
+import { createResolutionController } from "./resolution.js";
 import * as THREE from "../../vendor/three.module.min.js";
 import {
   BEACONS,
@@ -200,7 +201,8 @@ export function mountGame(canvas) {
     powerPreference: "high-performance",
     logarithmicDepthBuffer: true,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const resolution = createResolutionController(window.devicePixelRatio);
+  renderer.setPixelRatio(resolution.ratio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.06;
@@ -2497,6 +2499,8 @@ export function mountGame(canvas) {
     const dt = Math.min(raw / 1000, 0.1);
     clock.last = now;
     notePerf(raw, dt);
+    const pixelRatio = resolution.update(perf.tier, dt, window.devicePixelRatio);
+    if (renderer.getPixelRatio() !== pixelRatio) renderer.setPixelRatio(pixelRatio);
     resumeAudioIfNeeded();
 
     if (sim.phase === "pause") pauseTick();

@@ -1,6 +1,6 @@
 # js/npc/lanes.js
 
-[index](../../../README.md) · 141 lines · 29 symbols · 0 imports · 10 importers
+[index](../../../README.md) · 142 lines · 29 symbols · 0 imports · 11 importers
 
 ## About
 
@@ -60,6 +60,7 @@ _none_
 - [js/sim/sim.js](../sim/sim.js.md) — `laneOf`, `laneFlow`, `stationLane`
 - [js/station/stationworks.js](../station/stationworks.js.md) — `laneOf`, `lanePoint`, `stationLane`, `FUNNEL_U`, `RELEASE_U`
 - test/bay.test.mjs _(outside js/)_ — `lanePoint`
+- test/performance-upgrade.test.mjs _(outside js/)_ — `stationLane`, `lanePoint`, `laneCentre`, `subLaneOffset`, `spreadAt`
 - test/sky.test.mjs _(outside js/)_ — `stationLane`, `lanePoint`, `laneOf`, `runnerIndex`, `beadLit`, `LANE_BEADS`, `LANE_U`
 - test/sky.test.mjs _(outside js/)_ — `subLaneFor`, `subLaneOffset`, `SUBLANES`, `SUBLANE_GAP`, `ZONE_HALF_W`, `laneFlow`
 
@@ -78,13 +79,13 @@ _none_
 - [`FUNNEL_U`](#s-FUNNEL_U) · const — used by [js/station/stationworks.js](../station/stationworks.js.md)
 - [`LANE_DRAW_R`](#s-LANE_DRAW_R) · const — used by [js/render/engine.js](../render/engine.js.md)
 - [`RELEASE_U`](#s-RELEASE_U) · const — used by [js/station/stationworks.js](../station/stationworks.js.md)
-- [`stationLane`](#s-stationLane) · function — used by [js/npc/flow.js](flow.js.md), [js/npc/traffic.js](traffic.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), test/sky.test.mjs
-- [`subLaneOffset`](#s-subLaneOffset) · function — used by test/sky.test.mjs
+- [`stationLane`](#s-stationLane) · function — used by [js/npc/flow.js](flow.js.md), [js/npc/traffic.js](traffic.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), test/performance-upgrade.test.mjs, test/sky.test.mjs
+- [`subLaneOffset`](#s-subLaneOffset) · function — used by test/performance-upgrade.test.mjs, test/sky.test.mjs
 - [`subLaneFor`](#s-subLaneFor) · function — used by [js/npc/traffic.js](traffic.js.md), test/sky.test.mjs
 - [`funnel`](#s-funnel) · function — **no importer in scanned roots**
-- [`spreadAt`](#s-spreadAt) · function — used by [js/render/engine.js](../render/engine.js.md)
-- [`laneCentre`](#s-laneCentre) · function — used by [js/render/engine.js](../render/engine.js.md)
-- [`lanePoint`](#s-lanePoint) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md), [js/npc/bay.js](bay.js.md), [js/render/engine.js](../render/engine.js.md), [js/station/stationworks.js](../station/stationworks.js.md), test/bay.test.mjs, test/sky.test.mjs
+- [`spreadAt`](#s-spreadAt) · function — used by [js/render/engine.js](../render/engine.js.md), test/performance-upgrade.test.mjs
+- [`laneCentre`](#s-laneCentre) · function — used by [js/render/engine.js](../render/engine.js.md), test/performance-upgrade.test.mjs
+- [`lanePoint`](#s-lanePoint) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md), [js/npc/bay.js](bay.js.md), [js/render/engine.js](../render/engine.js.md), [js/station/stationworks.js](../station/stationworks.js.md), test/bay.test.mjs, test/performance-upgrade.test.mjs, test/sky.test.mjs
 - [`laneAt`](#s-laneAt) · function — used by [js/npc/flow.js](flow.js.md), [js/npc/traffic.js](traffic.js.md)
 - [`runnerIndex`](#s-runnerIndex) · function — used by test/sky.test.mjs
 - [`beadLit`](#s-beadLit) · function — used by [js/render/engine.js](../render/engine.js.md), test/sky.test.mjs
@@ -245,7 +246,7 @@ Which lane-way a hull uses, off its id — stable for the hull's whole life.
 
 function · **exported** · L56–59
 
-- called by: [`laneCentre`](#s-laneCentre) · [`spreadAt`](#s-spreadAt)
+- called by: [`laneCentre`](#s-laneCentre) · [`lanePoint`](#s-lanePoint) · [`spreadAt`](#s-spreadAt)
 
 <!-- note:funnel -->
 How far open the funnel is at `u` along the lane: 0 at the mouth, 1 past FUNNEL_U.
@@ -256,7 +257,7 @@ How far open the funnel is at `u` along the lane: 0 at the mouth, 1 past FUNNEL_
 function · **exported** · L61–65
 
 - calls: [`funnel`](#s-funnel)
-- called by: [`laneOf`](#s-laneOf) · [`lanePoint`](#s-lanePoint) · [`mountGame>makeLanes`](../render/engine.js.md#s-mountGame-makeLanes) _js/render/engine.js_ · [`mountGame>makeLanes>edge`](../render/engine.js.md#s-mountGame-makeLanes-edge) _js/render/engine.js_
+- called by: [`laneOf`](#s-laneOf) · [`mountGame>makeLanes`](../render/engine.js.md#s-mountGame-makeLanes) _js/render/engine.js_ · [`mountGame>makeLanes>edge`](../render/engine.js.md#s-mountGame-makeLanes-edge) _js/render/engine.js_
 
 <!-- note:spreadAt -->
 The lane-way spacing multiplier and zone scale at `u`.
@@ -282,9 +283,9 @@ const · L77–77
 
 ### <a id="s-lanePoint"></a>`lanePoint(st, which, u, out=, k=)`
 
-function · **exported** · L78–86
+function · **exported** · L78–87
 
-- calls: [`laneCentre`](#s-laneCentre) · [`spreadAt`](#s-spreadAt) · [`stationLane`](#s-stationLane) · [`subLaneOffset`](#s-subLaneOffset)
+- calls: [`funnel`](#s-funnel) · [`laneCentre`](#s-laneCentre) · [`stationLane`](#s-stationLane) · [`subLaneOffset`](#s-subLaneOffset)
 - called by: [`apDock`](../flight/autopilot.js.md#s-apDock) _js/flight/autopilot.js_ ×2 · [`controls`](bay.js.md#s-controls) _js/npc/bay.js_ · [`entryDoor`](bay.js.md#s-entryDoor) _js/npc/bay.js_ · [`laneAt`](#s-laneAt) · [`mountGame>makeLanes`](../render/engine.js.md#s-mountGame-makeLanes) _js/render/engine.js_ ×2 · [`engagePush`](../station/stationworks.js.md#s-engagePush) _js/station/stationworks.js_
 
 <!-- note:lanePoint -->
@@ -294,7 +295,7 @@ World point on a lane: `which` is "entry" | "exit", `u` 0 at the mouth, 1 at the
 
 ### <a id="s-laneAt"></a>`laneAt(st, which, dist, k=, out=)`
 
-function · **exported** · L88–90
+function · **exported** · L89–91
 
 - calls: [`lanePoint`](#s-lanePoint)
 - called by: [`flowPose`](flow.js.md#s-flowPose) _js/npc/flow.js_ ×2 · [`routePose`](traffic.js.md#s-routePose) _js/npc/traffic.js_ ×2 · [`stepHullOnce`](traffic.js.md#s-stepHullOnce) _js/npc/traffic.js_ ×4
@@ -305,7 +306,7 @@ The same by distance from the mouth (may run past the far gate: hulls drop out o
 
 ### <a id="s-runnerIndex"></a>`runnerIndex(t, which)`
 
-function · **exported** · L92–96
+function · **exported** · L93–97
 
 - called by: [`beadLit`](#s-beadLit)
 
@@ -315,7 +316,7 @@ Which bead the runner is on right now, 0..LANE_BEADS-1 in the direction of flow.
 
 ### <a id="s-beadLit"></a>`beadLit(t, which, i)`
 
-function · **exported** · L98–103
+function · **exported** · L99–104
 
 - calls: [`runnerIndex`](#s-runnerIndex)
 - called by: [`mountGame>updateLanes`](../render/engine.js.md#s-mountGame-updateLanes) _js/render/engine.js_
@@ -326,7 +327,7 @@ Brightness of bead `i` on a lane at time `t`: 1 on the runner, fading over the t
 
 ### <a id="s-laneOf"></a>`laneOf(st, p)`
 
-function · **exported** · L105–130
+function · **exported** · L106–131
 
 - calls: [`laneCentre`](#s-laneCentre) · [`spreadAt`](#s-spreadAt) · [`stationLane`](#s-stationLane) · [`subLaneOffset`](#s-subLaneOffset)
 - called by: [`stepLaneDiscipline`](../sim/sim.js.md#s-stepLaneDiscipline) _js/sim/sim.js_ · [`approachOf`](../station/stationworks.js.md#s-approachOf) _js/station/stationworks.js_ · [`inDeparture`](../station/stationworks.js.md#s-inDeparture) _js/station/stationworks.js_
@@ -337,12 +338,12 @@ for the lane-way it is in, or null if it is outside every zone. `off` is
 the lateral distance from that way's centreline, `along` the distance
 from the mouth in world units.
 
-- L113 · `if (along < -backR || along > f.length * 1.5 + 200) continue;` — hulls drop out of warp a little past the far gate
+- L114 · `if (along < -backR || along > f.length * 1.5 + 200) continue;` — hulls drop out of warp a little past the far gate
 <!-- /note -->
 
 ### <a id="s-laneDistance"></a>`laneDistance(st, p)`
 
-function · **exported** · L132–139
+function · **exported** · L133–140
 
 - calls: [`stationLane`](#s-stationLane)
 - called by: [`mountGame>updateLanes`](../render/engine.js.md#s-mountGame-updateLanes) _js/render/engine.js_
@@ -354,7 +355,7 @@ Distance from a point to the lane rig: to the axis from the mouth to the far gat
 
 ### <a id="s-laneFlow"></a>`laneFlow(which)`
 
-function · **exported** · L141–141
+function · **exported** · L142–142
 
 - called by: [`stepLaneDiscipline`](../sim/sim.js.md#s-stepLaneDiscipline) _js/sim/sim.js_
 

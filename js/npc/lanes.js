@@ -78,7 +78,8 @@ const _c = { x: 0, y: 0, z: 0 };
 export function lanePoint(st, which, u, out = { x: 0, y: 0, z: 0 }, k = (SUBLANES - 1) / 2) {
   const f = stationLane(st);
   laneCentre(f, which, u, _c);
-  const lat = subLaneOffset(k) * spreadAt(f, u).k;
+  const spread = f.port ? f.nearK + (1 - f.nearK) * funnel(u) : 1;
+  const lat = subLaneOffset(k) * spread;
   out.x = st.x + _c.x + f.side.x * lat;
   out.y = st.y + _c.y + f.side.y * lat;
   out.z = st.z + _c.z + f.side.z * lat;

@@ -141,7 +141,9 @@ function cellRocks(cx, cy, cz, out) {
 
 export function rocksInCell(cx, cy, cz) { const out = []; cellRocks(cx, cy, cz, out); return out; }
 
+export const CELL_CACHE_LIMIT = 2048;
 const _cells = new Map();
+export function fieldCacheStats() { return { cells: _cells.size, limit: CELL_CACHE_LIMIT }; }
 let _cellsSys = null;
 
 const RING = 24;
@@ -179,6 +181,10 @@ function cellCached(cx, cy, cz, time) {
   if (!got) {
     got = { at: NaN, rocks: [] };
     cellRocks(cx, cy, cz, got.rocks);
+    _cells.set(key, got);
+    if (_cells.size > CELL_CACHE_LIMIT) _cells.delete(_cells.keys().next().value);
+  } else {
+    _cells.delete(key);
     _cells.set(key, got);
   }
   if (got.at !== time) { refreshCell(got.rocks, time); got.at = time; }

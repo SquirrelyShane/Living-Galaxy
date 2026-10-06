@@ -114,7 +114,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/sim/sim.js](../files/js/sim/sim.js.md) L75 `clearDockwork` from `../station/dockwork.js`
 - [js/sim/sim.js](../files/js/sim/sim.js.md) L75 `handlingProgress` from `../station/dockwork.js`
 - [js/sim/sim.js](../files/js/sim/sim.js.md) L98 `notePerf` from `../core/perf.js`
-- [js/ui/hud.js](../files/js/ui/hud.js.md) L12 `recorder` from `../flight/recorder.js`
+- [js/ui/hud.js](../files/js/ui/hud.js.md) L13 `recorder` from `../flight/recorder.js`
 - [js/world/events/impacts.js](../files/js/world/events/impacts.js.md) L1 `DETAIL` from `../../bodygen/body.js`
 
 ## Top-level symbols never referenced (29)
@@ -129,7 +129,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/npc/speech.js › nearestPortName](../files/js/npc/speech.js.md#s-nearestPortName) L136
 - [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
 - [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
-- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L80
+- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L81
 - [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2167
 - [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
 - [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
@@ -147,7 +147,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/station/stations.js › SUFFIX](../files/js/station/stations.js.md#s-SUFFIX) L16
 - [js/station/stationyard.js › _v](../files/js/station/stationyard.js.md#s-_v) L41
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
-- [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L83
+- [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L84
 
 ## Exports with no importer (940)
 

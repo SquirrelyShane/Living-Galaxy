@@ -149,7 +149,7 @@ export function flyStep(n, dt, gx, gy, gz, opts = {}) {
   n.x += n.vx * dt;
   n.y += n.vy * dt;
   n.z += n.vz * dt;
-  n.speed = Math.hypot(n.vx, n.vy, n.vz);
+  n.speed = sp > cap ? Math.hypot(n.vx, n.vy, n.vz) : sp;
   faceVelocity(n, dt, opts.faceGoal ? { x: ux, y: uy, z: uz } : null);
   return Math.max(0, rem);
 }

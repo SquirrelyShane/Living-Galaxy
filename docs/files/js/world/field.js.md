@@ -1,6 +1,6 @@
 # js/world/field.js
 
-[index](../../../README.md) · 303 lines · 47 symbols · 4 imports · 21 importers
+[index](../../../README.md) · 309 lines · 49 symbols · 4 imports · 22 importers
 
 ## About
 
@@ -12,11 +12,11 @@ Space is diced into cells; each cell deterministically hashes out its own
 rocks. Fly away and back and the same rocks are in the same places. Mined
 rocks are remembered by key so they stay gone.
 
-- L144 · `const _cells = new Map();` — "cx,cy,cz" → { at, rocks }: the cell, and the time its wobble is for
-- L147 · `const RING = 24;` — distinct live queries per tick before reuse
-- L151 · `const _memo = new Map();` — query key → the ring array holding its answer
-- L154 · `siteHooks.onChange = () => forgetRocks();` — opening or closing a site changes what the cells hold: drop the caches
-- L248 · `const markSkip = new Map();` — rock key → sky time the skip lapses
+- L145 · `const _cells = new Map();` — "cx,cy,cz" → { at, rocks }: the cell, and the time its wobble is for
+- L149 · `const RING = 24;` — distinct live queries per tick before reuse
+- L153 · `const _memo = new Map();` — query key → the ring array holding its answer
+- L156 · `siteHooks.onChange = () => forgetRocks();` — opening or closing a site changes what the cells hold: drop the caches
+- L254 · `const markSkip = new Map();` — rock key → sky time the skip lapses
 <!-- /note -->
 
 ## Imports
@@ -49,6 +49,7 @@ rocks are remembered by key so they stay gone.
 - test/chart.test.mjs _(outside js/)_ — `inBelt`, `nearbyRocks`, `CELL`
 - test/ground.test.mjs _(outside js/)_ — `nearbyRocks`
 - test/marks.test.mjs _(outside js/)_ — `rockByKey`, `siteMarkRock`, `wearRock`, `depleted`, `nearbyRocks`
+- test/performance-upgrade.test.mjs _(outside js/)_ — `CELL_CACHE_LIMIT`, `fieldCacheStats`, `nearbyRocks`, `rockByKey`, `resetField`, `wearRock`, `depleted`
 - test/sites.test.mjs _(outside js/)_ — `nearbyRocks`, `depleted`, `wearRock`, `inBelt`, `CELL`
 - test/systems.test.mjs _(outside js/)_ — `nearbyRocks`, `bandNameAt`
 
@@ -63,14 +64,16 @@ rocks are remembered by key so they stay gone.
 - [`CELL`](#s-CELL) · const — used by [js/drones/ops.js](../drones/ops.js.md), [js/flight/probes.js](../flight/probes.js.md), test/chart.test.mjs, test/sites.test.mjs
 - [`BELT`](#s-BELT) · const — **no importer in scanned roots**
 - [`BELT_HALF_HEIGHT`](#s-BELT_HALF_HEIGHT) · const — used by test/avoid.test.mjs
-- [`depleted`](#s-depleted) · const — used by [js/aria/senses.js](../aria/senses.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), test/marks.test.mjs, test/sites.test.mjs
+- [`depleted`](#s-depleted) · const — used by [js/aria/senses.js](../aria/senses.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), test/marks.test.mjs, test/performance-upgrade.test.mjs, test/sites.test.mjs
 - [`icyAt`](#s-icyAt) · function — **no importer in scanned roots**
 - [`bandAt`](#s-bandAt) · function — used by [js/flight/probes.js](../flight/probes.js.md)
 - [`bandNameAt`](#s-bandNameAt) · function — used by [js/npc/ground.js](../npc/ground.js.md), test/systems.test.mjs
 - [`veinAt`](#s-veinAt) · function — **no importer in scanned roots**
 - [`rocksInCell`](#s-rocksInCell) · function — **no importer in scanned roots**
-- [`nearbyRocks`](#s-nearbyRocks) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/avoid.js](../flight/avoid.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/ground.js](../npc/ground.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/avoid.test.mjs, test/chart.test.mjs, test/ground.test.mjs, test/marks.test.mjs, test/sites.test.mjs, test/systems.test.mjs
-- [`rockByKey`](#s-rockByKey) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/marks.test.mjs
+- [`CELL_CACHE_LIMIT`](#s-CELL_CACHE_LIMIT) · const — used by test/performance-upgrade.test.mjs
+- [`fieldCacheStats`](#s-fieldCacheStats) · function — used by test/performance-upgrade.test.mjs
+- [`nearbyRocks`](#s-nearbyRocks) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/avoid.js](../flight/avoid.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/ground.js](../npc/ground.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/avoid.test.mjs, test/chart.test.mjs, test/ground.test.mjs, test/marks.test.mjs, test/performance-upgrade.test.mjs, test/sites.test.mjs, test/systems.test.mjs
+- [`rockByKey`](#s-rockByKey) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/marks.test.mjs, test/performance-upgrade.test.mjs
 - [`siteMarkRock`](#s-siteMarkRock) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md), [js/sim/sim.js](../sim/sim.js.md), test/marks.test.mjs
 - [`skipMarkRock`](#s-skipMarkRock) · function — used by [js/flight/autopilot.js](../flight/autopilot.js.md)
 - [`markSkipped`](#s-markSkipped) · function — **no importer in scanned roots**
@@ -78,9 +81,9 @@ rocks are remembered by key so they stay gone.
 - [`aboveBelt`](#s-aboveBelt) · function — used by test/avoid.test.mjs
 - [`inBelt`](#s-inBelt) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/mission/run.js](../mission/run.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/avoid.test.mjs, test/chart.test.mjs, test/sites.test.mjs
 - [`brokenRocks`](#s-brokenRocks) · const — used by [js/render/engine.js](../render/engine.js.md)
-- [`wearRock`](#s-wearRock) · function — used by [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), test/marks.test.mjs, test/sites.test.mjs
+- [`wearRock`](#s-wearRock) · function — used by [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/flight/turrets.js](../flight/turrets.js.md), test/marks.test.mjs, test/performance-upgrade.test.mjs, test/sites.test.mjs
 - [`eatRocks`](#s-eatRocks) · function — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`resetField`](#s-resetField) · function — used by [js/sim/sim.js](../sim/sim.js.md)
+- [`resetField`](#s-resetField) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/performance-upgrade.test.mjs
 
 ## Effects
 
@@ -345,9 +348,16 @@ function · **exported** · L142–142
 One cell's rocks, freshly grown (tests and tools; the game reads the cache).
 <!-- /note -->
 
+### <a id="s-CELL_CACHE_LIMIT"></a>`CELL_CACHE_LIMIT`
+
+const · **exported** · L144–144
+
+<!-- note:CELL_CACHE_LIMIT -->
+<!-- /note -->
+
 ### <a id="s-_cells"></a>`_cells`
 
-const · L144–144
+const · L145–145
 
 <!-- note:_cells -->
 ---- the rock query, and why it is cached twice ---------------------------
@@ -380,58 +390,65 @@ So there are two caches now, and they do different jobs:
     stated on the function: copy it if you mean to keep it.
 <!-- /note -->
 
+### <a id="s-fieldCacheStats"></a>`fieldCacheStats()`
+
+function · **exported** · L146–146
+
+<!-- note:fieldCacheStats -->
+<!-- /note -->
+
 ### <a id="s-_cellsSys"></a>`_cellsSys`
 
-const · L145–145
+const · L147–147
 
 <!-- note:_cellsSys -->
 <!-- /note -->
 
 ### <a id="s-RING"></a>`RING`
 
-const · L147–147
+const · L149–149
 
 <!-- note:RING -->
 <!-- /note -->
 
 ### <a id="s-_ring"></a>`_ring`
 
-const · L148–148
+const · L150–150
 
 <!-- note:_ring -->
 <!-- /note -->
 
 ### <a id="s-i"></a>`i`
 
-const · L149–149
+const · L151–151
 
 <!-- note:i -->
 <!-- /note -->
 
 ### <a id="s-_ringAt"></a>`_ringAt`
 
-const · L150–150
+const · L152–152
 
 <!-- note:_ringAt -->
 <!-- /note -->
 
 ### <a id="s-_memo"></a>`_memo`
 
-const · L151–151
+const · L153–153
 
 <!-- note:_memo -->
 <!-- /note -->
 
 ### <a id="s-_memoAt"></a>`_memoAt`
 
-const · L152–152
+const · L154–154
 
 <!-- note:_memoAt -->
 <!-- /note -->
 
 ### <a id="s-forgetRocks"></a>`forgetRocks()`
 
-function · L156–160
+function · L158–162
 
 - called by: [`@file`](#) · [`eatRocks`](#s-eatRocks) · [`nearbyRocks`](#s-nearbyRocks) · [`resetField`](#s-resetField) · [`wearRock`](#s-wearRock)
 
@@ -440,7 +457,7 @@ function · L156–160
 
 ### <a id="s-refreshCell"></a>`refreshCell(rocks, time)`
 
-function · L162–170
+function · L164–172
 
 - called by: [`cellCached`](#s-cellCached)
 
@@ -452,7 +469,7 @@ time, over rocks that already exist.
 
 ### <a id="s-cellCached"></a>`cellCached(cx, cy, cz, time)`
 
-function · L172–186
+function · L174–192
 
 - calls: [`cellRocks`](#s-cellRocks) · [`refreshCell`](#s-refreshCell)
 - called by: [`nearbyRocks`](#s-nearbyRocks) · [`rockByKey`](#s-rockByKey)
@@ -475,7 +492,7 @@ are refreshed over it when the clock moves on.
 
 ### <a id="s-nearbyRocks"></a>`nearbyRocks(pos, time, span=)`
 
-function · **exported** · L188–212
+function · **exported** · L194–218
 
 - calls: [`cellCached`](#s-cellCached) · [`forgetRocks`](#s-forgetRocks)
 - called by: [`senseSpace`](../aria/senses.js.md#s-senseSpace) _js/aria/senses.js_ · [`lockedRock`](../console/panels/nav.js.md#s-lockedRock) _js/console/panels/nav.js_ · [`stepMiner`](../drones/npcdrones.js.md#s-stepMiner) _js/drones/npcdrones.js_ · [`ROLE_STEP.harvester`](../drones/ops.js.md#s-ROLE_STEP-harvester) _js/drones/ops.js_ · [`ROLE_STEP.miner`](../drones/ops.js.md#s-ROLE_STEP-miner) _js/drones/ops.js_ · [`ROLE_STEP.surveyor`](../drones/ops.js.md#s-ROLE_STEP-surveyor) _js/drones/ops.js_ · [`apMine`](../flight/autopilot.js.md#s-apMine) _js/flight/autopilot.js_ · [`threatTo`](../flight/avoid.js.md#s-threatTo) _js/flight/avoid.js_ · [`assayPoint`](../flight/probes.js.md#s-assayPoint) _js/flight/probes.js_ · [`stepMining`](../flight/turrets.js.md#s-stepMining) _js/flight/turrets.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`claimSurvey`](../npc/ground.js.md#s-claimSurvey) _js/npc/ground.js_ · [`mountGame>updateAsteroids`](../render/engine.js.md#s-mountGame-updateAsteroids) _js/render/engine.js_ · [`candidateSig`](../sim/sim.js.md#s-candidateSig) _js/sim/sim.js_ · [`clearArrival`](../sim/sim.js.md#s-clearArrival) _js/sim/sim.js_ · [`lockCandidates`](../sim/sim.js.md#s-lockCandidates) _js/sim/sim.js_ · [`stepCollisions`](../sim/sim.js.md#s-stepCollisions) _js/sim/sim.js_ · [`stepWarp`](../sim/sim.js.md#s-stepWarp) _js/sim/sim.js_ · [`targetPosition`](../sim/sim.js.md#s-targetPosition) _js/sim/sim.js_ · [`tryAssay`](../sim/sim.js.md#s-tryAssay) _js/sim/sim.js_ · [`buildCtx`](../ui/tutorial.js.md#s-buildCtx) _js/ui/tutorial.js_
@@ -483,13 +500,13 @@ function · **exported** · L188–212
 <!-- note:nearbyRocks -->
 Rocks within `span` cells of a position. Reuses one array — copy if you keep it, never mutate it.
 
-- L200 · `for (const [k, v] of _memo) if (v === out) { _memo.delete(k); break; }` — the ring recycled an array that an earlier query in this same tick is
+- L206 · `for (const [k, v] of _memo) if (v === out) { _memo.delete(k); break; }` — the ring recycled an array that an earlier query in this same tick is
   still filed under — drop that memo entry so nobody is handed a stale one
 <!-- /note -->
 
 ### <a id="s-rockByKey"></a>`rockByKey(key, time)`
 
-function · **exported** · L214–230
+function · **exported** · L220–236
 
 - calls: [`siteRockBase`](../economy/sites.js.md#s-siteRockBase) _js/economy/sites.js_ · [`cellCached`](#s-cellCached)
 - called by: [`r`](../sim/sim.js.md#s-r) _js/sim/sim.js_ · [`siteMarkRock`](#s-siteMarkRock) ×2
@@ -502,7 +519,7 @@ the site that laid it has closed, or the key is not a rock's.
 
 ### <a id="s-siteMarkRock"></a>`siteMarkRock(siteId, time, prefer=)`
 
-function · **exported** · L232–246
+function · **exported** · L238–252
 
 - calls: [`siteRocks`](../economy/sites.js.md#s-siteRocks) _js/economy/sites.js_ · [`markSkipped`](#s-markSkipped) ×2 · [`rockByKey`](#s-rockByKey) ×2
 - called by: [`apMine`](../flight/autopilot.js.md#s-apMine) _js/flight/autopilot.js_ ×2 · [`r~2`](../sim/sim.js.md#s-r-2) _js/sim/sim.js_
@@ -514,13 +531,13 @@ while it lasts, and the mark moves to the next biggest when it is gone.
 `prefer` keeps a rock that is still live (the one already marked), so a
 mark never jumps while you are cutting it.
 
-- L237 · `let best = null, fallback = null;` — 0.3.68: a rock the cutter gave up on is passed over — unless every rock
+- L243 · `let best = null, fallback = null;` — 0.3.68: a rock the cutter gave up on is passed over — unless every rock
   left has been, in which case the biggest of them still carries the mark
 <!-- /note -->
 
 ### <a id="s-markSkip"></a>`markSkip`
 
-const · L248–248
+const · L254–254
 
 <!-- note:markSkip -->
 0.3.68 — the mark follows the cutter. When the mining loop gives up on a rock
@@ -531,7 +548,7 @@ loop has stopped working.
 
 ### <a id="s-skipMarkRock"></a>`skipMarkRock(key, until)`
 
-function · **exported** · L249–249
+function · **exported** · L255–255
 
 - called by: [`apMine`](../flight/autopilot.js.md#s-apMine) _js/flight/autopilot.js_
 
@@ -540,7 +557,7 @@ function · **exported** · L249–249
 
 ### <a id="s-markSkipped"></a>`markSkipped(key, time)`
 
-function · **exported** · L250–256
+function · **exported** · L256–262
 
 - called by: [`siteMarkRock`](#s-siteMarkRock) ×2
 
@@ -549,7 +566,7 @@ function · **exported** · L250–256
 
 ### <a id="s-beltExit"></a>`beltExit(pos, margin=)`
 
-function · **exported** · L258–263
+function · **exported** · L264–269
 
 - calls: [`inBelt`](#s-inBelt)
 - called by: [`apLeg`](../flight/autopilot.js.md#s-apLeg) _js/flight/autopilot.js_ · [`beginUnstick`](../flight/autopilot.js.md#s-beginUnstick) _js/flight/autopilot.js_
@@ -566,7 +583,7 @@ wobble.
 
 ### <a id="s-aboveBelt"></a>`aboveBelt(pos, margin=)`
 
-function · **exported** · L265–267
+function · **exported** · L271–273
 
 <!-- note:aboveBelt -->
 Is this position clear of the rock layer, wherever it is in the annulus?
@@ -574,7 +591,7 @@ Is this position clear of the rock layer, wherever it is in the annulus?
 
 ### <a id="s-inBelt"></a>`inBelt(pos)`
 
-function · **exported** · L269–276
+function · **exported** · L275–282
 
 - called by: [`senseHull`](../aria/senses.js.md#s-senseHull) _js/aria/senses.js_ · [`senseSpace`](../aria/senses.js.md#s-senseSpace) _js/aria/senses.js_ · [`lockedRock`](../console/panels/nav.js.md#s-lockedRock) _js/console/panels/nav.js_ · [`mountSurvey`](../console/panels/nav.js.md#s-mountSurvey) _js/console/panels/nav.js_ · [`atSeam`](../flight/autopilot.js.md#s-atSeam) _js/flight/autopilot.js_ · [`engageMiningLoop`](../flight/autopilot.js.md#s-engageMiningLoop) _js/flight/autopilot.js_ · [`assayPoint`](../flight/probes.js.md#s-assayPoint) _js/flight/probes.js_ · [`EXEC.MINE`](../mission/run.js.md#s-EXEC-MINE) _js/mission/run.js_ ×2 · [`bestHulk`](../mission/salvage.js.md#s-bestHulk) _js/mission/salvage.js_ · [`snapshot`](../npc/captain.js.md#s-snapshot) _js/npc/captain.js_ · [`mountGame>audioState`](../render/engine.js.md#s-mountGame-audioState) _js/render/engine.js_ · [`mountGame>updateAsteroids`](../render/engine.js.md#s-mountGame-updateAsteroids) _js/render/engine.js_ · [`clearArrival`](../sim/sim.js.md#s-clearArrival) _js/sim/sim.js_ · [`stepCollisions`](../sim/sim.js.md#s-stepCollisions) _js/sim/sim.js_ · [`stepWarp`](../sim/sim.js.md#s-stepWarp) _js/sim/sim.js_ · [`beltExit`](#s-beltExit)
 
@@ -583,7 +600,7 @@ function · **exported** · L269–276
 
 ### <a id="s-brokenRocks"></a>`brokenRocks`
 
-const · **exported** · L278–278
+const · **exported** · L284–284
 
 <!-- note:brokenRocks -->
 Rocks that were cut out, newest last, for whoever wants to see them go (the
@@ -593,14 +610,14 @@ queue nobody drains must not grow.
 
 ### <a id="s-wearRock"></a>`wearRock(key, amount)`
 
-function · **exported** · L280–291
+function · **exported** · L286–297
 
 - calls: [`forgetRocks`](#s-forgetRocks)
 - called by: [`stepMiner`](../drones/npcdrones.js.md#s-stepMiner) _js/drones/npcdrones.js_ · [`ROLE_STEP.harvester`](../drones/ops.js.md#s-ROLE_STEP-harvester) _js/drones/ops.js_ · [`ROLE_STEP.miner`](../drones/ops.js.md#s-ROLE_STEP-miner) _js/drones/ops.js_ · [`stepMining`](../flight/turrets.js.md#s-stepMining) _js/flight/turrets.js_
 
 <!-- note:wearRock -->
-- L287 · `forgetRocks();` — it is GONE, so the cells that held it have to be grown again without it
-- L288 · `return next;` — 0.3.28 — a rock being cut is still the same rock in the same place. This
+- L293 · `forgetRocks();` — it is GONE, so the cells that held it have to be grown again without it
+- L294 · `return next;` — 0.3.28 — a rock being cut is still the same rock in the same place. This
   used to drop every cached cell on every tick of the cutter, which is sixty
   full rebuilds of the whole neighbourhood a second while you are mining —
   the one moment you are certainly parked next to a rock and looking at it.
@@ -610,7 +627,7 @@ function · **exported** · L280–291
 
 ### <a id="s-eatRocks"></a>`eatRocks(keys)`
 
-function · **exported** · L293–296
+function · **exported** · L299–302
 
 - calls: [`forgetRocks`](#s-forgetRocks)
 
@@ -622,7 +639,7 @@ hole eats hundreds a second. Eaten rocks do not shatter: they fall in.
 
 ### <a id="s-resetField"></a>`resetField()`
 
-function · **exported** · L298–303
+function · **exported** · L304–309
 
 - calls: [`forgetRocks`](#s-forgetRocks)
 - called by: [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_

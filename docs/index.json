@@ -64331,7 +64331,7 @@
   },
   {
    "file": "js/npc/lanes.js",
-   "lines": 141,
+   "lines": 142,
    "vendor": false,
    "summary": "port traffic lanes.",
    "imports": [],
@@ -64560,20 +64560,20 @@
      "key": "lanePoint",
      "kind": "function",
      "line": 78,
-     "end": 86,
+     "end": 87,
      "exported": true,
      "calls": [
       "js/npc/lanes.js#stationLane",
       "js/npc/lanes.js#laneCentre",
-      "js/npc/lanes.js#subLaneOffset",
-      "js/npc/lanes.js#spreadAt"
+      "js/npc/lanes.js#funnel",
+      "js/npc/lanes.js#subLaneOffset"
      ]
     },
     {
      "key": "laneAt",
      "kind": "function",
-     "line": 88,
-     "end": 90,
+     "line": 89,
+     "end": 91,
      "exported": true,
      "calls": [
       "js/npc/lanes.js#lanePoint"
@@ -64582,16 +64582,16 @@
     {
      "key": "runnerIndex",
      "kind": "function",
-     "line": 92,
-     "end": 96,
+     "line": 93,
+     "end": 97,
      "exported": true,
      "calls": []
     },
     {
      "key": "beadLit",
      "kind": "function",
-     "line": 98,
-     "end": 103,
+     "line": 99,
+     "end": 104,
      "exported": true,
      "calls": [
       "js/npc/lanes.js#runnerIndex"
@@ -64600,8 +64600,8 @@
     {
      "key": "laneOf",
      "kind": "function",
-     "line": 105,
-     "end": 130,
+     "line": 106,
+     "end": 131,
      "exported": true,
      "calls": [
       "js/npc/lanes.js#stationLane",
@@ -64613,8 +64613,8 @@
     {
      "key": "laneDistance",
      "kind": "function",
-     "line": 132,
-     "end": 139,
+     "line": 133,
+     "end": 140,
      "exported": true,
      "calls": [
       "js/npc/lanes.js#stationLane"
@@ -64623,8 +64623,8 @@
     {
      "key": "laneFlow",
      "kind": "function",
-     "line": 141,
-     "end": 141,
+     "line": 142,
+     "end": 142,
      "exported": true,
      "calls": []
     }
@@ -68644,10 +68644,20 @@
   },
   {
    "file": "js/render/engine.js",
-   "lines": 2948,
+   "lines": 2952,
    "vendor": false,
    "summary": "The world is ~10^6 units across and the ship is 2.4 units long, so we never",
    "imports": [
+    {
+     "spec": "./resolution.js",
+     "target": "js/render/resolution.js",
+     "names": [
+      {
+       "local": "createResolutionController",
+       "imported": "createResolutionController"
+      }
+     ]
+    },
     {
      "spec": "../../vendor/three.module.min.js",
      "target": null,
@@ -69424,21 +69434,13 @@
     {
      "key": "_f",
      "kind": "const",
-     "line": 60,
-     "end": 60,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "_up",
-     "kind": "const",
      "line": 61,
      "end": 61,
      "exported": false,
      "calls": []
     },
     {
-     "key": "_right",
+     "key": "_up",
      "kind": "const",
      "line": 62,
      "end": 62,
@@ -69446,7 +69448,7 @@
      "calls": []
     },
     {
-     "key": "_shipUp",
+     "key": "_right",
      "kind": "const",
      "line": 63,
      "end": 63,
@@ -69454,7 +69456,7 @@
      "calls": []
     },
     {
-     "key": "_proj",
+     "key": "_shipUp",
      "kind": "const",
      "line": 64,
      "end": 64,
@@ -69462,7 +69464,7 @@
      "calls": []
     },
     {
-     "key": "_dummy",
+     "key": "_proj",
      "kind": "const",
      "line": 65,
      "end": 65,
@@ -69470,7 +69472,7 @@
      "calls": []
     },
     {
-     "key": "_wbox",
+     "key": "_dummy",
      "kind": "const",
      "line": 66,
      "end": 66,
@@ -69478,7 +69480,7 @@
      "calls": []
     },
     {
-     "key": "_wc",
+     "key": "_wbox",
      "kind": "const",
      "line": 67,
      "end": 67,
@@ -69486,7 +69488,7 @@
      "calls": []
     },
     {
-     "key": "_basisX",
+     "key": "_wc",
      "kind": "const",
      "line": 68,
      "end": 68,
@@ -69494,7 +69496,7 @@
      "calls": []
     },
     {
-     "key": "_mouse",
+     "key": "_basisX",
      "kind": "const",
      "line": 69,
      "end": 69,
@@ -69502,7 +69504,7 @@
      "calls": []
     },
     {
-     "key": "_ray",
+     "key": "_mouse",
      "kind": "const",
      "line": 70,
      "end": 70,
@@ -69510,7 +69512,7 @@
      "calls": []
     },
     {
-     "key": "_mat",
+     "key": "_ray",
      "kind": "const",
      "line": 71,
      "end": 71,
@@ -69518,7 +69520,7 @@
      "calls": []
     },
     {
-     "key": "_bp",
+     "key": "_mat",
      "kind": "const",
      "line": 72,
      "end": 72,
@@ -69526,15 +69528,15 @@
      "calls": []
     },
     {
-     "key": "NEAR",
+     "key": "_bp",
      "kind": "const",
-     "line": 74,
-     "end": 74,
+     "line": 73,
+     "end": 73,
      "exported": false,
      "calls": []
     },
     {
-     "key": "FAR",
+     "key": "NEAR",
      "kind": "const",
      "line": 75,
      "end": 75,
@@ -69542,7 +69544,7 @@
      "calls": []
     },
     {
-     "key": "STAR_SHELL",
+     "key": "FAR",
      "kind": "const",
      "line": 76,
      "end": 76,
@@ -69550,7 +69552,7 @@
      "calls": []
     },
     {
-     "key": "MAX_ROCKS",
+     "key": "STAR_SHELL",
      "kind": "const",
      "line": 77,
      "end": 77,
@@ -69558,7 +69560,7 @@
      "calls": []
     },
     {
-     "key": "MAX_CHUNKS",
+     "key": "MAX_ROCKS",
      "kind": "const",
      "line": 78,
      "end": 78,
@@ -69566,7 +69568,7 @@
      "calls": []
     },
     {
-     "key": "MAX_SCRAP",
+     "key": "MAX_CHUNKS",
      "kind": "const",
      "line": 79,
      "end": 79,
@@ -69574,7 +69576,7 @@
      "calls": []
     },
     {
-     "key": "MAX_IMPACTORS",
+     "key": "MAX_SCRAP",
      "kind": "const",
      "line": 80,
      "end": 80,
@@ -69582,7 +69584,7 @@
      "calls": []
     },
     {
-     "key": "MAX_SHOTS",
+     "key": "MAX_IMPACTORS",
      "kind": "const",
      "line": 81,
      "end": 81,
@@ -69590,10 +69592,18 @@
      "calls": []
     },
     {
+     "key": "MAX_SHOTS",
+     "kind": "const",
+     "line": 82,
+     "end": 82,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "disposeObject",
      "kind": "function",
-     "line": 83,
-     "end": 94,
+     "line": 84,
+     "end": 95,
      "exported": false,
      "calls": [
       "js/render/engine.js#disposeMat"
@@ -69602,40 +69612,40 @@
     {
      "key": "disposeMat",
      "kind": "function",
-     "line": 96,
-     "end": 103,
+     "line": 97,
+     "end": 104,
      "exported": false,
      "calls": []
     },
     {
      "key": "hexColor",
      "kind": "function",
-     "line": 105,
-     "end": 107,
+     "line": 106,
+     "end": 108,
      "exported": false,
      "calls": []
     },
     {
      "key": "_dematState",
      "kind": "const",
-     "line": 109,
-     "end": 109,
+     "line": 110,
+     "end": 110,
      "exported": false,
      "calls": []
     },
     {
      "key": "dematerialize",
      "kind": "function",
-     "line": 110,
-     "end": 130,
+     "line": 111,
+     "end": 131,
      "exported": false,
      "calls": []
     },
     {
      "key": "makeShipGroup",
      "kind": "function",
-     "line": 132,
-     "end": 137,
+     "line": 133,
+     "end": 138,
      "exported": false,
      "calls": [
       "js/ships/shipdb.js#shipById",
@@ -69645,24 +69655,24 @@
     {
      "key": "PART_IDS",
      "kind": "const",
-     "line": 139,
-     "end": 139,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "hullBudget",
-     "kind": "const",
      "line": 140,
      "end": 140,
      "exported": false,
      "calls": []
     },
     {
-     "key": "drawRange",
-     "kind": "function",
+     "key": "hullBudget",
+     "kind": "const",
      "line": 141,
      "end": 141,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "drawRange",
+     "kind": "function",
+     "line": 142,
+     "end": 142,
      "exported": false,
      "calls": [
       "js/sim/sim.js#sensorRange"
@@ -69671,16 +69681,16 @@
     {
      "key": "MESH_K",
      "kind": "const",
-     "line": 142,
-     "end": 142,
+     "line": 143,
+     "end": 143,
      "exported": false,
      "calls": []
     },
     {
      "key": "meshRange",
      "kind": "function",
-     "line": 143,
-     "end": 143,
+     "line": 144,
+     "end": 144,
      "exported": false,
      "calls": [
       "js/render/engine.js#drawRange"
@@ -69689,21 +69699,13 @@
     {
      "key": "ROCK_DRAW_R",
      "kind": "const",
-     "line": 144,
-     "end": 144,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "ROCK_FADE",
-     "kind": "const",
      "line": 145,
      "end": 145,
      "exported": false,
      "calls": []
     },
     {
-     "key": "frameDt",
+     "key": "ROCK_FADE",
      "kind": "const",
      "line": 146,
      "end": 146,
@@ -69711,18 +69713,26 @@
      "calls": []
     },
     {
-     "key": "throttleCapOf",
-     "kind": "function",
+     "key": "frameDt",
+     "kind": "const",
      "line": 147,
      "end": 147,
      "exported": false,
      "calls": []
     },
     {
+     "key": "throttleCapOf",
+     "kind": "function",
+     "line": 148,
+     "end": 148,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "orientCraft",
      "kind": "function",
-     "line": 149,
-     "end": 169,
+     "line": 150,
+     "end": 170,
      "exported": false,
      "calls": [
       "js/flight/ship.js#forwardOf"
@@ -69731,8 +69741,8 @@
     {
      "key": "mountGame",
      "kind": "function",
-     "line": 171,
-     "end": 2948,
+     "line": 172,
+     "end": 2952,
      "exported": true,
      "calls": [
       "js/sim/sim.js#wireControlsTest",
@@ -69741,6 +69751,7 @@
       "js/aria/aria.js#wireAria",
       "js/net/worldsync.js#wireWorldSyncTest",
       "js/core/input.js#bindInput",
+      "js/render/resolution.js#createResolutionController",
       "js/render/warpfx.js#makeWarpFx",
       "js/render/postfx.js#makeBloom",
       "js/world/textures.js#makeGlowTexture",
@@ -69767,72 +69778,72 @@
     {
      "key": "mountGame>rel",
      "kind": "function",
-     "line": 213,
-     "end": 213,
+     "line": 215,
+     "end": 215,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>inst",
      "kind": "function",
-     "line": 295,
-     "end": 304,
+     "line": 297,
+     "end": 306,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame.count",
      "kind": "prop",
-     "line": 313,
-     "end": 313,
+     "line": 315,
+     "end": 315,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>rogueClass",
      "kind": "function",
-     "line": 438,
-     "end": 438,
+     "line": 440,
+     "end": 440,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>navLightFor",
      "kind": "function",
-     "line": 446,
-     "end": 458,
+     "line": 448,
+     "end": 460,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>placeNavLight",
      "kind": "function",
-     "line": 459,
-     "end": 465,
+     "line": 461,
+     "end": 467,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>dropNavLight",
      "kind": "function",
-     "line": 466,
-     "end": 472,
+     "line": 468,
+     "end": 474,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>lampLevel",
      "kind": "function",
-     "line": 475,
-     "end": 480,
+     "line": 477,
+     "end": 482,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>makeStation",
      "kind": "function",
-     "line": 483,
-     "end": 493,
+     "line": 485,
+     "end": 495,
      "exported": false,
      "calls": [
       "js/station/stationyard.js#ensureBuilt"
@@ -69841,16 +69852,16 @@
     {
      "key": "mountGame>dropProxy",
      "kind": "function",
-     "line": 494,
-     "end": 501,
+     "line": 496,
+     "end": 503,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>makeLanes",
      "kind": "function",
-     "line": 508,
-     "end": 589,
+     "line": 510,
+     "end": 591,
      "exported": false,
      "calls": [
       "js/npc/lanes.js#stationLane",
@@ -69863,8 +69874,8 @@
     {
      "key": "mountGame>makeLanes>edge",
      "kind": "function",
-     "line": 515,
-     "end": 524,
+     "line": 517,
+     "end": 526,
      "exported": false,
      "calls": [
       "js/npc/lanes.js#laneCentre",
@@ -69874,8 +69885,8 @@
     {
      "key": "mountGame>updateLanes",
      "kind": "function",
-     "line": 590,
-     "end": 616,
+     "line": 592,
+     "end": 618,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>rel",
@@ -69886,8 +69897,8 @@
     {
      "key": "mountGame>updateStations",
      "kind": "function",
-     "line": 618,
-     "end": 650,
+     "line": 620,
+     "end": 652,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>makeStation",
@@ -69904,8 +69915,8 @@
     {
      "key": "mountGame>clearWorld",
      "kind": "function",
-     "line": 662,
-     "end": 688,
+     "line": 664,
+     "end": 690,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>dropProxy",
@@ -69919,8 +69930,8 @@
     {
      "key": "mountGame>applyStar",
      "kind": "function",
-     "line": 690,
-     "end": 702,
+     "line": 692,
+     "end": 704,
      "exported": false,
      "calls": [
       "js/world/textures.js#makePlanetTexture",
@@ -69930,16 +69941,16 @@
     {
      "key": "mountGame>dropCloseUp",
      "kind": "function",
-     "line": 712,
-     "end": 719,
+     "line": 714,
+     "end": 721,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>stepCloseUp",
      "kind": "function",
-     "line": 720,
-     "end": 746,
+     "line": 722,
+     "end": 748,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyPosition",
@@ -69951,16 +69962,16 @@
     {
      "key": "mountGame>texArgs",
      "kind": "function",
-     "line": 747,
-     "end": 747,
+     "line": 749,
+     "end": 749,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>texKey",
      "kind": "function",
-     "line": 748,
-     "end": 748,
+     "line": 750,
+     "end": 750,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>texArgs"
@@ -69969,16 +69980,16 @@
     {
      "key": "mountGame>texCacheFor",
      "kind": "function",
-     "line": 749,
-     "end": 754,
+     "line": 751,
+     "end": 756,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>surfJag",
      "kind": "function",
-     "line": 756,
-     "end": 758,
+     "line": 758,
+     "end": 760,
      "exported": false,
      "calls": [
       "js/world/events/cataclysm.js#dirNoise"
@@ -69987,8 +69998,8 @@
     {
      "key": "mountGame>deformCratered",
      "kind": "function",
-     "line": 760,
-     "end": 806,
+     "line": 762,
+     "end": 808,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>surfJag"
@@ -69997,8 +70008,8 @@
     {
      "key": "mountGame>deformShatteredCore",
      "kind": "function",
-     "line": 808,
-     "end": 824,
+     "line": 810,
+     "end": 826,
      "exported": false,
      "calls": [
       "js/world/events/cataclysm.js#dirFbm",
@@ -70008,8 +70019,8 @@
     {
      "key": "mountGame>buildPlanet",
      "kind": "function",
-     "line": 826,
-     "end": 906,
+     "line": 828,
+     "end": 908,
      "exported": false,
      "calls": [
       "js/render/engine.js#hexColor",
@@ -70022,24 +70033,24 @@
     {
      "key": "mountGame>buildOrbits",
      "kind": "function",
-     "line": 908,
-     "end": 925,
+     "line": 910,
+     "end": 927,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>buildBeacons",
      "kind": "function",
-     "line": 927,
-     "end": 934,
+     "line": 929,
+     "end": 936,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>rebuildBody",
      "kind": "function",
-     "line": 936,
-     "end": 961,
+     "line": 938,
+     "end": 963,
      "exported": false,
      "calls": [
       "js/render/engine.js#disposeObject",
@@ -70049,8 +70060,8 @@
     {
      "key": "mountGame>rebuildWorld",
      "kind": "function",
-     "line": 963,
-     "end": 981,
+     "line": 965,
+     "end": 983,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>clearWorld",
@@ -70068,8 +70079,8 @@
     {
      "key": "mountGame>buildBeltHaze",
      "kind": "function",
-     "line": 984,
-     "end": 1008,
+     "line": 986,
+     "end": 1010,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>buildBeltHaze>rnd"
@@ -70078,16 +70089,16 @@
     {
      "key": "mountGame>buildBeltHaze>rnd",
      "kind": "function",
-     "line": 993,
-     "end": 993,
+     "line": 995,
+     "end": 995,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>refreshOwnHull",
      "kind": "function",
-     "line": 1015,
-     "end": 1027,
+     "line": 1017,
+     "end": 1029,
      "exported": false,
      "calls": [
       "js/sim/sim.js#currentShipId",
@@ -70098,24 +70109,24 @@
     {
      "key": "mountGame>fxMat",
      "kind": "function",
-     "line": 1043,
-     "end": 1045,
+     "line": 1045,
+     "end": 1047,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>placeOnSurface",
      "kind": "function",
-     "line": 1047,
-     "end": 1050,
+     "line": 1049,
+     "end": 1052,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>spawnImpactFX",
      "kind": "function",
-     "line": 1052,
-     "end": 1118,
+     "line": 1054,
+     "end": 1120,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -70128,24 +70139,24 @@
     {
      "key": "mountGame>spawnImpactFX>add",
      "kind": "function",
-     "line": 1057,
-     "end": 1057,
+     "line": 1059,
+     "end": 1059,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>easeOut",
      "kind": "function",
-     "line": 1120,
-     "end": 1122,
+     "line": 1122,
+     "end": 1124,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>stepImpactFX",
      "kind": "function",
-     "line": 1124,
-     "end": 1139,
+     "line": 1126,
+     "end": 1141,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>spawnImpactFX"
@@ -70154,16 +70165,16 @@
     {
      "key": "mountGame>shellMat",
      "kind": "function",
-     "line": 1157,
-     "end": 1171,
+     "line": 1159,
+     "end": 1173,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>buildEventRig",
      "kind": "function",
-     "line": 1178,
-     "end": 1210,
+     "line": 1180,
+     "end": 1212,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>shellMat"
@@ -70172,8 +70183,8 @@
     {
      "key": "mountGame>disposeRig",
      "kind": "function",
-     "line": 1212,
-     "end": 1216,
+     "line": 1214,
+     "end": 1218,
      "exported": false,
      "calls": [
       "js/render/engine.js#disposeObject"
@@ -70182,8 +70193,8 @@
     {
      "key": "mountGame>stepEventFX",
      "kind": "function",
-     "line": 1220,
-     "end": 1271,
+     "line": 1222,
+     "end": 1273,
      "exported": false,
      "calls": [
       "js/world/bodies.js#bodyById",
@@ -70195,24 +70206,24 @@
     {
      "key": "mountGame>stepBodyRings",
      "kind": "function",
-     "line": 1273,
-     "end": 1296,
+     "line": 1275,
+     "end": 1298,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>stepSkyLight",
      "kind": "function",
-     "line": 1312,
-     "end": 1357,
+     "line": 1314,
+     "end": 1359,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>audioState",
      "kind": "function",
-     "line": 1359,
-     "end": 1382,
+     "line": 1361,
+     "end": 1384,
      "exported": false,
      "calls": [
       "js/world/field.js#inBelt",
@@ -70223,48 +70234,48 @@
     {
      "key": "mountGame>resize",
      "kind": "function",
-     "line": 1392,
-     "end": 1398,
+     "line": 1394,
+     "end": 1400,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extZoom",
      "kind": "function",
-     "line": 1417,
-     "end": 1419,
+     "line": 1419,
+     "end": 1421,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extOrbit",
      "kind": "function",
-     "line": 1420,
-     "end": 1423,
+     "line": 1422,
+     "end": 1425,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extPan",
      "kind": "function",
-     "line": 1424,
-     "end": 1428,
+     "line": 1426,
+     "end": 1430,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extReset",
      "kind": "function",
-     "line": 1429,
-     "end": 1431,
+     "line": 1431,
+     "end": 1433,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>pickAt",
      "kind": "function",
-     "line": 1439,
-     "end": 1457,
+     "line": 1441,
+     "end": 1459,
      "exported": false,
      "calls": [
       "js/sim/sim.js#acquireLock"
@@ -70273,16 +70284,16 @@
     {
      "key": "mountGame>onPointerDown",
      "kind": "function",
-     "line": 1459,
-     "end": 1478,
+     "line": 1461,
+     "end": 1480,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>onPointerMove",
      "kind": "function",
-     "line": 1479,
-     "end": 1511,
+     "line": 1481,
+     "end": 1513,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>extPan",
@@ -70293,8 +70304,8 @@
     {
      "key": "mountGame>onPointerUp",
      "kind": "function",
-     "line": 1512,
-     "end": 1522,
+     "line": 1514,
+     "end": 1524,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>pickAt"
@@ -70303,56 +70314,56 @@
     {
      "key": "mountGame>rockQuality",
      "kind": "function",
-     "line": 1530,
-     "end": 1543,
+     "line": 1532,
+     "end": 1545,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>releaseBody",
      "kind": "function",
-     "line": 1545,
-     "end": 1552,
+     "line": 1547,
+     "end": 1554,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>rogueKey",
      "kind": "function",
-     "line": 1558,
-     "end": 1558,
+     "line": 1560,
+     "end": 1560,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>shapeKey",
      "kind": "function",
-     "line": 1561,
-     "end": 1561,
+     "line": 1563,
+     "end": 1563,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>bucketOf",
      "kind": "function",
-     "line": 1562,
-     "end": 1562,
+     "line": 1564,
+     "end": 1564,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>stretchOf",
      "kind": "function",
-     "line": 1563,
-     "end": 1569,
+     "line": 1565,
+     "end": 1571,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>rockTint",
      "kind": "function",
-     "line": 1571,
-     "end": 1577,
+     "line": 1573,
+     "end": 1579,
      "exported": false,
      "calls": [
       "js/world/rockgen.js#rockLook"
@@ -70361,8 +70372,8 @@
     {
      "key": "mountGame>shapeFor",
      "kind": "function",
-     "line": 1579,
-     "end": 1602,
+     "line": 1581,
+     "end": 1604,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>shapeKey",
@@ -70374,8 +70385,8 @@
     {
      "key": "mountGame>bodyFor",
      "kind": "function",
-     "line": 1604,
-     "end": 1629,
+     "line": 1606,
+     "end": 1631,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>bucketOf",
@@ -70387,8 +70398,8 @@
     {
      "key": "mountGame>mountShared",
      "kind": "function",
-     "line": 1631,
-     "end": 1645,
+     "line": 1633,
+     "end": 1647,
      "exported": false,
      "calls": [
       "js/bodygen/baked.js#bakedMaterial",
@@ -70398,16 +70409,16 @@
     {
      "key": "mountGame>mountShared.dispose",
      "kind": "prop",
-     "line": 1644,
-     "end": 1644,
+     "line": 1646,
+     "end": 1646,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>poseBody",
      "kind": "function",
-     "line": 1647,
-     "end": 1655,
+     "line": 1649,
+     "end": 1657,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>stretchOf"
@@ -70416,8 +70427,8 @@
     {
      "key": "mountGame>mountBody",
      "kind": "function",
-     "line": 1657,
-     "end": 1669,
+     "line": 1659,
+     "end": 1671,
      "exported": false,
      "calls": [
       "js/bodygen/baked.js#mountBakedData"
@@ -70426,16 +70437,16 @@
     {
      "key": "mountGame>assayFor",
      "kind": "function",
-     "line": 1671,
-     "end": 1673,
+     "line": 1673,
+     "end": 1675,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>clearRockBuckets",
      "kind": "function",
-     "line": 1675,
-     "end": 1679,
+     "line": 1677,
+     "end": 1681,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>releaseBody"
@@ -70444,8 +70455,8 @@
     {
      "key": "mountGame>drainBrokenRocks",
      "kind": "function",
-     "line": 1683,
-     "end": 1691,
+     "line": 1685,
+     "end": 1693,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>releaseBody"
@@ -70454,8 +70465,8 @@
     {
      "key": "mountGame>updateAsteroids",
      "kind": "function",
-     "line": 1694,
-     "end": 1790,
+     "line": 1696,
+     "end": 1792,
      "exported": false,
      "calls": [
       "js/bodygen/grower.js#pump",
@@ -70475,8 +70486,8 @@
     {
      "key": "mountGame>updateDebris",
      "kind": "function",
-     "line": 1793,
-     "end": 1834,
+     "line": 1795,
+     "end": 1836,
      "exported": false,
      "calls": [
       "js/world/events/cataclysm.js#kelvinHex"
@@ -70485,16 +70496,16 @@
     {
      "key": "mountGame>releaseImpactorBody",
      "kind": "function",
-     "line": 1836,
-     "end": 1843,
+     "line": 1838,
+     "end": 1845,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>impactorBody",
      "kind": "function",
-     "line": 1845,
-     "end": 1855,
+     "line": 1847,
+     "end": 1857,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>rogueKey",
@@ -70509,16 +70520,16 @@
     {
      "key": "mountGame>rogueAssay",
      "kind": "function",
-     "line": 1857,
-     "end": 1859,
+     "line": 1859,
+     "end": 1861,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>updateImpactors",
      "kind": "function",
-     "line": 1861,
-     "end": 1876,
+     "line": 1863,
+     "end": 1878,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>impactorBody",
@@ -70528,32 +70539,32 @@
     {
      "key": "mountGame>updateShots",
      "kind": "function",
-     "line": 1878,
-     "end": 1890,
+     "line": 1880,
+     "end": 1892,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>spawnChip",
      "kind": "function",
-     "line": 1892,
-     "end": 1906,
+     "line": 1894,
+     "end": 1908,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>spawnPuff",
      "kind": "function",
-     "line": 1908,
-     "end": 1919,
+     "line": 1910,
+     "end": 1921,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>updateMiningFX",
      "kind": "function",
-     "line": 1921,
-     "end": 2008,
+     "line": 1923,
+     "end": 2010,
      "exported": false,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -70566,8 +70577,8 @@
     {
      "key": "mountGame>updateRigFX",
      "kind": "function",
-     "line": 2028,
-     "end": 2074,
+     "line": 2030,
+     "end": 2076,
      "exported": false,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -70579,16 +70590,16 @@
     {
      "key": "mountGame>updateTractorBeam",
      "kind": "function",
-     "line": 2089,
-     "end": 2106,
+     "line": 2091,
+     "end": 2108,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>droneDesign",
      "kind": "function",
-     "line": 2109,
-     "end": 2114,
+     "line": 2111,
+     "end": 2116,
      "exported": false,
      "calls": [
       "js/drones/droneforge.js#droneFor"
@@ -70597,8 +70608,8 @@
     {
      "key": "mountGame>syncContactMeshes",
      "kind": "function",
-     "line": 2115,
-     "end": 2145,
+     "line": 2117,
+     "end": 2147,
      "exported": false,
      "calls": [
       "js/drones/droneforge.js#droneBudget",
@@ -70613,8 +70624,8 @@
     {
      "key": "mountGame>syncWorkDrones",
      "kind": "function",
-     "line": 2150,
-     "end": 2193,
+     "line": 2152,
+     "end": 2195,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -70628,16 +70639,16 @@
     {
      "key": "mountGame>unitsUseDrone",
      "kind": "function",
-     "line": 2194,
-     "end": 2199,
+     "line": 2196,
+     "end": 2201,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>syncProbeMeshes",
      "kind": "function",
-     "line": 2202,
-     "end": 2223,
+     "line": 2204,
+     "end": 2225,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -70649,8 +70660,8 @@
     {
      "key": "mountGame>syncRemotes",
      "kind": "function",
-     "line": 2225,
-     "end": 2254,
+     "line": 2227,
+     "end": 2256,
      "exported": false,
      "calls": [
       "js/render/engine.js#disposeObject",
@@ -70663,8 +70674,8 @@
     {
      "key": "mountGame>syncTraffic",
      "kind": "function",
-     "line": 2257,
-     "end": 2302,
+     "line": 2259,
+     "end": 2304,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>dropNavLight",
@@ -70683,8 +70694,8 @@
     {
      "key": "mountGame>syncFlow",
      "kind": "function",
-     "line": 2305,
-     "end": 2335,
+     "line": 2307,
+     "end": 2337,
      "exported": false,
      "calls": [
       "js/render/engine.js#meshRange",
@@ -70704,24 +70715,24 @@
     {
      "key": "mountGame>hash01",
      "kind": "function",
-     "line": 2343,
-     "end": 2343,
+     "line": 2345,
+     "end": 2345,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>wreckMat",
      "kind": "function",
-     "line": 2346,
-     "end": 2358,
+     "line": 2348,
+     "end": 2360,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>wreckOf",
      "kind": "function",
-     "line": 2360,
-     "end": 2391,
+     "line": 2362,
+     "end": 2393,
      "exported": false,
      "calls": [
       "js/ships/shipdb.js#shipById",
@@ -70732,16 +70743,16 @@
     {
      "key": "mountGame>cutBack",
      "kind": "function",
-     "line": 2393,
-     "end": 2402,
+     "line": 2395,
+     "end": 2404,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>syncHulks",
      "kind": "function",
-     "line": 2404,
-     "end": 2450,
+     "line": 2406,
+     "end": 2452,
      "exported": false,
      "calls": [
       "js/render/engine.js#meshRange",
@@ -70761,24 +70772,24 @@
     {
      "key": "mountGame>projectMark",
      "kind": "function",
-     "line": 2458,
-     "end": 2480,
+     "line": 2460,
+     "end": 2482,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>projectPoint",
      "kind": "function",
-     "line": 2482,
-     "end": 2486,
+     "line": 2484,
+     "end": 2488,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>projectDir",
      "kind": "function",
-     "line": 2488,
-     "end": 2491,
+     "line": 2490,
+     "end": 2493,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>projectPoint"
@@ -70787,8 +70798,8 @@
     {
      "key": "mountGame>tick",
      "kind": "function",
-     "line": 2493,
-     "end": 2907,
+     "line": 2495,
+     "end": 2911,
      "exported": false,
      "calls": [
       "js/core/perf.js#notePerf",
@@ -70856,8 +70867,8 @@
     {
      "key": "mountGame.bodyDetail",
      "kind": "prop",
-     "line": 2909,
-     "end": 2909,
+     "line": 2913,
+     "end": 2913,
      "exported": false,
      "calls": []
     }
@@ -70867,20 +70878,20 @@
      "kind": "storage.get",
      "value": "lgaa.attract",
      "at": "mountGame",
-     "line": 176,
+     "line": 177,
      "store": "local"
     },
     {
      "kind": "dom.id",
      "value": "warp-flash",
      "at": "mountGame",
-     "line": 1388
+     "line": 1390
     },
     {
      "kind": "event.listen",
      "value": "wheel",
      "at": "mountGame",
-     "line": 1432,
+     "line": 1434,
      "target": "canvas",
      "handler": "(inline)"
     },
@@ -70888,7 +70899,7 @@
      "kind": "event.listen",
      "value": "dblclick",
      "at": "mountGame",
-     "line": 1437,
+     "line": 1439,
      "target": "canvas",
      "handler": "(inline)"
     },
@@ -70896,7 +70907,7 @@
      "kind": "event.listen",
      "value": "pointerdown",
      "at": "mountGame",
-     "line": 1523,
+     "line": 1525,
      "target": "canvas",
      "handler": "onPointerDown"
     },
@@ -70904,7 +70915,7 @@
      "kind": "event.listen",
      "value": "pointermove",
      "at": "mountGame",
-     "line": 1524,
+     "line": 1526,
      "target": "canvas",
      "handler": "onPointerMove"
     },
@@ -70912,7 +70923,7 @@
      "kind": "event.listen",
      "value": "pointerup",
      "at": "mountGame",
-     "line": 1525,
+     "line": 1527,
      "target": "canvas",
      "handler": "onPointerUp"
     },
@@ -70920,7 +70931,7 @@
      "kind": "event.listen",
      "value": "pointercancel",
      "at": "mountGame",
-     "line": 1526,
+     "line": 1528,
      "target": "canvas",
      "handler": "onPointerUp"
     },
@@ -70928,32 +70939,32 @@
      "kind": "storage.get",
      "value": "lgaa.rocks",
      "at": "mountGame>rockQuality",
-     "line": 1533,
+     "line": 1535,
      "store": "local"
     },
     {
      "kind": "global.write",
      "value": "window.__lgMarkers",
      "at": "mountGame>tick",
-     "line": 2901
+     "line": 2905
     },
     {
      "kind": "global.write",
      "value": "window.__lgGL",
      "at": "mountGame",
-     "line": 2909
+     "line": 2913
     },
     {
      "kind": "global.write",
      "value": "window.__lgAttract",
      "at": "mountGame",
-     "line": 2912
+     "line": 2916
     },
     {
      "kind": "event.unlisten",
      "value": "pointerdown",
      "at": "mountGame",
-     "line": 2921,
+     "line": 2925,
      "target": "canvas",
      "handler": "onPointerDown"
     },
@@ -70961,7 +70972,7 @@
      "kind": "event.unlisten",
      "value": "pointermove",
      "at": "mountGame",
-     "line": 2922,
+     "line": 2926,
      "target": "canvas",
      "handler": "onPointerMove"
     },
@@ -70969,7 +70980,7 @@
      "kind": "event.unlisten",
      "value": "pointerup",
      "at": "mountGame",
-     "line": 2923,
+     "line": 2927,
      "target": "canvas",
      "handler": "onPointerUp"
     },
@@ -70977,7 +70988,7 @@
      "kind": "event.unlisten",
      "value": "pointercancel",
      "at": "mountGame",
-     "line": 2924,
+     "line": 2928,
      "target": "canvas",
      "handler": "onPointerUp"
     }
@@ -72011,6 +72022,67 @@
      "end": 246,
      "exported": false,
      "calls": []
+    }
+   ],
+   "effects": []
+  },
+  {
+   "file": "js/render/resolution.js",
+   "lines": 20,
+   "vendor": false,
+   "summary": "",
+   "imports": [],
+   "dynamic": [],
+   "importedBy": [
+    "js/render/engine.js"
+   ],
+   "exports": [
+    "createResolutionController"
+   ],
+   "symbols": [
+    {
+     "key": "RATIOS",
+     "kind": "const",
+     "line": 1,
+     "end": 1,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "capFor",
+     "kind": "function",
+     "line": 2,
+     "end": 2,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "createResolutionController",
+     "kind": "function",
+     "line": 4,
+     "end": 20,
+     "exported": true,
+     "calls": [
+      "js/render/resolution.js#capFor"
+     ]
+    },
+    {
+     "key": "createResolutionController.ratio",
+     "kind": "prop",
+     "line": 7,
+     "end": 7,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "createResolutionController.update",
+     "kind": "prop",
+     "line": 8,
+     "end": 18,
+     "exported": false,
+     "calls": [
+      "js/render/resolution.js#capFor"
+     ]
     }
    ],
    "effects": []
@@ -108163,10 +108235,24 @@
   },
   {
    "file": "js/ui/hud.js",
-   "lines": 1213,
+   "lines": 1206,
    "vendor": false,
    "summary": "1.8",
    "imports": [
+    {
+     "spec": "./hudnodes.js",
+     "target": "js/ui/hudnodes.js",
+     "names": [
+      {
+       "local": "paintLabels",
+       "imported": "paintLabels"
+      },
+      {
+       "local": "paintMarkerNodes",
+       "imported": "paintMarkerNodes"
+      }
+     ]
+    },
     {
      "spec": "../world/bodies.js",
      "target": "js/world/bodies.js",
@@ -108856,21 +108942,13 @@
     {
      "key": "THR_SPAN",
      "kind": "const",
-     "line": 46,
-     "end": 46,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "NOTICE_LIFE",
-     "kind": "const",
      "line": 47,
      "end": 47,
      "exported": false,
      "calls": []
     },
     {
-     "key": "THR_ZERO",
+     "key": "NOTICE_LIFE",
      "kind": "const",
      "line": 48,
      "end": 48,
@@ -108878,47 +108956,39 @@
      "calls": []
     },
     {
+     "key": "THR_ZERO",
+     "kind": "const",
+     "line": 49,
+     "end": 49,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "readOrient",
      "kind": "function",
-     "line": 50,
-     "end": 54,
+     "line": 51,
+     "end": 55,
      "exported": false,
      "calls": []
     },
     {
      "key": "measureDock",
      "kind": "function",
-     "line": 56,
-     "end": 63,
+     "line": 57,
+     "end": 64,
      "exported": false,
      "calls": []
     },
     {
      "key": "RAIL_GAP",
      "kind": "const",
-     "line": 65,
-     "end": 65,
+     "line": 66,
+     "end": 66,
      "exported": false,
      "calls": []
     },
     {
      "key": "PUCK_H",
-     "kind": "const",
-     "line": 66,
-     "end": 66,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "PUCK_W",
-     "kind": "const",
-     "line": 66,
-     "end": 66,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "ANSWER_GAP",
      "kind": "const",
      "line": 67,
      "end": 67,
@@ -108926,7 +108996,15 @@
      "calls": []
     },
     {
-     "key": "ANSWER_W",
+     "key": "PUCK_W",
+     "kind": "const",
+     "line": 67,
+     "end": 67,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "ANSWER_GAP",
      "kind": "const",
      "line": 68,
      "end": 68,
@@ -108934,42 +109012,50 @@
      "calls": []
     },
     {
+     "key": "ANSWER_W",
+     "kind": "const",
+     "line": 69,
+     "end": 69,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "PUCK_AVOID",
      "kind": "const",
-     "line": 70,
-     "end": 70,
+     "line": 71,
+     "end": 71,
      "exported": false,
      "calls": []
     },
     {
      "key": "boxesToAvoid",
      "kind": "function",
-     "line": 72,
-     "end": 81,
+     "line": 73,
+     "end": 82,
      "exported": false,
      "calls": []
     },
     {
      "key": "hits",
      "kind": "function",
-     "line": 83,
-     "end": 84,
+     "line": 84,
+     "end": 85,
      "exported": false,
      "calls": []
     },
     {
      "key": "overlapArea",
      "kind": "function",
-     "line": 86,
-     "end": 94,
+     "line": 87,
+     "end": 95,
      "exported": false,
      "calls": []
     },
     {
      "key": "measureRail",
      "kind": "function",
-     "line": 96,
-     "end": 163,
+     "line": 97,
+     "end": 164,
      "exported": false,
      "calls": [
       "js/ui/hud.js#boxesToAvoid",
@@ -108980,21 +109066,13 @@
     {
      "key": "measureRail>slot",
      "kind": "function",
-     "line": 107,
-     "end": 119,
+     "line": 108,
+     "end": 120,
      "exported": false,
      "calls": []
     },
     {
      "key": "LEFT_STACK",
-     "kind": "const",
-     "line": 165,
-     "end": 165,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "STACK_GAP",
      "kind": "const",
      "line": 166,
      "end": 166,
@@ -109002,7 +109080,7 @@
      "calls": []
     },
     {
-     "key": "stackAt",
+     "key": "STACK_GAP",
      "kind": "const",
      "line": 167,
      "end": 167,
@@ -109010,10 +109088,18 @@
      "calls": []
     },
     {
+     "key": "stackAt",
+     "kind": "const",
+     "line": 168,
+     "end": 168,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "stackLeftColumn",
      "kind": "function",
-     "line": 168,
-     "end": 185,
+     "line": 169,
+     "end": 195,
      "exported": false,
      "calls": [
       "js/ui/hud.js#stackRightColumn"
@@ -109022,16 +109108,16 @@
     {
      "key": "rightSig",
      "kind": "const",
-     "line": 187,
-     "end": 187,
+     "line": 197,
+     "end": 197,
      "exported": false,
      "calls": []
     },
     {
      "key": "stackRightColumn",
      "kind": "function",
-     "line": 188,
-     "end": 212,
+     "line": 198,
+     "end": 222,
      "exported": false,
      "calls": [
       "js/ui/hud.js#measureRail"
@@ -109040,8 +109126,8 @@
     {
      "key": "bindOrient",
      "kind": "function",
-     "line": 214,
-     "end": 231,
+     "line": 224,
+     "end": 241,
      "exported": true,
      "calls": [
       "js/ui/hud.js#bindOrient>go",
@@ -109051,8 +109137,8 @@
     {
      "key": "bindOrient>measure",
      "kind": "function",
-     "line": 215,
-     "end": 215,
+     "line": 225,
+     "end": 225,
      "exported": false,
      "calls": [
       "js/ui/hud.js#measureDock",
@@ -109062,8 +109148,8 @@
     {
      "key": "bindOrient>go",
      "kind": "function",
-     "line": 216,
-     "end": 219,
+     "line": 226,
+     "end": 229,
      "exported": false,
      "calls": [
       "js/ui/hud.js#readOrient",
@@ -109073,64 +109159,64 @@
     {
      "key": "elCache",
      "kind": "const",
-     "line": 233,
-     "end": 233,
+     "line": 243,
+     "end": 243,
      "exported": false,
      "calls": []
     },
     {
      "key": "$",
      "kind": "function",
-     "line": 235,
-     "end": 241,
+     "line": 245,
+     "end": 251,
      "exported": false,
      "calls": []
     },
     {
      "key": "sanitizeRoom",
      "kind": "function",
-     "line": 243,
-     "end": 246,
+     "line": 253,
+     "end": 256,
      "exported": false,
      "calls": []
     },
     {
      "key": "makePrivateCode",
      "kind": "function",
-     "line": 248,
-     "end": 253,
+     "line": 258,
+     "end": 263,
      "exported": false,
      "calls": []
     },
     {
      "key": "fmtDist",
      "kind": "function",
-     "line": 255,
-     "end": 261,
+     "line": 265,
+     "end": 271,
      "exported": false,
      "calls": []
     },
     {
      "key": "fmtNum",
      "kind": "function",
-     "line": 263,
-     "end": 265,
+     "line": 273,
+     "end": 275,
      "exported": false,
      "calls": []
     },
     {
      "key": "esc",
      "kind": "function",
-     "line": 267,
-     "end": 269,
+     "line": 277,
+     "end": 279,
      "exported": false,
      "calls": []
     },
     {
      "key": "bindPad",
      "kind": "function",
-     "line": 271,
-     "end": 322,
+     "line": 281,
+     "end": 332,
      "exported": false,
      "calls": [
       "js/ui/hud.js#bindPad>setKnob"
@@ -109139,16 +109225,16 @@
     {
      "key": "bindPad>setKnob",
      "kind": "function",
-     "line": 278,
-     "end": 281,
+     "line": 288,
+     "end": 291,
      "exported": false,
      "calls": []
     },
     {
      "key": "bindPad>move",
      "kind": "function",
-     "line": 283,
-     "end": 300,
+     "line": 293,
+     "end": 310,
      "exported": false,
      "calls": [
       "js/ui/hud.js#bindPad>setKnob"
@@ -109157,8 +109243,8 @@
     {
      "key": "bindPad>end",
      "kind": "function",
-     "line": 302,
-     "end": 307,
+     "line": 312,
+     "end": 317,
      "exported": false,
      "calls": [
       "js/ui/hud.js#bindPad>setKnob"
@@ -109167,32 +109253,32 @@
     {
      "key": "bindHold",
      "kind": "function",
-     "line": 324,
-     "end": 342,
+     "line": 334,
+     "end": 352,
      "exported": false,
      "calls": []
     },
     {
      "key": "bindHold>d",
      "kind": "function",
-     "line": 325,
-     "end": 333,
+     "line": 335,
+     "end": 343,
      "exported": false,
      "calls": []
     },
     {
      "key": "bindHold>u",
      "kind": "function",
-     "line": 334,
-     "end": 337,
+     "line": 344,
+     "end": 347,
      "exported": false,
      "calls": []
     },
     {
      "key": "bindThrottle",
      "kind": "function",
-     "line": 344,
-     "end": 392,
+     "line": 354,
+     "end": 402,
      "exported": false,
      "calls": [
       "js/ui/hud.js#bindThrottle>set",
@@ -109202,8 +109288,8 @@
     {
      "key": "bindThrottle>set",
      "kind": "function",
-     "line": 346,
-     "end": 354,
+     "line": 356,
+     "end": 364,
      "exported": false,
      "calls": [
       "js/sim/sim.js#setThrottle"
@@ -109212,8 +109298,8 @@
     {
      "key": "bindThrottle>end",
      "kind": "function",
-     "line": 364,
-     "end": 369,
+     "line": 374,
+     "end": 379,
      "exported": false,
      "calls": [
       "js/sim/sim.js#setThrottle"
@@ -109222,21 +109308,31 @@
     {
      "key": "MARKER",
      "kind": "const",
-     "line": 394,
-     "end": 403,
+     "line": 404,
+     "end": 413,
      "exported": false,
      "calls": []
     },
     {
      "key": "paintMarkers",
      "kind": "function",
-     "line": 405,
-     "end": 418,
+     "line": 415,
+     "end": 417,
+     "exported": false,
+     "calls": [
+      "js/ui/hudnodes.js#paintMarkerNodes"
+     ]
+    },
+    {
+     "key": "TURRET_IX",
+     "kind": "const",
+     "line": 419,
+     "end": 419,
      "exported": false,
      "calls": []
     },
     {
-     "key": "TURRET_IX",
+     "key": "CUTTER_IX",
      "kind": "const",
      "line": 420,
      "end": 420,
@@ -109244,7 +109340,7 @@
      "calls": []
     },
     {
-     "key": "CUTTER_IX",
+     "key": "PHASE_IX",
      "kind": "const",
      "line": 421,
      "end": 421,
@@ -109252,18 +109348,10 @@
      "calls": []
     },
     {
-     "key": "PHASE_IX",
-     "kind": "const",
-     "line": 422,
-     "end": 422,
-     "exported": false,
-     "calls": []
-    },
-    {
      "key": "sampleWorld",
      "kind": "function",
-     "line": 424,
-     "end": 462,
+     "line": 423,
+     "end": 461,
      "exported": false,
      "calls": [
       "js/flight/autopilot.js#nearestSeam",
@@ -109275,24 +109363,24 @@
     {
      "key": "holdOpen",
      "kind": "const",
-     "line": 464,
-     "end": 464,
+     "line": 463,
+     "end": 463,
      "exported": false,
      "calls": []
     },
     {
      "key": "holdPaintedAt",
      "kind": "const",
-     "line": 465,
-     "end": 465,
+     "line": 464,
+     "end": 464,
      "exported": false,
      "calls": []
     },
     {
      "key": "paintHold",
      "kind": "function",
-     "line": 466,
-     "end": 471,
+     "line": 465,
+     "end": 470,
      "exported": false,
      "calls": [
       "js/ui/holdview.js#renderHold"
@@ -109301,16 +109389,16 @@
     {
      "key": "paintHold.onChange",
      "kind": "prop",
-     "line": 470,
-     "end": 470,
+     "line": 469,
+     "end": 469,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud",
      "kind": "function",
-     "line": 473,
-     "end": 1213,
+     "line": 472,
+     "end": 1206,
      "exported": true,
      "calls": [
       "js/ui/hud.js#bindOrient",
@@ -109389,16 +109477,16 @@
     {
      "key": "mountHud.who",
      "kind": "prop",
-     "line": 477,
-     "end": 477,
+     "line": 476,
+     "end": 476,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>describeSeed",
      "kind": "function",
-     "line": 497,
-     "end": 507,
+     "line": 496,
+     "end": 506,
      "exported": false,
      "calls": [
       "js/world/generate.js#generateSystem",
@@ -109408,8 +109496,8 @@
     {
      "key": "mountHud>refreshPreview",
      "kind": "function",
-     "line": 509,
-     "end": 515,
+     "line": 508,
+     "end": 514,
      "exported": false,
      "calls": [
       "js/core/store.js#skyProgress",
@@ -109421,8 +109509,8 @@
     {
      "key": "mountHud>askSol",
      "kind": "function",
-     "line": 519,
-     "end": 523,
+     "line": 518,
+     "end": 522,
      "exported": false,
      "calls": [
       "js/net/net.js#primeSol"
@@ -109431,8 +109519,8 @@
     {
      "key": "mountHud>queueSky",
      "kind": "function",
-     "line": 524,
-     "end": 529,
+     "line": 523,
+     "end": 528,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>askSol",
@@ -109443,8 +109531,8 @@
     {
      "key": "mountHud>go",
      "kind": "function",
-     "line": 532,
-     "end": 551,
+     "line": 531,
+     "end": 550,
      "exported": false,
      "calls": [
       "js/audio/index.js#unlockAudio",
@@ -109462,8 +109550,8 @@
     {
      "key": "mountHud.rollSeed",
      "kind": "prop",
-     "line": 561,
-     "end": 561,
+     "line": 560,
+     "end": 560,
      "exported": false,
      "calls": [
       "js/ui/hud.js#makePrivateCode"
@@ -109472,8 +109560,8 @@
     {
      "key": "mountHud.onSeed",
      "kind": "prop",
-     "line": 562,
-     "end": 565,
+     "line": 561,
+     "end": 564,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>queueSky"
@@ -109482,8 +109570,8 @@
     {
      "key": "mountHud.describe",
      "kind": "prop",
-     "line": 566,
-     "end": 566,
+     "line": 565,
+     "end": 565,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>describeSeed"
@@ -109492,8 +109580,8 @@
     {
      "key": "mountHud.systemName",
      "kind": "prop",
-     "line": 567,
-     "end": 567,
+     "line": 566,
+     "end": 566,
      "exported": false,
      "calls": [
       "js/world/generate.js#generateSystem"
@@ -109502,16 +109590,16 @@
     {
      "key": "mountHud.loadedSeed",
      "kind": "prop",
-     "line": 568,
-     "end": 568,
+     "line": 567,
+     "end": 567,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud.normalizeSeed",
      "kind": "prop",
-     "line": 569,
-     "end": 569,
+     "line": 568,
+     "end": 568,
      "exported": false,
      "calls": [
       "js/ui/hud.js#sanitizeRoom"
@@ -109520,8 +109608,8 @@
     {
      "key": "mountHud.onLaunch",
      "kind": "prop",
-     "line": 570,
-     "end": 570,
+     "line": 569,
+     "end": 569,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>go",
@@ -109531,16 +109619,16 @@
     {
      "key": "mountHud.fixedSky",
      "kind": "prop",
-     "line": 571,
-     "end": 571,
+     "line": 570,
+     "end": 570,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>paintStart",
      "kind": "function",
-     "line": 575,
-     "end": 586,
+     "line": 574,
+     "end": 585,
      "exported": false,
      "calls": [
       "js/flight/pilot.js#loadPilot",
@@ -109550,8 +109638,8 @@
     {
      "key": "mountHud>setMode",
      "kind": "function",
-     "line": 612,
-     "end": 667,
+     "line": 611,
+     "end": 666,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>queueSky",
@@ -109562,16 +109650,16 @@
     {
      "key": "mountHud>setMode.system",
      "kind": "prop",
-     "line": 628,
-     "end": 628,
+     "line": 627,
+     "end": 627,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>setMode.setSystem",
      "kind": "prop",
-     "line": 629,
-     "end": 629,
+     "line": 628,
+     "end": 628,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>queueSky"
@@ -109580,8 +109668,8 @@
     {
      "key": "mountHud>setMode.rollSeed",
      "kind": "prop",
-     "line": 630,
-     "end": 630,
+     "line": 629,
+     "end": 629,
      "exported": false,
      "calls": [
       "js/ui/hud.js#makePrivateCode"
@@ -109590,8 +109678,8 @@
     {
      "key": "mountHud>setMode.clean",
      "kind": "prop",
-     "line": 631,
-     "end": 631,
+     "line": 630,
+     "end": 630,
      "exported": false,
      "calls": [
       "js/ui/hud.js#sanitizeRoom"
@@ -109600,8 +109688,8 @@
     {
      "key": "mountHud>setMode.name",
      "kind": "prop",
-     "line": 633,
-     "end": 633,
+     "line": 632,
+     "end": 632,
      "exported": false,
      "calls": [
       "js/world/generate.js#generateSystem"
@@ -109610,8 +109698,8 @@
     {
      "key": "mountHud>setMode.onFly",
      "kind": "prop",
-     "line": 634,
-     "end": 642,
+     "line": 633,
+     "end": 641,
      "exported": false,
      "calls": [
       "js/net/account.js#flyPilot",
@@ -109625,8 +109713,8 @@
     {
      "key": "mountHud>setMode.onNew",
      "kind": "prop",
-     "line": 643,
-     "end": 648,
+     "line": 642,
+     "end": 647,
      "exported": false,
      "calls": [
       "js/net/account.js#newPilotSlot",
@@ -109636,8 +109724,8 @@
     {
      "key": "mountHud>setMode.onDelete",
      "kind": "prop",
-     "line": 649,
-     "end": 649,
+     "line": 648,
+     "end": 648,
      "exported": false,
      "calls": [
       "js/net/account.js#deletePilot"
@@ -109646,8 +109734,8 @@
     {
      "key": "mountHud>onAccount",
      "kind": "function",
-     "line": 668,
-     "end": 668,
+     "line": 667,
+     "end": 667,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>setMode"
@@ -109656,32 +109744,32 @@
     {
      "key": "mountHud.continueRun",
      "kind": "prop",
-     "line": 672,
-     "end": 672,
+     "line": 671,
+     "end": 671,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud.mode",
      "kind": "prop",
-     "line": 672,
-     "end": 672,
+     "line": 671,
+     "end": 671,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud.hangar",
      "kind": "prop",
-     "line": 672,
-     "end": 672,
+     "line": 671,
+     "end": 671,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>setPage",
      "kind": "function",
-     "line": 722,
-     "end": 729,
+     "line": 721,
+     "end": 728,
      "exported": false,
      "calls": [
       "js/ui/hud.js#$"
@@ -109690,8 +109778,8 @@
     {
      "key": "mountHud>toggleHold",
      "kind": "function",
-     "line": 792,
-     "end": 792,
+     "line": 791,
+     "end": 791,
      "exported": false,
      "calls": [
       "js/ui/hud.js#paintHold"
@@ -109700,16 +109788,16 @@
     {
      "key": "mountHud.onChange",
      "kind": "prop",
-     "line": 804,
-     "end": 804,
+     "line": 803,
+     "end": 803,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>paintRow",
      "kind": "function",
-     "line": 817,
-     "end": 832,
+     "line": 816,
+     "end": 831,
      "exported": false,
      "calls": [
       "js/audio/graph.js#setBusLevel"
@@ -109718,13 +109806,21 @@
     {
      "key": "mountHud.shields",
      "kind": "prop",
+     "line": 855,
+     "end": 855,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "mountHud.turretsArmed",
+     "kind": "prop",
      "line": 856,
      "end": 856,
      "exported": false,
      "calls": []
     },
     {
-     "key": "mountHud.turretsArmed",
+     "key": "mountHud.engines",
      "kind": "prop",
      "line": 857,
      "end": 857,
@@ -109732,7 +109828,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.engines",
+     "key": "mountHud.pressurized",
      "kind": "prop",
      "line": 858,
      "end": 858,
@@ -109740,7 +109836,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.pressurized",
+     "key": "mountHud.localGravity",
      "kind": "prop",
      "line": 859,
      "end": 859,
@@ -109748,7 +109844,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.localGravity",
+     "key": "mountHud.assist",
      "kind": "prop",
      "line": 860,
      "end": 860,
@@ -109756,7 +109852,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.assist",
+     "key": "mountHud.lights",
      "kind": "prop",
      "line": 861,
      "end": 861,
@@ -109764,7 +109860,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.lights",
+     "key": "mountHud.sentry",
      "kind": "prop",
      "line": 862,
      "end": 862,
@@ -109772,7 +109868,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.sentry",
+     "key": "mountHud.salvage",
      "kind": "prop",
      "line": 863,
      "end": 863,
@@ -109780,7 +109876,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.salvage",
+     "key": "mountHud.matchLock",
      "kind": "prop",
      "line": 864,
      "end": 864,
@@ -109788,15 +109884,15 @@
      "calls": []
     },
     {
-     "key": "mountHud.matchLock",
+     "key": "mountHud.shields~2",
      "kind": "prop",
-     "line": 865,
-     "end": 865,
+     "line": 879,
+     "end": 879,
      "exported": false,
      "calls": []
     },
     {
-     "key": "mountHud.shields~2",
+     "key": "mountHud.turretsArmed~2",
      "kind": "prop",
      "line": 880,
      "end": 880,
@@ -109804,7 +109900,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.turretsArmed~2",
+     "key": "mountHud.engines~2",
      "kind": "prop",
      "line": 881,
      "end": 881,
@@ -109812,7 +109908,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.engines~2",
+     "key": "mountHud.pressurized~2",
      "kind": "prop",
      "line": 882,
      "end": 882,
@@ -109820,7 +109916,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.pressurized~2",
+     "key": "mountHud.localGravity~2",
      "kind": "prop",
      "line": 883,
      "end": 883,
@@ -109828,7 +109924,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.localGravity~2",
+     "key": "mountHud.assist~2",
      "kind": "prop",
      "line": 884,
      "end": 884,
@@ -109836,7 +109932,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.assist~2",
+     "key": "mountHud.lights~2",
      "kind": "prop",
      "line": 885,
      "end": 885,
@@ -109844,7 +109940,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.lights~2",
+     "key": "mountHud.sentry~2",
      "kind": "prop",
      "line": 886,
      "end": 886,
@@ -109852,7 +109948,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.sentry~2",
+     "key": "mountHud.salvage~2",
      "kind": "prop",
      "line": 887,
      "end": 887,
@@ -109860,7 +109956,7 @@
      "calls": []
     },
     {
-     "key": "mountHud.salvage~2",
+     "key": "mountHud.matchLock~2",
      "kind": "prop",
      "line": 888,
      "end": 888,
@@ -109868,34 +109964,26 @@
      "calls": []
     },
     {
-     "key": "mountHud.matchLock~2",
-     "kind": "prop",
-     "line": 889,
-     "end": 889,
-     "exported": false,
-     "calls": []
-    },
-    {
      "key": "mountHud>setGauge",
      "kind": "function",
-     "line": 895,
-     "end": 899,
+     "line": 894,
+     "end": 898,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>rowEl",
      "kind": "function",
-     "line": 910,
-     "end": 915,
+     "line": 909,
+     "end": 914,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountHud>paintClock",
      "kind": "function",
-     "line": 922,
-     "end": 934,
+     "line": 921,
+     "end": 933,
      "exported": false,
      "calls": [
       "js/station/stationclock.js#clockAt",
@@ -109905,8 +109993,8 @@
     {
      "key": "mountHud>paint",
      "kind": "function",
-     "line": 939,
-     "end": 943,
+     "line": 938,
+     "end": 942,
      "exported": false,
      "calls": [
       "js/ui/hud.js#mountHud>paintAll"
@@ -109915,8 +110003,8 @@
     {
      "key": "mountHud>paintAll",
      "kind": "function",
-     "line": 944,
-     "end": 1196,
+     "line": 943,
+     "end": 1189,
      "exported": false,
      "calls": [
       "js/flight/recorder.js#settle",
@@ -109932,6 +110020,7 @@
       "js/ui/hud.js#stackLeftColumn",
       "js/ui/hud.js#mountHud>rowEl",
       "js/sim/sim.js#rigWanted",
+      "js/ui/hudnodes.js#paintLabels",
       "js/ui/hud.js#paintMarkers"
      ]
     }
@@ -109941,61 +110030,61 @@
      "kind": "dom.query",
      "value": ".hud-tools",
      "at": "measureDock",
-     "line": 58
+     "line": 59
     },
     {
      "kind": "dom.query",
      "value": "‹PUCK_AVOID›",
      "at": "boxesToAvoid",
-     "line": 74
+     "line": 75
     },
     {
      "kind": "dom.query",
      "value": ".cx",
      "at": "boxesToAvoid",
-     "line": 75
+     "line": 76
     },
     {
      "kind": "dom.query",
      "value": ".sys-strip",
      "at": "measureRail",
-     "line": 100
+     "line": 101
     },
     {
      "kind": "dom.id",
      "value": "‹id›",
      "at": "stackLeftColumn",
-     "line": 176
+     "line": 177
     },
     {
      "kind": "dom.query",
      "value": "link[href*=\"cockpit.css\"]",
      "at": "stackRightColumn",
-     "line": 189
+     "line": 199
     },
     {
      "kind": "dom.id",
      "value": "gauges",
      "at": "stackRightColumn",
-     "line": 190
+     "line": 200
     },
     {
      "kind": "dom.id",
      "value": "sys-strip",
      "at": "stackRightColumn",
-     "line": 190
+     "line": 200
     },
     {
      "kind": "dom.id",
      "value": "dash",
      "at": "stackRightColumn",
-     "line": 190
+     "line": 200
     },
     {
      "kind": "event.listen",
      "value": "resize",
      "at": "bindOrient",
-     "line": 221,
+     "line": 231,
      "target": "window",
      "handler": "go"
     },
@@ -110003,7 +110092,7 @@
      "kind": "event.listen",
      "value": "orientationchange",
      "at": "bindOrient",
-     "line": 222,
+     "line": 232,
      "target": "window",
      "handler": "go"
     },
@@ -110011,7 +110100,7 @@
      "kind": "event.listen",
      "value": "resize",
      "at": "bindOrient",
-     "line": 223,
+     "line": 233,
      "target": "window.visualViewport",
      "handler": "go"
     },
@@ -110019,25 +110108,25 @@
      "kind": "dom.query",
      "value": "‹sel›",
      "at": "bindOrient",
-     "line": 226
+     "line": 236
     },
     {
      "kind": "timer",
      "value": "setTimeout",
      "at": "bindOrient",
-     "line": 229
+     "line": 239
     },
     {
      "kind": "dom.id",
      "value": "‹id›",
      "at": "$",
-     "line": 238
+     "line": 248
     },
     {
      "kind": "event.listen",
      "value": "pointerdown",
      "at": "bindPad",
-     "line": 309,
+     "line": 319,
      "target": "el",
      "handler": "(inline)"
     },
@@ -110045,7 +110134,7 @@
      "kind": "event.listen",
      "value": "pointermove",
      "at": "bindPad",
-     "line": 319,
+     "line": 329,
      "target": "el",
      "handler": "move"
     },
@@ -110053,7 +110142,7 @@
      "kind": "event.listen",
      "value": "pointerup",
      "at": "bindPad",
-     "line": 320,
+     "line": 330,
      "target": "el",
      "handler": "end"
     },
@@ -110061,7 +110150,7 @@
      "kind": "event.listen",
      "value": "pointercancel",
      "at": "bindPad",
-     "line": 321,
+     "line": 331,
      "target": "el",
      "handler": "end"
     },
@@ -110069,7 +110158,7 @@
      "kind": "event.listen",
      "value": "pointerdown",
      "at": "bindHold",
-     "line": 338,
+     "line": 348,
      "target": "el",
      "handler": "d"
     },
@@ -110077,7 +110166,7 @@
      "kind": "event.listen",
      "value": "pointerup",
      "at": "bindHold",
-     "line": 339,
+     "line": 349,
      "target": "el",
      "handler": "u"
     },
@@ -110085,7 +110174,7 @@
      "kind": "event.listen",
      "value": "pointercancel",
      "at": "bindHold",
-     "line": 340,
+     "line": 350,
      "target": "el",
      "handler": "u"
     },
@@ -110093,7 +110182,7 @@
      "kind": "event.listen",
      "value": "pointerleave",
      "at": "bindHold",
-     "line": 341,
+     "line": 351,
      "target": "el",
      "handler": "u"
     },
@@ -110101,7 +110190,7 @@
      "kind": "event.listen",
      "value": "pointerdown",
      "at": "bindThrottle",
-     "line": 355,
+     "line": 365,
      "target": "track",
      "handler": "(inline)"
     },
@@ -110109,7 +110198,7 @@
      "kind": "event.listen",
      "value": "pointermove",
      "at": "bindThrottle",
-     "line": 360,
+     "line": 370,
      "target": "track",
      "handler": "(inline)"
     },
@@ -110117,13 +110206,13 @@
      "kind": "dom.query",
      "value": "#thr-presets [data-thr]",
      "at": "bindThrottle",
-     "line": 371
+     "line": 381
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "bindThrottle",
-     "line": 372,
+     "line": 382,
      "target": "b",
      "handler": "(inline)"
     },
@@ -110131,7 +110220,7 @@
      "kind": "event.listen",
      "value": "pointerup",
      "at": "bindThrottle",
-     "line": 373,
+     "line": 383,
      "target": "track",
      "handler": "end"
     },
@@ -110139,7 +110228,7 @@
      "kind": "event.listen",
      "value": "pointercancel",
      "at": "bindThrottle",
-     "line": 374,
+     "line": 384,
      "target": "track",
      "handler": "end"
     },
@@ -110147,49 +110236,49 @@
      "kind": "dom.id",
      "value": "hold-body",
      "at": "paintHold",
-     "line": 467
+     "line": 466
     },
     {
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountHud",
-     "line": 495
+     "line": 494
     },
     {
      "kind": "dom.id",
      "value": "sys-line",
      "at": "mountHud>refreshPreview",
-     "line": 512
+     "line": 511
     },
     {
      "kind": "dom.id",
      "value": "stat-survey",
      "at": "mountHud>refreshPreview",
-     "line": 513
+     "line": 512
     },
     {
      "kind": "dom.id",
      "value": "stat-probes",
      "at": "mountHud>refreshPreview",
-     "line": 514
+     "line": 513
     },
     {
      "kind": "timer",
      "value": "setTimeout",
      "at": "mountHud>queueSky",
-     "line": 528
+     "line": 527
     },
     {
      "kind": "dom.id",
      "value": "build-line",
      "at": "mountHud",
-     "line": 555
+     "line": 554
     },
     {
      "kind": "event.listen",
      "value": "input",
      "at": "mountHud",
-     "line": 558,
+     "line": 557,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110197,25 +110286,25 @@
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountHud",
-     "line": 558
+     "line": 557
     },
     {
      "kind": "dom.id",
      "value": "btn-continue",
      "at": "mountHud",
-     "line": 573
+     "line": 572
     },
     {
      "kind": "dom.id",
      "value": "btn-create",
      "at": "mountHud",
-     "line": 574
+     "line": 573
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 588,
+     "line": 587,
      "target": "contBtn",
      "handler": "(inline)"
     },
@@ -110223,13 +110312,13 @@
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountHud",
-     "line": 592
+     "line": 591
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 598,
+     "line": 597,
      "target": "createBtn",
      "handler": "(inline)"
     },
@@ -110237,37 +110326,37 @@
      "kind": "dom.id",
      "value": "hangar",
      "at": "mountHud",
-     "line": 609
+     "line": 608
     },
     {
      "kind": "dom.query",
      "value": "label",
      "at": "mountHud",
-     "line": 610
+     "line": 609
     },
     {
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountHud",
-     "line": 610
+     "line": 609
     },
     {
      "kind": "dom.id",
      "value": "callsign",
      "at": "mountHud>setMode.onFly",
-     "line": 639
+     "line": 638
     },
     {
      "kind": "global.write",
      "value": "window.__lgFlyQueued",
      "at": "mountHud>setMode",
-     "line": 664
+     "line": 663
     },
     {
      "kind": "event.listen",
      "value": "lg-account",
      "at": "mountHud",
-     "line": 669,
+     "line": 668,
      "target": "globalThis.document",
      "handler": "onAccount"
     },
@@ -110275,91 +110364,91 @@
      "kind": "timer",
      "value": "setTimeout",
      "at": "mountHud",
-     "line": 671
+     "line": 670
     },
     {
      "kind": "dom.id",
      "value": "stick",
      "at": "mountHud",
-     "line": 675
+     "line": 674
     },
     {
      "kind": "dom.id",
      "value": "stick-knob",
      "at": "mountHud",
-     "line": 676
+     "line": 675
     },
     {
      "kind": "dom.query",
      "value": "[data-rcs]",
      "at": "mountHud",
-     "line": 695
+     "line": 694
     },
     {
      "kind": "dom.id",
      "value": "btn-brake",
      "at": "mountHud",
-     "line": 708
+     "line": 707
     },
     {
      "kind": "dom.id",
      "value": "thr-track",
      "at": "mountHud",
-     "line": 717
+     "line": 716
     },
     {
      "kind": "dom.id",
      "value": "thr-fill",
      "at": "mountHud",
-     "line": 717
+     "line": 716
     },
     {
      "kind": "dom.id",
      "value": "thr-thumb",
      "at": "mountHud",
-     "line": 717
+     "line": 716
     },
     {
      "kind": "dom.id",
      "value": "dash-page-${…}",
      "at": "mountHud>setPage",
-     "line": 724
+     "line": 723
     },
     {
      "kind": "dom.query",
      "value": "button",
      "at": "mountHud>setPage",
-     "line": 725
+     "line": 724
     },
     {
      "kind": "dom.id",
      "value": "dash-tabs",
      "at": "mountHud>setPage",
-     "line": 725
+     "line": 724
     },
     {
      "kind": "dom.id",
      "value": "dash-page-name",
      "at": "mountHud>setPage",
-     "line": 728
+     "line": 727
     },
     {
      "kind": "dom.query",
      "value": "button[data-page]",
      "at": "mountHud",
-     "line": 730
+     "line": 729
     },
     {
      "kind": "dom.id",
      "value": "dash-tabs",
      "at": "mountHud",
-     "line": 730
+     "line": 729
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 732,
+     "line": 731,
      "target": "b",
      "handler": "(inline)"
     },
@@ -110367,7 +110456,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 737,
+     "line": 736,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110375,21 +110464,35 @@
      "kind": "dom.id",
      "value": "sw-cut",
      "at": "mountHud",
-     "line": 737
+     "line": 736
     },
     {
      "kind": "dom.query",
      "value": ".sw[data-sys]",
      "at": "mountHud",
-     "line": 746
+     "line": 745
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 747,
+     "line": 746,
      "target": "el",
      "handler": "(inline)"
+    },
+    {
+     "kind": "event.listen",
+     "value": "click",
+     "at": "mountHud",
+     "line": 748,
+     "target": "$()",
+     "handler": "(inline)"
+    },
+    {
+     "kind": "dom.id",
+     "value": "mode-turret",
+     "at": "mountHud",
+     "line": 748
     },
     {
      "kind": "event.listen",
@@ -110401,7 +110504,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "mode-turret",
+     "value": "mode-mining",
      "at": "mountHud",
      "line": 749
     },
@@ -110409,15 +110512,15 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 750,
+     "line": 751,
      "target": "$()",
      "handler": "(inline)"
     },
     {
      "kind": "dom.id",
-     "value": "mode-mining",
+     "value": "op-pulse",
      "at": "mountHud",
-     "line": 750
+     "line": 751
     },
     {
      "kind": "event.listen",
@@ -110429,7 +110532,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "op-pulse",
+     "value": "op-level",
      "at": "mountHud",
      "line": 752
     },
@@ -110443,7 +110546,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "op-level",
+     "value": "op-time",
      "at": "mountHud",
      "line": 753
     },
@@ -110457,7 +110560,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "op-time",
+     "value": "op-dock",
      "at": "mountHud",
      "line": 754
     },
@@ -110471,7 +110574,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "op-dock",
+     "value": "op-claim",
      "at": "mountHud",
      "line": 755
     },
@@ -110479,21 +110582,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 756,
-     "target": "$()",
-     "handler": "(inline)"
-    },
-    {
-     "kind": "dom.id",
-     "value": "op-claim",
-     "at": "mountHud",
-     "line": 756
-    },
-    {
-     "kind": "event.listen",
-     "value": "click",
-     "at": "mountHud",
-     "line": 760,
+     "line": 759,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110501,7 +110590,21 @@
      "kind": "dom.id",
      "value": "op-threat",
      "at": "mountHud",
-     "line": 760
+     "line": 759
+    },
+    {
+     "kind": "event.listen",
+     "value": "click",
+     "at": "mountHud",
+     "line": 761,
+     "target": "$()",
+     "handler": "(inline)"
+    },
+    {
+     "kind": "dom.id",
+     "value": "btn-survey",
+     "at": "mountHud",
+     "line": 761
     },
     {
      "kind": "event.listen",
@@ -110513,7 +110616,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-survey",
+     "value": "btn-plock",
      "at": "mountHud",
      "line": 762
     },
@@ -110527,7 +110630,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-plock",
+     "value": "btn-warp",
      "at": "mountHud",
      "line": 763
     },
@@ -110541,7 +110644,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-warp",
+     "value": "btn-con",
      "at": "mountHud",
      "line": 764
     },
@@ -110555,7 +110658,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-con",
+     "value": "btn-cam",
      "at": "mountHud",
      "line": 765
     },
@@ -110563,21 +110666,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 766,
-     "target": "$()",
-     "handler": "(inline)"
-    },
-    {
-     "kind": "dom.id",
-     "value": "btn-cam",
-     "at": "mountHud",
-     "line": 766
-    },
-    {
-     "kind": "event.listen",
-     "value": "click",
-     "at": "mountHud",
-     "line": 769,
+     "line": 768,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110585,7 +110674,21 @@
      "kind": "dom.id",
      "value": "btn-pause",
      "at": "mountHud",
-     "line": 769
+     "line": 768
+    },
+    {
+     "kind": "event.listen",
+     "value": "click",
+     "at": "mountHud",
+     "line": 772,
+     "target": "$()",
+     "handler": "(inline)"
+    },
+    {
+     "kind": "dom.id",
+     "value": "btn-resume",
+     "at": "mountHud",
+     "line": 772
     },
     {
      "kind": "event.listen",
@@ -110597,7 +110700,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-resume",
+     "value": "btn-tutor",
      "at": "mountHud",
      "line": 773
     },
@@ -110605,21 +110708,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 774,
-     "target": "$()",
-     "handler": "(inline)"
-    },
-    {
-     "kind": "dom.id",
-     "value": "btn-tutor",
-     "at": "mountHud",
-     "line": 774
-    },
-    {
-     "kind": "event.listen",
-     "value": "click",
-     "at": "mountHud",
-     "line": 778,
+     "line": 777,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110627,13 +110716,13 @@
      "kind": "dom.id",
      "value": "btn-watch",
      "at": "mountHud",
-     "line": 778
+     "line": 777
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 784,
+     "line": 783,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110641,13 +110730,13 @@
      "kind": "dom.id",
      "value": "btn-menu",
      "at": "mountHud",
-     "line": 784
+     "line": 783
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 791,
+     "line": 790,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110655,7 +110744,21 @@
      "kind": "dom.id",
      "value": "btn-map",
      "at": "mountHud",
-     "line": 791
+     "line": 790
+    },
+    {
+     "kind": "event.listen",
+     "value": "click",
+     "at": "mountHud",
+     "line": 792,
+     "target": "$()",
+     "handler": "toggleHold"
+    },
+    {
+     "kind": "dom.id",
+     "value": "btn-hold",
+     "at": "mountHud",
+     "line": 792
     },
     {
      "kind": "event.listen",
@@ -110667,7 +110770,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-hold",
+     "value": "g-cgo-btn",
      "at": "mountHud",
      "line": 793
     },
@@ -110677,11 +110780,11 @@
      "at": "mountHud",
      "line": 794,
      "target": "$()",
-     "handler": "toggleHold"
+     "handler": "(inline)"
     },
     {
      "kind": "dom.id",
-     "value": "g-cgo-btn",
+     "value": "hold-close",
      "at": "mountHud",
      "line": 794
     },
@@ -110695,7 +110798,7 @@
     },
     {
      "kind": "dom.id",
-     "value": "hold-close",
+     "value": "hold",
      "at": "mountHud",
      "line": 795
     },
@@ -110709,29 +110812,29 @@
     },
     {
      "kind": "dom.id",
-     "value": "hold",
-     "at": "mountHud",
-     "line": 796
-    },
-    {
-     "kind": "event.listen",
-     "value": "click",
-     "at": "mountHud",
-     "line": 797,
-     "target": "$()",
-     "handler": "(inline)"
-    },
-    {
-     "kind": "dom.id",
      "value": "btn-aria",
      "at": "mountHud",
-     "line": 797
+     "line": 796
     },
     {
      "kind": "dom.id",
      "value": "btn-full",
      "at": "mountHud",
-     "line": 803
+     "line": 802
+    },
+    {
+     "kind": "event.listen",
+     "value": "click",
+     "at": "mountHud",
+     "line": 805,
+     "target": "$()",
+     "handler": "(inline)"
+    },
+    {
+     "kind": "dom.id",
+     "value": "btn-map-close",
+     "at": "mountHud",
+     "line": 805
     },
     {
      "kind": "event.listen",
@@ -110743,59 +110846,45 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-map-close",
-     "at": "mountHud",
-     "line": 806
-    },
-    {
-     "kind": "event.listen",
-     "value": "click",
-     "at": "mountHud",
-     "line": 807,
-     "target": "$()",
-     "handler": "(inline)"
-    },
-    {
-     "kind": "dom.id",
      "value": "btn-mute",
      "at": "mountHud",
-     "line": 807
+     "line": 806
     },
     {
      "kind": "dom.id",
      "value": "mix-rows",
      "at": "mountHud",
-     "line": 815
+     "line": 814
     },
     {
      "kind": "dom.create",
      "value": "div",
      "at": "mountHud>paintRow",
-     "line": 818
+     "line": 817
     },
     {
      "kind": "dom.create",
      "value": "label",
      "at": "mountHud>paintRow",
-     "line": 820
+     "line": 819
     },
     {
      "kind": "dom.create",
      "value": "input",
      "at": "mountHud>paintRow",
-     "line": 822
+     "line": 821
     },
     {
      "kind": "dom.create",
      "value": "b",
      "at": "mountHud>paintRow",
-     "line": 826
+     "line": 825
     },
     {
      "kind": "event.listen",
      "value": "input",
      "at": "mountHud>paintRow",
-     "line": 828,
+     "line": 827,
      "target": "r",
      "handler": "(inline)"
     },
@@ -110803,7 +110892,7 @@
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 834,
+     "line": 833,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110811,13 +110900,13 @@
      "kind": "dom.id",
      "value": "btn-mix-reset",
      "at": "mountHud",
-     "line": 834
+     "line": 833
     },
     {
      "kind": "event.listen",
      "value": "pointerdown",
      "at": "mountHud",
-     "line": 845,
+     "line": 844,
      "target": "document",
      "handler": "(inline)"
     },
@@ -110825,25 +110914,25 @@
      "kind": "dom.query",
      "value": "button, .btn, .tbtn, .pick, .chip",
      "at": "mountHud",
-     "line": 846
+     "line": 845
     },
     {
      "kind": "dom.query",
      "value": ".sw[data-sys]",
      "at": "mountHud",
-     "line": 891
+     "line": 890
     },
     {
      "kind": "dom.query",
      "value": ".st",
      "at": "mountHud",
-     "line": 892
+     "line": 891
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "mountHud",
-     "line": 901,
+     "line": 900,
      "target": "$()",
      "handler": "(inline)"
     },
@@ -110851,107 +110940,113 @@
      "kind": "dom.id",
      "value": "notice-card",
      "at": "mountHud",
-     "line": 901
+     "line": 900
     },
     {
      "kind": "dom.id",
      "value": "canopy",
      "at": "mountHud",
-     "line": 903
+     "line": 902
     },
     {
      "kind": "dom.id",
      "value": "markers",
      "at": "mountHud",
-     "line": 904
+     "line": 903
     },
     {
      "kind": "dom.id",
      "value": "notice-card",
      "at": "mountHud",
-     "line": 905
+     "line": 904
     },
     {
      "kind": "dom.id",
      "value": "btn-warp",
      "at": "mountHud",
-     "line": 906
+     "line": 905
     },
     {
      "kind": "dom.id",
      "value": "impact-flash",
      "at": "mountHud",
-     "line": 907
+     "line": 906
     },
     {
      "kind": "dom.id",
      "value": "sky-glare",
      "at": "mountHud",
-     "line": 908
+     "line": 907
     },
     {
      "kind": "dom.create",
      "value": "div",
      "at": "mountHud>rowEl",
-     "line": 911
+     "line": 910
     },
     {
      "kind": "dom.id",
      "value": "warp-fill",
      "at": "mountHud",
-     "line": 916
+     "line": 915
     },
     {
      "kind": "dom.id",
      "value": "warp-state",
      "at": "mountHud",
-     "line": 917
+     "line": 916
     },
     {
      "kind": "dom.id",
      "value": "hud-clock",
      "at": "mountHud>paintClock",
-     "line": 927
+     "line": 926
     },
     {
      "kind": "dom.id",
      "value": "hud",
      "at": "mountHud>paintClock",
-     "line": 932
+     "line": 931
     },
     {
      "kind": "dom.id",
      "value": "start",
      "at": "mountHud>paintAll",
-     "line": 949
+     "line": 948
     },
     {
      "kind": "dom.id",
      "value": "hud",
      "at": "mountHud>paintAll",
-     "line": 950
+     "line": 949
     },
     {
      "kind": "dom.id",
      "value": "pause",
      "at": "mountHud>paintAll",
-     "line": 952
+     "line": 951
     },
     {
      "kind": "dom.id",
      "value": "btn-watch",
      "at": "mountHud>paintAll",
-     "line": 953
+     "line": 952
     },
     {
      "kind": "dom.id",
      "value": "map",
      "at": "mountHud>paintAll",
-     "line": 954
+     "line": 953
     },
     {
      "kind": "dom.id",
      "value": "hold",
+     "at": "mountHud>paintAll",
+     "line": 954
+    },
+    {
+     "kind": "dom.id",
+     "value": "btn-hold",
      "at": "mountHud>paintAll",
      "line": 955
     },
@@ -110963,211 +111058,211 @@
     },
     {
      "kind": "dom.id",
-     "value": "btn-hold",
-     "at": "mountHud>paintAll",
-     "line": 957
-    },
-    {
-     "kind": "dom.id",
      "value": "btn-cam",
      "at": "mountHud>paintAll",
-     "line": 963
+     "line": 962
     },
     {
      "kind": "dom.id",
      "value": "btn-aria",
      "at": "mountHud>paintAll",
-     "line": 964
+     "line": 963
     },
     {
      "kind": "dom.id",
      "value": "hud-sky",
      "at": "mountHud>paintAll",
-     "line": 968
+     "line": 967
     },
     {
      "kind": "dom.id",
      "value": "i-vel",
      "at": "mountHud>paintAll",
-     "line": 971
+     "line": 970
     },
     {
      "kind": "dom.id",
      "value": "i-cls",
      "at": "mountHud>paintAll",
-     "line": 972
+     "line": 971
     },
     {
      "kind": "dom.id",
      "value": "i-alt",
      "at": "mountHud>paintAll",
-     "line": 973
+     "line": 972
     },
     {
      "kind": "dom.id",
      "value": "hazline",
      "at": "mountHud>paintAll",
-     "line": 976
+     "line": 975
     },
     {
      "kind": "dom.id",
      "value": "haz-text",
      "at": "mountHud>paintAll",
-     "line": 982
+     "line": 981
     },
     {
      "kind": "dom.id",
      "value": "respline",
      "at": "mountHud>paintAll",
-     "line": 987
+     "line": 986
     },
     {
      "kind": "dom.id",
      "value": "resp-text",
      "at": "mountHud>paintAll",
-     "line": 995
+     "line": 994
     },
     {
      "kind": "dom.id",
      "value": "i-g",
      "at": "mountHud>paintAll",
-     "line": 1003
+     "line": 1002
     },
     {
      "kind": "dom.id",
      "value": "instruments",
      "at": "mountHud>paintAll",
-     "line": 1004
+     "line": 1003
     },
     {
      "kind": "dom.id",
      "value": "g-pwr",
      "at": "mountHud>paintAll",
-     "line": 1006
+     "line": 1005
     },
     {
      "kind": "dom.id",
      "value": "g-pwr-n",
      "at": "mountHud>paintAll",
-     "line": 1006
+     "line": 1005
     },
     {
      "kind": "dom.id",
      "value": "g-hull",
      "at": "mountHud>paintAll",
-     "line": 1009
+     "line": 1008
     },
     {
      "kind": "dom.id",
      "value": "g-hull-n",
      "at": "mountHud>paintAll",
-     "line": 1009
+     "line": 1008
     },
     {
      "kind": "dom.id",
      "value": "g-shld",
      "at": "mountHud>paintAll",
-     "line": 1010
+     "line": 1009
     },
     {
      "kind": "dom.id",
      "value": "g-shld-n",
      "at": "mountHud>paintAll",
-     "line": 1010
+     "line": 1009
     },
     {
      "kind": "dom.id",
      "value": "g-o2",
      "at": "mountHud>paintAll",
-     "line": 1011
+     "line": 1010
     },
     {
      "kind": "dom.id",
      "value": "g-o2-n",
      "at": "mountHud>paintAll",
-     "line": 1011
+     "line": 1010
     },
     {
      "kind": "dom.id",
      "value": "g-cgo",
      "at": "mountHud>paintAll",
-     "line": 1012
+     "line": 1011
     },
     {
      "kind": "dom.id",
      "value": "g-cgo-n",
      "at": "mountHud>paintAll",
-     "line": 1012
+     "line": 1011
     },
     {
      "kind": "dom.id",
      "value": "alarms",
      "at": "mountHud>paintAll",
-     "line": 1020
+     "line": 1019
     },
     {
      "kind": "dom.id",
      "value": "lock-name",
      "at": "mountHud>paintAll",
-     "line": 1027
+     "line": 1026
     },
     {
      "kind": "dom.id",
      "value": "notice",
      "at": "mountHud>paintAll",
-     "line": 1028
+     "line": 1027
     },
     {
      "kind": "dom.id",
      "value": "status",
      "at": "mountHud>paintAll",
-     "line": 1044
+     "line": 1043
     },
     {
      "kind": "dom.id",
      "value": "btn-mute",
      "at": "mountHud>paintAll",
-     "line": 1046
+     "line": 1045
     },
     {
      "kind": "dom.id",
      "value": "btn-con",
      "at": "mountHud>paintAll",
-     "line": 1047
+     "line": 1046
     },
     {
      "kind": "dom.id",
      "value": "route-card",
      "at": "mountHud>paintAll",
-     "line": 1071
+     "line": 1070
     },
     {
      "kind": "dom.id",
      "value": "route-target",
      "at": "mountHud>paintAll",
-     "line": 1081
+     "line": 1080
     },
     {
      "kind": "dom.id",
      "value": "route-eta",
      "at": "mountHud>paintAll",
-     "line": 1082
+     "line": 1081
     },
     {
      "kind": "dom.id",
      "value": "route-hazards",
      "at": "mountHud>paintAll",
-     "line": 1083
+     "line": 1082
     },
     {
      "kind": "dom.id",
      "value": "thr-track",
      "at": "mountHud>paintAll",
-     "line": 1100
+     "line": 1099
     },
     {
      "kind": "dom.id",
      "value": "thr-num",
+     "at": "mountHud>paintAll",
+     "line": 1100
+    },
+    {
+     "kind": "dom.id",
+     "value": "thr-draw",
      "at": "mountHud>paintAll",
      "line": 1101
     },
@@ -111179,31 +111274,31 @@
     },
     {
      "kind": "dom.id",
-     "value": "thr-draw",
-     "at": "mountHud>paintAll",
-     "line": 1103
-    },
-    {
-     "kind": "dom.id",
      "value": "sw-cut",
      "at": "mountHud>paintAll",
-     "line": 1115
+     "line": 1114
     },
     {
      "kind": "dom.query",
      "value": ".st",
      "at": "mountHud>paintAll",
-     "line": 1122
+     "line": 1121
     },
     {
      "kind": "dom.query",
      "value": ".nm",
      "at": "mountHud>paintAll",
-     "line": 1123
+     "line": 1122
     },
     {
      "kind": "dom.id",
      "value": "mode-turret-st",
+     "at": "mountHud>paintAll",
+     "line": 1133
+    },
+    {
+     "kind": "dom.id",
+     "value": "mode-turret",
      "at": "mountHud>paintAll",
      "line": 1134
     },
@@ -111215,91 +111310,91 @@
     },
     {
      "kind": "dom.id",
-     "value": "mode-turret",
+     "value": "lockbar",
      "at": "mountHud>paintAll",
      "line": 1136
     },
     {
      "kind": "dom.id",
-     "value": "lockbar",
-     "at": "mountHud>paintAll",
-     "line": 1137
-    },
-    {
-     "kind": "dom.id",
      "value": "lock-fill",
      "at": "mountHud>paintAll",
-     "line": 1139
+     "line": 1138
     },
     {
      "kind": "dom.id",
      "value": "lock-text",
      "at": "mountHud>paintAll",
-     "line": 1140
+     "line": 1139
     },
     {
      "kind": "dom.id",
      "value": "op-pulse-st",
      "at": "mountHud>paintAll",
-     "line": 1146
+     "line": 1145
     },
     {
      "kind": "dom.id",
      "value": "op-pulse",
      "at": "mountHud>paintAll",
-     "line": 1147
+     "line": 1146
     },
     {
      "kind": "dom.id",
      "value": "op-time-st",
      "at": "mountHud>paintAll",
-     "line": 1148
+     "line": 1147
     },
     {
      "kind": "dom.id",
      "value": "op-dock-st",
      "at": "mountHud>paintAll",
-     "line": 1150
+     "line": 1149
     },
     {
      "kind": "dom.id",
      "value": "op-dock",
      "at": "mountHud>paintAll",
-     "line": 1159
+     "line": 1158
     },
     {
      "kind": "dom.id",
      "value": "op-claim-st",
      "at": "mountHud>paintAll",
-     "line": 1160
+     "line": 1159
     },
     {
      "kind": "dom.id",
      "value": "op-claim",
      "at": "mountHud>paintAll",
-     "line": 1161
+     "line": 1160
     },
     {
      "kind": "dom.id",
      "value": "op-time",
      "at": "mountHud>paintAll",
-     "line": 1162
+     "line": 1161
     },
     {
      "kind": "dom.id",
      "value": "op-threat-st",
      "at": "mountHud>paintAll",
-     "line": 1164
+     "line": 1163
     },
     {
      "kind": "dom.id",
      "value": "op-threat",
      "at": "mountHud>paintAll",
-     "line": 1171
+     "line": 1170
     },
     {
      "kind": "dom.id",
      "value": "mode-mining-st",
+     "at": "mountHud>paintAll",
+     "line": 1173
+    },
+    {
+     "kind": "dom.id",
+     "value": "mode-mining",
      "at": "mountHud>paintAll",
      "line": 1174
     },
@@ -111311,46 +111406,137 @@
     },
     {
      "kind": "dom.id",
-     "value": "mode-mining",
-     "at": "mountHud>paintAll",
-     "line": 1176
-    },
-    {
-     "kind": "dom.id",
      "value": "labels",
      "at": "mountHud>paintAll",
-     "line": 1178
+     "line": 1177
     },
     {
      "kind": "dom.id",
      "value": "heat-wash",
      "at": "mountHud>paintAll",
-     "line": 1186
+     "line": 1179
     },
     {
      "kind": "dom.id",
      "value": "toast",
      "at": "mountHud>paintAll",
-     "line": 1189
+     "line": 1182
     },
     {
      "kind": "dom.id",
      "value": "toast",
      "at": "mountHud>paintAll",
-     "line": 1190
+     "line": 1183
     },
     {
      "kind": "dom.id",
      "value": "toast",
      "at": "mountHud>paintAll",
-     "line": 1192
+     "line": 1185
     },
     {
      "kind": "bus.on",
      "value": "‹paint›",
      "at": "mountHud",
-     "line": 1198,
+     "line": 1191,
      "target": "store"
+    }
+   ]
+  },
+  {
+   "file": "js/ui/hudnodes.js",
+   "lines": 75,
+   "vendor": false,
+   "summary": "",
+   "imports": [],
+   "dynamic": [],
+   "importedBy": [
+    "js/ui/hud.js"
+   ],
+   "exports": [
+    "paintLabels",
+    "paintMarkerNodes"
+   ],
+   "symbols": [
+    {
+     "key": "labels",
+     "kind": "const",
+     "line": 1,
+     "end": 1,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "markers",
+     "kind": "const",
+     "line": 2,
+     "end": 2,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "reconcile",
+     "kind": "function",
+     "line": 4,
+     "end": 24,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "position",
+     "kind": "function",
+     "line": 26,
+     "end": 30,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "paintLabels",
+     "kind": "function",
+     "line": 32,
+     "end": 55,
+     "exported": true,
+     "calls": [
+      "js/ui/hudnodes.js#reconcile",
+      "js/ui/hudnodes.js#position"
+     ]
+    },
+    {
+     "key": "paintMarkerNodes",
+     "kind": "function",
+     "line": 57,
+     "end": 75,
+     "exported": true,
+     "calls": [
+      "js/ui/hudnodes.js#reconcile",
+      "js/ui/hudnodes.js#position"
+     ]
+    }
+   ],
+   "effects": [
+    {
+     "kind": "dom.create",
+     "value": "span",
+     "at": "paintLabels",
+     "line": 34
+    },
+    {
+     "kind": "dom.create",
+     "value": "i",
+     "at": "paintLabels",
+     "line": 49
+    },
+    {
+     "kind": "dom.create",
+     "value": "span",
+     "at": "paintMarkerNodes",
+     "line": 59
+    },
+    {
+     "kind": "dom.create",
+     "value": "b",
+     "at": "paintMarkerNodes",
+     "line": 71
     }
    ]
   },
@@ -116894,7 +117080,7 @@
   },
   {
    "file": "js/world/field.js",
-   "lines": 303,
+   "lines": 309,
    "vendor": false,
    "summary": "procedural asteroid field.",
    "imports": [
@@ -116993,6 +117179,8 @@
     "bandNameAt",
     "veinAt",
     "rocksInCell",
+    "CELL_CACHE_LIMIT",
+    "fieldCacheStats",
     "nearbyRocks",
     "rockByKey",
     "siteMarkRock",
@@ -117216,15 +117404,15 @@
      ]
     },
     {
-     "key": "_cells",
+     "key": "CELL_CACHE_LIMIT",
      "kind": "const",
      "line": 144,
      "end": 144,
-     "exported": false,
+     "exported": true,
      "calls": []
     },
     {
-     "key": "_cellsSys",
+     "key": "_cells",
      "kind": "const",
      "line": 145,
      "end": 145,
@@ -117232,7 +117420,15 @@
      "calls": []
     },
     {
-     "key": "RING",
+     "key": "fieldCacheStats",
+     "kind": "function",
+     "line": 146,
+     "end": 146,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "_cellsSys",
      "kind": "const",
      "line": 147,
      "end": 147,
@@ -117240,15 +117436,7 @@
      "calls": []
     },
     {
-     "key": "_ring",
-     "kind": "const",
-     "line": 148,
-     "end": 148,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "i",
+     "key": "RING",
      "kind": "const",
      "line": 149,
      "end": 149,
@@ -117256,7 +117444,7 @@
      "calls": []
     },
     {
-     "key": "_ringAt",
+     "key": "_ring",
      "kind": "const",
      "line": 150,
      "end": 150,
@@ -117264,7 +117452,7 @@
      "calls": []
     },
     {
-     "key": "_memo",
+     "key": "i",
      "kind": "const",
      "line": 151,
      "end": 151,
@@ -117272,7 +117460,7 @@
      "calls": []
     },
     {
-     "key": "_memoAt",
+     "key": "_ringAt",
      "kind": "const",
      "line": 152,
      "end": 152,
@@ -117280,26 +117468,42 @@
      "calls": []
     },
     {
+     "key": "_memo",
+     "kind": "const",
+     "line": 153,
+     "end": 153,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "_memoAt",
+     "kind": "const",
+     "line": 154,
+     "end": 154,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "forgetRocks",
      "kind": "function",
-     "line": 156,
-     "end": 160,
+     "line": 158,
+     "end": 162,
      "exported": false,
      "calls": []
     },
     {
      "key": "refreshCell",
      "kind": "function",
-     "line": 162,
-     "end": 170,
+     "line": 164,
+     "end": 172,
      "exported": false,
      "calls": []
     },
     {
      "key": "cellCached",
      "kind": "function",
-     "line": 172,
-     "end": 186,
+     "line": 174,
+     "end": 192,
      "exported": false,
      "calls": [
       "js/world/field.js#cellRocks",
@@ -117309,8 +117513,8 @@
     {
      "key": "nearbyRocks",
      "kind": "function",
-     "line": 188,
-     "end": 212,
+     "line": 194,
+     "end": 218,
      "exported": true,
      "calls": [
       "js/world/field.js#forgetRocks",
@@ -117320,8 +117524,8 @@
     {
      "key": "rockByKey",
      "kind": "function",
-     "line": 214,
-     "end": 230,
+     "line": 220,
+     "end": 236,
      "exported": true,
      "calls": [
       "js/economy/sites.js#siteRockBase",
@@ -117331,8 +117535,8 @@
     {
      "key": "siteMarkRock",
      "kind": "function",
-     "line": 232,
-     "end": 246,
+     "line": 238,
+     "end": 252,
      "exported": true,
      "calls": [
       "js/world/field.js#markSkipped",
@@ -117343,32 +117547,32 @@
     {
      "key": "markSkip",
      "kind": "const",
-     "line": 248,
-     "end": 248,
+     "line": 254,
+     "end": 254,
      "exported": false,
      "calls": []
     },
     {
      "key": "skipMarkRock",
      "kind": "function",
-     "line": 249,
-     "end": 249,
+     "line": 255,
+     "end": 255,
      "exported": true,
      "calls": []
     },
     {
      "key": "markSkipped",
      "kind": "function",
-     "line": 250,
-     "end": 256,
+     "line": 256,
+     "end": 262,
      "exported": true,
      "calls": []
     },
     {
      "key": "beltExit",
      "kind": "function",
-     "line": 258,
-     "end": 263,
+     "line": 264,
+     "end": 269,
      "exported": true,
      "calls": [
       "js/world/field.js#inBelt"
@@ -117377,32 +117581,32 @@
     {
      "key": "aboveBelt",
      "kind": "function",
-     "line": 265,
-     "end": 267,
+     "line": 271,
+     "end": 273,
      "exported": true,
      "calls": []
     },
     {
      "key": "inBelt",
      "kind": "function",
-     "line": 269,
-     "end": 276,
+     "line": 275,
+     "end": 282,
      "exported": true,
      "calls": []
     },
     {
      "key": "brokenRocks",
      "kind": "const",
-     "line": 278,
-     "end": 278,
+     "line": 284,
+     "end": 284,
      "exported": true,
      "calls": []
     },
     {
      "key": "wearRock",
      "kind": "function",
-     "line": 280,
-     "end": 291,
+     "line": 286,
+     "end": 297,
      "exported": true,
      "calls": [
       "js/world/field.js#forgetRocks"
@@ -117411,8 +117615,8 @@
     {
      "key": "eatRocks",
      "kind": "function",
-     "line": 293,
-     "end": 296,
+     "line": 299,
+     "end": 302,
      "exported": true,
      "calls": [
       "js/world/field.js#forgetRocks"
@@ -117421,8 +117625,8 @@
     {
      "key": "resetField",
      "kind": "function",
-     "line": 298,
-     "end": 303,
+     "line": 304,
+     "end": 309,
      "exported": true,
      "calls": [
       "js/world/field.js#forgetRocks"

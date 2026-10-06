@@ -1,6 +1,6 @@
 # js/npc/flight.js
 
-[index](../../../README.md) · 203 lines · 31 symbols · 2 imports · 6 importers
+[index](../../../README.md) · 203 lines · 31 symbols · 2 imports · 7 importers
 
 ## About
 
@@ -82,6 +82,7 @@ midpoint, brake from it, arriving as fast as it can.
 - [js/npc/security.js](security.js.md) — `flyStep`, `armFlight`
 - [js/npc/traffic.js](traffic.js.md) — `armFlight`, `flyStep`, `coastStep`, `legCruise`, `legTime`, `faceVelocity`, `placeAt`, `hullPerf`, `usesLane`, `laneProfile`, `RUN_OUT_U`, `RUN_IN_U`
 - test/ground.test.mjs _(outside js/)_ — `armFlight`
+- test/performance-upgrade.test.mjs _(outside js/)_ — `flyStep`
 - test/reactive.test.mjs _(outside js/)_ — `legCruise`, `legTime`, `usesLane`, `laneProfile`, `hullPerf`, `armFlight`, `flyStep`, `LANE_MIN_U`, `RUN_OUT_U`, `RUN_IN_U`
 
 ## Exports
@@ -98,7 +99,7 @@ midpoint, brake from it, arriving as fast as it can.
 - [`laneProfile`](#s-laneProfile) · function — used by [js/npc/traffic.js](traffic.js.md), test/reactive.test.mjs
 - [`legTime`](#s-legTime) · function — used by [js/npc/traffic.js](traffic.js.md), test/reactive.test.mjs
 - [`armFlight`](#s-armFlight) · function — used by [js/npc/combat.js](combat.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/npc/traffic.js](traffic.js.md), test/ground.test.mjs, test/reactive.test.mjs
-- [`flyStep`](#s-flyStep) · function — used by [js/npc/combat.js](combat.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/npc/traffic.js](traffic.js.md), test/reactive.test.mjs
+- [`flyStep`](#s-flyStep) · function — used by [js/npc/combat.js](combat.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/npc/traffic.js](traffic.js.md), test/performance-upgrade.test.mjs, test/reactive.test.mjs
 - [`coastStep`](#s-coastStep) · function — used by [js/npc/traffic.js](traffic.js.md)
 - [`faceVelocity`](#s-faceVelocity) · function — used by [js/npc/traffic.js](traffic.js.md)
 - [`faceAt`](#s-faceAt) · function — used by [js/npc/combat.js](combat.js.md)

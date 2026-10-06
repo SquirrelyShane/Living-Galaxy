@@ -1,6 +1,6 @@
 # js/world/bodies.js
 
-[index](../../../README.md) · 522 lines · 43 symbols · 3 imports · 58 importers
+[index](../../../README.md) · 522 lines · 43 symbols · 3 imports · 59 importers
 
 ## About
 
@@ -67,6 +67,7 @@
 - test/mission.test.mjs _(outside js/)_ — `currentSystem`, `dist3`
 - test/nav.test.mjs _(outside js/)_ — `applySystem`, `BODIES`, `bodyById`, `bodyPosition`
 - test/nose.test.mjs _(outside js/)_ — `BODIES`
+- test/performance-upgrade.test.mjs _(outside js/)_ — `currentSystem`, `applySystem`
 - test/reactive.test.mjs _(outside js/)_ — `currentSystem`
 - test/rogues.test.mjs _(outside js/)_ — `currentSystem`
 - test/sites.test.mjs _(outside js/)_ — `currentSystem`
@@ -87,8 +88,8 @@
 - [`scaleSystem`](#s-scaleSystem) · function — used by test/spacing.test.mjs
 - [`BODIES`](#s-BODIES) · let — used by [js/aria/nav.js](../aria/nav.js.md), [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/console/panels/work.js](../console/panels/work.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/avoid.js](../flight/avoid.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/ship.js](../flight/ship.js.md), [js/mission/run.js](../mission/run.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/speech.js](../npc/speech.js.md), [js/render/attract.js](../render/attract.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), [js/world/debris.js](debris.js.md), [js/world/events/atmoworks.js](events/atmoworks.js.md), [js/world/hulks.js](hulks.js.md), test/ariasense.test.mjs, test/chart.test.mjs, test/desk.test.mjs, test/hulks.test.mjs, test/nav.test.mjs, test/nose.test.mjs, test/sky.test.mjs, test/solprime.test.mjs
 - [`BEACONS`](#s-BEACONS) · let — used by [js/core/store.js](../core/store.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md)
-- [`currentSystem`](#s-currentSystem) · let — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/console.js](../console/console.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/npc/ground.js](../npc/ground.js.md), [js/npc/rogues.js](../npc/rogues.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/render/attract.js](../render/attract.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), [js/world/field.js](field.js.md), test/autopilot.test.mjs, test/avoid.test.mjs, test/bay.test.mjs, test/board.test.mjs, test/chart.test.mjs, test/economy.test.mjs, test/ground.test.mjs, test/hulks.test.mjs, test/mission.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs, test/sites.test.mjs, test/sky.test.mjs, test/systems.test.mjs, test/trade.test.mjs
-- [`applySystem`](#s-applySystem) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/nav.test.mjs, test/spacing.test.mjs
+- [`currentSystem`](#s-currentSystem) · let — used by [js/aria/senses.js](../aria/senses.js.md), [js/console/console.js](../console/console.js.md), [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](../npc/battles.js.md), [js/npc/ground.js](../npc/ground.js.md), [js/npc/rogues.js](../npc/rogues.js.md), [js/npc/traffic.js](../npc/traffic.js.md), [js/render/attract.js](../render/attract.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), [js/world/field.js](field.js.md), test/autopilot.test.mjs, test/avoid.test.mjs, test/bay.test.mjs, test/board.test.mjs, test/chart.test.mjs, test/economy.test.mjs, test/ground.test.mjs, test/hulks.test.mjs, test/mission.test.mjs, test/performance-upgrade.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs, test/sites.test.mjs, test/sky.test.mjs, test/systems.test.mjs, test/trade.test.mjs
+- [`applySystem`](#s-applySystem) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/nav.test.mjs, test/performance-upgrade.test.mjs, test/spacing.test.mjs
 - [`surveyIds`](#s-surveyIds) · function — used by [js/core/store.js](../core/store.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`SHIP_COLORS`](#s-SHIP_COLORS) · const — **no importer in scanned roots**
 - [`hashHue`](#s-hashHue) · function — used by [js/npc/traffic.js](../npc/traffic.js.md), [js/sim/sim.js](../sim/sim.js.md)
