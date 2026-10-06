@@ -1,6 +1,6 @@
 # js/drones/npcdrones.js
 
-[index](../../../README.md) · 241 lines · 19 symbols · 10 imports · 6 importers
+[index](../../../README.md) · 241 lines · 19 symbols · 10 imports · 7 importers
 
 ## About
 
@@ -58,11 +58,12 @@ same rate a gun drone does.
 - [js/render/engine.js](../render/engine.js.md) — `npcDrones`
 - [js/sim/sim.js](../sim/sim.js.md) — `populateNpcDrones`, `stepNpcDrones`, `npcDroneHooks`, `npcDrones`, `DRONE_LINE`
 - test/bay.test.mjs _(outside js/)_ — `npcDrones`, `stepNpcDrones`
+- test/hotpath-optimization.test.mjs _(outside js/)_ — `npcDrones`
 - test/portdrones.test.mjs _(outside js/)_ — `npcDrones`, `stepNpcDrones`, `populateNpcDrones`, `DRONE_LINE`, `npcDroneHooks`
 
 ## Exports
 
-- [`npcDrones`](#s-npcDrones) · const — used by [js/flight/turrets.js](../flight/turrets.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/bay.test.mjs, test/portdrones.test.mjs
+- [`npcDrones`](#s-npcDrones) · const — used by [js/flight/turrets.js](../flight/turrets.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/bay.test.mjs, test/hotpath-optimization.test.mjs, test/portdrones.test.mjs
 - [`DRONE_LINE`](#s-DRONE_LINE) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs
 - [`npcDroneHooks`](#s-npcDroneHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs
 - [`populateNpcDrones`](#s-populateNpcDrones) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs

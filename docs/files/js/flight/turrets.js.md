@@ -1,6 +1,6 @@
 # js/flight/turrets.js
 
-[index](../../../README.md) · 506 lines · 52 symbols · 10 imports · 26 importers
+[index](../../../README.md) · 510 lines · 52 symbols · 10 imports · 27 importers
 
 ## About
 
@@ -69,6 +69,7 @@ drones already did.
 - [js/ui/hud.js](../ui/hud.js.md) — `contacts`
 - [js/ui/tutorial.js](../ui/tutorial.js.md) — `MINE_RANGE`
 - test/aria-mining-loop.test.mjs _(outside js/)_ — `contacts`
+- test/hotpath-optimization.test.mjs _(outside js/)_ — `contacts`, `syncContacts`, `CONTACT_R`, `shots`
 - test/hulks.test.mjs _(outside js/)_ — `contacts`, `fireRound`
 - test/portdrones.test.mjs _(outside js/)_ — `contacts`, `shots`, `stepShots`, `syncContacts`
 - test/qrf.test.mjs _(outside js/)_ — `contacts`, `shots`, `stepShots`, `syncContacts`
@@ -81,18 +82,18 @@ drones already did.
 
 - [`MINE_YIELD`](#s-MINE_YIELD) · const — **no importer in scanned roots**
 - [`miningHooks`](#s-miningHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`CONTACT_R`](#s-CONTACT_R) · const — used by test/reactive.test.mjs, test/sky.test.mjs
+- [`CONTACT_R`](#s-CONTACT_R) · const — used by test/hotpath-optimization.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`COMBAT_RANGE`](#s-COMBAT_RANGE) · const — **no importer in scanned roots**
 - [`MINE_RANGE`](#s-MINE_RANGE) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md)
 - [`MINE_RANGE_OD`](#s-MINE_RANGE_OD) · const — **no importer in scanned roots**
-- [`contacts`](#s-contacts) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/aria-mining-loop.test.mjs, test/hulks.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
-- [`shots`](#s-shots) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
+- [`contacts`](#s-contacts) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/aria-mining-loop.test.mjs, test/hotpath-optimization.test.mjs, test/hulks.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
+- [`shots`](#s-shots) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`combatHooks`](#s-combatHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`mining`](#s-mining) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
 - [`turretAim`](#s-turretAim) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md)
 - [`resetCombat`](#s-resetCombat) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`contactById`](#s-contactById) · function — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/npc/combat.js](../npc/combat.js.md)
-- [`syncContacts`](#s-syncContacts) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
+- [`syncContacts`](#s-syncContacts) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
 - [`npcTracer`](#s-npcTracer) · function — used by [js/npc/combat.js](../npc/combat.js.md), [js/sim/sim.js](../sim/sim.js.md), test/sky.test.mjs
 - [`pickCombatTarget`](#s-pickCombatTarget) · function — **no importer in scanned roots**
 - [`nearestContact`](#s-nearestContact) · function — **no importer in scanned roots**
@@ -103,7 +104,7 @@ drones already did.
 
 ## Effects
 
-- **bus.emit** — `‹c› on fire` (syncContacts:142, stepPirates:170, stepDrones:252) · `‹from› on fire` (npcTracer:177, fireRound:323) · `‹ship.pos› on fire` (stepTurrets:404)
+- **bus.emit** — `‹c› on fire` (syncContacts:146, stepPirates:174, stepDrones:256) · `‹from› on fire` (npcTracer:181, fireRound:327) · `‹ship.pos› on fire` (stepTurrets:408)
 
 ## Symbols
 
@@ -324,7 +325,7 @@ function · **exported** · L45–55
 
 function · L57–59
 
-- called by: [`fire`](#s-fire) · [`nearestContact`](#s-nearestContact) · [`pickCombatTarget`](#s-pickCombatTarget) · [`stepDrones`](#s-stepDrones) · [`stepPirates`](#s-stepPirates) · [`syncContacts`](#s-syncContacts) ×3
+- called by: [`fire`](#s-fire) · [`nearestContact`](#s-nearestContact) · [`pickCombatTarget`](#s-pickCombatTarget) · [`stepDrones`](#s-stepDrones) · [`stepPirates`](#s-stepPirates)
 
 <!-- note:d3 -->
 <!-- /note -->
@@ -397,14 +398,16 @@ Push onto the board and into this call's index, so the next pass sees it.
 
 ### <a id="s-syncContacts"></a>`syncContacts(ship, remotes, relationOf, time, dt)`
 
-function · **exported** · L76–150
+function · **exported** · L76–154
 
-- calls: [`addContact`](#s-addContact) ×3 · [`d3`](#s-d3) ×3 · [`fire`](#s-fire) · [`stepDrones`](#s-stepDrones) · [`stepPirates`](#s-stepPirates)
+- calls: [`addContact`](#s-addContact) ×3 · [`fire`](#s-fire) · [`stepDrones`](#s-stepDrones) · [`stepPirates`](#s-stepPirates)
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
 - called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
 - effects: bus.emit `‹c›`
 
 <!-- note:syncContacts -->
+Sensor and drone firing range comparisons use squared distances; sensor equality is included and firing equality is excluded. Retain the per-call contact index and bidirectional damage synchronization.
+
 Rebuilds the contact list: live peers plus whatever drones are around.
 
 - L77 · `byId.clear();` — one O(n) pass to index the board, then every lookup below is O(1). The
@@ -413,21 +416,21 @@ Rebuilds the contact list: live peers plus whatever drones are around.
 - L81 · `for (const r of remotes.values()) {` — peers
 - L97 · `for (const n of traffic) {` — CRADLE captains working this sky — traders, miners, haulers, pickets
 - L98 · `if (n.visible === false) continue;` — docked inside a ring, in a lane, or shot down: off the board
-- L99 · `if (d3(n, ship.pos) > CONTACT_R) continue;` — sensors do not reach: the board knows it, the turrets do not
-- L103 · `c = addContact({ id: n.id, kind: "npc", name: n.name, hp: n.hp ?? 120, shield: n.shield ??` — the hull's own numbers, not one size for a picket and an ore barge
-- L105 · `if (n.hp != null) {` — two-way: rounds that land on the contact land on the hull, and damage
+- L? · `if (d3(n, ship.pos) > CONTACT_R) continue;` — sensors do not reach: the board knows it, the turrets do not
+- L104 · `c = addContact({ id: n.id, kind: "npc", name: n.name, hp: n.hp ?? 120, shield: n.shield ??` — the hull's own numbers, not one size for a picket and an ore barge
+- L106 · `if (n.hp != null) {` — two-way: rounds that land on the contact land on the hull, and damage
   the hull took out of contact range is already on it when it comes back
-- L122 · `const rel = relationOf(n.id);` — relationOf() was called twice per hull per tick to answer one question
-- L123 · `c.relation = rel === "neutral" ? (LAW_ROLES.has(n.role) ? (ship.outlaw ? "hostile" : "ally` — 0.3.48: a wanted pilot (security ◆ RED) is the Directorate's quarry
-- L131 · `for (const u of npcDrones.units) {` — the corporations' drones (drones/npcdrones.js): hostile holds' gun drones join the board as
+- L123 · `const rel = relationOf(n.id);` — relationOf() was called twice per hull per tick to answer one question
+- L124 · `c.relation = rel === "neutral" ? (LAW_ROLES.has(n.role) ? (ship.outlaw ? "hostile" : "ally` — 0.3.48: a wanted pilot (security ◆ RED) is the Directorate's quarry
+- L132 · `for (const u of npcDrones.units) {` — the corporations' drones (drones/npcdrones.js): hostile holds' gun drones join the board as
   hostile "drone" contacts inside contact range, so the sentry sees them and they shoot back
-- L139 · `if (c.hp < u.hp) u.hp = c.hp;` — rounds landed on the contact land on the drone
-- L142 · `if (u.hostile && u.role === "combat" && c.cooldown <= 0 && d3(u, ship.pos) < 900) { c.cool` — a hold's gun drone shoots at anyone inside its port's water
+- L143 · `if (c.hp < u.hp) u.hp = c.hp;` — rounds landed on the contact land on the drone
+- L? · `if (u.hostile && u.role === "combat" && c.cooldown <= 0 && d3(u, ship.pos) < 900) { c.cool` — a hold's gun drone shoots at anyone inside its port's water
 <!-- /note -->
 
 ### <a id="s-HOSTILE_GUN"></a>`HOSTILE_GUN`
 
-const · L152–155
+const · L156–159
 
 <!-- note:HOSTILE_GUN -->
 Pirates shoot back. A lurker takes anyone inside PIRATE_RANGE; once you
@@ -452,35 +455,35 @@ it does not shoot like one. The profile is per role rather than one number
 for everything hostile, so this cannot quietly happen again the next time
 something is added to HOSTILE_ROLES.
 
-- L153 · `pirate: { dmg: 6, wing: 8, speed: 560, cd: () => PIRATE_RATE * (0.8 + Math.random() * 0.5)` — a crewed hull hunting you: fast, and worse once its wing is on you
-- L154 · `rogue: { dmg: DRONE_DMG, wing: DRONE_DMG, speed: 520, cd: () => DRONE_CD_MIN + Math.random` — a nest drone: the same gun the ambient swarm carries, because it is the
+- L157 · `pirate: { dmg: 6, wing: 8, speed: 560, cd: () => PIRATE_RATE * (0.8 + Math.random() * 0.5)` — a crewed hull hunting you: fast, and worse once its wing is on you
+- L158 · `rogue: { dmg: DRONE_DMG, wing: DRONE_DMG, speed: 520, cd: () => DRONE_CD_MIN + Math.random` — a nest drone: the same gun the ambient swarm carries, because it is the
   same kind of thing — and no wing bonus, because a wave is not a wing
 <!-- /note -->
 
 #### <a id="s-HOSTILE_GUN-cd"></a>`HOSTILE_GUN.cd()`
 
-prop · L153–153
+prop · L157–157
 
 <!-- note:HOSTILE_GUN.cd -->
 <!-- /note -->
 
 #### <a id="s-HOSTILE_GUN-cd-2"></a>`HOSTILE_GUN.cd~2()`
 
-prop · L154–154
+prop · L158–158
 
 <!-- note:HOSTILE_GUN.cd~2 -->
 <!-- /note -->
 
 ### <a id="s-DEFAULT_GUN"></a>`DEFAULT_GUN`
 
-const · L156–156
+const · L160–160
 
 <!-- note:DEFAULT_GUN -->
 <!-- /note -->
 
 ### <a id="s-stepPirates"></a>`stepPirates(ship, time, dt)`
 
-function · L158–172
+function · L162–176
 
 - calls: [`d3`](#s-d3) · [`fire`](#s-fire) · [`engagementAt`](../npc/battles.js.md#s-engagementAt) _js/npc/battles.js_
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
@@ -492,7 +495,7 @@ function · L158–172
 
 ### <a id="s-npcTracer"></a>`npcTracer(from, to, faction=, damage=, speed=, spread=)`
 
-function · **exported** · L174–182
+function · **exported** · L178–186
 
 - calls: [`fire`](#s-fire)
 - called by: [`stepGuns`](../npc/combat.js.md#s-stepGuns) _js/npc/combat.js_
@@ -506,7 +509,7 @@ and will only ever land on `to`.
 
 ### <a id="s-spawnDrone"></a>`spawnDrone(ship)`
 
-function · L184–203
+function · L188–207
 
 - calls: [`rng`](#s-rng) ×5
 - called by: [`stepDrones`](#s-stepDrones)
@@ -516,21 +519,21 @@ function · L184–203
 
 ### <a id="s-stepDrones"></a>`stepDrones(ship, time, dt)`
 
-function · L205–255
+function · L209–259
 
 - calls: [`addCargo`](ship.js.md#s-addCargo) _js/flight/ship.js_ ×2 · [`d3`](#s-d3) · [`fire`](#s-fire) · [`rng`](#s-rng) ×4 · [`spawnDrone`](#s-spawnDrone)
 - called by: [`syncContacts`](#s-syncContacts)
 - effects: bus.emit `‹c›`
 
 <!-- note:stepDrones -->
-- L217 · `if (c.hp <= 0 && !c.eaten) {` — a hole's kill leaves nothing to salvage
-- L224 · `if ((c.truceUntil ?? -1) > time) {` — A guard under truce (toll paid over comms) holds station and holds fire.
-- L230 · `const want = 620;` — Close to standoff range, then hold and shoot.
+- L221 · `if (c.hp <= 0 && !c.eaten) {` — a hole's kill leaves nothing to salvage
+- L228 · `if ((c.truceUntil ?? -1) > time) {` — A guard under truce (toll paid over comms) holds station and holds fire.
+- L234 · `const want = 620;` — Close to standoff range, then hold and shoot.
 <!-- /note -->
 
 ### <a id="s-engages"></a>`engages(mode, contact, ship, time)`
 
-function · L257–275
+function · L261–279
 
 - called by: [`pickCombatTarget`](#s-pickCombatTarget)
 
@@ -540,7 +543,7 @@ function · L257–275
 
 ### <a id="s-pickCombatTarget"></a>`pickCombatTarget(ship, time)`
 
-function · **exported** · L277–290
+function · **exported** · L281–294
 
 - calls: [`d3`](#s-d3) · [`engages`](#s-engages)
 - called by: [`stepTurrets`](#s-stepTurrets)
@@ -551,7 +554,7 @@ Nearest contact the current rules allow us to shoot.
 
 ### <a id="s-nearestContact"></a>`nearestContact(ship)`
 
-function · **exported** · L292–303
+function · **exported** · L296–307
 
 - calls: [`d3`](#s-d3)
 - called by: [`stepTurrets`](#s-stepTurrets)
@@ -562,7 +565,7 @@ Tracked-but-not-engaged contact, so PASSIVE still earns its power.
 
 ### <a id="s-fire"></a>`fire(from, to, speed, damage, owner, faction, kind=, target=)`
 
-function · L305–322
+function · L309–326
 
 - calls: [`d3`](#s-d3)
 - called by: [`fireRound`](#s-fireRound) · [`npcTracer`](#s-npcTracer) · [`stepDrones`](#s-stepDrones) · [`stepPirates`](#s-stepPirates) · [`stepTurrets`](#s-stepTurrets) · [`syncContacts`](#s-syncContacts)
@@ -573,7 +576,7 @@ function · L305–322
 
 ### <a id="s-fireRound"></a>`fireRound(from, to, speed, damage, owner, faction, kind=, target=)`
 
-function · **exported** · L323–323
+function · **exported** · L327–327
 
 - calls: [`fire`](#s-fire)
 - called by: [`wingSupport`](../corp/seclevel.js.md#s-wingSupport) _js/corp/seclevel.js_ · [`ROLE_STEP.combat`](../drones/ops.js.md#s-ROLE_STEP-combat) _js/drones/ops.js_ · [`wireReactiveSky`](../sim/sim.js.md#s-wireReactiveSky) _js/sim/sim.js_ · [`stepDefences`](../station/stationworks.js.md#s-stepDefences) _js/station/stationworks.js_ · [`stepStationDrones`](../station/stationworks.js.md#s-stepStationDrones) _js/station/stationworks.js_
@@ -585,7 +588,7 @@ A round from something that is not the player's ship: station mounts and drones 
 
 ### <a id="s-sweptMiss"></a>`sweptMiss(px, py, pz, ax, ay, az, dx, dy, dz)`
 
-function · L325–330
+function · L329–334
 
 - called by: [`stepShots`](#s-stepShots) ×3
 
@@ -595,27 +598,27 @@ Closest approach of the segment travelled this tick to a point.
 
 ### <a id="s-stepShots"></a>`stepShots(ship, dt, time, onKill)`
 
-function · **exported** · L332–386
+function · **exported** · L336–390
 
 - calls: [`applyDamage`](ship.js.md#s-applyDamage) _js/flight/ship.js_ · [`sweptMiss`](#s-sweptMiss) ×3
 - called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
 
 <!-- note:stepShots -->
-- L349 · `if (s.faction.startsWith("npc")) {` — An NPC round with no target is theatre (something still firing tracers);
+- L353 · `if (s.faction.startsWith("npc")) {` — An NPC round with no target is theatre (something still firing tracers);
   one with a target is real, and lands on that hull alone.
-- L351 · `const c = byId.get(s.target);` — through the index, never a scan: stepShots runs immediately after
+- L355 · `const c = byId.get(s.target);` — through the index, never a scan: stepShots runs immediately after
   syncContacts rebuilt it, and a target that is not on the board is a
   round with nothing to land on
-- L364 · `if (s.faction === "hostile") {` — Rounds move hundreds of units a frame, so test the whole segment.
-- L366 · `applyDamage(ship, s.damage, s.owner, time, s.dmgKind ?? "kinetic");` — a round is mass on a trajectory: kinetic, which is exactly what a
+- L368 · `if (s.faction === "hostile") {` — Rounds move hundreds of units a frame, so test the whole segment.
+- L370 · `applyDamage(ship, s.damage, s.owner, time, s.dmgKind ?? "kinetic");` — a round is mass on a trajectory: kinetic, which is exactly what a
   screen is worst at and plate is best at (js/flight/defence.js)
-- L373 · `if (s.faction === "station" && (c.relation !== "hostile" || c.kind === "sdrone")) continue` — a port's guns and drones only ever hit what is hostile; your own rounds hit whatever they meet
-- L380 · `combatHooks.onHit?.(c, s.damage, s.owner, time);` — somebody just shot somebody: whoever cares about that hears it here
+- L377 · `if (s.faction === "station" && (c.relation !== "hostile" || c.kind === "sdrone")) continue` — a port's guns and drones only ever hit what is hostile; your own rounds hit whatever they meet
+- L384 · `combatHooks.onHit?.(c, s.damage, s.owner, time);` — somebody just shot somebody: whoever cares about that hears it here
 <!-- /note -->
 
 ### <a id="s-stepTurrets"></a>`stepTurrets(ship, dt, time)`
 
-function · **exported** · L388–418
+function · **exported** · L392–422
 
 - calls: [`fire`](#s-fire) · [`nearestContact`](#s-nearestContact) · [`pickCombatTarget`](#s-pickCombatTarget)
 - called by: [`stepShip`](../sim/sim.js.md#s-stepShip) _js/sim/sim.js_
@@ -624,17 +627,17 @@ function · **exported** · L388–418
 <!-- note:stepTurrets -->
 ---- the turret tick ----------------------------------------------------
 
-- L398 · `const rate = (ship.powered.gravity ? 0.42 : 0.52) / ((ship.tune?.turretRate ?? 1) * (ship.` — Local gravity on gives the mounts something to brace against.
-- L401 · `ship.lastFireAt = time;` — 0.3.48: shooting is being in a fight (js/corp/seclevel.js)
-- L402 · `combatHooks.onFire?.(target, time);` — 0.3.56: …and whether it was self-defence
-- L417 · `return target && ship.powered.turrets ? (DRAW.turretFire - DRAW.turrets) * (ship.tune?.tur` — Faster cycling costs proportionally more on the bus. Billed for the whole
+- L402 · `const rate = (ship.powered.gravity ? 0.42 : 0.52) / ((ship.tune?.turretRate ?? 1) * (ship.` — Local gravity on gives the mounts something to brace against.
+- L405 · `ship.lastFireAt = time;` — 0.3.48: shooting is being in a fight (js/corp/seclevel.js)
+- L406 · `combatHooks.onFire?.(target, time);` — 0.3.56: …and whether it was self-defence
+- L421 · `return target && ship.powered.turrets ? (DRAW.turretFire - DRAW.turrets) * (ship.tune?.tur` — Faster cycling costs proportionally more on the bus. Billed for the whole
   engagement, not only the tick a round leaves: a one-tick 19 kW spike
   averaged under 1 kW and cost twice as much at 30 fps as at 60.
 <!-- /note -->
 
 ### <a id="s-minableDebris"></a>`minableDebris(ship, range)`
 
-function · L420–434
+function · L424–438
 
 - calls: [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_
 - called by: [`stepMining`](#s-stepMining)
@@ -647,7 +650,7 @@ Impact debris the cutter can reach, shaped like a belt rock so one loop mines bo
 
 ### <a id="s-stepMining"></a>`stepMining(ship, dt, time, lock=, want=)`
 
-function · **exported** · L436–506
+function · **exported** · L440–510
 
 - calls: [`handsOff`](../aria/aria.js.md#s-handsOff) _js/aria/aria.js_ · [`notePlayerChoice`](../aria/aria.js.md#s-notePlayerChoice) _js/aria/aria.js_ · [`addCargo`](ship.js.md#s-addCargo) _js/flight/ship.js_ ×2 · [`holdRoom`](ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`minableDebris`](#s-minableDebris) · [`removeChunk`](../world/debris.js.md#s-removeChunk) _js/world/debris.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`wearRock`](../world/field.js.md#s-wearRock) _js/world/field.js_
 - called by: [`tickSim`](../sim/sim.js.md#s-tickSim) _js/sim/sim.js_
@@ -657,28 +660,28 @@ The cutter works whatever is in reach: belt rocks and impact debris alike.
 A locked rock or chunk is preferred over the merely nearest one, so P-LOCK
 picks the cut. `lock` is the sim's lock record ({kind, id, locked}).
 
-- L450 · `const hasWant = want ? rocks.some((r) => r.ore === want && Math.hypot(r.x - ship.pos.x, r.` — 0.3.22: `want` is an ore the pilot is under contract for, passed only while
+- L454 · `const hasWant = want ? rocks.some((r) => r.ore === want && Math.hypot(r.x - ship.pos.x, r.` — 0.3.22: `want` is an ore the pilot is under contract for, passed only while
   something else is flying (the mining loop). A rock of that ore inside the
   cutter's reach wins over a nearer rock of anything else — otherwise a loop
   sent to cut nickel comes home with a hold of whatever it brushed past. It
   is a preference, not a filter: with none in reach the cutter works the
   belt as it always has, and a locked rock still overrides everything.
-- L478 · `const cut = (od ? 0.075 : 0.032) * dt;` — 0.3.11 halved the pull. A hold used to fill faster than anything downstream
+- L482 · `const cut = (od ? 0.075 : 0.032) * dt;` — 0.3.11 halved the pull. A hold used to fill faster than anything downstream
   of it could consume — and now that ore is the input to a fabrication chain
   rather than just a thing to sell, the cut rate is the tap on the whole
   economy. One named constant, because this is the number to reach for when
   the belt feels too generous or too mean.
-- L481 · `const c = best.debris;` — a chunk is finite: the cutter eats it down and it is gone
-- L488 · `const boiloff = best.ice && od ? 0.75 : 1;` — Bigger rock, richer pull — same exponential logic as the worlds.
+- L485 · `const c = best.debris;` — a chunk is finite: the cutter eats it down and it is gone
+- L492 · `const boiloff = best.ice && od ? 0.75 : 1;` — Bigger rock, richer pull — same exponential logic as the worlds.
   An overdriven cutter boils volatiles off an ice rock — faster, wasteful.
-- L493 · `if (!handsOff() && Math.floor(time) !== lastCutNote) { lastCutNote = Math.floor(time); not` — what you actually point the cutter at, sampled rather than counted every
+- L497 · `if (!handsOff() && Math.floor(time) !== lastCutNote) { lastCutNote = Math.floor(time); not` — what you actually point the cutter at, sampled rather than counted every
   frame — one example a second is plenty and keeps the tally honest
-- L494 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — the odd rock carries something better than what it looks like
-- L494 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — 0.3.58: one rock in twenty, a fortieth of the pull (was one in seven, an eighth)
-- L497 · `mining.fullSince = time;` — The hold is full and the cutter is still burning: power into a beam that
+- L498 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — the odd rock carries something better than what it looks like
+- L498 · `if (best.seed > 0.95) addCargo(ship, best.ice ? "deuterium" : "platinum_ore", yieldRate *` — 0.3.58: one rock in twenty, a fortieth of the pull (was one in seven, an eighth)
+- L501 · `mining.fullSince = time;` — The hold is full and the cutter is still burning: power into a beam that
   lands nothing. Stow it and say so, once per fill — the latch matters
   because this runs every frame and a notice per frame is a strobe.
   turrets.js is a leaf and may not import sim.js, so the actual stow goes
   through the hook, which sim.js owns.
-- L501 · `if (best.rich && mining.assayed !== best.key) {` — the assay call every prospector lives for — sim picks this up and logs it
+- L505 · `if (best.rich && mining.assayed !== best.key) {` — the assay call every prospector lives for — sim picks this up and logs it
 <!-- /note -->

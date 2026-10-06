@@ -661,10 +661,11 @@ function stepHullOnce(n, t, dt, ctx) {
       const gate = st ? laneAt(st, "entry", LANE_U, n.way ?? subLaneFor(n.id), _a) : null;
       const gx = gate ? gate.x : B.x, gy = gate ? gate.y : B.y, gz = gate ? gate.z : B.z;
       const capture = ARRIVE_U * CAPTURE_MULT;
+      let gateDistance;
       if (st) {
-        const d = Math.hypot(n.x - st.x, n.y - st.y, n.z - st.z);
-        const dg = Math.hypot(n.x - gx, n.y - gy, n.z - gz);
-        if (d < capture || dg < capture * 0.7) { n.drive = 0; n.state = "approach"; return; }
+        const dx = n.x - st.x, dy = n.y - st.y, dz = n.z - st.z;
+        gateDistance = Math.hypot(n.x - gx, n.y - gy, n.z - gz);
+        if (dx * dx + dy * dy + dz * dz < capture * capture || gateDistance < capture * 0.7) { n.drive = 0; n.state = "approach"; return; }
       }
 
       const match = st ? { vx: st.vx ?? 0, vy: st.vy ?? 0, vz: st.vz ?? 0 } : null;
@@ -672,7 +673,7 @@ function stepHullOnce(n, t, dt, ctx) {
       if (L3 && L3.top > 0) {
         const F = n.legFrom ?? { x: n.x, y: n.y, z: n.z };
         const dOut = Math.hypot(n.x - F.x, n.y - F.y, n.z - F.z);
-        const dIn = Math.hypot(n.x - gx, n.y - gy, n.z - gz);
+        const dIn = gateDistance ?? Math.hypot(n.x - gx, n.y - gy, n.z - gz);
         if (dOut > RUN_OUT_U && dIn > RUN_IN_U) {
           n.drive = 1;
           n.lane = "drive";

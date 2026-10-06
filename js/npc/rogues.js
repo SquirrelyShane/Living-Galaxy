@@ -267,6 +267,12 @@ function resolveTarget(tg, stationList) {
   return n && n.job !== "down" && n.visible !== false ? n : null;
 }
 
+function indexWaveVessels() {
+  const index = new Map();
+  for (const n of traffic) if (!index.has(n.id)) index.set(n.id, n);
+  return index;
+}
+
 export function stepRogues(t, dt, stationList = liveStations, shipPos = null) {
   const slot = Math.floor(t / WAVE_SLOT);
   if (slot !== slotSeen) {
@@ -280,14 +286,16 @@ export function stepRogues(t, dt, stationList = liveStations, shipPos = null) {
     }
   }
 
+  if (!waves.length) return waves;
+  let vessels = indexWaveVessels();
   for (let i = waves.length - 1; i >= 0; i--) {
     const w = waves[i];
     let alive = 0;
     for (let k = w.drones.length - 1; k >= 0; k--) {
       const id = w.drones[k];
-      const n = traffic.find((x) => x.id === id);
+      const n = vessels.get(id);
       if (!n || n.despawn || n.job === "down" || n.hp <= 0) {
-        if (n && (n.despawn || n.job === "down" || n.hp <= 0)) removeVessel(id);
+        if (n && (n.despawn || n.job === "down" || n.hp <= 0)) { removeVessel(id); vessels = indexWaveVessels(); }
         w.drones.splice(k, 1);
         continue;
       }
@@ -307,7 +315,7 @@ export function stepRogues(t, dt, stationList = liveStations, shipPos = null) {
       if (st) {
         let onIt = 0;
         for (const id of w.drones) {
-          const n = traffic.find((x) => x.id === id);
+          const n = vessels.get(id);
           if (n && d3(n, st) < SIEGE_R) onIt++;
         }
         if (onIt) {
@@ -329,7 +337,7 @@ export function stepRogues(t, dt, stationList = liveStations, shipPos = null) {
             const line = st.stock[Math.floor(rng() * st.stock.length)];
             if (line && line.qty > 0) line.qty = Math.max(0, line.qty - SIEGE_RATE * onIt * dt * 0.6);
           }
-          rogueHooks.onSiege?.(st, w, onIt, dt);
+          if (rogueHooks.onSiege) { rogueHooks.onSiege(st, w, onIt, dt); vessels = indexWaveVessels(); }
         } else if (w.state === "siege") { w.state = "outbound"; st.siegeDrones = 0; }
       }
     }
@@ -339,14 +347,14 @@ export function stepRogues(t, dt, stationList = liveStations, shipPos = null) {
       if (o && o.hp > 0) {
         let onIt = 0;
         for (const id of w.drones) {
-          const n = traffic.find((x) => x.id === id);
+          const n = vessels.get(id);
           if (n && d3(n, o) < SIEGE_R) onIt++;
         }
         if (onIt) {
           o.hp -= onIt * 7 * dt;
           if (o.hp <= 0) {
             o.hp = 0;
-            rogueHooks.onNestDown?.(o, w);
+            if (rogueHooks.onNestDown) { rogueHooks.onNestDown(o, w); vessels = indexWaveVessels(); }
             for (let k = waves.length - 1; k >= 0; k--) if (waves[k].nest === o.id) waves[k].state = "home";
           }
         }

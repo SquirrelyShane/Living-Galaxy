@@ -126,4 +126,4 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `lgaa.rocks`
 
-- storage.get — [js/render/engine.js › mountGame>rockQuality](../files/js/render/engine.js.md#s-mountGame-rockQuality) L1535
+- storage.get — [js/render/engine.js › mountGame>rockQuality](../files/js/render/engine.js.md#s-mountGame-rockQuality) L1536

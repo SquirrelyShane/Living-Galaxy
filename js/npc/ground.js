@@ -106,7 +106,8 @@ export function threatsNear(p, r = THREAT_R, except = null) {
   rogues.sort((a, b) => a.d - b.d);
   let nest = null;
   for (const ns of nests) { if (ns.hp > 0 && d3(ns, p) < r * 1.5) { nest = ns; break; } }
-  const nearest = [...pirates, ...rogues].sort((a, b) => a.d - b.d)[0] ?? null;
+  const pirate = pirates[0], rogue = rogues[0];
+  const nearest = !pirate ? rogue ?? null : !rogue || pirate.d <= rogue.d ? pirate : rogue;
   return { pirates, rogues, nest, count: pirates.length + rogues.length, nearest };
 }
 

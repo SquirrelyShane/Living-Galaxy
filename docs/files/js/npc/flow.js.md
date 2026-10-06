@@ -197,9 +197,11 @@ function · **exported** · L83–125
 - called by: [`stepFlow`](#s-stepFlow)
 
 <!-- note:flowPose -->
+Docked hulls return before station lane geometry is requested; timetable transitions stay unchanged.
+
 Pure pose of a flow hull at sky time t.
 
-- L89 · `const away = n.period - dock - DEPART_S - ARRIVE_S;` — gone: somewhere else, off the board
+- L88 · `const away = n.period - dock - DEPART_S - ARRIVE_S;` — gone: somewhere else, off the board
 - L95 · `const bay = hasBay(st);` — 0.3.15: a port with a built hangar puts the first seconds of a departure
   and the last seconds of an arrival INSIDE the bay (npc/bay.js) — off the
   clamps and out through the exit door, in through the entry door and down

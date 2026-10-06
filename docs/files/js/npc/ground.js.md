@@ -1,6 +1,6 @@
 # js/npc/ground.js
 
-[index](../../../README.md) · 170 lines · 20 symbols · 9 imports · 3 importers
+[index](../../../README.md) · 171 lines · 20 symbols · 9 imports · 4 importers
 
 ## About
 
@@ -33,7 +33,7 @@ Units: 1 world unit = 10 m, so 100 u is a kilometre.
 - L12 · `export const THREAT_R = 3000;` — 30 km: a contact worth calling
 - L13 · `export const BELT_THREAT_R = 6000;` — 60 km: a raider or drone near enough to a claim to matter
 - L14 · `export const HIT_FRESH_S = 25;` — a hit this recent means the shooting is still going on
-- L167 · `trafficHooks.claimOre = (p, t) => {` — the timetable asks what a finished claim sends home
+- L168 · `trafficHooks.claimOre = (p, t) => {` — the timetable asks what a finished claim sends home
 <!-- /note -->
 
 ## Imports
@@ -55,6 +55,7 @@ Units: 1 world unit = 10 m, so 100 u is a kilometre.
 - [js/npc/reports.js](reports.js.md) — `placeOf`, `placePhrase`, `portCensus`, `underFire`, `threatsNear`, `claimSurvey`, `unitsPhrase`, `countWord`, `bearingTo`, `PORT_R`, `BELT_THREAT_R`
 - [js/npc/speech.js](speech.js.md) — `placeOf`, `portCensus`, `underFire`, `threatsNear`, `claimSurvey`, `bearingTo`, `THREAT_R`
 - test/ground.test.mjs _(outside js/)_ — `placeOf`, `portCensus`, `underFire`, `threatsNear`, `claimSurvey`, `PORT_R`, `BELT_THREAT_R`
+- test/hotpath-optimization.test.mjs _(outside js/)_ — `threatsNear`
 
 ## Exports
 
@@ -66,7 +67,7 @@ Units: 1 world unit = 10 m, so 100 u is a kilometre.
 - [`placePhrase`](#s-placePhrase) · function — used by [js/npc/reports.js](reports.js.md)
 - [`portCensus`](#s-portCensus) · function — used by [js/npc/reports.js](reports.js.md), [js/npc/speech.js](speech.js.md), test/ground.test.mjs
 - [`underFire`](#s-underFire) · function — used by [js/npc/reports.js](reports.js.md), [js/npc/speech.js](speech.js.md), test/ground.test.mjs
-- [`threatsNear`](#s-threatsNear) · function — used by [js/npc/reports.js](reports.js.md), [js/npc/speech.js](speech.js.md), test/ground.test.mjs
+- [`threatsNear`](#s-threatsNear) · function — used by [js/npc/reports.js](reports.js.md), [js/npc/speech.js](speech.js.md), test/ground.test.mjs, test/hotpath-optimization.test.mjs
 - [`bearingTo`](#s-bearingTo) · function — used by [js/npc/reports.js](reports.js.md), [js/npc/speech.js](speech.js.md)
 - [`rockUnits`](#s-rockUnits) · function — **no importer in scanned roots**
 - [`claimSurvey`](#s-claimSurvey) · function — used by [js/npc/reports.js](reports.js.md), [js/npc/speech.js](speech.js.md), test/ground.test.mjs
@@ -207,13 +208,15 @@ back at it — it does not get to call a mayday.
 
 ### <a id="s-threatsNear"></a>`threatsNear(p, r=, except=)`
 
-function · **exported** · L95–111
+function · **exported** · L95–112
 
 - calls: [`d3`](#s-d3) ×2
 - via [js/npc/traffic.js](traffic.js.md): `HOSTILE_ROLES.has`
 - called by: [`answerFor`](reports.js.md#s-answerFor) _js/npc/reports.js_ ×2 · [`claimFor`](reports.js.md#s-claimFor) _js/npc/reports.js_ · [`picketFor`](reports.js.md#s-picketFor) _js/npc/reports.js_ · [`GROUNDED.positionReport`](speech.js.md#s-GROUNDED-positionReport) _js/npc/speech.js_ · [`GROUNDED.smallTalk`](speech.js.md#s-GROUNDED-smallTalk) _js/npc/speech.js_ · [`groundCtx`](speech.js.md#s-groundCtx) _js/npc/speech.js_ ×3
 
 <!-- note:threatsNear -->
+Choose nearest from the two sorted heads; equal distances favor pirates, matching the former stable combined sort.
+
 ---- threats -------------------------------------------------------------------
 
 Raiders and rogue drones actually on the board within r of p, nearest first, plus any known nest inside r.
@@ -221,7 +224,7 @@ Raiders and rogue drones actually on the board within r of p, nearest first, plu
 
 ### <a id="s-bearingTo"></a>`bearingTo(a, b)`
 
-function · **exported** · L113–116
+function · **exported** · L114–117
 
 - called by: [`answerFor`](reports.js.md#s-answerFor) _js/npc/reports.js_ · [`claimFor`](reports.js.md#s-claimFor) _js/npc/reports.js_ · [`picketFor`](reports.js.md#s-picketFor) _js/npc/reports.js_ · [`groundCtx`](speech.js.md#s-groundCtx) _js/npc/speech.js_ ×2
 
@@ -231,7 +234,7 @@ Bearing from a to b as a compass number, 0..359 on the flat x/z plane (0 = −z,
 
 ### <a id="s-rockUnits"></a>`rockUnits(k)`
 
-function · **exported** · L118–121
+function · **exported** · L119–122
 
 - called by: [`claimSurvey`](#s-claimSurvey)
 
@@ -244,14 +247,14 @@ turrets.js cuts with (2.5 + (r/60)^1.5 · 5 u/s at MINE_YIELD 0.5, ~31 s a rock)
 
 ### <a id="s-_survey"></a>`_survey`
 
-const · L123–123
+const · L124–124
 
 <!-- note:_survey -->
 <!-- /note -->
 
 ### <a id="s-claimSurvey"></a>`claimSurvey(p, t)`
 
-function · **exported** · L125–154
+function · **exported** · L126–155
 
 - calls: [`baseValue`](../economy/materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`rockUnits`](#s-rockUnits) · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_
 - called by: [`s`](#s-s) · [`answerFor`](reports.js.md#s-answerFor) _js/npc/reports.js_ · [`claimFor`](reports.js.md#s-claimFor) _js/npc/reports.js_ · [`vesselUnit`](speech.js.md#s-vesselUnit) _js/npc/speech.js_
@@ -262,13 +265,13 @@ how many units a cutter would actually get, what it is worth at book, which
 are rich seams. Sorted by value, richest first. Cached per claim cell for
 thirty seconds of sky time (the field drifts slowly and wears as it is cut).
 
-- L146 · `const pays = ores.slice().sort((a, b) => b.worth - a.worth)[0] ?? null;` — what a cutter would work: the most money in the rock, not the most rock
-- L148 · `const perUnit = units > 0 ? worth / units : 0;` — a grade the speech engine understands, 0..1: book value per unit against iron's
+- L147 · `const pays = ores.slice().sort((a, b) => b.worth - a.worth)[0] ?? null;` — what a cutter would work: the most money in the rock, not the most rock
+- L149 · `const perUnit = units > 0 ? worth / units : 0;` — a grade the speech engine understands, 0..1: book value per unit against iron's
 <!-- /note -->
 
 ### <a id="s-unitsPhrase"></a>`unitsPhrase(n)`
 
-function · **exported** · L156–160
+function · **exported** · L157–161
 
 - called by: [`answerFor`](reports.js.md#s-answerFor) _js/npc/reports.js_ · [`claimFor`](reports.js.md#s-claimFor) _js/npc/reports.js_ ×4
 
@@ -278,7 +281,7 @@ Say an amount of ore the way a cutter would: "about 340 units".
 
 ### <a id="s-countWord"></a>`countWord(n)`
 
-function · **exported** · L162–165
+function · **exported** · L163–166
 
 - called by: [`answerFor`](reports.js.md#s-answerFor) _js/npc/reports.js_ ×6 · [`claimFor`](reports.js.md#s-claimFor) _js/npc/reports.js_ ×3 · [`maydayFor`](reports.js.md#s-maydayFor) _js/npc/reports.js_ ×2 · [`picketFor`](reports.js.md#s-picketFor) _js/npc/reports.js_ ×2 · [`portFor`](reports.js.md#s-portFor) _js/npc/reports.js_ ×8
 
@@ -287,7 +290,7 @@ function · **exported** · L162–165
 
 ### <a id="s-s"></a>`s`
 
-const · L168–168
+const · L169–169
 
 - calls: [`claimSurvey`](#s-claimSurvey)
 

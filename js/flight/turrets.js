@@ -96,7 +96,8 @@ export function syncContacts(ship, remotes, relationOf, time, dt) {
 
   for (const n of traffic) {
     if (n.visible === false) continue;
-    if (d3(n, ship.pos) > CONTACT_R) continue;
+    const dx = n.x - ship.pos.x, dy = n.y - ship.pos.y, dz = n.z - ship.pos.z;
+    if (dx * dx + dy * dy + dz * dz > CONTACT_R * CONTACT_R) continue;
     liveNpc.add(n.id);
     let c = byId.get(n.id);
     if (!c) {
@@ -129,7 +130,10 @@ export function syncContacts(ship, remotes, relationOf, time, dt) {
   }
 
   for (const u of npcDrones.units) {
-    if (u.dockedAt || u.hp <= 0 || d3(u, ship.pos) > CONTACT_R) continue;
+    if (u.dockedAt || u.hp <= 0) continue;
+    const dx = u.x - ship.pos.x, dy = u.y - ship.pos.y, dz = u.z - ship.pos.z;
+    const range2 = dx * dx + dy * dy + dz * dz;
+    if (range2 > CONTACT_R * CONTACT_R) continue;
     liveCd.add(u.id);
     let c = byId.get(u.id);
     if (!c) c = addContact({ id: u.id, kind: u.hostile ? "drone" : "cdrone", name: u.name, hp: u.hp, shield: 0, radius: 3, corpDrone: u });
@@ -139,7 +143,7 @@ export function syncContacts(ship, remotes, relationOf, time, dt) {
     if (c.hp < u.hp) u.hp = c.hp;
     c.hp = u.hp;
     c.cooldown = (c.cooldown ?? Math.random() * 3) - dt;
-    if (u.hostile && u.role === "combat" && c.cooldown <= 0 && d3(u, ship.pos) < 900) { c.cooldown = 2.4 + Math.random(); fire(c, ship.pos, 560, 4, c.id, "hostile"); }
+    if (u.hostile && u.role === "combat" && c.cooldown <= 0 && range2 < 900 * 900) { c.cooldown = 2.4 + Math.random(); fire(c, ship.pos, 560, 4, c.id, "hostile"); }
   }
   for (let i = contacts.length - 1; i >= 0; i--) {
     const c = contacts[i];

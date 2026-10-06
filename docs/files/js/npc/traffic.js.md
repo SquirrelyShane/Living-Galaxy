@@ -1,6 +1,6 @@
 # js/npc/traffic.js
 
-[index](../../../README.md) · 973 lines · 67 symbols · 13 imports · 46 importers
+[index](../../../README.md) · 974 lines · 67 symbols · 13 imports · 47 importers
 
 ## About
 
@@ -112,6 +112,7 @@ map rides in the host's snapshot so the whole room sees the same gap.
 - test/gdb.test.mjs _(outside js/)_ — `traffic`
 - test/ground.test.mjs _(outside js/)_ — `traffic`, `stepTraffic`, `HOSTILE_ROLES`, `trafficHooks`
 - test/hostilegun.test.mjs _(outside js/)_ — `HOSTILE_ROLES`
+- test/hotpath-optimization.test.mjs _(outside js/)_ — `traffic`, `reindexTraffic`, `vesselById`, `LAW_ROLES`
 - test/hulks.test.mjs _(outside js/)_ — `traffic`, `vesselById`
 - test/marks.test.mjs _(outside js/)_ — `traffic`
 - test/npcchat.test.mjs _(outside js/)_ — `traffic`
@@ -127,7 +128,7 @@ map rides in the host's snapshot so the whole room sees the same gap.
 ## Exports
 
 - [`SLOT_S`](#s-SLOT_S) · const — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`traffic`](#s-traffic) · const — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md), [js/console/panels/crew-sky.js](../console/panels/crew-sky.js.md), [js/corp/fleet.js](../corp/fleet.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/contacts.js](../flight/contacts.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/net/worldsync.js](../net/worldsync.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/ground.js](ground.js.md), [js/npc/npccrew.js](npccrew.js.md), [js/npc/reports.js](reports.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/npc/speech.js](speech.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), test/bay.test.mjs, test/board.test.mjs, test/chartquiet.test.mjs, test/economy.test.mjs, test/gdb.test.mjs, test/ground.test.mjs, test/hulks.test.mjs, test/marks.test.mjs, test/npcchat.test.mjs, test/people.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/speech.test.mjs
+- [`traffic`](#s-traffic) · const — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/crew-gdb.js](../console/panels/crew-gdb.js.md), [js/console/panels/crew-sky.js](../console/panels/crew-sky.js.md), [js/corp/fleet.js](../corp/fleet.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/contacts.js](../flight/contacts.js.md), [js/flight/probes.js](../flight/probes.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/net/worldsync.js](../net/worldsync.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/ground.js](ground.js.md), [js/npc/npccrew.js](npccrew.js.md), [js/npc/reports.js](reports.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/npc/speech.js](speech.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), test/bay.test.mjs, test/board.test.mjs, test/chartquiet.test.mjs, test/economy.test.mjs, test/gdb.test.mjs, test/ground.test.mjs, test/hotpath-optimization.test.mjs, test/hulks.test.mjs, test/marks.test.mjs, test/npcchat.test.mjs, test/people.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/speech.test.mjs
 - [`trafficDown`](#s-trafficDown) · const — used by [js/net/worldsync.js](../net/worldsync.js.md), [js/npc/battles.js](battles.js.md), [js/npc/npccrew.js](npccrew.js.md), [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs
 - [`trafficHooks`](#s-trafficHooks) · const — used by [js/comms/comms.js](../comms/comms.js.md), [js/corp/fleet.js](../corp/fleet.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/ground.js](ground.js.md), [js/npc/security.js](security.js.md), [js/sim/sim.js](../sim/sim.js.md), test/ground.test.mjs
 - [`DEPART_S`](#s-DEPART_S) · const — used by [js/npc/flow.js](flow.js.md), test/sky.test.mjs
@@ -138,7 +139,7 @@ map rides in the host's snapshot so the whole room sees the same gap.
 - [`MIN_TRAVEL_S`](#s-MIN_TRAVEL_S) · const — used by test/reactive.test.mjs
 - [`ROLES`](#s-ROLES) · const — used by test/reactive.test.mjs, test/sky.test.mjs
 - [`HOSTILE_ROLES`](#s-HOSTILE_ROLES) · const — used by [js/aria/senses.js](../aria/senses.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/ground.js](ground.js.md), [js/npc/reports.js](reports.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/npc/speech.js](speech.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/map.js](../ui/map.js.md), test/ground.test.mjs, test/hostilegun.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
-- [`LAW_ROLES`](#s-LAW_ROLES) · const — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/reports.js](reports.js.md), [js/npc/security.js](security.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
+- [`LAW_ROLES`](#s-LAW_ROLES) · const — used by [js/corp/seclevel.js](../corp/seclevel.js.md), [js/flight/turrets.js](../flight/turrets.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/reports.js](reports.js.md), [js/npc/security.js](security.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/map.js](../ui/map.js.md), test/hotpath-optimization.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
 - [`buildRoster`](#s-buildRoster) · function — **no importer in scanned roots**
 - [`spawnVessel`](#s-spawnVessel) · function — used by [js/corp/fleet.js](../corp/fleet.js.md)
 - [`removeVessel`](#s-removeVessel) · function — used by [js/corp/fleet.js](../corp/fleet.js.md), [js/npc/rogues.js](rogues.js.md)
@@ -150,8 +151,8 @@ map rides in the host's snapshot so the whole room sees the same gap.
 - [`seatHull`](#s-seatHull) · function — used by test/reactive.test.mjs
 - [`stepTraffic`](#s-stepTraffic) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/bay.test.mjs, test/board.test.mjs, test/economy.test.mjs, test/ground.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs, test/sky.test.mjs, test/skycrew.test.mjs, test/speech.test.mjs
 - [`markVesselDown`](#s-markVesselDown) · function — used by [js/drones/ops.js](../drones/ops.js.md), [js/net/worldsync.js](../net/worldsync.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/npccrew.js](npccrew.js.md), [js/npc/rogues.js](rogues.js.md), [js/npc/security.js](security.js.md), [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/skycrew.test.mjs
-- [`reindexTraffic`](#s-reindexTraffic) · function — used by [js/npc/rogues.js](rogues.js.md)
-- [`vesselById`](#s-vesselById) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/net/worldsync.js](../net/worldsync.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/ground.js](ground.js.md), [js/npc/reports.js](reports.js.md), [js/npc/security.js](security.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/reactive.test.mjs
+- [`reindexTraffic`](#s-reindexTraffic) · function — used by [js/npc/rogues.js](rogues.js.md), test/hotpath-optimization.test.mjs
+- [`vesselById`](#s-vesselById) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/net/worldsync.js](../net/worldsync.js.md), [js/npc/battles.js](battles.js.md), [js/npc/combat.js](combat.js.md), [js/npc/ground.js](ground.js.md), [js/npc/reports.js](reports.js.md), [js/npc/security.js](security.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/hulks.test.mjs, test/reactive.test.mjs
 - [`captainLine`](#s-captainLine) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/ui/map.js](../ui/map.js.md)
 - [`vesselStatus`](#s-vesselStatus) · function — used by [js/comms/comms.js](../comms/comms.js.md), [js/ui/map.js](../ui/map.js.md), test/people.test.mjs, test/skycrew.test.mjs
 - [`visibleVessels`](#s-visibleVessels) · function — **no importer in scanned roots**
@@ -721,12 +722,14 @@ function · L557–562
 
 ### <a id="s-stepHullOnce"></a>`stepHullOnce(n, t, dt, ctx)`
 
-function · L564–794
+function · L564–795
 
 - calls: [`bayOffset`](bay.js.md#s-bayOffset) _js/npc/bay.js_ · [`hasBay`](bay.js.md#s-hasBay) _js/npc/bay.js_ ×6 · [`coastStep`](flight.js.md#s-coastStep) _js/npc/flight.js_ · [`flyStep`](flight.js.md#s-flyStep) _js/npc/flight.js_ ×9 · [`placeAt`](flight.js.md#s-placeAt) _js/npc/flight.js_ · [`laneAt`](lanes.js.md#s-laneAt) _js/npc/lanes.js_ ×4 · [`stationLane`](lanes.js.md#s-stationLane) _js/npc/lanes.js_ · [`subLaneFor`](lanes.js.md#s-subLaneFor) _js/npc/lanes.js_ ×4 · [`deliverCargo`](#s-deliverCargo) · [`liftCargo`](#s-liftCargo) · [`nextLeg`](#s-nextLeg) ×7 · [`nodeName`](#s-nodeName) ×4 · [`nodePos`](#s-nodePos) ×2 · [`poseBay`](#s-poseBay) ×3 · [`setJob`](#s-setJob) ×12 · [`stationById`](#s-stationById) ×5
 - called by: [`stepHull`](#s-stepHull) ×2
 
 <!-- note:stepHullOnce -->
+Reuse the cruise gate distance only within the current step; station capture uses a squared comparison. Docking projection, port-relative velocity, bay priority and cargo transition order remain unchanged.
+
 - L567 · `const inBay = n.state === "berth" || n.state === "unberth";` — anything with a claim on this hull flies it: a security response, a
   pirate run-in, a hull that is running for its life (npc/combat.js,
   npc/security.js). The timetable waits. 0.3.60: but a hull in its bay run
@@ -747,47 +750,47 @@ function · L564–794
 - L645 · `n.state = "cruise";` — clear of the mouth and the funnel: open the throttle and cross
 - L661 · `const gate = st ? laneAt(st, "entry", LANE_U, n.way ?? subLaneFor(n.id), _a) : null;` — the lane gate at the far end, if the destination is a port: the hull
   aims at the lane rather than the hull plating the whole way in
-- L673 · `const F = n.legFrom ?? { x: n.x, y: n.y, z: n.z };` — how far out of the origin, and how far still to run
-- L677 · `n.drive = 1;` — drive lit. The goal is the DROP POINT — RUN_IN_U short of the far
+- L674 · `const F = n.legFrom ?? { x: n.x, y: n.y, z: n.z };` — how far out of the origin, and how far still to run
+- L678 · `n.drive = 1;` — drive lit. The goal is the DROP POINT — RUN_IN_U short of the far
   end — so the arrive-brake sheds the drive on its own, and the hull
   comes out of the lane already slow. It stays visible throughout:
   a lane transit you can see is a transit you can get ahead of.
-- L689 · `if (st) {` — sublight: the run out of the port, the run in to the far one, and
+- L690 · `if (st) {` — sublight: the run out of the port, the run in to the far one, and
   every short leg from end to end
-- L695 · `if (t > n.stateUntil) nextLeg(n, t, SL);` — watchdog: a leg that somehow cannot be finished does not strand a hull
-- L710 · `const along = (n.x - mouth.x) * f.dir.x + (n.y - mouth.y) * f.dir.y + (n.z - mouth.z) * f.` — How far down the lane the hull is — a PROJECTION onto the lane axis,
+- L696 · `if (t > n.stateUntil) nextLeg(n, t, SL);` — watchdog: a leg that somehow cannot be finished does not strand a hull
+- L711 · `const along = (n.x - mouth.x) * f.dir.x + (n.y - mouth.y) * f.dir.y + (n.z - mouth.z) * f.` — How far down the lane the hull is — a PROJECTION onto the lane axis,
   not the range to the mouth. The funnel offsets the lane sideways, so
   the two are not the same number, and using the range as if it were
   one gives a goal that sits further out than the hull does: the hull
   flies to it, recomputes the same goal, and parks in the funnel for
   good. Project, and the goal always lies inboard.
-- L713 · `const pre = { x: n.x, y: n.y, z: n.z };` — 0.3.15: the last few hundred units come down to a creep, so the hull
+- L714 · `const pre = { x: n.x, y: n.y, z: n.z };` — 0.3.15: the last few hundred units come down to a creep, so the hull
   reaches the entry door at the pace it flies the bay rather than
   stopping dead on the aperture
-- L713 · `const pre = { x: n.x, y: n.y, z: n.z };` — where the hull is in the port's frame at this tick (flyStep integrates it to the next)
-- L717 · `const rvx = n.vx - (st.vx ?? 0), rvy = n.vy - (st.vy ?? 0), rvz = n.vz - (st.vz ?? 0);` — the harbour brake: a heavy hull that came off the cruise hot is
+- L714 · `const pre = { x: n.x, y: n.y, z: n.z };` — where the hull is in the port's frame at this tick (flyStep integrates it to the next)
+- L718 · `const rvx = n.vx - (st.vx ?? 0), rvy = n.vy - (st.vy ?? 0), rvz = n.vz - (st.vz ?? 0);` — the harbour brake: a heavy hull that came off the cruise hot is
   walked down to the creep by the port's own beam, so nothing enters
   the bay at cruise speed
-- L727 · `const relSp = hasBay(st) ? Math.hypot(n.vx - (st.vx ?? 0), n.vy - (st.vy ?? 0), n.vz - (st` — the gate has to be at least as wide as one step of travel, or a
+- L728 · `const relSp = hasBay(st) ? Math.hypot(n.vx - (st.vx ?? 0), n.vy - (st.vy ?? 0), n.vz - (st` — the gate has to be at least as wide as one step of travel, or a
   coarse tick flies straight through it and the hull orbits forever
-- L727 · `const relSp = hasBay(st) ? Math.hypot(n.vx - (st.vx ?? 0), n.vy - (st.vy ?? 0), n.vz - (st` — (the step is measured in the port's frame: a tethered port's own orbit is hundreds of u/s and is not travel)
-- L732 · `n.state = "berth";` — 0.3.15: through the entry door and down onto the clamps — the hull stays on the board until it is on them
-- L755 · `if (n.role === "miner") {` — 0.3.16: a miner hauls home what its claim actually holds — the ore
+- L728 · `const relSp = hasBay(st) ? Math.hypot(n.vx - (st.vx ?? 0), n.vy - (st.vy ?? 0), n.vz - (st` — (the step is measured in the port's frame: a tethered port's own orbit is hundreds of u/s and is not travel)
+- L733 · `n.state = "berth";` — 0.3.15: through the entry door and down onto the clamps — the hull stays on the board until it is on them
+- L756 · `if (n.role === "miner") {` — 0.3.16: a miner hauls home what its claim actually holds — the ore
   with the most money in reach (npc/ground.js claimSurvey) — not a
   name drawn when the timetable was written. What it said on the band
   about its seam and what lands on the port's shelf are the same ore.
-- L766 · `const L = n.lurk ?? { angle: 0, rad: n.orbitR, y: 0 };` — a pirate with no hold to fly out of: it lives on its stretch of belt
-- L769 · `n.visible = true;` — No timetable and no orders: hold position. A hull in this state used
+- L767 · `const L = n.lurk ?? { angle: 0, rad: n.orbitR, y: 0 };` — a pirate with no hold to fly out of: it lives on its stretch of belt
+- L770 · `n.visible = true;` — No timetable and no orders: hold position. A hull in this state used
   to fall through to the picket ellipse and fly off on a sweep it was
   never assigned — which is wrong for a company hull between contracts,
   a hull whose route was cleared, and anything a caller is holding on
   purpose.
-- L786 · `const r = n.orbitR * 1.35;` — watch: a picket's long ellipse through the inner system
+- L787 · `const r = n.orbitR * 1.35;` — watch: a picket's long ellipse through the inner system
 <!-- /note -->
 
 ### <a id="s-_ctx"></a>`_ctx`
 
-const · L796–796
+const · L797–797
 
 <!-- note:_ctx -->
 ---- the tick ------------------------------------------------------------
@@ -795,26 +798,26 @@ const · L796–796
 
 ### <a id="s-stepTraffic"></a>`stepTraffic(t, dt, stationList=, system=, shipPos=)`
 
-function · **exported** · L798–849
+function · **exported** · L799–850
 
 - calls: [`farBudget`](../core/perf.js.md#s-farBudget) _js/core/perf.js_ · [`armFlight`](flight.js.md#s-armFlight) _js/npc/flight.js_ · [`coastStep`](flight.js.md#s-coastStep) _js/npc/flight.js_ ×2 · [`seatHull`](#s-seatHull) · [`stepHull`](#s-stepHull)
 - called by: [`stepWorld`](../sim/sim.js.md#s-stepWorld) _js/sim/sim.js_
 
 <!-- note:stepTraffic -->
-- L813 · `const down = trafficDown[n.id];` — shot down: off the board until its clock is up, then seated back onto
+- L814 · `const down = trafficDown[n.id];` — shot down: off the board until its clock is up, then seated back onto
   the timetable wherever that now puts it
-- L822 · `delete trafficDown[n.id];` — its ten minutes are up: a replacement hull under the same name takes
+- L823 · `delete trafficDown[n.id];` — its ten minutes are up: a replacement hull under the same name takes
   the run over, which is why the roster count never sags
-- L831 · `if (n.heldUntil) {` — 0.3.65: a mirror holding the host's word for this hull (worldsync.js
+- L832 · `if (n.heldUntil) {` — 0.3.65: a mirror holding the host's word for this hull (worldsync.js
   adoptHulls) dead-reckons it instead of flying its own timetable, which
   would carry it straight back to where the host says it is not
-- L836 · `let step = dt;` — Far field: stepped on a stride with the time it missed, coasting in
+- L837 · `let step = dt;` — Far field: stepped on a stride with the time it missed, coasting in
   between. `shipPos` null (tests, headless) means everything is near.
 <!-- /note -->
 
 ### <a id="s-markVesselDown"></a>`markVesselDown(id, t)`
 
-function · **exported** · L851–867
+function · **exported** · L852–868
 
 - calls: [`downScaleFor`](../economy/insurance.js.md#s-downScaleFor) _js/economy/insurance.js_ · [`vesselById`](#s-vesselById) ×2
 - called by: [`ROLE_STEP.combat`](../drones/ops.js.md#s-ROLE_STEP-combat) _js/drones/ops.js_ · [`handleMessage`](../net/worldsync.js.md#s-handleMessage) _js/net/worldsync.js_ · [`stepBattles`](battles.js.md#s-stepBattles) _js/npc/battles.js_ · [`downHull`](combat.js.md#s-downHull) _js/npc/combat.js_ · [`applyMood`](npccrew.js.md#s-applyMood) _js/npc/npccrew.js_ ×2 · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ ×3
@@ -831,12 +834,12 @@ the right one: you can read a lane's underwriting off how well it keeps its
 traffic after a bad week. Seeded off the vessel id, so a shared sky agrees
 without exchanging anything.
 
-- L861 · `n.respondTo = null;` — whatever had a claim on it lets go
+- L862 · `n.respondTo = null;` — whatever had a claim on it lets go
 <!-- /note -->
 
 ### <a id="s-hullIx"></a>`hullIx`
 
-const · L869–869
+const · L870–870
 
 <!-- note:hullIx -->
 `traffic` is an array because everything that draws it walks it in order.
@@ -849,14 +852,14 @@ the source of truth; the Map is only ever a view of it.
 
 ### <a id="s-hullIxDirty"></a>`hullIxDirty`
 
-const · L870–870
+const · L871–871
 
 <!-- note:hullIxDirty -->
 <!-- /note -->
 
 ### <a id="s-reindexTraffic"></a>`reindexTraffic()`
 
-function · **exported** · L872–874
+function · **exported** · L873–875
 
 - called by: [`launchWave`](rogues.js.md#s-launchWave) _js/npc/rogues.js_ · [`populateTraffic`](#s-populateTraffic) · [`removeVessel`](#s-removeVessel) · [`resetTraffic`](#s-resetTraffic) · [`spawnVessel`](#s-spawnVessel)
 
@@ -866,25 +869,25 @@ Mark the hull index stale — after any push/splice/clear of `traffic`.
 
 ### <a id="s-hullIxLen"></a>`hullIxLen`
 
-const · L876–876
+const · L877–877
 
 <!-- note:hullIxLen -->
 <!-- /note -->
 
 ### <a id="s-vesselById"></a>`vesselById(id)`
 
-function · **exported** · L878–886
+function · **exported** · L879–887
 
 - called by: [`hailContact`](../comms/comms.js.md#s-hailContact) _js/comms/comms.js_ · [`alive`](../corp/seclevel.js.md#s-alive) _js/corp/seclevel.js_ · [`attackerKind`](../corp/seclevel.js.md#s-attackerKind) _js/corp/seclevel.js_ · [`bountyFor`](../corp/seclevel.js.md#s-bountyFor) _js/corp/seclevel.js_ · [`callSOS`](../corp/seclevel.js.md#s-callSOS) _js/corp/seclevel.js_ · [`wingArrived`](../corp/seclevel.js.md#s-wingArrived) _js/corp/seclevel.js_ ×2 · [`wingSupport`](../corp/seclevel.js.md#s-wingSupport) _js/corp/seclevel.js_ · [`adoptHulls`](../net/worldsync.js.md#s-adoptHulls) _js/net/worldsync.js_ · [`hostVesselDown`](../net/worldsync.js.md#s-hostVesselDown) _js/net/worldsync.js_ · [`fightCentre`](battles.js.md#s-fightCentre) _js/npc/battles.js_ ×2 · [`stepBattles`](battles.js.md#s-stepBattles) _js/npc/battles.js_ ×4 · [`acquire`](combat.js.md#s-acquire) _js/npc/combat.js_ · [`clearHunt`](combat.js.md#s-clearHunt) _js/npc/combat.js_ · [`combatFly`](combat.js.md#s-combatFly) _js/npc/combat.js_ ×2 · [`damageHull`](combat.js.md#s-damageHull) _js/npc/combat.js_ · [`stepFar`](combat.js.md#s-stepFar) _js/npc/combat.js_ · [`stepGuns`](combat.js.md#s-stepGuns) _js/npc/combat.js_ · [`nameOf`](ground.js.md#s-nameOf) _js/npc/ground.js_ · [`underFire`](ground.js.md#s-underFire) _js/npc/ground.js_ ×3 · [`transitionReport`](reports.js.md#s-transitionReport) _js/npc/reports.js_ · [`flyResponse`](security.js.md#s-flyResponse) _js/npc/security.js_ · [`noteAttack`](security.js.md#s-noteAttack) _js/npc/security.js_ · [`stepSecurity`](security.js.md#s-stepSecurity) _js/npc/security.js_ ×3 · [`victimOf`](security.js.md#s-victimOf) _js/npc/security.js_ · [`markVesselDown`](#s-markVesselDown) ×2 · [`leaveHulk`](../sim/sim.js.md#s-leaveHulk) _js/sim/sim.js_ · [`n`](../sim/sim.js.md#s-n) _js/sim/sim.js_ · [`onKill`](../sim/sim.js.md#s-onKill) _js/sim/sim.js_ · [`wireReactiveSky`](../sim/sim.js.md#s-wireReactiveSky) _js/sim/sim.js_ ×3
 
 <!-- note:vesselById -->
-- L879 · `if (hullIxDirty || traffic.length !== hullIxLen) {` — self-healing on the array's length as well as on reindexTraffic(), because
+- L880 · `if (hullIxDirty || traffic.length !== hullIxLen) {` — self-healing on the array's length as well as on reindexTraffic(), because
   `traffic` is exported and a caller (or a test) can mutate it directly
 <!-- /note -->
 
 ### <a id="s-captainLine"></a>`captainLine(n)`
 
-function · **exported** · L888–891
+function · **exported** · L889–892
 
 - called by: [`onVesselTransition`](../comms/comms.js.md#s-onVesselTransition) _js/comms/comms.js_ · [`vesselStatus`](#s-vesselStatus) · [`mountMap>dirEntries`](../ui/map.js.md#s-mountMap-dirEntries) _js/ui/map.js_ · [`mountMap>openMenu`](../ui/map.js.md#s-mountMap-openMenu) _js/ui/map.js_
 
@@ -894,7 +897,7 @@ function · **exported** · L888–891
 
 ### <a id="s-vesselStatus"></a>`vesselStatus(n)`
 
-function · **exported** · L893–910
+function · **exported** · L894–911
 
 - calls: [`corpById`](../corp/corps.js.md#s-corpById) _js/corp/corps.js_ ×2 · [`captainLine`](#s-captainLine)
 - called by: [`hailContact`](../comms/comms.js.md#s-hailContact) _js/comms/comms.js_ · [`mountMap>dirEntries`](../ui/map.js.md#s-mountMap-dirEntries) _js/ui/map.js_ · [`mountMap>openMenu`](../ui/map.js.md#s-mountMap-openMenu) _js/ui/map.js_
@@ -902,14 +905,14 @@ function · **exported** · L893–910
 <!-- note:vesselStatus -->
 "on approach to Bastion Anchorage — Ilya Voss · she/her commanding"
 
-- L894 · `` const tag = n.crewTag ? ` · ${n.crewTag}` : ""; `` — npc/npccrew.js writes `crewTag` onto a vessel once it has a crew worth
+- L895 · `` const tag = n.crewTag ? ` · ${n.crewTag}` : ""; `` — npc/npccrew.js writes `crewTag` onto a vessel once it has a crew worth
   mentioning — a strike, a mutiny, a hull nobody is maintaining. Read as a
   plain string so this module never has to know that crews exist.
 <!-- /note -->
 
 ### <a id="s-visibleVessels"></a>`visibleVessels(pos)`
 
-function · **exported** · L912–917
+function · **exported** · L913–918
 
 <!-- note:visibleVessels -->
 Everyone currently on the board, nearest first.
@@ -917,7 +920,7 @@ Everyone currently on the board, nearest first.
 
 ### <a id="s-EVENT_KINDS"></a>`EVENT_KINDS`
 
-const · **exported** · L919–919
+const · **exported** · L920–920
 
 <!-- note:EVENT_KINDS -->
 ---- shared sky events --------------------------------------------------
@@ -925,7 +928,7 @@ const · **exported** · L919–919
 
 ### <a id="s-eventAt"></a>`eventAt(seed, t)`
 
-function · **exported** · L921–945
+function · **exported** · L922–946
 
 - calls: [`rngFromSeed`](../world/generate.js.md#s-rngFromSeed) _js/world/generate.js_
 - called by: [`engagementFor`](battles.js.md#s-engagementFor) _js/npc/battles.js_ · [`stepMarket`](../sim/sim.js.md#s-stepMarket) _js/sim/sim.js_
@@ -939,17 +942,17 @@ minutes, not every three.
 
 ### <a id="s-eventLine"></a>`eventLine(ev, ports=)`
 
-function · **exported** · L947–958
+function · **exported** · L948–959
 
 - called by: [`applySkyEvent`](../sim/sim.js.md#s-applySkyEvent) _js/sim/sim.js_
 
 <!-- note:eventLine -->
-- L951 · `if (!named.length) return null;` — no thirsty port, no bulletin
+- L952 · `if (!named.length) return null;` — no thirsty port, no bulletin
 <!-- /note -->
 
 ### <a id="s-trafficCensus"></a>`trafficCensus(list=)`
 
-function · **exported** · L960–973
+function · **exported** · L961–974
 
 - called by: [`publishHud`](../sim/sim.js.md#s-publishHud) _js/sim/sim.js_
 

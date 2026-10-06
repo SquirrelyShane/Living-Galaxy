@@ -83,7 +83,6 @@ const _p = { x: 0, y: 0, z: 0 };
 export function flowPose(n, t, stationList = liveStations, out = {}) {
   const st = stationList.find((s) => s.id === n.port);
   if (!st) { out.visible = false; out.job = "docked"; return out; }
-  const f = stationLane(st);
   const phase = ((t + n.phase) % n.period + n.period) % n.period;
   const dock = n.period * n.dockFrac;
   const away = n.period - dock - DEPART_S - ARRIVE_S;
@@ -91,6 +90,7 @@ export function flowPose(n, t, stationList = liveStations, out = {}) {
     out.x = st.x; out.y = st.y; out.z = st.z; out.visible = false; out.job = "docked"; out.lane = null; out.speed = 0;
     return out;
   }
+  const f = stationLane(st);
   let lt = phase - dock;
   const bay = hasBay(st);
   const bOut = bay ? BAY_OUT_S : 0, bIn = bay ? BAY_IN_S : 0;

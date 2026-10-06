@@ -62,6 +62,8 @@ export function acquire(n, radius = HUNT_R) {
   let best = null, bestScore = 0;
   for (const m of traffic) {
     if (m === n || m.job === "down" || m.visible === false) continue;
+    const dx = n.x - m.x, dy = n.y - m.y, dz = n.z - m.z;
+    if (radius >= 0 && dx * dx + dy * dy + dz * dz > radius * radius) continue;
     if (!hostileTo(n, m)) continue;
     const d = d3(n, m);
     if (d > radius) continue;

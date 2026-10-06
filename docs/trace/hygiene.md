@@ -149,7 +149,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L84
 
-## Exports with no importer (940)
+## Exports with no importer (938)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
@@ -585,8 +585,6 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/npc/captain.js](../files/js/npc/captain.js.md) `llamaCaptainProvider`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) `PROWL_R`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) `ENGAGE_R`
-- [js/npc/combat.js](../files/js/npc/combat.js.md) `CLOSE_R`
-- [js/npc/combat.js](../files/js/npc/combat.js.md) `STALK_TOP`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) `ALARM_R`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) `BREAK_R`
 - [js/npc/combat.js](../files/js/npc/combat.js.md) `HUNT_FOR`

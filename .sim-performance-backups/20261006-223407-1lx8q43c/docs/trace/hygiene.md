@@ -1,0 +1,1103 @@
+# Hygiene
+
+[index](../README.md)
+
+Candidates, not verdicts: tests, index.html, tools and the addon are scanned for imports, but anything reached by string, by `window`, or from a file outside the scanned roots will look dead here.
+
+## Unused imports (110)
+
+- [js/aria/play.js](../files/js/aria/play.js.md) L19 `legSeconds` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L19 `tripSeconds` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L19 `navLine` from `./nav.js`
+- [js/aria/senses.js](../files/js/aria/senses.js.md) L5 `stockOf` from `../economy/economy.js`
+- [js/aria/senses.js](../files/js/aria/senses.js.md) L5 `shortagesOf` from `../economy/economy.js`
+- [js/console/panels/work.js](../files/js/console/panels/work.js.md) L5 `hasUpgrade` from `../../economy/upgrades.js`
+- [js/corp/fleet.js](../files/js/corp/fleet.js.md) L6 `hullTuneFor` from `../ships/shipdb.js`
+- [js/crew/deckmind.js](../files/js/crew/deckmind.js.md) L6 `social` from `./family.js`
+- [js/crew/talk.js](../files/js/crew/talk.js.md) L13 `voiceWrap` from `./voice.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `sellAllOre` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `tradeBuy` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `tradeSell` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `sellPriceAt` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L2 `buyPriceAt` from `../sim/sim.js`
+- [js/mission/run.js](../files/js/mission/run.js.md) L12 `hasUpgrade` from `../economy/upgrades.js`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) L4 `rigRange` from `../flight/rig.js`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) L3 `contacts` from `../flight/turrets.js`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) L3 `contactById` from `../flight/turrets.js`
+- [js/npc/npccrew.js](../files/js/npc/npccrew.js.md) L8 `crew` from `../crew/ledger.js`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) L4 `markVesselDown` from `./traffic.js`
+- [js/npc/security.js](../files/js/npc/security.js.md) L2 `markVesselDown` from `./traffic.js`
+- [js/npc/traffic.js](../files/js/npc/traffic.js.md) L10 `faceVelocity` from `./flight.js`
+- [js/shipgen/builder/StarshipBuilder.js](../files/js/shipgen/builder/StarshipBuilder.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/StarshipBuilder.js](../files/js/shipgen/builder/StarshipBuilder.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/StarshipBuilder.js](../files/js/shipgen/builder/StarshipBuilder.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/StarshipBuilder.js](../files/js/shipgen/builder/StarshipBuilder.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/StarshipBuilder.js](../files/js/shipgen/builder/StarshipBuilder.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L2 `RNG` from `../core/rng.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L4 `faceNormal` from `./faces.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L4 `faceEuler` from `./faces.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/details.js](../files/js/shipgen/builder/details.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L2 `RNG` from `../core/rng.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L4 `faceNormal` from `./faces.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L4 `faceEuler` from `./faces.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/docking.js](../files/js/shipgen/builder/docking.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L2 `RNG` from `../core/rng.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L4 `faceNormal` from `./faces.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L4 `faceEuler` from `./faces.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/drives.js](../files/js/shipgen/builder/drives.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L2 `RNG` from `../core/rng.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L4 `faceEuler` from `./faces.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/glazing.js](../files/js/shipgen/builder/glazing.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L2 `RNG` from `../core/rng.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L4 `faceNormal` from `./faces.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L4 `faceEuler` from `./faces.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/hull.js](../files/js/shipgen/builder/hull.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L3 `G` from `../core/geometry.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L3 `addMesh` from `../core/geometry.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L2 `RNG` from `../core/rng.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L3 `makeMat` from `../core/geometry.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L3 `wingShape` from `../core/geometry.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L4 `faceNormal` from `./faces.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L4 `faceEuler` from `./faces.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L4 `faceRotation` from `./faces.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L5 `DRIVE_TYPES` from `../data/drives.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L6 `WEAPON_TYPES` from `../data/weapons.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L7 `PARTS` from `../data/catalog/index.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `PREFABS` from `../prefabs/index.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `ALL_FACES` from `../prefabs/index.js`
+- [js/shipgen/builder/weapons.js](../files/js/shipgen/builder/weapons.js.md) L8 `fpArea` from `../prefabs/index.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L73 `stockMult` from `../economy/economy.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L75 `clearDockwork` from `../station/dockwork.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L75 `handlingProgress` from `../station/dockwork.js`
+- [js/sim/sim.js](../files/js/sim/sim.js.md) L98 `notePerf` from `../core/perf.js`
+- [js/ui/hud.js](../files/js/ui/hud.js.md) L13 `recorder` from `../flight/recorder.js`
+- [js/world/events/impacts.js](../files/js/world/events/impacts.js.md) L1 `DETAIL` from `../../bodygen/body.js`
+
+## Top-level symbols never referenced (29)
+
+- [js/audio/index.js › engineAir](../files/js/audio/index.js.md#s-engineAir) L24
+- [js/console/panels/work.js › capLabel](../files/js/console/panels/work.js.md#s-capLabel) L37
+- [js/crew/beats.js › roll](../files/js/crew/beats.js.md#s-roll) L12
+- [js/npc/battles.js › _p](../files/js/npc/battles.js.md#s-_p) L30
+- [js/npc/battles.js › _route](../files/js/npc/battles.js.md#s-_route) L106
+- [js/npc/flight.js › clamp](../files/js/npc/flight.js.md#s-clamp) L105
+- [js/npc/security.js › d3](../files/js/npc/security.js.md#s-d3) L59
+- [js/npc/speech.js › nearestPortName](../files/js/npc/speech.js.md#s-nearestPortName) L136
+- [js/render/attract.js › side](../files/js/render/attract.js.md#s-side) L25
+- [js/render/attract.js › UP](../files/js/render/attract.js.md#s-UP) L29
+- [js/render/engine.js › MAX_IMPACTORS](../files/js/render/engine.js.md#s-MAX_IMPACTORS) L81
+- [js/sim/sim.js › _lv](../files/js/sim/sim.js.md#s-_lv) L2167
+- [js/speech/npc-speech.js › wnext](../files/js/speech/npc-speech.js.md#s-wnext) L30
+- [js/speech/npc-speech.js › wrand](../files/js/speech/npc-speech.js.md#s-wrand) L31
+- [js/speech/npc-speech.js › worldSeed](../files/js/speech/npc-speech.js.md#s-worldSeed) L33
+- [js/speech/npc-speech.js › resetStream](../files/js/speech/npc-speech.js.md#s-resetStream) L55
+- [js/speech/npc-speech.js › streamNames](../files/js/speech/npc-speech.js.md#s-streamNames) L60
+- [js/speech/npc-speech.js › EXPRESSIVE_LEAD](../files/js/speech/npc-speech.js.md#s-EXPRESSIVE_LEAD) L1002
+- [js/speech/npc-speech.js › partLaden](../files/js/speech/npc-speech.js.md#s-partLaden) L2254
+- [js/speech/npc-speech.js › fleeing](../files/js/speech/npc-speech.js.md#s-fleeing) L2263
+- [js/speech/npc-speech.js › owes](../files/js/speech/npc-speech.js.md#s-owes) L2282
+- [js/station/staffline.js › first](../files/js/station/staffline.js.md#s-first) L36
+- [js/station/staffline.js › prOf](../files/js/station/staffline.js.md#s-prOf) L37
+- [js/station/staffline.js › moodWord](../files/js/station/staffline.js.md#s-moodWord) L85
+- [js/station/stations.js › PREFIX](../files/js/station/stations.js.md#s-PREFIX) L8
+- [js/station/stations.js › SUFFIX](../files/js/station/stations.js.md#s-SUFFIX) L16
+- [js/station/stationyard.js › _v](../files/js/station/stationyard.js.md#s-_v) L41
+- [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
+- [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L84
+
+## Exports with no importer (940)
+
+- [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
+- [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
+- [js/aria/aria.js](../files/js/aria/aria.js.md) `noteAdvice`
+- [js/aria/aria.js](../files/js/aria/aria.js.md) `answerAdvice`
+- [js/aria/aria.js](../files/js/aria/aria.js.md) `ariaNoteDecision`
+- [js/aria/aria.js](../files/js/aria/aria.js.md) `wireAriaHooks`
+- [js/aria/company.js](../files/js/aria/company.js.md) `wageOf`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `BREAK`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `domainOf`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `reserveFor`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `ARIA_JOBS`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `INVEST_JOBS`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `bestRepairPort`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `fabLeaning`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `fabStop`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `refitPlan`
+- [js/aria/pilot.js](../files/js/aria/pilot.js.md) `buildPlan`
+- [js/aria/play.js](../files/js/aria/play.js.md) `purse`
+- [js/aria/play.js](../files/js/aria/play.js.md) `moveKeyFor`
+- [js/aria/play.js](../files/js/aria/play.js.md) `readyForTrouble`
+- [js/aria/play.js](../files/js/aria/play.js.md) `hullFrac`
+- [js/aria/play.js](../files/js/aria/play.js.md) `bestYard`
+- [js/aria/play.js](../files/js/aria/play.js.md) `hostilesClose`
+- [js/aria/play.js](../files/js/aria/play.js.md) `shouldBreakOff`
+- [js/aria/play.js](../files/js/aria/play.js.md) `tendBus`
+- [js/aria/play.js](../files/js/aria/play.js.md) `brainSig`
+- [js/aria/play.js](../files/js/aria/play.js.md) `brainOut`
+- [js/aria/play.js](../files/js/aria/play.js.md) `adoptBrain`
+- [js/aria/play.js](../files/js/aria/play.js.md) `jobProgress`
+- [js/asteroidgen/addons/Pass.js](../files/js/asteroidgen/addons/Pass.js.md) `Pass`
+- [js/asteroidgen/addons/Pass.js](../files/js/asteroidgen/addons/Pass.js.md) `FullScreenQuad`
+- [js/asteroidgen/blackhole.js](../files/js/asteroidgen/blackhole.js.md) `BH_DISK`
+- [js/asteroidgen/blackhole.js](../files/js/asteroidgen/blackhole.js.md) `BlackHolePass`
+- [js/asteroidgen/blackhole.js](../files/js/asteroidgen/blackhole.js.md) `attachComposerDepth`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `makeCrystalGeometry`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `makeDebrisDepthMaterial`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `wellTau`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `bhDissolve`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `captureWeight`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `worldToFieldLocal`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `bhDiskRadius`
+- [js/asteroidgen/debris.js](../files/js/asteroidgen/debris.js.md) `bakeForExport`
+- [js/asteroidgen/fracture.js](../files/js/asteroidgen/fracture.js.md) `resetFractureChunk`
+- [js/asteroidgen/fracture.js](../files/js/asteroidgen/fracture.js.md) `heatColor`
+- [js/asteroidgen/generator.js](../files/js/asteroidgen/generator.js.md) `GENERATOR_VERSION`
+- [js/asteroidgen/generator.js](../files/js/asteroidgen/generator.js.md) `buildCubeSphere`
+- [js/asteroidgen/generator.js](../files/js/asteroidgen/generator.js.md) `makeRockMaterial`
+- [js/asteroidgen/impact-sim.js](../files/js/asteroidgen/impact-sim.js.md) `quatMul`
+- [js/asteroidgen/impact-sim.js](../files/js/asteroidgen/impact-sim.js.md) `quatConj`
+- [js/asteroidgen/impact-sim.js](../files/js/asteroidgen/impact-sim.js.md) `quatRotate`
+- [js/asteroidgen/impact-sim.js](../files/js/asteroidgen/impact-sim.js.md) `chunkShapes`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `IMPACT`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `contactTime`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `setupApproach`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `rotate`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `rotateT`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `planMomentum`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `composeAxisAngle`
+- [js/asteroidgen/impact.js](../files/js/asteroidgen/impact.js.md) `rogueHandoff`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `trappedOrbit`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `trappedRange`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `metric`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `worldToBL`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `blToWorld`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `cartToBL`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `blToCart`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `fidoBasis`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `initRay`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `derivs`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `hamiltonian`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `stepSize`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `rk2`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `poleHop`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `exitDirection`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `diskRedshift`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `traceRay`
+- [js/asteroidgen/kerr.js](../files/js/asteroidgen/kerr.js.md) `blackbodyRGB`
+- [js/asteroidgen/ores.js](../files/js/asteroidgen/ores.js.md) `CLASS_ORDER`
+- [js/asteroidgen/ores.js](../files/js/asteroidgen/ores.js.md) `lerpColor`
+- [js/asteroidgen/rng.js](../files/js/asteroidgen/rng.js.md) `randomSeedString`
+- [js/asteroidgen/tidal.js](../files/js/asteroidgen/tidal.js.md) `rocheRadius`
+- [js/asteroidgen/tidal.js](../files/js/asteroidgen/tidal.js.md) `gravity`
+- [js/asteroidgen/tidal.js](../files/js/asteroidgen/tidal.js.md) `periapsis`
+- [js/asteroidgen/tidal.js](../files/js/asteroidgen/tidal.js.md) `aimFlyby`
+- [js/asteroidgen/tidal.js](../files/js/asteroidgen/tidal.js.md) `integrateQuat`
+- [js/asteroidgen/tidal.js](../files/js/asteroidgen/tidal.js.md) `cloudCapture`
+- [js/audio/ambience.js](../files/js/audio/ambience.js.md) `placeFor`
+- [js/audio/graph.js](../files/js/audio/graph.js.md) `ROOT`
+- [js/audio/graph.js](../files/js/audio/graph.js.md) `busNode`
+- [js/audio/graph.js](../files/js/audio/graph.js.md) `sendNode`
+- [js/audio/graph.js](../files/js/audio/graph.js.md) `now`
+- [js/audio/graph.js](../files/js/audio/graph.js.md) `_installContext`
+- [js/audio/graph.js](../files/js/audio/graph.js.md) `_teardown`
+- [js/audio/index.js](../files/js/audio/index.js.md) `cue`
+- [js/audio/index.js](../files/js/audio/index.js.md) `CUES`
+- [js/audio/index.js](../files/js/audio/index.js.md) `audio`
+- [js/audio/index.js](../files/js/audio/index.js.md) `duck`
+- [js/audio/index.js](../files/js/audio/index.js.md) `ambience`
+- [js/audio/index.js](../files/js/audio/index.js.md) `PLACE_IDS`
+- [js/audio/index.js](../files/js/audio/index.js.md) `startAmbience`
+- [js/audio/index.js](../files/js/audio/index.js.md) `stopAmbience`
+- [js/audio/index.js](../files/js/audio/index.js.md) `disposeAmbience`
+- [js/audio/index.js](../files/js/audio/index.js.md) `playScan`
+- [js/audio/index.js](../files/js/audio/index.js.md) `playCollect`
+- [js/audio/index.js](../files/js/audio/index.js.md) `playWarp`
+- [js/audio/index.js](../files/js/audio/index.js.md) `playWarn`
+- [js/audio/index.js](../files/js/audio/index.js.md) `warnCaution`
+- [js/audio/index.js](../files/js/audio/index.js.md) `warnAlarm`
+- [js/audio/index.js](../files/js/audio/index.js.md) `warnCritical`
+- [js/audio/index.js](../files/js/audio/index.js.md) `audioState`
+- [js/audio/voices.js](../files/js/audio/voices.js.md) `releaseVoice`
+- [js/bodygen/bake.js](../files/js/bodygen/bake.js.md) `faceGrids`
+- [js/bodygen/baked.js](../files/js/bodygen/baked.js.md) `bakedGeometry`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `SHAPE_LABELS`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `FEATURE_SCALE`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `FEATURE_DENSITY`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `featureAt`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `bakedTransfer`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `CUT_SECONDS`
+- [js/bodygen/body.js](../files/js/bodygen/body.js.md) `assayOf`
+- [js/bodygen/grower.js](../files/js/bodygen/grower.js.md) `isPending`
+- [js/bodygen/grower.js](../files/js/bodygen/grower.js.md) `resetGrower`
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) `hashString`
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) `RNG`
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) `valueNoise3`
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) `fbm`
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) `ridged`
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) `randomSeedString`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `COMPLEXES`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `COMPLEX_IDS`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `SKILLS`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `RANK_LETTERS`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `getComplex`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `getRank`
+- [js/careers/careerEngine.js](../files/js/careers/careerEngine.js.md) `getSpecialization`
+- [js/careers/index.js](../files/js/careers/index.js.md) `SKILL_LIST`
+- [js/careers/index.js](../files/js/careers/index.js.md) `SKILL_CAP`
+- [js/careers/index.js](../files/js/careers/index.js.md) `createEmptySkills`
+- [js/careers/index.js](../files/js/careers/index.js.md) `getRank`
+- [js/careers/index.js](../files/js/careers/index.js.md) `getSpecialization`
+- [js/careers/index.js](../files/js/careers/index.js.md) `ENGINE_VERSION`
+- [js/careers/index.js](../files/js/careers/index.js.md) `evaluateRequirements`
+- [js/careers/index.js](../files/js/careers/index.js.md) `nextRank`
+- [js/careers/index.js](../files/js/careers/index.js.md) `grantCert`
+- [js/careers/index.js](../files/js/careers/index.js.md) `formatMissing`
+- [js/careers/index.js](../files/js/careers/index.js.md) `ladderSummary`
+- [js/careers/index.js](../files/js/careers/index.js.md) `allLaddersText`
+- [js/careers/index.js](../files/js/careers/index.js.md) `catalog`
+- [js/careers/status.js](../files/js/careers/status.js.md) `CAREER_ARCS`
+- [js/comms/call-scripts.js](../files/js/comms/call-scripts.js.md) `llamaProvider`
+- [js/comms/call-session.js](../files/js/comms/call-session.js.md) `Emitter`
+- [js/comms/call-session.js](../files/js/comms/call-session.js.md) `default`
+- [js/comms/call-ui.js](../files/js/comms/call-ui.js.md) `default`
+- [js/comms/comms.js](../files/js/comms/comms.js.md) `hail`
+- [js/comms/gnn.js](../files/js/comms/gnn.js.md) `gnnById`
+- [js/console/console.js](../files/js/console/console.js.md) `RECENTS_KEY`
+- [js/console/console.js](../files/js/console/console.js.md) `registerPanel`
+- [js/console/panels/corp-marshal.js](../files/js/console/panels/corp-marshal.js.md) `marshalView`
+- [js/console/panels/corp-town.js](../files/js/console/panels/corp-town.js.md) `default`
+- [js/console/panels/crew-brig.js](../files/js/console/panels/crew-brig.js.md) `brigView`
+- [js/console/panels/crew-gdb.js](../files/js/console/panels/crew-gdb.js.md) `default`
+- [js/console/panels/crew-gene.js](../files/js/console/panels/crew-gene.js.md) `geneView`
+- [js/console/panels/crew-sky.js](../files/js/console/panels/crew-sky.js.md) `skyView`
+- [js/console/panels/market.js](../files/js/console/panels/market.js.md) `flyRoute`
+- [js/console/panels/market.js](../files/js/console/panels/market.js.md) `portWants`
+- [js/console/panels/nav.js](../files/js/console/panels/nav.js.md) `lockedRock`
+- [js/console/panels/ship.js](../files/js/console/panels/ship.js.md) `POSTURES`
+- [js/console/panels/ship.js](../files/js/console/panels/ship.js.md) `postureMatches`
+- [js/console/panels/ship.js](../files/js/console/panels/ship.js.md) `applyPosture`
+- [js/console/search.js](../files/js/console/search.js.md) `buildIndex`
+- [js/console/search.js](../files/js/console/search.js.md) `run`
+- [js/core/addon-loader.js](../files/js/core/addon-loader.js.md) `PACKS`
+- [js/core/addon-loader.js](../files/js/core/addon-loader.js.md) `loadAddons`
+- [js/core/addon-loader.js](../files/js/core/addon-loader.js.md) `addonsReady`
+- [js/core/input.js](../files/js/core/input.js.md) `lookDelta`
+- [js/core/input.js](../files/js/core/input.js.md) `setInjectedSteer`
+- [js/core/perf.js](../files/js/core/perf.js.md) `TIERS`
+- [js/core/profile.js](../files/js/core/profile.js.md) `SKY_KEYS`
+- [js/core/profile.js](../files/js/core/profile.js.md) `DEVICE_KEYS`
+- [js/core/profile.js](../files/js/core/profile.js.md) `profile`
+- [js/core/profile.js](../files/js/core/profile.js.md) `runId`
+- [js/core/profile.js](../files/js/core/profile.js.md) `runCallsign`
+- [js/core/profile.js](../files/js/core/profile.js.md) `clearRun`
+- [js/core/profile.js](../files/js/core/profile.js.md) `renameRun`
+- [js/core/profile.js](../files/js/core/profile.js.md) `forgetRun`
+- [js/corp/company.js](../files/js/corp/company.js.md) `BOARD`
+- [js/corp/company.js](../files/js/corp/company.js.md) `companyReport`
+- [js/corp/company.js](../files/js/corp/company.js.md) `serializeCompany`
+- [js/corp/company.js](../files/js/corp/company.js.md) `restoreCompany`
+- [js/corp/corps.js](../files/js/corp/corps.js.md) `relationLabel`
+- [js/corp/fleet.js](../files/js/corp/fleet.js.md) `FLEET`
+- [js/corp/fleet.js](../files/js/corp/fleet.js.md) `fleetHold`
+- [js/corp/fleet.js](../files/js/corp/fleet.js.md) `yardPrice`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `GDB`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `catalogueNo`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `looksAlike`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `uniqueName`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `sighted`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `everyone`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `flushGdb`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `mergeEntries`
+- [js/corp/gdb.js](../files/js/corp/gdb.js.md) `resetGdb`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `secState`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `attackerKind`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `noteHitBy`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `assault`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `bountyFor`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `heat`
+- [js/corp/seclevel.js](../files/js/corp/seclevel.js.md) `noteFired`
+- [js/crew/bonds.js](../files/js/crew/bonds.js.md) `TIE`
+- [js/crew/captive.js](../files/js/crew/captive.js.md) `NEGLECT_DRIFT`
+- [js/crew/childtalk.js](../files/js/crew/childtalk.js.md) `CHILD`
+- [js/crew/childtalk.js](../files/js/crew/childtalk.js.md) `childTopicById`
+- [js/crew/childtalk.js](../files/js/crew/childtalk.js.md) `CHILD_ASKS`
+- [js/crew/childtalk.js](../files/js/crew/childtalk.js.md) `tickChildren`
+- [js/crew/deckgraph.js](../files/js/crew/deckgraph.js.md) `deckNodes`
+- [js/crew/deckmind.js](../files/js/crew/deckmind.js.md) `clearBodies`
+- [js/crew/deckmind.js](../files/js/crew/deckmind.js.md) `HEARD`
+- [js/crew/deckmind.js](../files/js/crew/deckmind.js.md) `computedNeeds`
+- [js/crew/deckmind.js](../files/js/crew/deckmind.js.md) `applyAction`
+- [js/crew/duties.js](../files/js/crew/duties.js.md) `DUTY_FX`
+- [js/crew/duties.js](../files/js/crew/duties.js.md) `strengthOf`
+- [js/crew/duties.js](../files/js/crew/duties.js.md) `KIND_LABEL`
+- [js/crew/family.js](../files/js/crew/family.js.md) `playerPronouns`
+- [js/crew/heritage.js](../files/js/crew/heritage.js.md) `GENERATION_STEP`
+- [js/crew/heritage.js](../files/js/crew/heritage.js.md) `MAX_GENERATIONS`
+- [js/crew/heritage.js](../files/js/crew/heritage.js.md) `houseTradeOf`
+- [js/crew/heritage.js](../files/js/crew/heritage.js.md) `lineFor`
+- [js/crew/hooks.js](../files/js/crew/hooks.js.md) `listHooks`
+- [js/crew/hull.js](../files/js/crew/hull.js.md) `hullOf`
+- [js/crew/hull.js](../files/js/crew/hull.js.md) `resetHulls`
+- [js/crew/journal.js](../files/js/crew/journal.js.md) `JOURNAL_VERSION`
+- [js/crew/journal.js](../files/js/crew/journal.js.md) `RING_CAP`
+- [js/crew/journal.js](../files/js/crew/journal.js.md) `shedJournals`
+- [js/crew/learn.js](../files/js/crew/learn.js.md) `FULL_CONFIDENCE`
+- [js/crew/learn.js](../files/js/crew/learn.js.md) `COACH_STEPS`
+- [js/crew/ledger.js](../files/js/crew/ledger.js.md) `FIRST_HAND_WAGE`
+- [js/crew/ledger.js](../files/js/crew/ledger.js.md) `forgetGenome`
+- [js/crew/ledger.js](../files/js/crew/ledger.js.md) `kinLineBetween`
+- [js/crew/orders.js](../files/js/crew/orders.js.md) `ORDER`
+- [js/crew/orders.js](../files/js/crew/orders.js.md) `grievanceCauses`
+- [js/crew/orders.js](../files/js/crew/orders.js.md) `ordersFor`
+- [js/crew/races.js](../files/js/crew/races.js.md) `RACE_IDS`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `ROBOT_PRICE_K`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `ROBOT_WEAR`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `ROBOT_REPAIR`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `SERVICE_CR`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `SCRAP_REFUND`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `robotDesign`
+- [js/crew/robots.js](../files/js/crew/robots.js.md) `engineerAboard`
+- [js/crew/robotyard.js](../files/js/crew/robotyard.js.md) `default`
+- [js/crew/talk.js](../files/js/crew/talk.js.md) `WANT_TOPICS`
+- [js/crew/talk.js](../files/js/crew/talk.js.md) `TIERS`
+- [js/crew/talk.js](../files/js/crew/talk.js.md) `talkContext`
+- [js/crew/talk.js](../files/js/crew/talk.js.md) `rapportBetween`
+- [js/crew/talkview.js](../files/js/crew/talkview.js.md) `default`
+- [js/crew/tiers.js](../files/js/crew/tiers.js.md) `MORALE_TIERS`
+- [js/crew/tiers.js](../files/js/crew/tiers.js.md) `friendTierBetween`
+- [js/crew/tiers.js](../files/js/crew/tiers.js.md) `moraleTier`
+- [js/crew/tiers.js](../files/js/crew/tiers.js.md) `romanceTier`
+- [js/crew/tiers.js](../files/js/crew/tiers.js.md) `tierLine`
+- [js/crew/tiers.js](../files/js/crew/tiers.js.md) `tierReport`
+- [js/crew/voice.js](../files/js/crew/voice.js.md) `BANK_SIZE`
+- [js/crew/voice.js](../files/js/crew/voice.js.md) `hashN`
+- [js/crew/voice.js](../files/js/crew/voice.js.md) `leanTrait`
+- [js/data/factions.js](../files/js/data/factions.js.md) `BLOCS`
+- [js/data/factions.js](../files/js/data/factions.js.md) `BLOC_KEYS`
+- [js/data/factions.js](../files/js/data/factions.js.md) `POWER_KEYS`
+- [js/data/factions.js](../files/js/data/factions.js.md) `HISTORY`
+- [js/data/factions.js](../files/js/data/factions.js.md) `NOW`
+- [js/data/factions.js](../files/js/data/factions.js.md) `historyOf`
+- [js/data/factions.js](../files/js/data/factions.js.md) `powerFor`
+- [js/drones/board.js](../files/js/drones/board.js.md) `heldBy`
+- [js/drones/droneforge.js](../files/js/drones/droneforge.js.md) `DRONE_KINDS`
+- [js/drones/droneforge.js](../files/js/drones/droneforge.js.md) `droneSpec`
+- [js/drones/droneforge.js](../files/js/drones/droneforge.js.md) `droneSummary`
+- [js/drones/npcdrones.js](../files/js/drones/npcdrones.js.md) `resetNpcDrones`
+- [js/drones/npcdrones.js](../files/js/drones/npcdrones.js.md) `npcDronesNear`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `FREIGHT_RATE`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `BOUNTY_DRONE`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `THREAT_R`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `posOf`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `priceOf`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `unitById`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `freightSlots`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `save`
+- [js/drones/ops.js](../files/js/drones/ops.js.md) `resetDroneOps`
+- [js/drones/roles.js](../files/js/drones/roles.js.md) `ROLE_IDS`
+- [js/economy/chains.js](../files/js/economy/chains.js.md) `chainState`
+- [js/economy/contracts.js](../files/js/economy/contracts.js.md) `SALVAGE_PAY`
+- [js/economy/contracts.js](../files/js/economy/contracts.js.md) `WRECK`
+- [js/economy/contracts.js](../files/js/economy/contracts.js.md) `anchorFor`
+- [js/economy/contracts.js](../files/js/economy/contracts.js.md) `visitRadius`
+- [js/economy/economy.js](../files/js/economy/economy.js.md) `SHORT_FRAC`
+- [js/economy/economy.js](../files/js/economy/economy.js.md) `tierOf`
+- [js/economy/economy.js](../files/js/economy/economy.js.md) `glutsOf`
+- [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `FAB_KEY`
+- [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `fabJobs`
+- [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `billOfMaterials`
+- [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `fabJobById`
+- [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `save`
+- [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `default`
+- [js/economy/materials.js](../files/js/economy/materials.js.md) `COMPONENTS`
+- [js/economy/materials.js](../files/js/economy/materials.js.md) `goodMass`
+- [js/economy/materials.js](../files/js/economy/materials.js.md) `BULK`
+- [js/economy/materials.js](../files/js/economy/materials.js.md) `oresFor`
+- [js/economy/materials.js](../files/js/economy/materials.js.md) `FINISHED_BONUS`
+- [js/economy/materials.js](../files/js/economy/materials.js.md) `demandFor`
+- [js/economy/shipcost.js](../files/js/economy/shipcost.js.md) `SECTION_LABEL`
+- [js/economy/sites.js](../files/js/economy/sites.js.md) `siteVersion`
+- [js/economy/sites.js](../files/js/economy/sites.js.md) `inSite`
+- [js/economy/traderoutes.js](../files/js/economy/traderoutes.js.md) `ROUTE`
+- [js/economy/traderoutes.js](../files/js/economy/traderoutes.js.md) `legSeconds`
+- [js/flight/contacts.js](../files/js/flight/contacts.js.md) `focus`
+- [js/flight/contacts.js](../files/js/flight/contacts.js.md) `effLevel`
+- [js/flight/contacts.js](../files/js/flight/contacts.js.md) `levelFor`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `PILOT_KEY`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `PILOT_RECORD_VERSION`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `raceTraits`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `PAY_SHARE`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `PROBATION_SHARE`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `COMPLEXES`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `COMPLEX_IDS`
+- [js/flight/pilot.js](../files/js/flight/pilot.js.md) `certName`
+- [js/flight/probes.js](../files/js/flight/probes.js.md) `PROBE_CHARGE`
+- [js/flight/probes.js](../files/js/flight/probes.js.md) `SCAN_CHARGE`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `RECORDER_KEY`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `TAPE_CAP`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `STATE_KEYS`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `tapeJSONL`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `loadTape`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `describeTarget`
+- [js/flight/recorder.js](../files/js/flight/recorder.js.md) `default`
+- [js/flight/repair.js](../files/js/flight/repair.js.md) `REPAIR`
+- [js/flight/repair.js](../files/js/flight/repair.js.md) `patchDrone`
+- [js/flight/repair.js](../files/js/flight/repair.js.md) `resetRepair`
+- [js/flight/turrets.js](../files/js/flight/turrets.js.md) `MINE_YIELD`
+- [js/flight/turrets.js](../files/js/flight/turrets.js.md) `COMBAT_RANGE`
+- [js/flight/turrets.js](../files/js/flight/turrets.js.md) `MINE_RANGE_OD`
+- [js/flight/turrets.js](../files/js/flight/turrets.js.md) `pickCombatTarget`
+- [js/flight/turrets.js](../files/js/flight/turrets.js.md) `nearestContact`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `validateGraph`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `pruneGraph`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `edgesOf`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `pathString`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `toMermaid`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `GraphError`
+- [js/genome/behavior-graph.js](../files/js/genome/behavior-graph.js.md) `MAX_DEPTH`
+- [js/genome/context.js](../files/js/genome/context.js.md) `LIFE_STAGES`
+- [js/genome/context.js](../files/js/genome/context.js.md) `BIOME_GENES`
+- [js/genome/context.js](../files/js/genome/context.js.md) `CAPABILITY_SPECS`
+- [js/genome/context.js](../files/js/genome/context.js.md) `recordStress`
+- [js/genome/context.js](../files/js/genome/context.js.md) `dominantStressor`
+- [js/genome/context.js](../files/js/genome/context.js.md) `biomeFitness`
+- [js/genome/context.js](../files/js/genome/context.js.md) `thermalComfort`
+- [js/genome/context.js](../files/js/genome/context.js.md) `circadianAlertness`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `SYNTH_RANGES`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `activeIndices`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `SKILL_GENES`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `PACK_VERSION`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `TRANS_SHARE`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `lifeStage`
+- [js/genome/spacer.js](../files/js/genome/spacer.js.md) `engine`
+- [js/interior/boarding.js](../files/js/interior/boarding.js.md) `POD_RANGE`
+- [js/interior/boarding.js](../files/js/interior/boarding.js.md) `startBoarding`
+- [js/interior/boarding.js](../files/js/interior/boarding.js.md) `defensePower`
+- [js/interior/deckplan.js](../files/js/interior/deckplan.js.md) `INTERIOR_SCALE`
+- [js/interior/deckplan.js](../files/js/interior/deckplan.js.md) `COMPLEX_ROOMS`
+- [js/interior/deckplan.js](../files/js/interior/deckplan.js.md) `COMPLEXES`
+- [js/interior/interior.js](../files/js/interior/interior.js.md) `openInterior`
+- [js/interior/interior.js](../files/js/interior/interior.js.md) `closeInterior`
+- [js/mission/detour.js](../files/js/mission/detour.js.md) `LEG`
+- [js/mission/run.js](../files/js/mission/run.js.md) `clearRun`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `rigModeFor`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `hulkPark`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `forgetSkipped`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `skipHulk`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `rigRate`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `cutSeconds`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `hulkWorth`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `hotHulk`
+- [js/mission/salvage.js](../files/js/mission/salvage.js.md) `salvageReport`
+- [js/mission/script.js](../files/js/mission/script.js.md) `REF_KINDS`
+- [js/net/account.js](../files/js/net/account.js.md) `SNAP_VERSION`
+- [js/net/account.js](../files/js/net/account.js.md) `SLOT`
+- [js/net/account.js](../files/js/net/account.js.md) `PILOT_SLOTS`
+- [js/net/account.js](../files/js/net/account.js.md) `SYNC_EVERY_MS`
+- [js/net/account.js](../files/js/net/account.js.md) `MIN_GAP_MS`
+- [js/net/account.js](../files/js/net/account.js.md) `NEWS_MAX_AT_ONCE`
+- [js/net/account.js](../files/js/net/account.js.md) `STATE_KEY`
+- [js/net/account.js](../files/js/net/account.js.md) `NEWS_SEEN_KEY`
+- [js/net/account.js](../files/js/net/account.js.md) `SCOPE`
+- [js/net/account.js](../files/js/net/account.js.md) `snapshot`
+- [js/net/account.js](../files/js/net/account.js.md) `hashOf`
+- [js/net/account.js](../files/js/net/account.js.md) `hasLocalPilot`
+- [js/net/account.js](../files/js/net/account.js.md) `restore`
+- [js/net/account.js](../files/js/net/account.js.md) `probe`
+- [js/net/account.js](../files/js/net/account.js.md) `pull`
+- [js/net/account.js](../files/js/net/account.js.md) `describe`
+- [js/net/account.js](../files/js/net/account.js.md) `push`
+- [js/net/account.js](../files/js/net/account.js.md) `plainText`
+- [js/net/account.js](../files/js/net/account.js.md) `postNews`
+- [js/net/account.js](../files/js/net/account.js.md) `newsActions`
+- [js/net/account.js](../files/js/net/account.js.md) `BOARD_EVERY_MS`
+- [js/net/account.js](../files/js/net/account.js.md) `listPilots`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_CAP`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_SNAP`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULK_EVERY`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `hostVesselDown`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `hullWire`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_DEAD`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_BLEND`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `HULL_HOLD`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `adoptHulls`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `blendHulls`
+- [js/net/worldsync.js](../files/js/net/worldsync.js.md) `mirrorMode`
+- [js/npc/battles.js](../files/js/npc/battles.js.md) `ENG_CHANCE`
+- [js/npc/battles.js](../files/js/npc/battles.js.md) `DISENGAGE_S`
+- [js/npc/battles.js](../files/js/npc/battles.js.md) `isHostileRole`
+- [js/npc/battles.js](../files/js/npc/battles.js.md) `isLawRole`
+- [js/npc/battles.js](../files/js/npc/battles.js.md) `trafficDown`
+- [js/npc/bay.js](../files/js/npc/bay.js.md) `entryDoor`
+- [js/npc/bay.js](../files/js/npc/bay.js.md) `droneWay`
+- [js/npc/bounty.js](../files/js/npc/bounty.js.md) `BOARD_SIZE`
+- [js/npc/bounty.js](../files/js/npc/bounty.js.md) `TICKET_CYCLES`
+- [js/npc/bounty.js](../files/js/npc/bounty.js.md) `hasBrig`
+- [js/npc/bounty.js](../files/js/npc/bounty.js.md) `priceLine`
+- [js/npc/captain.js](../files/js/npc/captain.js.md) `snapshot`
+- [js/npc/captain.js](../files/js/npc/captain.js.md) `forecast`
+- [js/npc/captain.js](../files/js/npc/captain.js.md) `holdValueAt`
+- [js/npc/captain.js](../files/js/npc/captain.js.md) `captainPrompt`
+- [js/npc/captain.js](../files/js/npc/captain.js.md) `llamaCaptainProvider`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `PROWL_R`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `ENGAGE_R`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `CLOSE_R`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `STALK_TOP`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `ALARM_R`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `BREAK_R`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `HUNT_FOR`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `FLEE_SPEED`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `FLEE_FOR`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `NEAR_R`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `FAR_TICK`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `HIT_CHANCE`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `clearHunt`
+- [js/npc/combat.js](../files/js/npc/combat.js.md) `combatFly`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `rollIdentity`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `employedCount`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `FLUSH_MS`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `FLUSH_MAX`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `PULL_RETRY_MS`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `PULL_RETRY_STEADY_MS`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `PUSH_RETRY_MS`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `pullRemote`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `cradleRemote`
+- [js/npc/cradle.js](../files/js/npc/cradle.js.md) `flushRemote`
+- [js/npc/crewfx.js](../files/js/npc/crewfx.js.md) `ROTA`
+- [js/npc/flight.js](../files/js/npc/flight.js.md) `CROSS_MIN`
+- [js/npc/flight.js](../files/js/npc/flight.js.md) `CROSS_MAX`
+- [js/npc/flight.js](../files/js/npc/flight.js.md) `LANE_SPOOL_S`
+- [js/npc/flight.js](../files/js/npc/flight.js.md) `matchStep`
+- [js/npc/flow.js](../files/js/npc/flow.js.md) `FLOW_VARIANTS`
+- [js/npc/flow.js](../files/js/npc/flow.js.md) `flowNear`
+- [js/npc/ground.js](../files/js/npc/ground.js.md) `HIT_FRESH_S`
+- [js/npc/ground.js](../files/js/npc/ground.js.md) `rockUnits`
+- [js/npc/lanes.js](../files/js/npc/lanes.js.md) `LANE_GAP_K`
+- [js/npc/lanes.js](../files/js/npc/lanes.js.md) `LANE_RUN_S`
+- [js/npc/lanes.js](../files/js/npc/lanes.js.md) `LANE_TRAIL`
+- [js/npc/lanes.js](../files/js/npc/lanes.js.md) `LANE_HALF_W`
+- [js/npc/lanes.js](../files/js/npc/lanes.js.md) `funnel`
+- [js/npc/npccrew.js](../files/js/npc/npccrew.js.md) `MUTINY_AT`
+- [js/npc/reports.js](../files/js/npc/reports.js.md) `REPORT_RANGE`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `NEST_MIN`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `NEST_MAX`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `WAVE_CHANCE`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `REBUILD_S`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `SIEGE_R`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `CHASE_GIVEUP`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `SIEGE_RATE`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `DRONE_HULLS`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `NEST_COLOURS`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `resetRogues`
+- [js/npc/rogues.js](../files/js/npc/rogues.js.md) `flyRogue`
+- [js/npc/security.js](../files/js/npc/security.js.md) `CALL_TTL`
+- [js/npc/security.js](../files/js/npc/security.js.md) `CALL_COOLDOWN`
+- [js/npc/security.js](../files/js/npc/security.js.md) `RESPONSE_R`
+- [js/npc/security.js](../files/js/npc/security.js.md) `ON_SCENE_R`
+- [js/npc/security.js](../files/js/npc/security.js.md) `HOLD_AFTER_S`
+- [js/npc/security.js](../files/js/npc/security.js.md) `LATE_GRACE`
+- [js/npc/security.js](../files/js/npc/security.js.md) `QRF_PER_PORT`
+- [js/npc/security.js](../files/js/npc/security.js.md) `QRF_RING`
+- [js/npc/security.js](../files/js/npc/security.js.md) `dispatch`
+- [js/npc/security.js](../files/js/npc/security.js.md) `flyResponse`
+- [js/npc/security.js](../files/js/npc/security.js.md) `flyGuard`
+- [js/npc/speech.js](../files/js/npc/speech.js.md) `voiceName`
+- [js/npc/traffic.js](../files/js/npc/traffic.js.md) `DEPART_U`
+- [js/npc/traffic.js](../files/js/npc/traffic.js.md) `buildRoster`
+- [js/npc/traffic.js](../files/js/npc/traffic.js.md) `legAt`
+- [js/npc/traffic.js](../files/js/npc/traffic.js.md) `visibleVessels`
+- [js/npc/traffic.js](../files/js/npc/traffic.js.md) `EVENT_KINDS`
+- [js/render/postfx.js](../files/js/render/postfx.js.md) `BLOOM_ON_TIER`
+- [js/render/postfx.js](../files/js/render/postfx.js.md) `BLOOM_OFF_TIER`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `trackPoint`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `placeTrackLinks`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `measureNode`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `gaitAngles`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `computeMassModel`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `centreOfMass`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `colliderBoxes`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `boxesOverlap`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `gravityProfile`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `weightN`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `EARTH_G`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `BUILD_VERSION`
+- [js/robotgen/build.js](../files/js/robotgen/build.js.md) `D2R`
+- [js/robotgen/camera.js](../files/js/robotgen/camera.js.md) `fitCamera`
+- [js/robotgen/camera.js](../files/js/robotgen/camera.js.md) `focusFromBox`
+- [js/robotgen/camera.js](../files/js/robotgen/camera.js.md) `orbitPosition`
+- [js/robotgen/camera.js](../files/js/robotgen/camera.js.md) `clampOrbit`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `PARTS`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `PART_DOMAINS`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `MATERIALS`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `COMPONENTS`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `partBom`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `bomMass`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `expandBom`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `HAND_PART`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `LIMB_PART`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `MOUNT_PART`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `BACK_PART`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `KIT_PART`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `MICRO_SWAP`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `isMicro`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `robotParts`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `partCost`
+- [js/robotgen/data/bom.js](../files/js/robotgen/data/bom.js.md) `describeBom`
+- [js/robotgen/data/catalog.js](../files/js/robotgen/data/catalog.js.md) `ROBOT_ONLY`
+- [js/robotgen/data/catalog.js](../files/js/robotgen/data/catalog.js.md) `STATION_ALIAS`
+- [js/robotgen/data/catalog.js](../files/js/robotgen/data/catalog.js.md) `KIND_PRICE`
+- [js/robotgen/data/catalog.js](../files/js/robotgen/data/catalog.js.md) `FAB_RATE`
+- [js/robotgen/data/catalog.js](../files/js/robotgen/data/catalog.js.md) `componentMass`
+- [js/robotgen/data/parts.js](../files/js/robotgen/data/parts.js.md) `reconcileParts`
+- [js/robotgen/data/parts.js](../files/js/robotgen/data/parts.js.md) `RECONCILE`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `DRILLS`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `DRILL_SECONDS`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `destroyPart`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `detachPart`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `createDrillRunner`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `aimAt`
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) `stepDebris`
+- [js/robotgen/physics.js](../files/js/robotgen/physics.js.md) `originIn`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `LOCOMOTION`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `HEAD_TYPES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `TORSO_SHAPES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `INSIGNIA`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `OPTIC_LAYOUTS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `ANTENNA_TYPES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `HANDS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `SHOULDER_MOUNTS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `ARMOR_SLOTS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `ARMOR_STYLES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `LIMB_TYPES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `BACK_UNITS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `CHEST_MODULES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `HIP_MODULES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `PAYLOADS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `SIGHTS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `MUZZLES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `MAGS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `UNDERBARREL`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `ROLES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `ROLE_KEYS`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `CAREER_CLASSES`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `bias`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `applyPartsMass`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `describe`
+- [js/robotgen/spec.js](../files/js/robotgen/spec.js.md) `randomSeed`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `WORLDS`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `WORLD_KEYS`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `FLIES`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `SETTLEMENTS`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `SETTLEMENT_KEYS`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `resolveWorld`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `gravityOf`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `generatePopulation`
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) `describeWorld`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) `CONFORMAL_FLAGS`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) `partPrio`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) `workzoneBox`
+- [js/shipgen/builder/placement.js](../files/js/shipgen/builder/placement.js.md) `shapeOk`
+- [js/shipgen/data/environment.js](../files/js/shipgen/data/environment.js.md) `SUN_DIR`
+- [js/shipgen/data/environment.js](../files/js/shipgen/data/environment.js.md) `FACE_NORMALS`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `StarshipBuilder`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `SHIP_CLASSES`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `DRIVE_TYPES`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `WEAPON_TYPES`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `FACTION_PALETTES`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `PARTS`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `CLASS_LOADOUT`
+- [js/shipgen/generate.js](../files/js/shipgen/generate.js.md) `expandLoadout`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `buildShip`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `releaseShip`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `randomConfig`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `shipBounds`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `loadoutFor`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `normalizeConfig`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `DEFAULT_CFG`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `StarshipBuilder`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `RNG`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `G`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `FINISHES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `makeMat`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `addMesh`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `wingShape`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `disposeDeep`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `SHIP_CLASSES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `EQUIP_DEFAULT`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `CLASS_EQUIP`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `DRIVE_TYPES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `WEAPON_TYPES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `FACTION_PALETTES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `CATALOG`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `PARTS`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `WEAPON_PART`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `PREFABS`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `ALL_FACES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `fpArea`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `CORE`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `CLASS_LOADOUT`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `expandLoadout`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `doctrineLoadout`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `REGIMES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `DESIGN_REGIMES`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `HULL_CD`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `analyzeFlight`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `optimizeDrag`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `MATERIALS`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `COMPONENTS`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `partBom`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `expandBom`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `bomMass`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `hullBom`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `shipBom`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `newRegistry`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `collectInto`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `disposeShip`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `tick`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `setOpsHost`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `host`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `rig`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `ops`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `opsBind`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `opsUpdate`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `doScan`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `startMining`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `stopMining`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `aimAngles`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `fireShot`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `fireLauncher`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `targetDrone`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `colliderGroup`
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) `fxUpdate`
+- [js/shipgen/ops/fx.js](../files/js/shipgen/ops/fx.js.md) `fxAdd`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `rig`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `rock`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `miningBeams`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `makeTargetDrone`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `makeRock`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `placeRock`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `wrapAngle`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `muzzleWorld`
+- [js/shipgen/ops/ops.js](../files/js/shipgen/ops/ops.js.md) `hitDrone`
+- [js/ships/hullspec.js](../files/js/ships/hullspec.js.md) `GEN_MAX_LENGTH_M`
+- [js/ships/shipdb.js](../files/js/ships/shipdb.js.md) `shipsForComplex`
+- [js/ships/shipdb.js](../files/js/ships/shipdb.js.md) `complexesInDb`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `plural`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `isMass`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `gerund`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `regularPast`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `third`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `participle`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `pastOf`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `copula`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `conjugate`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `infinitive`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `imperative`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `comparative`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `superlative`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `adverbise`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `numberWord`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `ordinal`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `vagueCount`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `article`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `pronoun`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `agreeWith`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `np`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `possessive`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `listOf`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `LEX`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `contract`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `REGISTERS`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `REGISTER_PROFILE`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `profileFor`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `chooseFrom`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `chooseWeighted`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `saidRecently`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `resetGrammarMemory`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `serialiseGrammarMemory`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `restoreGrammarMemory`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `grammarStats`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `MOVES`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `ACT_MOVE`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `checkMove`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `FRAMES`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `moveOf`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `framesFor`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `PROOF_RULES`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `proof`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `isWellFormed`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `looksClausal`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `realise`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `quantity`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `attributive`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `described`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `place`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `timeRef`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `bearing`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `phonetic`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `shortName`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `combine`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `realiseAll`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `speak`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `varietyOf`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `TOPIC_KEYS`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `RESPONSE_OK`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `coerceResponse`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `createSpeechMemory`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `utter`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `utterRecord`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `utterFromRecord`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `turnsFor`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `availableTopics`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `scoreTopic`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `chainsOf`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `CHANNELS`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `topicStats`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `lastSentence`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `runTopicSelfTest`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `sampleTraffic`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `INTENTS`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `parsePlayerLine`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `talkToNpc`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `TARGET`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `currentTarget`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `fitTarget`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `parseTranscript`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `profileOf`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `compareProfiles`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `calibrate`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `resetCalibration`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `makeCrew`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `createMemoryStore`
+- [js/speech/npc-speech.js](../files/js/speech/npc-speech.js.md) `runSpeechSelfTest`
+- [js/station/deckworks.js](../files/js/station/deckworks.js.md) `default`
+- [js/station/dockwork.js](../files/js/station/dockwork.js.md) `dockworkHooks`
+- [js/station/fabyard.js](../files/js/station/fabyard.js.md) `default`
+- [js/station/refityard.js](../files/js/station/refityard.js.md) `default`
+- [js/station/staffcare.js](../files/js/station/staffcare.js.md) `CARE_COST`
+- [js/station/staffcare.js](../files/js/station/staffcare.js.md) `courseCost`
+- [js/station/staffcare.js](../files/js/station/staffcare.js.md) `careById`
+- [js/station/stafflife.js](../files/js/station/stafflife.js.md) `JOBS`
+- [js/station/stafflife.js](../files/js/station/stafflife.js.md) `productivity`
+- [js/station/stafflife.js](../files/js/station/stafflife.js.md) `needsOf`
+- [js/station/staffline.js](../files/js/station/staffline.js.md) `LINE`
+- [js/station/staffline.js](../files/js/station/staffline.js.md) `bonusCost`
+- [js/station/staffline.js](../files/js/station/staffline.js.md) `promoteCost`
+- [js/station/staffline.js](../files/js/station/staffline.js.md) `passage`
+- [js/station/staffline.js](../files/js/station/staffline.js.md) `destinations`
+- [js/station/stationclock.js](../files/js/station/stationclock.js.md) `DAY_S`
+- [js/station/stationclock.js](../files/js/station/stationclock.js.md) `WEEKDAYS`
+- [js/station/stationclock.js](../files/js/station/stationclock.js.md) `secondsUntilHour`
+- [js/station/stationlife.js](../files/js/station/stationlife.js.md) `STATION_ADULT`
+- [js/station/stationlife.js](../files/js/station/stationlife.js.md) `ACTIVITY_K`
+- [js/station/stationlife.js](../files/js/station/stationlife.js.md) `bearChild`
+- [js/station/stations.js](../files/js/station/stations.js.md) `sectorOf`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `REQUEST_TTL`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `departure`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `stepProduction`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `batteryDps`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `stepDefences`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `stepStationDrones`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `approachOf`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `outboundSpeed`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `mouthAround`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `TRACTOR_R`
+- [js/station/stationworks.js](../files/js/station/stationworks.js.md) `TRACTOR_V`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `SIM_SCALE`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `YARD_VERSION`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `MOUNT_KINDS`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `stationConfig`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `carriedCount`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `portFrameOf`
+- [js/station/stationyard.js](../files/js/station/stationyard.js.md) `mountsOf`
+- [js/stationgen/builder/placement.js](../files/js/stationgen/builder/placement.js.md) `scoreSlot`
+- [js/stationgen/core/geometry.js](../files/js/stationgen/core/geometry.js.md) `cached`
+- [js/stationgen/core/geometry.js](../files/js/stationgen/core/geometry.js.md) `jitterProfile`
+- [js/stationgen/core/geometry.js](../files/js/stationgen/core/geometry.js.md) `mergeGeometries`
+- [js/stationgen/data/doctrine.js](../files/js/stationgen/data/doctrine.js.md) `expand`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `normalizeConfig`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `stationBounds`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `DEFAULT_CFG`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `StationBuilder`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `hangarPlan`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `roll`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `FORMS`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `DECOR`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `body`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `decorate`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `RNG`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `G`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `makeMat`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `addMesh`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `mergeStatic`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `instanced`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `disposeOwned`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `MODULE_COUNT`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `ZONE`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `PART_DOMAINS`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `PART_COUNT`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `FAB_RATE`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `ALLOY_KEYS`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `ARCHETYPES`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `TIERS`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `partBom`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `partCost`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `moduleBom`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `PREFABS`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `newRegistry`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `collectInto`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `disposeAnim`
+- [js/stationgen/index.js](../files/js/stationgen/index.js.md) `bake`
+- [js/stationgen/prefabs/forms.js](../files/js/stationgen/prefabs/forms.js.md) `pickForm`
+- [js/ui/boardview.js](../files/js/ui/boardview.js.md) `BOARD`
+- [js/ui/chatbox.js](../files/js/ui/chatbox.js.md) `chatbox`
+- [js/ui/dockboot.js](../files/js/ui/dockboot.js.md) `DOCK_CINE`
+- [js/ui/dockboot.js](../files/js/ui/dockboot.js.md) `dockCine`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `FULLSCREEN_KEY`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `fullscreen`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `fullscreenSupported`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `immersiveMode`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `isFullscreen`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `enterFullscreen`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `exitFullscreen`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `toggleFullscreen`
+- [js/ui/fullscreen.js](../files/js/ui/fullscreen.js.md) `default`
+- [js/ui/glyphs.js](../files/js/ui/glyphs.js.md) `ALPHABETS`
+- [js/ui/glyphs.js](../files/js/ui/glyphs.js.md) `glyphString`
+- [js/ui/hangar.js](../files/js/ui/hangar.js.md) `SOL_ALIASES`
+- [js/ui/hangar.js](../files/js/ui/hangar.js.md) `skyOf`
+- [js/ui/hangar.js](../files/js/ui/hangar.js.md) `pilotsBySky`
+- [js/ui/hud.js](../files/js/ui/hud.js.md) `bindOrient`
+- [js/ui/tutorial-core.js](../files/js/ui/tutorial-core.js.md) `core`
+- [js/ui/tutorial-core.js](../files/js/ui/tutorial-core.js.md) `coreYard`
+- [js/ui/tutorial-core.js](../files/js/ui/tutorial-core.js.md) `coreTrackSteps`
+- [js/ui/tutorial.js](../files/js/ui/tutorial.js.md) `tutorial`
+- [js/ui/tutorial.js](../files/js/ui/tutorial.js.md) `skipTutorial`
+- [js/ui/tutorial.js](../files/js/ui/tutorial.js.md) `tutorialSteps`
+- [js/ui/tutorial.js](../files/js/ui/tutorial.js.md) `tutorialContext`
+- [js/ui/tutorial.js](../files/js/ui/tutorial.js.md) `tutorialEvaluate`
+- [js/vendor/stellar-names/index.js](../files/js/vendor/stellar-names/index.js.md) `CLASSIFIED_NAMES`
+- [js/vendor/stellar-names/index.js](../files/js/vendor/stellar-names/index.js.md) `CATEGORIES`
+- [js/vendor/stellar-names/index.js](../files/js/vendor/stellar-names/index.js.md) `STYLES`
+- [js/vendor/stellar-names/index.js](../files/js/vendor/stellar-names/index.js.md) `DEFAULT_DATA`
+- [js/vendor/stellar-names/index.js](../files/js/vendor/stellar-names/index.js.md) `default`
+- [js/version.js](../files/js/version.js.md) `NAME`
+- [js/version.js](../files/js/version.js.md) `SUBTITLE`
+- [js/version.js](../files/js/version.js.md) `FULL_NAME`
+- [js/world/anchors.js](../files/js/world/anchors.js.md) `anchorKinds`
+- [js/world/archetypes.js](../files/js/world/archetypes.js.md) `ARCHETYPES`
+- [js/world/archetypes.js](../files/js/world/archetypes.js.md) `archetypesFor`
+- [js/world/archetypes.js](../files/js/world/archetypes.js.md) `rollArchetype`
+- [js/world/bodies.js](../files/js/world/bodies.js.md) `SHIP_COLORS`
+- [js/world/bodies.js](../files/js/world/bodies.js.md) `orbitPosition`
+- [js/world/bodies.js](../files/js/world/bodies.js.md) `TEMP_K`
+- [js/world/bodies.js](../files/js/world/bodies.js.md) `gravitySources`
+- [js/world/debris.js](../files/js/world/debris.js.md) `debrisCount`
+- [js/world/debris.js](../files/js/world/debris.js.md) `bodyById`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `ATMO_MODES`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `ATMO_RATE`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `ATMO_RANGE`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `ATMO_LIMIT`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `atmoworks`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `atmoFit`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `cycleAtmoMode`
+- [js/world/events/atmoworks.js](../files/js/world/events/atmoworks.js.md) `atmoTarget`
+- [js/world/events/cataclysm.js](../files/js/world/events/cataclysm.js.md) `kelvinRGB`
+- [js/world/events/cataclysm.js](../files/js/world/events/cataclysm.js.md) `PHASES`
+- [js/world/events/cataclysm.js](../files/js/world/events/cataclysm.js.md) `SN_PHASES`
+- [js/world/events/cataclysm.js](../files/js/world/events/cataclysm.js.md) `rocheLimit`
+- [js/world/events/cataclysm.js](../files/js/world/events/cataclysm.js.md) `glowFalloff`
+- [js/world/events/impactors.js](../files/js/world/events/impactors.js.md) `impactorAuthority`
+- [js/world/events/impactors.js](../files/js/world/events/impactors.js.md) `closestApproach`
+- [js/world/events/impacts.js](../files/js/world/events/impacts.js.md) `CLASSES`
+- [js/world/field.js](../files/js/world/field.js.md) `BAND_STONE`
+- [js/world/field.js](../files/js/world/field.js.md) `VEIN_ORES`
+- [js/world/field.js](../files/js/world/field.js.md) `ICE_ORES`
+- [js/world/field.js](../files/js/world/field.js.md) `pickOre`
+- [js/world/field.js](../files/js/world/field.js.md) `BELT`
+- [js/world/field.js](../files/js/world/field.js.md) `icyAt`
+- [js/world/field.js](../files/js/world/field.js.md) `veinAt`
+- [js/world/field.js](../files/js/world/field.js.md) `rocksInCell`
+- [js/world/field.js](../files/js/world/field.js.md) `markSkipped`
+- [js/world/names.js](../files/js/world/names.js.md) `catalogueRoot`
+- [js/world/names.js](../files/js/world/names.js.md) `LEXICONS`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `SURFACES`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `LOOK`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `bodySurface`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `makeRockTexture`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `makeRockRough`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `makeCraterDetail`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `deformGeometry`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `rockShapes`
+- [js/world/rockgen.js](../files/js/world/rockgen.js.md) `shapeOf`
+- [js/world/scale.js](../files/js/world/scale.js.md) `UNIT_M`
+- [js/world/scale.js](../files/js/world/scale.js.md) `SHIP_LENGTH`
+- [js/world/scale.js](../files/js/world/scale.js.md) `RADIUS_FLOOR`
+- [js/world/scale.js](../files/js/world/scale.js.md) `RADIUS_K`
+- [js/world/scale.js](../files/js/world/scale.js.md) `RADIUS_P`
+- [js/world/scale.js](../files/js/world/scale.js.md) `ORBIT_K`
+- [js/world/scale.js](../files/js/world/scale.js.md) `ORBIT_P`
+- [js/world/scale.js](../files/js/world/scale.js.md) `DENSITY`
+- [js/world/scale.js](../files/js/world/scale.js.md) `G_K`
+- [js/world/scale.js](../files/js/world/scale.js.md) `EARTH_R`
+- [js/world/scale.js](../files/js/world/scale.js.md) `density`
+- [js/world/scale.js](../files/js/world/scale.js.md) `escapeVelocity`
+- [js/world/scale.js](../files/js/world/scale.js.md) `orbitalVelocity`
+- [js/world/scale.js](../files/js/world/scale.js.md) `TIERS`
+- [js/world/scale.js](../files/js/world/scale.js.md) `richness`
+- [js/world/scale.js](../files/js/world/scale.js.md) `tierOf`
+- [js/world/textures.js](../files/js/world/textures.js.md) `makeNameSprite`
+
+## Files nothing imports
+
+- [js/asteroidgen/addons/Pass.js](../files/js/asteroidgen/addons/Pass.js.md) — 35 lines
+- [js/bodygen/rng.js](../files/js/bodygen/rng.js.md) — 132 lines
+- [js/bodygen/worker.js](../files/js/bodygen/worker.js.md) — 46 lines
+- [js/robotgen/camera.js](../files/js/robotgen/camera.js.md) — 54 lines
+- [js/robotgen/drills.js](../files/js/robotgen/drills.js.md) — 386 lines
+- [js/robotgen/world.js](../files/js/robotgen/world.js.md) — 168 lines
+- [js/shipgen/index.js](../files/js/shipgen/index.js.md) — 24 lines

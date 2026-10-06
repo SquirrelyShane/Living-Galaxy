@@ -1,6 +1,6 @@
 # js/npc/combat.js
 
-[index](../../../README.md) · 290 lines · 37 symbols · 6 imports · 4 importers
+[index](../../../README.md) · 292 lines · 37 symbols · 6 imports · 5 importers
 
 ## About
 
@@ -55,7 +55,7 @@ damage already done still on the hulls.
 - L19 · `export const FAR_TICK = 2.0;` — seconds between abstract resolutions
 - L20 · `export const HIT_CHANCE = 0.42;` — fraction of aimed rounds that connect, near and far alike
 - L22 · `export const combatLog = [];` — recent kills, for the news desk and the console
-- L245 · `const LOOK_TICK = 1.4;` — how often a hull sweeps for something to attack
+- L247 · `const LOOK_TICK = 1.4;` — how often a hull sweeps for something to attack
 <!-- /note -->
 
 ## Imports
@@ -72,6 +72,7 @@ damage already done still on the hulls.
 ## Imported by
 
 - [js/sim/sim.js](../sim/sim.js.md) — `resetNpcCombat`, `stepNpcCombat`, `mountNpcCombat`, `combatHooksOut`, `combatReport`, `combatLog`, `damageHull`
+- test/hotpath-optimization.test.mjs _(outside js/)_ — `acquire`, `hostileTo`, `CLOSE_R`, `STALK_TOP`
 - test/hulks.test.mjs _(outside js/)_ — `damageHull`
 - test/reactive.test.mjs _(outside js/)_ — `stepNpcCombat`, `hostileTo`, `acquire`, `setHunt`, `damageHull`, `combatLog`, `combatReport`, `HUNT_R`
 - test/rogues.test.mjs _(outside js/)_ — `stepNpcCombat`
@@ -81,8 +82,8 @@ damage already done still on the hulls.
 - [`PROWL_R`](#s-PROWL_R) · const — **no importer in scanned roots**
 - [`HUNT_R`](#s-HUNT_R) · const — used by test/reactive.test.mjs
 - [`ENGAGE_R`](#s-ENGAGE_R) · const — **no importer in scanned roots**
-- [`CLOSE_R`](#s-CLOSE_R) · const — **no importer in scanned roots**
-- [`STALK_TOP`](#s-STALK_TOP) · const — **no importer in scanned roots**
+- [`CLOSE_R`](#s-CLOSE_R) · const — used by test/hotpath-optimization.test.mjs
+- [`STALK_TOP`](#s-STALK_TOP) · const — used by test/hotpath-optimization.test.mjs
 - [`ALARM_R`](#s-ALARM_R) · const — **no importer in scanned roots**
 - [`BREAK_R`](#s-BREAK_R) · const — **no importer in scanned roots**
 - [`HUNT_FOR`](#s-HUNT_FOR) · const — **no importer in scanned roots**
@@ -93,8 +94,8 @@ damage already done still on the hulls.
 - [`HIT_CHANCE`](#s-HIT_CHANCE) · const — **no importer in scanned roots**
 - [`combatLog`](#s-combatLog) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs
 - [`resetNpcCombat`](#s-resetNpcCombat) · function — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`hostileTo`](#s-hostileTo) · function — used by test/reactive.test.mjs
-- [`acquire`](#s-acquire) · function — used by test/reactive.test.mjs
+- [`hostileTo`](#s-hostileTo) · function — used by test/hotpath-optimization.test.mjs, test/reactive.test.mjs
+- [`acquire`](#s-acquire) · function — used by test/hotpath-optimization.test.mjs, test/reactive.test.mjs
 - [`setHunt`](#s-setHunt) · function — used by test/reactive.test.mjs
 - [`clearHunt`](#s-clearHunt) · function — **no importer in scanned roots**
 - [`damageHull`](#s-damageHull) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/reactive.test.mjs
@@ -298,24 +299,26 @@ is committed to a lane. This is what pushes raiders onto the approaches.
 
 ### <a id="s-acquire"></a>`acquire(n, radius=)`
 
-function · **exported** · L61–74
+function · **exported** · L61–76
 
 - calls: [`catchable`](#s-catchable) · [`d3`](#s-d3) · [`hostileTo`](#s-hostileTo) · [`worth`](#s-worth) · [`vesselById`](traffic.js.md#s-vesselById) _js/npc/traffic.js_
 - called by: [`stepLook`](#s-stepLook) ×2
 
 <!-- note:acquire -->
+Reject distant candidates using squared range before hostility evaluation, then retain actual distance for scoring and the original final radius check. Preserve first-best ties and huntedBy exclusions.
+
 ---- acquisition ---------------------------------------------------------
 
 Best thing within reach for `n` to attack, or null.
 
-- L69 · `if (m.huntedBy && m.huntedBy !== n.id && vesselById(m.huntedBy)?.hunt === m.id) continue;` — somebody else's problem: a wing of four on one trader is not a sky, it
+- L71 · `if (m.huntedBy && m.huntedBy !== n.id && vesselById(m.huntedBy)?.hunt === m.id) continue;` — somebody else's problem: a wing of four on one trader is not a sky, it
   is a pile-on, and it strips the lanes bare in minutes
-- L70 · `const score = worth(m) / (1 + d / radius);` — close and fat beats far and empty
+- L72 · `const score = worth(m) / (1 + d / radius);` — close and fat beats far and empty
 <!-- /note -->
 
 ### <a id="s-setHunt"></a>`setHunt(n, foe, t)`
 
-function · **exported** · L76–82
+function · **exported** · L78–84
 
 - called by: [`damageHull`](#s-damageHull) · [`stepLook`](#s-stepLook) ×2
 
@@ -325,7 +328,7 @@ Put `n` onto `foe`.
 
 ### <a id="s-clearHunt"></a>`clearHunt(n)`
 
-function · **exported** · L84–90
+function · **exported** · L86–92
 
 - calls: [`vesselById`](traffic.js.md#s-vesselById) _js/npc/traffic.js_
 - called by: [`combatFly`](#s-combatFly) ×2
@@ -336,7 +339,7 @@ function · **exported** · L84–90
 
 ### <a id="s-damageHull"></a>`damageHull(n, amount, byId, t)`
 
-function · **exported** · L92–110
+function · **exported** · L94–112
 
 - calls: [`downHull`](#s-downHull) · [`setHunt`](#s-setHunt) · [`noteAttack`](security.js.md#s-noteAttack) _js/npc/security.js_ · [`vesselById`](traffic.js.md#s-vesselById) _js/npc/traffic.js_
 - via [js/npc/traffic.js](traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
@@ -348,13 +351,13 @@ function · **exported** · L92–110
 The one place a hull loses integrity, whoever fired and however the fight is
 being resolved. Raises the alarm, and hands the kill to `onDown`.
 
-- L102 · `if (!HOSTILE_ROLES.has(n.role) && !n.rogue) {` — being shot at is the thing that makes a hull do something other than its
+- L104 · `if (!HOSTILE_ROLES.has(n.role) && !n.rogue) {` — being shot at is the thing that makes a hull do something other than its
   timetable: run, shoot back, and get on the radio
 <!-- /note -->
 
 ### <a id="s-downHull"></a>`downHull(n, byId, t)`
 
-function · L112–117
+function · L114–119
 
 - calls: [`markVesselDown`](traffic.js.md#s-markVesselDown) _js/npc/traffic.js_
 - called by: [`damageHull`](#s-damageHull)
@@ -364,14 +367,14 @@ function · L112–117
 
 ### <a id="s-combatHooksOut"></a>`combatHooksOut`
 
-const · **exported** · L119–119
+const · **exported** · L121–121
 
 <!-- note:combatHooksOut -->
 <!-- /note -->
 
 ### <a id="s-combatFly"></a>`combatFly(n, t, dt, ctx)`
 
-function · **exported** · L121–183
+function · **exported** · L123–185
 
 - calls: [`clearHunt`](#s-clearHunt) ×2 · [`d3`](#s-d3) ×2 · [`nearestHaven`](#s-nearestHaven) · [`armFlight`](flight.js.md#s-armFlight) _js/npc/flight.js_ ×2 · [`faceAt`](flight.js.md#s-faceAt) _js/npc/flight.js_ · [`flyStep`](flight.js.md#s-flyStep) _js/npc/flight.js_ ×4 · [`callForHelp`](security.js.md#s-callForHelp) _js/npc/security.js_ · [`vesselById`](traffic.js.md#s-vesselById) _js/npc/traffic.js_ ×2
 - via [js/npc/traffic.js](traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
@@ -383,19 +386,19 @@ function · **exported** · L121–183
 A hull with a fight on is flown by this instead of by its timetable.
 Returns true if it took the hull over.
 
-- L122 · `if (n.fleeFrom) {` — running
-- L133 · `const haven = nearestHaven(n, ctx?.stations);` — toward the nearest thing with guns on it if there is one, else flat out
+- L124 · `if (n.fleeFrom) {` — running
+- L135 · `const haven = nearestHaven(n, ctx?.stations);` — toward the nearest thing with guns on it if there is one, else flat out
   away — a hull running for a port is a hull the port's batteries can cover
-- L144 · `if (n.hunt) {` — hunting
-- L148 · `const reach = raider ? PROWL_R : BREAK_R;` — a raider will follow across the system; anything else only fights what
+- L146 · `if (n.hunt) {` — hunting
+- L150 · `const reach = raider ? PROWL_R : BREAK_R;` — a raider will follow across the system; anything else only fights what
   is in front of it
-- L153 · `if (foe.drive && d > CLOSE_R) { clearHunt(n); return false; }` — it got its drive lit and is gone: not worth the fuel
-- L159 · `n.job = "hunting";` — the stalk: its own drive, aimed at where the target is going to be
+- L155 · `if (foe.drive && d > CLOSE_R) { clearHunt(n); return false; }` — it got its drive lit and is gone: not worth the fuel
+- L161 · `n.job = "hunting";` — the stalk: its own drive, aimed at where the target is going to be
   rather than where it is, because a stern chase never closes
-- L166 · `n.job = "engaged";` — the attack run
-- L167 · `if (!n.alarmed && d < ALARM_R && raider) {` — close enough that the victim knows: this is where the radio call goes
+- L168 · `n.job = "engaged";` — the attack run
+- L169 · `if (!n.alarmed && d < ALARM_R && raider) {` — close enough that the victim knows: this is where the radio call goes
   out, not the moment a raider a hundred kilometres away thought about it
-- L173 · `n.fly.top = Math.max(760, n.fly.accel * 9, (foe.speed ?? 0) * 1.3 + 260);` — A raider has to be able to STAY on what it is shooting at. Sublight
+- L175 · `n.fly.top = Math.max(760, n.fly.accel * 9, (foe.speed ?? 0) * 1.3 + 260);` — A raider has to be able to STAY on what it is shooting at. Sublight
   cruise for a laden hauler runs to a couple of thousand units a second,
   and an attack run pinned at its own nominal speed simply falls behind,
   breaks off, re-stalks, and never lands a round. The run speed tracks the
@@ -404,7 +407,7 @@ Returns true if it took the hull over.
 
 ### <a id="s-nearestHaven"></a>`nearestHaven(n, stationList)`
 
-function · L185–194
+function · L187–196
 
 - calls: [`d3`](#s-d3)
 - called by: [`combatFly`](#s-combatFly)
@@ -415,7 +418,7 @@ The nearest thing a frightened hull would rather be near: a friendly port.
 
 ### <a id="s-canShoot"></a>`canShoot(n)`
 
-function · L196–198
+function · L198–200
 
 - called by: [`stepFar`](#s-stepFar) · [`stepGuns`](#s-stepGuns)
 
@@ -425,7 +428,7 @@ function · L196–198
 
 ### <a id="s-stepGuns"></a>`stepGuns(t, dt, shipPos)`
 
-function · L200–223
+function · L202–225
 
 - calls: [`tracerGate`](../core/perf.js.md#s-tracerGate) _js/core/perf.js_ · [`npcTracer`](../flight/turrets.js.md#s-npcTracer) _js/flight/turrets.js_ · [`canShoot`](#s-canShoot) · [`d3`](#s-d3) ×2 · [`vesselById`](traffic.js.md#s-vesselById) _js/npc/traffic.js_
 - via [js/npc/traffic.js](traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
@@ -434,16 +437,16 @@ function · L200–223
 <!-- note:stepGuns -->
 Everyone with a target in range takes their shot. Near field only.
 
-- L214 · `const near = shipPos ? d3(n, shipPos) < NEAR_R : true;` — inside sensor range the round is a real object that can miss; outside
+- L216 · `const near = shipPos ? d3(n, shipPos) < NEAR_R : true;` — inside sensor range the round is a real object that can miss; outside
   it, the far tick has already accounted for this hull's firepower and
   drawing a tracer nobody can see is pure cost
-- L218 · `const wild = Math.random() > HIT_CHANCE;` — spread stands in for gunnery: a fraction of rounds are aimed to miss
-- L219 · `if (gate < 1 && Math.random() > gate && wild) continue;` — thin the misses first when the budget is tight
+- L220 · `const wild = Math.random() > HIT_CHANCE;` — spread stands in for gunnery: a fraction of rounds are aimed to miss
+- L221 · `if (gate < 1 && Math.random() > gate && wild) continue;` — thin the misses first when the budget is tight
 <!-- /note -->
 
 ### <a id="s-stepFar"></a>`stepFar(t, dt, shipPos)`
 
-function · L225–242
+function · L227–244
 
 - calls: [`canShoot`](#s-canShoot) · [`d3`](#s-d3) ×2 · [`damageHull`](#s-damageHull) · [`vesselById`](traffic.js.md#s-vesselById) _js/npc/traffic.js_
 - called by: [`stepNpcCombat`](#s-stepNpcCombat)
@@ -455,14 +458,14 @@ Fights the player cannot see, settled on the numbers. Runs on a slow tick
 and touches only hulls that are actually engaged, so an empty sky costs
 nothing and a busy one costs a handful of multiplications.
 
-- L235 · `if (shipPos && d3(n, shipPos) < NEAR_R) continue;` — the near model already handled it
-- L239 · `const dps = (n.gun.dmg * (n.gun.mounts ?? 1) / Math.max(0.2, n.gun.rate)) * HIT_CHANCE;` — effective firepower over the slice, with the same hit fraction the
+- L237 · `if (shipPos && d3(n, shipPos) < NEAR_R) continue;` — the near model already handled it
+- L241 · `const dps = (n.gun.dmg * (n.gun.mounts ?? 1) / Math.max(0.2, n.gun.rate)) * HIT_CHANCE;` — effective firepower over the slice, with the same hit fraction the
   ballistic model gets, so a fight resolves to the same place either way
 <!-- /note -->
 
 ### <a id="s-lookClock"></a>`lookClock`
 
-const · L244–244
+const · L246–246
 
 <!-- note:lookClock -->
 ---- acquisition tick ----------------------------------------------------
@@ -470,30 +473,30 @@ const · L244–244
 
 ### <a id="s-LOOK_TICK"></a>`LOOK_TICK`
 
-const · L245–245
+const · L247–247
 
 <!-- note:LOOK_TICK -->
 <!-- /note -->
 
 ### <a id="s-stepLook"></a>`stepLook(t, dt, shipPos)`
 
-function · L247–266
+function · L249–268
 
 - calls: [`acquire`](#s-acquire) ×2 · [`setHunt`](#s-setHunt) ×2
 - via [js/npc/traffic.js](traffic.js.md): `HOSTILE_ROLES.has`, `LAW_ROLES.has`
 - called by: [`stepNpcCombat`](#s-stepNpcCombat)
 
 <!-- note:stepLook -->
-- L255 · `if (n.job === "docked" || n.visible === false) continue;` — raiders hunt from a lurk or a patrol, not while docked
-- L257 · `if (prey) setHunt(n, prey, t);` — no call goes out here: being picked out from two hundred kilometres
+- L257 · `if (n.job === "docked" || n.visible === false) continue;` — raiders hunt from a lurk or a patrol, not while docked
+- L259 · `if (prey) setHunt(n, prey, t);` — no call goes out here: being picked out from two hundred kilometres
   away is not something the victim can know. The radio call happens when
   the raider is close enough to be seen coming (combatFly, ALARM_R).
-- L261 · `if (n.visible === false) continue;` — the law does not need to be asked about something in front of it
+- L263 · `if (n.visible === false) continue;` — the law does not need to be asked about something in front of it
 <!-- /note -->
 
 ### <a id="s-stepNpcCombat"></a>`stepNpcCombat(t, dt, shipPos=)`
 
-function · **exported** · L268–272
+function · **exported** · L270–274
 
 - calls: [`stepFar`](#s-stepFar) · [`stepGuns`](#s-stepGuns) · [`stepLook`](#s-stepLook)
 - called by: [`stepWorld`](../sim/sim.js.md#s-stepWorld) _js/sim/sim.js_
@@ -504,7 +507,7 @@ function · **exported** · L268–272
 
 ### <a id="s-mountNpcCombat"></a>`mountNpcCombat()`
 
-function · **exported** · L274–280
+function · **exported** · L276–282
 
 - calls: [`combatFly`](#s-combatFly)
 - called by: [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_
@@ -515,7 +518,7 @@ Install the flight director. Chain-safe.
 
 ### <a id="s-combatReport"></a>`combatReport()`
 
-function · **exported** · L282–290
+function · **exported** · L284–292
 
 <!-- note:combatReport -->
 For the console: what is actually happening out there.

@@ -16,7 +16,7 @@ Assignments onto window / globalThis / self.
 
 ### `window.__lgAttract`
 
-- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2916
+- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2921
 
 ### `window.__lgFlyQueued`
 
@@ -24,11 +24,11 @@ Assignments onto window / globalThis / self.
 
 ### `window.__lgGL`
 
-- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2913
+- global.write — [js/render/engine.js › mountGame](../files/js/render/engine.js.md#s-mountGame) L2918
 
 ### `window.__lgMarkers`
 
-- global.write — [js/render/engine.js › mountGame>tick](../files/js/render/engine.js.md#s-mountGame-tick) L2905
+- global.write — [js/render/engine.js › mountGame>tick](../files/js/render/engine.js.md#s-mountGame-tick) L2910
 
 ### `window.npcSpeech`
 

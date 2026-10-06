@@ -52246,7 +52246,7 @@
   },
   {
    "file": "js/flight/turrets.js",
-   "lines": 506,
+   "lines": 510,
    "vendor": false,
    "summary": "turret hardpoints, contacts and ordnance.",
    "imports": [
@@ -52702,11 +52702,10 @@
      "key": "syncContacts",
      "kind": "function",
      "line": 76,
-     "end": 150,
+     "end": 154,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#addContact",
-      "js/flight/turrets.js#d3",
       "js/flight/turrets.js#fire",
       "js/flight/turrets.js#stepDrones",
       "js/flight/turrets.js#stepPirates"
@@ -52715,40 +52714,40 @@
     {
      "key": "HOSTILE_GUN",
      "kind": "const",
-     "line": 152,
-     "end": 155,
+     "line": 156,
+     "end": 159,
      "exported": false,
      "calls": []
     },
     {
      "key": "HOSTILE_GUN.cd",
      "kind": "prop",
-     "line": 153,
-     "end": 153,
+     "line": 157,
+     "end": 157,
      "exported": false,
      "calls": []
     },
     {
      "key": "HOSTILE_GUN.cd~2",
      "kind": "prop",
-     "line": 154,
-     "end": 154,
+     "line": 158,
+     "end": 158,
      "exported": false,
      "calls": []
     },
     {
      "key": "DEFAULT_GUN",
      "kind": "const",
-     "line": 156,
-     "end": 156,
+     "line": 160,
+     "end": 160,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepPirates",
      "kind": "function",
-     "line": 158,
-     "end": 172,
+     "line": 162,
+     "end": 176,
      "exported": false,
      "calls": [
       "js/npc/battles.js#engagementAt",
@@ -52759,8 +52758,8 @@
     {
      "key": "npcTracer",
      "kind": "function",
-     "line": 174,
-     "end": 182,
+     "line": 178,
+     "end": 186,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#fire"
@@ -52769,8 +52768,8 @@
     {
      "key": "spawnDrone",
      "kind": "function",
-     "line": 184,
-     "end": 203,
+     "line": 188,
+     "end": 207,
      "exported": false,
      "calls": [
       "js/flight/turrets.js#rng"
@@ -52779,8 +52778,8 @@
     {
      "key": "stepDrones",
      "kind": "function",
-     "line": 205,
-     "end": 255,
+     "line": 209,
+     "end": 259,
      "exported": false,
      "calls": [
       "js/flight/turrets.js#rng",
@@ -52793,16 +52792,16 @@
     {
      "key": "engages",
      "kind": "function",
-     "line": 257,
-     "end": 275,
+     "line": 261,
+     "end": 279,
      "exported": false,
      "calls": []
     },
     {
      "key": "pickCombatTarget",
      "kind": "function",
-     "line": 277,
-     "end": 290,
+     "line": 281,
+     "end": 294,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#d3",
@@ -52812,8 +52811,8 @@
     {
      "key": "nearestContact",
      "kind": "function",
-     "line": 292,
-     "end": 303,
+     "line": 296,
+     "end": 307,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#d3"
@@ -52822,8 +52821,8 @@
     {
      "key": "fire",
      "kind": "function",
-     "line": 305,
-     "end": 322,
+     "line": 309,
+     "end": 326,
      "exported": false,
      "calls": [
       "js/flight/turrets.js#d3"
@@ -52832,8 +52831,8 @@
     {
      "key": "fireRound",
      "kind": "function",
-     "line": 323,
-     "end": 323,
+     "line": 327,
+     "end": 327,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#fire"
@@ -52842,16 +52841,16 @@
     {
      "key": "sweptMiss",
      "kind": "function",
-     "line": 325,
-     "end": 330,
+     "line": 329,
+     "end": 334,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepShots",
      "kind": "function",
-     "line": 332,
-     "end": 386,
+     "line": 336,
+     "end": 390,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#sweptMiss",
@@ -52861,8 +52860,8 @@
     {
      "key": "stepTurrets",
      "kind": "function",
-     "line": 388,
-     "end": 418,
+     "line": 392,
+     "end": 422,
      "exported": true,
      "calls": [
       "js/flight/turrets.js#nearestContact",
@@ -52873,8 +52872,8 @@
     {
      "key": "minableDebris",
      "kind": "function",
-     "line": 420,
-     "end": 434,
+     "line": 424,
+     "end": 438,
      "exported": false,
      "calls": [
       "js/economy/materials.js#goodName"
@@ -52883,8 +52882,8 @@
     {
      "key": "stepMining",
      "kind": "function",
-     "line": 436,
-     "end": 506,
+     "line": 440,
+     "end": 510,
      "exported": true,
      "calls": [
       "js/world/field.js#nearbyRocks",
@@ -52903,42 +52902,42 @@
      "kind": "bus.emit",
      "value": "‹c›",
      "at": "syncContacts",
-     "line": 142,
+     "line": 146,
      "target": "fire"
     },
     {
      "kind": "bus.emit",
      "value": "‹c›",
      "at": "stepPirates",
-     "line": 170,
+     "line": 174,
      "target": "fire"
     },
     {
      "kind": "bus.emit",
      "value": "‹from›",
      "at": "npcTracer",
-     "line": 177,
+     "line": 181,
      "target": "fire"
     },
     {
      "kind": "bus.emit",
      "value": "‹c›",
      "at": "stepDrones",
-     "line": 252,
+     "line": 256,
      "target": "fire"
     },
     {
      "kind": "bus.emit",
      "value": "‹from›",
      "at": "fireRound",
-     "line": 323,
+     "line": 327,
      "target": "fire"
     },
     {
      "kind": "bus.emit",
      "value": "‹ship.pos›",
      "at": "stepTurrets",
-     "line": 404,
+     "line": 408,
      "target": "fire"
     }
    ]
@@ -61869,7 +61868,7 @@
   },
   {
    "file": "js/npc/combat.js",
-   "lines": 290,
+   "lines": 292,
    "vendor": false,
    "summary": "NPC hulls that actually fight each other.",
    "imports": [
@@ -62181,7 +62180,7 @@
      "key": "acquire",
      "kind": "function",
      "line": 61,
-     "end": 74,
+     "end": 76,
      "exported": true,
      "calls": [
       "js/npc/combat.js#hostileTo",
@@ -62194,16 +62193,16 @@
     {
      "key": "setHunt",
      "kind": "function",
-     "line": 76,
-     "end": 82,
+     "line": 78,
+     "end": 84,
      "exported": true,
      "calls": []
     },
     {
      "key": "clearHunt",
      "kind": "function",
-     "line": 84,
-     "end": 90,
+     "line": 86,
+     "end": 92,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#vesselById"
@@ -62212,8 +62211,8 @@
     {
      "key": "damageHull",
      "kind": "function",
-     "line": 92,
-     "end": 110,
+     "line": 94,
+     "end": 112,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#vesselById",
@@ -62225,8 +62224,8 @@
     {
      "key": "downHull",
      "kind": "function",
-     "line": 112,
-     "end": 117,
+     "line": 114,
+     "end": 119,
      "exported": false,
      "calls": [
       "js/npc/traffic.js#markVesselDown"
@@ -62235,16 +62234,16 @@
     {
      "key": "combatHooksOut",
      "kind": "const",
-     "line": 119,
-     "end": 119,
+     "line": 121,
+     "end": 121,
      "exported": true,
      "calls": []
     },
     {
      "key": "combatFly",
      "kind": "function",
-     "line": 121,
-     "end": 183,
+     "line": 123,
+     "end": 185,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#vesselById",
@@ -62260,8 +62259,8 @@
     {
      "key": "nearestHaven",
      "kind": "function",
-     "line": 185,
-     "end": 194,
+     "line": 187,
+     "end": 196,
      "exported": false,
      "calls": [
       "js/npc/combat.js#d3"
@@ -62270,16 +62269,16 @@
     {
      "key": "canShoot",
      "kind": "function",
-     "line": 196,
-     "end": 198,
+     "line": 198,
+     "end": 200,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepGuns",
      "kind": "function",
-     "line": 200,
-     "end": 223,
+     "line": 202,
+     "end": 225,
      "exported": false,
      "calls": [
       "js/core/perf.js#tracerGate",
@@ -62292,8 +62291,8 @@
     {
      "key": "stepFar",
      "kind": "function",
-     "line": 225,
-     "end": 242,
+     "line": 227,
+     "end": 244,
      "exported": false,
      "calls": [
       "js/npc/combat.js#canShoot",
@@ -62305,24 +62304,24 @@
     {
      "key": "lookClock",
      "kind": "const",
-     "line": 244,
-     "end": 244,
+     "line": 246,
+     "end": 246,
      "exported": false,
      "calls": []
     },
     {
      "key": "LOOK_TICK",
      "kind": "const",
-     "line": 245,
-     "end": 245,
+     "line": 247,
+     "end": 247,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepLook",
      "kind": "function",
-     "line": 247,
-     "end": 266,
+     "line": 249,
+     "end": 268,
      "exported": false,
      "calls": [
       "js/npc/combat.js#acquire",
@@ -62332,8 +62331,8 @@
     {
      "key": "stepNpcCombat",
      "kind": "function",
-     "line": 268,
-     "end": 272,
+     "line": 270,
+     "end": 274,
      "exported": true,
      "calls": [
       "js/npc/combat.js#stepLook",
@@ -62344,8 +62343,8 @@
     {
      "key": "mountNpcCombat",
      "kind": "function",
-     "line": 274,
-     "end": 280,
+     "line": 276,
+     "end": 282,
      "exported": true,
      "calls": [
       "js/npc/combat.js#combatFly"
@@ -62354,8 +62353,8 @@
     {
      "key": "combatReport",
      "kind": "function",
-     "line": 282,
-     "end": 290,
+     "line": 284,
+     "end": 292,
      "exported": true,
      "calls": []
     }
@@ -64006,7 +64005,7 @@
   },
   {
    "file": "js/npc/ground.js",
-   "lines": 170,
+   "lines": 171,
    "vendor": false,
    "summary": "ground truth for anything said on the band.",
    "imports": [
@@ -64257,7 +64256,7 @@
      "key": "threatsNear",
      "kind": "function",
      "line": 95,
-     "end": 111,
+     "end": 112,
      "exported": true,
      "calls": [
       "js/npc/ground.js#d3"
@@ -64266,32 +64265,32 @@
     {
      "key": "bearingTo",
      "kind": "function",
-     "line": 113,
-     "end": 116,
+     "line": 114,
+     "end": 117,
      "exported": true,
      "calls": []
     },
     {
      "key": "rockUnits",
      "kind": "function",
-     "line": 118,
-     "end": 121,
+     "line": 119,
+     "end": 122,
      "exported": true,
      "calls": []
     },
     {
      "key": "_survey",
      "kind": "const",
-     "line": 123,
-     "end": 123,
+     "line": 124,
+     "end": 124,
      "exported": false,
      "calls": []
     },
     {
      "key": "claimSurvey",
      "kind": "function",
-     "line": 125,
-     "end": 154,
+     "line": 126,
+     "end": 155,
      "exported": true,
      "calls": [
       "js/world/field.js#nearbyRocks",
@@ -64303,24 +64302,24 @@
     {
      "key": "unitsPhrase",
      "kind": "function",
-     "line": 156,
-     "end": 160,
+     "line": 157,
+     "end": 161,
      "exported": true,
      "calls": []
     },
     {
      "key": "countWord",
      "kind": "function",
-     "line": 162,
-     "end": 165,
+     "line": 163,
+     "end": 166,
      "exported": true,
      "calls": []
     },
     {
      "key": "s",
      "kind": "const",
-     "line": 168,
-     "end": 168,
+     "line": 169,
+     "end": 169,
      "exported": false,
      "calls": [
       "js/npc/ground.js#claimSurvey"
@@ -65429,7 +65428,7 @@
   },
   {
    "file": "js/npc/rogues.js",
-   "lines": 376,
+   "lines": 384,
    "vendor": false,
    "summary": "the rogue drones, and where they come from.",
    "imports": [
@@ -65860,15 +65859,24 @@
      ]
     },
     {
-     "key": "stepRogues",
+     "key": "indexWaveVessels",
      "kind": "function",
      "line": 270,
-     "end": 357,
+     "end": 274,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "stepRogues",
+     "kind": "function",
+     "line": 276,
+     "end": 365,
      "exported": true,
      "calls": [
       "js/npc/rogues.js#rogueTide",
       "js/npc/rogues.js#rng",
       "js/npc/rogues.js#launchWave",
+      "js/npc/rogues.js#indexWaveVessels",
       "js/npc/traffic.js#removeVessel",
       "js/npc/rogues.js#nestById",
       "js/npc/rogues.js#d3",
@@ -65878,8 +65886,8 @@
     {
      "key": "mountRogues",
      "kind": "function",
-     "line": 359,
-     "end": 365,
+     "line": 367,
+     "end": 373,
      "exported": true,
      "calls": [
       "js/npc/rogues.js#flyRogue"
@@ -65888,8 +65896,8 @@
     {
      "key": "rogueReport",
      "kind": "function",
-     "line": 367,
-     "end": 374,
+     "line": 375,
+     "end": 382,
      "exported": true,
      "calls": [
       "js/npc/rogues.js#tideState"
@@ -67244,7 +67252,7 @@
   },
   {
    "file": "js/npc/traffic.js",
-   "lines": 973,
+   "lines": 974,
    "vendor": false,
    "summary": "LIVING GALAXY experimental — other pilots in the sky.",
    "imports": [
@@ -68050,7 +68058,7 @@
      "key": "stepHullOnce",
      "kind": "function",
      "line": 564,
-     "end": 794,
+     "end": 795,
      "exported": false,
      "calls": [
       "js/npc/traffic.js#setJob",
@@ -68074,16 +68082,16 @@
     {
      "key": "_ctx",
      "kind": "const",
-     "line": 796,
-     "end": 796,
+     "line": 797,
+     "end": 797,
      "exported": false,
      "calls": []
     },
     {
      "key": "stepTraffic",
      "kind": "function",
-     "line": 798,
-     "end": 849,
+     "line": 799,
+     "end": 850,
      "exported": true,
      "calls": [
       "js/core/perf.js#farBudget",
@@ -68096,8 +68104,8 @@
     {
      "key": "markVesselDown",
      "kind": "function",
-     "line": 851,
-     "end": 867,
+     "line": 852,
+     "end": 868,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#vesselById",
@@ -68107,56 +68115,56 @@
     {
      "key": "hullIx",
      "kind": "const",
-     "line": 869,
-     "end": 869,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "hullIxDirty",
-     "kind": "const",
      "line": 870,
      "end": 870,
      "exported": false,
      "calls": []
     },
     {
+     "key": "hullIxDirty",
+     "kind": "const",
+     "line": 871,
+     "end": 871,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "reindexTraffic",
      "kind": "function",
-     "line": 872,
-     "end": 874,
+     "line": 873,
+     "end": 875,
      "exported": true,
      "calls": []
     },
     {
      "key": "hullIxLen",
      "kind": "const",
-     "line": 876,
-     "end": 876,
+     "line": 877,
+     "end": 877,
      "exported": false,
      "calls": []
     },
     {
      "key": "vesselById",
      "kind": "function",
-     "line": 878,
-     "end": 886,
+     "line": 879,
+     "end": 887,
      "exported": true,
      "calls": []
     },
     {
      "key": "captainLine",
      "kind": "function",
-     "line": 888,
-     "end": 891,
+     "line": 889,
+     "end": 892,
      "exported": true,
      "calls": []
     },
     {
      "key": "vesselStatus",
      "kind": "function",
-     "line": 893,
-     "end": 910,
+     "line": 894,
+     "end": 911,
      "exported": true,
      "calls": [
       "js/npc/traffic.js#captainLine",
@@ -68166,24 +68174,24 @@
     {
      "key": "visibleVessels",
      "kind": "function",
-     "line": 912,
-     "end": 917,
+     "line": 913,
+     "end": 918,
      "exported": true,
      "calls": []
     },
     {
      "key": "EVENT_KINDS",
      "kind": "const",
-     "line": 919,
-     "end": 919,
+     "line": 920,
+     "end": 920,
      "exported": true,
      "calls": []
     },
     {
      "key": "eventAt",
      "kind": "function",
-     "line": 921,
-     "end": 945,
+     "line": 922,
+     "end": 946,
      "exported": true,
      "calls": [
       "js/world/generate.js#rngFromSeed"
@@ -68192,16 +68200,16 @@
     {
      "key": "eventLine",
      "kind": "function",
-     "line": 947,
-     "end": 958,
+     "line": 948,
+     "end": 959,
      "exported": true,
      "calls": []
     },
     {
      "key": "trafficCensus",
      "kind": "function",
-     "line": 960,
-     "end": 973,
+     "line": 961,
+     "end": 974,
      "exported": true,
      "calls": []
     }
@@ -68644,7 +68652,7 @@
   },
   {
    "file": "js/render/engine.js",
-   "lines": 2952,
+   "lines": 2957,
    "vendor": false,
    "summary": "The world is ~10^6 units across and the ship is 2.4 units long, so we never",
    "imports": [
@@ -69742,7 +69750,7 @@
      "key": "mountGame",
      "kind": "function",
      "line": 172,
-     "end": 2952,
+     "end": 2957,
      "exported": true,
      "calls": [
       "js/sim/sim.js#wireControlsTest",
@@ -70214,16 +70222,16 @@
     {
      "key": "mountGame>stepSkyLight",
      "kind": "function",
-     "line": 1314,
-     "end": 1359,
+     "line": 1315,
+     "end": 1360,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>audioState",
      "kind": "function",
-     "line": 1361,
-     "end": 1384,
+     "line": 1362,
+     "end": 1385,
      "exported": false,
      "calls": [
       "js/world/field.js#inBelt",
@@ -70234,48 +70242,48 @@
     {
      "key": "mountGame>resize",
      "kind": "function",
-     "line": 1394,
-     "end": 1400,
+     "line": 1395,
+     "end": 1401,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extZoom",
      "kind": "function",
-     "line": 1419,
-     "end": 1421,
+     "line": 1420,
+     "end": 1422,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extOrbit",
      "kind": "function",
-     "line": 1422,
-     "end": 1425,
+     "line": 1423,
+     "end": 1426,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extPan",
      "kind": "function",
-     "line": 1426,
-     "end": 1430,
+     "line": 1427,
+     "end": 1431,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>extReset",
      "kind": "function",
-     "line": 1431,
-     "end": 1433,
+     "line": 1432,
+     "end": 1434,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>pickAt",
      "kind": "function",
-     "line": 1441,
-     "end": 1459,
+     "line": 1442,
+     "end": 1460,
      "exported": false,
      "calls": [
       "js/sim/sim.js#acquireLock"
@@ -70284,16 +70292,16 @@
     {
      "key": "mountGame>onPointerDown",
      "kind": "function",
-     "line": 1461,
-     "end": 1480,
+     "line": 1462,
+     "end": 1481,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>onPointerMove",
      "kind": "function",
-     "line": 1481,
-     "end": 1513,
+     "line": 1482,
+     "end": 1514,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>extPan",
@@ -70304,8 +70312,8 @@
     {
      "key": "mountGame>onPointerUp",
      "kind": "function",
-     "line": 1514,
-     "end": 1524,
+     "line": 1515,
+     "end": 1525,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>pickAt"
@@ -70314,37 +70322,29 @@
     {
      "key": "mountGame>rockQuality",
      "kind": "function",
-     "line": 1532,
-     "end": 1545,
+     "line": 1533,
+     "end": 1546,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>releaseBody",
      "kind": "function",
-     "line": 1547,
-     "end": 1554,
+     "line": 1548,
+     "end": 1555,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>rogueKey",
      "kind": "function",
-     "line": 1560,
-     "end": 1560,
+     "line": 1561,
+     "end": 1561,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>shapeKey",
-     "kind": "function",
-     "line": 1563,
-     "end": 1563,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "mountGame>bucketOf",
      "kind": "function",
      "line": 1564,
      "end": 1564,
@@ -70352,18 +70352,26 @@
      "calls": []
     },
     {
-     "key": "mountGame>stretchOf",
+     "key": "mountGame>bucketOf",
      "kind": "function",
      "line": 1565,
-     "end": 1571,
+     "end": 1565,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "mountGame>stretchOf",
+     "kind": "function",
+     "line": 1566,
+     "end": 1572,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>rockTint",
      "kind": "function",
-     "line": 1573,
-     "end": 1579,
+     "line": 1574,
+     "end": 1580,
      "exported": false,
      "calls": [
       "js/world/rockgen.js#rockLook"
@@ -70372,8 +70380,8 @@
     {
      "key": "mountGame>shapeFor",
      "kind": "function",
-     "line": 1581,
-     "end": 1604,
+     "line": 1582,
+     "end": 1605,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>shapeKey",
@@ -70385,8 +70393,8 @@
     {
      "key": "mountGame>bodyFor",
      "kind": "function",
-     "line": 1606,
-     "end": 1631,
+     "line": 1607,
+     "end": 1632,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>bucketOf",
@@ -70398,8 +70406,8 @@
     {
      "key": "mountGame>mountShared",
      "kind": "function",
-     "line": 1633,
-     "end": 1647,
+     "line": 1634,
+     "end": 1648,
      "exported": false,
      "calls": [
       "js/bodygen/baked.js#bakedMaterial",
@@ -70409,16 +70417,16 @@
     {
      "key": "mountGame>mountShared.dispose",
      "kind": "prop",
-     "line": 1646,
-     "end": 1646,
+     "line": 1647,
+     "end": 1647,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>poseBody",
      "kind": "function",
-     "line": 1649,
-     "end": 1657,
+     "line": 1650,
+     "end": 1658,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>stretchOf"
@@ -70427,8 +70435,8 @@
     {
      "key": "mountGame>mountBody",
      "kind": "function",
-     "line": 1659,
-     "end": 1671,
+     "line": 1660,
+     "end": 1672,
      "exported": false,
      "calls": [
       "js/bodygen/baked.js#mountBakedData"
@@ -70437,16 +70445,16 @@
     {
      "key": "mountGame>assayFor",
      "kind": "function",
-     "line": 1673,
-     "end": 1675,
+     "line": 1674,
+     "end": 1676,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>clearRockBuckets",
      "kind": "function",
-     "line": 1677,
-     "end": 1681,
+     "line": 1678,
+     "end": 1682,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>releaseBody"
@@ -70455,8 +70463,8 @@
     {
      "key": "mountGame>drainBrokenRocks",
      "kind": "function",
-     "line": 1685,
-     "end": 1693,
+     "line": 1686,
+     "end": 1694,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>releaseBody"
@@ -70465,8 +70473,8 @@
     {
      "key": "mountGame>updateAsteroids",
      "kind": "function",
-     "line": 1696,
-     "end": 1792,
+     "line": 1697,
+     "end": 1794,
      "exported": false,
      "calls": [
       "js/bodygen/grower.js#pump",
@@ -70486,8 +70494,8 @@
     {
      "key": "mountGame>updateDebris",
      "kind": "function",
-     "line": 1795,
-     "end": 1836,
+     "line": 1797,
+     "end": 1838,
      "exported": false,
      "calls": [
       "js/world/events/cataclysm.js#kelvinHex"
@@ -70496,16 +70504,16 @@
     {
      "key": "mountGame>releaseImpactorBody",
      "kind": "function",
-     "line": 1838,
-     "end": 1845,
+     "line": 1840,
+     "end": 1847,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>impactorBody",
      "kind": "function",
-     "line": 1847,
-     "end": 1857,
+     "line": 1849,
+     "end": 1859,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>rogueKey",
@@ -70520,16 +70528,16 @@
     {
      "key": "mountGame>rogueAssay",
      "kind": "function",
-     "line": 1859,
-     "end": 1861,
+     "line": 1861,
+     "end": 1863,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>updateImpactors",
      "kind": "function",
-     "line": 1863,
-     "end": 1878,
+     "line": 1866,
+     "end": 1882,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>impactorBody",
@@ -70539,32 +70547,32 @@
     {
      "key": "mountGame>updateShots",
      "kind": "function",
-     "line": 1880,
-     "end": 1892,
+     "line": 1884,
+     "end": 1896,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>spawnChip",
      "kind": "function",
-     "line": 1894,
-     "end": 1908,
+     "line": 1898,
+     "end": 1912,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>spawnPuff",
      "kind": "function",
-     "line": 1910,
-     "end": 1921,
+     "line": 1914,
+     "end": 1925,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>updateMiningFX",
      "kind": "function",
-     "line": 1923,
-     "end": 2010,
+     "line": 1927,
+     "end": 2014,
      "exported": false,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -70577,8 +70585,8 @@
     {
      "key": "mountGame>updateRigFX",
      "kind": "function",
-     "line": 2030,
-     "end": 2076,
+     "line": 2034,
+     "end": 2080,
      "exported": false,
      "calls": [
       "js/flight/ship.js#forwardOf",
@@ -70590,16 +70598,16 @@
     {
      "key": "mountGame>updateTractorBeam",
      "kind": "function",
-     "line": 2091,
-     "end": 2108,
+     "line": 2095,
+     "end": 2112,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>droneDesign",
      "kind": "function",
-     "line": 2111,
-     "end": 2116,
+     "line": 2115,
+     "end": 2120,
      "exported": false,
      "calls": [
       "js/drones/droneforge.js#droneFor"
@@ -70608,8 +70616,8 @@
     {
      "key": "mountGame>syncContactMeshes",
      "kind": "function",
-     "line": 2117,
-     "end": 2147,
+     "line": 2121,
+     "end": 2151,
      "exported": false,
      "calls": [
       "js/drones/droneforge.js#droneBudget",
@@ -70624,8 +70632,8 @@
     {
      "key": "mountGame>syncWorkDrones",
      "kind": "function",
-     "line": 2152,
-     "end": 2195,
+     "line": 2156,
+     "end": 2199,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -70639,16 +70647,16 @@
     {
      "key": "mountGame>unitsUseDrone",
      "kind": "function",
-     "line": 2196,
-     "end": 2201,
+     "line": 2200,
+     "end": 2205,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>syncProbeMeshes",
      "kind": "function",
-     "line": 2204,
-     "end": 2225,
+     "line": 2208,
+     "end": 2229,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -70660,8 +70668,8 @@
     {
      "key": "mountGame>syncRemotes",
      "kind": "function",
-     "line": 2227,
-     "end": 2256,
+     "line": 2231,
+     "end": 2260,
      "exported": false,
      "calls": [
       "js/render/engine.js#disposeObject",
@@ -70674,8 +70682,8 @@
     {
      "key": "mountGame>syncTraffic",
      "kind": "function",
-     "line": 2259,
-     "end": 2304,
+     "line": 2263,
+     "end": 2308,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>dropNavLight",
@@ -70694,8 +70702,8 @@
     {
      "key": "mountGame>syncFlow",
      "kind": "function",
-     "line": 2307,
-     "end": 2337,
+     "line": 2311,
+     "end": 2342,
      "exported": false,
      "calls": [
       "js/render/engine.js#meshRange",
@@ -70715,24 +70723,24 @@
     {
      "key": "mountGame>hash01",
      "kind": "function",
-     "line": 2345,
-     "end": 2345,
+     "line": 2350,
+     "end": 2350,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>wreckMat",
      "kind": "function",
-     "line": 2348,
-     "end": 2360,
+     "line": 2353,
+     "end": 2365,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>wreckOf",
      "kind": "function",
-     "line": 2362,
-     "end": 2393,
+     "line": 2367,
+     "end": 2398,
      "exported": false,
      "calls": [
       "js/ships/shipdb.js#shipById",
@@ -70743,16 +70751,16 @@
     {
      "key": "mountGame>cutBack",
      "kind": "function",
-     "line": 2395,
-     "end": 2404,
+     "line": 2400,
+     "end": 2409,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>syncHulks",
      "kind": "function",
-     "line": 2406,
-     "end": 2452,
+     "line": 2411,
+     "end": 2457,
      "exported": false,
      "calls": [
       "js/render/engine.js#meshRange",
@@ -70772,24 +70780,24 @@
     {
      "key": "mountGame>projectMark",
      "kind": "function",
-     "line": 2460,
-     "end": 2482,
+     "line": 2465,
+     "end": 2487,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>projectPoint",
      "kind": "function",
-     "line": 2484,
-     "end": 2488,
+     "line": 2489,
+     "end": 2493,
      "exported": false,
      "calls": []
     },
     {
      "key": "mountGame>projectDir",
      "kind": "function",
-     "line": 2490,
-     "end": 2493,
+     "line": 2495,
+     "end": 2498,
      "exported": false,
      "calls": [
       "js/render/engine.js#mountGame>projectPoint"
@@ -70798,8 +70806,8 @@
     {
      "key": "mountGame>tick",
      "kind": "function",
-     "line": 2495,
-     "end": 2911,
+     "line": 2500,
+     "end": 2916,
      "exported": false,
      "calls": [
       "js/core/perf.js#notePerf",
@@ -70867,8 +70875,8 @@
     {
      "key": "mountGame.bodyDetail",
      "kind": "prop",
-     "line": 2913,
-     "end": 2913,
+     "line": 2918,
+     "end": 2918,
      "exported": false,
      "calls": []
     }
@@ -70885,13 +70893,13 @@
      "kind": "dom.id",
      "value": "warp-flash",
      "at": "mountGame",
-     "line": 1390
+     "line": 1391
     },
     {
      "kind": "event.listen",
      "value": "wheel",
      "at": "mountGame",
-     "line": 1434,
+     "line": 1435,
      "target": "canvas",
      "handler": "(inline)"
     },
@@ -70899,7 +70907,7 @@
      "kind": "event.listen",
      "value": "dblclick",
      "at": "mountGame",
-     "line": 1439,
+     "line": 1440,
      "target": "canvas",
      "handler": "(inline)"
     },
@@ -70907,7 +70915,7 @@
      "kind": "event.listen",
      "value": "pointerdown",
      "at": "mountGame",
-     "line": 1525,
+     "line": 1526,
      "target": "canvas",
      "handler": "onPointerDown"
     },
@@ -70915,7 +70923,7 @@
      "kind": "event.listen",
      "value": "pointermove",
      "at": "mountGame",
-     "line": 1526,
+     "line": 1527,
      "target": "canvas",
      "handler": "onPointerMove"
     },
@@ -70923,7 +70931,7 @@
      "kind": "event.listen",
      "value": "pointerup",
      "at": "mountGame",
-     "line": 1527,
+     "line": 1528,
      "target": "canvas",
      "handler": "onPointerUp"
     },
@@ -70931,7 +70939,7 @@
      "kind": "event.listen",
      "value": "pointercancel",
      "at": "mountGame",
-     "line": 1528,
+     "line": 1529,
      "target": "canvas",
      "handler": "onPointerUp"
     },
@@ -70939,32 +70947,32 @@
      "kind": "storage.get",
      "value": "lgaa.rocks",
      "at": "mountGame>rockQuality",
-     "line": 1535,
+     "line": 1536,
      "store": "local"
     },
     {
      "kind": "global.write",
      "value": "window.__lgMarkers",
      "at": "mountGame>tick",
-     "line": 2905
+     "line": 2910
     },
     {
      "kind": "global.write",
      "value": "window.__lgGL",
      "at": "mountGame",
-     "line": 2913
+     "line": 2918
     },
     {
      "kind": "global.write",
      "value": "window.__lgAttract",
      "at": "mountGame",
-     "line": 2916
+     "line": 2921
     },
     {
      "kind": "event.unlisten",
      "value": "pointerdown",
      "at": "mountGame",
-     "line": 2925,
+     "line": 2930,
      "target": "canvas",
      "handler": "onPointerDown"
     },
@@ -70972,7 +70980,7 @@
      "kind": "event.unlisten",
      "value": "pointermove",
      "at": "mountGame",
-     "line": 2926,
+     "line": 2931,
      "target": "canvas",
      "handler": "onPointerMove"
     },
@@ -70980,7 +70988,7 @@
      "kind": "event.unlisten",
      "value": "pointerup",
      "at": "mountGame",
-     "line": 2927,
+     "line": 2932,
      "target": "canvas",
      "handler": "onPointerUp"
     },
@@ -70988,7 +70996,7 @@
      "kind": "event.unlisten",
      "value": "pointercancel",
      "at": "mountGame",
-     "line": 2928,
+     "line": 2933,
      "target": "canvas",
      "handler": "onPointerUp"
     }

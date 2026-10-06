@@ -1262,7 +1262,7 @@ export function mountGame(canvas) {
           const u = ((ev.pulse ?? 0) + i / 3) % 1;
           const rr = R * (2 + u * 26);
           ring.scale.set(rr, rr, 1);
-          ring.lookAt(camera.position.clone().sub(rig.group.getWorldPosition(_bpv)));
+          ring.lookAt(_pulseLook.copy(camera.position).sub(rig.group.getWorldPosition(_bpv)));
           ring.material.uniforms.uColor.value.setHex(hex);
           ring.material.uniforms.uOpacity.value = Math.max(0, (1 - u) * 0.7 * ev.lum);
         });
@@ -1305,6 +1305,7 @@ export function mountGame(canvas) {
     eventLights.push(l);
   }
   const _bpv = new THREE.Vector3();
+  const _pulseLook = new THREE.Vector3();
   const baseExposure = 1.06;
   const baseAmbient = ambient.intensity;
 
@@ -1721,7 +1722,8 @@ export function mountGame(canvas) {
       }
       near.sort((a, b) => a.rank - b.rank);
       let built = 0;
-      for (const { r, d } of near.slice(0, bodyBudget)) {
+      for (let i = 0, count = Math.min(near.length, bodyBudget); i < count; i++) {
+        const { r, d } = near[i];
         const had = bodies.has(r.key);
         if (!had && built >= 1) { shapeFor(bucketOf(r)); continue; }
         const body = bodyFor(r, d, t);
@@ -1860,8 +1862,10 @@ export function mountGame(canvas) {
     return impBodies.get(id)?.assay ?? null;
   }
 
+  const _liveImpactors = new Set();
   function updateImpactors(t) {
-    const live = new Set();
+    const live = _liveImpactors;
+    live.clear();
     let mounted = 0;
     for (const m of impactors) {
       live.add(m.id);
@@ -1874,7 +1878,7 @@ export function mountGame(canvas) {
       body.group.rotation.set(t * m.spin, t * m.spin * 0.6, (m.seed ?? 0.5) * 6.28);
       body.group.visible = true;
     }
-    if (impBodies.size) for (const id of [...impBodies.keys()]) if (!live.has(id)) releaseImpactorBody(id);
+    if (impBodies.size) for (const id of impBodies.keys()) if (!live.has(id)) releaseImpactorBody(id);
   }
 
   function updateShots() {
@@ -2087,7 +2091,7 @@ export function mountGame(canvas) {
   beamGlow.material.userData.keep = true;
   beamGlow.visible = false;
   scene.add(beamGlow);
-  const _bA = new THREE.Vector3(), _bB = new THREE.Vector3(), _bUp = new THREE.Vector3(0, 1, 0);
+  const _bA = new THREE.Vector3(), _bB = new THREE.Vector3(), _beamDir = new THREE.Vector3(), _bUp = new THREE.Vector3(0, 1, 0);
   function updateTractorBeam(t) {
     const on = tractor.active;
     beam.visible = on; beamGlow.visible = on;
@@ -2100,7 +2104,7 @@ export function mountGame(canvas) {
     const L = _bA.distanceTo(_bB);
     beam.position.copy(_bA).add(_bB).multiplyScalar(0.5);
     beam.scale.set(3 + Math.sin(t * 9) * 0.6, Math.max(1, L), 3 + Math.sin(t * 9) * 0.6);
-    beam.quaternion.setFromUnitVectors(_bUp, _bB.clone().sub(_bA).normalize());
+    beam.quaternion.setFromUnitVectors(_bUp, _beamDir.copy(_bB).sub(_bA).normalize());
     beamMat.opacity = 0.16 + 0.1 * (0.5 + 0.5 * Math.sin(t * 6));
     beamGlow.position.copy(_bA);
     const g = 26 + Math.sin(t * 5) * 6;
@@ -2291,7 +2295,7 @@ export function mountGame(canvas) {
       rel(n.x, n.y, n.z, obj.group);
       orientCraft(obj.group, n.yaw ?? 0, n.pitch ?? 0, 0);
       tickHull(obj.group, frameDt, sim.time, { throttle: n.job === "docked" || n.job === "hold" ? 0.05 : Math.min(1, 0.25 + (n.speed ?? 0) / 40) });
-      placeNavLight(navLightFor(n.id, HOSTILE_ROLES.has(n.role) ? "#ff6a4a" : LAW_ROLES.has(n.role) ? "#8fd6ff" : "#dfe9ff"), n.x, n.y, n.z, sim.time, dist3(sim.ship.pos, n));
+      placeNavLight(navLightFor(n.id, HOSTILE_ROLES.has(n.role) ? "#ff6a4a" : LAW_ROLES.has(n.role) ? "#8fd6ff" : "#dfe9ff"), n.x, n.y, n.z, sim.time, dn);
     }
     for (const [id] of navLights) if (id.startsWith("npc:") && !live.has(id)) dropNavLight(id);
     for (const [id, obj] of npcMeshes) {
@@ -2310,7 +2314,8 @@ export function mountGame(canvas) {
     const R = meshRange();
     for (const n of flow) {
       if (!n.visible) continue;
-      if (dist3(sim.ship.pos, n) > R) continue;
+      const dn = dist3(sim.ship.pos, n);
+      if (dn > R) continue;
       live.add(n.id);
       let obj = flowMeshes.get(n.id);
       if (!obj) {
@@ -2324,7 +2329,7 @@ export function mountGame(canvas) {
       rel(n.x, n.y, n.z, obj.group);
       orientCraft(obj.group, n.yaw ?? 0, n.pitch ?? 0, 0);
       tickHull(obj.group, frameDt, sim.time, { throttle: n.job === "approach" ? 0.35 : 0.9 });
-      placeNavLight(navLightFor(n.id, n.color), n.x, n.y, n.z, sim.time, dist3(sim.ship.pos, n));
+      placeNavLight(navLightFor(n.id, n.color), n.x, n.y, n.z, sim.time, dn);
     }
     for (const [id, obj] of flowMeshes) {
       if (!live.has(id)) {
@@ -2938,7 +2943,7 @@ export function mountGame(canvas) {
     for (const key of [...bodies.keys()]) releaseBody(key);
     for (const sh of shapes.values()) if (sh.owned) sh.mount.dispose();
     shapes.clear();
-    for (const id of [...impBodies.keys()]) releaseImpactorBody(id);
+    for (const id of impBodies.keys()) releaseImpactorBody(id);
     rockFx.dispose();
     impactFx.dispose();
     holeFx.dispose();

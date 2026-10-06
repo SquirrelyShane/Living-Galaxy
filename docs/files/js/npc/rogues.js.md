@@ -1,6 +1,6 @@
 # js/npc/rogues.js
 
-[index](../../../README.md) · 376 lines · 35 symbols · 7 imports · 9 importers
+[index](../../../README.md) · 384 lines · 36 symbols · 7 imports · 10 importers
 
 ## About
 
@@ -44,7 +44,7 @@ nest and no paying it off.
 - L45 · `export const SIEGE_RATE = 0.9;` — stock destroyed per drone per second inside SIEGE_R
 - L49 · `export const nests = [];` — live nests
 - L50 · `export const waves = [];` — live waves
-- L376 · `HOSTILE_ROLES.add("rogue");` — rogues are hostile to everything with a crew, which is what makes station
+- L384 · `HOSTILE_ROLES.add("rogue");` — rogues are hostile to everything with a crew, which is what makes station
   batteries and the directorate answer them without being told to
 <!-- /note -->
 
@@ -69,6 +69,7 @@ nest and no paying it off.
 - [js/npc/ground.js](ground.js.md) — `nests`
 - [js/sim/sim.js](../sim/sim.js.md) — `populateNests`, `stepRogues`, `mountRogues`, `rogueHooks`, `rogueReport`, `nests`, `waves`
 - test/hostilegun.test.mjs _(outside js/)_ — 
+- test/hotpath-optimization.test.mjs _(outside js/)_ — `waves`, `nests`, `rogueHooks`, `stepRogues`, `TIDE`
 - test/reactive.test.mjs _(outside js/)_ — `nests`, `waves`, `launchWave`, `stepRogues`, `rogueReport`, `nestById`, `WAVE_SLOT`
 - test/rogues.test.mjs _(outside js/)_ — `nests`, `waves`, `populateNests`, `launchWave`, `stepRogues`, `rogueReport`, `rogueTide`, `tideState`, `TIDE`, `WAVE_SLOT`, `WAVE_TTL`
 
@@ -78,7 +79,7 @@ nest and no paying it off.
 - [`NEST_MAX`](#s-NEST_MAX) · const — **no importer in scanned roots**
 - [`WAVE_SLOT`](#s-WAVE_SLOT) · const — used by test/reactive.test.mjs, test/rogues.test.mjs
 - [`WAVE_CHANCE`](#s-WAVE_CHANCE) · const — **no importer in scanned roots**
-- [`TIDE`](#s-TIDE) · const — used by test/rogues.test.mjs
+- [`TIDE`](#s-TIDE) · const — used by test/hotpath-optimization.test.mjs, test/rogues.test.mjs
 - [`rogueTide`](#s-rogueTide) · function — used by test/rogues.test.mjs
 - [`tideState`](#s-tideState) · function — used by test/rogues.test.mjs
 - [`WAVE_TTL`](#s-WAVE_TTL) · const — used by test/rogues.test.mjs
@@ -88,15 +89,15 @@ nest and no paying it off.
 - [`SIEGE_RATE`](#s-SIEGE_RATE) · const — **no importer in scanned roots**
 - [`DRONE_HULLS`](#s-DRONE_HULLS) · const — **no importer in scanned roots**
 - [`NEST_COLOURS`](#s-NEST_COLOURS) · const — **no importer in scanned roots**
-- [`nests`](#s-nests) · const — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/ground.js](ground.js.md), [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
-- [`waves`](#s-waves) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
-- [`rogueHooks`](#s-rogueHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
+- [`nests`](#s-nests) · const — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/ground.js](ground.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs
+- [`waves`](#s-waves) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs
+- [`rogueHooks`](#s-rogueHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs
 - [`resetRogues`](#s-resetRogues) · function — **no importer in scanned roots**
 - [`populateNests`](#s-populateNests) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/rogues.test.mjs
 - [`nestById`](#s-nestById) · function — used by test/reactive.test.mjs
 - [`launchWave`](#s-launchWave) · function — used by test/reactive.test.mjs, test/rogues.test.mjs
 - [`flyRogue`](#s-flyRogue) · function — **no importer in scanned roots**
-- [`stepRogues`](#s-stepRogues) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
+- [`stepRogues`](#s-stepRogues) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/reactive.test.mjs, test/rogues.test.mjs
 - [`mountRogues`](#s-mountRogues) · function — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`rogueReport`](#s-rogueReport) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/reactive.test.mjs, test/rogues.test.mjs
 
@@ -440,38 +441,48 @@ function · L263–268
 <!-- note:resolveTarget -->
 <!-- /note -->
 
+### <a id="s-indexWaveVessels"></a>`indexWaveVessels()`
+
+function · L270–274
+
+- called by: [`stepRogues`](#s-stepRogues) ×4
+
+<!-- note:indexWaveVessels -->
+<!-- /note -->
+
 ### <a id="s-stepRogues"></a>`stepRogues(t, dt, stationList=, shipPos=)`
 
-function · **exported** · L270–357
+function · **exported** · L276–365
 
-- calls: [`d3`](#s-d3) ×2 · [`launchWave`](#s-launchWave) · [`nestById`](#s-nestById) ×2 · [`rng`](#s-rng) ×2 · [`rogueTide`](#s-rogueTide) ×2 · [`removeVessel`](traffic.js.md#s-removeVessel) _js/npc/traffic.js_ · [`worksFor`](../station/stationworks.js.md#s-worksFor) _js/station/stationworks.js_
-- via [js/npc/traffic.js](traffic.js.md): `traffic.find`
+- calls: [`d3`](#s-d3) ×2 · [`indexWaveVessels`](#s-indexWaveVessels) ×4 · [`launchWave`](#s-launchWave) · [`nestById`](#s-nestById) ×2 · [`rng`](#s-rng) ×2 · [`rogueTide`](#s-rogueTide) ×2 · [`removeVessel`](traffic.js.md#s-removeVessel) _js/npc/traffic.js_ · [`worksFor`](../station/stationworks.js.md#s-worksFor) _js/station/stationworks.js_
 - called by: [`stepWorld`](../sim/sim.js.md#s-stepWorld) _js/sim/sim.js_
 
 <!-- note:stepRogues -->
+Vessel lookups use a first-match index scoped to this call, rebuilt after removals and mutation-capable hooks. Never reuse it across calls: exported traffic can be replaced without changing length. Duplicate IDs preserve Array.find ordering.
+
 ---- the tick ------------------------------------------------------------
 
-- L271 · `const slot = Math.floor(t / WAVE_SLOT);` — launch rolls, on the shared slot cadence
-- L277 · `if (tide < TIDE.calm) continue;` — 0.3.30: nothing builds during a lull. The nest is still there, it is
+- L277 · `const slot = Math.floor(t / WAVE_SLOT);` — launch rolls, on the shared slot cadence
+- L283 · `if (tide < TIDE.calm) continue;` — 0.3.30: nothing builds during a lull. The nest is still there, it is
   just not sending anything, which is what makes the belt worth flying
   through some of the time.
-- L278 · `const chance = WAVE_CHANCE * (perf.tier >= 2 ? 1 : 0.55) * (1 + (TIDE.lift - 1) * tide);` — a busy sky sends fewer: the budget decides how much of this the
+- L284 · `const chance = WAVE_CHANCE * (perf.tier >= 2 ? 1 : 0.55) * (1 + (TIDE.lift - 1) * tide);` — a busy sky sends fewer: the budget decides how much of this the
   device can carry, not a guess about the device
-- L283 · `for (let i = waves.length - 1; i >= 0; i--) {` — waves: siege, expiry, and cleaning up the dead
-- L303 · `if (TIDE.recall && w.state !== "home" && rogueTide(t) < TIDE.calm) { w.state = "home"; w.e` — 0.3.30: the tide went out from under them — they break off and go home
+- L291 · `for (let i = waves.length - 1; i >= 0; i--) {` — waves: siege, expiry, and cleaning up the dead
+- L311 · `if (TIDE.recall && w.state !== "home" && rogueTide(t) < TIDE.calm) { w.state = "home"; w.e` — 0.3.30: the tide went out from under them — they break off and go home
   rather than hanging about until their ten minutes are up
-- L305 · `if (w.target.kind === "station" && w.state !== "home") {` — a wave sitting on a port is taking it apart
-- L318 · `const w2 = worksFor(st);` — they are not raiding it, they are eating it: the magazines and the
+- L313 · `if (w.target.kind === "station" && w.state !== "home") {` — a wave sitting on a port is taking it apart
+- L326 · `const w2 = worksFor(st);` — they are not raiding it, they are eating it: the magazines and the
   drone racks go first, which is exactly what the port needs to
   fight them off. A siege left alone disarms the port that is
   under it.
-- L337 · `if (w.target.kind === "nest" && w.state !== "home") {` — and a wave sitting on a rival nest is dismantling it
-- L350 · `for (let k = waves.length - 1; k >= 0; k--) if (waves[k].nest === o.id) waves[k].state = "` — its own drones go with it
+- L345 · `if (w.target.kind === "nest" && w.state !== "home") {` — and a wave sitting on a rival nest is dismantling it
+- L358 · `for (let k = waves.length - 1; k >= 0; k--) if (waves[k].nest === o.id) waves[k].state = "` — its own drones go with it
 <!-- /note -->
 
 ### <a id="s-mountRogues"></a>`mountRogues(trafficHooks)`
 
-function · **exported** · L359–365
+function · **exported** · L367–373
 
 - calls: [`flyRogue`](#s-flyRogue)
 - called by: [`loadSky`](../sim/sim.js.md#s-loadSky) _js/sim/sim.js_
@@ -484,7 +495,7 @@ one with nothing in front of it presses on toward the wave's objective.
 
 ### <a id="s-rogueReport"></a>`rogueReport(t)`
 
-function · **exported** · L367–374
+function · **exported** · L375–382
 
 - calls: [`tideState`](#s-tideState)
 - via [js/npc/traffic.js](traffic.js.md): `traffic.reduce`
