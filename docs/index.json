@@ -3,7 +3,7 @@
  "files": [
   {
    "file": "js/aria/aria.js",
-   "lines": 197,
+   "lines": 212,
    "vendor": false,
    "summary": "ARIA: the conn that learned from you.",
    "imports": [
@@ -48,6 +48,66 @@
       {
        "local": "explanationPacket",
        "imported": "explanationPacket"
+      },
+      {
+       "local": "bindPacketExtras",
+       "imported": "bindPacketExtras"
+      },
+      {
+       "local": "calibReport",
+       "imported": "calibReport"
+      }
+     ]
+    },
+    {
+     "spec": "./wake.js",
+     "target": "js/aria/wake.js",
+     "names": [
+      {
+       "local": "wakeSave",
+       "imported": "wakeSave"
+      },
+      {
+       "local": "wakeLoad",
+       "imported": "wakeLoad"
+      },
+      {
+       "local": "wakeReset",
+       "imported": "wakeReset"
+      }
+     ]
+    },
+    {
+     "spec": "./footprint.js",
+     "target": "js/aria/footprint.js",
+     "names": [
+      {
+       "local": "footprintReport",
+       "imported": "footprintReport"
+      },
+      {
+       "local": "footprintLine",
+       "imported": "footprintLine"
+      }
+     ]
+    },
+    {
+     "spec": "./belief.js",
+     "target": "js/aria/belief.js",
+     "names": [
+      {
+       "local": "beliefReport",
+       "imported": "beliefReport"
+      }
+     ]
+    },
+    {
+     "spec": "./senses.js",
+     "target": "js/aria/senses.js",
+     "names": [
+      {
+       "local": "perceive",
+       "imported": "perceive"
       }
      ]
     },
@@ -189,52 +249,53 @@
     {
      "key": "KEY",
      "kind": "function",
-     "line": 9,
-     "end": 9,
+     "line": 13,
+     "end": 13,
      "exported": false,
      "calls": []
     },
     {
      "key": "SAVE_EVERY",
      "kind": "const",
-     "line": 10,
-     "end": 10,
+     "line": 14,
+     "end": 14,
      "exported": false,
      "calls": []
     },
     {
      "key": "aria",
      "kind": "const",
-     "line": 12,
-     "end": 17,
+     "line": 16,
+     "end": 21,
      "exported": true,
      "calls": []
     },
     {
      "key": "resetAria",
      "kind": "function",
-     "line": 19,
-     "end": 25,
+     "line": 23,
+     "end": 30,
      "exported": true,
      "calls": [
       "js/aria/mind.js#resetMind",
       "js/aria/mind.js#mindKey",
-      "js/aria/pilot.js#bindAriaPrefs"
+      "js/aria/pilot.js#bindAriaPrefs",
+      "js/aria/wake.js#wakeReset"
      ]
     },
     {
      "key": "handsOff",
      "kind": "function",
-     "line": 27,
-     "end": 27,
+     "line": 32,
+     "end": 32,
      "exported": true,
      "calls": []
     },
     {
      "key": "notePlayerChoice",
      "kind": "function",
-     "line": 29,
-     "end": 36,
+     "line": 34,
+     "end": 41,
      "exported": true,
      "calls": [
       "js/aria/aria.js#saveAria"
@@ -243,16 +304,16 @@
     {
      "key": "preferenceFor",
      "kind": "function",
-     "line": 38,
-     "end": 47,
+     "line": 43,
+     "end": 52,
      "exported": true,
      "calls": []
     },
     {
      "key": "preferenceReport",
      "kind": "function",
-     "line": 49,
-     "end": 55,
+     "line": 54,
+     "end": 60,
      "exported": true,
      "calls": [
       "js/aria/aria.js#preferenceFor"
@@ -261,24 +322,24 @@
     {
      "key": "MUTE_AT",
      "kind": "const",
-     "line": 57,
-     "end": 57,
+     "line": 62,
+     "end": 62,
      "exported": false,
      "calls": []
     },
     {
      "key": "adv",
      "kind": "function",
-     "line": 59,
-     "end": 62,
+     "line": 64,
+     "end": 67,
      "exported": false,
      "calls": []
     },
     {
      "key": "shouldAdvise",
      "kind": "function",
-     "line": 64,
-     "end": 66,
+     "line": 69,
+     "end": 71,
      "exported": true,
      "calls": [
       "js/aria/aria.js#adv"
@@ -287,8 +348,8 @@
     {
      "key": "noteAdvice",
      "kind": "function",
-     "line": 68,
-     "end": 72,
+     "line": 73,
+     "end": 77,
      "exported": true,
      "calls": [
       "js/aria/aria.js#adv"
@@ -297,8 +358,8 @@
     {
      "key": "answerAdvice",
      "kind": "function",
-     "line": 74,
-     "end": 80,
+     "line": 79,
+     "end": 85,
      "exported": true,
      "calls": [
       "js/aria/aria.js#adv",
@@ -308,32 +369,32 @@
     {
      "key": "adviceReport",
      "kind": "function",
-     "line": 82,
-     "end": 86,
+     "line": 87,
+     "end": 91,
      "exported": true,
      "calls": []
     },
     {
      "key": "ariaMember",
      "kind": "function",
-     "line": 88,
-     "end": 94,
+     "line": 93,
+     "end": 99,
      "exported": false,
      "calls": []
     },
     {
      "key": "ariaHasConn",
      "kind": "function",
-     "line": 96,
-     "end": 96,
+     "line": 101,
+     "end": 101,
      "exported": true,
      "calls": []
     },
     {
      "key": "ariaTakeConn",
      "kind": "function",
-     "line": 98,
-     "end": 116,
+     "line": 103,
+     "end": 121,
      "exported": true,
      "calls": [
       "js/npc/captain.js#houseBrain",
@@ -347,8 +408,8 @@
     {
      "key": "ariaRelease",
      "kind": "function",
-     "line": 118,
-     "end": 127,
+     "line": 123,
+     "end": 132,
      "exported": true,
      "calls": [
       "js/aria/pilot.js#endAriaWatch",
@@ -360,8 +421,8 @@
     {
      "key": "ariaNoteDecision",
      "kind": "function",
-     "line": 129,
-     "end": 134,
+     "line": 134,
+     "end": 139,
      "exported": true,
      "calls": [
       "js/aria/aria.js#ariaHasConn"
@@ -370,22 +431,25 @@
     {
      "key": "ariaWatchReport",
      "kind": "function",
-     "line": 136,
-     "end": 151,
+     "line": 141,
+     "end": 160,
      "exported": true,
      "calls": [
       "js/npc/captain.js#houseBrain",
       "js/aria/aria.js#ariaHasConn",
-      "js/aria/pilot.js#jobHabits"
+      "js/aria/pilot.js#jobHabits",
+      "js/aria/footprint.js#footprintLine",
+      "js/aria/mind.js#calibReport"
      ]
     },
     {
      "key": "saveAria",
      "kind": "function",
-     "line": 153,
-     "end": 159,
+     "line": 162,
+     "end": 169,
      "exported": true,
      "calls": [
+      "js/aria/wake.js#wakeSave",
       "js/aria/mind.js#saveMind",
       "js/aria/mind.js#mindKey",
       "js/aria/aria.js#KEY"
@@ -394,12 +458,13 @@
     {
      "key": "loadAria",
      "kind": "function",
-     "line": 161,
-     "end": 173,
+     "line": 171,
+     "end": 184,
      "exported": true,
      "calls": [
       "js/aria/mind.js#loadMind",
       "js/aria/mind.js#mindKey",
+      "js/aria/wake.js#wakeLoad",
       "js/aria/pilot.js#bindAriaPrefs",
       "js/aria/aria.js#KEY"
      ]
@@ -407,8 +472,8 @@
     {
      "key": "wireAriaHooks",
      "kind": "function",
-     "line": 175,
-     "end": 189,
+     "line": 186,
+     "end": 200,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#flushPending",
@@ -427,11 +492,14 @@
     {
      "key": "wireAria",
      "kind": "function",
-     "line": 191,
-     "end": 197,
+     "line": 202,
+     "end": 212,
      "exported": true,
      "calls": [
       "js/aria/mind.js#bindPeopleLookup",
+      "js/aria/mind.js#bindPacketExtras",
+      "js/aria/footprint.js#footprintReport",
+      "js/aria/footprint.js#footprintLine",
       "js/aria/aria.js#wireAriaHooks"
      ]
     }
@@ -441,17 +509,212 @@
      "kind": "storage.set",
      "value": "‹KEY()›",
      "at": "saveAria",
-     "line": 157,
+     "line": 167,
      "store": "local"
     },
     {
      "kind": "storage.get",
      "value": "‹KEY()›",
      "at": "loadAria",
-     "line": 166,
+     "line": 177,
      "store": "local"
     }
    ]
+  },
+  {
+   "file": "js/aria/belief.js",
+   "lines": 130,
+   "vendor": false,
+   "summary": "",
+   "imports": [],
+   "dynamic": [],
+   "importedBy": [
+    "js/aria/aria.js",
+    "js/aria/senses.js",
+    "js/aria/wake.js"
+   ],
+   "exports": [
+    "BELIEF",
+    "belief",
+    "resetBelief",
+    "observe",
+    "recall",
+    "track",
+    "anchor",
+    "trackerOf",
+    "alertsSince",
+    "markDanger",
+    "dangers",
+    "beliefReport",
+    "alertLine"
+   ],
+   "symbols": [
+    {
+     "key": "BELIEF",
+     "kind": "const",
+     "line": 1,
+     "end": 13,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "belief",
+     "kind": "const",
+     "line": 15,
+     "end": 15,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "resetBelief",
+     "kind": "function",
+     "line": 17,
+     "end": 23,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "halfOf",
+     "kind": "function",
+     "line": 25,
+     "end": 25,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "decay",
+     "kind": "function",
+     "line": 26,
+     "end": 26,
+     "exported": false,
+     "calls": [
+      "js/aria/belief.js#halfOf"
+     ]
+    },
+    {
+     "key": "trim",
+     "kind": "function",
+     "line": 28,
+     "end": 33,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "observe",
+     "kind": "function",
+     "line": 35,
+     "end": 40,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#trim"
+     ]
+    },
+    {
+     "key": "recall",
+     "kind": "function",
+     "line": 42,
+     "end": 48,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#decay"
+     ]
+    },
+    {
+     "key": "track",
+     "kind": "function",
+     "line": 50,
+     "end": 79,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#trim"
+     ]
+    },
+    {
+     "key": "anchor",
+     "kind": "function",
+     "line": 81,
+     "end": 86,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "trackerOf",
+     "kind": "function",
+     "line": 88,
+     "end": 91,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "alertsSince",
+     "kind": "function",
+     "line": 93,
+     "end": 95,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "cellKey",
+     "kind": "function",
+     "line": 97,
+     "end": 97,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "markDanger",
+     "kind": "function",
+     "line": 99,
+     "end": 106,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#cellKey",
+      "js/aria/belief.js#decay",
+      "js/aria/belief.js#trim"
+     ]
+    },
+    {
+     "key": "dangers",
+     "kind": "function",
+     "line": 108,
+     "end": 116,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#decay"
+     ]
+    },
+    {
+     "key": "beliefReport",
+     "kind": "function",
+     "line": 118,
+     "end": 125,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#dangers",
+      "js/aria/belief.js#alertsSince",
+      "js/aria/belief.js#alertLine"
+     ]
+    },
+    {
+     "key": "alertLine",
+     "kind": "function",
+     "line": 127,
+     "end": 130,
+     "exported": true,
+     "calls": [
+      "js/aria/belief.js#alertLine>f"
+     ]
+    },
+    {
+     "key": "alertLine>f",
+     "kind": "function",
+     "line": 128,
+     "end": 128,
+     "exported": false,
+     "calls": []
+    }
+   ],
+   "effects": []
   },
   {
    "file": "js/aria/company.js",
@@ -906,8 +1169,337 @@
    "effects": []
   },
   {
+   "file": "js/aria/footprint.js",
+   "lines": 126,
+   "vendor": false,
+   "summary": "",
+   "imports": [],
+   "dynamic": [],
+   "importedBy": [
+    "js/aria/aria.js",
+    "js/aria/play.js",
+    "js/aria/wake.js",
+    "js/console/panels/aria-core.js"
+   ],
+   "exports": [
+    "FOOT",
+    "footprint",
+    "resetFootprint",
+    "footprintOut",
+    "footprintIn",
+    "noteTrade",
+    "noteWork",
+    "audit",
+    "footprintReport",
+    "footprintLine"
+   ],
+   "symbols": [
+    {
+     "key": "FOOT",
+     "kind": "const",
+     "line": 1,
+     "end": 1,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "fresh",
+     "kind": "function",
+     "line": 3,
+     "end": 12,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "footprint",
+     "kind": "const",
+     "line": 14,
+     "end": 14,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#fresh"
+     ]
+    },
+    {
+     "key": "resetFootprint",
+     "kind": "function",
+     "line": 16,
+     "end": 16,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#fresh"
+     ]
+    },
+    {
+     "key": "footprintOut",
+     "kind": "function",
+     "line": 18,
+     "end": 18,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "footprintIn",
+     "kind": "function",
+     "line": 20,
+     "end": 28,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#resetFootprint"
+     ]
+    },
+    {
+     "key": "event",
+     "kind": "function",
+     "line": 30,
+     "end": 33,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "portOf",
+     "kind": "function",
+     "line": 35,
+     "end": 44,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "noteTrade",
+     "kind": "function",
+     "line": 46,
+     "end": 75,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#portOf",
+      "js/aria/footprint.js#event"
+     ]
+    },
+    {
+     "key": "noteWork",
+     "kind": "function",
+     "line": 77,
+     "end": 82,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#event"
+     ]
+    },
+    {
+     "key": "audit",
+     "kind": "function",
+     "line": 84,
+     "end": 99,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#event"
+     ]
+    },
+    {
+     "key": "footprintReport",
+     "kind": "function",
+     "line": 101,
+     "end": 115,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "footprintLine",
+     "kind": "function",
+     "line": 117,
+     "end": 126,
+     "exported": true,
+     "calls": []
+    }
+   ],
+   "effects": []
+  },
+  {
+   "file": "js/aria/foresee.js",
+   "lines": 96,
+   "vendor": false,
+   "summary": "",
+   "imports": [
+    {
+     "spec": "../economy/economy.js",
+     "target": "js/economy/economy.js",
+     "names": [
+      {
+       "local": "runLines",
+       "imported": "runLines"
+      },
+      {
+       "local": "stockOf",
+       "imported": "stockOf"
+      },
+      {
+       "local": "stockMultAt",
+       "imported": "stockMultAt"
+      },
+      {
+       "local": "lotMult",
+       "imported": "lotMult"
+      },
+      {
+       "local": "targetFor",
+       "imported": "targetFor"
+      },
+      {
+       "local": "bidPrice",
+       "imported": "bidPrice"
+      },
+      {
+       "local": "askPrice",
+       "imported": "askPrice"
+      },
+      {
+       "local": "LINES",
+       "imported": "LINES"
+      },
+      {
+       "local": "GLUT_FRAC",
+       "imported": "GLUT_FRAC"
+      },
+      {
+       "local": "SHORT_FRAC",
+       "imported": "SHORT_FRAC"
+      }
+     ]
+    },
+    {
+     "spec": "../economy/materials.js",
+     "target": "js/economy/materials.js",
+     "names": [
+      {
+       "local": "goodName",
+       "imported": "goodName"
+      }
+     ]
+    }
+   ],
+   "dynamic": [],
+   "importedBy": [
+    "js/aria/wake.js"
+   ],
+   "exports": [
+    "FORESEE",
+    "ghost",
+    "foreseeSale",
+    "foreseeBuy",
+    "counterfactual",
+    "sellValue",
+    "saleLine"
+   ],
+   "symbols": [
+    {
+     "key": "FORESEE",
+     "kind": "const",
+     "line": 4,
+     "end": 4,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "ghost",
+     "kind": "function",
+     "line": 6,
+     "end": 13,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "bump",
+     "kind": "function",
+     "line": 15,
+     "end": 19,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "stalledOn",
+     "kind": "function",
+     "line": 21,
+     "end": 21,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "feeds",
+     "kind": "function",
+     "line": 22,
+     "end": 22,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "foreseeSale",
+     "kind": "function",
+     "line": 24,
+     "end": 43,
+     "exported": true,
+     "calls": [
+      "js/economy/economy.js#stockOf",
+      "js/economy/economy.js#targetFor",
+      "js/economy/economy.js#stockMultAt",
+      "js/economy/economy.js#lotMult",
+      "js/aria/foresee.js#stalledOn",
+      "js/economy/materials.js#goodName",
+      "js/aria/foresee.js#feeds"
+     ]
+    },
+    {
+     "key": "foreseeBuy",
+     "kind": "function",
+     "line": 45,
+     "end": 51,
+     "exported": true,
+     "calls": [
+      "js/economy/economy.js#stockOf",
+      "js/economy/economy.js#targetFor",
+      "js/economy/economy.js#stockMultAt",
+      "js/economy/materials.js#goodName",
+      "js/aria/foresee.js#feeds"
+     ]
+    },
+    {
+     "key": "counterfactual",
+     "kind": "function",
+     "line": 53,
+     "end": 73,
+     "exported": true,
+     "calls": [
+      "js/aria/foresee.js#ghost",
+      "js/aria/foresee.js#bump",
+      "js/economy/economy.js#runLines",
+      "js/economy/materials.js#goodName",
+      "js/economy/economy.js#stockMultAt",
+      "js/economy/economy.js#stockOf"
+     ]
+    },
+    {
+     "key": "sellValue",
+     "kind": "function",
+     "line": 75,
+     "end": 85,
+     "exported": true,
+     "calls": [
+      "js/aria/foresee.js#foreseeSale"
+     ]
+    },
+    {
+     "key": "saleLine",
+     "kind": "function",
+     "line": 87,
+     "end": 96,
+     "exported": true,
+     "calls": []
+    }
+   ],
+   "effects": []
+  },
+  {
    "file": "js/aria/mind.js",
-   "lines": 108,
+   "lines": 255,
    "vendor": false,
    "summary": "One bounded, deterministic intelligence. No simulation imports or actuator access.",
    "imports": [],
@@ -917,6 +1509,8 @@
     "js/aria/company.js",
     "js/aria/pilot.js",
     "js/aria/play.js",
+    "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/console/panels/aria-core.js",
     "js/flight/recorder.js",
     "js/mission/run.js",
@@ -931,6 +1525,7 @@
     "spendCap",
     "ariaMind",
     "bindPeopleLookup",
+    "bindPacketExtras",
     "resetMind",
     "mindKey",
     "saveMind",
@@ -938,13 +1533,24 @@
     "setOrders",
     "remember",
     "personMemory",
+    "VERBS",
+    "verbOf",
+    "CONTEXT_CAP",
+    "migrateContexts",
+    "FADE",
     "learnTape",
     "contextualScore",
+    "riskAversion",
     "authorize",
+    "calibrated",
+    "forecast",
+    "settleForecast",
+    "calibReport",
     "decideMind",
     "explanationPacket",
     "policyScore",
-    "learnOutcome"
+    "learnOutcome",
+    "discount"
    ],
    "symbols": [
     {
@@ -956,7 +1562,7 @@
      "calls": []
     },
     {
-     "key": "fresh",
+     "key": "freshCalib",
      "kind": "function",
      "line": 2,
      "end": 2,
@@ -964,23 +1570,25 @@
      "calls": []
     },
     {
-     "key": "WORKING_FLOOR",
-     "kind": "const",
+     "key": "fresh",
+     "kind": "function",
      "line": 3,
      "end": 3,
+     "exported": false,
+     "calls": [
+      "js/aria/mind.js#freshCalib"
+     ]
+    },
+    {
+     "key": "WORKING_FLOOR",
+     "kind": "const",
+     "line": 4,
+     "end": 4,
      "exported": true,
      "calls": []
     },
     {
      "key": "INVESTMENT",
-     "kind": "const",
-     "line": 4,
-     "end": 4,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "UNCAPPED",
      "kind": "const",
      "line": 5,
      "end": 5,
@@ -988,7 +1596,7 @@
      "calls": []
     },
     {
-     "key": "DOMAIN",
+     "key": "UNCAPPED",
      "kind": "const",
      "line": 6,
      "end": 6,
@@ -996,42 +1604,52 @@
      "calls": []
     },
     {
-     "key": "BREAK",
+     "key": "DOMAIN",
      "kind": "const",
      "line": 7,
      "end": 7,
-     "exported": true,
+     "exported": false,
      "calls": []
     },
     {
-     "key": "breakLine",
-     "kind": "function",
+     "key": "BREAK",
+     "kind": "const",
      "line": 8,
      "end": 8,
      "exported": true,
      "calls": []
     },
     {
-     "key": "domainOf",
+     "key": "breakLine",
      "kind": "function",
      "line": 9,
-     "end": 9,
+     "end": 11,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#clamp"
+     ]
+    },
+    {
+     "key": "domainOf",
+     "kind": "function",
+     "line": 12,
+     "end": 12,
      "exported": true,
      "calls": []
     },
     {
      "key": "reserveFor",
      "kind": "function",
-     "line": 10,
-     "end": 10,
+     "line": 13,
+     "end": 13,
      "exported": true,
      "calls": []
     },
     {
      "key": "spendCap",
      "kind": "function",
-     "line": 11,
-     "end": 11,
+     "line": 14,
+     "end": 14,
      "exported": true,
      "calls": [
       "js/aria/mind.js#domainOf",
@@ -1041,32 +1659,6 @@
     {
      "key": "ariaMind",
      "kind": "const",
-     "line": 12,
-     "end": 12,
-     "exported": true,
-     "calls": [
-      "js/aria/mind.js#fresh"
-     ]
-    },
-    {
-     "key": "resolver",
-     "kind": "function",
-     "line": 13,
-     "end": 13,
-     "exported": false,
-     "calls": []
-    },
-    {
-     "key": "bindPeopleLookup",
-     "kind": "function",
-     "line": 14,
-     "end": 14,
-     "exported": true,
-     "calls": []
-    },
-    {
-     "key": "resetMind",
-     "kind": "function",
      "line": 15,
      "end": 15,
      "exported": true,
@@ -1075,37 +1667,81 @@
      ]
     },
     {
-     "key": "mindKey",
+     "key": "resolver",
      "kind": "function",
      "line": 16,
      "end": 16,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "extras",
+     "kind": "function",
+     "line": 17,
+     "end": 17,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "bindPeopleLookup",
+     "kind": "function",
+     "line": 18,
+     "end": 18,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "bindPacketExtras",
+     "kind": "function",
+     "line": 19,
+     "end": 19,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "resetMind",
+     "kind": "function",
+     "line": 20,
+     "end": 20,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#fresh"
+     ]
+    },
+    {
+     "key": "mindKey",
+     "kind": "function",
+     "line": 21,
+     "end": 21,
      "exported": true,
      "calls": []
     },
     {
      "key": "saveMind",
      "kind": "function",
-     "line": 17,
-     "end": 17,
+     "line": 22,
+     "end": 22,
      "exported": true,
      "calls": []
     },
     {
      "key": "loadMind",
      "kind": "function",
-     "line": 18,
-     "end": 31,
+     "line": 23,
+     "end": 38,
      "exported": true,
      "calls": [
       "js/aria/mind.js#resetMind",
-      "js/aria/mind.js#setOrders"
+      "js/aria/mind.js#setOrders",
+      "js/aria/mind.js#migrateContexts",
+      "js/aria/mind.js#freshCalib"
      ]
     },
     {
      "key": "setOrders",
      "kind": "function",
-     "line": 32,
-     "end": 38,
+     "line": 39,
+     "end": 46,
      "exported": true,
      "calls": [
       "js/aria/mind.js#clamp"
@@ -1114,8 +1750,8 @@
     {
      "key": "remember",
      "kind": "function",
-     "line": 39,
-     "end": 42,
+     "line": 47,
+     "end": 50,
      "exported": true,
      "calls": [
       "js/aria/mind.js#clamp"
@@ -1124,21 +1760,168 @@
     {
      "key": "personMemory",
      "kind": "function",
-     "line": 43,
-     "end": 43,
+     "line": 51,
+     "end": 51,
      "exported": true,
      "calls": [
       "js/aria/mind.js#resolver"
      ]
     },
     {
+     "key": "VERBS",
+     "kind": "const",
+     "line": 53,
+     "end": 53,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "OP_VERB",
+     "kind": "const",
+     "line": 54,
+     "end": 54,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "OP_SKIP",
+     "kind": "const",
+     "line": 55,
+     "end": 55,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "ORDER_VERB",
+     "kind": "const",
+     "line": 56,
+     "end": 56,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "KEY_VERB",
+     "kind": "const",
+     "line": 57,
+     "end": 57,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "CAT_VERB",
+     "kind": "const",
+     "line": 58,
+     "end": 58,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "TAP_VERB",
+     "kind": "const",
+     "line": 59,
+     "end": 59,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "verbOf",
+     "kind": "function",
+     "line": 60,
+     "end": 70,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "CONTEXT_CAP",
+     "kind": "const",
+     "line": 72,
+     "end": 72,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "migrateContexts",
+     "kind": "function",
+     "line": 73,
+     "end": 87,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#verbOf"
+     ]
+    },
+    {
+     "key": "FADE",
+     "kind": "const",
+     "line": 88,
+     "end": 88,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "KERNEL",
+     "kind": "const",
+     "line": 89,
+     "end": 89,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "fade",
+     "kind": "function",
+     "line": 90,
+     "end": 90,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "cellOf",
+     "kind": "function",
+     "line": 91,
+     "end": 91,
+     "exported": false,
+     "calls": [
+      "js/aria/mind.js#clamp"
+     ]
+    },
+    {
+     "key": "pointOf",
+     "kind": "function",
+     "line": 92,
+     "end": 92,
+     "exported": false,
+     "calls": [
+      "js/aria/mind.js#clamp"
+     ]
+    },
+    {
+     "key": "centreOf",
+     "kind": "function",
+     "line": 93,
+     "end": 97,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "nearness",
+     "kind": "function",
+     "line": 98,
+     "end": 102,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "learnTape",
      "kind": "function",
-     "line": 44,
-     "end": 61,
+     "line": 103,
+     "end": 141,
      "exported": true,
      "calls": [
       "js/aria/mind.js#clamp",
+      "js/aria/mind.js#verbOf",
+      "js/aria/mind.js#cellOf",
+      "js/aria/mind.js#pointOf",
+      "js/aria/mind.js#fade",
+      "js/aria/mind.js#centreOf",
       "js/aria/mind.js#remember",
       "js/aria/mind.js#saveMind"
      ]
@@ -1146,8 +1929,21 @@
     {
      "key": "contextualScore",
      "kind": "function",
-     "line": 62,
-     "end": 69,
+     "line": 142,
+     "end": 155,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#verbOf",
+      "js/aria/mind.js#pointOf",
+      "js/aria/mind.js#nearness",
+      "js/aria/mind.js#centreOf"
+     ]
+    },
+    {
+     "key": "riskAversion",
+     "kind": "function",
+     "line": 156,
+     "end": 158,
      "exported": true,
      "calls": [
       "js/aria/mind.js#clamp"
@@ -1156,8 +1952,8 @@
     {
      "key": "authorize",
      "kind": "function",
-     "line": 70,
-     "end": 79,
+     "line": 159,
+     "end": 168,
      "exported": true,
      "calls": [
       "js/aria/mind.js#domainOf",
@@ -1165,29 +1961,88 @@
      ]
     },
     {
+     "key": "BIN_EDGES",
+     "kind": "const",
+     "line": 170,
+     "end": 170,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "binOf",
+     "kind": "function",
+     "line": 171,
+     "end": 171,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "calibrated",
+     "kind": "function",
+     "line": 172,
+     "end": 175,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#binOf",
+      "js/aria/mind.js#clamp"
+     ]
+    },
+    {
+     "key": "forecast",
+     "kind": "function",
+     "line": 176,
+     "end": 179,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#clamp"
+     ]
+    },
+    {
+     "key": "settleForecast",
+     "kind": "function",
+     "line": 180,
+     "end": 195,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#binOf"
+     ]
+    },
+    {
+     "key": "calibReport",
+     "kind": "function",
+     "line": 196,
+     "end": 200,
+     "exported": true,
+     "calls": []
+    },
+    {
      "key": "decideMind",
      "kind": "function",
-     "line": 80,
-     "end": 88,
+     "line": 202,
+     "end": 210,
      "exported": true,
      "calls": [
       "js/aria/mind.js#contextualScore",
-      "js/aria/mind.js#clamp"
+      "js/aria/mind.js#clamp",
+      "js/aria/mind.js#calibrated"
      ]
     },
     {
      "key": "explanationPacket",
      "kind": "function",
-     "line": 89,
-     "end": 89,
+     "line": 211,
+     "end": 215,
      "exported": true,
-     "calls": []
+     "calls": [
+      "js/aria/mind.js#extras",
+      "js/aria/mind.js#calibReport"
+     ]
     },
     {
      "key": "policyScore",
      "kind": "function",
-     "line": 91,
-     "end": 100,
+     "line": 217,
+     "end": 232,
      "exported": true,
      "calls": [
       "js/aria/mind.js#contextualScore",
@@ -1197,12 +2052,21 @@
     {
      "key": "learnOutcome",
      "kind": "function",
-     "line": 102,
-     "end": 108,
+     "line": 234,
+     "end": 244,
      "exported": true,
      "calls": [
+      "js/aria/mind.js#fade",
       "js/aria/mind.js#remember"
      ]
+    },
+    {
+     "key": "discount",
+     "kind": "function",
+     "line": 245,
+     "end": 255,
+     "exported": true,
+     "calls": []
     }
    ],
    "effects": [
@@ -1210,14 +2074,14 @@
      "kind": "storage.set",
      "value": "‹key›",
      "at": "saveMind",
-     "line": 17,
+     "line": 22,
      "store": "local"
     },
     {
      "kind": "storage.get",
      "value": "‹key›",
      "at": "loadMind",
-     "line": 21,
+     "line": 26,
      "store": "local"
     }
    ]
@@ -1467,7 +2331,7 @@
   },
   {
    "file": "js/aria/pilot.js",
-   "lines": 518,
+   "lines": 536,
    "vendor": false,
    "summary": "ARIA at the conn, flying your jobs the way you fly them.",
    "imports": [
@@ -1502,6 +2366,68 @@
       {
        "local": "breakLine",
        "imported": "breakLine"
+      },
+      {
+       "local": "forecast",
+       "imported": "forecast"
+      },
+      {
+       "local": "settleForecast",
+       "imported": "settleForecast"
+      },
+      {
+       "local": "riskAversion",
+       "imported": "riskAversion"
+      }
+     ]
+    },
+    {
+     "spec": "./senses.js",
+     "target": "js/aria/senses.js",
+     "names": [
+      {
+       "local": "perceive",
+       "imported": "perceive"
+      },
+      {
+       "local": "hostileWithin",
+       "imported": "hostileWithin"
+      }
+     ]
+    },
+    {
+     "spec": "./threat.js",
+     "target": "js/aria/threat.js",
+     "names": [
+      {
+       "local": "pathRisk",
+       "imported": "pathRisk"
+      }
+     ]
+    },
+    {
+     "spec": "./wake.js",
+     "target": "js/aria/wake.js",
+     "names": [
+      {
+       "local": "wakeArm",
+       "imported": "wakeArm"
+      },
+      {
+       "local": "sellValueAt",
+       "imported": "sellValueAt"
+      },
+      {
+       "local": "wakeJobOpen",
+       "imported": "wakeJobOpen"
+      },
+      {
+       "local": "wakeJobClose",
+       "imported": "wakeJobClose"
+      },
+      {
+       "local": "wakeAudit",
+       "imported": "wakeAudit"
       }
      ]
     },
@@ -1578,16 +2504,6 @@
      ]
     },
     {
-     "spec": "../flight/turrets.js",
-     "target": "js/flight/turrets.js",
-     "names": [
-      {
-       "local": "contacts",
-       "imported": "contacts"
-      }
-     ]
-    },
-    {
      "spec": "../npc/captain.js",
      "target": "js/npc/captain.js",
      "names": [
@@ -1620,6 +2536,10 @@
       {
        "local": "pilotInput",
        "imported": "pilotInput"
+      },
+      {
+       "local": "portHooks",
+       "imported": "portHooks"
       }
      ]
     },
@@ -1847,64 +2767,64 @@
     {
      "key": "ARIA_JOBS",
      "kind": "const",
-     "line": 21,
-     "end": 21,
+     "line": 23,
+     "end": 23,
      "exported": true,
      "calls": []
     },
     {
      "key": "INVEST_JOBS",
      "kind": "const",
-     "line": 22,
-     "end": 22,
+     "line": 24,
+     "end": 24,
      "exported": true,
      "calls": []
     },
     {
      "key": "LABEL_JOB",
      "kind": "const",
-     "line": 23,
-     "end": 23,
+     "line": 25,
+     "end": 25,
      "exported": false,
      "calls": []
     },
     {
      "key": "ariaPilot",
      "kind": "const",
-     "line": 25,
-     "end": 39,
+     "line": 27,
+     "end": 42,
      "exported": true,
      "calls": []
     },
     {
      "key": "prefs",
      "kind": "const",
-     "line": 41,
-     "end": 41,
+     "line": 44,
+     "end": 44,
      "exported": false,
      "calls": []
     },
     {
      "key": "say",
      "kind": "const",
-     "line": 42,
-     "end": 42,
+     "line": 45,
+     "end": 45,
      "exported": false,
      "calls": []
     },
     {
      "key": "notePlayerJob",
      "kind": "function",
-     "line": 44,
-     "end": 50,
+     "line": 47,
+     "end": 53,
      "exported": true,
      "calls": []
     },
     {
      "key": "notePlayLabel",
      "kind": "function",
-     "line": 52,
-     "end": 55,
+     "line": 55,
+     "end": 58,
      "exported": true,
      "calls": [
       "js/aria/pilot.js#notePlayerJob"
@@ -1913,44 +2833,67 @@
     {
      "key": "jobHabits",
      "kind": "function",
-     "line": 57,
-     "end": 63,
+     "line": 60,
+     "end": 66,
      "exported": true,
      "calls": []
     },
     {
      "key": "unsurveyed",
      "kind": "function",
-     "line": 65,
-     "end": 75,
+     "line": 68,
+     "end": 78,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "YARD_RISK",
+     "kind": "const",
+     "line": 80,
+     "end": 80,
      "exported": false,
      "calls": []
     },
     {
      "key": "bestRepairPort",
      "kind": "function",
-     "line": 77,
-     "end": 85,
+     "line": 82,
+     "end": 92,
      "exported": true,
      "calls": [
-      "js/flight/repair.js#repairsAt",
+      "js/aria/senses.js#perceive",
       "js/world/bodies.js#dist3",
-      "js/flight/repair.js#pricePerPoint"
+      "js/flight/repair.js#repairsAt",
+      "js/flight/repair.js#pricePerPoint",
+      "js/aria/threat.js#pathRisk",
+      "js/aria/mind.js#riskAversion"
      ]
     },
     {
      "key": "hostileNear",
      "kind": "function",
-     "line": 87,
-     "end": 90,
+     "line": 94,
+     "end": 94,
      "exported": false,
-     "calls": []
+     "calls": [
+      "js/aria/senses.js#hostileWithin"
+     ]
+    },
+    {
+     "key": "threatNow",
+     "kind": "function",
+     "line": 95,
+     "end": 95,
+     "exported": false,
+     "calls": [
+      "js/aria/senses.js#perceive"
+     ]
     },
     {
      "key": "deskSteps",
      "kind": "function",
-     "line": 92,
-     "end": 97,
+     "line": 97,
+     "end": 102,
      "exported": false,
      "calls": [
       "js/mission/script.js#makeStep"
@@ -1959,64 +2902,64 @@
     {
      "key": "INVEST",
      "kind": "const",
-     "line": 99,
-     "end": 104,
+     "line": 104,
+     "end": 109,
      "exported": false,
      "calls": []
     },
     {
      "key": "GUESS",
      "kind": "const",
-     "line": 106,
-     "end": 109,
+     "line": 111,
+     "end": 114,
      "exported": false,
      "calls": []
     },
     {
      "key": "WORK",
      "kind": "const",
-     "line": 110,
-     "end": 110,
+     "line": 115,
+     "end": 115,
      "exported": false,
      "calls": []
     },
     {
      "key": "SALVOR",
      "kind": "const",
-     "line": 111,
-     "end": 111,
+     "line": 116,
+     "end": 116,
      "exported": false,
      "calls": []
     },
     {
      "key": "JOB_REFITS",
      "kind": "const",
-     "line": 113,
-     "end": 118,
+     "line": 118,
+     "end": 123,
      "exported": false,
      "calls": []
     },
     {
      "key": "ALWAYS_REFITS",
      "kind": "const",
-     "line": 119,
-     "end": 119,
+     "line": 124,
+     "end": 124,
      "exported": false,
      "calls": []
     },
     {
      "key": "JOB_DRONES",
      "kind": "const",
-     "line": 121,
-     "end": 126,
+     "line": 126,
+     "end": 131,
      "exported": false,
      "calls": []
     },
     {
      "key": "inRange",
      "kind": "function",
-     "line": 128,
-     "end": 128,
+     "line": 133,
+     "end": 133,
      "exported": false,
      "calls": [
       "js/world/bodies.js#dist3"
@@ -2025,16 +2968,16 @@
     {
      "key": "FABRULE",
      "kind": "const",
-     "line": 130,
-     "end": 135,
+     "line": 135,
+     "end": 140,
      "exported": false,
      "calls": []
     },
     {
      "key": "fabLeaning",
      "kind": "function",
-     "line": 137,
-     "end": 153,
+     "line": 142,
+     "end": 158,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#snapshot",
@@ -2044,8 +2987,8 @@
     {
      "key": "fabStop",
      "kind": "function",
-     "line": 155,
-     "end": 180,
+     "line": 160,
+     "end": 185,
      "exported": true,
      "calls": [
       "js/aria/pilot.js#fabLeaning",
@@ -2061,8 +3004,8 @@
     {
      "key": "refitPlan",
      "kind": "function",
-     "line": 182,
-     "end": 199,
+     "line": 187,
+     "end": 204,
      "exported": true,
      "calls": [
       "js/economy/upgrades.js#hasUpgrade",
@@ -2074,8 +3017,8 @@
     {
      "key": "buildPlan",
      "kind": "function",
-     "line": 201,
-     "end": 217,
+     "line": 206,
+     "end": 222,
      "exported": true,
      "calls": [
       "js/corp/company.js#hasCompany",
@@ -2087,8 +3030,8 @@
     {
      "key": "MISSION",
      "kind": "function",
-     "line": 219,
-     "end": 219,
+     "line": 224,
+     "end": 224,
      "exported": false,
      "calls": [
       "js/mission/script.js#makeMission"
@@ -2097,8 +3040,8 @@
     {
      "key": "rawPlanJob",
      "kind": "function",
-     "line": 221,
-     "end": 308,
+     "line": 226,
+     "end": 313,
      "exported": false,
      "calls": [
       "js/flight/repair.js#hullMaxOf",
@@ -2123,8 +3066,8 @@
     {
      "key": "rawPlanJob>weight",
      "kind": "function",
-     "line": 282,
-     "end": 282,
+     "line": 287,
+     "end": 287,
      "exported": false,
      "calls": [
       "js/aria/mind.js#policyScore",
@@ -2134,14 +3077,15 @@
     {
      "key": "planJob",
      "kind": "function",
-     "line": 310,
-     "end": 317,
+     "line": 315,
+     "end": 322,
      "exported": true,
      "calls": [
       "js/flight/recorder.js#snapshot",
       "js/flight/repair.js#hullMaxOf",
       "js/flight/ship.js#cargoTotal",
       "js/aria/pilot.js#hostileNear",
+      "js/aria/pilot.js#threatNow",
       "js/aria/pilot.js#rawPlanJob",
       "js/aria/mind.js#authorize",
       "js/aria/mind.js#decideMind",
@@ -2151,13 +3095,14 @@
     {
      "key": "shouldBreakOff",
      "kind": "function",
-     "line": 319,
-     "end": 326,
+     "line": 324,
+     "end": 331,
      "exported": true,
      "calls": [
       "js/flight/repair.js#hullMaxOf",
       "js/aria/mind.js#breakLine",
       "js/flight/ship.js#batteryCap",
+      "js/aria/pilot.js#threatNow",
       "js/aria/pilot.js#hostileNear",
       "js/aria/pilot.js#bestRepairPort",
       "js/flight/repair.js#pricePerPoint"
@@ -2166,8 +3111,8 @@
     {
      "key": "beginAriaWatch",
      "kind": "function",
-     "line": 328,
-     "end": 343,
+     "line": 333,
+     "end": 348,
      "exported": true,
      "calls": [
       "js/mission/run.js#stopMission"
@@ -2176,8 +3121,8 @@
     {
      "key": "endAriaWatch",
      "kind": "function",
-     "line": 345,
-     "end": 348,
+     "line": 350,
+     "end": 353,
      "exported": true,
      "calls": [
       "js/mission/run.js#stopMission"
@@ -2186,11 +3131,13 @@
     {
      "key": "tickAriaPilot",
      "kind": "function",
-     "line": 350,
-     "end": 421,
+     "line": 355,
+     "end": 437,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#pilotInput",
+      "js/aria/senses.js#perceive",
+      "js/aria/wake.js#wakeAudit",
       "js/aria/pilot.js#hostileNear",
       "js/sim/sim.js#setTurretMode",
       "js/aria/pilot.js#say",
@@ -2201,6 +3148,8 @@
       "js/flight/repair.js#hullMaxOf",
       "js/mission/run.js#stopMission",
       "js/aria/mind.js#learnOutcome",
+      "js/aria/mind.js#settleForecast",
+      "js/aria/wake.js#wakeJobClose",
       "js/station/stations.js#stationById",
       "js/flight/repair.js#repairsAt",
       "js/flight/repair.js#repairQuote",
@@ -2208,14 +3157,16 @@
       "js/flight/repair.js#yardRepair",
       "js/aria/pilot.js#planJob",
       "js/mission/run.js#startMission",
+      "js/aria/wake.js#wakeJobOpen",
+      "js/aria/mind.js#forecast",
       "js/sim/sim.js#logEvent"
      ]
     },
     {
      "key": "registerAriaOps",
      "kind": "function",
-     "line": 423,
-     "end": 441,
+     "line": 439,
+     "end": 457,
      "exported": false,
      "calls": [
       "js/aria/pilot.js#registerRefitOp",
@@ -2231,8 +3182,8 @@
     {
      "key": "registerRefitOp",
      "kind": "function",
-     "line": 443,
-     "end": 464,
+     "line": 459,
+     "end": 480,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -2246,8 +3197,8 @@
     {
      "key": "registerBuildOp",
      "kind": "function",
-     "line": 466,
-     "end": 486,
+     "line": 482,
+     "end": 502,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -2259,8 +3210,8 @@
     {
      "key": "registerFabOp",
      "kind": "function",
-     "line": 488,
-     "end": 510,
+     "line": 504,
+     "end": 526,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -2273,18 +3224,19 @@
     {
      "key": "wireAriaPilot",
      "kind": "function",
-     "line": 512,
-     "end": 516,
+     "line": 528,
+     "end": 534,
      "exported": true,
      "calls": [
-      "js/aria/pilot.js#registerAriaOps"
+      "js/aria/pilot.js#registerAriaOps",
+      "js/aria/wake.js#wakeArm"
      ]
     },
     {
      "key": "bindAriaPrefs",
      "kind": "function",
-     "line": 518,
-     "end": 518,
+     "line": 536,
+     "end": 536,
      "exported": true,
      "calls": []
     }
@@ -2293,7 +3245,7 @@
   },
   {
    "file": "js/aria/play.js",
-   "lines": 710,
+   "lines": 769,
    "vendor": false,
    "summary": "ARIA at the controls, playing for herself.",
    "imports": [
@@ -2328,6 +3280,22 @@
       {
        "local": "breakLine",
        "imported": "breakLine"
+      },
+      {
+       "local": "forecast",
+       "imported": "forecast"
+      },
+      {
+       "local": "settleForecast",
+       "imported": "settleForecast"
+      },
+      {
+       "local": "riskAversion",
+       "imported": "riskAversion"
+      },
+      {
+       "local": "calibReport",
+       "imported": "calibReport"
       }
      ]
     },
@@ -2562,6 +3530,10 @@
       {
        "local": "AP_POWER",
        "imported": "AP_POWER"
+      },
+      {
+       "local": "portHooks",
+       "imported": "portHooks"
       }
      ]
     },
@@ -2572,16 +3544,6 @@
       {
        "local": "chainReport",
        "imported": "chainReport"
-      }
-     ]
-    },
-    {
-     "spec": "../version.js",
-     "target": "js/version.js",
-     "names": [
-      {
-       "local": "VERSION",
-       "imported": "VERSION"
       }
      ]
     },
@@ -2628,10 +3590,6 @@
        "imported": "sense"
       },
       {
-       "local": "senseSpace",
-       "imported": "senseSpace"
-      },
-      {
        "local": "senseLine",
        "imported": "senseLine"
       },
@@ -2642,6 +3600,72 @@
       {
        "local": "unpostedWork",
        "imported": "unpostedWork"
+      },
+      {
+       "local": "perceive",
+       "imported": "perceive"
+      },
+      {
+       "local": "hostileWithin",
+       "imported": "hostileWithin"
+      }
+     ]
+    },
+    {
+     "spec": "./threat.js",
+     "target": "js/aria/threat.js",
+     "names": [
+      {
+       "local": "pathRisk",
+       "imported": "pathRisk"
+      },
+      {
+       "local": "threatLine",
+       "imported": "threatLine"
+      }
+     ]
+    },
+    {
+     "spec": "./wake.js",
+     "target": "js/aria/wake.js",
+     "names": [
+      {
+       "local": "wakeArm",
+       "imported": "wakeArm"
+      },
+      {
+       "local": "sellValueAt",
+       "imported": "sellValueAt"
+      },
+      {
+       "local": "wakeJobOpen",
+       "imported": "wakeJobOpen"
+      },
+      {
+       "local": "wakeJobClose",
+       "imported": "wakeJobClose"
+      },
+      {
+       "local": "wakeAudit",
+       "imported": "wakeAudit"
+      },
+      {
+       "local": "wakeReset",
+       "imported": "wakeReset"
+      }
+     ]
+    },
+    {
+     "spec": "./footprint.js",
+     "target": "js/aria/footprint.js",
+     "names": [
+      {
+       "local": "footprintLine",
+       "imported": "footprintLine"
+      },
+      {
+       "local": "footprintReport",
+       "imported": "footprintReport"
       }
      ]
     },
@@ -2806,6 +3830,7 @@
     "brainNote",
     "brainReport",
     "nearestPort",
+    "jobHops",
     "jobSeconds",
     "jobsFor",
     "sourceFor",
@@ -2821,6 +3846,8 @@
     "weightOf",
     "hostilesClose",
     "shouldBreakOff",
+    "leastKnown",
+    "exploreRate",
     "beginPlay",
     "tendBus",
     "stepPlay",
@@ -2835,64 +3862,64 @@
     {
      "key": "CAREER_DEPT",
      "kind": "const",
-     "line": 28,
-     "end": 30,
+     "line": 30,
+     "end": 32,
      "exported": true,
      "calls": []
     },
     {
      "key": "PLAY",
      "kind": "const",
-     "line": 32,
-     "end": 50,
+     "line": 34,
+     "end": 54,
      "exported": true,
      "calls": []
     },
     {
      "key": "play",
      "kind": "const",
-     "line": 52,
-     "end": 69,
+     "line": 56,
+     "end": 73,
      "exported": true,
      "calls": []
     },
     {
      "key": "play.brain",
      "kind": "prop",
-     "line": 64,
-     "end": 64,
+     "line": 68,
+     "end": 68,
      "exported": false,
      "calls": []
     },
     {
      "key": "play.brain~2",
      "kind": "prop",
-     "line": 65,
-     "end": 65,
+     "line": 69,
+     "end": 69,
      "exported": false,
      "calls": []
     },
     {
      "key": "now",
      "kind": "function",
-     "line": 71,
-     "end": 71,
+     "line": 75,
+     "end": 75,
      "exported": false,
      "calls": []
     },
     {
      "key": "bizSeen",
      "kind": "const",
-     "line": 72,
-     "end": 72,
+     "line": 76,
+     "end": 76,
      "exported": false,
      "calls": []
     },
     {
      "key": "netWorth",
      "kind": "function",
-     "line": 74,
-     "end": 74,
+     "line": 78,
+     "end": 78,
      "exported": true,
      "calls": [
       "js/corp/company.js#hasCompany"
@@ -2901,8 +3928,8 @@
     {
      "key": "holdUsed",
      "kind": "function",
-     "line": 75,
-     "end": 78,
+     "line": 79,
+     "end": 82,
      "exported": true,
      "calls": [
       "js/flight/ship.js#cargoTotal"
@@ -2911,8 +3938,8 @@
     {
      "key": "note",
      "kind": "function",
-     "line": 79,
-     "end": 79,
+     "line": 83,
+     "end": 83,
      "exported": false,
      "calls": [
       "js/aria/play.js#now"
@@ -2921,16 +3948,16 @@
     {
      "key": "scoreOf",
      "kind": "function",
-     "line": 81,
-     "end": 85,
+     "line": 85,
+     "end": 89,
      "exported": true,
      "calls": []
     },
     {
      "key": "brainNote",
      "kind": "function",
-     "line": 87,
-     "end": 89,
+     "line": 91,
+     "end": 93,
      "exported": true,
      "calls": [
       "js/aria/mind.js#learnOutcome",
@@ -2940,8 +3967,8 @@
     {
      "key": "brainReport",
      "kind": "function",
-     "line": 91,
-     "end": 95,
+     "line": 95,
+     "end": 99,
      "exported": true,
      "calls": [
       "js/aria/play.js#scoreOf"
@@ -2950,24 +3977,24 @@
     {
      "key": "honest",
      "kind": "function",
-     "line": 97,
-     "end": 97,
+     "line": 101,
+     "end": 101,
      "exported": false,
      "calls": []
     },
     {
      "key": "d3",
      "kind": "function",
-     "line": 98,
-     "end": 98,
+     "line": 102,
+     "end": 102,
      "exported": false,
      "calls": []
     },
     {
      "key": "nearestPort",
      "kind": "function",
-     "line": 100,
-     "end": 108,
+     "line": 104,
+     "end": 112,
      "exported": true,
      "calls": [
       "js/aria/play.js#honest",
@@ -2975,39 +4002,53 @@
      ]
     },
     {
-     "key": "jobSeconds",
+     "key": "jobHops",
      "kind": "function",
-     "line": 110,
-     "end": 136,
+     "line": 114,
+     "end": 127,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
       "js/world/hulks.js#hulkById",
       "js/mission/salvage.js#bestHulk",
-      "js/economy/contracts.js#targetPos",
+      "js/economy/contracts.js#targetPos"
+     ]
+    },
+    {
+     "key": "jobSeconds",
+     "kind": "function",
+     "line": 129,
+     "end": 144,
+     "exported": true,
+     "calls": [
+      "js/aria/play.js#jobHops",
       "js/aria/nav.js#planRoute"
      ]
     },
     {
      "key": "jobsFor",
      "kind": "function",
-     "line": 138,
-     "end": 149,
+     "line": 146,
+     "end": 162,
      "exported": true,
      "calls": [
       "js/aria/play.js#now",
+      "js/aria/senses.js#perceive",
+      "js/aria/mind.js#riskAversion",
       "js/economy/contracts.js#boardFor",
       "js/economy/contracts.js#acceptBlocker",
       "js/aria/play.js#canFly",
+      "js/aria/play.js#jobHops",
       "js/aria/play.js#jobSeconds",
-      "js/economy/contracts.js#categoryOf"
+      "js/economy/contracts.js#categoryOf",
+      "js/aria/threat.js#pathRisk"
      ]
     },
     {
      "key": "sourceFor",
      "kind": "function",
-     "line": 151,
-     "end": 160,
+     "line": 164,
+     "end": 173,
      "exported": true,
      "calls": [
       "js/aria/play.js#honest",
@@ -3018,8 +4059,8 @@
     {
      "key": "canFly",
      "kind": "function",
-     "line": 162,
-     "end": 181,
+     "line": 175,
+     "end": 194,
      "exported": true,
      "calls": [
       "js/economy/contracts.js#hullFit",
@@ -3036,8 +4077,8 @@
     {
      "key": "purse",
      "kind": "function",
-     "line": 183,
-     "end": 183,
+     "line": 196,
+     "end": 196,
      "exported": true,
      "calls": [
       "js/aria/mind.js#spendCap"
@@ -3046,16 +4087,16 @@
     {
      "key": "C",
      "kind": "function",
-     "line": 185,
-     "end": 185,
+     "line": 198,
+     "end": 198,
      "exported": false,
      "calls": []
     },
     {
      "key": "jobPlan",
      "kind": "function",
-     "line": 187,
-     "end": 273,
+     "line": 200,
+     "end": 286,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -3076,8 +4117,8 @@
     {
      "key": "jobPlan>go",
      "kind": "function",
-     "line": 192,
-     "end": 198,
+     "line": 205,
+     "end": 211,
      "exported": false,
      "calls": [
       "js/aria/play.js#legsTo"
@@ -3086,8 +4127,8 @@
     {
      "key": "legsTo",
      "kind": "function",
-     "line": 275,
-     "end": 289,
+     "line": 288,
+     "end": 302,
      "exported": false,
      "calls": [
       "js/aria/nav.js#planRoute",
@@ -3097,8 +4138,8 @@
     {
      "key": "startJob",
      "kind": "function",
-     "line": 291,
-     "end": 308,
+     "line": 304,
+     "end": 321,
      "exported": false,
      "calls": [
       "js/aria/mind.js#authorize",
@@ -3120,16 +4161,16 @@
     {
      "key": "moveKeyFor",
      "kind": "function",
-     "line": 310,
-     "end": 310,
+     "line": 323,
+     "end": 323,
      "exported": true,
      "calls": []
     },
     {
      "key": "startRoute",
      "kind": "function",
-     "line": 312,
-     "end": 334,
+     "line": 325,
+     "end": 347,
      "exported": false,
      "calls": [
       "js/economy/traderoutes.js#tradeRoutes",
@@ -3148,8 +4189,8 @@
     {
      "key": "startRoute>go",
      "kind": "function",
-     "line": 323,
-     "end": 323,
+     "line": 336,
+     "end": 336,
      "exported": false,
      "calls": [
       "js/aria/play.js#legsTo"
@@ -3158,8 +4199,8 @@
     {
      "key": "startFreeMine",
      "kind": "function",
-     "line": 336,
-     "end": 350,
+     "line": 349,
+     "end": 363,
      "exported": false,
      "calls": [
       "js/mission/script.js#makeMission",
@@ -3174,8 +4215,8 @@
     {
      "key": "startFreeSalvage",
      "kind": "function",
-     "line": 352,
-     "end": 368,
+     "line": 365,
+     "end": 381,
      "exported": false,
      "calls": [
       "js/mission/salvage.js#bestHulk",
@@ -3191,8 +4232,8 @@
     {
      "key": "readyForTrouble",
      "kind": "function",
-     "line": 370,
-     "end": 375,
+     "line": 383,
+     "end": 388,
      "exported": true,
      "calls": [
       "js/sim/sim.js#setTurretMode"
@@ -3201,8 +4242,8 @@
     {
      "key": "hullFrac",
      "kind": "function",
-     "line": 377,
-     "end": 377,
+     "line": 390,
+     "end": 390,
      "exported": true,
      "calls": [
       "js/flight/repair.js#hullMaxOf"
@@ -3211,8 +4252,8 @@
     {
      "key": "startYard",
      "kind": "function",
-     "line": 379,
-     "end": 395,
+     "line": 392,
+     "end": 408,
      "exported": false,
      "calls": [
       "js/aria/play.js#now",
@@ -3230,8 +4271,8 @@
     {
      "key": "bestYard",
      "kind": "function",
-     "line": 397,
-     "end": 406,
+     "line": 410,
+     "end": 419,
      "exported": true,
      "calls": [
       "js/aria/play.js#honest",
@@ -3243,8 +4284,8 @@
     {
      "key": "startSupply",
      "kind": "function",
-     "line": 408,
-     "end": 426,
+     "line": 421,
+     "end": 439,
      "exported": false,
      "calls": [
       "js/aria/senses.js#sense",
@@ -3266,8 +4307,8 @@
     {
      "key": "startSupply>go",
      "kind": "function",
-     "line": 415,
-     "end": 415,
+     "line": 428,
+     "end": 428,
      "exported": false,
      "calls": [
       "js/aria/play.js#legsTo"
@@ -3276,8 +4317,8 @@
     {
      "key": "startSell",
      "kind": "function",
-     "line": 428,
-     "end": 439,
+     "line": 441,
+     "end": 452,
      "exported": false,
      "calls": [
       "js/economy/traderoutes.js#sellable",
@@ -3291,8 +4332,8 @@
     {
      "key": "movesNow",
      "kind": "function",
-     "line": 441,
-     "end": 457,
+     "line": 454,
+     "end": 476,
      "exported": true,
      "calls": [
       "js/station/stations.js#stationById",
@@ -3302,6 +4343,8 @@
       "js/aria/play.js#moveKeyFor",
       "js/economy/traderoutes.js#bestRoute",
       "js/flight/ship.js#holdRoom",
+      "js/aria/senses.js#unpostedWork",
+      "js/aria/play.js#purse",
       "js/mission/salvage.js#bestHulk",
       "js/economy/traderoutes.js#sellable",
       "js/aria/play.js#hullFrac",
@@ -3312,8 +4355,8 @@
     {
      "key": "movesNow.start",
      "kind": "prop",
-     "line": 447,
-     "end": 447,
+     "line": 460,
+     "end": 460,
      "exported": false,
      "calls": [
       "js/aria/play.js#startJob"
@@ -3322,24 +4365,24 @@
     {
      "key": "rng",
      "kind": "const",
-     "line": 459,
-     "end": 459,
+     "line": 478,
+     "end": 478,
      "exported": false,
      "calls": []
     },
     {
      "key": "setPlayRng",
      "kind": "function",
-     "line": 460,
-     "end": 460,
+     "line": 479,
+     "end": 479,
      "exported": true,
      "calls": []
     },
     {
      "key": "rand",
      "kind": "function",
-     "line": 461,
-     "end": 461,
+     "line": 480,
+     "end": 480,
      "exported": false,
      "calls": [
       "js/aria/play.js#rng"
@@ -3348,8 +4391,8 @@
     {
      "key": "weightOf",
      "kind": "function",
-     "line": 463,
-     "end": 469,
+     "line": 482,
+     "end": 488,
      "exported": true,
      "calls": [
       "js/aria/mind.js#policyScore",
@@ -3361,31 +4404,58 @@
     {
      "key": "hostilesClose",
      "kind": "function",
-     "line": 471,
-     "end": 471,
+     "line": 490,
+     "end": 490,
      "exported": true,
      "calls": [
-      "js/aria/senses.js#senseSpace"
+      "js/aria/senses.js#hostileWithin"
+     ]
+    },
+    {
+     "key": "threatNow",
+     "kind": "function",
+     "line": 491,
+     "end": 491,
+     "exported": false,
+     "calls": [
+      "js/aria/senses.js#perceive"
      ]
     },
     {
      "key": "shouldBreakOff",
      "kind": "function",
-     "line": 472,
-     "end": 475,
+     "line": 492,
+     "end": 495,
      "exported": true,
      "calls": [
       "js/aria/play.js#hullFrac",
       "js/aria/mind.js#breakLine",
       "js/flight/ship.js#batteryCap",
+      "js/aria/play.js#threatNow",
       "js/aria/play.js#hostilesClose"
      ]
     },
     {
+     "key": "leastKnown",
+     "kind": "function",
+     "line": 497,
+     "end": 507,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "exploreRate",
+     "kind": "function",
+     "line": 508,
+     "end": 511,
+     "exported": true,
+     "calls": []
+    },
+    {
      "key": "heldFlyable",
      "kind": "function",
-     "line": 477,
-     "end": 477,
+     "line": 513,
+     "end": 513,
      "exported": false,
      "calls": [
       "js/economy/contracts.js#hullFit"
@@ -3394,8 +4464,8 @@
     {
      "key": "resumeHeld",
      "kind": "function",
-     "line": 479,
-     "end": 501,
+     "line": 515,
+     "end": 537,
      "exported": false,
      "calls": [
       "js/aria/play.js#heldFlyable",
@@ -3408,14 +4478,15 @@
       "js/aria/play.js#jobPlan",
       "js/aria/play.js#moveKeyFor",
       "js/aria/play.js#netWorth",
+      "js/aria/wake.js#wakeJobOpen",
       "js/aria/play.js#note"
      ]
     },
     {
      "key": "resumeHeld>drop",
      "kind": "function",
-     "line": 487,
-     "end": 494,
+     "line": 523,
+     "end": 530,
      "exported": false,
      "calls": [
       "js/economy/contracts.js#abandonContract",
@@ -3428,8 +4499,8 @@
     {
      "key": "decide",
      "kind": "function",
-     "line": 503,
-     "end": 514,
+     "line": 539,
+     "end": 552,
      "exported": false,
      "calls": [
       "js/aria/play.js#resumeHeld",
@@ -3437,37 +4508,57 @@
       "js/aria/mind.js#authorize",
       "js/aria/play.js#now",
       "js/aria/play.js#hullFrac",
+      "js/aria/play.js#begun",
       "js/aria/play.js#rand",
+      "js/aria/play.js#exploreRate",
+      "js/aria/play.js#leastKnown",
       "js/aria/play.js#weightOf",
       "js/aria/mind.js#decideMind",
       "js/aria/play.js#holdUsed",
-      "js/aria/play.js#hostilesClose"
+      "js/aria/play.js#hostilesClose",
+      "js/aria/play.js#threatNow"
+     ]
+    },
+    {
+     "key": "begun",
+     "kind": "function",
+     "line": 554,
+     "end": 561,
+     "exported": false,
+     "calls": [
+      "js/aria/wake.js#wakeJobOpen",
+      "js/aria/mind.js#forecast",
+      "js/aria/play.js#now"
      ]
     },
     {
      "key": "finishMove",
      "kind": "function",
-     "line": 516,
-     "end": 526,
+     "line": 563,
+     "end": 575,
      "exported": false,
      "calls": [
       "js/aria/play.js#now",
       "js/aria/play.js#netWorth",
       "js/aria/play.js#brainNote",
+      "js/aria/mind.js#settleForecast",
+      "js/aria/wake.js#wakeJobClose",
       "js/aria/play.js#note"
      ]
     },
     {
      "key": "beginPlay",
      "kind": "function",
-     "line": 528,
-     "end": 551,
+     "line": 577,
+     "end": 604,
      "exported": true,
      "calls": [
       "js/aria/play.js#setPlayRng",
       "js/aria/play.js#now",
       "js/aria/play.js#netWorth",
       "js/aria/senses.js#forgetSenses",
+      "js/aria/wake.js#wakeReset",
+      "js/aria/wake.js#wakeArm",
       "js/aria/company.js#resetBusiness",
       "js/aria/play.js#adoptBrain",
       "js/aria/play.js#brainOut",
@@ -3477,24 +4568,24 @@
     {
      "key": "COMFORT",
      "kind": "const",
-     "line": 553,
-     "end": 553,
+     "line": 606,
+     "end": 606,
      "exported": false,
      "calls": []
     },
     {
      "key": "TRACTOR_OPS",
      "kind": "const",
-     "line": 554,
-     "end": 554,
+     "line": 607,
+     "end": 607,
      "exported": false,
      "calls": []
     },
     {
      "key": "tendBus",
      "kind": "function",
-     "line": 556,
-     "end": 580,
+     "line": 609,
+     "end": 633,
      "exported": true,
      "calls": [
       "js/flight/ship.js#batteryCap",
@@ -3508,10 +4599,12 @@
     {
      "key": "stepPlay",
      "kind": "function",
-     "line": 582,
-     "end": 643,
+     "line": 635,
+     "end": 697,
      "exported": true,
      "calls": [
+      "js/aria/senses.js#perceive",
+      "js/aria/wake.js#wakeAudit",
       "js/aria/play.js#tendBus",
       "js/aria/play.js#now",
       "js/aria/play.js#note",
@@ -3532,6 +4625,7 @@
       "js/economy/contracts.js#timeLeft",
       "js/economy/contracts.js#abandonContract",
       "js/aria/play.js#startYard",
+      "js/aria/play.js#begun",
       "js/aria/play.js#holdUsed",
       "js/mission/run.js#startMission",
       "js/aria/play.js#jobPlan",
@@ -3541,16 +4635,16 @@
     {
      "key": "brainSig",
      "kind": "function",
-     "line": 645,
-     "end": 645,
+     "line": 699,
+     "end": 699,
      "exported": true,
      "calls": []
     },
     {
      "key": "brainOut",
      "kind": "function",
-     "line": 647,
-     "end": 649,
+     "line": 701,
+     "end": 703,
      "exported": true,
      "calls": [
       "js/aria/play.js#brainSig",
@@ -3560,8 +4654,8 @@
     {
      "key": "adoptBrain",
      "kind": "function",
-     "line": 651,
-     "end": 656,
+     "line": 705,
+     "end": 710,
      "exported": true,
      "calls": [
       "js/aria/play.js#brainSig"
@@ -3570,8 +4664,8 @@
     {
      "key": "playReport",
      "kind": "function",
-     "line": 658,
-     "end": 695,
+     "line": 712,
+     "end": 754,
      "exported": true,
      "calls": [
       "js/aria/play.js#now",
@@ -3585,6 +4679,10 @@
       "js/aria/play.js#jobProgress",
       "js/economy/contracts.js#timeLeft",
       "js/aria/senses.js#senseLine",
+      "js/aria/threat.js#threatLine",
+      "js/aria/footprint.js#footprintLine",
+      "js/aria/footprint.js#footprintReport",
+      "js/aria/mind.js#calibReport",
       "js/aria/company.js#bizLine",
       "js/aria/company.js#bizReport",
       "js/station/dockwork.js#handlingLeft",
@@ -3595,16 +4693,16 @@
     {
      "key": "jobProgress",
      "kind": "function",
-     "line": 697,
-     "end": 701,
+     "line": 756,
+     "end": 760,
      "exported": true,
      "calls": []
     },
     {
      "key": "endPlay",
      "kind": "function",
-     "line": 703,
-     "end": 708,
+     "line": 762,
+     "end": 767,
      "exported": true,
      "calls": [
       "js/aria/play.js#finishMove",
@@ -3618,7 +4716,7 @@
   },
   {
    "file": "js/aria/senses.js",
-   "lines": 216,
+   "lines": 304,
    "vendor": false,
    "summary": "what ARIA can see.",
    "imports": [
@@ -3905,15 +5003,98 @@
        "imported": "SECTORS"
       }
      ]
+    },
+    {
+     "spec": "../world/hulks.js",
+     "target": "js/world/hulks.js",
+     "names": [
+      {
+       "local": "hulks",
+       "imported": "hulks"
+      }
+     ]
+    },
+    {
+     "spec": "./mind.js",
+     "target": "js/aria/mind.js",
+     "names": [
+      {
+       "local": "ariaMind",
+       "imported": "ariaMind"
+      },
+      {
+       "local": "discount",
+       "imported": "discount"
+      },
+      {
+       "local": "remember",
+       "imported": "remember"
+      }
+     ]
+    },
+    {
+     "spec": "./belief.js",
+     "target": "js/aria/belief.js",
+     "names": [
+      {
+       "local": "track",
+       "imported": "track"
+      },
+      {
+       "local": "markDanger",
+       "imported": "markDanger"
+      },
+      {
+       "local": "dangers",
+       "imported": "dangers"
+      },
+      {
+       "local": "alertsSince",
+       "imported": "alertsSince"
+      },
+      {
+       "local": "alertLine",
+       "imported": "alertLine"
+      },
+      {
+       "local": "resetBelief",
+       "imported": "resetBelief"
+      }
+     ]
+    },
+    {
+     "spec": "./threat.js",
+     "target": "js/aria/threat.js",
+     "names": [
+      {
+       "local": "threatOf",
+       "imported": "threatOf"
+      },
+      {
+       "local": "hazardsFrom",
+       "imported": "hazardsFrom"
+      },
+      {
+       "local": "threatLine",
+       "imported": "threatLine"
+      },
+      {
+       "local": "THREAT",
+       "imported": "THREAT"
+      }
+     ]
     }
    ],
    "dynamic": [],
    "importedBy": [
+    "js/aria/aria.js",
+    "js/aria/pilot.js",
     "js/aria/play.js"
    ],
    "exports": [
     "SENSE",
     "forgetSenses",
+    "PERCEIVE",
     "senseHull",
     "senseSpace",
     "sensePorts",
@@ -3922,70 +5103,98 @@
     "sense",
     "nearestReachablePort",
     "unpostedWork",
-    "senseLine"
+    "senseLine",
+    "hostileWithin",
+    "perceive"
    ],
    "symbols": [
     {
      "key": "SENSE",
      "kind": "const",
-     "line": 22,
-     "end": 28,
+     "line": 26,
+     "end": 32,
      "exported": true,
      "calls": []
     },
     {
      "key": "cache",
      "kind": "const",
-     "line": 30,
-     "end": 30,
+     "line": 34,
+     "end": 34,
      "exported": false,
      "calls": []
     },
     {
      "key": "fresh",
      "kind": "function",
-     "line": 31,
-     "end": 31,
+     "line": 35,
+     "end": 35,
      "exported": false,
      "calls": []
     },
     {
      "key": "keep",
      "kind": "function",
-     "line": 32,
-     "end": 32,
+     "line": 36,
+     "end": 36,
      "exported": false,
      "calls": []
     },
     {
      "key": "forgetSenses",
      "kind": "function",
-     "line": 34,
-     "end": 37,
+     "line": 38,
+     "end": 43,
      "exported": true,
+     "calls": [
+      "js/aria/belief.js#resetBelief"
+     ]
+    },
+    {
+     "key": "staleMarket",
+     "kind": "function",
+     "line": 45,
+     "end": 47,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "PERCEIVE",
+     "kind": "const",
+     "line": 49,
+     "end": 49,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "seen",
+     "kind": "const",
+     "line": 50,
+     "end": 50,
+     "exported": false,
      "calls": []
     },
     {
      "key": "honest",
      "kind": "function",
-     "line": 39,
-     "end": 39,
+     "line": 52,
+     "end": 52,
      "exported": false,
      "calls": []
     },
     {
      "key": "_p",
      "kind": "const",
-     "line": 40,
-     "end": 40,
+     "line": 53,
+     "end": 53,
      "exported": false,
      "calls": []
     },
     {
      "key": "senseHull",
      "kind": "function",
-     "line": 42,
-     "end": 67,
+     "line": 55,
+     "end": 80,
      "exported": true,
      "calls": [
       "js/ships/shipdb.js#shipById",
@@ -4001,8 +5210,8 @@
     {
      "key": "senseSpace",
      "kind": "function",
-     "line": 69,
-     "end": 109,
+     "line": 82,
+     "end": 122,
      "exported": true,
      "calls": [
       "js/aria/senses.js#fresh",
@@ -4019,8 +5228,8 @@
     {
      "key": "sensePorts",
      "kind": "function",
-     "line": 111,
-     "end": 141,
+     "line": 124,
+     "end": 154,
      "exported": true,
      "calls": [
       "js/aria/senses.js#fresh",
@@ -4040,8 +5249,8 @@
     {
      "key": "senseBoard",
      "kind": "function",
-     "line": 143,
-     "end": 155,
+     "line": 156,
+     "end": 168,
      "exported": true,
      "calls": [
       "js/aria/senses.js#fresh",
@@ -4055,8 +5264,8 @@
     {
      "key": "senseRoutes",
      "kind": "function",
-     "line": 157,
-     "end": 164,
+     "line": 170,
+     "end": 177,
      "exported": true,
      "calls": [
       "js/aria/senses.js#fresh",
@@ -4067,8 +5276,8 @@
     {
      "key": "sense",
      "kind": "function",
-     "line": 166,
-     "end": 177,
+     "line": 179,
+     "end": 190,
      "exported": true,
      "calls": [
       "js/aria/senses.js#senseHull",
@@ -4081,8 +5290,8 @@
     {
      "key": "nearestReachablePort",
      "kind": "function",
-     "line": 179,
-     "end": 182,
+     "line": 192,
+     "end": 195,
      "exported": true,
      "calls": [
       "js/aria/senses.js#sensePorts"
@@ -4091,8 +5300,8 @@
     {
      "key": "unpostedWork",
      "kind": "function",
-     "line": 184,
-     "end": 208,
+     "line": 197,
+     "end": 221,
      "exported": true,
      "calls": [
       "js/flight/ship.js#holdRoom",
@@ -4107,11 +5316,563 @@
     {
      "key": "senseLine",
      "kind": "function",
-     "line": 210,
-     "end": 214,
+     "line": 223,
+     "end": 227,
      "exported": true,
      "calls": [
       "js/aria/senses.js#sense"
+     ]
+    },
+    {
+     "key": "hostileWithin",
+     "kind": "function",
+     "line": 229,
+     "end": 233,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "TRADE_KEY",
+     "kind": "function",
+     "line": 235,
+     "end": 235,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "react",
+     "kind": "function",
+     "line": 237,
+     "end": 249,
+     "exported": false,
+     "calls": [
+      "js/aria/senses.js#staleMarket",
+      "js/aria/mind.js#discount",
+      "js/aria/belief.js#alertLine",
+      "js/aria/mind.js#remember"
+     ]
+    },
+    {
+     "key": "sceneOf",
+     "kind": "function",
+     "line": 251,
+     "end": 258,
+     "exported": false,
+     "calls": [
+      "js/aria/threat.js#threatLine"
+     ]
+    },
+    {
+     "key": "perceive",
+     "kind": "function",
+     "line": 260,
+     "end": 302,
+     "exported": true,
+     "calls": [
+      "js/aria/senses.js#senseHull",
+      "js/aria/senses.js#senseSpace",
+      "js/aria/threat.js#threatOf",
+      "js/aria/belief.js#markDanger",
+      "js/aria/senses.js#perceive>feed",
+      "js/aria/belief.js#track",
+      "js/aria/senses.js#honest",
+      "js/world/bodies.js#dist3",
+      "js/economy/economy.js#wantsOf",
+      "js/sim/sim.js#sellPriceAt",
+      "js/economy/materials.js#goodName",
+      "js/aria/senses.js#sceneOf",
+      "js/aria/belief.js#alertsSince",
+      "js/aria/belief.js#alertLine",
+      "js/aria/threat.js#hazardsFrom",
+      "js/aria/belief.js#dangers"
+     ]
+    },
+    {
+     "key": "perceive>feed",
+     "kind": "function",
+     "line": 274,
+     "end": 274,
+     "exported": false,
+     "calls": [
+      "js/aria/senses.js#react"
+     ]
+    }
+   ],
+   "effects": []
+  },
+  {
+   "file": "js/aria/threat.js",
+   "lines": 90,
+   "vendor": false,
+   "summary": "",
+   "imports": [],
+   "dynamic": [],
+   "importedBy": [
+    "js/aria/pilot.js",
+    "js/aria/play.js",
+    "js/aria/senses.js"
+   ],
+   "exports": [
+    "THREAT",
+    "bandOf",
+    "guardOf",
+    "threatOf",
+    "legRisk",
+    "pathRisk",
+    "hazardsFrom",
+    "threatLine"
+   ],
+   "symbols": [
+    {
+     "key": "THREAT",
+     "kind": "const",
+     "line": 1,
+     "end": 10,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "d3",
+     "kind": "function",
+     "line": 12,
+     "end": 12,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "clamp01",
+     "kind": "function",
+     "line": 13,
+     "end": 13,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "bandOf",
+     "kind": "function",
+     "line": 15,
+     "end": 15,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "guardOf",
+     "kind": "function",
+     "line": 17,
+     "end": 20,
+     "exported": true,
+     "calls": [
+      "js/aria/threat.js#clamp01"
+     ]
+    },
+    {
+     "key": "threatOf",
+     "kind": "function",
+     "line": 22,
+     "end": 44,
+     "exported": true,
+     "calls": [
+      "js/aria/threat.js#guardOf",
+      "js/aria/threat.js#bandOf"
+     ]
+    },
+    {
+     "key": "segDist",
+     "kind": "function",
+     "line": 46,
+     "end": 52,
+     "exported": false,
+     "calls": [
+      "js/aria/threat.js#d3",
+      "js/aria/threat.js#clamp01"
+     ]
+    },
+    {
+     "key": "legRisk",
+     "kind": "function",
+     "line": 54,
+     "end": 65,
+     "exported": true,
+     "calls": [
+      "js/aria/threat.js#segDist",
+      "js/aria/threat.js#clamp01"
+     ]
+    },
+    {
+     "key": "pathRisk",
+     "kind": "function",
+     "line": 67,
+     "end": 76,
+     "exported": true,
+     "calls": [
+      "js/aria/threat.js#legRisk"
+     ]
+    },
+    {
+     "key": "hazardsFrom",
+     "kind": "function",
+     "line": 78,
+     "end": 84,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "threatLine",
+     "kind": "function",
+     "line": 86,
+     "end": 90,
+     "exported": true,
+     "calls": []
+    }
+   ],
+   "effects": []
+  },
+  {
+   "file": "js/aria/wake.js",
+   "lines": 110,
+   "vendor": false,
+   "summary": "",
+   "imports": [
+    {
+     "spec": "../sim/sim.js",
+     "target": "js/sim/sim.js",
+     "names": [
+      {
+       "local": "sim",
+       "imported": "sim"
+      },
+      {
+       "local": "sellPriceAt",
+       "imported": "sellPriceAt"
+      }
+     ]
+    },
+    {
+     "spec": "../station/stations.js",
+     "target": "js/station/stations.js",
+     "names": [
+      {
+       "local": "stationById",
+       "imported": "stationById"
+      }
+     ]
+    },
+    {
+     "spec": "../economy/economy.js",
+     "target": "js/economy/economy.js",
+     "names": [
+      {
+       "local": "stockOf",
+       "imported": "stockOf"
+      },
+      {
+       "local": "stockMultAt",
+       "imported": "stockMultAt"
+      },
+      {
+       "local": "targetFor",
+       "imported": "targetFor"
+      },
+      {
+       "local": "LINES",
+       "imported": "LINES"
+      },
+      {
+       "local": "GLUT_FRAC",
+       "imported": "GLUT_FRAC"
+      },
+      {
+       "local": "SHORT_FRAC",
+       "imported": "SHORT_FRAC"
+      }
+     ]
+    },
+    {
+     "spec": "../economy/materials.js",
+     "target": "js/economy/materials.js",
+     "names": [
+      {
+       "local": "goodName",
+       "imported": "goodName"
+      },
+      {
+       "local": "baseValue",
+       "imported": "baseValue"
+      }
+     ]
+    },
+    {
+     "spec": "../corp/corps.js",
+     "target": "js/corp/corps.js",
+     "names": [
+      {
+       "local": "corpOfStation",
+       "imported": "corpOfStation"
+      }
+     ]
+    },
+    {
+     "spec": "../economy/traderoutes.js",
+     "target": "js/economy/traderoutes.js",
+     "names": [
+      {
+       "local": "sellable",
+       "imported": "sellable"
+      }
+     ]
+    },
+    {
+     "spec": "./mind.js",
+     "target": "js/aria/mind.js",
+     "names": [
+      {
+       "local": "ariaMind",
+       "imported": "ariaMind"
+      },
+      {
+       "local": "verbOf",
+       "imported": "verbOf"
+      }
+     ]
+    },
+    {
+     "spec": "./foresee.js",
+     "target": "js/aria/foresee.js",
+     "names": [
+      {
+       "local": "counterfactual",
+       "imported": "counterfactual"
+      },
+      {
+       "local": "sellValue",
+       "imported": "sellValue"
+      }
+     ]
+    },
+    {
+     "spec": "./footprint.js",
+     "target": "js/aria/footprint.js",
+     "names": [
+      {
+       "local": "footprint",
+       "imported": "footprint"
+      },
+      {
+       "local": "noteTrade",
+       "imported": "noteTrade"
+      },
+      {
+       "local": "noteWork",
+       "imported": "noteWork"
+      },
+      {
+       "local": "audit",
+       "imported": "audit"
+      },
+      {
+       "local": "footprintIn",
+       "imported": "footprintIn"
+      },
+      {
+       "local": "footprintOut",
+       "imported": "footprintOut"
+      },
+      {
+       "local": "resetFootprint",
+       "imported": "resetFootprint"
+      }
+     ]
+    },
+    {
+     "spec": "./belief.js",
+     "target": "js/aria/belief.js",
+     "names": [
+      {
+       "local": "anchor",
+       "imported": "anchor"
+      }
+     ]
+    }
+   ],
+   "dynamic": [],
+   "importedBy": [
+    "js/aria/aria.js",
+    "js/aria/pilot.js",
+    "js/aria/play.js",
+    "js/mission/tradeops.js"
+   ],
+   "exports": [
+    "WAKE",
+    "wakeArm",
+    "ariaFlying",
+    "sellValueAt",
+    "wakeOpen",
+    "wakeClose",
+    "wakeJobOpen",
+    "wakeJobClose",
+    "wakeAudit",
+    "wakeSave",
+    "wakeLoad",
+    "wakeReset"
+   ],
+   "symbols": [
+    {
+     "key": "WAKE",
+     "kind": "const",
+     "line": 12,
+     "end": 12,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "armed",
+     "kind": "const",
+     "line": 14,
+     "end": 14,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "auditAt",
+     "kind": "const",
+     "line": 15,
+     "end": 15,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "wakeArm",
+     "kind": "function",
+     "line": 17,
+     "end": 17,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "ariaFlying",
+     "kind": "function",
+     "line": 18,
+     "end": 21,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "sellValueAt",
+     "kind": "function",
+     "line": 23,
+     "end": 26,
+     "exported": true,
+     "calls": [
+      "js/aria/wake.js#ariaFlying",
+      "js/aria/foresee.js#sellValue",
+      "js/economy/traderoutes.js#sellable"
+     ]
+    },
+    {
+     "key": "feeds",
+     "kind": "function",
+     "line": 28,
+     "end": 28,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "stalledOn",
+     "kind": "function",
+     "line": 29,
+     "end": 29,
+     "exported": false,
+     "calls": []
+    },
+    {
+     "key": "wakeOpen",
+     "kind": "function",
+     "line": 31,
+     "end": 39,
+     "exported": true,
+     "calls": [
+      "js/corp/corps.js#corpOfStation",
+      "js/aria/wake.js#stalledOn"
+     ]
+    },
+    {
+     "key": "wakeClose",
+     "kind": "function",
+     "line": 41,
+     "end": 86,
+     "exported": true,
+     "calls": [
+      "js/economy/economy.js#stockOf",
+      "js/economy/economy.js#targetFor",
+      "js/economy/economy.js#stockMultAt",
+      "js/economy/materials.js#baseValue",
+      "js/economy/materials.js#goodName",
+      "js/aria/wake.js#feeds",
+      "js/aria/belief.js#anchor",
+      "js/sim/sim.js#sellPriceAt",
+      "js/aria/foresee.js#counterfactual",
+      "js/corp/corps.js#corpOfStation",
+      "js/aria/footprint.js#noteTrade"
+     ]
+    },
+    {
+     "key": "wakeJobOpen",
+     "kind": "function",
+     "line": 88,
+     "end": 90,
+     "exported": true,
+     "calls": []
+    },
+    {
+     "key": "wakeJobClose",
+     "kind": "function",
+     "line": 91,
+     "end": 96,
+     "exported": true,
+     "calls": [
+      "js/aria/mind.js#verbOf",
+      "js/aria/footprint.js#noteWork"
+     ]
+    },
+    {
+     "key": "wakeAudit",
+     "kind": "function",
+     "line": 98,
+     "end": 106,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#audit",
+      "js/station/stations.js#stationById"
+     ]
+    },
+    {
+     "key": "wakeSave",
+     "kind": "function",
+     "line": 108,
+     "end": 108,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#footprintOut"
+     ]
+    },
+    {
+     "key": "wakeLoad",
+     "kind": "function",
+     "line": 109,
+     "end": 109,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#footprintIn"
+     ]
+    },
+    {
+     "key": "wakeReset",
+     "kind": "function",
+     "line": 110,
+     "end": 110,
+     "exported": true,
+     "calls": [
+      "js/aria/footprint.js#resetFootprint"
      ]
     }
    ],
@@ -15220,7 +16981,7 @@
   },
   {
    "file": "js/console/panels/aria-core.js",
-   "lines": 47,
+   "lines": 77,
    "vendor": false,
    "summary": "",
    "imports": [
@@ -15269,6 +17030,28 @@
       {
        "local": "explanationPacket",
        "imported": "explanationPacket"
+      },
+      {
+       "local": "calibReport",
+       "imported": "calibReport"
+      }
+     ]
+    },
+    {
+     "spec": "../../aria/footprint.js",
+     "target": "js/aria/footprint.js",
+     "names": [
+      {
+       "local": "footprint",
+       "imported": "footprint"
+      },
+      {
+       "local": "footprintReport",
+       "imported": "footprintReport"
+      },
+      {
+       "local": "footprintLine",
+       "imported": "footprintLine"
       }
      ]
     },
@@ -15294,8 +17077,8 @@
     {
      "key": "mountCore",
      "kind": "function",
-     "line": 5,
-     "end": 47,
+     "line": 6,
+     "end": 77,
      "exported": true,
      "calls": [
       "js/console/kit.js#section",
@@ -15311,14 +17094,26 @@
      ]
     },
     {
+     "key": "mountCore>pct",
+     "kind": "function",
+     "line": 11,
+     "end": 11,
+     "exported": false,
+     "calls": []
+    },
+    {
      "key": "mountCore>draw",
      "kind": "function",
-     "line": 8,
-     "end": 22,
+     "line": 12,
+     "end": 49,
      "exported": false,
      "calls": [
+      "js/aria/footprint.js#footprintReport",
       "js/console/kit.js#el",
-      "js/console/kit.js#row"
+      "js/console/kit.js#row",
+      "js/aria/mind.js#calibReport",
+      "js/console/panels/aria-core.js#mountCore>pct",
+      "js/aria/footprint.js#footprintLine"
      ]
     }
    ],
@@ -15327,7 +17122,7 @@
      "kind": "event.listen",
      "value": "change",
      "at": "mountCore",
-     "line": 27,
+     "line": 54,
      "target": "input",
      "handler": "(inline)"
     },
@@ -15335,7 +17130,7 @@
      "kind": "event.listen",
      "value": "change",
      "at": "mountCore",
-     "line": 31,
+     "line": 58,
      "target": "mode",
      "handler": "(inline)"
     },
@@ -15343,7 +17138,15 @@
      "kind": "event.listen",
      "value": "change",
      "at": "mountCore",
-     "line": 32,
+     "line": 60,
+     "target": "input",
+     "handler": "(inline)"
+    },
+    {
+     "kind": "event.listen",
+     "value": "change",
+     "at": "mountCore",
+     "line": 61,
      "target": "avoid",
      "handler": "(inline)"
     },
@@ -15351,7 +17154,7 @@
      "kind": "event.listen",
      "value": "change",
      "at": "mountCore",
-     "line": 37,
+     "line": 67,
      "target": "c",
      "handler": "(inline)"
     }
@@ -25135,6 +26938,7 @@
    "dynamic": [],
    "importedBy": [
     "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/comms/comms.js",
     "js/console/panels/corp-marshal.js",
     "js/console/panels/corp.js",
@@ -45304,9 +47108,11 @@
    ],
    "dynamic": [],
    "importedBy": [
+    "js/aria/foresee.js",
     "js/aria/play.js",
     "js/aria/play.js",
     "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/comms/comms.js",
     "js/corp/fleet.js",
     "js/drones/board.js",
@@ -46519,9 +48325,11 @@
    "imports": [],
    "dynamic": [],
    "importedBy": [
+    "js/aria/foresee.js",
     "js/aria/play.js",
     "js/aria/senses.js",
     "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/asteroidgen/ores.js",
     "js/bodygen/body.js",
     "js/comms/comms.js",
@@ -47420,6 +49228,7 @@
     "js/aria/company.js",
     "js/aria/play.js",
     "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/console/panels/market.js",
     "js/mission/tradeops.js"
    ],
@@ -48095,7 +49904,7 @@
   },
   {
    "file": "js/flight/autopilot.js",
-   "lines": 803,
+   "lines": 805,
    "vendor": false,
    "summary": "the autopilot: flight primitives under a mission script.",
    "imports": [
@@ -48542,6 +50351,7 @@
     "apHold",
     "pilotInput",
     "relSpeedTo",
+    "portHooks",
     "bestPortFor",
     "parkDistance",
     "tickAutopilot",
@@ -49072,10 +50882,18 @@
      "calls": []
     },
     {
+     "key": "portHooks",
+     "kind": "const",
+     "line": 499,
+     "end": 499,
+     "exported": true,
+     "calls": []
+    },
+    {
      "key": "bestPortFor",
      "kind": "function",
-     "line": 499,
-     "end": 518,
+     "line": 501,
+     "end": 520,
      "exported": true,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -49087,16 +50905,16 @@
     {
      "key": "parkDistance",
      "kind": "function",
-     "line": 520,
-     "end": 523,
+     "line": 522,
+     "end": 525,
      "exported": true,
      "calls": []
     },
     {
      "key": "tickAutopilot",
      "kind": "function",
-     "line": 525,
-     "end": 553,
+     "line": 527,
+     "end": 555,
      "exported": true,
      "calls": [
       "js/mission/run.js#restoreRun",
@@ -49112,8 +50930,8 @@
     {
      "key": "apLeg",
      "kind": "function",
-     "line": 555,
-     "end": 646,
+     "line": 557,
+     "end": 648,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#parkDistance",
@@ -49142,8 +50960,8 @@
     {
      "key": "apPark",
      "kind": "function",
-     "line": 648,
-     "end": 667,
+     "line": 650,
+     "end": 669,
      "exported": true,
      "calls": [
       "js/world/bodies.js#dist3",
@@ -49158,8 +50976,8 @@
     {
      "key": "apDock",
      "kind": "function",
-     "line": 669,
-     "end": 712,
+     "line": 671,
+     "end": 714,
      "exported": true,
      "calls": [
       "js/sim/sim.js#stationStatus",
@@ -49181,24 +50999,24 @@
     {
      "key": "MINE_STANDOFF",
      "kind": "function",
-     "line": 714,
-     "end": 714,
+     "line": 716,
+     "end": 716,
      "exported": false,
      "calls": []
     },
     {
      "key": "_rock",
      "kind": "const",
-     "line": 715,
-     "end": 715,
+     "line": 717,
+     "end": 717,
      "exported": false,
      "calls": []
     },
     {
      "key": "atSeam",
      "kind": "function",
-     "line": 717,
-     "end": 719,
+     "line": 719,
+     "end": 721,
      "exported": true,
      "calls": [
       "js/world/field.js#inBelt",
@@ -49208,8 +51026,8 @@
     {
      "key": "apMine",
      "kind": "function",
-     "line": 721,
-     "end": 782,
+     "line": 723,
+     "end": 784,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#apUnstick",
@@ -49233,16 +51051,16 @@
     {
      "key": "jumpEndedShort",
      "kind": "function",
-     "line": 784,
-     "end": 788,
+     "line": 786,
+     "end": 790,
      "exported": true,
      "calls": []
     },
     {
      "key": "wireAutopilot",
      "kind": "function",
-     "line": 790,
-     "end": 803,
+     "line": 792,
+     "end": 805,
      "exported": true,
      "calls": [
       "js/flight/autopilot.js#toggleAutopilot",
@@ -49255,19 +51073,19 @@
      "kind": "dom.id",
      "value": "aux-auto",
      "at": "wireAutopilot",
-     "line": 792
+     "line": 794
     },
     {
      "kind": "dom.id",
      "value": "aux-auto-st",
      "at": "wireAutopilot",
-     "line": 793
+     "line": 795
     },
     {
      "kind": "event.listen",
      "value": "click",
      "at": "wireAutopilot",
-     "line": 794,
+     "line": 796,
      "target": "btn",
      "handler": "(inline)"
     },
@@ -49275,7 +51093,7 @@
      "kind": "timer",
      "value": "setInterval",
      "at": "wireAutopilot",
-     "line": 796
+     "line": 798
     }
    ]
   },
@@ -52389,7 +54207,6 @@
    ],
    "dynamic": [],
    "importedBy": [
-    "js/aria/pilot.js",
     "js/aria/senses.js",
     "js/comms/comms.js",
     "js/console/panels/nav.js",
@@ -57884,7 +59701,7 @@
   },
   {
    "file": "js/mission/tradeops.js",
-   "lines": 123,
+   "lines": 128,
    "vendor": false,
    "summary": "the mission's trade ops: the route a TRADE RUN flies, BUY and SELL.",
    "imports": [
@@ -57899,6 +59716,20 @@
       {
        "local": "spendCap",
        "imported": "spendCap"
+      }
+     ]
+    },
+    {
+     "spec": "../aria/wake.js",
+     "target": "js/aria/wake.js",
+     "names": [
+      {
+       "local": "wakeOpen",
+       "imported": "wakeOpen"
+      },
+      {
+       "local": "wakeClose",
+       "imported": "wakeClose"
       }
      ]
     },
@@ -58004,16 +59835,16 @@
     {
      "key": "makeTradeOps",
      "kind": "function",
-     "line": 8,
-     "end": 123,
+     "line": 9,
+     "end": 128,
      "exported": true,
      "calls": []
     },
     {
      "key": "makeTradeOps>pickRoute",
      "kind": "function",
-     "line": 9,
-     "end": 20,
+     "line": 10,
+     "end": 21,
      "exported": false,
      "calls": [
       "js/economy/traderoutes.js#bestRoute",
@@ -58025,22 +59856,24 @@
     {
      "key": "makeTradeOps.SELL",
      "kind": "prop",
-     "line": 24,
-     "end": 58,
+     "line": 25,
+     "end": 61,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
+      "js/aria/wake.js#wakeOpen",
       "js/sim/sim.js#sellAllOre",
       "js/economy/traderoutes.js#sellable",
       "js/sim/sim.js#tradeSell",
+      "js/aria/wake.js#wakeClose",
       "js/sim/sim.js#logEvent"
      ]
     },
     {
      "key": "makeTradeOps.DELIVER",
      "kind": "prop",
-     "line": 59,
-     "end": 84,
+     "line": 62,
+     "end": 87,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -58053,8 +59886,8 @@
     {
      "key": "makeTradeOps.BUY",
      "kind": "prop",
-     "line": 85,
-     "end": 120,
+     "line": 88,
+     "end": 125,
      "exported": false,
      "calls": [
       "js/station/stations.js#stationById",
@@ -58064,7 +59897,9 @@
       "js/aria/mind.js#spendCap",
       "js/sim/sim.js#buyPriceAt",
       "js/aria/mind.js#authorize",
-      "js/sim/sim.js#tradeBuy"
+      "js/aria/wake.js#wakeOpen",
+      "js/sim/sim.js#tradeBuy",
+      "js/aria/wake.js#wakeClose"
      ]
     }
    ],
@@ -85675,6 +87510,7 @@
     "js/aria/pilot.js",
     "js/aria/play.js",
     "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/comms/comms.js",
     "js/console/console.js",
     "js/console/panels/corp-marshal.js",
@@ -100191,6 +102027,7 @@
     "js/aria/pilot.js",
     "js/aria/play.js",
     "js/aria/senses.js",
+    "js/aria/wake.js",
     "js/comms/comms.js",
     "js/comms/gnn.js",
     "js/console/panels/corp-marshal.js",
@@ -114584,7 +116421,6 @@
    "imports": [],
    "dynamic": [],
    "importedBy": [
-    "js/aria/play.js",
     "js/core/boot.js",
     "js/ui/hud.js"
    ],
@@ -118018,6 +119854,7 @@
    "importedBy": [
     "js/aria/pilot.js",
     "js/aria/play.js",
+    "js/aria/senses.js",
     "js/drones/ops.js",
     "js/economy/contracts.js",
     "js/flight/autopilot.js",
@@ -120285,6 +122122,8 @@
    "js/aria/aria.js",
    "js/aria/nav.js",
    "js/aria/pilot.js",
+   "js/aria/senses.js",
+   "js/aria/wake.js",
    "js/corp/company.js",
    "js/corp/fleet.js",
    "js/corp/seclevel.js",

@@ -1,6 +1,6 @@
 # js/world/hulks.js
 
-[index](../../../README.md) · 407 lines · 38 symbols · 4 imports · 14 importers
+[index](../../../README.md) · 407 lines · 38 symbols · 4 imports · 15 importers
 
 ## About
 
@@ -30,6 +30,7 @@ A hulk is plain JSON-able data so a later slice can put it on the wire.
 
 - [js/aria/pilot.js](../aria/pilot.js.md) — `hulks`
 - [js/aria/play.js](../aria/play.js.md) — `hulkById`
+- [js/aria/senses.js](../aria/senses.js.md) — `hulks`
 - [js/drones/ops.js](../drones/ops.js.md) — `spawnHulk`
 - [js/economy/contracts.js](../economy/contracts.js.md) — `HULK`, `hulkById`, `hullForPlate`, `plateOf`, `spawnHulk`
 - [js/flight/autopilot.js](../flight/autopilot.js.md) — `hulkById`
@@ -48,7 +49,7 @@ A hulk is plain JSON-able data so a later slice can put it on the wire.
 - [`HULK`](#s-HULK) · const — used by [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/rig.js](../flight/rig.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
 - [`HULK_SECTIONS`](#s-HULK_SECTIONS) · const — used by test/hulks.test.mjs
 - [`HULK_PARTS`](#s-HULK_PARTS) · const — used by [js/render/engine.js](../render/engine.js.md), test/hulks.test.mjs
-- [`hulks`](#s-hulks) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/hulks.test.mjs, test/rig.test.mjs
+- [`hulks`](#s-hulks) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md), test/hulks.test.mjs, test/rig.test.mjs
 - [`resetHulks`](#s-resetHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
 - [`bindHulks`](#s-bindHulks) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs, test/rig.test.mjs
 - [`hulkById`](#s-hulkById) · function — used by [js/aria/play.js](../aria/play.js.md), [js/economy/contracts.js](../economy/contracts.js.md), [js/flight/autopilot.js](../flight/autopilot.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hulks.test.mjs
@@ -174,7 +175,7 @@ function · **exported** · L57–59
 
 function · **exported** · L61–64
 
-- called by: [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`jobSeconds`](../aria/play.js.md#s-jobSeconds) _js/aria/play.js_ · [`anchorFor`](../economy/contracts.js.md#s-anchorFor) _js/economy/contracts.js_ · [`jobStatus`](../economy/contracts.js.md#s-jobStatus) _js/economy/contracts.js_ · [`noteSalvaged`](../economy/contracts.js.md#s-noteSalvaged) _js/economy/contracts.js_ · [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`engageSalvageLoop`](../flight/autopilot.js.md#s-engageSalvageLoop) _js/flight/autopilot.js_ · [`makeSalvage`](../mission/salvage.js.md#s-makeSalvage) _js/mission/salvage.js_ · [`makeSalvage>pick`](../mission/salvage.js.md#s-makeSalvage-pick) _js/mission/salvage.js_ ×2 · [`mountGame>updateRigFX`](../render/engine.js.md#s-mountGame-updateRigFX) _js/render/engine.js_ · [`candidateSig`](../sim/sim.js.md#s-candidateSig) _js/sim/sim.js_ · [`h`](../sim/sim.js.md#s-h) _js/sim/sim.js_ · [`targetPosition`](../sim/sim.js.md#s-targetPosition) _js/sim/sim.js_ · [`targetVelocity`](../sim/sim.js.md#s-targetVelocity) _js/sim/sim.js_
+- called by: [`jobHops`](../aria/play.js.md#s-jobHops) _js/aria/play.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`anchorFor`](../economy/contracts.js.md#s-anchorFor) _js/economy/contracts.js_ · [`jobStatus`](../economy/contracts.js.md#s-jobStatus) _js/economy/contracts.js_ · [`noteSalvaged`](../economy/contracts.js.md#s-noteSalvaged) _js/economy/contracts.js_ · [`settle`](../economy/contracts.js.md#s-settle) _js/economy/contracts.js_ · [`engageSalvageLoop`](../flight/autopilot.js.md#s-engageSalvageLoop) _js/flight/autopilot.js_ · [`makeSalvage`](../mission/salvage.js.md#s-makeSalvage) _js/mission/salvage.js_ · [`makeSalvage>pick`](../mission/salvage.js.md#s-makeSalvage-pick) _js/mission/salvage.js_ ×2 · [`mountGame>updateRigFX`](../render/engine.js.md#s-mountGame-updateRigFX) _js/render/engine.js_ · [`candidateSig`](../sim/sim.js.md#s-candidateSig) _js/sim/sim.js_ · [`h`](../sim/sim.js.md#s-h) _js/sim/sim.js_ · [`targetPosition`](../sim/sim.js.md#s-targetPosition) _js/sim/sim.js_ · [`targetVelocity`](../sim/sim.js.md#s-targetVelocity) _js/sim/sim.js_
 
 <!-- note:hulkById -->
 <!-- /note -->

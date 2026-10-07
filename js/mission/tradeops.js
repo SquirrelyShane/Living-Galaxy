@@ -1,4 +1,5 @@
 import { authorize, spendCap } from "../aria/mind.js";
+import { wakeOpen, wakeClose } from "../aria/wake.js";
 import { sim, sellAllOre, tradeBuy, tradeSell, logEvent, buyPriceAt } from "../sim/sim.js";
 import { holdRoom, roomFor } from "../flight/ship.js";
 import { stationById } from "../station/stations.js";
@@ -28,6 +29,7 @@ export function makeTradeOps({ mission, note, ap }) {
       ap().phase = "trade"; ap().task = `sell · ${st.name}`;
       const what = s.args?.what ?? "ore";
       const before = ship.credits;
+      const wake = mission.active?.mode === "aria" || mission.active?.aria ? wakeOpen(st) : null;
       let refused = null;
       if (what === "ore") sellAllOre();
       else if (what === "all") { const keep = s.args?.keep ?? null; for (const [k, q] of Object.entries(sellable(ship))) if (k !== keep) refused = tradeSell(k, q) ?? refused; }
@@ -38,6 +40,7 @@ export function makeTradeOps({ mission, note, ap }) {
         if (q > 0) refused = tradeSell(t.good, q);
       } else if (ship.hold[what] > 0) refused = tradeSell(what, sellable(ship)[what] ?? 0);
       const got = ship.credits - before;
+      wakeClose(wake, "sell");
       if (what === "route" && mission.trade) {
         const t = mission.trade;
         const net = got - t.spent;
@@ -111,8 +114,10 @@ export function makeTradeOps({ mission, note, ap }) {
         const a = authorize("trading", { cost: buyPriceAt(st, { id: good }, qty) * qty, credits: ship.credits, at: sim.time });
         if (!a.ok) return `fail:${a.why}`;
       }
+      const wake = mission.active?.mode === "aria" || mission.active?.aria ? wakeOpen(st) : null;
       const e = tradeBuy(good, qty);
       if (e) return `fail:${e.toLowerCase()}`;
+      wakeClose(wake, "buy");
       const got = (ship.hold[good] ?? 0) - h0;
       if (mission.trade && good === mission.trade.good) { mission.trade.bought += got; mission.trade.spent += c0 - ship.credits; }
       mission.run.why = `bought ${Math.round(got)} ${good.replace(/_/g, " ")} for ${Math.round(c0 - ship.credits).toLocaleString()} cr`;

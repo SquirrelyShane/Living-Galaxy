@@ -1,6 +1,6 @@
 # js/version.js
 
-[index](../../README.md) · 7 lines · 5 symbols · 0 imports · 4 importers
+[index](../../README.md) · 7 lines · 5 symbols · 0 imports · 3 importers
 
 ## About
 
@@ -23,7 +23,6 @@ _none_
 
 ## Imported by
 
-- [js/aria/play.js](aria/play.js.md) — `VERSION`
 - [js/core/boot.js](core/boot.js.md) — `VERSION`
 - [js/ui/hud.js](ui/hud.js.md) — `BUILD_LINE`
 - test/boot.test.mjs _(outside js/)_ — `VERSION`
@@ -32,7 +31,7 @@ _none_
 
 - [`NAME`](#s-NAME) · const — **no importer in scanned roots**
 - [`SUBTITLE`](#s-SUBTITLE) · const — **no importer in scanned roots**
-- [`VERSION`](#s-VERSION) · const — used by [js/aria/play.js](aria/play.js.md), [js/core/boot.js](core/boot.js.md), test/boot.test.mjs
+- [`VERSION`](#s-VERSION) · const — used by [js/core/boot.js](core/boot.js.md), test/boot.test.mjs
 - [`FULL_NAME`](#s-FULL_NAME) · const — **no importer in scanned roots**
 - [`BUILD_LINE`](#s-BUILD_LINE) · const — used by [js/ui/hud.js](ui/hud.js.md)
 

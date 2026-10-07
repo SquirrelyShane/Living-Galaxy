@@ -316,11 +316,11 @@ Element ids and selectors the code reaches for — the contract with index.html.
 
 ### `aux-auto`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L792
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L794
 
 ### `aux-auto-st`
 
-- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L793
+- dom.id — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L795
 
 ### `aux-comms`
 

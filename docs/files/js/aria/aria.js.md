@@ -1,6 +1,6 @@
 # js/aria/aria.js
 
-[index](../../../README.md) · 197 lines · 24 symbols · 7 imports · 10 importers
+[index](../../../README.md) · 212 lines · 24 symbols · 11 imports · 10 importers
 
 ## About
 
@@ -34,7 +34,7 @@ data, not what you say:
      same learnOutcome path the NPC captains use, which means a long ARIA
      watch makes it better at being you than you were when it started.
 
-- L57 · `const MUTE_AT = 4;` — ignored this many times running and it stops asking
+- L62 · `const MUTE_AT = 4;` — ignored this many times running and it stops asking
 <!-- /note -->
 
 ## Imports
@@ -42,12 +42,16 @@ data, not what you say:
 | line | from | names | target |
 |---|---|---|---|
 | 1 | `../flight/recorder.js` | `flushPending` | [js/flight/recorder.js](../flight/recorder.js.md) |
-| 2 | `./mind.js` | `ariaMind`, `resetMind`, `saveMind`, `loadMind`, `mindKey`, `bindPeopleLookup`, `explanationPacket` | [js/aria/mind.js](mind.js.md) |
-| 3 | `../corp/gdb.js` | `entryOf` | [js/corp/gdb.js](../corp/gdb.js.md) |
-| 4 | `../sim/sim.js` | `sim`, `logEvent` | [js/sim/sim.js](../sim/sim.js.md) |
-| 5 | `../npc/captain.js` | `captain`, `houseBrain`, `retakeCommand`, `ariaHooks` | [js/npc/captain.js](../npc/captain.js.md) |
-| 6 | `../comms/chat.js` | `post` | [js/comms/chat.js](../comms/chat.js.md) |
-| 7 | `./pilot.js` | `beginAriaWatch`, `endAriaWatch`, `tickAriaPilot`, `wireAriaPilot`, `bindAriaPrefs`, `notePlayLabel`, `notePlayerJob`, `ariaPilot`, `jobHabits`, `planJob` | [js/aria/pilot.js](pilot.js.md) |
+| 2 | `./mind.js` | `ariaMind`, `resetMind`, `saveMind`, `loadMind`, `mindKey`, `bindPeopleLookup`, `explanationPacket`, `bindPacketExtras`, `calibReport` | [js/aria/mind.js](mind.js.md) |
+| 3 | `./wake.js` | `wakeSave`, `wakeLoad`, `wakeReset` | [js/aria/wake.js](wake.js.md) |
+| 4 | `./footprint.js` | `footprintReport`, `footprintLine` | [js/aria/footprint.js](footprint.js.md) |
+| 5 | `./belief.js` | `beliefReport` | [js/aria/belief.js](belief.js.md) |
+| 6 | `./senses.js` | `perceive` | [js/aria/senses.js](senses.js.md) |
+| 7 | `../corp/gdb.js` | `entryOf` | [js/corp/gdb.js](../corp/gdb.js.md) |
+| 8 | `../sim/sim.js` | `sim`, `logEvent` | [js/sim/sim.js](../sim/sim.js.md) |
+| 9 | `../npc/captain.js` | `captain`, `houseBrain`, `retakeCommand`, `ariaHooks` | [js/npc/captain.js](../npc/captain.js.md) |
+| 10 | `../comms/chat.js` | `post` | [js/comms/chat.js](../comms/chat.js.md) |
+| 11 | `./pilot.js` | `beginAriaWatch`, `endAriaWatch`, `tickAriaPilot`, `wireAriaPilot`, `bindAriaPrefs`, `notePlayLabel`, `notePlayerJob`, `ariaPilot`, `jobHabits`, `planJob` | [js/aria/pilot.js](pilot.js.md) |
 
 ## Imported by
 
@@ -86,14 +90,14 @@ data, not what you say:
 
 ## Effects
 
-- **storage.get** — `‹KEY()›` (loadAria:166)
-- **storage.set** — `‹KEY()›` (saveAria:157)
+- **storage.get** — `‹KEY()›` (loadAria:177)
+- **storage.set** — `‹KEY()›` (saveAria:167)
 
 ## Symbols
 
 ### <a id="s-KEY"></a>`KEY()`
 
-function · L9–9
+function · L13–13
 
 - called by: [`loadAria`](#s-loadAria) · [`saveAria`](#s-saveAria)
 
@@ -102,33 +106,33 @@ function · L9–9
 
 ### <a id="s-SAVE_EVERY"></a>`SAVE_EVERY`
 
-const · L10–10
+const · L14–14
 
 <!-- note:SAVE_EVERY -->
 <!-- /note -->
 
 ### <a id="s-aria"></a>`aria`
 
-const · **exported** · L12–17
+const · **exported** · L16–21
 
 <!-- note:aria -->
 - L? · `prefs: { port: {}, ore: {}, plan: {}, lane: {}, job: {} },` — kind → key → { n, last } : how often you chose this, and when
-- L14 · `advice: {},` — advisory kind → { shown, acted, ignored, muted }
-- L15 · `conn: { held: false, since: 0, decisions: 0, earned: 0, hullAt: 100, log: [] },` — ARIA's own watch
+- L18 · `advice: {},` — advisory kind → { shown, acted, ignored, muted }
+- L19 · `conn: { held: false, since: 0, decisions: 0, earned: 0, hullAt: 100, log: [] },` — ARIA's own watch
 <!-- /note -->
 
 ### <a id="s-resetAria"></a>`resetAria()`
 
-function · **exported** · L19–25
+function · **exported** · L23–30
 
-- calls: [`mindKey`](mind.js.md#s-mindKey) _js/aria/mind.js_ · [`resetMind`](mind.js.md#s-resetMind) _js/aria/mind.js_ · [`bindAriaPrefs`](pilot.js.md#s-bindAriaPrefs) _js/aria/pilot.js_
+- calls: [`mindKey`](mind.js.md#s-mindKey) _js/aria/mind.js_ · [`resetMind`](mind.js.md#s-resetMind) _js/aria/mind.js_ · [`bindAriaPrefs`](pilot.js.md#s-bindAriaPrefs) _js/aria/pilot.js_ · [`wakeReset`](wake.js.md#s-wakeReset) _js/aria/wake.js_
 
 <!-- note:resetAria -->
 <!-- /note -->
 
 ### <a id="s-handsOff"></a>`handsOff()`
 
-function · **exported** · L27–27
+function · **exported** · L32–32
 
 - called by: [`stepMining`](../flight/turrets.js.md#s-stepMining) _js/flight/turrets.js_
 
@@ -144,7 +148,7 @@ own habits and calls that your taste.
 
 ### <a id="s-notePlayerChoice"></a>`notePlayerChoice(kind, key, weight=)`
 
-function · **exported** · L29–36
+function · **exported** · L34–41
 
 - calls: [`saveAria`](#s-saveAria)
 - called by: [`stepMining`](../flight/turrets.js.md#s-stepMining) _js/flight/turrets.js_ · [`sellAllOre`](../sim/sim.js.md#s-sellAllOre) _js/sim/sim.js_
@@ -159,7 +163,7 @@ full hold says more than dropping two units.
 
 ### <a id="s-preferenceFor"></a>`preferenceFor(kind, key)`
 
-function · **exported** · L38–47
+function · **exported** · L43–52
 
 - called by: [`preferenceReport`](#s-preferenceReport) · [`apMine`](../flight/autopilot.js.md#s-apMine) _js/flight/autopilot.js_ · [`bestPortFor`](../flight/autopilot.js.md#s-bestPortFor) _js/flight/autopilot.js_
 
@@ -171,12 +175,12 @@ autopilot that only ever went where you had been before would never find you
 the better price, and the whole point of the thing is that it flies while you
 are doing something else.
 
-- L45 · `const confidence = Math.min(1, total / 12);` — it has to have seen enough
+- L50 · `const confidence = Math.min(1, total / 12);` — it has to have seen enough
 <!-- /note -->
 
 ### <a id="s-preferenceReport"></a>`preferenceReport(kind)`
 
-function · **exported** · L49–55
+function · **exported** · L54–60
 
 - calls: [`preferenceFor`](#s-preferenceFor)
 - called by: [`mountAria`](../console/panels/nav.js.md#s-mountAria) _js/console/panels/nav.js_
@@ -187,7 +191,7 @@ What it thinks it knows, for the panel.
 
 ### <a id="s-MUTE_AT"></a>`MUTE_AT`
 
-const · L57–57
+const · L62–62
 
 <!-- note:MUTE_AT -->
 ---- 2. advisories ----------------------------------------------------------
@@ -195,7 +199,7 @@ const · L57–57
 
 ### <a id="s-adv"></a>`adv(kind)`
 
-function · L59–62
+function · L64–67
 
 - called by: [`answerAdvice`](#s-answerAdvice) · [`noteAdvice`](#s-noteAdvice) · [`shouldAdvise`](#s-shouldAdvise)
 
@@ -204,7 +208,7 @@ function · L59–62
 
 ### <a id="s-shouldAdvise"></a>`shouldAdvise(kind)`
 
-function · **exported** · L64–66
+function · **exported** · L69–71
 
 - calls: [`adv`](#s-adv)
 
@@ -214,7 +218,7 @@ Should the assistant raise this kind of thing at all?
 
 ### <a id="s-noteAdvice"></a>`noteAdvice(kind)`
 
-function · **exported** · L68–72
+function · **exported** · L73–77
 
 - calls: [`adv`](#s-adv)
 
@@ -224,7 +228,7 @@ It raised one.
 
 ### <a id="s-answerAdvice"></a>`answerAdvice(kind, acted)`
 
-function · **exported** · L74–80
+function · **exported** · L79–85
 
 - calls: [`adv`](#s-adv) · [`saveAria`](#s-saveAria)
 
@@ -236,7 +240,7 @@ battery" in an hour of belt work should not keep that forever.
 
 ### <a id="s-adviceReport"></a>`adviceReport()`
 
-function · **exported** · L82–86
+function · **exported** · L87–91
 
 - called by: [`mountAria`](../console/panels/nav.js.md#s-mountAria) _js/console/panels/nav.js_
 
@@ -245,7 +249,7 @@ function · **exported** · L82–86
 
 ### <a id="s-ariaMember"></a>`ariaMember()`
 
-function · L88–94
+function · L93–99
 
 - called by: [`ariaTakeConn`](#s-ariaTakeConn)
 
@@ -261,7 +265,7 @@ shape captain.js expects and nothing else.
 
 ### <a id="s-ariaHasConn"></a>`ariaHasConn()`
 
-function · **exported** · L96–96
+function · **exported** · L101–101
 
 - called by: [`ariaNoteDecision`](#s-ariaNoteDecision) · [`ariaWatchReport`](#s-ariaWatchReport) · [`wireAriaHooks`](#s-wireAriaHooks) · [`search.status~4`](../console/panels/nav.js.md#s-search-status-4) _js/console/panels/nav.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_ ×2 · [`mountHud>paintAll`](../ui/hud.js.md#s-mountHud-paintAll) _js/ui/hud.js_
 
@@ -271,7 +275,7 @@ Is ARIA flying?
 
 ### <a id="s-ariaTakeConn"></a>`ariaTakeConn()`
 
-function · **exported** · L98–116
+function · **exported** · L103–121
 
 - calls: [`ariaMember`](#s-ariaMember) · [`beginAriaWatch`](pilot.js.md#s-beginAriaWatch) _js/aria/pilot.js_ · [`jobHabits`](pilot.js.md#s-jobHabits) _js/aria/pilot.js_ · [`post`](../comms/chat.js.md#s-post) _js/comms/chat.js_ · [`houseBrain`](../npc/captain.js.md#s-houseBrain) _js/npc/captain.js_ · [`logEvent`](../sim/sim.js.md#s-logEvent) _js/sim/sim.js_
 - called by: [`mountAria`](../console/panels/nav.js.md#s-mountAria) _js/console/panels/nav.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
@@ -287,7 +291,7 @@ flies like you.
 
 ### <a id="s-ariaRelease"></a>`ariaRelease()`
 
-function · **exported** · L118–127
+function · **exported** · L123–132
 
 - calls: [`saveAria`](#s-saveAria) · [`endAriaWatch`](pilot.js.md#s-endAriaWatch) _js/aria/pilot.js_ · [`post`](../comms/chat.js.md#s-post) _js/comms/chat.js_ · [`retakeCommand`](../npc/captain.js.md#s-retakeCommand) _js/npc/captain.js_
 - called by: [`wireAriaHooks`](#s-wireAriaHooks) · [`mountAria`](../console/panels/nav.js.md#s-mountAria) _js/console/panels/nav.js_ · [`mountHud`](../ui/hud.js.md#s-mountHud) _js/ui/hud.js_
@@ -297,7 +301,7 @@ function · **exported** · L118–127
 
 ### <a id="s-ariaNoteDecision"></a>`ariaNoteDecision(action, rationale)`
 
-function · **exported** · L129–134
+function · **exported** · L134–139
 
 - calls: [`ariaHasConn`](#s-ariaHasConn)
 - called by: [`wireAriaHooks`](#s-wireAriaHooks) ×2
@@ -311,9 +315,9 @@ the credits and the hold did next, and writes it into the same core.
 
 ### <a id="s-ariaWatchReport"></a>`ariaWatchReport()`
 
-function · **exported** · L136–151
+function · **exported** · L141–160
 
-- calls: [`ariaHasConn`](#s-ariaHasConn) · [`jobHabits`](pilot.js.md#s-jobHabits) _js/aria/pilot.js_ · [`houseBrain`](../npc/captain.js.md#s-houseBrain) _js/npc/captain.js_
+- calls: [`ariaHasConn`](#s-ariaHasConn) · [`footprintLine`](footprint.js.md#s-footprintLine) _js/aria/footprint.js_ · [`calibReport`](mind.js.md#s-calibReport) _js/aria/mind.js_ · [`jobHabits`](pilot.js.md#s-jobHabits) _js/aria/pilot.js_ · [`houseBrain`](../npc/captain.js.md#s-houseBrain) _js/npc/captain.js_
 - called by: [`mountAria`](../console/panels/nav.js.md#s-mountAria) _js/console/panels/nav.js_ · [`search.status~4`](../console/panels/nav.js.md#s-search-status-4) _js/console/panels/nav.js_
 
 <!-- note:ariaWatchReport -->
@@ -321,23 +325,23 @@ function · **exported** · L136–151
 
 ### <a id="s-saveAria"></a>`saveAria()`
 
-function · **exported** · L153–159
+function · **exported** · L162–169
 
-- calls: [`KEY`](#s-KEY) · [`mindKey`](mind.js.md#s-mindKey) _js/aria/mind.js_ · [`saveMind`](mind.js.md#s-saveMind) _js/aria/mind.js_
-- called by: [`answerAdvice`](#s-answerAdvice) · [`ariaRelease`](#s-ariaRelease) · [`notePlayerChoice`](#s-notePlayerChoice) · [`wireAriaHooks`](#s-wireAriaHooks) ×2 · [`mountCore`](../console/panels/aria-core.js.md#s-mountCore) _js/console/panels/aria-core.js_ ×4
+- calls: [`KEY`](#s-KEY) · [`mindKey`](mind.js.md#s-mindKey) _js/aria/mind.js_ · [`saveMind`](mind.js.md#s-saveMind) _js/aria/mind.js_ · [`wakeSave`](wake.js.md#s-wakeSave) _js/aria/wake.js_
+- called by: [`answerAdvice`](#s-answerAdvice) · [`ariaRelease`](#s-ariaRelease) · [`notePlayerChoice`](#s-notePlayerChoice) · [`wireAriaHooks`](#s-wireAriaHooks) ×2 · [`mountCore`](../console/panels/aria-core.js.md#s-mountCore) _js/console/panels/aria-core.js_ ×5
 - effects: storage.set `‹KEY()›`
 
 <!-- note:saveAria -->
 ---- persistence --------------------------------------------------------------
 
-- L158 · `} catch {` — quota, or no window
+- L168 · `} catch {` — quota, or no window
 <!-- /note -->
 
 ### <a id="s-loadAria"></a>`loadAria()`
 
-function · **exported** · L161–173
+function · **exported** · L171–184
 
-- calls: [`KEY`](#s-KEY) · [`loadMind`](mind.js.md#s-loadMind) _js/aria/mind.js_ · [`mindKey`](mind.js.md#s-mindKey) _js/aria/mind.js_ · [`bindAriaPrefs`](pilot.js.md#s-bindAriaPrefs) _js/aria/pilot.js_ ×2
+- calls: [`KEY`](#s-KEY) · [`loadMind`](mind.js.md#s-loadMind) _js/aria/mind.js_ · [`mindKey`](mind.js.md#s-mindKey) _js/aria/mind.js_ · [`bindAriaPrefs`](pilot.js.md#s-bindAriaPrefs) _js/aria/pilot.js_ ×2 · [`wakeLoad`](wake.js.md#s-wakeLoad) _js/aria/wake.js_
 - called by: [`wireAriaHooks`](#s-wireAriaHooks) · [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
 - effects: storage.get `‹KEY()›`
 
@@ -346,7 +350,7 @@ function · **exported** · L161–173
 
 ### <a id="s-wireAriaHooks"></a>`wireAriaHooks()`
 
-function · **exported** · L175–189
+function · **exported** · L186–200
 
 - calls: [`ariaHasConn`](#s-ariaHasConn) · [`ariaNoteDecision`](#s-ariaNoteDecision) ×2 · [`ariaRelease`](#s-ariaRelease) · [`loadAria`](#s-loadAria) · [`saveAria`](#s-saveAria) ×2 · [`notePlayerJob`](pilot.js.md#s-notePlayerJob) _js/aria/pilot.js_ · [`notePlayLabel`](pilot.js.md#s-notePlayLabel) _js/aria/pilot.js_ · [`tickAriaPilot`](pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`wireAriaPilot`](pilot.js.md#s-wireAriaPilot) _js/aria/pilot.js_ · [`post`](../comms/chat.js.md#s-post) _js/comms/chat.js_ · [`flushPending`](../flight/recorder.js.md#s-flushPending) _js/flight/recorder.js_
 - called by: [`wireAria`](#s-wireAria)
@@ -376,9 +380,9 @@ calls it after the graph has finished loading, when nothing is in TDZ.
 
 ### <a id="s-wireAria"></a>`wireAria()`
 
-function · **exported** · L191–197
+function · **exported** · L202–212
 
-- calls: [`wireAriaHooks`](#s-wireAriaHooks) · [`bindPeopleLookup`](mind.js.md#s-bindPeopleLookup) _js/aria/mind.js_
+- calls: [`wireAriaHooks`](#s-wireAriaHooks) · [`footprintLine`](footprint.js.md#s-footprintLine) _js/aria/footprint.js_ · [`footprintReport`](footprint.js.md#s-footprintReport) _js/aria/footprint.js_ · [`bindPacketExtras`](mind.js.md#s-bindPacketExtras) _js/aria/mind.js_ · [`bindPeopleLookup`](mind.js.md#s-bindPeopleLookup) _js/aria/mind.js_
 - called by: [`mountGame`](../render/engine.js.md#s-mountGame) _js/render/engine.js_
 
 <!-- note:wireAria -->

@@ -119,6 +119,8 @@ export function makeScreen({ career, name, hull, sky, server, minutes, speed, co
     L.push(`  ${dim(pad("HELM", 9))}${s.handling ? c(214, clip(`berth · ${s.handling}`, w - 12)) : s.task ? clip(s.task, w - 12) : dim("—")}`);
     if (s.chain) L.push(`  ${dim(pad("CHAIN", 9))}${c(col.fg, clip(s.chain, w - 12))}`);
     if (s.sees) L.push(`  ${dim(pad("SEES", 9))}${dim(clip(s.sees, w - 12))}`);
+    if (s.threat && s.threat !== "clear") L.push(`  ${dim(pad("THREAT", 9))}${clip(s.threat, w - 12)}`);
+    if (s.wake && s.wake !== "no wake yet") L.push(`  ${dim(pad("WAKE", 9))}${dim(clip(s.wake, w - 12))}`);
     if (s.biz) L.push(`  ${dim(pad("BRIDGE", 9))}${clip(s.biz, w - 12)}`);
     if (s.business?.board?.length) L.push(`  ${dim(pad("BOARD", 9))}${dim(s.business.board.map((b) => `${b.role} ${b.verdict}`).join(" · "))}  ${dim(`confidence ${Math.round((s.business.confidence ?? 0) * 100)}%`)}`);
     L.push("");

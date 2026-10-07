@@ -380,7 +380,7 @@ function · **exported** · L121–127
 
 - calls: [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`beaconPosition`](../world/bodies.js.md#s-beaconPosition) _js/world/bodies.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_
 - via [js/world/bodies.js](../world/bodies.js.md): `BEACONS.find`
-- called by: [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`jobSeconds`](../aria/play.js.md#s-jobSeconds) _js/aria/play.js_ · [`startJob`](../aria/play.js.md#s-startJob) _js/aria/play.js_ · [`anchorFor`](#s-anchorFor) · [`markTarget`](#s-markTarget) · [`tickContracts`](#s-tickContracts)
+- called by: [`jobHops`](../aria/play.js.md#s-jobHops) _js/aria/play.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`startJob`](../aria/play.js.md#s-startJob) _js/aria/play.js_ · [`anchorFor`](#s-anchorFor) · [`markTarget`](#s-markTarget) · [`tickContracts`](#s-tickContracts)
 
 <!-- note:targetPos -->
 World position of a job's target right now: a body, a beacon, a point off a port, or a fixed point.

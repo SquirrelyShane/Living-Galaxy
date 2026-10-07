@@ -1,5 +1,9 @@
 import { flushPending } from "../flight/recorder.js";
-import { ariaMind, resetMind, saveMind, loadMind, mindKey, bindPeopleLookup, explanationPacket } from "./mind.js";
+import { ariaMind, resetMind, saveMind, loadMind, mindKey, bindPeopleLookup, explanationPacket, bindPacketExtras, calibReport } from "./mind.js";
+import { wakeSave, wakeLoad, wakeReset } from "./wake.js";
+import { footprintReport, footprintLine } from "./footprint.js";
+import { beliefReport } from "./belief.js";
+import { perceive } from "./senses.js";
 import { entryOf } from "../corp/gdb.js";
 import { sim, logEvent } from "../sim/sim.js";
 import { captain, houseBrain, retakeCommand, ariaHooks } from "../npc/captain.js";
@@ -22,6 +26,7 @@ export function resetAria() {
   bindAriaPrefs(aria.prefs);
   aria.advice = {};
   aria.conn = { held: false, since: 0, decisions: 0, earned: 0, hullAt: 100, log: [] };
+  wakeReset();
 }
 
 export const handsOff = () => Boolean(sim.handsOff) || captain.holder !== "player";
@@ -147,11 +152,16 @@ export function ariaWatchReport() {
     why: ariaPilot.why,
     jobs: ariaPilot.jobs,
     habits: jobHabits(),
+    scene: ariaMind.scene,
+    shift: ariaMind.shift,
+    wake: footprintLine(),
+    calibration: calibReport(),
   };
 }
 
 export function saveAria() {
   aria.dirty = 0;
+  wakeSave();
   saveMind(mindKey(sim.skySeed, sim.callsign));
   try {
     globalThis.localStorage?.setItem(KEY(), JSON.stringify({ prefs: aria.prefs, advice: aria.advice }));
@@ -160,6 +170,7 @@ export function saveAria() {
 
 export function loadAria() {
   const loaded = loadMind(mindKey(sim.skySeed, sim.callsign));
+  wakeLoad();
   aria.prefs = ariaMind.prefs;
   bindAriaPrefs(aria.prefs);
   try {
@@ -190,8 +201,12 @@ export function wireAriaHooks() {
 
 export function wireAria() {
   bindPeopleLookup(entryOf);
+  bindPacketExtras(() => {
+    const w = footprintReport();
+    return { wake: { line: footprintLine(), totals: w.totals, lines: w.lines, ports: w.ports.slice(0, 3), corps: w.corps.slice(0, 3), recent: w.events.slice(0, 4) } };
+  });
   wireAriaHooks();
   if (globalThis.window?.__lg) {
-    window.__lg.aria = { ariaMind, explanationPacket, aria, ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceFor, preferenceReport, notePlayerChoice, adviceReport, shouldAdvise, answerAdvice, ariaPilot, planJob, notePlayerJob };
+    window.__lg.aria = { ariaMind, explanationPacket, perceive, footprintReport, beliefReport, calibReport, aria, ariaTakeConn, ariaRelease, ariaHasConn, ariaWatchReport, preferenceFor, preferenceReport, notePlayerChoice, adviceReport, shouldAdvise, answerAdvice, ariaPilot, planJob, notePlayerJob };
   }
 }

@@ -6,9 +6,9 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 
 ## Unused imports (110)
 
-- [js/aria/play.js](../files/js/aria/play.js.md) L19 `legSeconds` from `./nav.js`
-- [js/aria/play.js](../files/js/aria/play.js.md) L19 `tripSeconds` from `./nav.js`
-- [js/aria/play.js](../files/js/aria/play.js.md) L19 `navLine` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L21 `legSeconds` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L21 `tripSeconds` from `./nav.js`
+- [js/aria/play.js](../files/js/aria/play.js.md) L21 `navLine` from `./nav.js`
 - [js/aria/senses.js](../files/js/aria/senses.js.md) L5 `stockOf` from `../economy/economy.js`
 - [js/aria/senses.js](../files/js/aria/senses.js.md) L5 `shortagesOf` from `../economy/economy.js`
 - [js/console/panels/work.js](../files/js/console/panels/work.js.md) L5 `hasUpgrade` from `../../economy/upgrades.js`
@@ -149,7 +149,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/stationgen/prefabs/modules.js › rack](../files/js/stationgen/prefabs/modules.js.md#s-rack) L16
 - [js/ui/hud.js › hits](../files/js/ui/hud.js.md#s-hits) L84
 
-## Exports with no importer (938)
+## Exports with no importer (962)
 
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `resetAria`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `shouldAdvise`
@@ -157,10 +157,26 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `answerAdvice`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `ariaNoteDecision`
 - [js/aria/aria.js](../files/js/aria/aria.js.md) `wireAriaHooks`
+- [js/aria/belief.js](../files/js/aria/belief.js.md) `BELIEF`
+- [js/aria/belief.js](../files/js/aria/belief.js.md) `belief`
+- [js/aria/belief.js](../files/js/aria/belief.js.md) `observe`
+- [js/aria/belief.js](../files/js/aria/belief.js.md) `recall`
+- [js/aria/belief.js](../files/js/aria/belief.js.md) `trackerOf`
 - [js/aria/company.js](../files/js/aria/company.js.md) `wageOf`
+- [js/aria/footprint.js](../files/js/aria/footprint.js.md) `FOOT`
+- [js/aria/foresee.js](../files/js/aria/foresee.js.md) `FORESEE`
+- [js/aria/foresee.js](../files/js/aria/foresee.js.md) `ghost`
+- [js/aria/foresee.js](../files/js/aria/foresee.js.md) `foreseeSale`
+- [js/aria/foresee.js](../files/js/aria/foresee.js.md) `foreseeBuy`
+- [js/aria/foresee.js](../files/js/aria/foresee.js.md) `saleLine`
 - [js/aria/mind.js](../files/js/aria/mind.js.md) `BREAK`
 - [js/aria/mind.js](../files/js/aria/mind.js.md) `domainOf`
 - [js/aria/mind.js](../files/js/aria/mind.js.md) `reserveFor`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `VERBS`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `CONTEXT_CAP`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `migrateContexts`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `FADE`
+- [js/aria/mind.js](../files/js/aria/mind.js.md) `calibrated`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `ARIA_JOBS`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `INVEST_JOBS`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `bestRepairPort`
@@ -168,6 +184,7 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `fabStop`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `refitPlan`
 - [js/aria/pilot.js](../files/js/aria/pilot.js.md) `buildPlan`
+- [js/aria/play.js](../files/js/aria/play.js.md) `jobHops`
 - [js/aria/play.js](../files/js/aria/play.js.md) `purse`
 - [js/aria/play.js](../files/js/aria/play.js.md) `moveKeyFor`
 - [js/aria/play.js](../files/js/aria/play.js.md) `readyForTrouble`
@@ -175,11 +192,19 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/aria/play.js](../files/js/aria/play.js.md) `bestYard`
 - [js/aria/play.js](../files/js/aria/play.js.md) `hostilesClose`
 - [js/aria/play.js](../files/js/aria/play.js.md) `shouldBreakOff`
+- [js/aria/play.js](../files/js/aria/play.js.md) `leastKnown`
+- [js/aria/play.js](../files/js/aria/play.js.md) `exploreRate`
 - [js/aria/play.js](../files/js/aria/play.js.md) `tendBus`
 - [js/aria/play.js](../files/js/aria/play.js.md) `brainSig`
 - [js/aria/play.js](../files/js/aria/play.js.md) `brainOut`
 - [js/aria/play.js](../files/js/aria/play.js.md) `adoptBrain`
 - [js/aria/play.js](../files/js/aria/play.js.md) `jobProgress`
+- [js/aria/senses.js](../files/js/aria/senses.js.md) `PERCEIVE`
+- [js/aria/threat.js](../files/js/aria/threat.js.md) `bandOf`
+- [js/aria/threat.js](../files/js/aria/threat.js.md) `guardOf`
+- [js/aria/threat.js](../files/js/aria/threat.js.md) `legRisk`
+- [js/aria/wake.js](../files/js/aria/wake.js.md) `WAKE`
+- [js/aria/wake.js](../files/js/aria/wake.js.md) `ariaFlying`
 - [js/asteroidgen/addons/Pass.js](../files/js/asteroidgen/addons/Pass.js.md) `Pass`
 - [js/asteroidgen/addons/Pass.js](../files/js/asteroidgen/addons/Pass.js.md) `FullScreenQuad`
 - [js/asteroidgen/blackhole.js](../files/js/asteroidgen/blackhole.js.md) `BH_DISK`
@@ -444,7 +469,6 @@ Candidates, not verdicts: tests, index.html, tools and the addon are scanned for
 - [js/economy/contracts.js](../files/js/economy/contracts.js.md) `WRECK`
 - [js/economy/contracts.js](../files/js/economy/contracts.js.md) `anchorFor`
 - [js/economy/contracts.js](../files/js/economy/contracts.js.md) `visitRadius`
-- [js/economy/economy.js](../files/js/economy/economy.js.md) `SHORT_FRAC`
 - [js/economy/economy.js](../files/js/economy/economy.js.md) `tierOf`
 - [js/economy/economy.js](../files/js/economy/economy.js.md) `glutsOf`
 - [js/economy/fabricate.js](../files/js/economy/fabricate.js.md) `FAB_KEY`

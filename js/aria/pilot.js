@@ -1,11 +1,13 @@
-import { ariaMind, authorize, contextualScore, decideMind, policyScore, learnOutcome, breakLine } from "./mind.js";
+import { ariaMind, authorize, contextualScore, decideMind, policyScore, learnOutcome, breakLine, forecast, settleForecast, riskAversion } from "./mind.js";
+import { perceive, hostileWithin } from "./senses.js";
+import { pathRisk } from "./threat.js";
+import { wakeArm, sellValueAt, wakeJobOpen, wakeJobClose, wakeAudit } from "./wake.js";
 import { sim, logEvent, setTurretMode, setMiningMode, toggleSystem } from "../sim/sim.js";
 import { cargoTotal, holdRoom, batteryCap } from "../flight/ship.js";
 import { stations, stationById } from "../station/stations.js";
 import { BODIES, dist3 } from "../world/bodies.js";
-import { contacts } from "../flight/turrets.js";
 import { captain, ariaHooks as hooks } from "../npc/captain.js";
-import { autopilot, nearestSeam, busOverload, pilotInput } from "../flight/autopilot.js";
+import { autopilot, nearestSeam, busOverload, pilotInput, portHooks } from "../flight/autopilot.js";
 import { mission, startMission, stopMission, EXEC } from "../mission/run.js";
 import { makeMission, makeStep } from "../mission/script.js";
 import { repairsAt, pricePerPoint, yardRepair, repairQuote, hullMaxOf } from "../flight/repair.js";
@@ -36,6 +38,7 @@ export const ariaPilot = {
   bought: [],
   brokeOff: 0,
   yardRun: false,
+  wake: null,
 };
 
 let prefs = null;
@@ -74,20 +77,22 @@ function unsurveyed() {
   return best;
 }
 
+const YARD_RISK = 1.5;
+
 export function bestRepairPort(ship = sim.ship) {
   let best = null, score = -Infinity;
+  let hazards = [];
+  try { hazards = ship === sim.ship ? perceive().hazards.filter((h) => dist3(h, ship.pos) > 2500) : []; } catch { hazards = []; }
   for (const st of stations) {
     if (st.hostile || st.sector === "pirate" || !repairsAt(st) || !st.hangars?.length) continue;
-    const s = -dist3(ship.pos, st) / 100000 - pricePerPoint(st) / 20;
+    const s = -dist3(ship.pos, st) / 100000 - pricePerPoint(st) / 20 - (hazards.length ? pathRisk([ship.pos, st], hazards).risk * YARD_RISK * riskAversion() : 0);
     if (s > score) { score = s; best = st; }
   }
   return best;
 }
 
-function hostileNear(r = 6000) {
-  const p = sim.ship.pos;
-  return contacts.some((c) => c.hp > 0 && c.relation === "hostile" && Math.hypot(c.x - p.x, c.y - p.y, c.z - p.z) < r);
-}
+const hostileNear = (r = 6000) => hostileWithin(r);
+const threatNow = () => { try { return perceive().threat.level; } catch { return 0; } };
 
 function deskSteps() {
   const onDock = sim.autoPlan?.onDock ?? "sell";
@@ -308,7 +313,7 @@ function rawPlanJob() {
 }
 
 export function planJob() {
-  const state = { ...(snapshot() ?? {}), hull: sim.ship.hull / hullMaxOf(sim.ship), hold: cargoTotal(sim.ship) / Math.max(1, sim.ship.cargoCap), hz: hostileNear() ? 1 : 0 };
+  const state = { ...(snapshot() ?? {}), hull: sim.ship.hull / hullMaxOf(sim.ship), hold: cargoTotal(sim.ship) / Math.max(1, sim.ship.cargoCap), hz: hostileNear() ? 1 : 0, th: threatNow() };
   let plan = rawPlanJob();
   const permission = plan.job ? authorize(plan.job, { at: sim.time }) : { ok: true };
   if (!permission.ok) plan = { job: null, why: permission.why };
@@ -318,7 +323,7 @@ export function planJob() {
 
 export function shouldBreakOff(ship = sim.ship) {
   if (!ariaMind.orders.avoidHostiles || !ariaMind.authority.repairs) return null;
-  if (ship.dockedAt || ship.hull / hullMaxOf(ship) >= breakLine((ship.charge ?? 0) / Math.max(1, batteryCap(ship)))) return null;
+  if (ship.dockedAt || ship.hull / hullMaxOf(ship) >= breakLine((ship.charge ?? 0) / Math.max(1, batteryCap(ship)), ship === sim.ship ? threatNow() : 0)) return null;
   if ((ariaPilot.fails.repair ?? 0) >= 2 || !hostileNear()) return null;
   const st = bestRepairPort(ship);
   if (!st || ship.credits < pricePerPoint(st)) return null;
@@ -352,6 +357,7 @@ export function tickAriaPilot() {
   const ship = sim.ship;
   sim.handsOff = true;
   if (!autopilot.on && pilotInput()) { hooks.onStick?.(); return 0; }
+  try { perceive(); wakeAudit(); } catch {}
 
   if (hostileNear() && (ship.turretMode === "off" || ship.turretMode === "passive")) { setTurretMode("castle"); say?.("Contacts close — guns on CASTLE."); }
 
@@ -383,7 +389,13 @@ export function tickAriaPilot() {
   const running = mission.active && (mission.state === "running" || mission.state === "asking");
   if (running) return ship.credits - ariaPilot.creditsAt;
 
-  if (ariaPilot.job && ["done", "failed"].includes(mission.state)) learnOutcome(ariaPilot.job, sim.time - (ariaPilot.jobSince ?? sim.time), ship.credits - (ariaPilot.jobCredits ?? ship.credits), mission.state === "done", sim.time);
+  if (ariaPilot.job && ["done", "failed"].includes(mission.state)) {
+    const secs = sim.time - (ariaPilot.jobSince ?? sim.time), cr = ship.credits - (ariaPilot.jobCredits ?? ship.credits), ok = mission.state === "done";
+    learnOutcome(ariaPilot.job, secs, cr, ok, sim.time);
+    settleForecast(ariaPilot.job, secs, cr, ok);
+    wakeJobClose(ariaPilot.wake, ariaPilot.job, ok, cr);
+    ariaPilot.wake = null;
+  }
   if (ariaPilot.job && mission.state === "failed") { ariaPilot.fails[ariaPilot.job] = (ariaPilot.fails[ariaPilot.job] ?? 0) + 1; ariaPilot.failAt[ariaPilot.job] = sim.time; }
   else if (ariaPilot.job && mission.state === "done") ariaPilot.fails[ariaPilot.job] = 0;
   if (ariaPilot.job) { mission.state = "idle"; ariaPilot.job = null; ariaPilot.planAt = sim.time + 2; }
@@ -408,6 +420,10 @@ export function tickAriaPilot() {
   if (startMission(plan.mission)) {
     ariaPilot.jobSince = sim.time;
     ariaPilot.jobCredits = ship.credits;
+    ariaPilot.wake = wakeJobOpen();
+    const past = ariaMind.experience.moves[plan.job];
+    const runs = past ? Math.max(1, past.w ?? past.runs) : 0;
+    forecast({ key: plan.job, secs: runs ? past.secs / runs : null, cr: runs ? past.cr / runs : null, at: sim.time });
     ariaPilot.job = plan.job;
     ariaPilot.why = plan.why;
     ariaPilot.jobs++;
@@ -513,6 +529,8 @@ export function wireAriaPilot(ariaState, speak) {
   prefs = ariaState.prefs;
   say = (text) => speak?.(text);
   registerAriaOps();
+  wakeArm("conn", () => captain.holder === "aria");
+  portHooks.sellValue = sellValueAt;
 }
 
 export function bindAriaPrefs(p) { prefs = p; }

@@ -32,8 +32,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹key›`
 
-- storage.set — [js/aria/mind.js › saveMind](../files/js/aria/mind.js.md#s-saveMind) L17
-- storage.get — [js/aria/mind.js › loadMind](../files/js/aria/mind.js.md#s-loadMind) L21
+- storage.set — [js/aria/mind.js › saveMind](../files/js/aria/mind.js.md#s-saveMind) L22
+- storage.get — [js/aria/mind.js › loadMind](../files/js/aria/mind.js.md#s-loadMind) L26
 
 ### `‹KEY›`
 
@@ -42,8 +42,8 @@ Every localStorage/sessionStorage key read, written or removed.
 
 ### `‹KEY()›`
 
-- storage.set — [js/aria/aria.js › saveAria](../files/js/aria/aria.js.md#s-saveAria) L157
-- storage.get — [js/aria/aria.js › loadAria](../files/js/aria/aria.js.md#s-loadAria) L166
+- storage.set — [js/aria/aria.js › saveAria](../files/js/aria/aria.js.md#s-saveAria) L167
+- storage.get — [js/aria/aria.js › loadAria](../files/js/aria/aria.js.md#s-loadAria) L177
 - storage.set — [js/drones/ops.js › save](../files/js/drones/ops.js.md#s-save) L910
 - storage.get — [js/drones/ops.js › loadDroneOps](../files/js/drones/ops.js.md#s-loadDroneOps) L930
 

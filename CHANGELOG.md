@@ -1,5 +1,122 @@
 # Changelog
 
+## 0.3.95 — 2026-10-06 — ARIA 1.5: Sight and Wake
+
+0.3.94 was built on `bca971e` and withdrawn before it shipped, because `main`
+had moved; this is the same work carried onto `63e965a` (the second round of
+JS optimizing, which touches none of these files by hand), with the code docs
+and preload block regenerated there. There is no 0.3.94.
+
+A scan of every ARIA file on `main` at 0.3.93 found three
+defects in what she learns, confirmed with a headless probe before anything
+was changed, and a threat test that was a single distance check. This
+release fixes the defects and builds graded perception, a forward model and
+a ledger of her own effects on the ports.
+
+### Players
+
+ARIA grades the danger around her, keeps score of her own forecasts, and keeps a ledger of what her trading does to the ports.
+
+- ARIA keeps what she learned from watching you. Menu and button taps were crowding your real work out of her memory. They no longer count, and learning saved before this release is tidied the first time it loads.
+- Threat is graded instead of on or off: how many hostiles, how close, how fast they are closing and how tough they are, against her own guns, hull and battery. One drone drifting past is still not a reason to leave a belt. A pack closing on a hurt hull sends her to the yard sooner.
+- She remembers where trouble was for a few minutes and prefers a yard whose lane does not run past it.
+- She picks a buyer on the whole hold: what the lot fetches once her own selling has pushed the price down, and what the port can actually pay.
+- New standing order, Steward weight (0 to 1, starts at 0.25). Above 0 she leans toward a port that is short of the cargo and away from one she would flood. At 0 she sells for the best price and nothing else.
+- ARIA CORE has two new sections. WHAT SHE SEES: the scene, the threat grade, and anything that changed in the sky — a price step, raiders arriving, hulks appearing. HER WAKE: what she sold and bought where, what it did to prices and to your standing, what her own price moves cost, and station lines her cargo started or her buying stopped.
+- ARIA CORE shows "Forecasts kept": how often her jobs came off, against how sure she said she was. The confidence figure is corrected by that record.
+- Old results fade with time in the sky rather than counting for ever, and a change in the sky marks the affected kind of work down until she has flown it again.
+
+No Sol reset or save migration is required. Standing orders and learning are kept.
+
+Not in this release: planning more than one job ahead, pilots claiming a seam or hulk so two ARIAs do not pile onto it, and a spoken explanation.
+
+### What was wrong
+
+- **Taps evicted learning.** `learnTape` made a context per Tape kind and
+  act, so every distinct button was a context, and the 256-slot list dropped
+  the oldest whatever it held. Probe: 40 settled MINE observations, then 260
+  taps — the MINE context was gone and the lean for mining read 0.
+- **Two vocabularies.** The career planner's move keys (`board:mining:…`,
+  `route`, `supply`) never equalled a Tape act (`MINE`, `BUY`), so
+  `contextualScore` returned 0 for all of them.
+- **Two scales.** The career planner hands `policyScore` a base in cr/min
+  (hundreds); the learned terms top out near 1. Imitate, balanced and
+  optimize picked the same move.
+- `ariaMind.risk` was learned from the captain and read by no decision (it
+  now sets `riskAversion()`; `episodes` and `goals` are still display only).
+  `pilot.js` did not use `senses.js`. Threat was one test: a hostile inside
+  6,000 u or not.
+- The career brain's signature carried `VERSION`, so every patch emptied it,
+  while the conn's outcome book never aged at all.
+
+### What changed
+
+- `js/aria/mind.js`: `verbOf()` and one verb list; contexts keyed by verb,
+  only for acts that are decisions, thinnest evicted; kernel matching on
+  hull, hold, hazard, docked and charge; `migrateContexts()` on load;
+  `policyScore(…, { ratio: true })`; sky-time fade on contexts and outcomes
+  and `discount()`; `forecast()` / `settleForecast()` / `calibrated()` /
+  `calibReport()`; `breakLine(charge, threat)`; `riskAversion()`; the Steward
+  weight order; `explanationPacket()` v2.
+- `js/aria/belief.js` (new): fading facts, EWMA + CUSUM trackers, a fading
+  danger map. Pure.
+- `js/aria/threat.js` (new): `threatOf`, `legRisk`, `pathRisk`,
+  `hazardsFrom`. Pure.
+- `js/aria/foresee.js` (new): `foreseeSale`, `foreseeBuy`, `sellValue`, and
+  `counterfactual()` on copies of a port run through the economy's own
+  `runLines`.
+- `js/aria/footprint.js` (new): the ledger and its audit. Pure.
+- `js/aria/wake.js` (new): brackets ARIA-flown trades, books them, audits
+  forecasts against the real port, values a buyer on the whole lot.
+- `js/aria/senses.js`: `perceive()` — the one look both planners take — and
+  `hostileWithin()`.
+- `js/aria/pilot.js`, `js/aria/play.js`: both read `perceive()`; the break
+  line takes the threat level; the conn's yard and the career planner's board
+  jobs carry lane risk; jobs carry a forecast and close into the ledger; the
+  career planner explores the work it has flown least, at a rate that falls
+  as its book fills, instead of 18% at random; `brainSig()` drops the
+  version.
+- `js/flight/autopilot.js`: `portHooks.sellValue`, consulted by
+  `bestPortFor("sell")`. It returns `null` unless ARIA is flying, so the
+  captain's own autopilot scores ports as before.
+- `js/mission/tradeops.js`: SELL and BUY are bracketed by `wakeOpen` /
+  `wakeClose` on ARIA missions only.
+- `js/console/panels/aria-core.js`: WHAT SHE SEES, HER WAKE, Forecasts kept,
+  Steward weight.
+- `tools/aria-tty.mjs`: THREAT and WAKE lines on the pit screen.
+
+Files: `js/aria/{aria,mind,pilot,play,senses}.js`,
+`js/aria/{belief,threat,foresee,footprint,wake}.js` (new),
+`js/console/panels/aria-core.js`, `js/flight/autopilot.js`,
+`js/mission/tradeops.js`, `js/version.js`, `index.html` (preload block),
+`tools/aria-tty.mjs`, `test/aria15.test.mjs` (new, 113),
+`test/smoke-aria15.mjs` (new), `CHANGELOG.md`, `README.md`,
+`docs/PATCH-0.3.95.md` (new), regenerated code docs.
+
+Verified on `63e965a`: 114 of 114 node suites green (`aria15` new, 113
+checks; `hotpath-optimization` from the optimizing commit among them), the
+three Python suites, `codedocs --check`, `preload --check`,
+`git diff --check`. `smoke-aria15` green in headless Chromium at 412×915 on a
+software renderer (12 checks).
+
+`aria-bench`, 20 sky minutes, cr/min. On `bca971e`, seeds `bench` / `bench2`,
+0.3.93 → this work: mining 2,319 / 1,338 → 5,486 / 4,283 (0.3.93 lost its hull
+on both seeds, this work on neither); commerce −442 / 2,509 → 2,586 / 543;
+salvage 3,352 / 3,024 → 3,681 / 2,736. On `63e965a`, seed `bench`, this work:
+mining 4,288 (hull kept), commerce 2,220, salvage 4,171. The same seed gave
+5,486 / 2,586 / 3,681 one commit earlier, so a single run moves by a quarter
+on its own; the one thing that repeats across all three runs is that she
+keeps her hull. Salvage ÷ Mining came out 0.67, 0.64 and 0.97: rerun
+`aria-bench --seeds 3 --parity mining` before reading parity either way.
+0.3.93 was not re-benched on `63e965a`.
+
+Not measured: a phone, a live relay, two pilots, a long watch at the conn.
+The line audit and the calibration record need hours of real play before
+they say anything.
+
+Not built: planning more than one job ahead, claims between pilots over the
+relay, a model reading the explanation packet. Each is a slice of its own.
+
 ## 0.3.93 — 2026-10-04 — Dead Hulls: Plate That Keeps Up
 
 Found on a bug hunt of `main` at 0.3.92: `test/smoke-rig.mjs` failed on a slow

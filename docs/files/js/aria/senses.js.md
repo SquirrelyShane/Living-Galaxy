@@ -1,6 +1,6 @@
 # js/aria/senses.js
 
-[index](../../../README.md) · 216 lines · 16 symbols · 20 imports · 2 importers
+[index](../../../README.md) · 304 lines · 25 symbols · 24 imports · 4 importers
 
 ## About
 
@@ -55,18 +55,25 @@ it, which is a fact and not an error.
 | 18 | `../economy/traderoutes.js` | `tradeRoutes` | [js/economy/traderoutes.js](../economy/traderoutes.js.md) |
 | 19 | `../economy/chains.js` | `chainReport` | [js/economy/chains.js](../economy/chains.js.md) |
 | 20 | `../economy/materials.js` | `SECTORS` | [js/economy/materials.js](../economy/materials.js.md) |
+| 21 | `../world/hulks.js` | `hulks` | [js/world/hulks.js](../world/hulks.js.md) |
+| 22 | `./mind.js` | `ariaMind`, `discount`, `remember` | [js/aria/mind.js](mind.js.md) |
+| 23 | `./belief.js` | `track`, `markDanger`, `dangers`, `alertsSince`, `alertLine`, `resetBelief` | [js/aria/belief.js](belief.js.md) |
+| 24 | `./threat.js` | `threatOf`, `hazardsFrom`, `threatLine`, `THREAT` | [js/aria/threat.js](threat.js.md) |
 
 ## Imported by
 
-- [js/aria/play.js](play.js.md) — `sense`, `senseSpace`, `senseLine`, `forgetSenses`, `unpostedWork`
+- [js/aria/aria.js](aria.js.md) — `perceive`
+- [js/aria/pilot.js](pilot.js.md) — `perceive`, `hostileWithin`
+- [js/aria/play.js](play.js.md) — `sense`, `senseLine`, `forgetSenses`, `unpostedWork`, `perceive`, `hostileWithin`
 - test/ariasense.test.mjs _(outside js/)_ — `SENSE`, `sense`, `senseHull`, `senseSpace`, `sensePorts`, `senseBoard`, `senseRoutes`, `senseLine`, `forgetSenses`, `unpostedWork`, `nearestReachablePort`
 
 ## Exports
 
 - [`SENSE`](#s-SENSE) · const — used by test/ariasense.test.mjs
 - [`forgetSenses`](#s-forgetSenses) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
+- [`PERCEIVE`](#s-PERCEIVE) · const — **no importer in scanned roots**
 - [`senseHull`](#s-senseHull) · function — used by test/ariasense.test.mjs
-- [`senseSpace`](#s-senseSpace) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
+- [`senseSpace`](#s-senseSpace) · function — used by test/ariasense.test.mjs
 - [`sensePorts`](#s-sensePorts) · function — used by test/ariasense.test.mjs
 - [`senseBoard`](#s-senseBoard) · function — used by test/ariasense.test.mjs
 - [`senseRoutes`](#s-senseRoutes) · function — used by test/ariasense.test.mjs
@@ -74,6 +81,8 @@ it, which is a fact and not an error.
 - [`nearestReachablePort`](#s-nearestReachablePort) · function — used by test/ariasense.test.mjs
 - [`unpostedWork`](#s-unpostedWork) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
 - [`senseLine`](#s-senseLine) · function — used by [js/aria/play.js](play.js.md), test/ariasense.test.mjs
+- [`hostileWithin`](#s-hostileWithin) · function — used by [js/aria/pilot.js](pilot.js.md), [js/aria/play.js](play.js.md)
+- [`perceive`](#s-perceive) · function — used by [js/aria/aria.js](aria.js.md), [js/aria/pilot.js](pilot.js.md), [js/aria/play.js](play.js.md)
 
 ## Effects
 
@@ -83,27 +92,27 @@ _none detected_
 
 ### <a id="s-SENSE"></a>`SENSE`
 
-const · **exported** · L22–28
+const · **exported** · L26–32
 
 <!-- note:SENSE -->
 How stale each layer is allowed to get, in sim seconds.
 
-- L23 · `hull: 0,` — every look
-- L24 · `space: 2,` — what is around the hull
-- L25 · `ports: 20,` — ledgers and prices: the economy ticks every 20 s anyway
-- L26 · `board: 45,` — the desk re-posts every 480 s; 45 is plenty
+- L27 · `hull: 0,` — every look
+- L28 · `space: 2,` — what is around the hull
+- L29 · `ports: 20,` — ledgers and prices: the economy ticks every 20 s anyway
+- L30 · `board: 45,` — the desk re-posts every 480 s; 45 is plenty
 <!-- /note -->
 
 ### <a id="s-cache"></a>`cache`
 
-const · L30–30
+const · L34–34
 
 <!-- note:cache -->
 <!-- /note -->
 
 ### <a id="s-fresh"></a>`fresh(k)`
 
-function · L31–31
+function · L35–35
 
 - called by: [`senseBoard`](#s-senseBoard) · [`sensePorts`](#s-sensePorts) · [`senseRoutes`](#s-senseRoutes) · [`senseSpace`](#s-senseSpace)
 
@@ -112,7 +121,7 @@ function · L31–31
 
 ### <a id="s-keep"></a>`keep(k, v)`
 
-function · L32–32
+function · L36–36
 
 - called by: [`senseBoard`](#s-senseBoard) · [`sensePorts`](#s-sensePorts) · [`senseRoutes`](#s-senseRoutes) · [`senseSpace`](#s-senseSpace)
 
@@ -121,36 +130,60 @@ function · L32–32
 
 ### <a id="s-forgetSenses"></a>`forgetSenses()`
 
-function · **exported** · L34–37
+function · **exported** · L38–43
 
+- calls: [`resetBelief`](belief.js.md#s-resetBelief) _js/aria/belief.js_
 - called by: [`beginPlay`](play.js.md#s-beginPlay) _js/aria/play.js_
 
 <!-- note:forgetSenses -->
 Drop everything: a new sky, a new hull, a new run.
 <!-- /note -->
 
+### <a id="s-staleMarket"></a>`staleMarket()`
+
+function · L45–47
+
+- called by: [`react`](#s-react)
+
+<!-- note:staleMarket -->
+<!-- /note -->
+
+### <a id="s-PERCEIVE"></a>`PERCEIVE`
+
+const · **exported** · L49–49
+
+<!-- note:PERCEIVE -->
+<!-- /note -->
+
+### <a id="s-seen"></a>`seen`
+
+const · L50–50
+
+<!-- note:seen -->
+<!-- /note -->
+
 ### <a id="s-honest"></a>`honest(st)`
 
-function · L39–39
+function · L52–52
 
-- called by: [`sensePorts`](#s-sensePorts)
+- called by: [`perceive`](#s-perceive) · [`sensePorts`](#s-sensePorts)
 
 <!-- note:honest -->
 <!-- /note -->
 
 ### <a id="s-_p"></a>`_p`
 
-const · L40–40
+const · L53–53
 
 <!-- note:_p -->
 <!-- /note -->
 
 ### <a id="s-senseHull"></a>`senseHull()`
 
-function · **exported** · L42–67
+function · **exported** · L55–80
 
 - calls: [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`hullMaxOf`](../flight/repair.js.md#s-hullMaxOf) _js/flight/repair.js_ · [`batteryCap`](../flight/ship.js.md#s-batteryCap) _js/flight/ship.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`shipById`](../ships/shipdb.js.md#s-shipById) _js/ships/shipdb.js_ · [`currentShipId`](../sim/sim.js.md#s-currentShipId) _js/sim/sim.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_
-- called by: [`sense`](#s-sense)
+- called by: [`perceive`](#s-perceive) · [`sense`](#s-sense)
 
 <!-- note:senseHull -->
 ---- the hull -------------------------------------------------------------------
@@ -158,14 +191,14 @@ function · **exported** · L42–67
 
 ### <a id="s-senseSpace"></a>`senseSpace()`
 
-function · **exported** · L69–109
+function · **exported** · L82–122
 
 - calls: [`fresh`](#s-fresh) · [`keep`](#s-keep) · [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`sitesNear`](../economy/sites.js.md#s-sitesNear) _js/economy/sites.js_ · [`bodyPosition`](../world/bodies.js.md#s-bodyPosition) _js/world/bodies.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2 · [`inBelt`](../world/field.js.md#s-inBelt) _js/world/field.js_ · [`nearbyRocks`](../world/field.js.md#s-nearbyRocks) _js/world/field.js_ · [`wellRadius`](../world/scale.js.md#s-wellRadius) _js/world/scale.js_ ×2
 - via [js/npc/traffic.js](../npc/traffic.js.md): `HOSTILE_ROLES.has`, `traffic.filter`
 - via [js/npc/rogues.js](../npc/rogues.js.md): `nests.filter`, `nests.filter.map`, `nests.filter.map.sort`
 - via [js/economy/sites.js](../economy/sites.js.md): `sitesNear.map`
 - via [js/npc/flow.js](../npc/flow.js.md): `flow.filter`
-- called by: [`hostilesClose`](play.js.md#s-hostilesClose) _js/aria/play.js_ · [`sense`](#s-sense)
+- called by: [`perceive`](#s-perceive) · [`sense`](#s-sense)
 
 <!-- note:senseSpace -->
 ---- the space around it ----------------------------------------------------------
@@ -176,7 +209,7 @@ hold geometry, which is the thing a pilot actually plans around.
 
 ### <a id="s-sensePorts"></a>`sensePorts()`
 
-function · **exported** · L111–141
+function · **exported** · L124–154
 
 - calls: [`fresh`](#s-fresh) · [`honest`](#s-honest) · [`keep`](#s-keep) · [`corpOfStation`](../corp/corps.js.md#s-corpOfStation) _js/corp/corps.js_ · [`standingLabel`](../corp/corps.js.md#s-standingLabel) _js/corp/corps.js_ · [`econReport`](../economy/economy.js.md#s-econReport) _js/economy/economy.js_ · [`wantsOf`](../economy/economy.js.md#s-wantsOf) _js/economy/economy.js_ · [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ ×2 · [`pricePerPoint`](../flight/repair.js.md#s-pricePerPoint) _js/flight/repair.js_ · [`repairsAt`](../flight/repair.js.md#s-repairsAt) _js/flight/repair.js_ ×2 · [`losBlocker`](../sim/sim.js.md#s-losBlocker) _js/sim/sim.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_ ×2
 - via [js/economy/economy.js](../economy/economy.js.md): `wantsOf.map`
@@ -191,13 +224,13 @@ standing order for the thing it stalled on, which is a mining job nobody
 posted yet — and knowing that is the difference between a bot that reads a
 board and a pilot who reads a port.
 
-- L130 · `lines: e.lines.map((l) => ({ id: l.id, name: l.name, running: l.running, stalledOn: l.stal` — what its factories are doing right now
-- L135 · `stock: e.stock.filter((l) => l.qty >= 1).map((l) => ({ id: l.id, name: l.name, qty: l.qty,` — the shelf, priced for one unit — a lot is priced when a lot is proposed
+- L143 · `lines: e.lines.map((l) => ({ id: l.id, name: l.name, running: l.running, stalledOn: l.stal` — what its factories are doing right now
+- L148 · `stock: e.stock.filter((l) => l.qty >= 1).map((l) => ({ id: l.id, name: l.name, qty: l.qty,` — the shelf, priced for one unit — a lot is priced when a lot is proposed
 <!-- /note -->
 
 ### <a id="s-senseBoard"></a>`senseBoard()`
 
-function · **exported** · L143–155
+function · **exported** · L156–168
 
 - calls: [`fresh`](#s-fresh) · [`keep`](#s-keep) · [`sensePorts`](#s-sensePorts) · [`chainReport`](../economy/chains.js.md#s-chainReport) _js/economy/chains.js_ · [`boardByCategory`](../economy/contracts.js.md#s-boardByCategory) _js/economy/contracts.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_
 - called by: [`sense`](#s-sense)
@@ -208,7 +241,7 @@ function · **exported** · L143–155
 
 ### <a id="s-senseRoutes"></a>`senseRoutes(opts=)`
 
-function · **exported** · L157–164
+function · **exported** · L170–177
 
 - calls: [`fresh`](#s-fresh) · [`keep`](#s-keep) · [`tradeRoutes`](../economy/traderoutes.js.md#s-tradeRoutes) _js/economy/traderoutes.js_
 - via [js/economy/traderoutes.js](../economy/traderoutes.js.md): `tradeRoutes.map`
@@ -219,7 +252,7 @@ function · **exported** · L157–164
 
 ### <a id="s-sense"></a>`sense(opts=)`
 
-function · **exported** · L166–177
+function · **exported** · L179–190
 
 - calls: [`senseBoard`](#s-senseBoard) · [`senseHull`](#s-senseHull) · [`sensePorts`](#s-sensePorts) · [`senseRoutes`](#s-senseRoutes) · [`senseSpace`](#s-senseSpace)
 - via [js/corp/corps.js](../corp/corps.js.md): `corps.map`, `corps.map.sort`
@@ -233,7 +266,7 @@ One consistent picture of the sky. Everything downstream reads this.
 
 ### <a id="s-nearestReachablePort"></a>`nearestReachablePort(s=, except=)`
 
-function · **exported** · L179–182
+function · **exported** · L192–195
 
 - calls: [`sensePorts`](#s-sensePorts)
 
@@ -245,10 +278,10 @@ The port nearest the hull that a leg can actually be flown to.
 
 ### <a id="s-unpostedWork"></a>`unpostedWork(s=, room=, purse=)`
 
-function · **exported** · L184–208
+function · **exported** · L197–221
 
 - calls: [`sensePorts`](#s-sensePorts) · [`bulkOf`](../economy/materials.js.md#s-bulkOf) _js/economy/materials.js_ · [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`holdRoom`](../flight/ship.js.md#s-holdRoom) _js/flight/ship.js_ · [`buyPriceAt`](../sim/sim.js.md#s-buyPriceAt) _js/sim/sim.js_ · [`sellPriceAt`](../sim/sim.js.md#s-sellPriceAt) _js/sim/sim.js_ · [`stationById`](../station/stations.js.md#s-stationById) _js/station/stations.js_ ×2
-- called by: [`startSupply`](play.js.md#s-startSupply) _js/aria/play.js_
+- called by: [`movesNow`](play.js.md#s-movesNow) _js/aria/play.js_ · [`startSupply`](play.js.md#s-startSupply) _js/aria/play.js_
 
 <!-- note:unpostedWork -->
 What a port would pay over the odds for, that somebody else has on the
@@ -257,11 +290,68 @@ shelf: a stalled line is a standing order nobody has posted yet.
 
 ### <a id="s-senseLine"></a>`senseLine(s=)`
 
-function · **exported** · L210–214
+function · **exported** · L223–227
 
 - calls: [`sense`](#s-sense)
 - called by: [`playReport`](play.js.md#s-playReport) _js/aria/play.js_
 
 <!-- note:senseLine -->
 One line a terminal can print: what she is looking at.
+<!-- /note -->
+
+### <a id="s-hostileWithin"></a>`hostileWithin(r=)`
+
+function · **exported** · L229–233
+
+- called by: [`hostileNear`](pilot.js.md#s-hostileNear) _js/aria/pilot.js_ · [`hostilesClose`](play.js.md#s-hostilesClose) _js/aria/play.js_
+
+<!-- note:hostileWithin -->
+<!-- /note -->
+
+### <a id="s-TRADE_KEY"></a>`TRADE_KEY(k)`
+
+function · L235–235
+
+<!-- note:TRADE_KEY -->
+<!-- /note -->
+
+### <a id="s-react"></a>`react(a, now)`
+
+function · L237–249
+
+- calls: [`alertLine`](belief.js.md#s-alertLine) _js/aria/belief.js_ ×4 · [`discount`](mind.js.md#s-discount) _js/aria/mind.js_ ×2 · [`remember`](mind.js.md#s-remember) _js/aria/mind.js_ · [`staleMarket`](#s-staleMarket)
+- called by: [`perceive>feed`](#s-perceive-feed)
+
+<!-- note:react -->
+<!-- /note -->
+
+### <a id="s-sceneOf"></a>`sceneOf(hull, space, threat)`
+
+function · L251–258
+
+- calls: [`threatLine`](threat.js.md#s-threatLine) _js/aria/threat.js_
+- called by: [`perceive`](#s-perceive)
+
+<!-- note:sceneOf -->
+<!-- /note -->
+
+### <a id="s-perceive"></a>`perceive(force=)`
+
+function · **exported** · L260–302
+
+- calls: [`alertLine`](belief.js.md#s-alertLine) _js/aria/belief.js_ · [`alertsSince`](belief.js.md#s-alertsSince) _js/aria/belief.js_ · [`dangers`](belief.js.md#s-dangers) _js/aria/belief.js_ · [`markDanger`](belief.js.md#s-markDanger) _js/aria/belief.js_ · [`track`](belief.js.md#s-track) _js/aria/belief.js_ ×4 · [`honest`](#s-honest) · [`perceive>feed`](#s-perceive-feed) ×4 · [`sceneOf`](#s-sceneOf) · [`senseHull`](#s-senseHull) · [`senseSpace`](#s-senseSpace) · [`hazardsFrom`](threat.js.md#s-hazardsFrom) _js/aria/threat.js_ · [`threatOf`](threat.js.md#s-threatOf) _js/aria/threat.js_ · [`wantsOf`](../economy/economy.js.md#s-wantsOf) _js/economy/economy.js_ · [`goodName`](../economy/materials.js.md#s-goodName) _js/economy/materials.js_ · [`sellPriceAt`](../sim/sim.js.md#s-sellPriceAt) _js/sim/sim.js_ · [`dist3`](../world/bodies.js.md#s-dist3) _js/world/bodies.js_
+- via [js/economy/economy.js](../economy/economy.js.md): `wantsOf.map`
+- called by: [`bestRepairPort`](pilot.js.md#s-bestRepairPort) _js/aria/pilot.js_ · [`threatNow`](pilot.js.md#s-threatNow) _js/aria/pilot.js_ · [`tickAriaPilot`](pilot.js.md#s-tickAriaPilot) _js/aria/pilot.js_ · [`jobsFor`](play.js.md#s-jobsFor) _js/aria/play.js_ · [`stepPlay`](play.js.md#s-stepPlay) _js/aria/play.js_ · [`threatNow`](play.js.md#s-threatNow) _js/aria/play.js_
+
+<!-- note:perceive -->
+<!-- /note -->
+
+#### <a id="s-perceive-feed"></a>`perceive>feed(a)`
+
+function · L274–274
+
+- calls: [`react`](#s-react)
+- called by: [`perceive`](#s-perceive) ×4
+
+<!-- note:perceive>feed -->
 <!-- /note -->

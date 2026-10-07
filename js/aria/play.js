@@ -1,4 +1,4 @@
-import { ariaMind, authorize, decideMind, policyScore, learnOutcome, spendCap, breakLine } from "./mind.js";
+import { ariaMind, authorize, decideMind, policyScore, learnOutcome, spendCap, breakLine, forecast, settleForecast, riskAversion, calibReport } from "./mind.js";
 import { sim, sellPriceAt, setTurretMode, setMiningMode, toggleSystem } from "../sim/sim.js";
 import { stations, stationById } from "../station/stations.js";
 import { holdRoom, batteryCap, roomFor, cargoTotal } from "../flight/ship.js";
@@ -9,13 +9,15 @@ import { bestRoute, sellable, tradeRoutes } from "../economy/traderoutes.js";
 import { stockOf, askPrice } from "../economy/economy.js";
 import { makeMission, makeStep } from "../mission/script.js";
 import { mission, startMission, stopMission } from "../mission/run.js";
-import { autopilot, busIdle, AP_POWER } from "../flight/autopilot.js";
+import { autopilot, busIdle, AP_POWER, portHooks } from "../flight/autopilot.js";
 import { chainReport } from "../economy/chains.js";
-import { VERSION } from "../version.js";
 import { PRICE_CEIL, PRICE_FLOOR } from "../economy/economy.js";
 import { nests } from "../npc/rogues.js";
 import { traffic } from "../npc/traffic.js";
-import { sense, senseSpace, senseLine, forgetSenses, unpostedWork } from "./senses.js";
+import { sense, senseLine, forgetSenses, unpostedWork, perceive, hostileWithin } from "./senses.js";
+import { pathRisk, threatLine } from "./threat.js";
+import { wakeArm, sellValueAt, wakeJobOpen, wakeJobClose, wakeAudit, wakeReset } from "./wake.js";
+import { footprintLine, footprintReport } from "./footprint.js";
 import { planRoute, legSeconds, tripSeconds, aimAt, lockOn, markPlace, routeLine as navLine, NAV } from "./nav.js";
 import { handlingLeft, handlingLine } from "../station/dockwork.js";
 import { runBusiness, bizReport, bizLine, resetBusiness, biz } from "./company.js";
@@ -34,6 +36,8 @@ export const PLAY = {
   stuck: 1200,
   replans: 2,
   explore: 0.18,
+  exploreHalf: 8,
+  stewardLift: 0.8,
   deptBias: 2.2,
   minCredits: 800,
   patchAt: 0.55,
@@ -81,7 +85,7 @@ const note = (text) => { play.log.push({ t: Math.round(now()), text }); if (play
 export function scoreOf(key) {
   const m = play.brain.moves[key];
   if (!m || m.secs < 30) return 900;
-  return (m.cr / (m.secs / 60)) * (1 - 0.35 * (m.fails / Math.max(1, m.runs)));
+  return (m.cr / (m.secs / 60)) * (1 - 0.35 * ((m.wf ?? m.fails) / Math.max(1, m.w ?? m.runs)));
 }
 
 export function brainNote(key, secs, cr, ok) {
@@ -107,9 +111,8 @@ export function nearestPort(pos = sim.ship.pos, except = null) {
   return best?.st ?? null;
 }
 
-export function jobSeconds(o, from = sim.ship.pos) {
+export function jobHops(o) {
   const st = stationById(o.stationId);
-  let s = NAV.berth;
   const hops = [];
   if (o.spot) hops.push(o.spot, st);
   else if (o.salvage && o.mech === "deliver") {
@@ -120,6 +123,11 @@ export function jobSeconds(o, from = sim.ship.pos) {
   else if (o.sourceId) hops.push(stationById(o.sourceId), st);
   else if (o.targets?.length) { for (const t of o.targets) hops.push(targetPos(t, sim.time, {})); hops.push(st); }
   else hops.push(st);
+  return hops;
+}
+
+export function jobSeconds(o, from = sim.ship.pos, hops = jobHops(o)) {
+  let s = NAV.berth;
   let p = from;
   for (const h of hops) {
     if (!h) continue;
@@ -137,15 +145,20 @@ export function jobSeconds(o, from = sim.ship.pos) {
 
 export function jobsFor(st, dept = play.dept, now2 = now()) {
   const fit = [];
+  let hazards = [];
+  try { hazards = perceive().hazards; } catch { hazards = []; }
+  const averse = riskAversion();
   for (const o of boardFor(st, now2)) {
     if (acceptBlocker(o)) continue;
     if (!canFly(o)) continue;
-    const secs = jobSeconds(o);
+    const hops = jobHops(o);
+    const secs = jobSeconds(o, sim.ship.pos, hops);
     if (!Number.isFinite(secs)) continue;
     const mine = (o.cat ?? categoryOf(o.type)) === dept;
-    fit.push({ offer: o, mine, secs, perMin: (o.pay * (o.chain ? PLAY.chainBias : 1)) / Math.max(1, secs / 60) * (mine ? 1.4 : 1) });
+    const risk = hazards.length && !(o.armed || o.mech === "kill") ? pathRisk([sim.ship.pos, ...hops.filter(Boolean)], hazards).risk : 0;
+    fit.push({ offer: o, mine, secs, risk, perMin: (o.pay * (o.chain ? PLAY.chainBias : 1)) / Math.max(1, secs / 60) * (mine ? 1.4 : 1) * (1 - risk * averse) });
   }
-  return fit.sort((a, b) => b.perMin - a.perMin).map((f) => Object.assign(f.offer, { estSecs: Math.round(f.secs), estPerMin: Math.round(f.perMin) }));
+  return fit.sort((a, b) => b.perMin - a.perMin).map((f) => Object.assign(f.offer, { estSecs: Math.round(f.secs), estPerMin: Math.round(f.perMin), estRisk: Number(f.risk.toFixed(2)) }));
 }
 
 export function sourceFor(good, qty, except = null) {
@@ -301,7 +314,7 @@ function startJob(o) {
   else if (a.destId) aimAt(a.destId, a.destName);
   else if (a.targets?.length) { const w = targetPos(a.targets[0], sim.time, {}); if (w) markPlace(a.title, w); lockOn(a.stationId); }
   else aimAt(a.stationId, a.stationName);
-  play.move = { key: moveKeyFor(o), kind: "job", jobId: a.id, since: now(), cr0: netWorth(), note: o.title };
+  play.move = { key: moveKeyFor(o), kind: "job", jobId: a.id, since: now(), cr0: netWorth(), note: o.title, est: { secs: o.estSecs ?? null, cr: o.pay ?? null } };
   play.stats.jobs++;
   note(`took "${o.title}" at ${o.stationName} — ${o.pay} cr`);
   return true;
@@ -328,7 +341,7 @@ function startRoute() {
   const m = makeMission({ name: `ARIA · ${r.name} to ${r.to.name}`, steps, loop: { mode: "none" }, builtin: true, aria: true });
   if (!startMission(m)) return false;
   aimAt(r.from.id, r.from.name);
-  play.move = { key: "route", kind: "route", since: now(), cr0: netWorth(), note: `${r.name} ${r.from.name} → ${r.to.name}` };
+  play.move = { key: "route", kind: "route", since: now(), cr0: netWorth(), note: `${r.name} ${r.from.name} → ${r.to.name}`, est: { secs: r.secs ?? null, cr: r.profit ?? null } };
   note(`route: ${r.qty} ${r.name}, ${r.from.name} → ${r.to.name}, +${Math.round(r.margin)}/unit`);
   return true;
 }
@@ -420,7 +433,7 @@ function startSupply() {
   const m = makeMission({ name: `ARIA · ${pick.name} for ${pick.to}`, steps, loop: { mode: "none" }, builtin: true, aria: true });
   if (!startMission(m)) return false;
   aimAt(pick.fromId, pick.from);
-  play.move = { key: "supply", kind: "supply", since: now(), cr0: netWorth(), note: `${pick.qty} ${pick.name} → ${pick.to} (${pick.why})` };
+  play.move = { key: "supply", kind: "supply", since: now(), cr0: netWorth(), note: `${pick.qty} ${pick.name} → ${pick.to} (${pick.why})`, est: { secs: null, cr: pick.profit ?? null } };
   note(`${pick.to} ${pick.why}: ${pick.qty} ${pick.name} from ${pick.from}, about ${Math.round(pick.profit).toLocaleString("en-US")} cr`);
   return true;
 }
@@ -447,7 +460,13 @@ export function movesNow() {
     for (const o of [...mine, ...list.slice(0, 5)]) out.push({ key: moveKeyFor(o), start: () => startJob(o), what: o.title });
   }
   if (sim.ship.credits > PLAY.minCredits * 2 && bestRoute()) out.push({ key: "route", start: startRoute, what: "a trade route" });
-  if (sim.ship.credits > PLAY.minCredits * 2 && holdRoom(sim.ship) > 5) out.push({ key: "supply", start: startSupply, what: "supply a stalled line" });
+  if (sim.ship.credits > PLAY.minCredits * 2 && holdRoom(sim.ship) > 5) {
+    const steward = ariaMind.orders.steward ?? 0;
+    let lift = 1;
+    if (steward > 0) { try { const top = unpostedWork(null, holdRoom(sim.ship), purse())[0]; if (top && /stalled/.test(top.why)) lift = 1 + steward * PLAY.stewardLift; } catch { lift = 1; } }
+    play.lift = { supply: lift };
+    out.push({ key: "supply", start: startSupply, what: lift > 1 ? "restart a stalled line" : "supply a stalled line" });
+  }
   if (play.dept === "mining" || play.brain.moves.mine) out.push({ key: "mine", start: startFreeMine, what: "free mining" });
   if ((play.dept === "salvage" || play.brain.moves.salvage) && bestHulk()) out.push({ key: "salvage", start: startFreeSalvage, what: "free salvage" });
   if (Object.keys(sellable()).length) out.push({ key: "sell", start: startSell, what: "sell the hold" });
@@ -465,14 +484,31 @@ export function weightOf(key) {
     || (key === "mine" && play.dept === "mining")
     || (key === "salvage" && play.dept === "salvage")
     || ((key === "route" || key === "supply") && (play.dept === "trade" || play.dept === "logistics"));
-  return policyScore(key, scoreOf(key) * (mine ? PLAY.deptBias : 1), { hull: hullFrac(), hold: holdUsed(), dk: sim.ship.dockedAt ? 1 : 0 }) ;
+  return policyScore(key, scoreOf(key) * (mine ? PLAY.deptBias : 1) * (play.lift?.[key] ?? 1), { hull: hullFrac(), hold: holdUsed(), dk: sim.ship.dockedAt ? 1 : 0 }, { ratio: true });
 }
 
-export const hostilesClose = () => senseSpace().threat < PLAY.threatR;
+export const hostilesClose = () => hostileWithin(PLAY.threatR);
+const threatNow = () => { try { return perceive().threat.level; } catch { return 0; } };
 export function shouldBreakOff() {
   const h = hullFrac();
-  return h < PLAY.runAt || (ariaMind.orders.avoidHostiles && h < breakLine((sim.ship.charge ?? 0) / Math.max(1, batteryCap(sim.ship))) && hostilesClose());
+  return h < PLAY.runAt || (ariaMind.orders.avoidHostiles && h < breakLine((sim.ship.charge ?? 0) / Math.max(1, batteryCap(sim.ship)), threatNow()) && hostilesClose());
 }
+
+export function leastKnown(opts) {
+  const total = Object.values(play.brain.moves).reduce((a, m) => a + (m.w ?? m.runs ?? 0), 0);
+  let best = null, bs = -Infinity;
+  for (const o of opts) {
+    const m = play.brain.moves[o.key];
+    const n = m ? (m.w ?? m.runs ?? 0) : 0;
+    const s = Math.sqrt(Math.log(total + 2) / (n + 1));
+    if (s > bs + 1e-9) { bs = s; best = o; }
+  }
+  return best;
+}
+export const exploreRate = () => {
+  const total = Object.values(play.brain.moves).reduce((a, m) => a + (m.runs ?? 0), 0);
+  return PLAY.explore * Math.sqrt(PLAY.exploreHalf / (PLAY.exploreHalf + total));
+};
 
 const heldFlyable = (a) => a.mech !== "escort" && (!(a.armed || a.mech === "kill") || (ariaMind.authority.combat && hullFit().armed));
 
@@ -495,7 +531,7 @@ function resumeHeld() {
   if (!authorize("navigation", { at: now() }).ok) return drop("navigation withheld");
   if (!Number.isFinite(secs) || secs >= timeLeft(a)) return drop("no time left to finish it");
   if (!startMission(jobPlan(a))) return drop("no way to fly it from here");
-  play.move = { key: p?.key ?? moveKeyFor(a), kind: "job", jobId: a.id, since: p?.since ?? now(), cr0: p?.cr0 ?? netWorth(), note: a.title, replans: p?.replans ?? 0 };
+  play.move = { key: p?.key ?? moveKeyFor(a), kind: "job", jobId: a.id, since: p?.since ?? now(), cr0: p?.cr0 ?? netWorth(), note: a.title, replans: p?.replans ?? 0, wake: p?.wake ?? wakeJobOpen() };
   note(`${p ? "back on" : "picking up"} "${a.title}" — ${Math.round(timeLeft(a) / 60)} min left on it`);
   return true;
 }
@@ -505,12 +541,23 @@ function decide() {
   const opts = movesNow().filter(o => authorize(o.key, { at: now() }).ok);
   if (!opts.length) return false;
   const yard = hullFrac() < ariaMind.orders.repairBelow ? opts.find((o) => o.key === "yard") : null;
-  if (yard) { play.stats.decisions++; if (yard.start()) return true; }
-  const explore = ariaMind.orders.mode !== "directive" && rand() < PLAY.explore;
-  const pick = explore ? opts[Math.floor(rand() * opts.length)] : opts.reduce((a, b) => (weightOf(a.key) >= weightOf(b.key) ? a : b));
+  if (yard) { play.stats.decisions++; if (yard.start()) { begun(); return true; } }
+  const explore = ariaMind.orders.mode !== "directive" && rand() < exploreRate();
+  const pick = (explore ? leastKnown(opts) : null) ?? opts.reduce((a, b) => (weightOf(a.key) >= weightOf(b.key) ? a : b));
   play.stats.decisions++;
-  decideMind({ action: pick.key, why: pick.what, state: { hull: hullFrac(), hold: holdUsed(), hz: hostilesClose() ? 1 : 0 }, alternatives: opts.map(o => ({ action: o.key, score: weightOf(o.key) })), at: now() });
-  return pick.start();
+  const d = decideMind({ action: pick.key, why: explore ? `${pick.what} — looking, she has flown it least` : pick.what, state: { hull: hullFrac(), hold: holdUsed(), hz: hostilesClose() ? 1 : 0, th: threatNow() }, alternatives: opts.map(o => ({ action: o.key, score: weightOf(o.key) })), at: now() });
+  if (!pick.start()) return false;
+  begun(d.raw);
+  return true;
+}
+
+function begun(p = null) {
+  const m = play.move;
+  if (!m) return;
+  m.wake ??= wakeJobOpen();
+  const past = play.brain.moves[m.key];
+  const runs = past ? Math.max(1, past.w ?? past.runs) : 0;
+  forecast({ key: m.key, p, secs: m.est?.secs ?? (runs ? past.secs / runs : null), cr: m.est?.cr ?? (runs ? past.cr / runs : null), at: now() });
 }
 
 function finishMove(ok, why) {
@@ -519,6 +566,8 @@ function finishMove(ok, why) {
   const secs = Math.max(1, now() - m.since);
   const cr = netWorth() - m.cr0;
   brainNote(m.key, secs, cr, ok);
+  settleForecast(m.key, secs, cr, ok);
+  wakeJobClose(m.wake ?? null, m.key, ok, cr);
   play.stats[ok ? "done" : "failed"]++;
   if (cr > 0) play.stats.earned += cr; else play.stats.spent -= cr;
   note(`${ok ? "done" : `dropped (${why})`}: ${m.note} — ${cr >= 0 ? "+" : ""}${Math.round(cr)} cr in ${Math.round(secs)}s`);
@@ -541,6 +590,10 @@ export function beginPlay({ career = pilot?.complexId ?? "mining", name = "ARIA"
   play.yardAt = -1e9;
   play.log = [];
   forgetSenses();
+  wakeReset();
+  wakeArm("play", () => play.on);
+  portHooks.sellValue = sellValueAt;
+  play.lift = {};
   resetBusiness();
   bizSeen = 0;
   play.stats = { decisions: 0, jobs: 0, done: 0, failed: 0, earned: 0, spent: 0 };
@@ -581,6 +634,7 @@ export function tendBus() {
 
 export function stepPlay(dt) {
   if (!play.on) return;
+  try { perceive(); wakeAudit(); } catch {}
   const flat = tendBus();
   if (flat && !mission.active) {
     if (now() - play.flatAt > 60) { play.flatAt = now(); note("battery flat — holding here until it comes back"); }
@@ -615,7 +669,7 @@ export function stepPlay(dt) {
       if (a0) abandonContract(a0.id);
       finishMove(false, `hull at ${pct}%`);
     }
-    startYard();
+    if (startYard()) begun();
     return;
   }
   const m = play.move;
@@ -642,7 +696,7 @@ export function stepPlay(dt) {
   if (!decide()) play.think = PLAY.think * 4;
 }
 
-export const brainSig = () => `${VERSION}:${PRICE_FLOOR}-${PRICE_CEIL}:${BOARD.pay ?? 1}`;
+export const brainSig = () => `econ:${PRICE_FLOOR}-${PRICE_CEIL}:${BOARD.pay ?? 1}`;
 
 export function brainOut() {
   return { sig: brainSig(), career: play.career, sky: play.brain.sky, runs: play.brain.runs, moves: play.brain.moves, saved: Math.round(now()) };
@@ -651,7 +705,7 @@ export function brainOut() {
 export function adoptBrain(saved, sky = sim.skySeed) {
   if (!saved?.moves) return { moves: {}, runs: 0, why: "empty — first run in this sky" };
   if (saved.sky && saved.sky !== sky) return { moves: {}, runs: 0, why: `learned in "${saved.sky}", not this sky — starting clean` };
-  if (saved.sig !== brainSig()) return { moves: {}, runs: 0, why: `learned under ${saved.sig ?? "an older build"}, the rules have moved — starting clean` };
+  if (saved.sig !== brainSig()) return { moves: {}, runs: 0, why: `learned under ${saved.sig ?? "an older build"}, the price rules have moved — starting clean` };
   return { moves: { ...saved.moves }, runs: saved.runs ?? 0, why: `${Object.keys(saved.moves).length} moves from ${saved.runs ?? 0} earlier runs` };
 }
 
@@ -683,6 +737,11 @@ export function playReport() {
     chain: run ? `${run.name} · stage ${run.stage}/${run.of}${run.held ? " · in hand" : ` · next at ${run.stationName}`}` : null,
     task: autopilot.task ?? null,
     sees: senseLine(),
+    threat: ariaMind.scene?.threat?.n ? threatLine({ ...ariaMind.scene.threat, nearest: ariaMind.scene.threat.nearest ?? Infinity, eta: ariaMind.scene.threat.eta ?? Infinity }) : "clear",
+    wake: footprintLine(),
+    footprint: footprintReport(),
+    calibration: calibReport(),
+    shift: ariaMind.shift,
     biz: bizLine(),
     business: bizReport(),
     crew: crew.aboard.length,

@@ -18,6 +18,10 @@ import { boardByCategory } from "../economy/contracts.js";
 import { tradeRoutes } from "../economy/traderoutes.js";
 import { chainReport } from "../economy/chains.js";
 import { SECTORS } from "../economy/materials.js";
+import { hulks } from "../world/hulks.js";
+import { ariaMind, discount, remember } from "./mind.js";
+import { track, markDanger, dangers, alertsSince, alertLine, resetBelief } from "./belief.js";
+import { threatOf, hazardsFrom, threatLine, THREAT } from "./threat.js";
 
 export const SENSE = {
   hull: 0,
@@ -34,7 +38,16 @@ const keep = (k, v) => { cache[k] = v; cache.at[k] = sim.time; return v; };
 export function forgetSenses() {
   for (const k of Object.keys(cache)) if (k !== "at") cache[k] = null;
   cache.at = {};
+  seen.at = -1e9; seen.pricesAt = -1e9; seen.shiftAt = -1e9; seen.last = null;
+  resetBelief();
 }
+
+function staleMarket() {
+  cache.routes = null; cache.board = null; cache.ports = null;
+}
+
+export const PERCEIVE = { every: 2, prices: 20, ports: 6, goods: 5, mark: 0.3, shiftEvery: 120 };
+const seen = { at: -1e9, pricesAt: -1e9, shiftAt: -1e9, last: null };
 
 const honest = (st) => st && !(st.hostile && !st.claimed) && st.sector !== "pirate";
 const _p = { x: 0, y: 0, z: 0 };
@@ -211,6 +224,81 @@ export function senseLine(s = null) {
   const v = s ?? sense();
   const w = v.space.inWell;
   return `${v.system} · ${v.hull.name} ${Math.round(v.hull.hull * 100)}% hull ${Math.round(v.hull.charge * 100)}% charge · hold ${Math.round(v.hull.holdFrac * 100)}% · ${w ? `in ${w.name}'s well` : v.space.dominant ? `near ${v.space.dominant.name}` : "open space"}${v.space.hostiles.length ? ` · ${v.space.hostiles.length} hostile` : ""}${v.hull.inBelt ? ` · belt: ${v.space.rocks} rocks, ${v.space.ores.length} ores` : ""}`;
+}
+
+export function hostileWithin(r = 6000) {
+  const p = sim.ship.pos;
+  for (const c of contacts) if (c.hp > 0 && c.relation === "hostile" && Math.hypot(c.x - p.x, c.y - p.y, c.z - p.z) < r) return true;
+  return false;
+}
+
+const TRADE_KEY = (k) => k === "route" || k === "supply" || k === "sell" || k.startsWith("board:trade") || k.startsWith("board:logistics") || k.startsWith("chain:trade") || k.startsWith("chain:logistics");
+
+function react(a, now) {
+  if (a.group === "price") {
+    staleMarket();
+    if (now - seen.shiftAt < PERCEIVE.shiftEvery && now >= seen.shiftAt) return;
+    seen.shiftAt = now;
+    discount(TRADE_KEY, 0.8, alertLine(a), now);
+  } else if (a.group === "threat" && a.dir > 0) {
+    remember({ at: now, kind: "sky", summary: alertLine(a), importance: 0.7, consequences: { from: a.from, to: a.to } });
+    ariaMind.shift = { at: now, why: alertLine(a), moves: 0 };
+  } else if (a.group === "salvage") {
+    discount((k) => k === "salvage" || k.startsWith("board:salvage") || k.startsWith("chain:salvage"), 0.8, alertLine(a), now);
+  }
+}
+
+function sceneOf(hull, space, threat) {
+  if (hull.dockedAt) return { label: "docked", line: `docked at ${hull.dockedName ?? "port"}` };
+  if (threat.band === "outgunned" || threat.band === "pressed") return { label: threat.band, line: threatLine(threat) };
+  if (hull.warpState && hull.warpState !== "idle") return { label: "warp", line: "in warp" };
+  if (hull.inBelt) return { label: "belt", line: `in the belt — ${space.rocks} rocks, ${space.ores.length} ores` };
+  const w = space.inWell;
+  return { label: "transit", line: w ? `in ${w.name}'s well` : space.dominant ? `near ${space.dominant.name}` : "open space" };
+}
+
+export function perceive(force = false) {
+  const now = sim.time ?? 0;
+  if (!force && seen.last && now >= seen.at && now - seen.at < PERCEIVE.every) return seen.last;
+  const hull = senseHull();
+  const space = senseSpace();
+  const hostiles = [];
+  for (const c of contacts) if (c.hp > 0 && c.relation === "hostile") hostiles.push(c);
+  const threat = threatOf({ pos: hull.pos, vel: hull.vel, hull: hull.hull, charge: hull.charge, armed: hull.armed, turrets: hull.turrets }, hostiles);
+  const p = hull.pos;
+  for (const c of hostiles) {
+    const d = Math.hypot(c.x - p.x, c.y - p.y, c.z - p.z);
+    if (d <= THREAT.reach) markDanger(c, Math.min(1, PERCEIVE.mark + threat.level * 0.7), now, c.name ?? "contact");
+  }
+  const fresh = [];
+  const feed = (a) => { if (a) { fresh.push(a); react(a, now); } };
+  feed(track("hostiles", threat.n, now, { kind: "threat", scale: 1, label: "Hostiles in range", group: "threat" }));
+  feed(track("raiders", space.raiders, now, { kind: "threat", scale: 1, label: "Raiders in the sky", group: "threat" }));
+  feed(track("hulks", hulks.length, now, { kind: "count", scale: 1, label: "Hulks adrift", group: "salvage" }));
+  if (now - seen.pricesAt >= PERCEIVE.prices || now < seen.pricesAt) {
+    seen.pricesAt = now;
+    const near = [];
+    for (const st of stations) if (honest(st) && st.stock) near.push({ st, d: dist3(st, p) });
+    near.sort((a, b) => a.d - b.d);
+    const held = Object.keys(sim.ship.hold ?? {}).filter((id) => sim.ship.hold[id] > 0.01);
+    for (const { st } of near.slice(0, PERCEIVE.ports)) {
+      const ids = [...new Set([...held, ...wantsOf(st, 3).map((w) => w.id)])].slice(0, PERCEIVE.goods);
+      for (const id of ids) {
+        const px = sellPriceAt(st, id);
+        feed(track(`px:${st.id}:${id}`, px, now, { kind: "price", scale: Math.max(1, px * 0.05), label: `${goodName(id)} at ${st.name}`, group: "price" }));
+      }
+    }
+  }
+  const scene = sceneOf(hull, space, threat);
+  const alerts = alertsSince(now);
+  ariaMind.scene = {
+    at: now, label: scene.label, line: scene.line,
+    threat: { level: Number(threat.level.toFixed(2)), band: threat.band, n: threat.n, nearest: Number.isFinite(threat.nearest) ? Math.round(threat.nearest) : null, closing: Math.round(threat.closing), eta: Number.isFinite(threat.eta) ? Math.round(threat.eta) : null, worst: threat.worst?.name ?? null },
+    alerts: alerts.slice(0, 4).map((a) => ({ at: Math.round(a.at), line: alertLine(a) })),
+  };
+  seen.at = now;
+  seen.last = { at: now, hull, space, threat, hazards: hazardsFrom({ hostiles, nests: space.nests, dangers: dangers(now) }), alerts, fresh, scene };
+  return seen.last;
 }
 
 void depleted;

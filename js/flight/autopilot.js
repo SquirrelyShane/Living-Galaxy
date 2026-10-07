@@ -496,6 +496,8 @@ export function relSpeedTo(vel) {
   return Math.hypot(s.vel.x - vel.x, s.vel.y - vel.y, s.vel.z - vel.z);
 }
 
+export const portHooks = { sellValue: null };
+
 export function bestPortFor(plan = sim.autoPlan.onDock) {
   const ship = sim.ship;
   let best = null, bestScore = -Infinity;
@@ -506,8 +508,8 @@ export function bestPortFor(plan = sim.autoPlan.onDock) {
     let score = -d / 100000;
     if (plan === "smelt") score += canSmeltAt(st) ? 4 : -2;
     else if (plan === "sell") {
-      let value = 0;
-      for (const [k, q] of Object.entries(ship.hold)) value += sellPriceAt(st, k) * q;
+      let value = portHooks.sellValue?.(st, ship) ?? null;
+      if (value == null) { value = 0; for (const [k, q] of Object.entries(ship.hold)) value += sellPriceAt(st, k) * q; }
       score += Math.min(6, value / 4000) + (st.credits > 4000 ? 1 : -1);
     }
     const pref = preferenceFor("port", st.id);

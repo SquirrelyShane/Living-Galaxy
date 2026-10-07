@@ -1,6 +1,6 @@
 # Living Galaxy — Ad Astrum
 
-**Version 0.3.93**
+**Version 0.3.95**
 
 A first-person solar system you fly from the pilot's seat. Public sky is Sol.
 A private code grows a unique system — planets, moons, belts — you can edit and
@@ -15,7 +15,7 @@ on it. What changed between releases lives in
 
 ---
 
-Current patch: [0.3.93](docs/PATCH-0.3.93.md). Career roadmap:
+Current patch: [0.3.95](docs/PATCH-0.3.95.md). Career roadmap:
 [docs/CAREER_ROADMAP.md](docs/CAREER_ROADMAP.md). Salvage work plan:
 [docs/SALVAGE_PLAN.md](docs/SALVAGE_PLAN.md). Project housekeeping:
 [docs/PROJECT_CLEANUP.md](docs/PROJECT_CLEANUP.md).
@@ -239,7 +239,12 @@ updated with `node tools/codedocs/move.mjs --plan tools/codedocs/moves-0.3.78.js
 | `js/world/field.js` | Asteroid field density, rock size distribution, band names, taxonomic class per rock |
 | `js/aria/pilot.js` | ARIA at the conn: plans your jobs (repair, sell, mine, survey, and — 0.3.06 — refit and build) off your own habits and hands them to the mission runner |
 | `js/aria/mind.js` | 0.3.88: the one mind both ARIAs share — captain's standing orders (reserve, purchase ceiling, repair line, avoid hostiles, mode), authority by domain (all granted until unticked), the outcome book, Tape contexts, episodic memory; `authorize()` and `spendCap()` are the only spending gate; no sim imports |
-| `js/console/panels/aria-core.js` | 0.3.88: NAV › ARIA CORE — goals, the current decision and why, withheld-action notices, standing orders and authority ticks |
+| `js/console/panels/aria-core.js` | 0.3.88: NAV › ARIA CORE — goals, the current decision and why, withheld-action notices, standing orders and authority ticks; 0.3.95: WHAT SHE SEES, HER WAKE, forecasts kept, Steward weight |
+| `js/aria/belief.js` | 0.3.95: what she believes rather than what the sim holds — facts that lose confidence with age, EWMA + CUSUM trackers that announce a step change once, a fading map of where trouble was; pure, no imports |
+| `js/aria/threat.js` | 0.3.95: threat as a grade — range, closing speed and their toughness against her guns, hull and battery; `legRisk`/`pathRisk` for a lane past hostiles, nests and remembered danger; pure |
+| `js/aria/foresee.js` | 0.3.95: the forward model — a lot priced with its own slip, glut and need flags, what the port can pay, and `counterfactual()`: the economy's own `runLines` on two copies of a port, with and without her cargo |
+| `js/aria/footprint.js` | 0.3.95: the ledger of her wake — per port and corp what she moved and what it did, line forecasts waiting to be audited; pure, saved inside the mind |
+| `js/aria/wake.js` | 0.3.95: the sim side of the ledger — brackets an ARIA-flown SELL or BUY, books it, audits forecasts against the real port, and values a buyer on the whole lot for `bestPortFor` while she flies |
 | `js/mission/detour.js` | 0.3.88: the leg and the dogleg — an ARIA mission whose lane has a world across it marks a point clear of it, hops there and resumes; a factory beside `run.js`, so hand-started missions are untouched |
 | `js/mission/salvage.js` | 0.3.90: SALVAGE, the mission op, and the eye that picks a hulk — worth over leg-plus-cut seconds, passing over a hulk that will age out, lies under hostile guns, behind a world or under a raider; rig rest on a low battery; AUTO mode. A factory beside `run.js`, like `tradeops.js` and `detour.js` |
 | `js/economy/fabricate.js` | The fabrication solver and job queue: resolves a part down the whole recipe tree to raw ore, runs it on sim time at a port, delivers to the locker (leaf — no game imports) |
@@ -2381,6 +2386,75 @@ message is an instruction rather than a diagnosis. Chromium, Firefox and
 Safari phrase a link error three different ways; all three are read. The panel
 covers the shell rather than sitting behind it.
 
+### ARIA 1.5: what she sees, what she is sure of, the wake she leaves
+
+**One vocabulary** (0.3.95, `js/aria/mind.js`). Three things were wrong with
+what she learned and none of them showed. The Tape records every button
+press, and each distinct button made a context of its own, so a few hundred
+taps pushed the mining and selling she had watched out of the 256 slots
+(oldest first, whatever it was worth). The career planner's move keys
+(`board:mining:…`, `route`, `supply`) never matched a Tape act, so imitation
+was worth nothing to it. And its base score is cr/min, in the hundreds,
+against learned terms that top out near 1, so the mode switch did nothing
+there. `verbOf()` now puts a mission op, a cutter order, a tap, a move key and
+a contract category into one short list of verbs, or `null` when it is not a
+decision (a leg, a berth, a settings button). Only verbs make contexts; the
+thinnest context is the one evicted; the career planner scores by ratio
+(`policyScore(…, { ratio: true })`). `migrateContexts()` reads an older save
+into the new words on load. Matching is a kernel over hull, hold, hazard,
+docked and charge rather than a four-way bucket, so 74% hull is not a stranger
+to 90%.
+
+**Fade, not wipe.** Outcomes and contexts halve on a sky-time clock (two and
+four hours) instead of counting for ever, and the career brain's signature no
+longer carries the version, so a patch does not empty it; a change to the
+price band or the board's pay still does.
+
+**Belief and change** (`js/aria/belief.js`, fed by `perceive()` in
+`senses.js`). `perceive()` is the one look both planners take: hull, space,
+a graded threat, the hazards on any lane, and what changed. Prices at the six
+nearest honest ports, hostiles in reach, raiders in the sky and hulks adrift
+are tracked; a step change raises one alert, the market caches are dropped,
+and the kinds of work it touches are marked down (`discount()`) until
+re-flown. A price she moved herself is re-anchored, so her own sale is not
+reported to her as news.
+
+**Threat** (`js/aria/threat.js`). `threatOf()` weighs each hostile by range,
+closing speed and hull against her guard (guns, hull, charge) and returns a
+level and a band: clear, watch, pressed, outgunned. The 0.3.88 rule holds:
+proximity alone never breaks work off. What changed is the line:
+`breakLine(charge, threat)` lifts by up to 15 points of hull once the level
+passes 0.5, so the same 62% hull that keeps cutting beside one drone runs
+for the yard from a closing pack. The conn's choice of yard and the career
+planner's board jobs are scored
+with `pathRisk()` over hostiles, nests and where trouble was seen (halving
+every four minutes), scaled by `riskAversion()`, which reads the risk she learned
+from watching you and the Avoid hostiles order.
+
+**Calibration.** Each job starts with a forecast (how sure, how long, how
+much) and is scored when it ends. The Core's confidence is pulled toward the
+record for that band, and the panel shows the hit rate and whether jobs ran
+long.
+
+**The forward model and the wake** (`js/aria/foresee.js`, `footprint.js`,
+`wake.js`). While she flies, `bestPortFor("sell")` values a port on the whole
+hold: the lot price with her own slip in it, capped at what the port can pay.
+The Steward weight order (0 to 1, default 0.25) leans that value toward a
+port short of the cargo and away from one it would flood, and in the career
+planner lifts a supply run that restarts a stalled line. An ARIA-flown SELL or BUY is bracketed and
+booked: units, credits, the price multiplier before and after, what the price
+move cost her, standing with the port's corp, shelves flooded, wants met,
+feeds left short. `counterfactual()` runs the economy's own `runLines` on two
+copies of the port, with and without her cargo, and the difference is a
+forecast (this line starts, that one stops) that is audited against the real
+port 45 to 240 s later. The ledger is saved with the mind, per captain and
+sky, and goes into `explanationPacket()` (now v2, with the scene and the
+calibration). The captain's own missions leave no mark in it.
+
+The Core shows all of it under WHAT SHE SEES and HER WAKE. Not built yet:
+planning more than one job ahead, claims between pilots over the relay, and a
+model reading the packet aloud.
+
 ### ARIA runs the company
 
 **The bridge's business side** (0.3.26, `js/aria/company.js`). A career in this
@@ -3824,6 +3898,7 @@ node --import ./test/three-register.mjs test/<name>.test.mjs
 | `ariamind` | 0.3.88: authority defaults and withholding, the reserve guarding investments only, repairs and treasury transfers uncapped, the working floor, Tape settlement, source isolation, bounded contexts and episodes, people by id, goals, persistence, and a v1 mind dropping its withheld defaults once |
 | `ariamind-integration` | the mind is one object across aria.js and play.js, switches with the captain, and purchase and repair limits hold at execution |
 | `aria-mining-loop` | low battery outside the belt pauses MINE rather than finishing it, recharge resumes, a bus that cannot recharge fails by name; a drone alongside a whole hull is not a break-off, a hurt hull with contacts close is, and a docked hull undocks to work with no hold timer |
+| `aria15` | 0.3.95: one vocabulary across Tape, conn and career planner; taps not evicting learning; a 0.3.93 save migrated; kernel matching; ratio scoring by mode; sky-time fade and `discount`; forecast calibration; the break line under threat; CUSUM change detection and self-moves not announced; fading facts and danger; graded threat and lane risk; `counterfactual` exact against the real `runLines`; lot slip, glut and need; the ledger and its audit; then the real sim — an ARIA-flown SELL and BUY booked with price, standing and a line forecast borne out, the captain's missions not booked, the buyer valued on the whole lot, perception with hostiles put in the sky, the wake saved per captain, and the conn taken |
 | `bake` | every asteroid is the generator's: the bake lattice is its cube-sphere (vertex ids, winding), the atlas carries the fine surface, the drawn mesh subsamples the grown one, tiers divide, worker transfer, the grower's main-thread path |
 | `power` | the bus: the starter carries its loadout, a fresh overload verdict and a re-engage after shedding, the stand-down naming switches in kW, no power from nothing on a flat battery, mains derate before life support, the brownout latch, `ship.draws` adding up to the load, the bench on the mining bus, a relaunch keeping its hull tune, the pilot's cutter handed back, retaking the conn at zero throttle |
 | `hunt` | 0.3.01 outside the bus: the impact cap, zero-size guards, a stood-down spool, a lane through a hole refused, a hull lost at the horizon recovered at a port |

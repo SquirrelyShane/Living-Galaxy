@@ -54,10 +54,11 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 
 ### `change`
 
-- event.listen on `input` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L27
-- event.listen on `mode` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L31
-- event.listen on `avoid` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L32
-- event.listen on `c` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L37
+- event.listen on `input` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L54
+- event.listen on `mode` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L58
+- event.listen on `input` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L60
+- event.listen on `avoid` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L61
+- event.listen on `c` → `(inline)` — [js/console/panels/aria-core.js › mountCore](../files/js/console/panels/aria-core.js.md#s-mountCore) L67
 - event.listen on `sel` → `(inline)` — [js/console/panels/corp-town.js › careBlock>pick](../files/js/console/panels/corp-town.js.md#s-careBlock-pick) L37
 - event.listen on `name` → `(inline)` — [js/console/panels/crew.js › mountHouse](../files/js/console/panels/crew.js.md#s-mountHouse) L281
 - event.listen on `inp` → `(inline)` — [js/console/panels/work.js › condBuilder](../files/js/console/panels/work.js.md#s-condBuilder) L115
@@ -101,7 +102,7 @@ DOM listeners, `on*` handler assignments, dispatched events and bus emit/on pair
 - event.listen on `b` → `(inline)` — [js/console/panels/ship.js › mountSystems](../files/js/console/panels/ship.js.md#s-mountSystems) L331
 - event.listen on `b` → `fn` — [js/crew/talkview.js › mountTalk>btn](../files/js/crew/talkview.js.md#s-mountTalk-btn) L59
 - event.listen on `btn` → `(inline)` — [js/economy/icework.js › wireIcework](../files/js/economy/icework.js.md#s-wireIcework) L131
-- event.listen on `btn` → `(inline)` — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L794
+- event.listen on `btn` → `(inline)` — [js/flight/autopilot.js › wireAutopilot](../files/js/flight/autopilot.js.md#s-wireAutopilot) L796
 - event.listen on `b` → `(inline)` — [js/interior/interior.js › paintRail](../files/js/interior/interior.js.md#s-paintRail) L369
 - event.listen on `root.querySelector()` → `closeInterior` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L426
 - event.listen on `$()` → `toggleInterior` — [js/interior/interior.js › mountInterior](../files/js/interior/interior.js.md#s-mountInterior) L440

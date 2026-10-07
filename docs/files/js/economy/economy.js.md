@@ -1,6 +1,6 @@
 # js/economy/economy.js
 
-[index](../../../README.md) · 262 lines · 30 symbols · 1 imports · 19 importers
+[index](../../../README.md) · 262 lines · 30 symbols · 1 imports · 21 importers
 
 ## About
 
@@ -49,9 +49,11 @@ is fine: prices are a thing you fly to find out).
 
 ## Imported by
 
+- [js/aria/foresee.js](../aria/foresee.js.md) — `runLines`, `stockOf`, `stockMultAt`, `lotMult`, `targetFor`, `bidPrice`, `askPrice`, `LINES`, `GLUT_FRAC`, `SHORT_FRAC`
 - [js/aria/play.js](../aria/play.js.md) — `stockOf`, `askPrice`
 - [js/aria/play.js](../aria/play.js.md) — `PRICE_CEIL`, `PRICE_FLOOR`
 - [js/aria/senses.js](../aria/senses.js.md) — `econReport`, `stockOf`, `shortagesOf`, `wantsOf`
+- [js/aria/wake.js](../aria/wake.js.md) — `stockOf`, `stockMultAt`, `targetFor`, `LINES`, `GLUT_FRAC`, `SHORT_FRAC`
 - [js/comms/comms.js](../comms/comms.js.md) — `shortagesOf`
 - [js/corp/fleet.js](../corp/fleet.js.md) — `bidPrice`
 - [js/drones/board.js](../drones/board.js.md) — `stockOf`, `bidPrice`, `shortagesOf`
@@ -74,22 +76,22 @@ is fine: prices are a thing you fly to find out).
 - [`ECON_TICK`](#s-ECON_TICK) · const — used by test/economy.test.mjs
 - [`PRICE_FLOOR`](#s-PRICE_FLOOR) · const — used by [js/aria/play.js](../aria/play.js.md), test/balance.test.mjs, test/economy.test.mjs
 - [`PRICE_CEIL`](#s-PRICE_CEIL) · const — used by [js/aria/play.js](../aria/play.js.md), test/balance.test.mjs, test/economy.test.mjs
-- [`SHORT_FRAC`](#s-SHORT_FRAC) · const — **no importer in scanned roots**
-- [`GLUT_FRAC`](#s-GLUT_FRAC) · const — used by test/balance.test.mjs
-- [`LINES`](#s-LINES) · const — used by test/economy.test.mjs
+- [`SHORT_FRAC`](#s-SHORT_FRAC) · const — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/wake.js](../aria/wake.js.md)
+- [`GLUT_FRAC`](#s-GLUT_FRAC) · const — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/wake.js](../aria/wake.js.md), test/balance.test.mjs
+- [`LINES`](#s-LINES) · const — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/wake.js](../aria/wake.js.md), test/economy.test.mjs
 - [`tierOf`](#s-tierOf) · function — **no importer in scanned roots**
-- [`targetFor`](#s-targetFor) · function — used by [js/npc/traffic.js](../npc/traffic.js.md), test/balance.test.mjs, test/economy.test.mjs
-- [`stockOf`](#s-stockOf) · function — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/drones/board.js](../drones/board.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/traffic.js](../npc/traffic.js.md), test/chains.test.mjs, test/economy.test.mjs
-- [`stockMultAt`](#s-stockMultAt) · function — used by test/balance.test.mjs
+- [`targetFor`](#s-targetFor) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/wake.js](../aria/wake.js.md), [js/npc/traffic.js](../npc/traffic.js.md), test/balance.test.mjs, test/economy.test.mjs
+- [`stockOf`](#s-stockOf) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/aria/wake.js](../aria/wake.js.md), [js/drones/board.js](../drones/board.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/traffic.js](../npc/traffic.js.md), test/chains.test.mjs, test/economy.test.mjs
+- [`stockMultAt`](#s-stockMultAt) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/wake.js](../aria/wake.js.md), test/balance.test.mjs
 - [`stockMult`](#s-stockMult) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/economy.test.mjs
-- [`lotMult`](#s-lotMult) · function — used by [js/sim/sim.js](../sim/sim.js.md)
-- [`askPrice`](#s-askPrice) · function — used by [js/aria/play.js](../aria/play.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), [js/sim/sim.js](../sim/sim.js.md)
-- [`bidPrice`](#s-bidPrice) · function — used by [js/corp/fleet.js](../corp/fleet.js.md), [js/drones/board.js](../drones/board.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), test/balance.test.mjs
+- [`lotMult`](#s-lotMult) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/sim/sim.js](../sim/sim.js.md)
+- [`askPrice`](#s-askPrice) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/aria/play.js](../aria/play.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), [js/sim/sim.js](../sim/sim.js.md)
+- [`bidPrice`](#s-bidPrice) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), [js/corp/fleet.js](../corp/fleet.js.md), [js/drones/board.js](../drones/board.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), test/balance.test.mjs
 - [`deliver`](#s-deliver) · function — used by [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/traffic.js](../npc/traffic.js.md), test/dockwork.test.mjs, test/economy.test.mjs, test/hold.test.mjs
 - [`lift`](#s-lift) · function — used by [js/drones/npcdrones.js](../drones/npcdrones.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), [js/npc/flow.js](../npc/flow.js.md), [js/npc/traffic.js](../npc/traffic.js.md), test/ariasense.test.mjs, test/economy.test.mjs
 - [`ledgerOf`](#s-ledgerOf) · function — used by test/ariasense.test.mjs, test/economy.test.mjs
 - [`econHooks`](#s-econHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md), test/stafflife.test.mjs
-- [`runLines`](#s-runLines) · function — used by test/economy.test.mjs
+- [`runLines`](#s-runLines) · function — used by [js/aria/foresee.js](../aria/foresee.js.md), test/economy.test.mjs
 - [`stepEconomy`](#s-stepEconomy) · function — used by [js/sim/sim.js](../sim/sim.js.md), test/economy.test.mjs
 - [`shortagesOf`](#s-shortagesOf) · function — used by [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/drones/board.js](../drones/board.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/economy/contracts.js](contracts.js.md), test/economy.test.mjs
 - [`glutsOf`](#s-glutsOf) · function — **no importer in scanned roots**
@@ -187,7 +189,7 @@ The port's size as a multiplier on line rates and stock targets.
 function · **exported** · L49–59
 
 - calls: [`tierOf`](#s-tierOf)
-- called by: [`econReport`](#s-econReport) ×2 · [`glutsOf`](#s-glutsOf) ×2 · [`ledgerOf`](#s-ledgerOf) · [`pickCargoAt`](#s-pickCargoAt) · [`runLines`](#s-runLines) ×2 · [`shortagesOf>consider`](#s-shortagesOf-consider) · [`stockMultAt`](#s-stockMultAt) · [`liftCargo`](../npc/traffic.js.md#s-liftCargo) _js/npc/traffic.js_
+- called by: [`foreseeBuy`](../aria/foresee.js.md#s-foreseeBuy) _js/aria/foresee.js_ · [`foreseeSale`](../aria/foresee.js.md#s-foreseeSale) _js/aria/foresee.js_ · [`wakeClose`](../aria/wake.js.md#s-wakeClose) _js/aria/wake.js_ · [`econReport`](#s-econReport) ×2 · [`glutsOf`](#s-glutsOf) ×2 · [`ledgerOf`](#s-ledgerOf) · [`pickCargoAt`](#s-pickCargoAt) · [`runLines`](#s-runLines) ×2 · [`shortagesOf>consider`](#s-shortagesOf-consider) · [`stockMultAt`](#s-stockMultAt) · [`liftCargo`](../npc/traffic.js.md#s-liftCargo) _js/npc/traffic.js_
 
 <!-- note:targetFor -->
 What the port would like to hold of a good: its outputs and inputs deep, everything else shallow.
@@ -197,7 +199,7 @@ What the port would like to hold of a good: its outputs and inputs deep, everyth
 
 function · **exported** · L61–63
 
-- called by: [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`sourceFor`](../aria/play.js.md#s-sourceFor) _js/aria/play.js_ · [`openFreight`](../drones/board.js.md#s-openFreight) _js/drones/board.js_ ×2 · [`ROLE_STEP.courier`](../drones/ops.js.md#s-ROLE_STEP-courier) _js/drones/ops.js_ · [`tradeRoutes`](../drones/ops.js.md#s-tradeRoutes) _js/drones/ops.js_ · [`KINDS.build`](contracts.js.md#s-KINDS-build) _js/economy/contracts.js_ · [`KINDS.courier`](contracts.js.md#s-KINDS-courier) _js/economy/contracts.js_ ×2 · [`acceptBlocker`](contracts.js.md#s-acceptBlocker) _js/economy/contracts.js_ · [`acceptContract`](contracts.js.md#s-acceptContract) _js/economy/contracts.js_ ×2 · [`cheapestSource`](contracts.js.md#s-cheapestSource) _js/economy/contracts.js_ · [`deliver`](#s-deliver) ×2 · [`lotMult`](#s-lotMult) · [`runLines`](#s-runLines) ×2 · [`shortagesOf>consider`](#s-shortagesOf-consider) · [`stockMult`](#s-stockMult) · [`stepFlow`](../npc/flow.js.md#s-stepFlow) _js/npc/flow.js_ · [`liftCargo`](../npc/traffic.js.md#s-liftCargo) _js/npc/traffic.js_
+- called by: [`counterfactual`](../aria/foresee.js.md#s-counterfactual) _js/aria/foresee.js_ ×2 · [`foreseeBuy`](../aria/foresee.js.md#s-foreseeBuy) _js/aria/foresee.js_ · [`foreseeSale`](../aria/foresee.js.md#s-foreseeSale) _js/aria/foresee.js_ · [`canFly`](../aria/play.js.md#s-canFly) _js/aria/play.js_ · [`jobPlan`](../aria/play.js.md#s-jobPlan) _js/aria/play.js_ · [`sourceFor`](../aria/play.js.md#s-sourceFor) _js/aria/play.js_ · [`wakeClose`](../aria/wake.js.md#s-wakeClose) _js/aria/wake.js_ · [`openFreight`](../drones/board.js.md#s-openFreight) _js/drones/board.js_ ×2 · [`ROLE_STEP.courier`](../drones/ops.js.md#s-ROLE_STEP-courier) _js/drones/ops.js_ · [`tradeRoutes`](../drones/ops.js.md#s-tradeRoutes) _js/drones/ops.js_ · [`KINDS.build`](contracts.js.md#s-KINDS-build) _js/economy/contracts.js_ · [`KINDS.courier`](contracts.js.md#s-KINDS-courier) _js/economy/contracts.js_ ×2 · [`acceptBlocker`](contracts.js.md#s-acceptBlocker) _js/economy/contracts.js_ · [`acceptContract`](contracts.js.md#s-acceptContract) _js/economy/contracts.js_ ×2 · [`cheapestSource`](contracts.js.md#s-cheapestSource) _js/economy/contracts.js_ · [`deliver`](#s-deliver) ×2 · [`lotMult`](#s-lotMult) · [`runLines`](#s-runLines) ×2 · [`shortagesOf>consider`](#s-shortagesOf-consider) · [`stockMult`](#s-stockMult) · [`stepFlow`](../npc/flow.js.md#s-stepFlow) _js/npc/flow.js_ · [`liftCargo`](../npc/traffic.js.md#s-liftCargo) _js/npc/traffic.js_
 
 <!-- note:stockOf -->
 <!-- /note -->
@@ -207,7 +209,7 @@ function · **exported** · L61–63
 function · **exported** · L65–69
 
 - calls: [`targetFor`](#s-targetFor)
-- called by: [`lotMult`](#s-lotMult) · [`stockMult`](#s-stockMult)
+- called by: [`counterfactual`](../aria/foresee.js.md#s-counterfactual) _js/aria/foresee.js_ ×2 · [`foreseeBuy`](../aria/foresee.js.md#s-foreseeBuy) _js/aria/foresee.js_ ×2 · [`foreseeSale`](../aria/foresee.js.md#s-foreseeSale) _js/aria/foresee.js_ ×2 · [`wakeClose`](../aria/wake.js.md#s-wakeClose) _js/aria/wake.js_ ×2 · [`lotMult`](#s-lotMult) · [`stockMult`](#s-stockMult)
 
 <!-- note:stockMultAt -->
 The curve itself, at an arbitrary quantity — the thing a lot is integrated over.
@@ -235,7 +237,7 @@ Price curve on stock: bare shelves → PRICE_CEIL, target → about book, glut �
 function · **exported** · L75–86
 
 - calls: [`stockMult`](#s-stockMult) · [`stockMultAt`](#s-stockMultAt) · [`stockOf`](#s-stockOf)
-- called by: [`askPrice`](#s-askPrice) · [`bidPrice`](#s-bidPrice) · [`sellPriceAt`](../sim/sim.js.md#s-sellPriceAt) _js/sim/sim.js_
+- called by: [`foreseeSale`](../aria/foresee.js.md#s-foreseeSale) _js/aria/foresee.js_ · [`askPrice`](#s-askPrice) · [`bidPrice`](#s-bidPrice) · [`sellPriceAt`](../sim/sim.js.md#s-sellPriceAt) _js/sim/sim.js_
 
 <!-- note:lotMult -->
 0.3.24 — the price of a LOT, not of a unit.
@@ -344,7 +346,7 @@ shift there (js/station/stafflife.js labourAt). A hook, so this module stays a l
 function · **exported** · L142–177
 
 - calls: [`adjust`](#s-adjust) ×2 · [`ledgerOf`](#s-ledgerOf) · [`stockOf`](#s-stockOf) ×2 · [`targetFor`](#s-targetFor) ×2 · [`tierOf`](#s-tierOf) · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_
-- called by: [`stepEconomy`](#s-stepEconomy)
+- called by: [`counterfactual`](../aria/foresee.js.md#s-counterfactual) _js/aria/foresee.js_ ×2 · [`stepEconomy`](#s-stepEconomy)
 
 <!-- note:runLines -->
 - L150 · `let frac = 1, short = null;` — the pass runs at the fraction the scarcest input allows, down to a quarter; under that it stalls
@@ -404,7 +406,7 @@ function · **exported** · L204–209
 function · **exported** · L211–217
 
 - calls: [`bidPrice`](#s-bidPrice) ×2 · [`stockMult`](#s-stockMult) · [`baseValue`](materials.js.md#s-baseValue) _js/economy/materials.js_ · [`goodName`](materials.js.md#s-goodName) _js/economy/materials.js_
-- called by: [`sensePorts`](../aria/senses.js.md#s-sensePorts) _js/aria/senses.js_ · [`KINDS.tender`](contracts.js.md#s-KINDS-tender) _js/economy/contracts.js_ · [`portWants`](../sim/sim.js.md#s-portWants) _js/sim/sim.js_
+- called by: [`perceive`](../aria/senses.js.md#s-perceive) _js/aria/senses.js_ · [`sensePorts`](../aria/senses.js.md#s-sensePorts) _js/aria/senses.js_ · [`KINDS.tender`](contracts.js.md#s-KINDS-tender) _js/economy/contracts.js_ · [`portWants`](../sim/sim.js.md#s-portWants) _js/sim/sim.js_
 
 <!-- note:wantsOf -->
 The three goods a port most wants right now, by how far over book it pays.

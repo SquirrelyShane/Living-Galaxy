@@ -1,6 +1,6 @@
 # js/economy/traderoutes.js
 
-[index](../../../README.md) · 84 lines · 10 symbols · 5 imports · 6 importers
+[index](../../../README.md) · 84 lines · 10 symbols · 5 imports · 7 importers
 
 ## About
 
@@ -37,6 +37,7 @@ with FLY IT.
 - [js/aria/company.js](../aria/company.js.md) — `bestRoute`
 - [js/aria/play.js](../aria/play.js.md) — `bestRoute`, `sellable`, `tradeRoutes`
 - [js/aria/senses.js](../aria/senses.js.md) — `tradeRoutes`
+- [js/aria/wake.js](../aria/wake.js.md) — `sellable`
 - [js/console/panels/market.js](../console/panels/market.js.md) — `tradeRoutes`, `routeLine`
 - [js/mission/tradeops.js](../mission/tradeops.js.md) — `bestRoute`, `sellable`, `routeLine`
 - test/trade.test.mjs _(outside js/)_ — `tradeRoutes`, `bestRoute`, `sellable`, `routeLine`
@@ -47,7 +48,7 @@ with FLY IT.
 - [`legSeconds`](#s-legSeconds) · function — **no importer in scanned roots**
 - [`tradeRoutes`](#s-tradeRoutes) · function — used by [js/aria/play.js](../aria/play.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/console/panels/market.js](../console/panels/market.js.md), test/trade.test.mjs
 - [`bestRoute`](#s-bestRoute) · function — used by [js/aria/company.js](../aria/company.js.md), [js/aria/play.js](../aria/play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), test/trade.test.mjs
-- [`sellable`](#s-sellable) · function — used by [js/aria/play.js](../aria/play.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), test/trade.test.mjs
+- [`sellable`](#s-sellable) · function — used by [js/aria/play.js](../aria/play.js.md), [js/aria/wake.js](../aria/wake.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), test/trade.test.mjs
 - [`routeLine`](#s-routeLine) · function — used by [js/console/panels/market.js](../console/panels/market.js.md), [js/mission/tradeops.js](../mission/tradeops.js.md), test/trade.test.mjs
 
 ## Effects
@@ -155,7 +156,7 @@ The single best run from here, or null.
 function · **exported** · L72–80
 
 - calls: [`consigned`](#s-consigned)
-- called by: [`movesNow`](../aria/play.js.md#s-movesNow) _js/aria/play.js_ · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ · [`makeTradeOps.SELL`](../mission/tradeops.js.md#s-makeTradeOps-SELL) _js/mission/tradeops.js_ ×3
+- called by: [`movesNow`](../aria/play.js.md#s-movesNow) _js/aria/play.js_ · [`startSell`](../aria/play.js.md#s-startSell) _js/aria/play.js_ · [`sellValueAt`](../aria/wake.js.md#s-sellValueAt) _js/aria/wake.js_ · [`makeTradeOps.SELL`](../mission/tradeops.js.md#s-makeTradeOps-SELL) _js/mission/tradeops.js_ ×3
 
 <!-- note:sellable -->
 What in the hold can be sold without selling somebody else's consignment.

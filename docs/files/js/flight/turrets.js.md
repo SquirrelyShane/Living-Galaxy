@@ -1,6 +1,6 @@
 # js/flight/turrets.js
 
-[index](../../../README.md) · 510 lines · 52 symbols · 10 imports · 27 importers
+[index](../../../README.md) · 510 lines · 52 symbols · 10 imports · 26 importers
 
 ## About
 
@@ -50,7 +50,6 @@ drones already did.
 
 ## Imported by
 
-- [js/aria/pilot.js](../aria/pilot.js.md) — `contacts`
 - [js/aria/senses.js](../aria/senses.js.md) — `contacts`
 - [js/comms/comms.js](../comms/comms.js.md) — `contacts`
 - [js/console/panels/nav.js](../console/panels/nav.js.md) — `contacts`
@@ -86,7 +85,7 @@ drones already did.
 - [`COMBAT_RANGE`](#s-COMBAT_RANGE) · const — **no importer in scanned roots**
 - [`MINE_RANGE`](#s-MINE_RANGE) · const — used by [js/flight/autopilot.js](autopilot.js.md), [js/ui/tutorial.js](../ui/tutorial.js.md)
 - [`MINE_RANGE_OD`](#s-MINE_RANGE_OD) · const — **no importer in scanned roots**
-- [`contacts`](#s-contacts) · const — used by [js/aria/pilot.js](../aria/pilot.js.md), [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/aria-mining-loop.test.mjs, test/hotpath-optimization.test.mjs, test/hulks.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
+- [`contacts`](#s-contacts) · const — used by [js/aria/senses.js](../aria/senses.js.md), [js/comms/comms.js](../comms/comms.js.md), [js/console/panels/nav.js](../console/panels/nav.js.md), [js/corp/seclevel.js](../corp/seclevel.js.md), [js/drones/ops.js](../drones/ops.js.md), [js/interior/interior.js](../interior/interior.js.md), [js/mission/salvage.js](../mission/salvage.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/npc/combat.js](../npc/combat.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), [js/station/stationworks.js](../station/stationworks.js.md), [js/ui/chatbox.js](../ui/chatbox.js.md), [js/ui/hud.js](../ui/hud.js.md), test/aria-mining-loop.test.mjs, test/hotpath-optimization.test.mjs, test/hulks.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/seclevel.test.mjs, test/sky.test.mjs
 - [`shots`](#s-shots) · const — used by [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/hotpath-optimization.test.mjs, test/portdrones.test.mjs, test/qrf.test.mjs, test/reactive.test.mjs, test/sky.test.mjs
 - [`combatHooks`](#s-combatHooks) · const — used by [js/sim/sim.js](../sim/sim.js.md)
 - [`mining`](#s-mining) · const — used by [js/console/panels/ship.js](../console/panels/ship.js.md), [js/flight/autopilot.js](autopilot.js.md), [js/npc/captain.js](../npc/captain.js.md), [js/render/engine.js](../render/engine.js.md), [js/sim/sim.js](../sim/sim.js.md), test/rig.test.mjs
